@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "title": "Operations Workspace",
+  "components": [
+    { "type": "tabs", "id": "mainTabs", "span": 12, "tabs": [
+      { "id": "overview", "title": "Overview", "children": [
+        { "type": "metricGrid", "id": "overview-metrics", "metrics": [{ "title": "Records", "aggregation": "count", "format": "integer" }, { "title": "Total Cost", "field": "cost", "aggregation": "sum", "format": "currency" }] },
+        { "type": "barChart", "id": "overview-chart", "title": "Cost by Region", "category": "region", "measure": "cost", "aggregation": "sum" }
+      ]},
+      { "id": "analysis", "title": "Analysis", "children": [
+        { "type": "collapsible", "id": "risk-section", "title": "Risk Analysis", "defaultOpen": true, "children": [{ "type": "donutChart", "id": "risk-chart", "title": "Status Distribution", "category": "status", "measure": "cost", "aggregation": "count" }] },
+        { "type": "accordion", "id": "cost-section", "title": "Cost Detail", "defaultOpen": false, "children": [{ "type": "lineChart", "id": "cost-detail", "title": "Cost Trend", "category": "created_date", "measure": "cost", "aggregation": "sum" }] }
+      ]},
+      { "id": "details", "title": "Details", "children": [{ "type": "table", "id": "tab-table", "title": "All Records", "pagination": true, "search": true, "selectable": true }] }
+    ]}
+  ]
+}

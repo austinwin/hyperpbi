@@ -1,0 +1,65 @@
+{
+  "dataRoles": [
+    { "displayName": "Values", "name": "values", "kind": "GroupingOrMeasure" }
+  ],
+  "objects": {
+    "hyperpbiState": {
+      "displayName": "HyperPBI state",
+      "properties": {
+        "specification": { "displayName": "Specification", "type": { "text": true } },
+        "configuration": { "displayName": "Configuration", "type": { "text": true } },
+        "studioLayout": { "displayName": "Studio layout", "type": { "text": true } }
+      }
+    },
+    "interface": {
+      "displayName": "Interface",
+      "properties": {
+        "theme": { "displayName": "Theme", "type": { "enumeration": [{"displayName":"Light","value":"light"},{"displayName":"Dark","value":"dark"},{"displayName":"System","value":"auto"}] } }
+      }
+    },
+    "editor": {
+      "displayName": "Advanced editor",
+      "properties": {
+        "previewPosition": { "displayName": "Preview area", "type": { "enumeration": [{"displayName":"Right","value":"right"},{"displayName":"Bottom","value":"bottom"},{"displayName":"Hidden","value":"hidden"}] } },
+        "fontSize": { "displayName": "JSON editor font size", "type": { "numeric": true } },
+        "wordWrap": { "displayName": "Word wrap", "type": { "bool": true } },
+        "showDataPane": { "displayName": "Show data preview", "type": { "bool": true } },
+        "showLogPane": { "displayName": "Show log pane", "type": { "bool": true } }
+      }
+    },
+    "renderedVisual": {
+      "displayName": "Rendered visual",
+      "properties": {
+        "enableInteractions": { "displayName": "Interact with other visuals", "type": { "bool": true } }
+      }
+    },
+    "dataLimit": {
+      "displayName": "Data limit options",
+      "properties": {
+        "maxRows": { "displayName": "Maximum rows", "type": { "numeric": true } }
+      }
+    },
+    "general": {
+      "displayName": "General",
+      "properties": {
+        "filter": { "displayName": "Filter", "type": { "filter": true } }
+      }
+    }
+  },
+  "dataViewMappings": [{
+    "conditions": [{ "values": { "max": 50 } }],
+    "table": {
+      "rows": {
+        "select": [{ "for": { "in": "values" } }],
+        "dataReductionAlgorithm": { "window": { "count": 10000 } }
+      }
+    }
+  }],
+  "advancedEditModeSupport": 0,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
+  "supportsMultiVisualSelection": true,
+  "supportsKeyboardFocus": true,
+  "supportsHighlight": false,
+  "privileges": []
+}

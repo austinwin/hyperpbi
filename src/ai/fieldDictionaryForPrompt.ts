@@ -1,0 +1,2 @@
+import { NormalizedData } from "../data/normalizeData";
+export function fieldDictionaryForPrompt(data: NormalizedData, selected: string[] = [], typesOnly = false): unknown[] { const include = selected.length ? new Set(selected) : null; return Object.values(data.fields).filter(field => !include || include.has(field.key)).map(field => ({ key: field.key, displayName: typesOnly ? undefined : field.displayName, type: field.type, format: typesOnly ? undefined : field.format ?? null, roles: field.roles })); }

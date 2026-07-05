@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "bindings": {
+    "map": {
+      "latitude": "latitude",
+      "longitude": "longitude",
+      "layer": "asset_type",
+      "color": "status",
+      "size": "risk_score",
+      "tooltip": ["asset_id", "status"],
+      "details": ["address", "owner"]
+    }
+  },
+  "interactions": { "crossFilter": true, "multiSelect": true },
+  "renderer": { "showHeader": true, "showRowCount": true }
+}

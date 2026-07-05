@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "title": "Interactive Work Management",
+  "layout": { "type": "split", "leftPanel": { "width": 270, "collapsible": true, "defaultCollapsed": false }, "main": { "type": "grid", "columns": 12, "gap": 8 } },
+  "leftPanel": [
+    { "type": "section", "id": "filters-section", "title": "Filters", "children": [
+      { "type": "searchBox", "id": "asset-search", "label": "Asset search", "placeholder": "ID, region, status..." },
+      { "type": "multiSelect", "id": "status-filter", "label": "Status", "field": "status" },
+      { "type": "slider", "id": "minimum-cost", "label": "Minimum cost", "field": "cost", "min": 0, "max": 1000000, "step": 10000, "filter": { "operator": ">=" } },
+      { "type": "dateRange", "id": "created-range", "label": "Created date", "field": "created_date", "filter": { "operator": "between" } },
+      { "type": "filterChips", "id": "filter-chips" },
+      { "type": "button", "id": "clear", "title": "Clear all filters", "action": "clearFilters" }
+    ]}
+  ],
+  "components": [
+    { "type": "metricGrid", "id": "metrics", "span": 12, "metrics": [{ "title": "Visible records", "aggregation": "count", "format": "integer" }, { "title": "Visible cost", "field": "cost", "aggregation": "sum", "format": "currency" }] },
+    { "type": "lineChart", "id": "cost-trend", "title": "Cost Trend", "category": "created_date", "measure": "cost", "aggregation": "sum", "span": 12 },
+    { "type": "table", "id": "work-table", "title": "Filtered Work", "pagination": true, "search": true, "selectable": true, "span": 12 }
+  ]
+}

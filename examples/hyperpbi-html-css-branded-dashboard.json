@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "title": "Branded Operations Brief",
+  "theme": { "primaryColor": "#174a70", "accentColor": "#2f7da8", "surfaceColor": "#ffffff", "textColor": "#172b3a", "radius": 6 },
+  "components": [
+    { "type": "html", "id": "brand-hero", "span": 12, "html": "<div class='hp-brand-hero'><div class='hp-brand-kicker'>OPERATIONS CONTROL</div><h2>{{title}}</h2><p>{{count}} Power BI records · {{distinctCount.region}} operating regions</p></div>" },
+    { "type": "metricGrid", "id": "brand-metrics", "span": 12, "metrics": [{ "title": "Total Cost", "field": "cost", "aggregation": "sum", "format": "currency" }, { "title": "Average Cost", "field": "cost", "aggregation": "avg", "format": "currency" }] },
+    { "type": "areaChart", "id": "brand-chart", "title": "Cost by Month", "category": "month", "measure": "cost", "aggregation": "sum", "span": 12 }
+  ],
+  "css": ".hp-brand-hero { padding: 16px 18px; border: 1px solid var(--hp-border); border-left: 4px solid var(--hp-primary); border-radius: var(--hp-radius); background: var(--hp-surface); } .hp-brand-hero h2 { margin: 2px 0 4px; color: var(--hp-text); font-size: 19px; } .hp-brand-hero p { margin: 0; color: #526573; } .hp-brand-kicker { color: var(--hp-primary); font-size: 10px; font-weight: 700; letter-spacing: 1.2px; }"
+}

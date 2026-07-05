@@ -1,0 +1,11 @@
+node_modules/
+.tmp/
+dist/
+webpack.statistics*.html
+*.pfx
+*.pbiviz
+.DS_Store
+Thumbs.db
+.env
+.env.*
+npm-debug.log*

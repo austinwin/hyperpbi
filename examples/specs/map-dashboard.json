@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "title": "Asset Geography",
+  "components": [
+    { "type": "map", "id": "asset_map", "title": "Assets", "span": 8, "height": 420, "settings": { "fitBounds": true, "showLayerControl": true, "showLegend": true, "clusterPoints": true }, "style": { "defaultPointColor": "#206bc4", "colorMode": "categorical", "minRadius": 4, "maxRadius": 14 }, "popup": { "html": "<div><b>{{Asset ID}}</b><br>Status: {{Status}}</div>" } },
+    { "type": "table", "id": "map_details", "title": "Selected Geography", "columns": ["asset_id", "status", "latitude", "longitude"], "pagination": true, "selectable": true, "span": 4 }
+  ]
+}

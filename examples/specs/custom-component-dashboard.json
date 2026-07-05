@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "title": "Custom Operations Summary",
+  "calculations": { "metrics": [{ "key": "high_risk_count", "label": "High Risk", "aggregation": "countWhere", "where": { "op": ">=", "left": { "field": "risk_score" }, "right": { "value": 80 } } }] },
+  "components": [
+    { "type": "custom", "id": "risk_summary", "title": "Risk Summary", "span": 4, "props": { "tone": "warning" }, "html": "<div class='risk-card'><span>High risk assets</span><strong>{{metric.high_risk_count}}</strong><small>From {{count}} records</small></div>", "css": ".risk-card { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--hp-border); border-radius: var(--hp-radius); background: var(--hp-surface); } .risk-card strong { color: var(--hp-danger); font-size: 24px; }", "slots": { "footer": "<div>Click to select high-risk rows</div>" }, "interactions": { "onClick": { "action": "selectWhere", "where": { "op": ">=", "left": { "field": "risk_score" }, "right": { "value": 80 } } } },
+    { "type": "table", "id": "risk_table", "columns": ["asset_id", "risk_score", "status"], "pagination": true, "selectable": true, "span": 8 }
+  ]
+}
