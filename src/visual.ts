@@ -41,14 +41,11 @@ export class Visual implements IVisual {
     private specification = "";
     private configuration = defaultConfigJson;
     private editMode = powerbi.EditMode.Default;
-    private localStudioOpen = false;
     private draftSpecification = "";
     private draftConfiguration = "";
     private renderMs = 0;
-    private studioInitialTab: "specification" | "ai" = "specification";
     private studioLayout = JSON.stringify(defaultStudioLayout);
     private webAccessAvailable = false;
-    private viewMode = powerbi.ViewMode.View;
 
     constructor(options?: VisualConstructorOptions) {
         if (!options) throw new Error("HyperPBI requires Power BI visual constructor options.");
@@ -67,29 +64,28 @@ export class Visual implements IVisual {
         } else {
             const persisted = readVisualState(dataView); if (persisted.specification !== undefined) this.specification = persisted.specification; if (persisted.configuration !== undefined) this.configuration = persisted.configuration || defaultConfigJson; if (persisted.studioLayout !== undefined) this.studioLayout = persisted.studioLayout;
         }
-        this.data = parseDataView(dataView); this.selectionIds = buildTableSelectionIds(this.host, dataView); this.editMode = nextEditMode; this.viewMode = options.viewMode ?? powerbi.ViewMode.View;
+        this.data = parseDataView(dataView); this.selectionIds = buildTableSelectionIds(this.host, dataView); this.editMode = nextEditMode;
         this.target.style.width = `${Math.max(0, options.viewport.width)}px`; this.target.style.height = `${Math.max(0, options.viewport.height)}px`;
         this.renderMs = performance.now() - started; this.renderCurrent(); this.host.eventService?.renderingFinished(options);
     }
 
     private renderCurrent(): void {
         const settings = toRuntimeSettings(this.formattingSettings);
-        if (!Object.keys(this.data.fields).length && !this.localStudioOpen) { render(h(LandingPage, {}), this.target); return; }
-        if (this.editMode === powerbi.EditMode.Advanced && !this.specification.trim() && !this.localStudioOpen) { render(h(SetupExperience, { data: this.data, onOpen: this.openStudio }), this.target); return; }
-        if (this.editMode === powerbi.EditMode.Advanced || this.localStudioOpen) {
+        if (!Object.keys(this.data.fields).length) { render(h(LandingPage, {}), this.target); return; }
+        if (this.editMode === powerbi.EditMode.Advanced) {
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, initialEditorTab: this.studioInitialTab, webAccessAvailable: this.webAccessAvailable }), this.target); return;
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable }), this.target); return;
         }
-        if (!this.specification.trim()) { render(h(SetupExperience, { data: this.data, onOpen: this.openStudio }), this.target); return; }
+        if (!this.specification.trim()) { render(h(SetupExperience, { data: this.data }), this.target); return; }
         const schemaResult = this.parseSpecification(this.specification); const configResult = parseConfig(this.configuration);
         if (!schemaResult.schema || !configResult.config) {
             const errors = [...schemaResult.errors, ...configResult.errors];
-            render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "The saved dashboard needs attention", errors, fields: Object.keys(this.data.fields), showExample: false }), h("button", { type: "button", class: "hp-primary-action", onClick: () => this.openStudio(this.specification, this.configuration) }, "Open editor")), this.target); return;
+            render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "The saved dashboard needs attention", errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return;
         }
         const calculated = applyCalculations(this.data, schemaResult.schema.calculations);
-        if (calculated.errors.length) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: calculated.errors, fields: Object.keys(this.data.fields), showExample: false }), h("button", { type: "button", class: "hp-primary-action", onClick: () => this.openStudio(this.specification, this.configuration) }, "Open editor")), this.target); return; }
+        if (calculated.errors.length) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: calculated.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
         const configuredData = applyConfigToData(calculated.data, configResult.config);
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, webAccessAvailable: this.webAccessAvailable, onOpenStudio: this.viewMode === powerbi.ViewMode.Edit ? () => this.openStudio(this.specification, this.configuration, "ai") : undefined }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, webAccessAvailable: this.webAccessAvailable }), this.target);
     }
 
     private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[] } {
@@ -97,13 +93,8 @@ export class Visual implements IVisual {
         const validation = validateSchema(migrateSchema(parsed.value)); return validation.valid && validation.schema ? { schema: validation.schema, errors: [] } : { errors: validation.errors };
     }
 
-    private openStudio = (specification?: string, configuration?: string, initialTab: "specification" | "ai" = "ai"): void => {
-        if (specification) this.specification = specification; if (configuration) this.configuration = configuration;
-        this.studioInitialTab = initialTab; this.localStudioOpen = true; this.host.switchFocusModeState(true); this.renderCurrent();
-    };
-
     private saveAndCloseStudio = (specification: string, configuration: string): void => {
-        this.specification = specification; this.configuration = configuration; this.localStudioOpen = false;
+        this.specification = specification; this.configuration = configuration;
         persistVisualState(this.host, { specification, configuration, studioLayout: this.studioLayout });
         this.host.switchFocusModeState(false);
         this.editMode = powerbi.EditMode.Default; this.renderCurrent();

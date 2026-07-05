@@ -1,6 +1,6 @@
 # User guide
 
-Bind all dashboard columns and measures to **Values**. Select **Design with AI** inside the visual; manual JSON authoring is optional and hidden under Advanced.
+Bind all dashboard columns and measures to **Values**. Select the visual, open its top-right **…** menu, and select **Edit**; manual JSON authoring is optional and hidden under Advanced.
 
 Studio persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. Preview dashboard validates without closing Studio. Errors never replace the last saved dashboard.
 

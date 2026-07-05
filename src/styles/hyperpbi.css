@@ -153,7 +153,7 @@
 .hp-studio-bottom > nav > span { flex: 1; }.hp-studio-actions button.active { background: #e1eaf5; color: #174f87; font-weight: 700; }
 .hp-bottom-content, .hp-bottom-content table, .hp-bottom-content pre, .hp-bottom-content code, .hp-bottom-content td, .hp-bottom-content div { user-select: text; -webkit-user-select: text; }
 .hp-bottom-content button, .hp-studio-bottom > nav { user-select: none; -webkit-user-select: none; }
-.hp-open-studio { position: absolute; top: 6px; right: 8px; z-index: 50; min-height: 27px; padding: 4px 9px; border: 1px solid color-mix(in srgb, var(--hp-primary) 35%, var(--hp-border)); border-radius: 4px; background: color-mix(in srgb, var(--hp-surface) 94%, var(--hp-primary)); color: var(--hp-primary); font: inherit; font-size: 9px; font-weight: 700; cursor: pointer; opacity: .72; }.hp-open-studio:hover, .hp-open-studio:focus-visible { opacity: 1; }
+.hp-native-edit-guide { display: grid; grid-template-columns: auto 1fr auto 1fr auto 1fr; align-items: center; gap: 8px; margin: 18px 0; padding: 12px; border: 1px solid #dce3eb; border-radius: 8px; background: #f8fafc; }.hp-native-edit-guide span { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #206bc4; color: #fff; font-size: 10px; font-weight: 800; }.hp-native-edit-guide strong { min-width: 0; color: #334155; }.hp-native-edit-hint { margin: 10px 16px 16px; padding: 10px 12px; border: 1px solid #c8d8ea; border-radius: 6px; background: #f2f7fc; color: #174f87; }
 .hyperpbi-root { position: relative; }
 
 .hp-ai-designer { height: 100%; min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; background: #f5f7fa; }

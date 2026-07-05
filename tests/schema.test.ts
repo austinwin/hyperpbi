@@ -28,8 +28,12 @@ describe("schema validation", () => {
     });
     it("keeps the Power BI authoring surface intentionally simple", () => {
         const capabilities = JSON.parse(readFileSync(resolve(process.cwd(), "capabilities.json"), "utf8"));
+        const reportRenderer = readFileSync(resolve(process.cwd(), "src/render/HyperPbiRoot.tsx"), "utf8");
+        const setupExperience = readFileSync(resolve(process.cwd(), "src/editor/SetupExperience.tsx"), "utf8");
         expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
-        expect(capabilities.advancedEditModeSupport).toBe(0);
+        expect(capabilities.advancedEditModeSupport).toBe(2);
+        expect(reportRenderer).not.toContain("Design with AI");
+        expect(setupExperience).toContain("Select Edit");
         expect(capabilities.objects.hyperpbiState.properties.studioLayout).toBeDefined();
         expect(capabilities.supportsLandingPage).toBe(true);
         expect(capabilities.supportsEmptyDataView).toBe(true);

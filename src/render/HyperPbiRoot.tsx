@@ -14,7 +14,7 @@ import { RenderContext } from "./RenderContext";
 import { dashboardReducer, initialDashboardState } from "./stateStore";
 import { calculateDerivedMetrics } from "../calculations/derivedMetrics";
 
-export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, referenceWarnings = [], config = defaultConfig, selectExternal = () => undefined, clearExternal = () => undefined, webAccessAvailable = false, onOpenStudio }: { instanceId: string; schema: HyperPbiSchema; data: NormalizedData; settings: RuntimeSettings; renderMs: number; referenceWarnings?: string[]; config?: HyperPbiConfig; selectExternal?: (rowIndices: number[], multiSelect?: boolean) => void; clearExternal?: () => void; webAccessAvailable?: boolean; onOpenStudio?: () => void }) {
+export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, referenceWarnings = [], config = defaultConfig, selectExternal = () => undefined, clearExternal = () => undefined, webAccessAvailable = false }: { instanceId: string; schema: HyperPbiSchema; data: NormalizedData; settings: RuntimeSettings; renderMs: number; referenceWarnings?: string[]; config?: HyperPbiConfig; selectExternal?: (rowIndices: number[], multiSelect?: boolean) => void; clearExternal?: () => void; webAccessAvailable?: boolean }) {
     const [state, dispatch] = useReducer(dashboardReducer, initialDashboardState(schema.state?.search, schema.state?.activeTab));
     const rows = useMemo(() => filterRows(data.rows, state.filters, state.search), [data.rows, state.filters, state.search]);
     const filteredData = useMemo<NormalizedData>(() => ({ ...data, rows, aggregates: calculateAggregates(rows), calculatedMetrics: calculateDerivedMetrics(rows, schema.calculations?.metrics), map: normalizeMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries) }), [data, rows, schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
@@ -31,7 +31,6 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
     return <div id={instanceId} class={`hyperpbi-root hp-density-${schema.theme?.density ?? settings.layout.density} hp-theme-${schema.theme?.mode ?? settings.theme.mode} ${settings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`} style={style}>
         <style>{sanitizedCss.css}</style>
         <RenderContext.Provider value={context}>
-            {onOpenStudio && config.renderer?.showStudioButton !== false && <button type="button" class="hp-open-studio" onClick={onOpenStudio} title="Design this dashboard with AI">Design with AI</button>}
             {config.renderer?.showHeader !== false && <header class="hp-header"><div><h1>{schema.title ?? "HyperPBI"}</h1>{config.renderer?.showRowCount !== false && <span>{rows.length.toLocaleString()} of {data.rows.length.toLocaleString()} rows</span>}</div></header>}
             {schema.toolbar?.length ? <div class={`hp-toolbar ${settings.layout.stickyToolbar ? "hp-sticky" : ""}`}><DashboardRenderer components={schema.toolbar} /></div> : null}
             {hasSidePanel && sideCollapsible && <button type="button" class="hp-sidebar-toggle" onClick={() => dispatch({ type: "collapse", id: "__leftPanel", value: !sideCollapsed })}>{sideCollapsed ? "Show filters" : "Hide filters"}</button>}
