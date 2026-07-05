@@ -1,0 +1,1 @@
+import { GeocoderProvider } from "../providerTypes";export const noGeocoderProvider:GeocoderProvider={id:"none",label:"None",external:false,defaults:{provider:"none",enabled:false,autocomplete:false,userTriggeredOnly:true},async geocode(){return null;}};

@@ -1,0 +1,6 @@
+.hyperpbi-root .btn { --tblr-btn-padding-y: .32rem; --tblr-btn-padding-x: .62rem; --tblr-btn-font-size: var(--hp-font-size); border-color: var(--hp-border); }
+.hyperpbi-root .form-control, .hyperpbi-root .form-select { min-height: 30px; border-color: var(--hp-border); font-size: var(--hp-font-size); }
+.hyperpbi-root .form-control:focus, .hyperpbi-root .form-select:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--hp-primary) 18%, transparent); }
+.hyperpbi-root .nav-tabs { border-color: var(--hp-border); }
+.hyperpbi-root .nav-link { color: color-mix(in srgb, var(--hp-text) 72%, transparent); font-size: var(--hp-font-size); padding: 7px 12px; }
+.hyperpbi-root .nav-link.active { color: var(--hp-primary); border-color: var(--hp-border) var(--hp-border) var(--hp-surface); }

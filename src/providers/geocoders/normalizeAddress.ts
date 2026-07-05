@@ -1,0 +1,1 @@
+export function normalizeAddress(parts:Array<unknown>|string):string{return (Array.isArray(parts)?parts: [parts]).map(value=>String(value??"").trim()).filter(Boolean).join(", ").replace(/\s+/g," ").toLocaleLowerCase();}

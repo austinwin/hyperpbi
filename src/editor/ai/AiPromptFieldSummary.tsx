@@ -1,0 +1,2 @@
+import { NormalizedData } from "../../data/normalizeData";
+export function AiPromptFieldSummary({ data, onCopy }: { data: NormalizedData; onCopy: () => void }) { return <details class="hp-ai-details"><summary>{Object.keys(data.fields).length} available fields</summary><div class="hp-field-chip-list">{Object.values(data.fields).map(field=><code title={field.displayName}>{field.key}</code>)}</div><button onClick={onCopy}>Copy field dictionary</button></details>; }

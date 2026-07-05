@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "title": "Executive Operations Overview",
+  "theme": { "mode": "light", "density": "compact", "primaryColor": "#1f5a94", "accentColor": "#3b82b4", "surfaceColor": "#ffffff", "textColor": "#182433", "radius": 7, "gap": 8, "cardPadding": 12 },
+  "toolbar": [
+    { "type": "searchBox", "id": "search", "placeholder": "Search all records..." },
+    { "type": "filterChips", "id": "filters" },
+    { "type": "button", "id": "clear", "title": "Clear filters", "action": "clearFilters" }
+  ],
+  "components": [
+    { "type": "metricGrid", "id": "metrics", "span": 12, "metrics": [
+      { "title": "Total Cost", "field": "cost", "aggregation": "sum", "format": "currency", "intent": "primary" },
+      { "title": "Open Items", "field": "status", "aggregation": "countWhere", "where": { "field": "status", "equals": "Open" }, "format": "integer", "intent": "warning" },
+      { "title": "Regions", "field": "region", "aggregation": "distinctCount", "format": "integer", "intent": "neutral" }
+    ]},
+    { "type": "barChart", "id": "cost-region", "title": "Cost by Region", "category": "region", "measure": "cost", "aggregation": "sum", "span": 7 },
+    { "type": "donutChart", "id": "status-mix", "title": "Status Mix", "category": "status", "measure": "cost", "aggregation": "count", "span": 5 },
+    { "type": "table", "id": "executive-details", "title": "Operational Detail", "columns": ["asset_id", "region", "status", { "field": "cost", "title": "Cost", "format": "currency", "hozAlign": "right" }], "pagination": true, "pageSize": 25, "search": true, "maxRows": 5000, "span": 12 }
+  ]
+}

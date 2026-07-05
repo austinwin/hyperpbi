@@ -1,0 +1,2 @@
+import { GeocodeCacheEntry } from "../providerTypes";import { normalizeAddress } from "./normalizeAddress";
+export class GeocodeCache{private entries:Record<string,GeocodeCacheEntry>;constructor(initial:Record<string,GeocodeCacheEntry>={}){this.entries={...initial};}get(address:string){return this.entries[normalizeAddress(address)];}set(address:string,value:GeocodeCacheEntry){this.entries[normalizeAddress(address)]=value;}clear(){this.entries={};}toJSON(){return {...this.entries};}}

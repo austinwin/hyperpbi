@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HyperPBI is an AI-powered Power BI custom visual for building complete enterprise dashboards from a single Values field well.">
+  <meta name="theme-color" content="#10233f">
+  <title>HyperPBI — AI-powered enterprise dashboards for Power BI</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #10233f;
+      --navy-2: #17365f;
+      --blue: #206bc4;
+      --blue-2: #3b82d0;
+      --cyan: #67b7dc;
+      --ink: #182433;
+      --muted: #617084;
+      --line: #dce3eb;
+      --line-strong: #c8d2de;
+      --surface: #ffffff;
+      --surface-2: #f5f7fa;
+      --surface-3: #edf2f7;
+      --success: #238a5a;
+      --warning: #a86500;
+      --danger: #c13f3f;
+      --radius: 14px;
+      --shadow: 0 18px 55px rgb(16 35 63 / 12%);
+      --max: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--surface); color: var(--ink); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.55; }
+    a { color: inherit; text-decoration: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    .container { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .eyebrow::before { width: 22px; height: 2px; content: ""; background: currentColor; }
+    .section-heading { max-width: 720px; margin-bottom: 34px; }
+    .section-heading h2 { margin: 8px 0 10px; font-size: clamp(30px, 4vw, 48px); line-height: 1.1; letter-spacing: -.035em; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 18px; }
+    .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 10px 17px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .btn:hover { border-color: #93a5ba; box-shadow: 0 5px 18px rgb(16 35 63 / 10%); transform: translateY(-1px); }
+    .btn-primary { border-color: var(--blue); background: var(--blue); color: #fff; }
+    .btn-primary:hover { border-color: #175ba9; box-shadow: 0 8px 22px rgb(32 107 196 / 28%); }
+    .btn-dark { border-color: rgb(255 255 255 / 22%); background: rgb(255 255 255 / 9%); color: #fff; }
+    .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+
+    .site-header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgb(220 227 235 / 82%); background: rgb(255 255 255 / 92%); backdrop-filter: blur(16px); }
+    .nav { min-height: 66px; display: flex; align-items: center; gap: 28px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; margin-right: auto; font-weight: 850; letter-spacing: -.02em; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--blue); color: #fff; box-shadow: 0 5px 14px rgb(32 107 196 / 24%); font-size: 17px; }
+    .brand small { display: block; color: var(--muted); font-size: 9px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 24px; color: #405064; font-size: 13px; font-weight: 650; }
+    .nav-links a:hover { color: var(--blue); }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .menu-button { display: none; }
+
+    .hero { position: relative; overflow: hidden; padding: 86px 0 72px; background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); }
+    .hero::before { position: absolute; inset: 0; content: ""; pointer-events: none; background-image: linear-gradient(rgb(32 107 196 / 4%) 1px, transparent 1px), linear-gradient(90deg, rgb(32 107 196 / 4%) 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, black, transparent 75%); }
+    .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, .95fr) minmax(560px, 1.15fr); gap: 48px; align-items: center; }
+    .hero-copy h1 { margin: 15px 0 20px; font-size: clamp(46px, 6.2vw, 76px); line-height: .98; letter-spacing: -.055em; }
+    .hero-copy h1 span { color: var(--blue); }
+    .hero-copy > p { max-width: 630px; margin: 0; color: var(--muted); font-size: clamp(18px, 2vw, 21px); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .hero-note { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 22px; color: #526278; font-size: 12px; font-weight: 650; }
+    .hero-note span { display: inline-flex; align-items: center; gap: 6px; }
+    .hero-note i { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; background: #e5f5ed; color: var(--success); font-style: normal; font-size: 10px; }
+
+    .product-window { overflow: hidden; border: 1px solid #bbc8d7; border-radius: 12px; background: #fff; box-shadow: var(--shadow); }
+    .window-bar { height: 42px; display: flex; align-items: center; gap: 7px; padding: 0 12px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+    .window-bar i { width: 8px; height: 8px; border-radius: 50%; background: #b8c2ce; }
+    .window-title { margin-left: 5px; color: #48576a; font-size: 10px; font-weight: 750; }
+    .window-status { margin-left: auto; padding: 2px 6px; border-radius: 999px; background: #e7f6ee; color: var(--success); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+    .product-tabs { display: flex; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: #fff; }
+    .product-tabs button { padding: 6px 9px; border: 0; border-radius: 5px; background: transparent; color: #58677a; font: inherit; font-size: 9px; font-weight: 750; cursor: pointer; }
+    .product-tabs button.active { background: #e9eef4; color: var(--ink); }
+    .product-screen { min-height: 442px; }
+    .screen-panel { display: none; min-height: 442px; }
+    .screen-panel.active { display: grid; }
+    .studio-screen { grid-template-columns: 40% 6px 1fr; grid-template-rows: 1fr 126px; }
+    .studio-left { padding: 12px; background: #f7f9fb; }
+    .workflow-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 9px; }
+    .workflow-steps div { min-width: 0; padding: 6px; border: 1px solid var(--line); border-radius: 5px; background: #fff; }
+    .workflow-steps b { display: block; overflow: hidden; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }.workflow-steps span { color: var(--blue); }
+    .mock-field { margin: 7px 0; }.mock-field label { display: block; margin-bottom: 3px; color: #667382; font-size: 7px; font-weight: 800; text-transform: uppercase; }.mock-input { min-height: 31px; padding: 7px; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff; color: #35465b; font-size: 8px; }
+    .mock-area { min-height: 78px; }.mock-button { width: 100%; margin-top: 7px; padding: 8px; border-radius: 4px; background: var(--blue); color: #fff; text-align: center; font-size: 8px; font-weight: 800; }
+    .resize-rail { background: #cbd3dc; cursor: col-resize; }
+    .studio-preview { display: grid; place-items: center; background: #fff; }
+    .preview-card { width: 78%; padding: 13px; border: 1px dashed #b6c2cf; border-radius: 7px; color: #6b7888; text-align: center; font-size: 9px; }
+    .preview-card svg { width: 26px; color: var(--blue); }
+    .studio-bottom { grid-column: 1 / -1; overflow: hidden; border-top: 5px solid #cbd3dc; background: #fff; }
+    .bottom-tabs { display: flex; gap: 4px; padding: 5px 8px; border-bottom: 1px solid var(--line); font-size: 7px; font-weight: 750; }.bottom-tabs span:first-child { padding: 3px 6px; border-radius: 3px; background: #e9eef4; }
+    .data-grid { display: grid; grid-template-columns: 44px 1fr 1fr 1fr; font-family: monospace; font-size: 7px; }.data-grid span { padding: 4px 7px; border-right: 1px solid #edf0f3; border-bottom: 1px solid #edf0f3; }.data-grid .head { background: #f5f7fa; font-weight: 800; }
+
+    .dashboard-screen { grid-template-rows: 54px 1fr; background: #eef2f6; }
+    .dash-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: #fff; }.dash-header strong { font-size: 10px; }.dash-header small { display: block; color: var(--muted); font-size: 7px; }.dash-search { width: 130px; margin-left: auto; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; color: #7a8796; font-size: 7px; }
+    .dash-body { display: grid; grid-template-columns: 138px 1fr; min-height: 0; }.dash-side { padding: 9px; border-right: 1px solid var(--line); background: #f8fafc; }.dash-side b { display: block; margin-bottom: 7px; font-size: 7px; text-transform: uppercase; }.filter { margin-bottom: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: #5f6d7f; font-size: 7px; }
+    .dash-main { min-width: 0; padding: 9px; }.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }.kpi { padding: 8px; border: 1px solid var(--line); border-radius: 5px; background: #fff; }.kpi small { display: block; color: #6b7888; font-size: 6px; text-transform: uppercase; }.kpi strong { display: block; margin-top: 2px; font-size: 13px; }.kpi em { color: var(--success); font-size: 6px; font-style: normal; }
+    .visual-row { display: grid; grid-template-columns: 1.2fr .8fr; gap: 6px; margin-top: 6px; }.visual { position: relative; min-height: 120px; overflow: hidden; padding: 8px; border: 1px solid var(--line); border-radius: 5px; background: #fff; }.visual > b { font-size: 7px; }.bars { height: 76px; display: flex; align-items: end; gap: 7px; padding: 7px 5px 0; border-bottom: 1px solid #cbd4df; }.bars i { flex: 1; border-radius: 2px 2px 0 0; background: var(--blue); opacity: .88; }.bars i:nth-child(2) { height: 68%; }.bars i:nth-child(3) { height: 91%; }.bars i:nth-child(4) { height: 48%; }.bars i:nth-child(5) { height: 78%; }.bars i:first-child { height: 38%; }
+    .map-grid { position: absolute; inset: 28px 8px 8px; background-image: linear-gradient(#e1e7ed 1px, transparent 1px), linear-gradient(90deg, #e1e7ed 1px, transparent 1px); background-size: 18px 18px; }.dot { position: absolute; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: var(--blue); box-shadow: 0 1px 4px rgb(16 35 63 / 30%); }.dot:nth-child(1) { top: 25%; left: 24%; }.dot:nth-child(2) { top: 56%; left: 62%; background: var(--danger); }.dot:nth-child(3) { top: 34%; left: 76%; background: var(--success); }.dot:nth-child(4) { top: 68%; left: 35%; background: #8b5cf6; }
+    .dash-table { margin-top: 6px; min-height: 75px; }.table-lines { display: grid; grid-template-columns: 24px 1fr 1fr 1fr; margin-top: 5px; font-size: 6px; }.table-lines span { padding: 4px; border-bottom: 1px solid #edf0f3; }.table-lines .sel { background: #eaf2fb; }
+
+    .trust-strip { border-block: 1px solid var(--line); background: #fff; }
+    .trust-grid { min-height: 76px; display: grid; grid-template-columns: repeat(6, 1fr); align-items: center; gap: 14px; color: #617084; text-align: center; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    section.content { padding: 92px 0; }
+    section.alt { background: var(--surface-2); }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .step { position: relative; padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }.step-number { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #eaf2fb; color: var(--blue); font-size: 13px; font-weight: 850; }.step h3 { margin: 18px 0 6px; font-size: 17px; }.step p { margin: 0; color: var(--muted); font-size: 14px; }.step::after { position: absolute; top: 38px; right: -15px; z-index: 2; width: 17px; height: 1px; content: ""; background: #aebccc; }.step:last-child::after { display: none; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }.feature-card { padding: 23px; border: 1px solid var(--line); border-radius: 11px; background: #fff; transition: border-color .18s ease, box-shadow .18s ease; }.feature-card:hover { border-color: #aec2d8; box-shadow: 0 12px 30px rgb(16 35 63 / 7%); }.feature-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 9px; background: #edf4fb; color: var(--blue); }.feature-card h3 { margin: 18px 0 7px; font-size: 17px; }.feature-card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .inventory { display: grid; grid-template-columns: 240px 1fr; gap: 28px; }.inventory-nav { align-self: start; position: sticky; top: 92px; display: grid; gap: 5px; }.inventory-nav button { padding: 10px 12px; border: 0; border-left: 3px solid transparent; background: transparent; color: #5c6c7e; text-align: left; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }.inventory-nav button.active { border-color: var(--blue); background: #edf4fb; color: var(--blue); }.inventory-panel { display: none; }.inventory-panel.active { display: block; }.inventory-panel h3 { margin: 0 0 6px; font-size: 27px; }.inventory-panel > p { margin: 0 0 20px; color: var(--muted); }.component-chips { display: flex; flex-wrap: wrap; gap: 8px; }.component-chips span { padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font-family: monospace; font-size: 12px; }
+
+    .design-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 40px; align-items: center; }.token-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 24px; }.token { display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font-family: monospace; font-size: 12px; }.swatch { width: 18px; height: 18px; border-radius: 4px; background: var(--blue); }.token:nth-child(2) .swatch { background: var(--success); }.token:nth-child(3) .swatch { background: var(--warning); }.token:nth-child(4) .swatch { background: var(--danger); }
+    .code-window { overflow: hidden; border: 1px solid #263e5e; border-radius: 11px; background: #0f2038; box-shadow: var(--shadow); }.code-head { display: flex; align-items: center; gap: 8px; padding: 10px 13px; border-bottom: 1px solid rgb(255 255 255 / 10%); color: #b9c8da; font-size: 11px; }.code-head span { margin-left: auto; color: #7ca9dd; }.code-window pre { max-height: 440px; margin: 0; overflow: auto; padding: 20px; color: #d7e3f1; font-size: 12px; line-height: 1.7; tab-size: 2; }.code-window .key { color: #8cc8ff; }.code-window .str { color: #b8df9f; }.code-window .num { color: #e5bd76; }
+
+    .security { background: var(--navy); color: #fff; }.security .section-heading p { color: #b6c5d8; }.security-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 22px; }.security-card { padding: 25px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 11px; background: rgb(255 255 255 / 5%); }.security-card h3 { margin: 0 0 14px; font-size: 20px; }.check-list { display: grid; gap: 9px; padding: 0; list-style: none; }.check-list li { display: flex; align-items: flex-start; gap: 9px; color: #ced9e6; font-size: 14px; }.check-list i { width: 19px; height: 19px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: rgb(103 183 220 / 17%); color: #8ed2f2; font-style: normal; font-size: 11px; }
+    .build-modes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }.mode-card { padding: 18px; border-radius: 9px; background: #fff; color: var(--ink); }.mode-card header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.mode-card header span { padding: 3px 7px; border-radius: 999px; background: #e6f6ed; color: var(--success); font-size: 9px; font-weight: 850; text-transform: uppercase; }.mode-card:nth-child(2) header span { background: #fff1d9; color: var(--warning); }.mode-card h4 { margin: 0; font-size: 17px; }.mode-card p { color: var(--muted); font-size: 13px; }.mode-card code { display: block; padding: 8px; border-radius: 5px; background: #eff3f7; font-size: 11px; }
+
+    .build-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 35px; align-items: start; }.command-list { display: grid; gap: 9px; }.command { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }.command b { width: 105px; flex: 0 0 auto; font-size: 12px; }.command code { min-width: 0; overflow: hidden; color: var(--blue); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }.command button { margin-left: auto; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: #f8fafc; color: var(--muted); cursor: pointer; }
+    .faq { display: grid; gap: 8px; }.faq details { border: 1px solid var(--line); border-radius: 8px; background: #fff; }.faq summary { padding: 15px 17px; cursor: pointer; font-weight: 750; }.faq p { margin: 0; padding: 0 17px 16px; color: var(--muted); }
+    .cta { padding: 78px 0; background: #eaf2fb; }.cta-card { display: flex; align-items: center; gap: 30px; padding: 38px; border: 1px solid #b9cfe6; border-radius: 14px; background: #fff; box-shadow: 0 12px 36px rgb(16 35 63 / 8%); }.cta-card h2 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 43px); line-height: 1.08; }.cta-card p { max-width: 650px; margin: 0; color: var(--muted); }.cta-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+    footer { padding: 42px 0 25px; background: #0c1c31; color: #c3d0df; }.footer-grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 35px; }.footer-grid h4 { margin: 0 0 12px; color: #fff; }.footer-grid a { display: block; margin: 7px 0; color: #aebed0; font-size: 13px; }.footer-grid a:hover { color: #fff; }.footer-copy { max-width: 340px; margin-top: 12px; color: #94a6ba; font-size: 13px; }.footer-bottom { display: flex; justify-content: space-between; gap: 20px; margin-top: 35px; padding-top: 18px; border-top: 1px solid rgb(255 255 255 / 10%); color: #8296ad; font-size: 12px; }
+
+    @media (max-width: 1080px) { .hero-grid { grid-template-columns: minmax(0, 1fr); }.hero-copy { max-width: 800px; }.product-window { width: min(100%, 760px); min-width: 0; }.feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }.step::after { display: none; }.design-grid, .security-grid, .build-grid { grid-template-columns: minmax(0, 1fr); }.design-grid > *, .security-grid > *, .build-grid > * { min-width: 0; }.code-window { min-width: 0; }.trust-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }.footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 760px) { .container { width: min(calc(100% - 28px), var(--max)); }.nav-links, .nav-actions .btn:not(.btn-primary) { display: none; }.nav-actions .btn.menu-button { display: inline-flex; }.nav.open { flex-wrap: wrap; padding-bottom: 10px; }.nav.open .nav-links { width: 100%; display: grid; gap: 3px; order: 5; }.nav.open .nav-links a { padding: 8px; }.hero { padding-top: 58px; }.hero-copy h1 { font-size: clamp(42px, 13vw, 64px); }.studio-screen { grid-template-columns: 44% 5px minmax(0, 1fr); }.dash-body { grid-template-columns: 100px minmax(0, 1fr); }.kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }.visual-row { grid-template-columns: minmax(0, 1fr); }.map-visual { display: none; }.feature-grid, .steps, .build-modes { grid-template-columns: minmax(0, 1fr); }.inventory { grid-template-columns: minmax(0, 1fr); }.inventory-nav { position: static; display: flex; overflow-x: auto; }.inventory-nav button { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; }.token-list { grid-template-columns: minmax(0, 1fr); }.command-list, .faq { min-width: 0; }.command { min-width: 0; display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; }.command b { width: auto; }.cta-card { align-items: flex-start; flex-direction: column; }.cta-actions { margin-left: 0; }.footer-grid { grid-template-columns: minmax(0, 1fr); }.footer-bottom { flex-direction: column; }.product-screen, .screen-panel { min-height: 390px; } }
+    @media (max-width: 480px) { .nav-actions .btn-primary { display: none; }.hero-actions .btn { width: 100%; }.trust-grid { grid-template-columns: repeat(2, 1fr); }.studio-screen { grid-template-columns: 1fr; grid-template-rows: 260px 5px 140px 110px; }.resize-rail { cursor: row-resize; }.studio-preview { grid-row: 3; }.studio-bottom { grid-column: 1; grid-row: 4; }.dashboard-screen { overflow: hidden; }.dash-side { display: none; }.dash-body { grid-template-columns: 1fr; }.component-chips span { font-size: 10px; }.cta-actions .btn { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; }.btn, .feature-card { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav container" id="siteNav" aria-label="Main navigation">
+      <a class="brand" href="#top"><span class="brand-mark">H</span><span>HyperPBI<small>Power BI dashboard compiler</small></span></a>
+      <div class="nav-links"><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#security">Security</a><a href="#build">Build</a></div>
+      <div class="nav-actions"><a class="btn" href="./README.md">Documentation</a><a class="btn btn-primary" href="https://github.com/austinwin/hyperpbi">View on GitHub</a><button class="btn menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-grid container">
+        <div class="hero-copy">
+          <span class="eyebrow">AI-assisted Power BI authoring</span>
+          <h1>Describe the dashboard. <span>HyperPBI builds it.</span></h1>
+          <p>Bind your data once, copy an AI-ready prompt, paste the generated JSON, and render a complete enterprise dashboard inside one Power BI visual.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#workflow"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>See how it works</a><a class="btn" href="https://github.com/austinwin/hyperpbi"><svg class="icon" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.3-.4 6.8-1.6 6.8-7A5.4 5.4 0 0 0 19.4 4 5 5 0 0 0 19.3.5S18.2.1 15 1.8a13.4 13.4 0 0 0-7 0C4.8.1 3.7.5 3.7.5A5 5 0 0 0 3.6 4a5.4 5.4 0 0 0-1.4 3.7c0 5.3 3.5 6.5 6.8 7A4.8 4.8 0 0 0 8 18v4M8 19c-3 .9-3-1.5-4-2"/></svg>Explore the source</a></div>
+          <div class="hero-note"><span><i>✓</i>One Values field well</span><span><i>✓</i>No user JavaScript</span><span><i>✓</i>Power BI selections</span><span><i>✓</i>Core and maps builds</span></div>
+        </div>
+        <div class="product-window" aria-label="HyperPBI product preview">
+          <div class="window-bar"><i></i><i></i><i></i><span class="window-title">HyperPBI Designer</span><span class="window-status">Ready</span></div>
+          <div class="product-tabs" role="tablist"><button class="active" data-screen="studio" type="button" role="tab" aria-selected="true">AI Designer</button><button data-screen="dashboard" type="button" role="tab" aria-selected="false">Rendered dashboard</button></div>
+          <div class="product-screen">
+            <div class="screen-panel studio-screen active" id="screen-studio">
+              <div class="studio-left"><div class="workflow-steps"><div><b><span>1</span> Describe</b></div><div><b><span>2</span> Ask AI</b></div><div><b><span>3</span> Preview</b></div></div><div class="mock-field"><label>Dashboard goal</label><div class="mock-input mock-area">Create a compact operations dashboard for managers. Show risk, status, trends, a searchable table, and a map.</div></div><div class="mock-field"><label>Privacy</label><div class="mock-input">Field dictionary only</div></div><div class="mock-button">Copy complete AI prompt</div></div>
+              <div class="resize-rail" title="Resizable divider"></div>
+              <div class="studio-preview"><div class="preview-card"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg><br><strong>Live dashboard preview</strong><br>Import the AI response and preview safely.</div></div>
+              <div class="studio-bottom"><div class="bottom-tabs"><span>Data preview</span><span>Fields</span><span>Issues</span><span style="margin-left:auto">Copy output</span></div><div class="data-grid"><span class="head">row</span><span class="head">asset_id</span><span class="head">status</span><span class="head">risk_score</span><span>0</span><span>MH001</span><span>Open</span><span>82</span><span>1</span><span>MH002</span><span>Closed</span><span>41</span><span>2</span><span>MH003</span><span>Pending</span><span>67</span></div></div>
+            </div>
+            <div class="screen-panel dashboard-screen" id="screen-dashboard">
+              <div class="dash-header"><div><strong>Operations Command Center</strong><small>1,248 assets · updated from Power BI</small></div><div class="dash-search">Search assets…</div></div>
+              <div class="dash-body"><aside class="dash-side"><b>Filters</b><div class="filter">Status · All</div><div class="filter">Region · All</div><div class="filter">Risk ≥ 50</div><div class="filter">Date range</div></aside><div class="dash-main"><div class="kpis"><div class="kpi"><small>Total assets</small><strong>1,248</strong><em>+4.2%</em></div><div class="kpi"><small>Open work</small><strong>184</strong><em>↓ 12</em></div><div class="kpi"><small>High risk</small><strong>37</strong><em style="color:#c13f3f">Needs review</em></div><div class="kpi"><small>Total cost</small><strong>$8.4M</strong><em>On plan</em></div></div><div class="visual-row"><div class="visual"><b>Cost by region</b><div class="bars"><i></i><i></i><i></i><i></i><i></i></div></div><div class="visual map-visual"><b>Asset locations</b><div class="map-grid"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div></div><div class="visual dash-table"><b>Operational detail</b><div class="table-lines"><span></span><span><b>Asset</b></span><span><b>Status</b></span><span><b>Risk</b></span><span>□</span><span>MH001</span><span>Open</span><span>82</span><span class="sel">☑</span><span class="sel">MH047</span><span class="sel">Pending</span><span class="sel">91</span></div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust-strip"><div class="trust-grid container"><span>POWER BI NATIVE</span><span>PREACT</span><span>ECHARTS</span><span>LEAFLET</span><span>DOMPURIFY</span><span>JSON DSL</span></div></div>
+
+    <section class="content" id="workflow"><div class="container"><div class="section-heading"><span class="eyebrow">Simple by default</span><h2>From Power BI data to a complete dashboard in four steps</h2><p>Users describe the outcome. HyperPBI supplies the engine knowledge, data schema, validation, security, and rendering pipeline.</p></div><div class="steps"><article class="step"><span class="step-number">01</span><h3>Add Values</h3><p>Drag the columns and measures needed by the dashboard into one simple field well.</p></article><article class="step"><span class="step-number">02</span><h3>Describe the goal</h3><p>Choose the audience, privacy mode, and explain what the dashboard should help people decide.</p></article><article class="step"><span class="step-number">03</span><h3>Ask your AI</h3><p>Copy one complete prompt containing the HyperPBI skill, normalized fields, and safe data context.</p></article><article class="step"><span class="step-number">04</span><h3>Preview and save</h3><p>Paste the response, validate, preview, and persist it into the Power BI visual.</p></article></div></div></section>
+
+    <section class="content alt" id="features"><div class="container"><div class="section-heading"><span class="eyebrow">Full dashboard engine</span><h2>More than a chart specification</h2><p>HyperPBI combines an AI authoring workflow with the layout, data, interaction, security, and GIS capabilities needed for real operational dashboards.</p></div><div class="feature-grid">
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h7v6H4zM15 14h5v6h-5z"/></svg></span><h3>Dashboard layouts</h3><p>Responsive grids, flex layouts, split panels, toolbars, sidebars, tabs, sections, collapsibles, and accordions.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.9 4.5L19 9l-4 3.4 1.2 5.1L12 15l-4.2 2.5L9 12.4 5 9l5.1-1.5z"/></svg></span><h3>AI-ready prompts</h3><p>Engine skill, current fields, visual dimensions, privacy controls, samples or summaries, component rules, and output contract.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span><h3>ECharts visualizations</h3><p>Bar, horizontal bar, line, area, pie, donut, scatter, gauge, and heatmap with responsive resizing.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18M8 3v18"/></svg></span><h3>Enterprise tables</h3><p>Search, sort, pagination, sticky headers, conditional formatting, bounded rows, selection, and filter-to-selection.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M3 11l8-8 10 10-8 8L3 11zM11 3v8h8"/></svg></span><h3>Leaflet maps</h3><p>GeoJSON, WKT, latitude/longitude, X/Y, layers, legends, popups, clustering, OSM, and controlled geocoding.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3M13 15h3M4 4h16v16H4z"/></svg></span><h3>Safe calculation DSL</h3><p>Derived fields and metrics with arithmetic, comparison, boolean, text, date, null, conditional, and aggregate operators.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span><h3>Custom components</h3><p>Sanitized HTML, props, slots, repeat templates, safe bindings, scoped CSS, and predefined interactions without JavaScript.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4M3 20h18"/></svg></span><h3>Power BI interactions</h3><p>Selection identities for tables, chart categories, maps, custom actions, clear selection, and compatible report visuals.</p></article>
+      <article class="feature-card"><span class="feature-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7zM9 12l2 2 4-5"/></svg></span><h3>Secure compiler</h3><p>DOMPurify, parsed and scoped CSS, safe URLs, provider policy, no eval, no functions, no scripts, and no silent geocoding.</p></article>
+    </div></div></section>
+
+    <section class="content" id="components"><div class="container"><div class="section-heading"><span class="eyebrow">Component catalog</span><h2>Everything needed for app-like report experiences</h2><p>AI uses a stable, validation-friendly component vocabulary rather than inventing arbitrary web code.</p></div><div class="inventory"><div class="inventory-nav" role="tablist"><button class="active" data-inventory="layout" type="button">Layout</button><button data-inventory="controls" type="button">Controls</button><button data-inventory="display" type="button">Data display</button><button data-inventory="charts" type="button">Charts</button><button data-inventory="content" type="button">Tables, maps & content</button></div><div>
+      <div class="inventory-panel active" id="inventory-layout"><h3>Compose the full dashboard</h3><p>Build responsive application structure and progressively disclose complex information.</p><div class="component-chips"><span>grid</span><span>flex</span><span>split</span><span>leftPanel</span><span>rightPanel</span><span>toolbar</span><span>section</span><span>tabs</span><span>collapsible</span><span>accordion</span><span>spacer</span><span>divider</span></div></div>
+      <div class="inventory-panel" id="inventory-controls"><h3>Filter and navigate safely</h3><p>Every interaction is schema-defined and operates on local state or valid Power BI identities.</p><div class="component-chips"><span>searchBox</span><span>textInput</span><span>numberInput</span><span>slider</span><span>select</span><span>multiSelect</span><span>toggle</span><span>button</span><span>buttonGroup</span><span>filterChips</span><span>dateRange</span></div></div>
+      <div class="inventory-panel" id="inventory-display"><h3>Communicate operational state</h3><p>Dense, reusable components support executives, managers, engineers, analysts, and field operations.</p><div class="component-chips"><span>kpi</span><span>metricGrid</span><span>infoCard</span><span>statusBadge</span><span>progressBar</span><span>alert</span><span>statList</span><span>detailPanel</span></div></div>
+      <div class="inventory-panel" id="inventory-charts"><h3>Render decision-oriented ECharts</h3><p>Charts aggregate current filtered rows and propagate category or row selection where identities are available.</p><div class="component-chips"><span>barChart</span><span>horizontalBarChart</span><span>lineChart</span><span>areaChart</span><span>pieChart</span><span>donutChart</span><span>scatterChart</span><span>gauge</span><span>heatmap</span></div></div>
+      <div class="inventory-panel" id="inventory-content"><h3>Handle detail, geography, and branded content</h3><p>Tables and maps are wrapped behind stable HyperPBI abstractions. HTML and CSS are sanitized.</p><div class="component-chips"><span>table</span><span>map</span><span>html</span><span>text</span><span>markdown</span><span>custom</span><span>slots</span><span>repeat</span><span>popup</span><span>tooltip</span></div></div>
+    </div></div></div></section>
+
+    <section class="content alt" id="design"><div class="container"><div class="design-grid"><div><span class="eyebrow">Enterprise design system</span><h2 style="font-size:clamp(30px,4vw,48px);line-height:1.08;letter-spacing:-.035em;margin:10px 0">Global styling with component-level control</h2><p style="color:var(--muted);font-size:17px">Define visual-wide CSS, reusable defaults by component type, and id-specific overrides. HyperPBI scopes every rule so the dashboard cannot leak styles into Power BI.</p><div class="token-list"><div class="token"><i class="swatch"></i>--hp-primary</div><div class="token"><i class="swatch"></i>--hp-success</div><div class="token"><i class="swatch"></i>--hp-warning</div><div class="token"><i class="swatch"></i>--hp-danger</div></div></div><div class="code-window"><div class="code-head">hyperpbi-dashboard.json <span>Scoped and sanitized</span></div><pre>{
+  <span class="key">"version"</span>: <span class="str">"1.0"</span>,
+  <span class="key">"styles"</span>: {
+    <span class="key">"globalCss"</span>: <span class="str">".hp-card { box-shadow: none; }"</span>,
+    <span class="key">"components"</span>: {
+      <span class="key">"*"</span>: { <span class="key">"style"</span>: { <span class="key">"minWidth"</span>: <span class="num">0</span> } },
+      <span class="key">"kpi"</span>: {
+        <span class="key">"css"</span>: <span class="str">".hp-metric-value { font-size: 22px; }"</span>
+      },
+      <span class="key">"#critical_kpi"</span>: {
+        <span class="key">"css"</span>: <span class="str">".hp-metric { border-left: 4px solid var(--hp-danger); }"</span>
+      }
+    }
+  },
+  <span class="key">"components"</span>: [
+    { <span class="key">"type"</span>: <span class="str">"metricGrid"</span>, <span class="key">"id"</span>: <span class="str">"summary"</span> },
+    { <span class="key">"type"</span>: <span class="str">"barChart"</span>, <span class="key">"id"</span>: <span class="str">"cost_by_region"</span> },
+    { <span class="key">"type"</span>: <span class="str">"table"</span>, <span class="key">"id"</span>: <span class="str">"details"</span> }
+  ]
+}</pre></div></div></div></section>
+
+    <section class="content security" id="security"><div class="container"><div class="section-heading"><span class="eyebrow" style="color:#8ed2f2">Security and provider policy</span><h2>Flexible enough for AI. Constrained enough for enterprise use.</h2><p>HyperPBI is a renderer and compiler—not a JavaScript sandbox, iframe host, or arbitrary website runner.</p></div><div class="security-grid"><div class="security-card"><h3>Hard safety boundaries</h3><ul class="check-list"><li><i>✓</i><span>No <code>eval</code>, <code>new Function</code>, user functions, or inline event handlers.</span></li><li><i>✓</i><span>HTML, slots, templates, and map popups are sanitized with DOMPurify.</span></li><li><i>✓</i><span>CSS is parsed, allowlisted, and scoped to the visual or component instance.</span></li><li><i>✓</i><span>Scripts, iframes, object/embed, CSS imports, unsafe URLs, fixed positioning, and z-index abuse are blocked.</span></li><li><i>✓</i><span>AI prompts remain local until the user explicitly copies them to an AI service.</span></li><li><i>✓</i><span>Address geocoding is user-triggered, sequential, rate-limited, cancellable, and cached.</span></li></ul></div><div class="build-modes"><article class="mode-card"><header><h4>Core</h4><span>Offline</span></header><p>Neutral map background, no external provider privilege, and SDK certification-fix packaging.</p><code>npm run package:core</code></article><article class="mode-card"><header><h4>Maps</h4><span>WebAccess</span></header><p>Optional OpenStreetMap tiles and Nominatim geocoding for approved organizational use.</p><code>npm run package:maps</code></article></div></div></div></section>
+
+    <section class="content" id="build"><div class="container"><div class="section-heading"><span class="eyebrow">Build and distribute</span><h2>A maintainable Power BI custom visual</h2><p>TypeScript, Preact, bundled dependencies, automated tests, two packaging profiles, and documentation for users and AI systems.</p></div><div class="build-grid"><div class="command-list"><div class="command"><b>Install</b><code>npm install</code><button data-copy="npm install" type="button">Copy</button></div><div class="command"><b>Verify</b><code>npm run typecheck &amp;&amp; npm test &amp;&amp; npm run lint</code><button data-copy="npm run typecheck && npm test && npm run lint" type="button">Copy</button></div><div class="command"><b>Core package</b><code>npm run package</code><button data-copy="npm run package" type="button">Copy</button></div><div class="command"><b>Maps package</b><code>npm run package:maps</code><button data-copy="npm run package:maps" type="button">Copy</button></div><div class="command"><b>Audit</b><code>npm run certification:audit</code><button data-copy="npm run certification:audit" type="button">Copy</button></div></div><div class="faq"><details open><summary>Do users need to write JSON?</summary><p>No. The default workflow asks for a dashboard goal, generates a complete AI prompt, and imports the returned response. JSON and engine tools are grouped under Advanced.</p></details><details><summary>Can it interact with other Power BI visuals?</summary><p>Yes, where table selection identities, model relationships, host capabilities, and Power BI report interaction settings allow it. Internal filtering and external report selections are reported separately.</p></details><details><summary>Can AI execute code inside Power BI?</summary><p>No. AI output is data. HyperPBI validates JSON, evaluates a constrained calculation DSL, sanitizes HTML, parses and scopes CSS, and never executes user JavaScript.</p></details><details><summary>Does it require a server?</summary><p>No. The visual and authoring Studio run inside Power BI. AI prompts are copied by the user to their chosen service; HyperPBI has no AI server dependency.</p></details></div></div></div></section>
+
+    <section class="cta"><div class="container"><div class="cta-card"><div><span class="eyebrow">Build with your own data</span><h2>One visual. A complete dashboard experience.</h2><p>Use HyperPBI to turn ordinary Power BI-bound data into compact, responsive, app-like dashboards designed through AI and rendered safely.</p></div><div class="cta-actions"><a class="btn btn-primary" href="https://github.com/austinwin/hyperpbi">Get the source</a><a class="btn" href="./docs/user-guide.md">Read the user guide</a></div></div></div></section>
+  </main>
+
+  <footer><div class="container"><div class="footer-grid"><div><a class="brand" href="#top"><span class="brand-mark">H</span><span style="color:#fff">HyperPBI<small style="color:#91a6bd">AI-powered Power BI dashboards</small></span></a><p class="footer-copy">A schema-driven enterprise dashboard renderer with safe AI authoring, calculations, maps, interactions, and global styling.</p></div><div><h4>Product</h4><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#security">Security</a></div><div><h4>Documentation</h4><a href="./README.md">README</a><a href="./docs/user-guide.md">User guide</a><a href="./docs/hyperpbi-spec-reference.md">Specification</a><a href="./docs/hyperpbi-ai-skill.md">AI skill</a></div><div><h4>Engineering</h4><a href="./docs/calculations-dsl.md">Calculation DSL</a><a href="./docs/map-services.md">Map services</a><a href="./docs/interactions.md">Interactions</a><a href="./docs/security.md">Security</a></div></div><div class="footer-bottom"><span>HyperPBI · Apache-2.0 repository</span><span>Power BI is a trademark of Microsoft Corporation. HyperPBI is an independent project.</span></div></div></footer>
+
+  <script>
+    const nav = document.getElementById('siteNav');
+    const menu = document.getElementById('menuButton');
+    menu?.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      menu.setAttribute('aria-expanded', String(open));
+    });
+    document.querySelectorAll('.product-tabs button').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.product-tabs button').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-selected', 'false'); });
+      document.querySelectorAll('.screen-panel').forEach(item => item.classList.remove('active'));
+      button.classList.add('active'); button.setAttribute('aria-selected', 'true');
+      document.getElementById(`screen-${button.dataset.screen}`)?.classList.add('active');
+    }));
+    document.querySelectorAll('.inventory-nav button').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.inventory-nav button').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.inventory-panel').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      document.getElementById(`inventory-${button.dataset.inventory}`)?.classList.add('active');
+    }));
+    document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', async () => {
+      const text = button.dataset.copy;
+      try { await navigator.clipboard.writeText(text); button.textContent = 'Copied'; }
+      catch { button.textContent = 'Select command'; }
+      setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+    }));
+  </script>
+</body>
+</html>
