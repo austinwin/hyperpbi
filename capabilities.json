@@ -55,7 +55,7 @@
       }
     }
   }],
-  "advancedEditModeSupport": 0,
+  "advancedEditModeSupport": 2,
   "supportsLandingPage": true,
   "supportsEmptyDataView": true,
   "supportsMultiVisualSelection": true,

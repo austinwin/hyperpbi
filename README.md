@@ -7,7 +7,7 @@ The repository includes a responsive, dependency-free [product landing page](ind
 ## Workflow
 
 1. Add HyperPBI and drag the required columns/measures into the single **Values** field well.
-2. Select **Design with AI** inside HyperPBI. Studio opens in focus mode without placing Power BI in advanced format mode.
+2. Select the visual, open its top-right **…** menu, and select **Edit**. Power BI opens HyperPBI Designer in focus mode.
 3. Describe the dashboard. HyperPBI combines the complete engine skill, current fields, visual size, data privacy choice, and your goal into one prompt.
 4. Copy the prompt to ChatGPT, DeepSeek, or Copilot.
 5. Paste the AI response into Studio. HyperPBI extracts and validates the JSON and can produce a repair prompt.
