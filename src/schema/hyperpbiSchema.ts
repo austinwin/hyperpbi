@@ -36,6 +36,8 @@ export interface ComponentBase {
     data?: Record<string, unknown>;
     visibility?: Record<string, unknown>;
     interactions?: Record<string, SafeInteraction>;
+    internal?: boolean;
+    external?: boolean;
 }
 
 export interface GlobalComponentStyle {
@@ -49,7 +51,8 @@ export interface HyperPbiStyleSystem {
     components?: Record<string, GlobalComponentStyle>;
 }
 
-export interface SafeInteraction { action: "selectRow" | "selectWhere" | "clearSelection" | "setFilter" | "clearFilter" | "setState" | "toggleState" | "openTab" | "toggleCollapse" | "drillToDetail" | "highlight" | "clearHighlight"; where?: ExpressionNode; field?: string; value?: unknown; target?: string; }
+export type SelectionMode = "replace" | "toggle" | "add";
+export interface SafeInteraction { action: "selectRow" | "selectWhere" | "clearSelection" | "setFilter" | "clearFilter" | "setState" | "toggleState" | "openTab" | "toggleCollapse" | "drillToDetail" | "highlight" | "clearHighlight"; where?: ExpressionNode; field?: string; value?: unknown; target?: string; selectionMode?: SelectionMode; internal?: boolean; external?: boolean; }
 
 export interface ContainerComponent extends ComponentBase {
     children?: DashboardComponent[];
@@ -176,7 +179,7 @@ export interface ContentComponent extends ComponentBase {
     type: "html" | "text" | "markdown" | "custom";
     html?: string;
     text?: string;
-    repeat?: { source: "rows"; as?: "row"; limit?: number; template: string };
+    repeat?: { source: "rows"; as?: "row"; limit?: number; template: string; distinctBy?: string; sortBy?: string; sortDirection?: "asc" | "desc" };
 }
 
 export interface TabsComponent extends ComponentBase {

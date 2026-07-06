@@ -5,6 +5,9 @@ export interface NormalizedField {
     key: string;
     displayName: string;
     queryName?: string;
+    sourceTable?: string;
+    sourceColumn?: string;
+    qualifiedName?: string;
     type: "measure" | "date" | "latitude" | "longitude" | "geometry" | "schema" | "dimension";
     format?: string;
     roles: string[];

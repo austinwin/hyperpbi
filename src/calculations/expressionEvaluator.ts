@@ -12,6 +12,10 @@ const compare = (left: Primitive, right: Primitive): number => { const a = numbe
 export function evaluateExpression(expression: ExpressionNode, row: DataRow, context: EvaluationContext = {}): Primitive {
     if (!expression || typeof expression !== "object") return null;
     if ("field" in expression) return row[String(expression.field)];
+    if ("valueFromRow" in expression) {
+        const key = String(expression.valueFromRow);
+        return context.clickedRow && context.knownFieldKeys?.has(key) ? context.clickedRow[key] ?? null : null;
+    }
     if ("value" in expression) return expression.value as Primitive;
     const node = expression as Record<string, unknown> & { op: string }; const args = values(node, row, context); const one = args[0]; const two = args[1];
     switch (node.op) {

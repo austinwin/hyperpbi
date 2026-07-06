@@ -23,9 +23,9 @@ The designer/preview divider and bottom diagnostics panel are resizable. Their s
 
 **Skill** generates copyable Markdown containing the full HyperPBI engine contract plus the current field dictionary. **Help / Docs** is also plain copyable/downloadable Markdown, so either document can be pasted directly into ChatGPT, DeepSeek, Copilot, or internal AI tooling.
 
-Diagnostics: **Data**, **Fields**, **Logs**, **Errors**, **Map Services**, **Geocode Results**, and **Interactions**. The Fields panel exposes normalized key, Power BI display name, inferred type, format, roles, sample values, and a copy action.
+Diagnostics: **Data**, **Fields**, **Logs**, **Issues**, **Map Services**, **Geocode Results**, and **Interactions**. The Fields panel exposes normalized key, display name, source table/column, query lineage, inferred type, format, roles, sample values, and a copy action.
 
-Field keys are lowercase and stable: `Asset ID` → `asset_id`; duplicate names → `asset_id_2`.
+Field keys are lowercase, stable, and table-qualified when Power BI query metadata is available: `WorkOrders.Status` → `workorders_status`, while `Projects.Status` → `projects_status`. Numeric suffixes are only a final collision fallback. Visible labels continue to use friendly display names.
 
 ## AI and privacy
 
@@ -37,7 +37,7 @@ Imported output must be JSON only at runtime. HyperPBI never executes functions,
 
 Dashboard Specification defines UI and component behavior. Runtime Config defines field semantics, map providers, interactions, and renderer options.
 
-Every component supports `id`, `span`, `className`, sanitized `style`, scoped `css`, safe `slots`, `props`, `data`, `visibility`, and schema-defined interactions. The `custom` type adds sanitized HTML, repeat templates, props, metrics, state, and safe actions. See [spec reference](docs/hyperpbi-spec-reference.md) and [custom components](docs/custom-components.md).
+Every component supports `id`, `span`, `className`, sanitized `style`, scoped `css`, safe `slots`, `props`, `data`, `visibility`, and schema-defined interactions. The `custom` type adds sanitized HTML, row-aware repeat wrappers, distinct/sorted repeats, props, metrics, state, selected classes, and typed safe actions. See [spec reference](docs/hyperpbi-spec-reference.md) and [custom components](docs/custom-components.md).
 
 ### Global application styling
 
@@ -78,7 +78,7 @@ OSM attribution is displayed by Leaflet. Nominatim is user-triggered only, seque
 
 HyperPBI builds table selection identities with `SelectionIdBuilder.withTable`. Table rows, chart categories, map features, and safe custom `selectWhere` actions can select compatible report data. Internal filters and external report selection are distinct; other visuals react only when Power BI identities and report interaction settings permit it. See [interactions](docs/interactions.md).
 
-Selectable tables filter to selected rows by default and expose **Show all**. Normal click replaces the selection; Ctrl/Cmd-click adds or removes rows. Set `selectionMode: "highlight"` to keep all rows visible. Filtering another Power BI visual also requires valid selection identities, semantic-model relationships, and enabled Power BI report interactions.
+Selectable tables retain backward-compatible `selectionMode: "filter"` behavior and expose **Show all**. Normal click replaces the selection; Ctrl/Cmd-click adds or removes rows. Set `selectionMode: "highlight"`, or `internal:false`, to keep all rows visible. External selection can be controlled independently with `external`. Filtering another Power BI visual also requires enabled formatting interactions, host permission, valid table identities, matching source rows, compatible semantic-model lineage/relationships, and enabled Power BI Edit interactions.
 
 ## Security
 

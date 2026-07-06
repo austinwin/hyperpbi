@@ -5,6 +5,7 @@ export type CalculationOperator = "+" | "-" | "*" | "/" | "%" | "round" | "floor
 
 export type ExpressionNode =
     | { field: string }
+    | { valueFromRow: string }
     | { value: Primitive }
     | { op: CalculationOperator; [key: string]: unknown };
 
@@ -33,4 +34,4 @@ export interface CalculationSpecification {
 }
 
 export interface CalculationMessage { level: "error" | "warning"; path: string; message: string; }
-export interface EvaluationContext { now?: Date; warnings?: string[]; }
+export interface EvaluationContext { now?: Date; warnings?: string[]; clickedRow?: Record<string, Primitive>; knownFieldKeys?: ReadonlySet<string>; }

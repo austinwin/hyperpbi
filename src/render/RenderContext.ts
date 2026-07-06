@@ -5,6 +5,7 @@ import { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { RuntimeSettings } from "../settings";
 import { DashboardAction, DashboardState } from "./stateStore";
 import { HyperPbiConfig } from "../config/hyperpbiConfig";
+import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails } from "../powerbi/interactionDiagnostics";
 
 export interface RenderContextValue {
     data: NormalizedData;
@@ -15,8 +16,9 @@ export interface RenderContextValue {
     state: DashboardState;
     dispatch: (action: DashboardAction) => void;
     warnings: string[];
-    selectExternal: (rowIndices: number[], multiSelect?: boolean) => void;
-    clearExternal: () => void;
+    selectExternal: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult;
+    clearExternal: (details?: InteractionDetails) => ExternalSelectionResult;
+    reportInteraction: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void;
     config: HyperPbiConfig;
     webAccessAvailable: boolean;
 }

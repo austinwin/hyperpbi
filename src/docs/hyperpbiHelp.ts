@@ -6,7 +6,7 @@ HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashb
 
 - Specification: theme, global styles, layout, components, calculations, slots, HTML, and component interactions.
 - Runtime Config: map field semantics, provider policy, renderer settings, and Power BI interactions.
-- Use normalized field keys from the Fields panel. Never guess field names.
+- Use normalized, preferably table-qualified field keys from the Fields panel. displayName is only a friendly UI label; never use it as a JSON field reference.
 
 ## Global design system
 
@@ -37,11 +37,11 @@ Use calculations.fields and calculations.metrics. Expressions are JSON nodes con
 
 ## Custom components
 
-Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and predefined actions such as selectWhere and clearSelection.
+Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and predefined actions such as selectWhere and clearSelection. Repeated rows are engine-owned keyboard-accessible wrappers. For a safe slicer use repeat.distinctBy and selectWhere with valueFromRow; set internal:false and external:true to retain all list values while selecting Power BI rows.
 
 ## Table selection
 
-Selectable tables filter themselves to the selected row(s) by default and expose Show all. Set selectionMode to highlight to keep all rows visible. A normal click replaces selection; Ctrl/Cmd-click adds or removes rows. External Power BI filtering still requires valid selection identities, model relationships, host interaction support, and enabled report interactions.
+Selectable tables retain backward-compatible selectionMode filter behavior and expose Show all. Set selectionMode to highlight, or internal:false, to keep all rows visible. A normal click replaces selection; Ctrl/Cmd-click adds or removes rows. Internal HyperPBI filtering does not automatically mean external Power BI selection. External selection requires enabled formatting interactions, host permission, valid table identities, matching source rows, compatible model lineage/relationships, and Power BI Edit interactions configured to filter or highlight the target.
 
 ## Maps
 
@@ -61,7 +61,7 @@ You generate HyperPBI 1.0 dashboard specifications for a Power BI custom visual.
 
 ## Output contract
 
-Return one valid JSON object only. Do not return markdown fences, explanations, comments, JavaScript, functions, eval, event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use only normalized field keys provided by the user.
+Return one valid JSON object only. Do not return markdown fences, explanations, comments, JavaScript, functions, eval, inline event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use only normalized field keys provided by the user, preferably table-qualified keys such as workorders_status. displayName is only a UI label.
 
 ## Root shape
 
@@ -94,10 +94,12 @@ Create a compact enterprise dashboard with restrained colors, strong hierarchy, 
 
 ## Map and interaction rules
 
-Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Use selectable tables/charts/maps where external Power BI interactions are useful. Internal filters and external Power BI selections are separate.
+Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Use selectable tables/charts/maps where external Power BI interactions are useful. Internal HyperPBI filters and external Power BI selections are separate. External selection requires table identities, matching source rows, host permission, compatible model lineage/relationships, and Power BI Edit interactions.
 
-Selectable tables filter to selected rows by default. Use selectionMode "highlight" only when the dashboard should retain every row while highlighting selection.
+Selectable tables filter to selected rows by default for compatibility. Use selectionMode "highlight", or internal:false, when the dashboard should retain every row while highlighting selection. For custom slicers use repeat.distinctBy with interactions.onClick action selectWhere, valueFromRow, internal:false, and external:true.
+
+Custom slicer interaction shape: {"type":"custom","id":"field_slicer","repeat":{"source":"rows","distinctBy":"field_key","sortBy":"field_key","template":"<span>{{row.field_key}}</span>"},"interactions":{"onClick":{"action":"selectWhere","selectionMode":"replace","internal":false,"external":true,"where":{"op":"=","left":{"field":"field_key"},"right":{"valueFromRow":"field_key"}}}}}.
 
 ## Common mistakes
 
-Do not invent fields, use display names instead of keys, omit ids, put comments in JSON, put provider settings on every map, use unsupported chart types, create tabs without children, or produce spacious toy styling.`;
+Do not invent fields, use display names instead of keys, omit ids, put comments in JSON, put provider settings on every map, use unsupported chart types, create tabs without children, or produce spacious toy styling. Do not invent externalSelection, selectionTarget, crossFilter, or powerBISelection properties in dashboard JSON.`;

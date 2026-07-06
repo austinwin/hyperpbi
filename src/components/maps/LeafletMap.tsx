@@ -17,7 +17,7 @@ function bindInteractions(layer: L.Layer, feature: NormalizedMapFeature, mapData
 }
 
 export function LeafletMap({ component, mapData, visibleLayers }: { component: MapComponent; mapData: NormalizedMapData; visibleLayers: Set<string> }) {
-    const ref = useRef<HTMLDivElement>(null); const { settings, dispatch, data, sourceRows, selectExternal, config: runtimeConfig, webAccessAvailable } = useRenderContext();
+    const ref = useRef<HTMLDivElement>(null); const { settings, dispatch, data, sourceRows, selectExternal, reportInteraction, config: runtimeConfig, webAccessAvailable } = useRenderContext();
     useEffect(() => {
         if (!ref.current) return;
         const config = component.settings ?? {}; const policy = resolveProviderPolicy(runtimeConfig.providers,webAccessAvailable); const providerConfig = runtimeConfig.providers?.basemap; const provider = getBasemapProvider(providerConfig?.provider ?? "none"); const enableTiles = policy.tilesAllowed && provider.external;
@@ -41,13 +41,13 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
                     }).addTo(layerGroup);
                     layer = geometryLayer; const geometryBounds = geometryLayer.getBounds(); if (geometryBounds.isValid()) dataBounds.extend(geometryBounds);
                 }
-                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, () => { const sourceIndex = sourceRows.indexOf(feature.row); dispatch({ type: "selectMap", index: sourceIndex }); selectExternal(sourceIndex >= 0 ? [sourceIndex] : []); });
+                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, () => { const sourceIndex = sourceRows.indexOf(feature.row); const indices=sourceIndex >= 0 ? [sourceIndex] : []; dispatch({ type: "selectMap", index: sourceIndex }); const details={componentId:component.id,componentType:component.type,value:feature.id}; if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details); });
             });
         });
         if ((config.fitBounds ?? true) && dataBounds.isValid()) map.fitBounds(dataBounds.pad(.08), { maxZoom: 14 });
         const observer = new ResizeObserver(() => map.invalidateSize()); observer.observe(ref.current);
         return () => { observer.disconnect(); map.remove(); };
-    }, [mapData, component, settings.map, settings.theme.primary, visibleLayers, sourceRows, selectExternal, runtimeConfig.providers,webAccessAvailable]);
+    }, [mapData, component, settings.map, settings.theme.primary, visibleLayers, sourceRows, selectExternal, reportInteraction, runtimeConfig.providers,webAccessAvailable]);
     const external = resolveProviderPolicy(runtimeConfig.providers,webAccessAvailable).tilesAllowed;
     return <div ref={ref} class={`hp-map-canvas ${external ? "hp-map-tiled" : "hp-map-neutral"}`} style={{ height: `${component.height ?? 320}px` }} />;
 }

@@ -22,7 +22,7 @@ Design style: ${settings.designStyle}
 Current visual size: ${viewport?.width ?? "unknown"} x ${viewport?.height ?? "unknown"} pixels
 Requested components: ${requirements.join(", ")}
 
-Use only normalized field keys from this dictionary. Never invent a field:
+Use only normalized field keys from this dictionary. Prefer stable table-qualified keys such as workorders_status. displayName is a UI label only; never use it as a JSON field reference. Never invent a field:
 ${JSON.stringify(fields, null, 2)}
 
 Sample rows or safe summaries (${settings.privacyMode} mode):
@@ -31,7 +31,7 @@ ${JSON.stringify(samples, null, 2)}
 ${componentReference}
 ${calculationReference}
 Map rules: map location priority is geometry, latitude/longitude, X/Y, then address. Provider settings belong in Runtime Config, not each map. Address geocoding is explicit and user-triggered only. OSM attribution is required when tiles are enabled.
-Interaction rules: internal filters affect HyperPBI; external report interactions require source row selection identities. Add selectable tables/charts/maps when useful.
+Interaction rules: internal HyperPBI filtering and external Power BI report selection are separate. External selection requires enabled formatting interactions, host permission, source table selection identities, matching source rows, compatible model lineage/relationships, and Power BI Edit interactions configured on target visuals. For custom slicer-like components use repeat.distinctBy + interactions.onClick action selectWhere + valueFromRow, with internal:false and external:true. Never invent externalSelection, selectionTarget, crossFilter, or powerBISelection in dashboard JSON.
 ${securityReference}
 
 Every component needs a unique validation-friendly id. Components may use css and slots; custom components may use sanitized html, props, repeat, and predefined interactions only. Use compact enterprise spacing, restrained colors, useful tables/maps, and avoid decorative chart clutter.

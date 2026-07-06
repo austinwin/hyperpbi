@@ -9,7 +9,7 @@ import { SlotRenderer } from "../custom/slotRenderer";
 
 function columnDefinition(column: string | TableColumn): TableColumn { return typeof column === "string" ? { field: column } : column; }
 export function nextTableSelection(current: number[], index: number, multi: boolean): number[] { const selected=current.includes(index); return multi?(selected?current.filter(item=>item!==index):[...current,index]):(selected?[]:[index]); }
-export function tableRowsForSelection<T>(rows:T[],sourceRows:T[],selectedRows:number[],mode:TableComponent["selectionMode"]):T[]{return mode!=="highlight"&&selectedRows.length?rows.filter(row=>selectedRows.includes(sourceRows.indexOf(row))):rows;}
+export function tableRowsForSelection<T>(rows:T[],sourceRows:T[],selectedRows:number[],mode:TableComponent["selectionMode"],internal=true):T[]{return internal&&mode!=="highlight"&&selectedRows.length?rows.filter(row=>selectedRows.includes(sourceRows.indexOf(row))):rows;}
 
 function cellStyle(column: TableColumn, value: unknown): Record<string, string> | undefined {
     const rule = column.conditional?.find(item => {
@@ -27,14 +27,15 @@ function cellStyle(column: TableColumn, value: unknown): Record<string, string> 
 }
 
 export function SimpleVirtualTable({ component }: { component: TableComponent }) {
-    const { rows, sourceRows, data, settings, state, dispatch, selectExternal } = useRenderContext();
+    const { rows, sourceRows, data, settings, state, dispatch, selectExternal, clearExternal, reportInteraction } = useRenderContext();
     const id = component.id ?? "table";
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>();
     const columns: TableColumn[] = (component.columns?.length ? component.columns.map(columnDefinition) : Object.keys(data.fields).map(field => ({ field }))).filter(column => data.fields[column.field]);
     const maxRows = Math.min(component.maxRows ?? settings.table.maxRows, settings.table.maxRows, 5000);
     const needle = (state.tableSearch[id] ?? "").trim().toLowerCase();
-    const tableRows = tableRowsForSelection(rows,sourceRows,state.selectedRows,component.selectionMode);
+    const selectedRows = state.componentSelectedRows[id] ?? (component.internal === false ? [] : state.selectedRows);
+    const tableRows = tableRowsForSelection(rows,sourceRows,selectedRows,component.selectionMode,component.internal !== false);
     const prepared = useMemo(() => {
         const matching = needle ? tableRows.filter(row => columns.some(column => String(row[column.field] ?? "").toLowerCase().includes(needle))) : tableRows;
         return sort ? sortRows(matching, sort.field, sort.direction) : matching;
@@ -48,13 +49,13 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const toggleSort = (field: string) => setSort(current => ({ field, direction: current?.field === field && current.direction === "asc" ? "desc" : "asc" }));
 
     return <>
-        {(component.search ?? settings.table.search) && <div class="hp-table-toolbar"><input class="form-control form-control-sm" type="search" placeholder="Search table…" value={state.tableSearch[id] ?? ""} onInput={event => dispatch({ type: "tableSearch", id, value: event.currentTarget.value })} />{state.selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => { dispatch({ type: "selectRows", rows: [] }); selectExternal([]); }}>{component.selectionMode === "highlight" ? "Clear selection" : "Show all"}</button>}<span>{limited.length.toLocaleString()} rows</span></div>}
+        {(component.search ?? settings.table.search) && <div class="hp-table-toolbar"><input class="form-control form-control-sm" type="search" placeholder="Search table…" value={state.tableSearch[id] ?? ""} onInput={event => dispatch({ type: "tableSearch", id, value: event.currentTarget.value })} />{selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => { dispatch({ type: "selectComponentRows", id, rows: [] }); if (component.internal !== false) dispatch({ type: "selectRows", rows: [] }); if (component.external !== false) clearExternal({ componentId: id, componentType: component.type }); else reportInteraction({ componentId: id, componentType: component.type }); }}>{component.selectionMode === "highlight" || component.internal === false ? "Clear selection" : "Show all"}</button>}<span>{limited.length.toLocaleString()} rows</span></div>}
         {columns.length && rows.length ? <div class="hp-table-wrap"><table class="table table-sm table-vcenter hp-table"><thead><tr>
             {component.selectable && <th aria-label="Selection" />}
             {columns.map(column => <th style={{ width: column.width ? `${column.width}px` : undefined }}><button type="button" onClick={() => toggleSort(column.field)}>{column.title ?? data.fields[column.field]?.displayName ?? column.field}{sort?.field === column.field ? sort.direction === "asc" ? " ↑" : " ↓" : ""}</button></th>)}
         </tr></thead><tbody>{visible.map(row => {
-            const index = sourceRows.indexOf(row); const selected = state.selectedRows.includes(index);
-            return <tr class={selected ? "hp-row-selected" : ""} onClick={event => { if (!component.selectable) return; const multi = event.ctrlKey || event.metaKey; const next = nextTableSelection(state.selectedRows,index,multi); dispatch({ type: "selectRows", rows: next }); selectExternal(next, multi); }}>
+            const index = sourceRows.indexOf(row); const selected = selectedRows.includes(index);
+            return <tr class={selected ? "hp-row-selected" : ""} onClick={event => { if (!component.selectable) return; const multi = event.ctrlKey || event.metaKey; const next = nextTableSelection(selectedRows,index,multi); dispatch({ type: "selectComponentRows", id, rows: next }); if (component.internal !== false) dispatch({ type: "selectRows", rows: next }); const firstField=columns[0]?.field; const details={componentId:id,componentType:component.type,field:firstField,value:firstField?row[firstField]:undefined}; if(component.external!==false)selectExternal(next,false,details);else reportInteraction(details,"component did not call selectExternal",next); }}>
                 {component.selectable && <td><input type="checkbox" checked={selected} aria-label="Select row" /></td>}
                 {columns.map(column => <td class={column.hozAlign ? `text-${column.hozAlign}` : ""} style={cellStyle(column, row[column.field])}>{formatValue(row[column.field], column.format ?? data.fields[column.field]?.format)}</td>)}
             </tr>;

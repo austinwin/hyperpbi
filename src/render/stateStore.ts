@@ -7,6 +7,7 @@ export interface DashboardState {
     filters: ActiveFilter[];
     values: Record<string, unknown>;
     selectedRows: number[];
+    componentSelectedRows: Record<string, number[]>;
     selectedMapFeature?: number;
     tableSearch: Record<string, string>;
 }
@@ -19,12 +20,13 @@ export type DashboardAction =
     | { type: "removeFilter"; id: string }
     | { type: "value"; id: string; value: unknown }
     | { type: "selectRows"; rows: number[] }
+    | { type: "selectComponentRows"; id: string; rows: number[] }
     | { type: "selectMap"; index?: number }
     | { type: "tableSearch"; id: string; value: string }
     | { type: "clearFilters" };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
-    return { search, activeTabs: activeTab ? { mainTabs: activeTab } : {}, collapsed: {}, filters: [], values: {}, selectedRows: [], tableSearch: {} };
+    return { search, activeTabs: activeTab ? { mainTabs: activeTab } : {}, collapsed: {}, filters: [], values: {}, selectedRows: [], componentSelectedRows: {}, tableSearch: {} };
 }
 
 export function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
@@ -35,6 +37,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "removeFilter") return { ...state, filters: state.filters.filter(item => item.id !== action.id) };
     if (action.type === "value") return { ...state, values: { ...state.values, [action.id]: action.value } };
     if (action.type === "selectRows") return { ...state, selectedRows: action.rows };
+    if (action.type === "selectComponentRows") return { ...state, componentSelectedRows: { ...state.componentSelectedRows, [action.id]: action.rows } };
     if (action.type === "selectMap") return { ...state, selectedMapFeature: action.index };
     if (action.type === "tableSearch") return { ...state, tableSearch: { ...state.tableSearch, [action.id]: action.value } };
     return { ...state, filters: [], search: "", values: {}, tableSearch: {} };
