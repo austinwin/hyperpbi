@@ -14,6 +14,10 @@ Review every prompt before sending it externally. HyperPBI does not call an AI A
 
 The Skill tab is the densest reusable context document. Copy it at the start of an AI conversation when the model does not already know HyperPBI. It includes global styling, calculations, components, templates, maps, interactions, security restrictions, common mistakes, and the current normalized field dictionary.
 
+The guided Builder adds goal, audience, layout pattern, selected components, and one of six professional presets. The generated prompt includes a categorized capability catalog and reusable recipes instead of only listing component names. It also describes drawers, segmented controls, timelines, matrices, small multiples, selected-row details, and sanitized JSON-only advanced ECharts.
+
+Prefer normal components first. Use `advancedChart` only for justified radar, treemap, sankey, funnel, boxplot, calendar, network, combo, or waterfall patterns. Options cannot contain functions, formatter callbacks, event keys, URLs, or executable markup.
+
 AI output must reference the normalized `key`, preferably a table-qualified key such as `workorders_status`. `displayName` is a UI label and must never be used as a field reference. For custom slicer-like lists, generate `repeat.distinctBy` plus `interactions.onClick` using `selectWhere` and `valueFromRow`; set `internal:false` and `external:true` so all choices remain visible while Power BI identities are selected.
 
 Internal filtering changes HyperPBI data. External selection calls Power BI Selection Manager. Do not imply one automatically causes the other: external behavior also requires enabled formatting interactions, host permission, valid source-row identities, compatible semantic-model lineage/relationships, and report Edit-interactions configuration.

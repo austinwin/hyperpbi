@@ -3,7 +3,7 @@ import { CalculationSpecification, ExpressionNode } from "../calculations/calcul
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
 export type FilterOperator = "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
-export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap";
+export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap" | "advancedChart";
 
 export interface HyperPbiTheme {
     mode?: ThemeMode;
@@ -106,6 +106,9 @@ export interface DataDisplayComponent extends ComponentBase {
     text?: string;
     items?: Array<{ label: string; field?: string; value?: unknown; format?: string }>;
     max?: number;
+    selectedRow?: boolean;
+    groups?: Array<{ title?: string; fields: Array<string | { field: string; label?: string; badge?: boolean; copyable?: boolean; format?: string }> }>;
+    emptyText?: string;
 }
 
 export interface ChartComponent extends ComponentBase {
@@ -118,6 +121,15 @@ export interface ChartComponent extends ComponentBase {
     size?: string;
     height?: number;
     options?: Record<string, unknown>;
+}
+
+export interface SmallMultiplesComponent extends ComponentBase {
+    type: "smallMultiples";
+    splitField: string;
+    chart: ChartComponent;
+    maxPanels?: number;
+    sharedScale?: boolean;
+    height?: number;
 }
 
 export interface TableColumn {
@@ -141,6 +153,16 @@ export interface TableComponent extends ComponentBase {
     stickyHeader?: boolean;
     selectable?: boolean;
     selectionMode?: "highlight" | "filter";
+}
+
+export interface MatrixComponent extends ComponentBase {
+    type: "matrix";
+    rows: string[];
+    columns?: string[];
+    values: Array<{ field?: string; title?: string; aggregation?: MetricDefinition["aggregation"]; format?: string }>;
+    showTotals?: boolean;
+    heatmap?: boolean;
+    maxRows?: number;
 }
 
 export interface MapComponent extends ComponentBase {
@@ -187,7 +209,29 @@ export interface TabsComponent extends ComponentBase {
     tabs: Array<{ id: string; title: string; children?: DashboardComponent[]; components?: DashboardComponent[]; content?: DashboardComponent[] }>;
 }
 
-export type DashboardComponent = ContainerComponent | ControlComponent | DataDisplayComponent | ChartComponent | TableComponent | MapComponent | ContentComponent | TabsComponent;
+export interface DrawerComponent extends ComponentBase {
+    type: "drawer" | "filterDrawer";
+    children?: DashboardComponent[];
+    position?: "left" | "right";
+    width?: number;
+    openWhen?: "always" | "selectedRow" | "state";
+    stateKey?: string;
+    defaultOpen?: boolean;
+    collapsible?: boolean;
+}
+
+export interface TimelineComponent extends ComponentBase {
+    type: "timeline";
+    dateField: string;
+    titleField: string;
+    categoryField?: string;
+    statusField?: string;
+    descriptionField?: string;
+    sortDirection?: "asc" | "desc";
+    limit?: number;
+}
+
+export type DashboardComponent = ContainerComponent | ControlComponent | DataDisplayComponent | ChartComponent | SmallMultiplesComponent | TableComponent | MatrixComponent | MapComponent | ContentComponent | TabsComponent | DrawerComponent | TimelineComponent;
 
 export interface HyperPbiSchema {
     version: "1.0";

@@ -1,10 +1,46 @@
 # User guide
 
+## Guided Builder (Simple mode)
+
+Normal users do not need to edit JSON. Open the visual menu, choose **Edit**, and follow eight compact steps:
+
+1. Choose a dashboard goal.
+2. Choose the audience.
+3. Choose a proven layout pattern.
+4. Select useful components only.
+5. Choose one professional style preset.
+6. Select **Copy AI Prompt** and paste it into an approved AI.
+7. Paste the AI response and select **Validate & Preview**.
+8. After the preview succeeds, select **Save & return**.
+
+The Builder never sends data to an AI service. Field-only mode is the default, and the prompt is copied only when the user requests it.
+
+## Advanced mode
+
+Use **Advanced** only when raw control is needed. It exposes JSON, Runtime Config, calculations, map providers, field mapping, interaction diagnostics, AI skill text, logs, data, and issues. Returning to Simple mode does not discard the saved specification.
+
+## Style presets
+
+- Enterprise Light: neutral and audit-friendly.
+- Bright Modern: crisp white with blue/teal accents.
+- Futuristic Light: precise cyan technical styling without neon clutter.
+- Dark Ops Center: low-glare operational monitoring.
+- Dense Compact: maximum useful content for normal Power BI tiles.
+- Map Command Center: map-dominant layout with compact supporting panels.
+
+## Recover from a bad AI response
+
+Select **Copy repair prompt** after validation fails. The repair prompt includes broken JSON, errors, warnings, the valid field dictionary, supported components, security rules, and an instruction to return one corrected JSON object only.
+
+## Interaction troubleshooting
+
+Open **Interaction status** in the Builder or Advanced mode. It reports the visual setting, host permission, identity count, last clicked component/field/value, matching source rows, send result, plain-language reason, and suggested fix. A sent selection still requires target **Edit interactions** and compatible model lineage/relationships.
+
 Bind all dashboard columns and measures to **Values**. Select the visual, open its top-right **…** menu, and select **Edit**; manual JSON authoring is optional and hidden under Advanced.
 
-Studio persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. Preview dashboard validates without closing Studio. Errors never replace the last saved dashboard.
+The Builder persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. **Validate & Preview** never replaces the last saved dashboard when validation fails.
 
-The designer/preview divider and bottom data panel are draggable. Bottom Data, Fields, Logs, Issues, map, geocode, and interaction output is selectable and can be copied with **Copy output**.
+In Advanced mode, the builder/preview divider and bottom data panel are draggable. Data, Fields, Logs, Issues, map, geocode, and interaction output can be copied with **Copy output**.
 
 Use **Skill** to copy the full engine contract and current field dictionary into an AI conversation. Use **Help / Docs** for a shorter copyable Markdown authoring guide.
 

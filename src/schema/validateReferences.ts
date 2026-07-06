@@ -19,6 +19,10 @@ export function validateReferences(schema: HyperPbiSchema, data: NormalizedData)
         const owner = component.id ?? component.title ?? component.type;
         if ("field" in component) check(component.field, owner);
         if ("category" in component) { check(component.category, owner); check(component.measure, owner); check(component.x, owner); check(component.y, owner); }
+        if(component.type==="timeline"){const timeline=component as import("./hyperpbiSchema").TimelineComponent;check(timeline.dateField,owner);check(timeline.titleField,owner);check(timeline.categoryField,owner);check(timeline.statusField,owner);check(timeline.descriptionField,owner);}
+        if(component.type==="smallMultiples"){const small=component as import("./hyperpbiSchema").SmallMultiplesComponent;check(small.splitField,owner);visit(small.chart);}
+        if(component.type==="matrix"){const matrix=component as import("./hyperpbiSchema").MatrixComponent;matrix.rows.forEach(field=>check(field,owner));matrix.columns?.forEach(field=>check(field,owner));matrix.values.forEach(value=>check(value.field,owner));}
+        if(component.type==="detailPanel"&&"groups" in component)component.groups?.forEach(group=>group.fields.forEach(item=>check(typeof item==="string"?item:item.field,owner)));
         if (component.type === "table") (component as TableComponent).columns?.forEach(column => check(typeof column === "string" ? column : column.field, owner));
         if(component.type==="custom"&&"repeat" in component){check(component.repeat?.distinctBy,owner);check(component.repeat?.sortBy,owner);}
         Object.values(component.interactions??{}).forEach(interaction=>checkExpression(interaction.where,owner));

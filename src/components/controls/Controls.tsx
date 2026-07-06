@@ -3,7 +3,7 @@ import { ControlComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
 
 export function ControlBlock({ component }: { component: ControlComponent }) {
-    const { data, state, dispatch } = useRenderContext();
+    const { data, sourceRows, state, dispatch, selectExternal, clearExternal, reportInteraction } = useRenderContext();
     const id = component.id ?? component.type;
     const initial = state.values[id] ?? component.defaultValue ?? (component.type === "toggle" ? false : component.min ?? "");
     const [value, setValue] = useState<unknown>(initial);
@@ -13,11 +13,11 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
         const handle = window.setTimeout(() => {
             dispatch({ type: "value", id, value });
             const hasValue = value !== "" && value !== null && (!Array.isArray(value) || value.length > 0);
-            if (component.field && hasValue) {
+            if (component.field && hasValue && component.internal !== false) {
                 const defaultOperator = component.type === "multiSelect" || component.multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : "=";
                 dispatch({ type: "filter", filter: { id, field: component.field, operator: component.filter?.operator ?? defaultOperator, value } });
             }
-            else if (component.field) dispatch({ type: "removeFilter", id });
+            else if (component.field && component.internal !== false) dispatch({ type: "removeFilter", id });
             if (component.type === "searchBox") dispatch({ type: "search", value: String(value ?? "") });
         }, component.type === "slider" || component.type === "searchBox" ? 180 : 0);
         return () => window.clearTimeout(handle);
@@ -26,6 +26,10 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" onClick={() => component.action === "clearFilters" ? dispatch({ type: "clearFilters" }) : component.action === "setTab" && dispatch({ type: "tab", id: "mainTabs", value: component.actionValue ?? "" })}>{component.title ?? component.label ?? "Action"}</button>;
     if (component.type === "buttonGroup") return <div class="btn-group">{component.buttons?.map(button => <button type="button" class="btn btn-sm" onClick={() => setValue(button.value ?? button.id)}>{button.label}</button>)}</div>;
     if (component.type === "filterChips") return <div class="hp-chips">{state.filters.map(filter => <button type="button" class="badge hp-chip" onClick={() => dispatch({ type: "removeFilter", id: filter.id })}>{filter.field}: {String(filter.value)} ×</button>)}{state.filters.length > 0 && <button type="button" class="btn btn-sm btn-ghost-secondary" onClick={() => dispatch({ type: "clearFilters" })}>Clear</button>}</div>;
+    if (component.type === "segmentedControl") {
+        const choose=(next:unknown)=>{setValue(next);if(!component.field)return;const has=next!==""&&next!==null;const indices=has?data.rows.map(row=>String(row[component.field!]??"")===String(next)?sourceRows.indexOf(row):-1).filter(index=>index>=0):[];dispatch({type:"selectComponentRows",id,rows:indices});const details={componentId:id,componentType:component.type,field:component.field,value:has?String(next):"All"};if(component.external===true){if(has)selectExternal(indices,false,details);else clearExternal(details);}else reportInteraction(details,"component did not call selectExternal",indices);};
+        return <fieldset class="hp-segmented"><legend>{component.label??component.title}</legend><div><button type="button" class={value===""?"is-selected":""} onClick={()=>choose("")}>All</button>{options.slice(0,20).map(option=>{const item=typeof option==="string"?{label:option,value:option}:option;return <button type="button" class={String(value)===String(item.value)?"is-selected":""} onClick={()=>choose(item.value)}>{item.label}</button>;})}</div></fieldset>;
+    }
 
     const label = component.label ?? component.title;
     if (component.type === "toggle") return <label class="form-check form-switch hp-control"><input class="form-check-input" type="checkbox" checked={Boolean(value)} onChange={event => setValue(event.currentTarget.checked)} /><span class="form-check-label">{label}</span></label>;

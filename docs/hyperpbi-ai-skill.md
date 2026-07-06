@@ -17,3 +17,13 @@ Provider settings belong in Runtime Config. Never request silent or automatic ge
 For a custom slicer-like component, use `repeat.distinctBy`, optional `sortBy`/`sortDirection`, and `interactions.onClick` with `action:"selectWhere"`. Compare a normalized `{ "field": "field_key" }` with `{ "valueFromRow": "field_key" }`, and set `internal:false`, `external:true`. This keeps all values visible while selected wrappers receive `is-selected` and `hp-row-selected` and matching source identities are sent to Power BI. Selection modes are `replace`, `add`, and `toggle`; Ctrl/Cmd-click modifies replace into toggle behavior.
 
 Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.
+
+## Professional generation standard
+
+Shared properties are `id`, `span`, `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `internal`, and `external`. Use `styles.globalCss` for the visual design system and `styles.components` for reusable `*`, type, and `#id` rules.
+
+Prefer the runtime component catalog: layout, controls, navigation/drawers, displays/timeline/detail, simple charts, table/matrix, map, safe custom HTML/CSS, small multiples, and JSON-only `advancedChart`. Use advanced ECharts only when a simple chart cannot communicate the decision. Never use functions, formatter callbacks, event keys, external URLs, or executable markup in chart options.
+
+Use one of six preset contracts: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, or Map Command Center. Follow a recipe appropriate to the goal: executive overview, operations, map-first, detail explorer, KPI monitoring, table-heavy reporting, custom slicer/list, bright enterprise, futuristic light, or dense 600×500.
+
+Generated dashboards must be compact, responsive, and hierarchical. Avoid random bright colors, excessive gradients, giant empty cards, cluttered charts, fixed widths, and horizontal overflow.

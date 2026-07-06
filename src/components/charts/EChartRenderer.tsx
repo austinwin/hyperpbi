@@ -1,11 +1,11 @@
 import * as echarts from "echarts/core";
-import { BarChart, GaugeChart, HeatmapChart, LineChart, PieChart, ScatterChart } from "echarts/charts";
-import { GridComponent, LegendComponent, TooltipComponent, VisualMapComponent } from "echarts/components";
+import { BarChart, BoxplotChart, FunnelChart, GaugeChart, GraphChart, HeatmapChart, LineChart, PieChart, RadarChart, SankeyChart, ScatterChart, SunburstChart, TreemapChart } from "echarts/charts";
+import { CalendarComponent, DataZoomComponent, DatasetComponent, GridComponent, LegendComponent, RadarComponent, TimelineComponent, TitleComponent, ToolboxComponent, TooltipComponent, TransformComponent, VisualMapComponent } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import { useEffect, useRef } from "preact/hooks";
 import type { EChartsCoreOption } from "echarts/core";
 
-echarts.use([BarChart, GaugeChart, HeatmapChart, LineChart, PieChart, ScatterChart, GridComponent, LegendComponent, TooltipComponent, VisualMapComponent, CanvasRenderer]);
+echarts.use([BarChart, BoxplotChart, FunnelChart, GaugeChart, GraphChart, HeatmapChart, LineChart, PieChart, RadarChart, SankeyChart, ScatterChart, SunburstChart, TreemapChart, CalendarComponent, DataZoomComponent, DatasetComponent, GridComponent, LegendComponent, RadarComponent, TimelineComponent, TitleComponent, ToolboxComponent, TooltipComponent, TransformComponent, VisualMapComponent, CanvasRenderer]);
 
 export function EChartRenderer({ option, height = 260, onDataIndex }: { option: EChartsCoreOption; height?: number; onDataIndex?: (dataIndex: number) => void }) {
     const ref = useRef<HTMLDivElement>(null);

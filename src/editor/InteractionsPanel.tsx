@@ -1,17 +1,18 @@
 import { InteractionDiagnostics } from "../powerbi/interactionDiagnostics";
+import { interactionMessage, interactionSuggestedFix } from "./interactionHelp";
 
 const value = (input: unknown): string => input === undefined ? "—" : String(input);
+const yesNo=(input:boolean)=>input?"Yes":"No";
 
-export function InteractionsPanel({ diagnostics }: { diagnostics: InteractionDiagnostics }) {
-    return <div class="hp-interactions-panel"><h3>Power BI report interactions</h3><dl>
-        <div><dt>External interaction setting enabled</dt><dd>{diagnostics.externalInteractionEnabled ? "True" : "False"}</dd></div>
-        <div><dt>Host allows interactions</dt><dd>{diagnostics.hostAllowsInteractions ? "True" : "False"}</dd></div>
-        <div><dt>Selection identity count</dt><dd>{diagnostics.selectionIdentityCount.toLocaleString()}</dd></div>
-        <div><dt>Last component</dt><dd>{value(diagnostics.lastClickedComponentId)} · {value(diagnostics.lastClickedComponentType)}</dd></div>
-        <div><dt>Last field / value</dt><dd>{value(diagnostics.lastClickedField)} / {value(diagnostics.lastClickedValue)}</dd></div>
-        <div><dt>Resolved source rows</dt><dd>{diagnostics.lastResolvedSourceRowCount.toLocaleString()}</dd></div>
-        <div><dt>Selected source row indices</dt><dd>{diagnostics.lastSelectedSourceRowIndices.length ? diagnostics.lastSelectedSourceRowIndices.join(", ") : "None"}{diagnostics.lastResolvedSourceRowCount > diagnostics.lastSelectedSourceRowIndices.length ? " …" : ""}</dd></div>
-        <div><dt>External selection sent</dt><dd>{diagnostics.externalSelectionSent ? "True" : "False"}</dd></div>
-        <div><dt>Reason not sent</dt><dd>{diagnostics.reasonExternalSelectionNotSent ?? "—"}</dd></div>
-    </dl><p>Internal HyperPBI filtering and external Power BI selection are separate. A sent selection affects compatible visuals only when semantic-model lineage and relationships are compatible and Power BI Edit interactions configure the target visual to filter or highlight.</p></div>;
+export function InteractionsPanel({ diagnostics, compact=false }: { diagnostics: InteractionDiagnostics; compact?: boolean }) {
+    return <div class={`hp-interactions-panel ${compact?"hp-interactions-compact":""}`}><header><div><h3>Interaction status</h3><p>External Power BI selection is separate from filters inside HyperPBI.</p></div><span class={diagnostics.externalSelectionSent?"is-ok":"is-muted"}>{diagnostics.externalSelectionSent?"Selection sent":"Not sent"}</span></header><dl>
+        <div><dt>External interactions enabled</dt><dd>{yesNo(diagnostics.externalInteractionEnabled)}</dd></div>
+        <div><dt>Host allows interactions</dt><dd>{yesNo(diagnostics.hostAllowsInteractions)}</dd></div>
+        <div><dt>Selection identities found</dt><dd>{diagnostics.selectionIdentityCount.toLocaleString()}</dd></div>
+        <div><dt>Last clicked component</dt><dd>{value(diagnostics.lastClickedComponentId)}{diagnostics.lastClickedComponentType?` · ${diagnostics.lastClickedComponentType}`:""}</dd></div>
+        <div><dt>Last clicked field</dt><dd>{value(diagnostics.lastClickedField)}</dd></div>
+        <div><dt>Last clicked value</dt><dd>{value(diagnostics.lastClickedValue)}</dd></div>
+        <div><dt>Matching source rows</dt><dd>{diagnostics.lastResolvedSourceRowCount.toLocaleString()}</dd></div>
+        <div><dt>External selection sent</dt><dd>{yesNo(diagnostics.externalSelectionSent)}</dd></div>
+    </dl><div class="hp-interaction-guidance"><strong>{diagnostics.lastClickedComponentId?interactionMessage(diagnostics.reasonExternalSelectionNotSent):"No selectable component has been clicked yet."}</strong><span>Suggested fix: {diagnostics.lastClickedComponentId?interactionSuggestedFix(diagnostics):"Validate the preview, then click a table row, chart category, map feature, timeline event, or custom slicer item."}</span><small>The target visual may not have Edit interactions enabled, or it may not share compatible model lineage/relationships.</small></div></div>;
 }

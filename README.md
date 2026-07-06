@@ -17,7 +17,9 @@ The specification and runtime config are saved with Power BI persistent visual p
 
 ## Studio
 
-The default Studio exposes only **Create with AI**, **How it works**, Preview, and the Data/Fields/Issues panel. JSON, Runtime Config, Skill, Calculations, Map Services, Field Mapping, and interaction diagnostics are grouped under **Advanced**.
+The default **HyperPBI Builder** is a dense guided workflow for normal Power BI users. It asks for dashboard goal, audience, layout pattern, components, and a professional style preset; then provides **Copy AI Prompt**, a large response box, **Validate & Preview**, repair guidance, and a Save action that becomes prominent only after a successful preview. Raw JSON is never required in Simple mode.
+
+**Advanced** remains optional and exposes JSON, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, interaction diagnostics, import/export, formatting, and raw output panels.
 
 The designer/preview divider and bottom diagnostics panel are resizable. Their size, open state, and Simple/Advanced preference are stored in Power BI visual properties. Bottom output is selectable and has a **Copy output** action.
 
@@ -64,6 +66,18 @@ Use `styles.globalCss` to define a visual-wide design system and `styles.compone
 Keys under `styles.components` may be `*`, a component type, or `#component_id`. Local component styles override defaults. Existing root `css` remains supported.
 
 The calculation DSL provides derived fields and metrics using validated JSON operators. Calculated values work in metrics, charts, tables, maps, filters, and templates. See [calculation DSL](docs/calculations-dsl.md).
+
+### Professional presets and recipes
+
+The Builder and generated prompt share six reusable presets: **Enterprise Light**, **Bright Modern**, **Futuristic Light**, **Dark Ops Center**, **Dense Compact**, and **Map Command Center**. Each defines theme tokens plus card, KPI, table, chart, control, selected-state, spacing, and density guidance.
+
+The prompt includes executive overview, operations, map-first, detail explorer, KPI monitoring, table-heavy, custom slicer, bright enterprise, futuristic light, and dense 600×500 recipes. Generated dashboards are instructed to keep compact spacing, strong hierarchy, restrained colors, bounded tables, responsive spans, and no overflow-heavy fixed widths.
+
+### Advanced charts and high-value components
+
+`advancedChart` accepts JSON-only ECharts options for stacked/grouped bars, combo and waterfall-style charts, radar, treemap, sunburst, sankey, funnel, boxplot, calendar heatmap, timeline/dataZoom, and graph/network views. Options are recursively sanitized: no functions, formatter callbacks, event-handler keys, external URLs, script/style injection, or executable strings.
+
+High-value application components include `drawer`, `filterDrawer`, `segmentedControl`, `timeline`, `matrix`, `smallMultiples`, and an improved selected-row `detailPanel`. Existing component JSON remains supported.
 
 ## Maps and provider builds
 

@@ -1,6 +1,10 @@
 export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
-HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashboards. Bind data to the single Values field well, open Studio, generate an AI prompt, import the returned JSON, validate, preview, and save.
+HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashboards. In Simple mode, bind Values, choose a goal, audience, layout, components, and preset, copy the AI prompt, paste the response, validate, preview, and save. JSON stays hidden unless Advanced mode is selected.
+
+## Guided Builder
+
+The eight steps are goal, audience, layout pattern, components, style preset, Copy AI Prompt, Paste AI Response / Validate & Preview, and Save & return. Save becomes prominent after a successful preview. Advanced mode retains JSON, Runtime Config, Skill, Calculations, Map Services, Field Mapping, diagnostics, and import/export.
 
 ## Specification and Config
 
@@ -49,7 +53,11 @@ Location priority is Geometry, Latitude/Longitude, X/Y, then Address. Core mode 
 
 ## Validation and repair
 
-Validate reports structural, field, calculation, provider, and security errors. Start Render validates and updates only the Studio preview. Back to Report validates, persists properties, exits Studio, and renders. When AI JSON fails, use Copy repair prompt.
+Validate reports structural, field, calculation, provider, and security errors. Validate & Preview updates only the Builder preview. Save & return persists properties and exits. When AI JSON fails, Copy repair prompt includes the broken JSON, errors, warnings, valid fields, component contract, and strict JSON-only output instruction.
+
+## Presets, recipes, and advanced components
+
+Presets: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, and Map Command Center. Recipes cover executive, operations, map-first, detail explorer, KPI monitoring, table-heavy, custom slicer, theme, and dense 600x500 dashboards. High-value components include drawer, filterDrawer, segmentedControl, timeline, matrix, smallMultiples, improved detailPanel, and JSON-only advancedChart.
 
 ## Security
 
@@ -70,11 +78,11 @@ Required: version and components. Optional: title, theme, layout, state, toolbar
 ## Components
 
 Layouts: grid, flex, split, leftPanel, rightPanel, toolbar, section, spacer, divider.
-Controls: searchBox, textInput, numberInput, slider, select, multiSelect, toggle, button, buttonGroup, filterChips, dateRange.
-Navigation: tabs, collapsible, accordion.
-Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel.
-Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap.
-Data/content: table, map, html, text, markdown, custom.
+Controls: searchBox, textInput, numberInput, slider, select, multiSelect, segmentedControl, toggle, button, buttonGroup, filterChips, dateRange.
+Navigation: tabs, collapsible, accordion, drawer, filterDrawer.
+Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel, timeline.
+Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, smallMultiples, advancedChart.
+Data/content: table, matrix, map, html, text, markdown, custom.
 
 ## Global styling
 
@@ -91,6 +99,8 @@ Use field/value nodes and safe operators: arithmetic, comparison, boolean, text,
 ## Design standard
 
 Create a compact enterprise dashboard with restrained colors, strong hierarchy, useful KPIs, no chart clutter, practical filters, a detail table, and a map only when location fields exist. Ensure responsive 12-column spans and avoid fixed widths that overflow.
+
+Use a named preset and recipe. advancedChart options must be JSON-only and cannot contain functions, formatter callbacks, event keys, URLs, scripts, styles, or unsupported series types.
 
 ## Map and interaction rules
 

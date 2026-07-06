@@ -20,6 +20,24 @@ Internal HyperPBI filtering and external Power BI selection are separate. Extern
 
 Types: `grid`, `flex`, `split`, `leftPanel`, `rightPanel`, `toolbar`, `section`, `spacer`, `divider`, `searchBox`, `textInput`, `numberInput`, `slider`, `select`, `multiSelect`, `toggle`, `button`, `buttonGroup`, `filterChips`, `dateRange`, `tabs`, `collapsible`, `accordion`, `kpi`, `metricGrid`, `infoCard`, `statusBadge`, `progressBar`, `alert`, `statList`, `detailPanel`, `barChart`, `horizontalBarChart`, `lineChart`, `areaChart`, `pieChart`, `donutChart`, `scatterChart`, `gauge`, `heatmap`, `table`, `map`, `html`, `text`, `markdown`, and `custom`.
 
+Additional types: `drawer`, `filterDrawer`, `segmentedControl`, `timeline`, `matrix`, `smallMultiples`, and `advancedChart`.
+
+## Advanced ECharts
+
+`advancedChart.options` is JSON-only ECharts configuration. Safe modules include dataset/transform, title, toolbox, dataZoom, timeline, radar, treemap, sunburst, sankey, funnel, boxplot, graph/network, and calendar heatmap. Existing simple charts remain backward compatible and safely merge optional component `options`.
+
+The sanitizer removes functions, `formatter`, `renderItem`, event-handler keys, URL-bearing keys, external/data/javascript URLs, executable markup, and unsupported series types.
+
+## High-value components
+
+- `drawer`: `position`, `width`, `openWhen`, `stateKey`, `defaultOpen`, and `children`.
+- `filterDrawer`: drawer behavior plus applied-filter count and clear filters.
+- `segmentedControl`: `field` or static `options`, internal filtering, optional `external:true`, and selected pills.
+- `timeline`: `dateField`, `titleField`, optional category/status/description fields, sort direction, and limit.
+- `matrix`: `rows`, optional `columns`, `values`, totals, heatmap, and row limit.
+- `smallMultiples`: `splitField`, child `chart`, max panels, shared-scale intent, and height.
+- `detailPanel`: `selectedRow`, grouped fields, badges, copyable values, formats, and empty text.
+
 Template tokens: `count`, `title`, aggregate namespaces, `metric.key`, `selected.key`, `row.key`, `field.key.displayName`, `prop.name`, and `state.name`. Tokens are lookups, not expressions.
 
 Tabs should use `tabs[].children`. AI output using `tabs[].components` or `tabs[].content` is migrated automatically.

@@ -1,7 +1,7 @@
 import { NormalizedField } from "../data/normalizeData";
 import { slugFieldIdentifier } from "../data/fieldDictionary";
 
-const fieldProperties = new Set(["field", "category", "measure", "x", "y", "size", "distinctBy", "sortBy", "valueFromRow"]);
+const fieldProperties = new Set(["field", "category", "measure", "x", "y", "size", "distinctBy", "sortBy", "valueFromRow", "splitField", "dateField", "titleField", "categoryField", "statusField", "descriptionField"]);
 const templateProperties = new Set(["html", "template"]);
 
 export function legacyFieldKeyMap(fields: Record<string, NormalizedField>): Map<string, string> {
@@ -26,7 +26,7 @@ export function migrateFieldReferences<T>(value: T, fields: Record<string, Norma
         if (Array.isArray(node)) { node.forEach(visit); return; }
         for (const [key, child] of Object.entries(node as Record<string, unknown>)) {
             if (fieldProperties.has(key) && typeof child === "string" && aliases.has(child)) (node as Record<string, unknown>)[key] = aliases.get(child);
-            else if (key === "columns" && Array.isArray(child)) (node as Record<string, unknown>)[key] = child.map(column => typeof column === "string" ? aliases.get(column) ?? column : column);
+            else if ((key === "columns" || key === "rows") && Array.isArray(child)) (node as Record<string, unknown>)[key] = child.map(column => typeof column === "string" ? aliases.get(column) ?? column : column);
             else if (templateProperties.has(key) && typeof child === "string") (node as Record<string, unknown>)[key] = migrateTemplate(child, aliases);
             visit((node as Record<string, unknown>)[key]);
         }

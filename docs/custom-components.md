@@ -55,3 +55,7 @@ Complete slicer-style example:
 ```
 
 No JavaScript, `eval`, functions, inline handlers, scripts, iframes, or unsafe URLs are accepted. HTML remains DOMPurify-sanitized and CSS remains parsed, allowlisted, and scoped.
+
+## Builder template gallery
+
+The Builder catalog exposes six copyable safe templates: custom KPI tile, slicer/list, status card, record card, alert banner, and compact filter chips. They use only sanitized markup, safe tokens, scoped CSS, repeat wrappers, and typed interactions. The slicer/list and chips use `distinctBy`, `sortBy`, `selectWhere`, `valueFromRow`, `internal:false`, `external:true`, and `.is-selected` / `.hp-row-selected` styling.

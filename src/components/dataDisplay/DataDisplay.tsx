@@ -3,6 +3,7 @@ import { DataDisplayComponent, MetricDefinition } from "../../schema/hyperpbiSch
 import { useRenderContext } from "../../render/RenderContext";
 import { formatValue } from "../../utils/formatValue";
 import { Card } from "../layout/LayoutBlocks";
+import { DetailPanel } from "./DetailPanel";
 
 function Metric({ metric }: { metric: MetricDefinition }) {
     const { rows, data } = useRenderContext();
@@ -13,6 +14,7 @@ function Metric({ metric }: { metric: MetricDefinition }) {
 export function DataDisplayBlock({ component }: { component: DataDisplayComponent }) {
     const { rows } = useRenderContext();
     if (component.type === "metricGrid") return <div class="hp-metric-grid">{component.metrics?.map(metric => <Metric metric={metric} />)}</div>;
+    if (component.type === "detailPanel") return <DetailPanel component={component}/>;
     if (component.type === "kpi") return <Metric metric={{ title: component.title ?? "Metric", field: component.field, aggregation: component.aggregation, format: component.format, intent: component.intent }} />;
     if (component.type === "statusBadge") return <span class={`badge hp-status hp-intent-${component.intent ?? "neutral"}`}>{formatValue(component.value ?? (component.field ? rows[0]?.[component.field] : ""))}</span>;
     if (component.type === "progressBar") {

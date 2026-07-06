@@ -70,7 +70,7 @@ describe("built-in table and diagnostics", () => {
     });
     it("shows complete interaction diagnostics and report configuration guidance", () => {
         const host = document.createElement("div"); render(h(InteractionsPanel, { diagnostics: { externalInteractionEnabled: true, hostAllowsInteractions: false, selectionIdentityCount: 3, lastClickedComponentId: "details", lastClickedComponentType: "table", lastClickedField: "leadby", lastClickedValue: "Pranav", lastResolvedSourceRowCount: 2, lastSelectedSourceRowIndices: [0, 2], externalSelectionSent: false, reasonExternalSelectionNotSent: "host disallowed" } }), host);
-        expect(host.textContent).toContain("Host allows interactionsFalse"); expect(host.textContent).toContain("host disallowed"); expect(host.textContent).toContain("Power BI Edit interactions");
+        expect(host.textContent).toContain("Host allows interactionsNo"); expect(host.textContent).toContain("The host did not allow interactions."); expect(host.textContent).toContain("Edit interactions"); expect(host.textContent).toContain("compatible model lineage");
     });
     it("warns about ignored interaction-looking properties without blocking schema rendering", () => {
         const schema = { version: "1.0" as const, components: [{ type: "custom", id: "fake", html: "Safe", externalSelection: true, selectionTarget: "report", crossFilter: true, powerBISelection: true }] };
