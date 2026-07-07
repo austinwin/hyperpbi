@@ -18,6 +18,8 @@ The Skill tab is the densest reusable context document. Copy it at the start of 
 
 The guided Builder adds goal, audience, layout pattern, selected components, and one of six professional presets. The generated prompt includes a categorized capability catalog and reusable recipes instead of only listing component names. It also describes drawers, segmented controls, timelines, matrices, small multiples, selected-row details, and sanitized JSON-only advanced ECharts.
 
+The Component Catalog includes a complete, copyable JSON configuration for every component type. These examples cover the meaningful renderer properties, nested options, styling, and interaction flags; replace `__...field_key__` placeholders with normalized keys from the field dictionary.
+
 Prefer normal components first. Use `advancedChart` for ECharts 6 declarative configuration. All bundled series and components are registered, including candlestick, chord, custom, effectScatter, lines, map, parallel, pictorialBar, themeRiver, tree, dataset/transforms, coordinate systems, brush/dataZoom, marks, toolbox, graphic, aria, Canvas, and SVG. Safe string formatter templates are supported; functions such as `renderItem`, event keys, URLs, and executable markup are not.
 
 AI output must reference the normalized `key`, preferably a table-qualified key such as `workorders_status`. `displayName` is a UI label and must never be used as a field reference. For custom slicer-like lists, generate `repeat.distinctBy` plus `interactions.onClick` using `selectWhere` and `valueFromRow`; set `internal:false`, `external:true`, and `externalMode:"filter"` so all choices remain visible while Power BI is filtered.
