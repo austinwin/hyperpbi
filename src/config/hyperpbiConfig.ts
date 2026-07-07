@@ -6,7 +6,7 @@ import { defaultProviderConfig, validateProviderConfig } from "../providers/prov
 export interface HyperPbiConfig {
     version: "1.0";
     bindings?: { map?: Partial<MapBindingKeys> };
-    interactions?: { crossFilter?: boolean; multiSelect?: boolean };
+    interactions?: { crossFilter?: boolean; multiSelect?: boolean; externalMode?: "auto" | "filter" | "selection" };
     renderer?: { showHeader?: boolean; showRowCount?: boolean; showStudioButton?: boolean };
     security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
     providers?: ProviderConfiguration;
@@ -15,7 +15,7 @@ export interface HyperPbiConfig {
 export const defaultConfig: HyperPbiConfig = {
     version: "1.0",
     bindings: { map: {} },
-    interactions: { crossFilter: true, multiSelect: true },
+    interactions: { crossFilter: true, multiSelect: true, externalMode: "auto" },
     renderer: { showHeader: false, showRowCount: false, showStudioButton: true },
     security: { cssMode: "scoped", htmlMode: "sanitized", showSanitizerWarnings: false },
     providers: defaultProviderConfig
@@ -34,6 +34,10 @@ export function parseConfig(text: string): { config?: HyperPbiConfig; errors: st
     const errors = validateProviderConfig(config.providers);
     if (config.security?.cssMode && !["scoped", "trusted"].includes(config.security.cssMode)) errors.push("security.cssMode must be scoped or trusted.");
     if (config.security?.htmlMode && !["sanitized", "trusted"].includes(config.security.htmlMode)) errors.push("security.htmlMode must be sanitized or trusted.");
+    if (config.interactions?.externalMode && !["auto", "filter", "selection"].includes(config.interactions.externalMode)) errors.push("interactions.externalMode must be auto, filter, or selection.");
+    if (config.providers?.mode && !["core", "maps"].includes(config.providers.mode)) errors.push("providers.mode must be core or maps.");
+    if (config.providers?.basemap?.provider && !["none", "osm", "customTile"].includes(config.providers.basemap.provider)) errors.push("Unknown basemap provider.");
+    if (config.providers?.geocoder?.provider && !["none", "nominatim", "arcgis", "custom"].includes(config.providers.geocoder.provider)) errors.push("Unknown geocoder provider.");
     return { config, errors };
 }
 

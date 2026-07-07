@@ -38,7 +38,7 @@ Open **Interaction status** in the Builder or Advanced mode. It reports the visu
 
 Bind all dashboard columns and measures to **Values**. Select the visual, open its top-right **…** menu, and select **Edit**; manual JSON authoring is optional and hidden under Advanced.
 
-The Builder persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. **Validate & Preview** never replaces the last saved dashboard when validation fails.
+The Builder persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. Runtime Config is edited through a compact form; use the Advanced JSON panel only when necessary. GUI changes update JSON immediately, while raw JSON remains a draft until **Apply JSON**. Invalid JSON leaves the GUI unchanged. **Validate & Preview** never replaces the last saved dashboard when validation fails.
 
 In Advanced mode, the builder/preview divider and bottom data panel are draggable. Data, Fields, Logs, Issues, map, geocode, and interaction output can be copied with **Copy output**.
 

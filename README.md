@@ -37,7 +37,7 @@ Imported output must be JSON only at runtime. HyperPBI never executes functions,
 
 ## Specifications, custom components, and calculations
 
-Dashboard Specification defines UI and component behavior. Runtime Config defines field semantics, map providers, interactions, and renderer options.
+Dashboard Specification defines UI and component behavior. Runtime Config defines field semantics, map providers, interactions, security, and renderer options. The Runtime Config tab is GUI-first; its Advanced JSON panel is optional and changes nothing until **Apply JSON** is selected.
 
 Every component supports `id`, `span`, `className`, sanitized `style`, scoped `css`, safe `slots`, `props`, `data`, `visibility`, and schema-defined interactions. The `custom` type adds sanitized HTML, row-aware repeat wrappers, distinct/sorted repeats, props, metrics, state, selected classes, and typed safe actions. See [spec reference](docs/hyperpbi-spec-reference.md) and [custom components](docs/custom-components.md).
 
@@ -90,7 +90,7 @@ OSM attribution is displayed by Leaflet. Nominatim is user-triggered only, seque
 
 ## Power BI interactions
 
-HyperPBI builds table selection identities with `SelectionIdBuilder.withTable`. Table rows, chart categories, map features, and safe custom `selectWhere` actions can select compatible report data. Internal filters and external report selection are distinct; other visuals react only when Power BI identities and report interaction settings permit it. See [interactions](docs/interactions.md).
+HyperPBI uses two distinct Power BI interaction paths. Field-bound slicer controls call `applyJsonFilter` and externally filter by source table/column by default. Table rows, chart points, map features, timelines, and explicit custom row actions use selection identities built with `SelectionIdBuilder.withTable`. See [interactions](docs/interactions.md).
 
 HyperPBI requests 30,000-row Power BI windows and uses sequential aggregation-mode `fetchMoreData(true)` while `metadata.segment` indicates more data. Loaded rows and selection identities accumulate, while tables stay paginated and cap rendered rows. Power BI limits still apply: 30,000 rows per window, 1,048,576 total data-view rows, and 100 MB aggregation memory.
 

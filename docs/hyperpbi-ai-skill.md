@@ -14,7 +14,7 @@ Prefer compact enterprise layouts, restrained colors, clear hierarchy, useful KP
 
 Provider settings belong in Runtime Config. Never request silent or automatic geocoding. Internal HyperPBI filters and external Power BI selections are distinct. External selection requires enabled formatting interactions, host permission, source table identities, matching source rows, compatible semantic-model lineage/relationships, and Power BI Edit interactions configured on target visuals.
 
-For a custom slicer-like component, use `repeat.distinctBy`, optional `sortBy`/`sortDirection`, and `interactions.onClick` with `action:"selectWhere"`. Compare a normalized `{ "field": "field_key" }` with `{ "valueFromRow": "field_key" }`, and set `internal:false`, `external:true`. This keeps all values visible while selected wrappers receive `is-selected` and `hp-row-selected` and matching source identities are sent to Power BI. Selection modes are `replace`, `add`, and `toggle`; Ctrl/Cmd-click modifies replace into toggle behavior.
+For a custom slicer-like component, use `repeat.distinctBy`, optional `sortBy`/`sortDirection`, and `interactions.onClick` with `action:"selectWhere"`. Compare a normalized `{ "field": "field_key" }` with `{ "valueFromRow": "field_key" }`, and set `internal:false`, `external:true`, `externalMode:"filter"`. This keeps all values visible while applying a Power BI field filter. Use `externalMode:"selection"` only for explicit row/data-point selection. Selection modes are `replace`, `add`, and `toggle`; Ctrl/Cmd-click modifies replace into toggle behavior.
 
 Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.
 

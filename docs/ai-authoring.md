@@ -20,9 +20,11 @@ The guided Builder adds goal, audience, layout pattern, selected components, and
 
 Prefer normal components first. Use `advancedChart` only for justified radar, treemap, sankey, funnel, boxplot, calendar, network, combo, or waterfall patterns. Options cannot contain functions, formatter callbacks, event keys, URLs, or executable markup.
 
-AI output must reference the normalized `key`, preferably a table-qualified key such as `workorders_status`. `displayName` is a UI label and must never be used as a field reference. For custom slicer-like lists, generate `repeat.distinctBy` plus `interactions.onClick` using `selectWhere` and `valueFromRow`; set `internal:false` and `external:true` so all choices remain visible while Power BI identities are selected.
+AI output must reference the normalized `key`, preferably a table-qualified key such as `workorders_status`. `displayName` is a UI label and must never be used as a field reference. For custom slicer-like lists, generate `repeat.distinctBy` plus `interactions.onClick` using `selectWhere` and `valueFromRow`; set `internal:false`, `external:true`, and `externalMode:"filter"` so all choices remain visible while Power BI is filtered.
 
-Internal filtering changes HyperPBI data. External selection calls Power BI Selection Manager. Do not imply one automatically causes the other: external behavior also requires enabled formatting interactions, host permission, valid source-row identities, compatible semantic-model lineage/relationships, and report Edit-interactions configuration.
+Internal filtering changes HyperPBI data. Normal field-bound controls externally call Power BI `applyJsonFilter` by default when interactions are enabled. Use `internal:false` for an external-only slicer that does not shrink HyperPBI, or `external:false` for a control that must remain local. Table/chart/map/timeline data-point clicks use Power BI Selection Manager rather than filters and require valid row identities, compatible lineage/relationships, and report Edit-interactions configuration.
+
+For custom slicer/list templates, use `externalMode:"filter"`; for explicit custom row selection, use `externalMode:"selection"`. Do not substitute `selectionManager.select` for slicer filtering.
 
 Never invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON. Never emit JavaScript, `eval`, functions, inline handlers, scripts, iframes, or unsafe URLs.
 

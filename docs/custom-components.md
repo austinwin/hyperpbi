@@ -10,7 +10,7 @@ For app-wide design standards, use `styles.globalCss` and `styles.components` at
 
 Safe actions: `selectRow`, `selectWhere`, `clearSelection`, `setFilter`, `clearFilter`, `setState`, `toggleState`, `openTab`, `toggleCollapse`, `drillToDetail`, `highlight`, and `clearHighlight`. `valueFromRow` reads only a known normalized field from the clicked repeated row and returns null without a clicked row. Unsupported actions produce diagnostics; event-handler JavaScript is never interpreted.
 
-`selectionMode` is `replace`, `add`, or `toggle` (default `replace`). Ctrl/Cmd-click changes `replace` to toggle behavior. `internal:false` prevents internal selected-row filtering, while the component still receives `.is-selected` and `.hp-row-selected` classes. `external:true` sends matching source row identities to Power BI.
+`selectionMode` is `replace`, `add`, or `toggle` (default `replace`). Ctrl/Cmd-click changes `replace` to toggle behavior. `internal:false` prevents internal selected-row filtering, while the component still receives `.is-selected` and `.hp-row-selected` classes. `external:true` plus `externalMode:"filter"` applies a Power BI field filter; `externalMode:"selection"` sends matching row identities.
 
 ```json
 {"type":"custom","id":"risk_summary","html":"<div class='risk'><b>{{metric.high_risk_count}}</b></div>","css":".risk { padding: 12px; border: 1px solid var(--hp-border); }","interactions":{"onClick":{"action":"selectWhere","where":{"op":"=","left":{"field":"risk_band"},"right":{"value":"High"}}}}}
@@ -40,6 +40,7 @@ Complete slicer-style example:
           "action": "selectWhere",
           "selectionMode": "replace",
           "external": true,
+          "externalMode": "filter",
           "internal": false,
           "where": {
             "op": "=",

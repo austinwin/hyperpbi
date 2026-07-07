@@ -37,6 +37,8 @@ ${JSON.stringify(samples, null, 2)}
 
 Every component needs a unique validation-friendly id. Components may use css and slots; custom components may use sanitized html, props, repeat, and predefined interactions only. Use compact enterprise spacing, restrained colors, useful tables/maps, and avoid decorative chart clutter.
 
+Interaction behavior: normal field-bound slicer controls externally filter other Power BI visuals by default. Use internal:false for an external-only slicer, external:false for a control that must remain HyperPBI-only, and externalMode:"selection" only for explicit row/data-point selection. Table, chart, and map clicks are selections, not slicer filters.
+
 Required output:
 - Return only one valid JSON object.
 - Do not use markdown fences or explanations.

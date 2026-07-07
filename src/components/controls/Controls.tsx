@@ -4,22 +4,22 @@ import { useRenderContext } from "../../render/RenderContext";
 import { resolveSourceRowIndicesForFilter } from "../../data/filtering";
 
 export function ControlBlock({ component }: { component: ControlComponent }) {
-    const { data, sourceRows, state, dispatch, selectExternal, clearExternal } = useRenderContext();
+    const { data, sourceRows, state, dispatch, applyExternalFilter, clearExternalFilter } = useRenderContext();
     const id = component.id ?? component.type;
     const initial = state.values[id] ?? component.defaultValue ?? (component.type === "toggle" ? false : component.min ?? "");
     const [value, setValue] = useState<unknown>(initial);
     const options = useMemo(() => component.options ?? (component.field ? Array.from(new Set(data.rows.map(row => row[component.field!]).filter(item => item != null))).map(String).sort() : []), [component.options, component.field, data.rows]);
     const multiple = component.type === "multiSelect" || component.multiple === true;
-    const operator = component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : "=");
+    const operator = component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : component.type === "dateRange" ? "between" : "=");
     const changeValue = (next: unknown) => {
         setValue(next);
-        if (component.external !== true) return;
+        if (component.external === false || !component.field) return;
         const hasValue = next !== "" && next !== null && (!Array.isArray(next) || next.length > 0);
-        const details = { componentId: id, componentType: component.type, field: component.field, value: next };
+        const matchedRowCount=hasValue?resolveSourceRowIndicesForFilter(component.field,operator,next,sourceRows,data.rows).length:0;
+        const details = { componentId: id, componentType: component.type, field: component.field, value: next,matchedRowCount };
         if (hasValue) {
-            const indices = resolveSourceRowIndicesForFilter(component.field, operator, next, sourceRows, data.rows);
-            dispatch({ type: "selectComponentRows", id, rows: indices }); selectExternal(indices, multiple, details);
-        } else { dispatch({ type: "selectComponentRows", id, rows: [] }); clearExternal(details); }
+            applyExternalFilter(component.field,operator,next,details);
+        } else clearExternalFilter(details);
     };
 
     useEffect(() => {
@@ -35,9 +35,9 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
         return () => window.clearTimeout(handle);
     }, [value]);
 
-    if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" onClick={() => component.action === "clearFilters" ? dispatch({ type: "clearFilters" }) : component.action === "setTab" && dispatch({ type: "tab", id: "mainTabs", value: component.actionValue ?? "" })}>{component.title ?? component.label ?? "Action"}</button>;
+    if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" onClick={() => {if(component.action === "clearFilters"){dispatch({ type: "clearFilters" });clearExternalFilter({componentId:id,componentType:component.type});}else if(component.action === "setTab")dispatch({ type: "tab", id: "mainTabs", value: component.actionValue ?? "" });}}>{component.title ?? component.label ?? "Action"}</button>;
     if (component.type === "buttonGroup") return <div class="btn-group">{component.buttons?.map(button => <button type="button" class="btn btn-sm" onClick={() => changeValue(button.value ?? button.id)}>{button.label}</button>)}</div>;
-    if (component.type === "filterChips") return <div class="hp-chips">{state.filters.map(filter => <button type="button" class="badge hp-chip" onClick={() => dispatch({ type: "removeFilter", id: filter.id })}>{filter.field}: {String(filter.value)} ×</button>)}{state.filters.length > 0 && <button type="button" class="btn btn-sm btn-ghost-secondary" onClick={() => dispatch({ type: "clearFilters" })}>Clear</button>}</div>;
+    if (component.type === "filterChips") return <div class="hp-chips">{state.filters.map(filter => <button type="button" class="badge hp-chip" onClick={() => {dispatch({ type: "removeFilter", id: filter.id });clearExternalFilter({componentId:id,componentType:component.type,field:filter.field});}}>{filter.field}: {String(filter.value)} ×</button>)}{state.filters.length > 0 && <button type="button" class="btn btn-sm btn-ghost-secondary" onClick={() => {dispatch({ type: "clearFilters" });clearExternalFilter({componentId:id,componentType:component.type});}}>Clear</button>}</div>;
     if (component.type === "segmentedControl") {
         const choose=(next:unknown)=>changeValue(next);
         return <fieldset class="hp-segmented"><legend>{component.label??component.title}</legend><div><button type="button" class={value===""?"is-selected":""} onClick={()=>choose("")}>All</button>{options.slice(0,20).map(option=>{const item=typeof option==="string"?{label:option,value:option}:option;return <button type="button" class={String(value)===String(item.value)?"is-selected":""} onClick={()=>choose(item.value)}>{item.label}</button>;})}</div></fieldset>;

@@ -14,11 +14,19 @@ JSON field references must use the normalized `key`, preferably a stable qualifi
 
 ## Selection
 
-Selectable components support `internal` and `external` booleans where applicable. Tables support `selectionMode: "filter" | "highlight"`. Safe click interactions support `selectionMode: "replace" | "add" | "toggle"`. Custom row matching supports `{ "valueFromRow": "field_key" }`, which can only read a known normalized field from the clicked repeat row.
+Selectable components support `internal` and `external` booleans where applicable. Field-bound controls externally filter by default; `internal:false` makes a Power BI-only slicer and `external:false` keeps it local. Tables support `selectionMode: "filter" | "highlight"`. Safe custom interactions support `selectionMode: "replace" | "add" | "toggle"` and `externalMode:"filter" | "selection"`. Custom row matching supports `{ "valueFromRow": "field_key" }`, which can only read a known normalized field from the clicked repeat row.
 
 Custom `repeat` supports `source`, `as`, `limit`, `template`, `distinctBy`, `sortBy`, and `sortDirection`. Repeated content is sanitized HTML inside engine-owned accessible wrappers. Selected wrappers receive `is-selected` and `hp-row-selected`.
 
-Internal HyperPBI filtering and external Power BI selection are separate. External selection also requires enabled formatting interactions, host permission, table identities, matching source rows, compatible model lineage/relationships, and Power BI Edit interactions.
+Internal HyperPBI filtering, Power BI JSON filters, and Power BI selection are separate. Controls filter through `general.filter`; table/chart/map/timeline row clicks select identities. A field without `sourceTable` and `sourceColumn` cannot be an external filter target.
+
+## Runtime Config GUI and JSON
+
+The Runtime Config tab provides GUI sections for renderer, interactions, security, providers, geocoder, and map bindings. GUI changes immediately normalize and update saved JSON. Advanced JSON is a separate draft: edit it, validate or format it, then select **Apply JSON** to update the GUI. Invalid JSON never mutates the applied form.
+
+```json
+{"version":"1.0","renderer":{"showHeader":false,"showRowCount":false,"showStudioButton":true},"interactions":{"crossFilter":true,"multiSelect":true,"externalMode":"auto"},"security":{"cssMode":"scoped","htmlMode":"sanitized","showSanitizerWarnings":false}}
+```
 
 Types: `grid`, `flex`, `split`, `leftPanel`, `rightPanel`, `toolbar`, `section`, `spacer`, `divider`, `searchBox`, `textInput`, `numberInput`, `slider`, `select`, `multiSelect`, `toggle`, `button`, `buttonGroup`, `filterChips`, `dateRange`, `tabs`, `collapsible`, `accordion`, `kpi`, `metricGrid`, `infoCard`, `statusBadge`, `progressBar`, `alert`, `statList`, `detailPanel`, `barChart`, `horizontalBarChart`, `lineChart`, `areaChart`, `pieChart`, `donutChart`, `scatterChart`, `gauge`, `heatmap`, `table`, `map`, `html`, `text`, `markdown`, and `custom`.
 

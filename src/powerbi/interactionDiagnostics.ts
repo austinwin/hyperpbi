@@ -3,6 +3,9 @@ export type ExternalSelectionFailureReason =
     | "host disallowed"
     | "no selection identities"
     | "no matching source rows"
+    | "field has no Power BI filter target"
+    | "unsupported external filter operator"
+    | "host filter failed"
     | "unsupported interaction action"
     | "component did not call selectExternal";
 
@@ -11,6 +14,7 @@ export interface InteractionDetails {
     componentType?: string;
     field?: string;
     value?: unknown;
+    matchedRowCount?: number;
 }
 
 export interface ExternalSelectionResult {
@@ -29,10 +33,15 @@ export interface InteractionDiagnostics {
     lastResolvedSourceRowCount: number;
     lastSelectedSourceRowIndices: number[];
     externalSelectionSent: boolean;
+    externalMode?: "filter" | "selection";
+    filterSent: boolean;
+    selectionSent: boolean;
+    filterTargetTable?: string;
+    filterTargetColumn?: string;
     reasonExternalSelectionNotSent?: ExternalSelectionFailureReason;
 }
 
 export function createInteractionDiagnostics(enabled: boolean, hostAllowsInteractions: boolean, selectionIdentityCount: number): InteractionDiagnostics {
-    return { externalInteractionEnabled: enabled, hostAllowsInteractions, selectionIdentityCount, lastResolvedSourceRowCount: 0, lastSelectedSourceRowIndices: [], externalSelectionSent: false, reasonExternalSelectionNotSent: "component did not call selectExternal" };
+    return { externalInteractionEnabled: enabled, hostAllowsInteractions, selectionIdentityCount, lastResolvedSourceRowCount: 0, lastSelectedSourceRowIndices: [], externalSelectionSent: false, filterSent:false, selectionSent:false, reasonExternalSelectionNotSent: "component did not call selectExternal" };
 }
 

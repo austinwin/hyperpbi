@@ -10,7 +10,7 @@ Prefer proven recipes and normal components. New high-value types are `drawer`, 
 
 Use one named preset: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, or Map Command Center. Preserve strong hierarchy and compact spacing; avoid rainbow color, excessive gradients, giant empty cards, fixed widths, and overflow.
 
-Keep provider configuration in Runtime Config rather than every map. Do not request automatic geocoding. Internal HyperPBI filtering is separate from external Power BI selection. External selection requires source identities and report interactions. For custom slicer-like lists use `repeat.distinctBy`, `selectWhere`, `valueFromRow`, `internal:false`, and `external:true`.
+Keep provider configuration in Runtime Config rather than every map. Do not request automatic geocoding. Normal field-bound controls use Power BI filters; row/data-point clicks use selection identities. For custom slicer-like lists use `repeat.distinctBy`, `selectWhere`, `valueFromRow`, `internal:false`, `external:true`, and `externalMode:"filter"`.
 
 Avoid toy gradients, excessive spacing, too many charts, missing IDs, display names in place of field keys, unsupported chart types, and unescaped JSON strings. Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` properties.
 

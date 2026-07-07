@@ -52,7 +52,7 @@ export interface HyperPbiStyleSystem {
 }
 
 export type SelectionMode = "replace" | "toggle" | "add";
-export interface SafeInteraction { action: "selectRow" | "selectWhere" | "clearSelection" | "setFilter" | "clearFilter" | "setState" | "toggleState" | "openTab" | "toggleCollapse" | "drillToDetail" | "highlight" | "clearHighlight"; where?: ExpressionNode; field?: string; value?: unknown; target?: string; selectionMode?: SelectionMode; internal?: boolean; external?: boolean; }
+export interface SafeInteraction { action: "selectRow" | "selectWhere" | "clearSelection" | "setFilter" | "clearFilter" | "setState" | "toggleState" | "openTab" | "toggleCollapse" | "drillToDetail" | "highlight" | "clearHighlight"; where?: ExpressionNode; field?: string; value?: unknown; target?: string; selectionMode?: SelectionMode; internal?: boolean; external?: boolean; externalMode?: "filter" | "selection"; }
 
 export interface ContainerComponent extends ComponentBase {
     children?: DashboardComponent[];

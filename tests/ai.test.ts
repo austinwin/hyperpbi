@@ -2,6 +2,7 @@ import { describe,expect,it } from "vitest";
 import { buildAiPrompt } from "../src/ai/buildAiPrompt";
 import { defaultAiPromptSettings } from "../src/ai/aiPromptSettings";
 import { extractJsonFromAiResponse } from "../src/ai/extractJsonFromAiResponse";
+import { buildAiImportErrorLog } from "../src/editor/ai/AiResponseImporter";
 import { sampleRowsForPrompt } from "../src/ai/sampleRowsForPrompt";
 import { buildRepairPrompt } from "../src/ai/buildRepairPrompt";
 import { NormalizedData } from "../src/data/normalizeData";
@@ -16,5 +17,6 @@ describe("AI authoring",()=>{
     it("masks sample values and limits rows",()=>{expect(sampleRowsForPrompt(data,"masked",1)).toEqual([{asset_id:"[MASKED]",risk_score:0,status:"[MASKED]"}]);});
     it("extracts fenced JSON and safely repairs trailing commas and smart quotes",()=>{const result=extractJsonFromAiResponse('Explanation\n```json\n{“version”:“1.0”,“components”:[{“type”:“text”,“id”:“a”,}],}\n```\nDone');expect(result.value).toMatchObject({version:"1.0"});expect(result.repaired).toBe(true);});
     it("unwraps specification and config package responses",()=>{const result=extractJsonFromAiResponse('{"specification":{"version":"1.0","components":[]},"config":{"version":"1.0"}}');expect(result.value).toMatchObject({version:"1.0",components:[]});expect(result.config).toMatchObject({version:"1.0"});});
+    it("builds a complete copyable AI import error log",()=>{const log=buildAiImportErrorLog("original response","{\"fixed\":true}",["bad schema"],["unknown field"],"Repair needed");for(const value of ["Timestamp:","Repair needed","bad schema","unknown field","fixed","original response"])expect(log).toContain(value);});
     it("builds a targeted repair prompt with warnings and strict output",()=>{const prompt=buildRepairPrompt("{}",["components is required"],data,["selectionTarget is not used"]);expect(prompt).toContain("components is required");expect(prompt).toContain("selectionTarget is not used");expect(prompt).toContain("Return one corrected JSON object only");expect(prompt).toContain("Valid field dictionary");});
 });

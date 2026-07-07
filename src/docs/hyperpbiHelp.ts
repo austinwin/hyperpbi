@@ -9,7 +9,7 @@ The eight steps are goal, audience, layout pattern, components, style preset, Co
 ## Specification and Config
 
 - Specification: theme, global styles, layout, components, calculations, slots, HTML, and component interactions.
-- Runtime Config: map field semantics, provider policy, renderer settings, and Power BI interactions.
+- Runtime Config: GUI-first renderer, interaction, security, provider, geocoder, and map-binding settings, plus optional Advanced JSON with explicit Apply JSON.
 - Use normalized, preferably table-qualified field keys from the Fields panel. displayName is only a friendly UI label; never use it as a JSON field reference.
 
 ## Global design system
@@ -41,7 +41,7 @@ Use calculations.fields and calculations.metrics. Expressions are JSON nodes con
 
 ## Custom components
 
-Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and predefined actions such as selectWhere and clearSelection. Repeated rows are engine-owned keyboard-accessible wrappers. For a safe slicer use repeat.distinctBy and selectWhere with valueFromRow; set internal:false and external:true to retain all list values while selecting Power BI rows.
+Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and predefined actions such as selectWhere and clearSelection. Repeated rows are engine-owned keyboard-accessible wrappers. For a safe slicer use repeat.distinctBy and selectWhere with valueFromRow; set internal:false, external:true, and externalMode:"filter" to retain all list values while filtering Power BI.
 
 ## Table selection
 
@@ -106,7 +106,7 @@ Use a named preset and recipe. advancedChart options must be JSON-only and canno
 
 Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Use selectable tables/charts/maps where external Power BI interactions are useful. Internal HyperPBI filters and external Power BI selections are separate. External selection requires table identities, matching source rows, host permission, compatible model lineage/relationships, and Power BI Edit interactions.
 
-Selectable tables filter to selected rows by default for compatibility. Use selectionMode "highlight", or internal:false, when the dashboard should retain every row while highlighting selection. For custom slicers use repeat.distinctBy with interactions.onClick action selectWhere, valueFromRow, internal:false, and external:true.
+Selectable tables filter to selected rows by default for compatibility. Use selectionMode "highlight", or internal:false, when the dashboard should retain every row while highlighting selection. For custom slicers use repeat.distinctBy with interactions.onClick action selectWhere, valueFromRow, internal:false, external:true, and externalMode:"filter".
 
 Custom slicer interaction shape: {"type":"custom","id":"field_slicer","repeat":{"source":"rows","distinctBy":"field_key","sortBy":"field_key","template":"<span>{{row.field_key}}</span>"},"interactions":{"onClick":{"action":"selectWhere","selectionMode":"replace","internal":false,"external":true,"where":{"op":"=","left":{"field":"field_key"},"right":{"valueFromRow":"field_key"}}}}}.
 

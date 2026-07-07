@@ -6,6 +6,8 @@ import { RuntimeSettings } from "../settings";
 import { DashboardAction, DashboardState } from "./stateStore";
 import { HyperPbiConfig } from "../config/hyperpbiConfig";
 import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails } from "../powerbi/interactionDiagnostics";
+import { ExternalFilterResult } from "../powerbi/externalFilters";
+import { FilterOperator } from "../schema/hyperpbiSchema";
 
 export interface RenderContextValue {
     data: NormalizedData;
@@ -18,6 +20,8 @@ export interface RenderContextValue {
     warnings: string[];
     selectExternal: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult;
     clearExternal: (details?: InteractionDetails) => ExternalSelectionResult;
+    applyExternalFilter: (field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails) => ExternalFilterResult;
+    clearExternalFilter: (details?:InteractionDetails) => ExternalFilterResult;
     reportInteraction: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void;
     config: HyperPbiConfig;
     webAccessAvailable: boolean;

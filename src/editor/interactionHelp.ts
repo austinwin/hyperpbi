@@ -5,6 +5,9 @@ const help: Record<ExternalSelectionFailureReason,{message:string;fix:string}> =
     "host disallowed": { message: "The host did not allow interactions.", fix: "Use report edit/view mode that permits visual interactions and check tenant policy." },
     "no selection identities": { message: "No selection identities were created. Bind real table columns/measures in Values.", fix: "Add the source columns used by the component to the HyperPBI Values field well." },
     "no matching source rows": { message: "No source rows matched the clicked value.", fix: "Verify the component uses normalized field keys and the clicked value exists in the bound data." },
+    "field has no Power BI filter target": { message: "The field has no Power BI filter target.", fix: "Bind a model column with source table and column metadata; calculated and display-only fields cannot externally filter." },
+    "unsupported external filter operator": { message: "The filter operator is not supported for Power BI propagation.", fix: "Use =, in, contains, a numeric comparison, or between." },
+    "host filter failed": { message: "Power BI rejected the external filter.", fix: "Verify the filter target, report permissions, and visual interaction settings." },
     "unsupported interaction action": { message: "This interaction action is not supported by the safe engine.", fix: "Use selectRow, selectWhere, setFilter, clearSelection, or another documented safe action." },
     "component did not call selectExternal": { message: "This component was configured for internal interaction only.", fix: "Set external:true on a supported selectable component or safe interaction when report selection is intended." }
 };
@@ -14,4 +17,3 @@ export function interactionSuggestedFix(diagnostics: InteractionDiagnostics): st
     if(diagnostics.reasonExternalSelectionNotSent)return help[diagnostics.reasonExternalSelectionNotSent].fix;
     return "If the target does not respond, enable Power BI Edit interactions and confirm compatible semantic-model lineage and relationships.";
 }
-

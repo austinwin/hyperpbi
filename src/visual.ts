@@ -26,6 +26,8 @@ import { applyCalculations } from "./calculations/calculationEngine";
 import { defaultStudioLayout } from "./editor/studioLayout";
 import { migrateFieldReferences } from "./schema/migrateFieldReferences";
 import { createInteractionDiagnostics, ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails, InteractionDiagnostics } from "./powerbi/interactionDiagnostics";
+import { applyExternalFilter as applyPowerBiFilter, clearExternalFilter as clearPowerBiFilter, ExternalFilterResult } from "./powerbi/externalFilters";
+import { FilterOperator } from "./schema/hyperpbiSchema";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -85,7 +87,7 @@ export class Visual implements IVisual {
         if (!Object.keys(this.data.fields).length) { render(h(LandingPage, {}), this.target); return; }
         if (this.editMode === powerbi.EditMode.Advanced) {
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable }), this.target); return;
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable }), this.target); return;
         }
         if (!this.specification.trim()) { render(h(SetupExperience, { data: this.data }), this.target); return; }
         const schemaResult = this.parseSpecification(this.specification); const configResult = parseConfig(this.configuration);
@@ -96,7 +98,7 @@ export class Visual implements IVisual {
         const calculated = applyCalculations(this.data, schemaResult.schema.calculations);
         if (calculated.errors.length) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: calculated.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
         const configuredData = applyConfigToData(calculated.data, configResult.config);
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable }), this.target);
     }
 
     private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[] } {
@@ -116,7 +118,7 @@ export class Visual implements IVisual {
     private saveStudioLayout = (studioLayout: string): void => { this.studioLayout = studioLayout; persistVisualState(this.host, { specification: this.specification, configuration: this.configuration, studioLayout }); };
 
     private updateInteractionDiagnostics = (rowIndices: number[], details: InteractionDetails, result: ExternalSelectionResult): void => {
-        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount: rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalSelectionSent: result.sent, reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
+        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount: details.matchedRowCount??rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalMode:"selection",filterSent:false,selectionSent:result.sent, externalSelectionSent: result.sent, filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
     };
 
     private selectRows = (rowIndices: number[], multiSelect = false, details: InteractionDetails = {}): ExternalSelectionResult => {
@@ -138,6 +140,10 @@ export class Visual implements IVisual {
         const result: ExternalSelectionResult = !enabled ? { sent: false, reason: "interactions disabled" } : !this.host.hostCapabilities.allowInteractions ? { sent: false, reason: "host disallowed" } : !this.selectionIds.length ? { sent: false, reason: "no selection identities" } : { sent: true };
         if (result.sent) void this.selectionManager.clear(); this.updateInteractionDiagnostics([], details, result); return result;
     };
+
+    private updateFilterDiagnostics=(details:InteractionDetails,result:ExternalFilterResult):void=>{this.interactionDiagnostics={...this.interactionDiagnostics,externalInteractionEnabled:toRuntimeSettings(this.formattingSettings).enableInteractions,hostAllowsInteractions:this.host.hostCapabilities.allowInteractions===true,selectionIdentityCount:this.selectionIds.length,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??0,lastSelectedSourceRowIndices:[],externalMode:"filter",filterSent:result.sent,selectionSent:false,externalSelectionSent:false,filterTargetTable:result.target?.table,filterTargetColumn:result.target?.column,reasonExternalSelectionNotSent:result.sent?undefined:result.reason};};
+    private applyFilter=(field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult=>{const enabled=toRuntimeSettings(this.formattingSettings).enableInteractions;const result:ExternalFilterResult=!enabled?{sent:false,reason:"interactions disabled"}:!this.host.hostCapabilities.allowInteractions?{sent:false,reason:"host disallowed"}:applyPowerBiFilter(this.host,this.data.fields,field,operator,value,details);this.updateFilterDiagnostics({...details,field},result);return result;};
+    private clearFilter=(details:InteractionDetails={}):ExternalFilterResult=>{const enabled=toRuntimeSettings(this.formattingSettings).enableInteractions;const result:ExternalFilterResult=!enabled?{sent:false,reason:"interactions disabled"}:!this.host.hostCapabilities.allowInteractions?{sent:false,reason:"host disallowed"}:clearPowerBiFilter(this.host,details);this.updateFilterDiagnostics(details,result);return result;};
 
     private reportInteraction = (details: InteractionDetails, reason: ExternalSelectionFailureReason = "component did not call selectExternal", rowIndices: number[] = []): void => this.updateInteractionDiagnostics(rowIndices, details, { sent: false, reason });
 
