@@ -1,9 +1,11 @@
 import { h, render } from "preact";
+import { act } from "preact/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { calculateAggregates } from "../src/data/aggregations";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 import { DataRow, NormalizedData } from "../src/data/normalizeData";
 import { CustomComponent, prepareCustomRepeatRows } from "../src/components/custom/CustomComponent";
+import { ControlBlock } from "../src/components/controls/Controls";
 import { resolveSelection, runSafeInteraction } from "../src/components/custom/customInteractionResolver";
 import { SimpleVirtualTable } from "../src/components/tables/TableBlock";
 import { InteractionsPanel } from "../src/editor/InteractionsPanel";
@@ -55,10 +57,18 @@ describe("safe row-level interactions", () => {
         const test = context(); runSafeInteraction({ action: "selectWhere", external: false, internal: true, where: { op: "=", left: { field: "status" }, right: { value: "Open" } } }, test.value, undefined, undefined, { componentId: "status" });
         expect(test.value.state.selectedRows).toEqual([0, 1]); expect(test.selectExternal).not.toHaveBeenCalled();
     });
+    it("passes multiSelect for toggle custom external interactions",()=>{const test=context();runSafeInteraction({action:"selectWhere",selectionMode:"toggle",external:true,internal:false,where:{op:"=",left:{field:"status"},right:{value:"Open"}}},test.value,undefined,undefined,{componentId:"status_toggle",multiSelect:true});expect(test.selectExternal).toHaveBeenCalledWith([0,1],true,expect.objectContaining({componentId:"status_toggle",field:"status"}));});
     it("returns no matches for unknown clicked-row fields", () => {
         const test = context(); const result = runSafeInteraction({ action: "selectWhere", where: { op: "=", left: { field: "leadby" }, right: { valueFromRow: "unknown" } } }, test.value, rows[0], 0, { componentId: "invalid" });
         expect(result.matchedRows).toEqual([]); expect(test.selectExternal).toHaveBeenCalledWith([], false, expect.any(Object));
     });
+});
+
+describe("external control interactions",()=>{
+    const settle=()=>new Promise<void>(resolve=>setTimeout(resolve,25));
+    it("sends select and segmented matches without requiring internal filtering",async()=>{for(const type of ["select","segmentedControl"] as const){const test=context();const host=document.createElement("div");act(()=>render(h(RenderContext.Provider,{value:test.value},h(ControlBlock,{component:{type,id:type,field:"status",internal:false,external:true}})),host));await act(settle);test.selectExternal.mockClear();await act(async()=>{if(type==="select"){const select=host.querySelector("select") as HTMLSelectElement;select.value="Open";select.dispatchEvent(new Event("change",{bubbles:true}));}else{Array.from(host.querySelectorAll("button")).find(button=>button.textContent==="Open")?.dispatchEvent(new MouseEvent("click",{bubbles:true}));}await settle();});expect(test.selectExternal).toHaveBeenCalledWith([0,1],false,expect.objectContaining({componentId:type,componentType:type,field:"status",value:"Open"}));render(null,host);}});
+    it("sends multiSelect matches with the Power BI multi-select flag",async()=>{const test=context();const host=document.createElement("div");act(()=>render(h(RenderContext.Provider,{value:test.value},h(ControlBlock,{component:{type:"multiSelect",id:"statuses",field:"status",internal:false,external:true}})),host));await act(settle);test.selectExternal.mockClear();await act(async()=>{const select=host.querySelector("select") as HTMLSelectElement;Array.from(select.options).forEach(option=>option.selected=option.value==="Open"||option.value==="Closed");select.dispatchEvent(new Event("change",{bubbles:true}));await settle();});expect(test.selectExternal).toHaveBeenCalledWith([0,1,2],true,expect.objectContaining({componentId:"statuses",field:"status"}));render(null,host);});
+    it("clears external selection when an external text input is cleared",async()=>{const test=context();const host=document.createElement("div");act(()=>render(h(RenderContext.Provider,{value:test.value},h(ControlBlock,{component:{type:"textInput",id:"status_search",field:"status",internal:false,external:true}})),host));await act(settle);const input=host.querySelector("input") as HTMLInputElement;await act(async()=>{input.value="Open";input.dispatchEvent(new Event("input",{bubbles:true}));await settle();});expect(test.selectExternal).toHaveBeenLastCalledWith([0,1],false,expect.objectContaining({value:"Open"}));test.clearExternal.mockClear();await act(async()=>{input.value="";input.dispatchEvent(new Event("input",{bubbles:true}));await settle();});expect(test.clearExternal).toHaveBeenCalledWith(expect.objectContaining({componentId:"status_search"}));render(null,host);});
 });
 
 describe("built-in table and diagnostics", () => {
@@ -70,7 +80,7 @@ describe("built-in table and diagnostics", () => {
     });
     it("shows complete interaction diagnostics and report configuration guidance", () => {
         const host = document.createElement("div"); render(h(InteractionsPanel, { diagnostics: { externalInteractionEnabled: true, hostAllowsInteractions: false, selectionIdentityCount: 3, lastClickedComponentId: "details", lastClickedComponentType: "table", lastClickedField: "leadby", lastClickedValue: "Pranav", lastResolvedSourceRowCount: 2, lastSelectedSourceRowIndices: [0, 2], externalSelectionSent: false, reasonExternalSelectionNotSent: "host disallowed" } }), host);
-        expect(host.textContent).toContain("Host allows interactionsNo"); expect(host.textContent).toContain("The host did not allow interactions."); expect(host.textContent).toContain("Edit interactions"); expect(host.textContent).toContain("compatible model lineage");
+        expect(host.textContent).toContain("hostAllowsInteractionsNo"); expect(host.textContent).toContain("The host did not allow interactions."); expect(host.textContent).toContain("Edit interactions"); expect(host.textContent).toContain("compatible model lineage");
     });
     it("warns about ignored interaction-looking properties without blocking schema rendering", () => {
         const schema = { version: "1.0" as const, components: [{ type: "custom", id: "fake", html: "Safe", externalSelection: true, selectionTarget: "report", crossFilter: true, powerBISelection: true }] };

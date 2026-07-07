@@ -81,4 +81,5 @@ export interface NormalizedData {
     map: NormalizedMapData;
     schemaFromField?: string;
     calculatedMetrics?: Record<string, Primitive>;
+    loadStatus?: { loadedRowCount: number; moreRowsAvailable: boolean; fetchInProgress?: boolean };
 }

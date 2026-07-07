@@ -8,8 +8,9 @@ import { EmptyState } from "../system/EmptyState";
 import { SlotRenderer } from "../custom/slotRenderer";
 
 function columnDefinition(column: string | TableColumn): TableColumn { return typeof column === "string" ? { field: column } : column; }
+export const MAX_RENDERED_TABLE_ROWS = 5000;
 export function nextTableSelection(current: number[], index: number, multi: boolean): number[] { const selected=current.includes(index); return multi?(selected?current.filter(item=>item!==index):[...current,index]):(selected?[]:[index]); }
-export function tableRowsForSelection<T>(rows:T[],sourceRows:T[],selectedRows:number[],mode:TableComponent["selectionMode"],internal=true):T[]{return internal&&mode!=="highlight"&&selectedRows.length?rows.filter(row=>selectedRows.includes(sourceRows.indexOf(row))):rows;}
+export function tableRowsForSelection<T>(rows:T[],sourceRows:T[],selectedRows:number[],mode:TableComponent["selectionMode"],internal=true):T[]{if(!internal||mode==="highlight"||!selectedRows.length)return rows;const indices=new Map(sourceRows.map((row,index)=>[row,index] as const));const selected=new Set(selectedRows);return rows.filter(row=>{const index=indices.get(row);return index!==undefined&&selected.has(index);});}
 
 function cellStyle(column: TableColumn, value: unknown): Record<string, string> | undefined {
     const rule = column.conditional?.find(item => {
@@ -32,9 +33,10 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>();
     const columns: TableColumn[] = (component.columns?.length ? component.columns.map(columnDefinition) : Object.keys(data.fields).map(field => ({ field }))).filter(column => data.fields[column.field]);
-    const maxRows = Math.min(component.maxRows ?? settings.table.maxRows, settings.table.maxRows, 5000);
+    const maxRows = Math.min(component.maxRows ?? settings.table.maxRows, settings.table.maxRows, MAX_RENDERED_TABLE_ROWS);
     const needle = (state.tableSearch[id] ?? "").trim().toLowerCase();
     const selectedRows = state.componentSelectedRows[id] ?? (component.internal === false ? [] : state.selectedRows);
+    const sourceIndices = useMemo(() => new Map(sourceRows.map((row,index)=>[row,index] as const)), [sourceRows]);
     const tableRows = tableRowsForSelection(rows,sourceRows,selectedRows,component.selectionMode,component.internal !== false);
     const prepared = useMemo(() => {
         const matching = needle ? tableRows.filter(row => columns.some(column => String(row[column.field] ?? "").toLowerCase().includes(needle))) : tableRows;
@@ -54,8 +56,8 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
             {component.selectable && <th aria-label="Selection" />}
             {columns.map(column => <th style={{ width: column.width ? `${column.width}px` : undefined }}><button type="button" onClick={() => toggleSort(column.field)}>{column.title ?? data.fields[column.field]?.displayName ?? column.field}{sort?.field === column.field ? sort.direction === "asc" ? " ↑" : " ↓" : ""}</button></th>)}
         </tr></thead><tbody>{visible.map(row => {
-            const index = sourceRows.indexOf(row); const selected = selectedRows.includes(index);
-            return <tr class={selected ? "hp-row-selected" : ""} onClick={event => { if (!component.selectable) return; const multi = event.ctrlKey || event.metaKey; const next = nextTableSelection(selectedRows,index,multi); dispatch({ type: "selectComponentRows", id, rows: next }); if (component.internal !== false) dispatch({ type: "selectRows", rows: next }); const firstField=columns[0]?.field; const details={componentId:id,componentType:component.type,field:firstField,value:firstField?row[firstField]:undefined}; if(component.external!==false)selectExternal(next,false,details);else reportInteraction(details,"component did not call selectExternal",next); }}>
+            const index = sourceIndices.get(row) ?? -1; const selected = selectedRows.includes(index);
+            return <tr class={selected ? "hp-row-selected" : ""} onClick={event => { if (!component.selectable) return; const multi = event.ctrlKey || event.metaKey; const next = nextTableSelection(selectedRows,index,multi); dispatch({ type: "selectComponentRows", id, rows: next }); if (component.internal !== false) dispatch({ type: "selectRows", rows: next }); const firstField=columns[0]?.field; const details={componentId:id,componentType:component.type,field:firstField,value:firstField?row[firstField]:undefined}; if(component.external!==false)selectExternal(next,multi,details);else reportInteraction(details,"component did not call selectExternal",next); }}>
                 {component.selectable && <td><input type="checkbox" checked={selected} aria-label="Select row" /></td>}
                 {columns.map(column => <td class={column.hozAlign ? `text-${column.hozAlign}` : ""} style={cellStyle(column, row[column.field])}>{formatValue(row[column.field], column.format ?? data.fields[column.field]?.format)}</td>)}
             </tr>;

@@ -14,7 +14,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const [visibleLayers, setVisibleLayers] = useState<Set<string>>(() => new Set(layerNames));
     useEffect(() => setVisibleLayers(new Set(layerNames)), [layerSignature]);
     const mapStyle = useMemo(() => resolveMapStyle(component, settings.theme.primary, map), [component, settings.theme.primary, map]);
-    const selected = map.layers.flatMap(layer => layer.features).find(feature => sourceRows.indexOf(feature.row) === state.selectedMapFeature);
+    const sourceIndices=useMemo(()=>new Map(sourceRows.map((row,index)=>[row,index] as const)),[sourceRows]);
+    const selected = map.layers.flatMap(layer => layer.features).find(feature => sourceIndices.get(feature.row) === state.selectedMapFeature);
     const coordinateSystem = component.settings?.coordinateSystem ?? "EPSG:4326";
     const toggleLayer = (name: string, enabled: boolean) => setVisibleLayers(current => { const next = new Set(current); if (enabled) next.add(name); else next.delete(name); return next; });
     let content;

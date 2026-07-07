@@ -6,7 +6,7 @@ import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel
 import "./../style/visual.less";
 import { applyConfigToData } from "./data/applyConfig";
 import { NormalizedData } from "./data/normalizeData";
-import { parseDataView } from "./data/parseDataView";
+import { mergeNormalizedData, parseDataView } from "./data/parseDataView";
 import { defaultConfigJson, parseConfig } from "./config/hyperpbiConfig";
 import { HyperPbiStudio } from "./editor/HyperPbiStudio";
 import { LandingPage } from "./editor/LandingPage";
@@ -49,6 +49,9 @@ export class Visual implements IVisual {
     private studioLayout = JSON.stringify(defaultStudioLayout);
     private webAccessAvailable = false;
     private interactionDiagnostics: InteractionDiagnostics = createInteractionDiagnostics(false, false, 0);
+    private moreRowsAvailable = false;
+    private fetchMoreDataInProgress = false;
+    private lastFetchRequestedRowCount = -1;
 
     constructor(options?: VisualConstructorOptions) {
         if (!options) throw new Error("HyperPBI requires Power BI visual constructor options.");
@@ -67,10 +70,14 @@ export class Visual implements IVisual {
         } else {
             const persisted = readVisualState(dataView); if (persisted.specification !== undefined) this.specification = persisted.specification; if (persisted.configuration !== undefined) this.configuration = persisted.configuration || defaultConfigJson; if (persisted.studioLayout !== undefined) this.studioLayout = persisted.studioLayout;
         }
-        this.data = parseDataView(dataView); this.selectionIds = buildTableSelectionIds(this.host, dataView); this.editMode = nextEditMode;
+        const wasFetching = this.fetchMoreDataInProgress; const incomingData = parseDataView(dataView); const incomingSelectionIds = buildTableSelectionIds(this.host, dataView);
+        this.fetchMoreDataInProgress = false; this.moreRowsAvailable = Boolean(dataView?.metadata?.segment);
+        if (wasFetching && this.data.rows.length && incomingData.rows.length <= this.data.rows.length && !this.sameRows(this.data.rows, incomingData.rows)) { this.data = mergeNormalizedData(this.data, incomingData); this.selectionIds = [...this.selectionIds, ...incomingSelectionIds]; }
+        else { this.data = incomingData; this.selectionIds = incomingSelectionIds; }
+        this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: this.moreRowsAvailable, fetchInProgress: false } }; this.editMode = nextEditMode;
         this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length };
         this.target.style.width = `${Math.max(0, options.viewport.width)}px`; this.target.style.height = `${Math.max(0, options.viewport.height)}px`;
-        this.renderMs = performance.now() - started; this.renderCurrent(); this.host.eventService?.renderingFinished(options);
+        this.renderMs = performance.now() - started; this.renderCurrent(); this.host.eventService?.renderingFinished(options); this.requestMoreDataIfNeeded();
     }
 
     private renderCurrent(): void {
@@ -121,7 +128,7 @@ export class Visual implements IVisual {
         else {
             const indices = Array.from(new Set(rowIndices)).filter(index => Number.isInteger(index) && index >= 0 && index < this.selectionIds.length);
             if (!indices.length) { void this.selectionManager.clear(); result = { sent: false, reason: "no matching source rows" }; }
-            else { const identities = indices.slice(0, 1000).map(index => this.selectionIds[index]); void this.selectionManager.select(identities, multiSelect); result = { sent: true }; rowIndices = indices; }
+            else { const identities = indices.map(index => this.selectionIds[index]); void this.selectionManager.select(identities, multiSelect); result = { sent: true }; rowIndices = indices; }
         }
         this.updateInteractionDiagnostics(rowIndices, details, result); return result;
     };
@@ -133,6 +140,18 @@ export class Visual implements IVisual {
     };
 
     private reportInteraction = (details: InteractionDetails, reason: ExternalSelectionFailureReason = "component did not call selectExternal", rowIndices: number[] = []): void => this.updateInteractionDiagnostics(rowIndices, details, { sent: false, reason });
+
+    private sameRows(left: NormalizedData["rows"], right: NormalizedData["rows"]): boolean {
+        if (left.length !== right.length) return false; const keys = Object.keys(this.data.fields);
+        return left.every((row, index) => keys.every(key => row[key] === right[index]?.[key]));
+    }
+
+    private requestMoreDataIfNeeded(): void {
+        if (!this.moreRowsAvailable || this.fetchMoreDataInProgress || this.lastFetchRequestedRowCount === this.data.rows.length) return;
+        this.fetchMoreDataInProgress = true; this.lastFetchRequestedRowCount = this.data.rows.length;
+        this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: true, fetchInProgress: true } };
+        if (!this.host.fetchMoreData(true)) { this.fetchMoreDataInProgress = false; this.moreRowsAvailable = false; this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: false, fetchInProgress: false } }; this.renderCurrent(); }
+    }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel { return this.formattingSettingsService.buildFormattingModel(this.formattingSettings); }
     public destroy(): void { render(null, this.target); }

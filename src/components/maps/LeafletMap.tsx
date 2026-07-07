@@ -20,6 +20,7 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
     const ref = useRef<HTMLDivElement>(null); const { settings, dispatch, data, sourceRows, selectExternal, reportInteraction, config: runtimeConfig, webAccessAvailable } = useRenderContext();
     useEffect(() => {
         if (!ref.current) return;
+        const sourceIndices = new Map(sourceRows.map((row,index)=>[row,index] as const));
         const config = component.settings ?? {}; const policy = resolveProviderPolicy(runtimeConfig.providers,webAccessAvailable); const providerConfig = runtimeConfig.providers?.basemap; const provider = getBasemapProvider(providerConfig?.provider ?? "none"); const enableTiles = policy.tilesAllowed && provider.external;
         const tileUrl = providerConfig?.tileUrl?.trim() || provider.defaults.tileUrl || "";
         const map = L.map(ref.current, { zoomControl: true, attributionControl: enableTiles, preferCanvas: true }).setView(settings.map.center, settings.map.zoom);
@@ -41,7 +42,7 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
                     }).addTo(layerGroup);
                     layer = geometryLayer; const geometryBounds = geometryLayer.getBounds(); if (geometryBounds.isValid()) dataBounds.extend(geometryBounds);
                 }
-                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, () => { const sourceIndex = sourceRows.indexOf(feature.row); const indices=sourceIndex >= 0 ? [sourceIndex] : []; dispatch({ type: "selectMap", index: sourceIndex }); const details={componentId:component.id,componentType:component.type,value:feature.id}; if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details); });
+                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, () => { const sourceIndex = sourceIndices.get(feature.row); const indices=sourceIndex !== undefined ? [sourceIndex] : []; dispatch({ type: "selectMap", index: sourceIndex }); const details={componentId:component.id,componentType:component.type,value:feature.id}; if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details); });
             });
         });
         if ((config.fitBounds ?? true) && dataBounds.isValid()) map.fitBounds(dataBounds.pad(.08), { maxZoom: 14 });

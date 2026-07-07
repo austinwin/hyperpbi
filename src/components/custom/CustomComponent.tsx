@@ -13,7 +13,8 @@ function compareValues(left: unknown, right: unknown): number {
     return String(left ?? "").localeCompare(String(right ?? ""), undefined, { numeric: true, sensitivity: "base" });
 }
 export function prepareCustomRepeatRows(rows: DataRow[], sourceRows: DataRow[], repeat: NonNullable<ContentComponent["repeat"]>): CustomRepeatRow[] {
-    let prepared = rows.map(row => ({ row, sourceIndex: sourceRows.indexOf(row) })).filter(item => item.sourceIndex >= 0);
+    const sourceIndices = new Map(sourceRows.map((row, index) => [row, index] as const));
+    let prepared = rows.map(row => ({ row, sourceIndex: sourceIndices.get(row) ?? -1 })).filter(item => item.sourceIndex >= 0);
     if (repeat.distinctBy) {
         const seen = new Set<unknown>();
         prepared = prepared.filter(item => { const value = item.row[repeat.distinctBy as string]; if (seen.has(value)) return false; seen.add(value); return true; });
@@ -26,9 +27,9 @@ export function prepareCustomRepeatRows(rows: DataRow[], sourceRows: DataRow[], 
 }
 
 export function CustomComponent({ component }: { component: ContentComponent }) {
-    const context = useRenderContext(); const { data, sourceRows, state, schema, settings } = context; const errors = validateCustomComponent(component);
+    const context = useRenderContext(); const { data, sourceRows, state, schema, settings, config } = context; const errors = validateCustomComponent(component);
     if (errors.length) return <div class="hp-custom-error">{errors.join(" ")}</div>;
-    const render = (template: string, row?: DataRow) => sanitizeHtml(renderTemplate(template, data, state.values, component.title ?? schema.title ?? "", { row, props: component.props, state: state.values, title: component.title }), { allowInlineSvg: settings.allowInlineSvg, allowSafeImages: settings.allowSafeImages }).html;
+    const render = (template: string, row?: DataRow) => sanitizeHtml(renderTemplate(template, data, state.values, component.title ?? schema.title ?? "", { row, props: component.props, state: state.values, title: component.title }), { allowInlineSvg: settings.allowInlineSvg, allowSafeImages: settings.allowSafeImages, mode: config.security?.htmlMode }).html;
     const click = component.interactions?.onClick; const componentId = component.id ?? "custom";
     const repeated = component.repeat ? prepareCustomRepeatRows(data.rows, sourceRows, component.repeat) : [];
     const selectedRows = state.componentSelectedRows[componentId] ?? (click?.internal === false ? [] : state.selectedRows);

@@ -1,5 +1,3 @@
-import { Primitive } from "../data/normalizeData";
-
 export type ExternalSelectionFailureReason =
     | "interactions disabled"
     | "host disallowed"
@@ -12,7 +10,7 @@ export interface InteractionDetails {
     componentId?: string;
     componentType?: string;
     field?: string;
-    value?: Primitive;
+    value?: unknown;
 }
 
 export interface ExternalSelectionResult {
@@ -27,7 +25,7 @@ export interface InteractionDiagnostics {
     lastClickedComponentId?: string;
     lastClickedComponentType?: string;
     lastClickedField?: string;
-    lastClickedValue?: Primitive;
+    lastClickedValue?: unknown;
     lastResolvedSourceRowCount: number;
     lastSelectedSourceRowIndices: number[];
     externalSelectionSent: boolean;

@@ -49,7 +49,8 @@ export function runSafeInteraction(interaction: SafeInteraction | undefined, con
         context.dispatch({ type: "selectComponentRows", id: componentId, rows: selectedRows });
         if (interaction.internal !== false) context.dispatch({ type: "selectRows", rows: selectedRows });
         if (interaction.external === false) { context.reportInteraction(details, "component did not call selectExternal", selectedRows); return { matchedRows, selectedRows, externalSelectionSent: false }; }
-        const result = context.selectExternal(selectedRows, false, details);
+        const multiSelect = eventOptions.multiSelect === true || interaction.selectionMode === "add" || interaction.selectionMode === "toggle";
+        const result = context.selectExternal(selectedRows, multiSelect, details);
         return { matchedRows, selectedRows, externalSelectionSent: result.sent };
     }
     if (interaction.action === "setFilter" && interaction.field) { context.dispatch({ type: "filter", filter: { id: `custom-${interaction.field}`, field: interaction.field, operator: "=", value: interaction.value } }); context.reportInteraction(details); return empty; }

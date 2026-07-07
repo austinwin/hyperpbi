@@ -43,7 +43,7 @@ Every component supports `id`, `span`, `className`, sanitized `style`, scoped `c
 
 ### Global application styling
 
-Use `styles.globalCss` to define a visual-wide design system and `styles.components` for reusable defaults. All CSS remains sanitized and confined to the HyperPBI visual.
+Use `styles.globalCss` to define a visual-wide design system and `styles.components` for reusable defaults. CSS remains parsed and confined to the HyperPBI visual. Runtime Config defaults to certification-oriented `security.cssMode: "scoped"` and `htmlMode: "sanitized"`; trusted-author modes broaden HTML/CSS for controlled internal dashboards without enabling scripts or event handlers.
 
 ```json
 {
@@ -84,13 +84,15 @@ High-value application components include `drawer`, `filterDrawer`, `segmentedCo
 Location priority is Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon are supported.
 
 - `npm run package:core`: no WebAccess, neutral map background, no external geocoder; certification-oriented posture.
-- `npm run package:maps`: WebAccess for OpenStreetMap tiles and Nominatim; external-provider posture and not represented as certification-safe.
+- `npm run package:maps`: WebAccess for OpenStreetMap tiles, Nominatim, and declared ArcGIS geocoding hosts; external-provider posture and not represented as certification-safe.
 
 OSM attribution is displayed by Leaflet. Nominatim is user-triggered only, sequential, capped at one request/second, cached by normalized address, cancellable, and has no autocomplete. Address data is never silently sent. For bulk production geocoding, pre-geocode in Power Query/data model or use an approved enterprise provider. See [map services](docs/map-services.md).
 
 ## Power BI interactions
 
 HyperPBI builds table selection identities with `SelectionIdBuilder.withTable`. Table rows, chart categories, map features, and safe custom `selectWhere` actions can select compatible report data. Internal filters and external report selection are distinct; other visuals react only when Power BI identities and report interaction settings permit it. See [interactions](docs/interactions.md).
+
+HyperPBI requests 30,000-row Power BI windows and uses sequential aggregation-mode `fetchMoreData(true)` while `metadata.segment` indicates more data. Loaded rows and selection identities accumulate, while tables stay paginated and cap rendered rows. Power BI limits still apply: 30,000 rows per window, 1,048,576 total data-view rows, and 100 MB aggregation memory.
 
 Selectable tables retain backward-compatible `selectionMode: "filter"` behavior and expose **Show all**. Normal click replaces the selection; Ctrl/Cmd-click adds or removes rows. Set `selectionMode: "highlight"`, or `internal:false`, to keep all rows visible. External selection can be controlled independently with `external`. Filtering another Power BI visual also requires enabled formatting interactions, host permission, valid table identities, matching source rows, compatible semantic-model lineage/relationships, and enabled Power BI Edit interactions.
 
@@ -123,7 +125,7 @@ npm run package
 npm run package:core
 ```
 
-Build the map-provider `.pbiviz` with OSM/Nominatim WebAccess declarations:
+Build the map-provider `.pbiviz` with OSM/Nominatim/ArcGIS WebAccess declarations:
 
 ```powershell
 npm run package:maps
@@ -138,7 +140,7 @@ npm run certification:audit
 Generated files are under `dist/`:
 
 - `*-core.pbiviz`: no WebAccess privilege; external request call sites are removed by the SDK certification-fix pass.
-- `*-maps.pbiviz`: OSM/Nominatim WebAccess enabled; intended for approved organizational use and not claimed as certification-safe.
+- `*-maps.pbiviz`: OSM/Nominatim/declared ArcGIS WebAccess enabled; intended for approved organizational use and not claimed as certification-safe.
 - the unsuffixed `.pbiviz` is the most recently built profile; use the suffixed files to avoid ambiguity.
 
 Import a package in Power BI Desktop with **Visualizations → … → Import a visual from a file**, select the required `.pbiviz`, add the visual, and place fields in **Values**. For development-server use, enable the Power BI developer visual workflow and run `npm start`.
@@ -147,7 +149,7 @@ The profile script temporarily adjusts `capabilities.json` and the compile-time 
 
 ## Known limitations
 
-- Selection propagation is capped at 1,000 identities for responsiveness.
+- Power BI host row and aggregation-memory limits still bound total loaded data; table display remains independently capped and paginated.
 - Non-EPSG:4326 X/Y needs a projection adapter.
 - Native enterprise tables intentionally expose a bounded schema rather than arbitrary Tabulator options.
 - Nominatim is unsuitable for bulk production geocoding.

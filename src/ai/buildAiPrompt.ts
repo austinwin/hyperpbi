@@ -5,12 +5,16 @@ import { sampleRowsForPrompt } from "./sampleRowsForPrompt";
 import { specShape } from "./promptTemplates";
 import { buildHyperPbiSkill } from "./buildHyperPbiSkill";
 import { designPresetPrompt } from "../design/stylePresets";
+import { minimalDashboardJson } from "./minimalDashboard";
 
 export function buildAiPrompt(data: NormalizedData, settings: AiPromptSettings, viewport?: { width: number; height: number }): string {
     const fields = fieldDictionaryForPrompt(data, settings.selectedFields, settings.privacyMode === "types"); const samples = sampleRowsForPrompt(data, settings.privacyMode, settings.sampleRows, settings.selectedFields);
     const skill = buildHyperPbiSkill(data,false);
     const requirements = [...settings.components, settings.mapRequired ? "Map" : "", settings.tableRequired ? "Table" : "", settings.chartsRequired ? "Charts" : "", settings.controlsRequired ? "Filters and controls" : "", settings.calculationsRequired ? "Calculated fields/metrics" : "", settings.externalInteractions ? "Power BI external selections" : ""].filter(Boolean);
     return `You are generating a HyperPBI dashboard specification for a Power BI custom visual.
+
+return this exact shape expanded, not markdown.
+${minimalDashboardJson}
 
 HyperPBI renders full enterprise dashboards from JSON. It supports layouts, KPI cards, metric grids, safe controls, tabs, collapsibles, tables, ECharts charts, Leaflet maps, sanitized HTML/CSS, safe JSON calculations, custom components, slots, and Power BI report selections. It does not execute JavaScript.
 

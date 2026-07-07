@@ -36,7 +36,7 @@
     "dataLimit": {
       "displayName": "Data limit options",
       "properties": {
-        "maxRows": { "displayName": "Maximum rows", "type": { "numeric": true } }
+        "maxRows": { "displayName": "Maximum displayed table rows", "type": { "numeric": true } }
       }
     },
     "general": {
@@ -51,7 +51,7 @@
     "table": {
       "rows": {
         "select": [{ "for": { "in": "values" } }],
-        "dataReductionAlgorithm": { "window": { "count": 10000 } }
+        "dataReductionAlgorithm": { "window": { "count": 30000 } }
       }
     }
   }],
