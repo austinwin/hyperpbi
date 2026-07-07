@@ -1,4 +1,5 @@
 import { CalculationSpecification, ExpressionNode } from "../calculations/calculationTypes";
+import type { EChartsInitOpts, SetOptionOpts } from "echarts/core";
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
@@ -120,6 +121,9 @@ export interface ChartComponent extends ComponentBase {
     y?: string;
     size?: string;
     height?: number;
+    maxDataRows?: number;
+    initOptions?: EChartsInitOpts;
+    setOption?: SetOptionOpts;
     options?: Record<string, unknown>;
 }
 

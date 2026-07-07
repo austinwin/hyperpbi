@@ -75,7 +75,7 @@ The prompt includes executive overview, operations, map-first, detail explorer, 
 
 ### Advanced charts and high-value components
 
-`advancedChart` accepts JSON-only ECharts options for stacked/grouped bars, combo and waterfall-style charts, radar, treemap, sunburst, sankey, funnel, boxplot, calendar heatmap, timeline/dataZoom, and graph/network views. Options are recursively sanitized: no functions, formatter callbacks, event-handler keys, external URLs, script/style injection, or executable strings.
+`advancedChart` accepts JSON-only ECharts 6 options. HyperPBI registers every bundled declarative series (including candlestick, chord, custom, effectScatter, lines, map, parallel, pictorialBar, themeRiver, and tree), coordinate systems, dataset/transforms, dataZoom/brush, mark components, toolbox, graphic, aria, Canvas, and SVG rendering. Safe string formatter templates work; JavaScript callbacks such as `renderItem`, event-handler keys, external URLs, and executable markup remain blocked. `initOptions`, `setOption`, and `maxDataRows` expose renderer/update/performance controls without executing code.
 
 High-value application components include `drawer`, `filterDrawer`, `segmentedControl`, `timeline`, `matrix`, `smallMultiples`, and an improved selected-row `detailPanel`. Existing component JSON remains supported.
 
@@ -90,7 +90,7 @@ OSM attribution is displayed by Leaflet. Nominatim is user-triggered only, seque
 
 ## Power BI interactions
 
-HyperPBI uses two distinct Power BI interaction paths. Field-bound slicer controls call `applyJsonFilter` and externally filter by source table/column by default. Table rows, chart points, map features, timelines, and explicit custom row actions use selection identities built with `SelectionIdBuilder.withTable`. See [interactions](docs/interactions.md).
+HyperPBI uses Power BI JSON filters and row selections. Runtime Config defaults `interactions.externalMode` to `filter`, so all field-backed interactive components—controls, tables, charts, maps, timelines, and custom actions—filter other visuals by source table/column. Choose `auto` for slicer filters plus data-point selections, or `selection` for row/data-point Selection Manager behavior. See [interactions](docs/interactions.md).
 
 HyperPBI requests 30,000-row Power BI windows and uses sequential aggregation-mode `fetchMoreData(true)` while `metadata.segment` indicates more data. Loaded rows and selection identities accumulate, while tables stay paginated and cap rendered rows. Power BI limits still apply: 30,000 rows per window, 1,048,576 total data-view rows, and 100 MB aggregation memory.
 

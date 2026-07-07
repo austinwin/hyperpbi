@@ -15,6 +15,7 @@ export interface InteractionDetails {
     field?: string;
     value?: unknown;
     matchedRowCount?: number;
+    filterOperator?: "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
 }
 
 export interface ExternalSelectionResult {

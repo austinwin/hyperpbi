@@ -2,15 +2,15 @@ import type { EChartsCoreOption } from "echarts/core";
 
 export interface SanitizedEChartOptions { option: EChartsCoreOption; warnings: string[]; }
 
-const blockedKeys = /^(?:__proto__|prototype|constructor|formatter|renderItem|onclick|onmouseover|onmouseout|onmousemove|oncontextmenu|href|url|src|backgroundImage)$/i;
+const blockedKeys = /^(?:__proto__|prototype|constructor|renderItem|onclick|onmouseover|onmouseout|onmousemove|oncontextmenu|href|url|src|backgroundImage)$/i;
 const unsafeString = /(?:javascript\s*:|data\s*:|(?:https?|ftp):\/\/|mailto:|\/\/[^\s]|<\/?(?:script|style|iframe|object|embed)|\bon\w+\s*=)/i;
-const safeSeries = new Set(["bar", "line", "pie", "scatter", "gauge", "heatmap", "radar", "treemap", "sunburst", "sankey", "funnel", "boxplot", "graph"]);
+const safeSeries = new Set(["bar", "boxplot", "candlestick", "chord", "custom", "effectScatter", "funnel", "gauge", "graph", "heatmap", "line", "lines", "map", "parallel", "pictorialBar", "pie", "radar", "sankey", "scatter", "sunburst", "themeRiver", "tree", "treemap"]);
 
 function sanitizeNode(value: unknown, path: string, warnings: string[]): unknown {
     if (value === null || typeof value === "number" || typeof value === "boolean") return value;
     if (typeof value === "function") { warnings.push(`${path} removed: functions are not allowed.`); return undefined; }
     if (typeof value === "string") { if (unsafeString.test(value)) { warnings.push(`${path} removed: external URLs or executable markup are not allowed.`); return undefined; } return value.slice(0, 20000); }
-    if (Array.isArray(value)) return value.slice(0, 5000).map((item, index) => sanitizeNode(item, `${path}[${index}]`, warnings)).filter(item => item !== undefined);
+    if (Array.isArray(value)) return value.slice(0, 30000).map((item, index) => sanitizeNode(item, `${path}[${index}]`, warnings)).filter(item => item !== undefined);
     if (typeof value !== "object") return undefined;
     const result: Record<string, unknown> = {};
     for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
