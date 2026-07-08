@@ -1,0 +1,331 @@
+{
+  "version": "1.0",
+  "title": "Display Components Showcase",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#176b87",
+    "accentColor": "#6c63ff",
+    "surfaceColor": "#ffffff",
+    "textColor": "#173447",
+    "borderColor": "#cfe3ec",
+    "successColor": "#0f9f88",
+    "warningColor": "#d99020",
+    "dangerColor": "#d95f76",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 10
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 10
+  },
+  "styles": {
+    "globalCss": ".hp-card{position:relative;overflow:hidden;border:1px solid #cfe3ec;background:linear-gradient(145deg,#ffffff 0%,#f8fcfe 68%,#f1f8fb 100%);box-shadow:0 12px 30px rgba(23,107,135,.10),0 2px 8px rgba(72,92,120,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.hp-card:hover{transform:translateY(-2px);border-color:#9bcfdb;box-shadow:0 18px 38px rgba(23,107,135,.14),0 4px 12px rgba(72,92,120,.06)}.hp-card-title{margin-bottom:10px;color:#173447;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.hp-card-subtitle{color:#64808d}.hp-card:focus-within{outline:2px solid rgba(108,99,255,.22);outline-offset:2px}",
+    "components": {
+      "*": {
+        "style": {
+          "minWidth": 0
+        }
+      },
+      "html": {
+        "css": ".html-component-shell{padding:0;border:0;background:transparent;box-shadow:none;overflow:visible}.html-component-shell:hover{transform:none;border-color:transparent;box-shadow:none}.future-html-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;min-height:176px;padding:22px 24px;border:1px solid #bddce6;border-radius:16px;background:radial-gradient(circle at 86% 18%,rgba(108,99,255,.18),transparent 22%),radial-gradient(circle at 74% 88%,rgba(37,167,196,.20),transparent 28%),linear-gradient(135deg,#ffffff 0%,#f3fbfd 52%,#eef0ff 100%);box-shadow:0 20px 48px rgba(23,107,135,.14)}.future-html-main{position:relative;z-index:2;min-width:0}.future-eyebrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;color:#176b87;font-size:10px;font-weight:850;letter-spacing:.13em}.future-pulse{width:8px;height:8px;border-radius:999px;background:#25a7c4;box-shadow:0 0 0 5px rgba(37,167,196,.12),0 0 18px rgba(37,167,196,.45)}.future-status{padding:4px 8px;border:1px solid #c9c5ff;border-radius:999px;background:#f2f1ff;color:#5f56d9;letter-spacing:.08em}.future-html-card h2{margin:0;color:#173447;font-size:24px;line-height:1.18;font-weight:850;letter-spacing:-.03em}.future-html-card p{max-width:720px;margin:8px 0 16px;color:#56717f;font-size:13px;line-height:1.55}.future-html-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.future-stat{display:grid;gap:4px;padding:10px 12px;border:1px solid rgba(174,211,222,.78);border-radius:10px;background:rgba(255,255,255,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.92)}.future-stat span{color:#6b8490;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.future-stat strong{overflow:hidden;color:#173447;font-size:15px;font-weight:850;text-overflow:ellipsis;white-space:nowrap}.future-orbit{position:relative;width:116px;height:116px;border:1px solid rgba(108,99,255,.24);border-radius:999px;background:radial-gradient(circle at center,#ffffff 0 22%,rgba(108,99,255,.12) 23% 24%,transparent 25% 42%,rgba(37,167,196,.16) 43% 44%,transparent 45% 100%);box-shadow:0 0 36px rgba(108,99,255,.14),inset 0 0 22px rgba(37,167,196,.09)}.orbit-dot{position:absolute;top:12px;left:52px;width:12px;height:12px;border-radius:999px;background:linear-gradient(135deg,#25a7c4,#6c63ff);box-shadow:0 0 0 6px rgba(108,99,255,.10),0 0 20px rgba(108,99,255,.35)}.future-orbit-core{position:absolute;inset:40px;display:grid;place-items:center;border:1px solid #d5d2ff;border-radius:999px;background:linear-gradient(145deg,#ffffff,#ecebff);color:#5f56d9;font-size:11px;font-weight:900;letter-spacing:.05em}@media(max-width:760px){.future-html-card{grid-template-columns:1fr;padding:18px}.future-orbit{display:none}.future-html-grid{grid-template-columns:1fr}.future-html-card h2{font-size:20px}}"
+      },
+      "kpi": {
+        "css": ".display-kpi-demo{border-top:4px solid #25a7c4;background:radial-gradient(circle at 88% 12%,rgba(37,167,196,.18),transparent 34%),linear-gradient(145deg,#ffffff,#eef9fc)}.display-kpi-demo .hp-metric{min-height:108px;padding:16px;border:0;background:transparent}.display-kpi-demo .hp-metric-value{color:#176b87;font-size:30px;font-weight:850;letter-spacing:-.04em}.display-kpi-demo .hp-metric-label{color:#5b7583;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}"
+      },
+      "metricGrid": {
+        "css": ".display-metric-grid-demo{padding:4px;background:linear-gradient(135deg,#f9fdfe,#f2f3ff)}.display-metric-grid-demo .hp-metric{min-height:96px;margin:4px;border:1px solid #d6e7ed;border-radius:11px;background:linear-gradient(160deg,#ffffff 0%,#f4fbfd 100%);box-shadow:0 7px 20px rgba(23,107,135,.08)}.display-metric-grid-demo .hp-metric-value{color:#176b87;font-size:25px;font-weight:850}.display-metric-grid-demo .hp-metric-label{color:#587482;font-weight:750}"
+      },
+      "infoCard": {
+        "css": ".display-info-card-demo{border-top:4px solid #6c63ff;background:radial-gradient(circle at 92% 8%,rgba(108,99,255,.14),transparent 32%),linear-gradient(145deg,#ffffff,#f6f5ff)}.display-info-card-demo p{color:#4b6978;line-height:1.6}"
+      },
+      "statusBadge": {
+        "css": ".display-status-badge-demo{border-top:4px solid #0f9f88;background:radial-gradient(circle at 85% 15%,rgba(15,159,136,.16),transparent 34%),linear-gradient(145deg,#ffffff,#effbf8)}.display-status-badge-demo .hp-badge{border:1px solid #94d9cd;border-radius:999px;background:#e6f8f4;color:#087c6b;font-weight:850;letter-spacing:.04em;box-shadow:0 4px 12px rgba(15,159,136,.12)}"
+      },
+      "progressBar": {
+        "css": ".display-progress-bar-demo{border-top:4px solid #25a7c4;background:linear-gradient(145deg,#ffffff,#f1fbfd)}.display-progress-bar-demo .hp-progress-track{height:12px;border:1px solid #c6e2ea;border-radius:999px;background:#e7f3f7;overflow:hidden}.display-progress-bar-demo .hp-progress-fill{border-radius:999px;background:linear-gradient(90deg,#176b87 0%,#25a7c4 52%,#6c63ff 100%);box-shadow:0 0 16px rgba(37,167,196,.28)}"
+      },
+      "alert": {
+        "css": ".display-alert-demo{border:1px solid #ecd89d;border-left:5px solid #d99020;background:radial-gradient(circle at 92% 10%,rgba(217,144,32,.13),transparent 34%),linear-gradient(145deg,#fffef9,#fff8e7);box-shadow:0 10px 26px rgba(217,144,32,.10)}.display-alert-demo .hp-card-title{color:#8b5a12}.display-alert-demo p{color:#735d39}"
+      },
+      "statList": {
+        "css": ".display-stat-list-demo{border-top:4px solid #6c63ff;background:radial-gradient(circle at 95% 5%,rgba(108,99,255,.12),transparent 32%),linear-gradient(145deg,#ffffff,#f5f4ff)}.display-stat-list-demo .hp-stat-row{padding:10px 0;border-bottom:1px solid #dce9ef}.display-stat-list-demo .hp-stat-row:last-child.display-stat-list-demo .hp-stat-label{color:#637d8a;font-size:11px;font-weight:750}.display-stat-list-demo .hp-stat-value{color:#173447;font-weight:850}"
+      },
+      "detailPanel": {
+        "css": ".display-detail-panel-demo{border-top:4px solid #25a7c4;background:radial-gradient(circle at 90% 0%,rgba(37,167,196,.13),transparent 30%),linear-gradient(145deg,#ffffff,#f5fbfd)}.display-detail-panel-demo .hp-detail-group{margin-top:8px;padding:12px;border:1px solid #d5e7ed;border-radius:10px;background:rgba(255,255,255,.76)}.display-detail-panel-demo .hp-detail-label{color:#607b89;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}.display-detail-panel-demo .hp-detail-value{color:#173447;font-weight:800}"
+      }
+    }
+  },
+  "calculations": {
+    "fields": [],
+    "metrics": []
+  },
+  "components": [
+    {
+      "type": "html",
+      "id": "futuristic_html_card",
+      "title": "HTML Card Component",
+      "span": 12,
+      "className": "html-component-shell",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "html": "<section class='future-html-card'><div class='future-html-main'><div class='future-eyebrow'><span class='future-pulse'></span><span>HTML COMPONENT</span><span class='future-status'>SANITIZED</span></div><h2>Executive Display System</h2><p>A branded futuristic-light card rendered with safe HTML, template tokens, and component-scoped CSS. No JavaScript is required.</p><div class='future-html-grid'><div class='future-stat'><span>Records in scope</span><strong>{{count}}</strong></div><div class='future-stat'><span>Bound field</span><strong>Category</strong></div><div class='future-stat'><span>Render mode</span><strong>Futuristic Light</strong></div></div></div><div class='future-orbit'><span class='orbit-dot'></span><span class='future-orbit-core'>HPBI</span></div></section>"
+    },
+    {
+      "type": "kpi",
+      "id": "display_kpi",
+      "title": "KPI Component",
+      "span": 3,
+      "className": "display-kpi-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "aggregation": "count",
+      "format": "integer",
+      "intent": "primary"
+    },
+    {
+      "type": "statusBadge",
+      "id": "display_status_badge",
+      "title": "Status Badge Component",
+      "span": 3,
+      "className": "display-status-badge-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "aggregation": "first",
+      "format": "",
+      "intent": "success",
+      "value": "Operational"
+    },
+    {
+      "type": "infoCard",
+      "id": "display_info_card",
+      "title": "Info Card Component",
+      "span": 6,
+      "className": "display-info-card-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "aggregation": "first",
+      "format": "",
+      "intent": "neutral",
+      "text": "Use an Info Card for concise management context, operational guidance, or a short explanation of the records shown in the dashboard.",
+      "value": "Executive display demonstration"
+    },
+    {
+      "type": "metricGrid",
+      "id": "display_metric_grid",
+      "title": "Metric Grid Component",
+      "span": 12,
+      "className": "display-metric-grid-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "metrics": [
+        {
+          "title": "Total Records",
+          "aggregation": "count",
+          "format": "integer",
+          "intent": "primary",
+          "prefix": "",
+          "suffix": ""
+        },
+        {
+          "title": "Distinct Categories",
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "aggregation": "distinctCount",
+          "format": "integer",
+          "intent": "success",
+          "prefix": "",
+          "suffix": ""
+        },
+        {
+          "title": "Category Entries",
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "aggregation": "count",
+          "format": "integer",
+          "intent": "warning",
+          "prefix": "",
+          "suffix": ""
+        }
+      ]
+    },
+    {
+      "type": "progressBar",
+      "id": "display_progress_bar",
+      "title": "Progress Bar Component",
+      "span": 6,
+      "className": "display-progress-bar-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "format": "percent",
+      "intent": "success",
+      "value": 72,
+      "max": 100
+    },
+    {
+      "type": "alert",
+      "id": "display_alert",
+      "title": "Alert Component",
+      "span": 6,
+      "className": "display-alert-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "aggregation": "count",
+      "format": "integer",
+      "intent": "warning",
+      "text": "This component highlights exceptions, risks, missing information, or operational conditions requiring management attention.",
+      "value": "Management review recommended"
+    },
+    {
+      "type": "statList",
+      "id": "display_stat_list",
+      "title": "Stat List Component",
+      "span": 6,
+      "className": "display-stat-list-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "items": [
+        {
+          "label": "Bound Field",
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "format": ""
+        },
+        {
+          "label": "Design System",
+          "value": "Futuristic Light",
+          "format": ""
+        },
+        {
+          "label": "Visual Density",
+          "value": "Compact",
+          "format": ""
+        },
+        {
+          "label": "Primary Accent",
+          "value": "Cyan and Indigo",
+          "format": ""
+        }
+      ]
+    },
+    {
+      "type": "detailPanel",
+      "id": "display_detail_panel",
+      "title": "Detail Panel Component",
+      "span": 6,
+      "className": "display-detail-panel-demo",
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "selectedRow": true,
+      "emptyText": "Select a record from an interactive table, chart, map, or timeline to populate this panel.",
+      "groups": [
+        {
+          "title": "Selected Record",
+          "fields": [
+            {
+              "field": "hyperpbi_general_enterprise_demo_dataset_category",
+              "label": "Category",
+              "badge": true,
+              "copyable": true,
+              "format": ""
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "label": "Category",
+          "field": "hyperpbi_general_enterprise_demo_dataset_category"
+        }
+      ]
+    }
+  ]
+}
