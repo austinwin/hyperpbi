@@ -5,6 +5,11 @@ HyperPBI is a Deneb-inspired Power BI custom visual that compiles AI-generated J
 The repository includes a responsive, dependency-free [product landing page](index.html) ready for GitHub Pages. It documents the end-user workflow, Studio interface, component catalog, security model, provider modes, global styling, and build commands.
 <img width="1354" height="688" alt="image" src="https://github.com/user-attachments/assets/5a4c707a-f0a8-47a5-8365-f358a57fb000" />
 
+<img width="1359" height="662" alt="image" src="https://github.com/user-attachments/assets/12e5d4bd-dfa2-4d11-bb35-b223de4d2da5" />
+
+<img width="1359" height="754" alt="image" src="https://github.com/user-attachments/assets/a260cf09-ff0a-4439-82b6-fdf8c6b159e9" />
+
+
 ## Workflow
 
 1. Add HyperPBI and drag the required columns/measures into the single **Values** field well.
