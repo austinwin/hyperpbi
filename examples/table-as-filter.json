@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "title": "",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#206bc4",
+    "accentColor": "#4299e1",
+    "surfaceColor": "#ffffff",
+    "textColor": "#182433",
+    "radius": 8,
+    "cardPadding": 12,
+    "gap": 8
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 8
+  },
+  "state": {
+    "filters": {}
+  },
+  "components": [
+    {
+      "type": "table",
+      "engine": "native",
+      "id": "details",
+      "search": false,
+      "showSelector": false,
+      "columns": [
+        "hyperpbi_general_enterprise_demo_dataset_category"
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "internalMode": "highlight",
+        "internalScope": "self",
+        "externalMode": "filter",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ]
+}
