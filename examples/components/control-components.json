@@ -1,0 +1,468 @@
+{
+  "version": "1.0",
+  "title": "Control Components Showcase",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#176b87",
+    "accentColor": "#6c63ff",
+    "surfaceColor": "#ffffff",
+    "textColor": "#173447",
+    "borderColor": "#cfe3ec",
+    "successColor": "#0f9f88",
+    "warningColor": "#d99020",
+    "dangerColor": "#d95f76",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 10
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 10
+  },
+  "state": {
+    "search": "",
+    "filters": {},
+    "controlView": "compact",
+    "demoToggle": false
+  },
+  "styles": {
+    "globalCss": ".hp-card{position:relative;min-width:0;overflow:hidden;border:1px solid #cfe3ec;background:linear-gradient(145deg,#ffffff 0%,#f8fcfe 68%,#f2f7ff 100%);box-shadow:0 10px 28px rgba(23,107,135,.09),0 2px 7px rgba(49,72,92,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.hp-card:hover{transform:translateY(-2px);border-color:#9bcfdb;box-shadow:0 16px 36px rgba(23,107,135,.14),0 4px 10px rgba(49,72,92,.06)}.hp-card-title{margin-bottom:10px;color:#173447;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.hp-card-subtitle{color:#64808d}.hp-card:focus-within{border-color:#7e77e8;box-shadow:0 0 0 3px rgba(108,99,255,.11),0 16px 36px rgba(23,107,135,.12)}",
+    "components": {
+      "*": {
+        "style": {
+          "minWidth": 0
+        }
+      },
+      "html": {
+        "css": ".control-hero-shell{padding:0;border:0;background:transparent;box-shadow:none;overflow:visible}.control-hero-shell:hover{transform:none;border-color:transparent;box-shadow:none}.control-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;min-height:154px;padding:22px 24px;border:1px solid #badce6;border-radius:16px;background:radial-gradient(circle at 88% 18%,rgba(108,99,255,.17),transparent 24%),radial-gradient(circle at 72% 92%,rgba(37,167,196,.18),transparent 30%),linear-gradient(135deg,#ffffff 0%,#f3fbfd 54%,#f0efff 100%);box-shadow:0 20px 46px rgba(23,107,135,.13)}.control-hero-main{min-width:0}.control-hero-label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:9px;color:#176b87;font-size:10px;font-weight:800;letter-spacing:.13em}.control-hero-dot{width:8px;height:8px;border-radius:999px;background:#25a7c4;box-shadow:0 0 0 5px rgba(37,167,196,.11),0 0 18px rgba(37,167,196,.4)}.control-hero-pill{padding:4px 8px;border:1px solid #cbc7ff;border-radius:999px;background:#f3f2ff;color:#5d55ce}.control-hero h2{margin:0;color:#173447;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.03em}.control-hero p{max-width:760px;margin:8px 0 14px;color:#56717f;font-size:13px;line-height:1.55}.control-hero-tags{display:flex;flex-wrap:wrap;gap:7px}.control-hero-tags span{padding:6px 9px;border:1px solid rgba(173,210,221,.82);border-radius:8px;background:rgba(255,255,255,.75);color:#456473;font-size:10px;font-weight:700}.control-orbit{position:relative;width:104px;height:104px;border:1px solid rgba(108,99,255,.25);border-radius:999px;background:radial-gradient(circle at center,#ffffff 0 22%,rgba(108,99,255,.11) 23% 25%,transparent 26% 43%,rgba(37,167,196,.15) 44% 46%,transparent 47% 100%);box-shadow:0 0 34px rgba(108,99,255,.13),inset 0 0 20px rgba(37,167,196,.08)}.control-orbit-core{position:absolute;inset:36px;display:grid;place-items:center;border:1px solid #d7d3ff;border-radius:999px;background:linear-gradient(145deg,#ffffff,#eeedff);color:#5d55ce;font-size:10px;font-weight:900}.control-orbit-node{position:absolute;top:9px;left:46px;width:11px;height:11px;border-radius:999px;background:linear-gradient(135deg,#25a7c4,#6c63ff);box-shadow:0 0 0 6px rgba(108,99,255,.09),0 0 18px rgba(108,99,255,.34)}@media(max-width:720px){.control-hero{grid-template-columns:1fr;padding:18px}.control-orbit{display:none}.control-hero h2{font-size:19px}}"
+      },
+      "searchBox": {
+        "css": ".control-search{border-top:4px solid #25a7c4;background:radial-gradient(circle at 92% 8%,rgba(37,167,196,.16),transparent 34%),linear-gradient(145deg,#ffffff,#f0fbfd)}.control-search input{min-height:38px;border:1px solid #bddce5;border-radius:9px;background:#ffffff;color:#173447;box-shadow:inset 0 1px 2px rgba(23,52,71,.04)}.control-search input:focus{border-color:#25a7c4;outline:0;box-shadow:0 0 0 3px rgba(37,167,196,.13)}"
+      },
+      "textInput": {
+        "css": ".control-text{border-top:4px solid #6c63ff;background:radial-gradient(circle at 92% 8%,rgba(108,99,255,.14),transparent 34%),linear-gradient(145deg,#ffffff,#f6f5ff)}.control-text input{min-height:38px;border:1px solid #d0cdf6;border-radius:9px;background:#ffffff;color:#173447}.control-text input:focus{border-color:#6c63ff;outline:0;box-shadow:0 0 0 3px rgba(108,99,255,.12)}"
+      },
+      "numberInput": {
+        "css": ".control-number{border-top:4px solid #4f8fce;background:radial-gradient(circle at 92% 8%,rgba(79,143,206,.13),transparent 34%),linear-gradient(145deg,#ffffff,#f3f8fd)}.control-number input{min-height:38px;border:1px solid #c6dbea;border-radius:9px;background:#ffffff;color:#173447;font-weight:700}"
+      },
+      "slider": {
+        "css": ".control-slider{border-top:4px solid #25a7c4;background:radial-gradient(circle at 92% 8%,rgba(37,167,196,.13),transparent 34%),linear-gradient(145deg,#ffffff,#f1fafc)}.control-slider input[type='range']{accent-color:#25a7c4}.control-slider input[type='range']:focus"
+      },
+      "select": {
+        "css": ".control-select{border-top:4px solid #0f9f88;background:radial-gradient(circle at 92% 8%,rgba(15,159,136,.13),transparent 34%),linear-gradient(145deg,#ffffff,#f0fbf8)}.control-select select{min-height:38px;border:1px solid #b9dfd7;border-radius:9px;background:#ffffff;color:#173447;font-weight:700}.control-select select:focus{border-color:#0f9f88;outline:0;box-shadow:0 0 0 3px rgba(15,159,136,.11)}"
+      },
+      "multiSelect": {
+        "css": ".control-multi{border-top:4px solid #6c63ff;background:radial-gradient(circle at 92% 8%,rgba(108,99,255,.14),transparent 34%),linear-gradient(145deg,#ffffff,#f6f5ff)}.control-multi select{min-height:38px;border:1px solid #d0cdf6;border-radius:9px;background:#ffffff;color:#173447}.control-multi option{padding:6px}"
+      },
+      "segmentedControl": {
+        "css": ".control-segmented{border-top:4px solid #25a7c4;background:radial-gradient(circle at 92% 8%,rgba(37,167,196,.14),transparent 34%),linear-gradient(145deg,#ffffff,#f2fbfd)}.control-segmented button{min-height:34px;border-color:#c8e1e8;background:#ffffff;color:#4d6a78;font-weight:750}.control-segmented button[aria-pressed='true']{border-color:#176b87;background:linear-gradient(135deg,#176b87,#25a7c4);color:#ffffff;box-shadow:0 5px 14px rgba(23,107,135,.20)}"
+      },
+      "toggle": {
+        "css": ".control-toggle{border-top:4px solid #0f9f88;background:radial-gradient(circle at 92% 8%,rgba(15,159,136,.13),transparent 34%),linear-gradient(145deg,#ffffff,#f1fbf8)}.control-toggle input{accent-color:#0f9f88}"
+      },
+      "button": {
+        "css": ".control-button{border-top:4px solid #d99020;background:radial-gradient(circle at 92% 8%,rgba(217,144,32,.12),transparent 34%),linear-gradient(145deg,#ffffff,#fff9eb)}.control-button button{min-height:38px;border:1px solid #d7b86e;border-radius:9px;background:linear-gradient(135deg,#d99020,#e9ab48);color:#ffffff;font-weight:800;letter-spacing:.02em;box-shadow:0 7px 16px rgba(217,144,32,.18)}.control-button button:hover{box-shadow:0 10px 22px rgba(217,144,32,.24)}"
+      },
+      "buttonGroup": {
+        "css": ".control-button-group{border-top:4px solid #6c63ff;background:radial-gradient(circle at 92% 8%,rgba(108,99,255,.14),transparent 34%),linear-gradient(145deg,#ffffff,#f6f5ff)}.control-button-group button{min-height:35px;border-color:#d1cef7;background:#ffffff;color:#58518f;font-weight:750}.control-button-group button[aria-pressed='true']{border-color:#6c63ff;background:linear-gradient(135deg,#6c63ff,#837cff);color:#ffffff;box-shadow:0 6px 15px rgba(108,99,255,.20)}"
+      },
+      "filterChips": {
+        "css": ".control-filter-chips{border-left:4px solid #25a7c4;background:radial-gradient(circle at 96% 10%,rgba(37,167,196,.11),transparent 30%),linear-gradient(145deg,#ffffff,#f2fbfd)}.control-filter-chips{flex-wrap:wrap}.control-filter-chips button,.control-filter-chips span{border-radius:999px}"
+      },
+      "dateRange": {
+        "css": ".control-date{border-top:4px solid #4f8fce;background:radial-gradient(circle at 92% 8%,rgba(79,143,206,.13),transparent 34%),linear-gradient(145deg,#ffffff,#f3f8fd)}.control-date input{min-height:38px;border:1px solid #c6dbea;border-radius:9px;background:#ffffff;color:#173447}.control-date input:focus{border-color:#4f8fce;outline:0;box-shadow:0 0 0 3px rgba(79,143,206,.11)}"
+      }
+    }
+  },
+  "calculations": {
+    "fields": [],
+    "metrics": []
+  },
+  "components": [
+    {
+      "type": "html",
+      "id": "control_demo_header",
+      "title": "Control Components Demo",
+      "span": 12,
+      "className": "control-hero-shell",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "trigger": "auto",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "html": "<section class='control-hero'><div class='control-hero-main'><div class='control-hero-label'><span class='control-hero-dot'></span><span>CONTROL COMPONENT CATALOG</span><span class='control-hero-pill'>12 COMPONENTS</span></div><h2>Futuristic Light Control System</h2><p>A complete demonstration of every HyperPBI control component. Category-based controls are connected to the available Power BI field, while numeric, date, toggle, and view controls operate as safe local demonstrations.</p><div class='control-hero-tags'><span>Power BI filters</span><span>Responsive layout</span><span>Scoped CSS</span><span>No JavaScript</span></div></div><div class='control-orbit'><span class='control-orbit-node'></span><span class='control-orbit-core'>CTRL</span></div></section>"
+    },
+    {
+      "type": "searchBox",
+      "id": "control_search_box",
+      "title": "Search Box Component",
+      "span": 6,
+      "className": "control-search",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "filter",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "operator": "contains",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "label": "Search categories",
+      "placeholder": "Search category values...",
+      "defaultValue": "",
+      "filter": {
+        "operator": "contains",
+        "value": ""
+      }
+    },
+    {
+      "type": "textInput",
+      "id": "control_text_input",
+      "title": "Text Input Component",
+      "span": 6,
+      "className": "control-text",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "filter",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "operator": "contains",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "label": "Category contains",
+      "placeholder": "Enter category text...",
+      "defaultValue": "",
+      "filter": {
+        "operator": "contains",
+        "value": ""
+      }
+    },
+    {
+      "type": "numberInput",
+      "id": "control_number_input",
+      "title": "Number Input Component",
+      "span": 4,
+      "className": "control-number",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Demo threshold",
+      "placeholder": "Enter a value",
+      "defaultValue": 25,
+      "min": 0,
+      "max": 100,
+      "step": 5
+    },
+    {
+      "type": "slider",
+      "id": "control_slider",
+      "title": "Slider Component",
+      "span": 4,
+      "className": "control-slider",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Demo score",
+      "placeholder": "Choose a score",
+      "defaultValue": 65,
+      "min": 0,
+      "max": 100,
+      "step": 5
+    },
+    {
+      "type": "toggle",
+      "id": "control_toggle",
+      "title": "Toggle Component",
+      "span": 4,
+      "className": "control-toggle",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Enable focused view",
+      "placeholder": "Toggle focused view",
+      "defaultValue": false
+    },
+    {
+      "type": "select",
+      "id": "control_select",
+      "title": "Select Component",
+      "span": 4,
+      "className": "control-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "filter",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "label": "Select category",
+      "placeholder": "Choose one category",
+      "defaultValue": "",
+      "filter": {
+        "operator": "=",
+        "value": ""
+      }
+    },
+    {
+      "type": "multiSelect",
+      "id": "control_multi_select",
+      "title": "Multi-Select Component",
+      "span": 4,
+      "className": "control-multi",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "filter",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "operator": "in",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "label": "Select categories",
+      "placeholder": "Choose multiple categories",
+      "defaultValue": [],
+      "multiple": true,
+      "filter": {
+        "operator": "in",
+        "value": []
+      }
+    },
+    {
+      "type": "segmentedControl",
+      "id": "control_segmented",
+      "title": "Segmented Control Component",
+      "span": 4,
+      "className": "control-segmented",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "filter",
+        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      },
+      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+      "label": "Quick category selection",
+      "placeholder": "Choose a category",
+      "defaultValue": "",
+      "filter": {
+        "operator": "=",
+        "value": ""
+      }
+    },
+    {
+      "type": "button",
+      "id": "control_reset_button",
+      "title": "Button Component",
+      "span": 3,
+      "className": "control-button",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Reset all filters",
+      "action": "clearFilters",
+      "actionValue": ""
+    },
+    {
+      "type": "buttonGroup",
+      "id": "control_button_group",
+      "title": "Button Group Component",
+      "span": 5,
+      "className": "control-button-group",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Display density",
+      "defaultValue": "compact",
+      "buttons": [
+        {
+          "id": "density_compact",
+          "label": "Compact",
+          "value": "compact"
+        },
+        {
+          "id": "density_balanced",
+          "label": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "id": "density_focus",
+          "label": "Focus",
+          "value": "focus"
+        }
+      ]
+    },
+    {
+      "type": "dateRange",
+      "id": "control_date_range",
+      "title": "Date Range Component",
+      "span": 4,
+      "className": "control-date",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Demo reporting period",
+      "placeholder": "Choose a reporting period",
+      "defaultValue": [
+        "2026-01-01",
+        "2026-12-31"
+      ]
+    },
+    {
+      "type": "filterChips",
+      "id": "control_filter_chips",
+      "title": "Filter Chips Component",
+      "span": 12,
+      "className": "control-filter-chips",
+      "hidden": false,
+      "style": {
+        "display": "flex",
+        "gap": 6,
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ]
+}
