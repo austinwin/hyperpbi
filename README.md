@@ -19,7 +19,7 @@ The specification and runtime config are saved with Power BI persistent visual p
 
 The default **HyperPBI Builder** is a dense guided workflow for normal Power BI users. It asks for dashboard goal, audience, layout pattern, components, and a professional style preset; then provides **Copy AI Prompt**, a large response box, **Validate & Preview**, repair guidance, and a Save action that becomes prominent only after a successful preview. Raw JSON is never required in Simple mode.
 
-**Advanced** remains optional and exposes JSON, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, interaction diagnostics, import/export, formatting, and raw output panels.
+**Advanced** remains optional and exposes JSON, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, interaction diagnostics, formatting, validation, and raw output panels.
 
 The designer/preview divider and bottom diagnostics panel are resizable. Their size, open state, and Simple/Advanced preference are stored in Power BI visual properties. Bottom output is selectable and has a **Copy output** action.
 

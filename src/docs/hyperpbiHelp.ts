@@ -1,10 +1,10 @@
 export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
-HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashboards. In Simple mode, bind Values, choose a goal, audience, layout, components, and preset, copy the AI prompt, paste the response, validate, preview, and save. JSON stays hidden unless Advanced mode is selected.
+HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashboards. The default HyperPBI Builder prioritizes Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return. Optional guided settings for goal, audience, layout, components, style, privacy, and samples are available under Dashboard setup → Customize. JSON stays hidden unless Advanced mode is selected.
 
 ## Guided Builder
 
-The eight steps are goal, audience, layout pattern, components, style preset, Copy AI Prompt, Paste AI Response / Validate & Preview, and Save & return. Save becomes prominent after a successful preview. Advanced mode retains JSON, Runtime Config, Skill, Calculations, Map Services, Field Mapping, diagnostics, and import/export.
+The primary Simple-mode workflow is Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return. Optional guided setup for goal, audience, layout, components, style, privacy, samples, and fields is collapsed under Dashboard setup → Customize. Advanced mode retains JSON, Runtime Config, Skill, Calculations, Map Services, Field Mapping, and diagnostics.
 
 ## Specification and Config
 
