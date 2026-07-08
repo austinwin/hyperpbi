@@ -3,6 +3,7 @@
 HyperPBI is a Deneb-inspired Power BI custom visual that compiles AI-generated JSON into complete enterprise dashboards. It renders layouts, controls, metrics, tables, ECharts charts, Leaflet maps, custom components, sanitized HTML/CSS, safe calculations, and Power BI selections without executing user JavaScript.
 
 The repository includes a responsive, dependency-free [product landing page](index.html) ready for GitHub Pages. It documents the end-user workflow, Studio interface, component catalog, security model, provider modes, global styling, and build commands.
+<img width="1354" height="688" alt="image" src="https://github.com/user-attachments/assets/5a4c707a-f0a8-47a5-8365-f358a57fb000" />
 
 ## Workflow
 
