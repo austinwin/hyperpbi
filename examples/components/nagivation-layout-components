@@ -1,0 +1,1410 @@
+{
+  "version": "1.0",
+  "title": "Atlas Operations",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "fontFamily": "Inter, Segoe UI, Arial, sans-serif",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0f766e",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe4ee",
+    "successColor": "#15803d",
+    "warningColor": "#b45309",
+    "dangerColor": "#be123c",
+    "radius": 10,
+    "cardPadding": 14,
+    "gap": 10
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 10,
+    "leftPanel": {
+      "width": 288,
+      "collapsible": true,
+      "defaultCollapsed": false
+    },
+    "main": {
+      "type": "grid",
+      "columns": 12,
+      "gap": 10
+    }
+  },
+  "state": {
+    "search": "",
+    "activeTab": "overview",
+    "filters": {}
+  },
+  "styles": {
+    "globalCss": ".hyperpbi-root{\n  --app-bg:#f4f7fb;\n  --app-panel:#ffffff;\n  --app-soft:#f8fafc;\n  --app-line:#dbe4ee;\n  --app-line-strong:#c7d3e1;\n  --app-text:#172033;\n  --app-muted:#64748b;\n  --app-primary:#2563eb;\n  --app-primary-soft:#eff6ff;\n  --app-teal:#0f766e;\n  --app-warning:#b45309;\n  width:100%;height:100%;min-width:0;overflow:hidden;\n  background:var(--app-bg);color:var(--app-text);\n  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;\n  font-size:12px;line-height:1.45;\n}\n.hyperpbi-root *{scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}\n.hyperpbi-root *::-webkit-scrollbar{width:8px;height:8px}\n.hyperpbi-root *::-webkit-scrollbar-track{background:transparent}\n.hyperpbi-root *::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background:#cbd5e1;background-clip:padding-box}\n.hyperpbi-root *::-webkit-scrollbar-thumb:hover{background:#94a3b8;background-clip:padding-box}\n.hp-shell{height:100%;min-height:0;background:var(--app-bg)}\n.hp-shell.hp-with-sidebar{grid-template-columns:288px minmax(0,1fr)}\n.hp-sidebar{\n  height:100%;min-height:0;overflow-y:auto;\n  padding:72px 14px 18px;\n  border-right:1px solid var(--app-line);\n  background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);\n  box-shadow:8px 0 24px rgba(15,23,42,.035);\n}\n.hp-main{\n  height:100%;min-height:0;min-width:0;overflow:hidden;padding:0;\n  display:grid;grid-template-columns:minmax(0,1fr) 342px;gap:0;\n  background:var(--app-bg);\n}\n.hp-main>.hp-grid{\n  height:100%;min-height:0;overflow-y:auto;align-content:start;\n  padding:22px 24px 36px;gap:14px;\n}\n.hp-right-panel{\n  height:100%;min-height:0;overflow-y:auto;\n  padding:0 16px 28px;\n  border-left:1px solid var(--app-line);\n  background:#fff;\n  box-shadow:-8px 0 24px rgba(15,23,42,.03);\n}\n.hp-sidebar-toggle{\n  position:absolute;top:16px;left:16px;right:auto;z-index:70;\n  width:38px;height:38px;padding:0;display:grid;place-items:center;\n  border:1px solid var(--app-line-strong);border-radius:10px;\n  background:#fff;color:var(--app-text);font-size:0;\n  box-shadow:0 5px 16px rgba(15,23,42,.10);\n  transition:left .2s ease,background .16s ease,border-color .16s ease,transform .16s ease;\n}\n.hp-sidebar-toggle:hover{border-color:#93b4ec;background:var(--app-primary-soft);transform:translateY(-1px)}\n.hp-sidebar-toggle::before{content:\"☰\";font-size:17px;font-weight:800;color:var(--app-primary);line-height:1}\n.hyperpbi-root:has(.hp-shell.hp-with-sidebar) .hp-sidebar-toggle{left:238px}\n.hyperpbi-root:has(.hp-shell.hp-with-sidebar) .hp-sidebar-toggle::before{content:\"‹\";font-size:26px;font-weight:500}\n.hp-card{border:1px solid var(--app-line);border-radius:12px;background:#fff;box-shadow:0 5px 18px rgba(15,23,42,.045)}\n.hp-card-header{min-height:42px;padding:10px 14px;border-bottom:1px solid #e7edf4}\n.hp-card-header h3,.hp-section-title{font-size:12px;font-weight:700;letter-spacing:0;color:var(--app-text);text-transform:none}\n.hp-card-body{padding:14px}\n.hp-component{min-width:0}\n.hp-main>.hp-grid>.hp-component-html:first-child{grid-column:1/-1}\n.hp-tabs .nav-tabs{gap:4px;border-bottom:1px solid var(--app-line)}\n.hp-tabs .nav-link{margin:0;padding:9px 13px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64748b;font-size:12px;font-weight:650}\n.hp-tabs .nav-link:hover{color:var(--app-text);background:#f8fafc}\n.hp-tabs .nav-link.active{border-bottom-color:var(--app-primary);background:transparent;color:var(--app-primary)}\n.hp-tab-content{padding-top:14px}\n.hp-control{gap:6px;color:#475569;font-size:11px;font-weight:600}\n.hp-control input,.hp-control select{min-height:38px;border-color:var(--app-line-strong);border-radius:9px;background:#fff;color:var(--app-text)}\n.hp-control input:focus,.hp-control select:focus{border-color:#7aa2ed;box-shadow:0 0 0 3px rgba(37,99,235,.10)}\n.hp-button{min-height:36px;border-color:var(--app-line-strong);border-radius:9px;background:#fff;color:#334155;font-weight:650}\n.hp-button:hover{border-color:#93b4ec;background:var(--app-primary-soft);color:var(--app-primary)}\n.hp-metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n.hp-metric{min-height:92px;padding:16px;border:1px solid var(--app-line);border-left:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(15,23,42,.04)}\n.hp-metric::before{content:\"\";display:block;width:32px;height:3px;margin-bottom:13px;border-radius:999px;background:var(--hp-intent,var(--app-primary))}\n.hp-metric-label{margin-bottom:5px;color:#64748b;font-size:10px;font-weight:750;letter-spacing:.07em}\n.hp-metric-value{font-size:26px;font-weight:760;letter-spacing:-.025em}\n.hp-table-wrap{border-color:var(--app-line);border-radius:10px}\n.hp-table thead{top:0}\n.hp-table th{padding:10px 12px;background:#f8fafc;border-color:var(--app-line);color:#475569;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.06em}\n.hp-table td{padding:9px 12px;border-color:#edf1f5;font-size:12px}\n.hp-table tbody tr:hover td{background:#f8fbff}\n.hp-table tbody tr.hp-row-selected td{background:#eff6ff}\n.hp-table tbody tr.hp-row-selected td:first-child{box-shadow:inset 3px 0 0 var(--app-primary)}\n.hp-chips{min-height:0;padding:0;background:transparent;border:0;box-shadow:none}\n.hp-chip{padding:5px 9px;border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:650}\n.hp-collapsible{overflow:hidden;border:1px solid var(--app-line);border-radius:10px;background:#fff;box-shadow:none}\n.hp-collapse-button{padding:10px 11px;color:#334155;font-size:11px;font-weight:700}\n.hp-collapse-button:hover{background:#f8fafc}\n.hp-collapse-content{padding:0 10px 11px}\n.hp-drawer{max-width:100%;border-color:var(--app-line);border-radius:10px;box-shadow:none}\n.hp-drawer>header{min-height:40px;padding:8px 10px;background:#f8fafc}\n.hp-drawer-body{max-height:52vh;padding:10px}\n.hp-stat-list>div{padding:8px 0;border-color:#edf1f5}\n.hp-stat-list dt{color:#64748b}\n.hp-stat-list dd{font-weight:700;color:#334155}\n@container (max-width:1100px){\n  .hp-main{grid-template-columns:minmax(0,1fr) 300px}\n  .hp-main>.hp-grid{padding:18px 18px 30px}\n}\n@container (max-width:900px){\n  .hp-main{display:block;overflow-y:auto}\n  .hp-main>.hp-grid{height:auto;overflow:visible}\n  .hp-right-panel{height:auto;max-height:420px;border-left:0;border-top:1px solid var(--app-line)}\n  .hp-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}\n}\n@container (max-width:720px){\n  .hp-shell{display:block;position:relative}\n  .hp-shell.hp-with-sidebar .hp-sidebar{position:absolute;inset:0 auto 0 0;z-index:60;width:min(86%,288px);box-shadow:18px 0 44px rgba(15,23,42,.18)}\n  .hyperpbi-root:has(.hp-shell.hp-with-sidebar) .hp-sidebar-toggle{left:calc(min(86%,288px) - 50px)}\n  .hp-main>.hp-grid{padding:16px 12px 28px}\n  .hp-metric-grid{grid-template-columns:1fr}\n}",
+    "components": {
+      "*": {
+        "style": {
+          "minWidth": 0
+        }
+      },
+      "html": {
+        "css": ".app-html{border:0;background:transparent;box-shadow:none}\n.app-brand{display:flex;align-items:center;gap:11px;padding:2px 46px 14px 4px;border-bottom:1px solid #e7edf4}\n.app-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(145deg,#2563eb,#1d4ed8);color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;box-shadow:0 7px 16px rgba(37,99,235,.22)}\n.app-brand strong{display:block;color:#172033;font-size:13px;font-weight:760;letter-spacing:-.01em}\n.app-brand span{display:block;margin-top:2px;color:#7a889b;font-size:10px}\n.app-panel-label{margin:12px 4px 5px;color:#94a3b8;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}\n.app-sidebar-note{padding:10px 11px;border:1px solid #dbe4ee;border-radius:10px;background:#fff;color:#64748b;font-size:10px;line-height:1.45}\n.app-sidebar-footer{display:flex;align-items:center;gap:9px;margin-top:10px;padding:10px;border:1px solid #dbe4ee;border-radius:11px;background:#fff}\n.app-sidebar-avatar{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:800}\n.app-sidebar-footer strong{display:block;color:#334155;font-size:11px}.app-sidebar-footer span{display:block;color:#94a3b8;font-size:9px}\n.app-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:4px 2px 2px}\n.app-breadcrumb{margin-bottom:7px;color:#64748b;font-size:10px;font-weight:650}\n.app-page-header h2{margin:0;color:#172033;font-size:25px;font-weight:760;line-height:1.2;letter-spacing:-.025em}\n.app-page-header p{max-width:720px;margin:7px 0 0;color:#64748b;font-size:12px;line-height:1.55}\n.app-header-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}\n.app-meta-pill{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #dbe4ee;border-radius:999px;background:#fff;color:#475569;font-size:10px;font-weight:650;white-space:nowrap}\n.app-meta-dot{width:7px;height:7px;border-radius:999px;background:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.10)}\n.app-inspector-head{position:sticky;top:0;z-index:4;margin:0 -16px 14px;padding:19px 16px 14px;border-bottom:1px solid #e7edf4;background:rgba(255,255,255,.96);backdrop-filter:blur(10px)}\n.app-inspector-head small{display:block;color:#2563eb;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}\n.app-inspector-head h3{margin:5px 0 3px;color:#172033;font-size:16px;font-weight:760}\n.app-inspector-head p{margin:0;color:#64748b;font-size:10px;line-height:1.45}\n.app-empty-state{padding:14px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc;color:#64748b;font-size:10px;text-align:center}\n@container (max-width:720px){.app-page-header{display:block}.app-header-meta{margin-top:12px;justify-content:flex-start}.app-page-header h2{font-size:21px}}"
+      },
+      "button": {
+        "css": ".app-nav-button{margin:2px 0}\n.app-nav-button .hp-button{position:relative;width:100%;min-height:42px;padding:8px 10px 8px 43px;border:1px solid transparent;border-radius:10px;background:transparent;color:#475569;text-align:left;box-shadow:none}\n.app-nav-button .hp-button::before{position:absolute;left:8px;top:7px;display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#eef2f7;color:#64748b;font-size:10px;font-weight:800}\n.app-nav-button .hp-button:hover{border-color:#dbe4ee;background:#fff;color:#172033;box-shadow:0 4px 12px rgba(15,23,42,.04)}\n.nav-command .hp-button::before{content:\"01\"}.nav-registry .hp-button::before{content:\"02\"}.nav-review .hp-button::before{content:\"03\"}\n.app-primary-action .hp-button{border-color:#1d4ed8;background:#2563eb;color:#fff;box-shadow:0 5px 12px rgba(37,99,235,.18)}\n.app-primary-action .hp-button:hover{background:#1d4ed8;color:#fff}\n.app-secondary-action .hp-button{background:#fff}"
+      },
+      "accordion": {
+        "css": ".app-accordion{border:0;background:transparent}.app-accordion .hp-collapse-button{padding:9px 4px}.app-accordion .hp-collapse-content{padding:2px 0 6px}"
+      },
+      "collapsible": {
+        "css": ".app-collapsible{border:0;background:transparent}.app-collapsible .hp-collapse-button{padding:9px 4px}.app-collapsible .hp-collapse-content{padding:2px 0 6px}"
+      },
+      "filterDrawer": {
+        "css": ".app-filter-drawer{margin-top:4px;border-color:#dbe4ee;background:#fff}"
+      },
+      "drawer": {
+        "css": ".app-record-drawer{margin-top:4px;border-color:#dbe4ee;background:#fff}"
+      },
+      "tabs": {
+        "css": ".app-tabs{border:0;background:transparent;box-shadow:none}"
+      },
+      "grid": {
+        "css": ".app-grid{padding:0;border:0;background:transparent;box-shadow:none}"
+      },
+      "flex": {
+        "css": ".app-flex{padding:0;border:0;background:transparent;box-shadow:none}"
+      },
+      "split": {
+        "css": ".app-split{padding:0;border:0;background:transparent;box-shadow:none}"
+      },
+      "section": {
+        "css": ".app-section{padding:0;border:0;background:transparent;box-shadow:none}"
+      },
+      "toolbar": {
+        "css": ".app-inline-toolbar{padding:10px 12px;border:1px solid #dbe4ee;border-radius:11px;background:#fff;box-shadow:0 4px 14px rgba(15,23,42,.035)}"
+      },
+      "spacer": {
+        "css": ".app-spacer{display:block;background:transparent}"
+      },
+      "divider": {
+        "css": ".app-divider{border-color:#e2e8f0}"
+      },
+      "searchBox": {
+        "css": ".app-search{width:100%}"
+      },
+      "select": {
+        "css": ".app-select{width:100%}"
+      },
+      "multiSelect": {
+        "css": ".app-multi{width:100%}.app-multi select{min-height:92px}"
+      },
+      "filterChips": {
+        "css": ".app-chips{min-height:24px}"
+      },
+      "metricGrid": {
+        "css": ".app-metrics{border:0;background:transparent;box-shadow:none}"
+      },
+      "kpi": {
+        "css": ".app-kpi{min-height:104px}.app-kpi .hp-metric-value{font-size:27px}"
+      },
+      "infoCard": {
+        "css": ".app-info{border-color:#dbe4ee;background:#fff}.app-info .hp-info-text{color:#64748b;line-height:1.6}"
+      },
+      "alert": {
+        "css": ".app-alert{border-left:4px solid #d97706;background:#fffbeb}"
+      },
+      "statList": {
+        "css": ".app-stats{border-color:#dbe4ee;background:#fff}"
+      },
+      "detailPanel": {
+        "css": ".app-details{border-color:#dbe4ee;background:#fff}"
+      },
+      "horizontalBarChart": {
+        "css": ".domain-chart{border-color:#dbe4ee;background:#fff}"
+      },
+      "table": {
+        "css": ".domain-table{border-color:#dbe4ee;background:#fff}"
+      },
+      "stepper": {
+        "css": ".app-stepper{border:0;background:transparent;box-shadow:none}.app-stepper>.hp-collapsible{border:0;background:transparent}"
+      }
+    }
+  },
+  "calculations": {
+    "fields": [],
+    "metrics": []
+  },
+  "leftPanel": [
+    {
+      "type": "html",
+      "id": "sidebar_brand",
+      "title": "Atlas Operations",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<div class='app-brand'><div class='app-brand-mark'>AO</div><div><strong>Atlas Operations</strong><span>Enterprise portfolio workspace</span></div></div>"
+    },
+    {
+      "type": "html",
+      "id": "sidebar_workspace_label",
+      "title": "Workspace Navigation",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<div class='app-panel-label'>Workspace</div>"
+    },
+    {
+      "type": "button",
+      "id": "nav_command",
+      "title": "Command Center",
+      "span": 12,
+      "className": "app-nav-button nav-command",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Command Center",
+      "action": "setTab",
+      "actionValue": "overview"
+    },
+    {
+      "type": "button",
+      "id": "nav_registry",
+      "title": "Domain Registry",
+      "span": 12,
+      "className": "app-nav-button nav-registry",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Domain Registry",
+      "action": "setTab",
+      "actionValue": "directory"
+    },
+    {
+      "type": "button",
+      "id": "nav_review",
+      "title": "Review Workflow",
+      "span": 12,
+      "className": "app-nav-button nav-review",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "label": "Review Workflow",
+      "action": "setTab",
+      "actionValue": "review"
+    },
+    {
+      "type": "divider",
+      "id": "sidebar_nav_divider",
+      "title": "Navigation Divider",
+      "span": 12,
+      "className": "app-divider",
+      "hidden": false,
+      "style": {
+        "marginTop": 8,
+        "marginBottom": 5
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "html",
+      "id": "sidebar_filters_label",
+      "title": "Portfolio Controls",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<div class='app-panel-label'>Portfolio controls</div>"
+    },
+    {
+      "type": "accordion",
+      "id": "sidebar_filters",
+      "title": "Filter portfolio",
+      "span": 12,
+      "className": "app-accordion",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "direction": "column",
+      "columns": 12,
+      "gap": 8,
+      "collapsible": true,
+      "defaultOpen": true,
+      "children": [
+        {
+          "type": "searchBox",
+          "id": "sidebar_search",
+          "title": "Search Portfolio",
+          "span": 12,
+          "className": "app-search",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "internalScope": "all",
+            "externalMode": "filter",
+            "field": "hyperpbi_general_enterprise_demo_dataset_category",
+            "operator": "contains",
+            "selectionMode": "replace",
+            "multiSelect": false,
+            "showSelector": false,
+            "clearOnSecondClick": true
+          },
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "label": "Search domains",
+          "placeholder": "Search by domain name...",
+          "defaultValue": "",
+          "targets": [
+            "domain_chart",
+            "domain_table"
+          ]
+        },
+        {
+          "type": "multiSelect",
+          "id": "sidebar_compare",
+          "title": "Domain Scope",
+          "span": 12,
+          "className": "app-multi",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "internalScope": "all",
+            "externalMode": "filter",
+            "field": "hyperpbi_general_enterprise_demo_dataset_category",
+            "operator": "in",
+            "selectionMode": "replace",
+            "multiSelect": true,
+            "showSelector": false,
+            "clearOnSecondClick": true
+          },
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "label": "Domain scope",
+          "placeholder": "Select business domains",
+          "defaultValue": [],
+          "multiple": true,
+          "targets": [
+            "domain_chart",
+            "domain_table"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "collapsible",
+      "id": "sidebar_saved_views",
+      "title": "Saved views",
+      "span": 12,
+      "className": "app-collapsible",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "direction": "column",
+      "columns": 12,
+      "gap": 8,
+      "collapsible": true,
+      "defaultOpen": false,
+      "children": [
+        {
+          "type": "html",
+          "id": "saved_views_note",
+          "title": "Saved Portfolio Views",
+          "span": 12,
+          "className": "app-html",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          },
+          "html": "<div class='app-sidebar-note'>Create focused working views by combining the domain filters above. Applied filters remain synchronized with the analytical workspace.</div>"
+        }
+      ]
+    },
+    {
+      "type": "filterDrawer",
+      "id": "sidebar_filter_drawer",
+      "title": "Advanced filters",
+      "span": 12,
+      "className": "app-filter-drawer",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "position": "left",
+      "width": 300,
+      "openWhen": "always",
+      "stateKey": "advanced_filters_open",
+      "defaultOpen": false,
+      "collapsible": true,
+      "children": [
+        {
+          "type": "select",
+          "id": "drawer_domain_select",
+          "title": "Business Domain",
+          "span": 12,
+          "className": "app-select",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "internalScope": "all",
+            "externalMode": "filter",
+            "field": "hyperpbi_general_enterprise_demo_dataset_category",
+            "operator": "=",
+            "selectionMode": "replace",
+            "multiSelect": false,
+            "showSelector": false,
+            "clearOnSecondClick": true
+          },
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "label": "Business domain",
+          "placeholder": "Choose a domain",
+          "defaultValue": "",
+          "targets": [
+            "domain_chart",
+            "domain_table"
+          ]
+        },
+        {
+          "type": "searchBox",
+          "id": "drawer_keyword_search",
+          "title": "Keyword Search",
+          "span": 12,
+          "className": "app-search",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "internalScope": "all",
+            "externalMode": "filter",
+            "field": "hyperpbi_general_enterprise_demo_dataset_category",
+            "operator": "contains",
+            "selectionMode": "replace",
+            "multiSelect": false,
+            "showSelector": false,
+            "clearOnSecondClick": true
+          },
+          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+          "label": "Keyword",
+          "placeholder": "Enter a keyword...",
+          "defaultValue": "",
+          "targets": [
+            "domain_chart",
+            "domain_table"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "spacer",
+      "id": "sidebar_flex_spacer",
+      "title": "Sidebar Spacer",
+      "span": 12,
+      "className": "app-spacer",
+      "hidden": false,
+      "style": {
+        "height": 12,
+        "minHeight": 12
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "html",
+      "id": "sidebar_user",
+      "title": "Workspace Identity",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<div class='app-sidebar-footer'><div class='app-sidebar-avatar'>OP</div><div><strong>Operations Workspace</strong><span>Connected to Power BI</span></div></div>"
+    }
+  ],
+  "rightPanel": [
+    {
+      "type": "html",
+      "id": "inspector_header",
+      "title": "Record Inspector",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<div class='app-inspector-head'><small>Context panel</small><h3>Record Inspector</h3><p>Select a chart item or registry row to review its current business-domain context.</p></div>"
+    },
+    {
+      "type": "detailPanel",
+      "id": "selected_domain_details",
+      "title": "Selected Domain",
+      "span": 12,
+      "className": "app-details",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "selectedRow": true,
+      "emptyText": "No record selected. Choose a domain from the chart or registry.",
+      "groups": [
+        {
+          "title": "Business Context",
+          "fields": [
+            {
+              "field": "hyperpbi_general_enterprise_demo_dataset_category",
+              "label": "Business domain",
+              "badge": true,
+              "copyable": true,
+              "format": ""
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "label": "Domain",
+          "field": "hyperpbi_general_enterprise_demo_dataset_category"
+        }
+      ]
+    },
+    {
+      "type": "statList",
+      "id": "inspector_context",
+      "title": "Workspace Context",
+      "span": 12,
+      "className": "app-stats",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "items": [
+        {
+          "label": "Workspace",
+          "value": "Portfolio operations"
+        },
+        {
+          "label": "Primary dimension",
+          "value": "Business domain"
+        },
+        {
+          "label": "Selection mode",
+          "value": "Power BI identity"
+        },
+        {
+          "label": "Panel behavior",
+          "value": "Independent scroll"
+        }
+      ]
+    },
+    {
+      "type": "collapsible",
+      "id": "inspector_guidance",
+      "title": "Selection guidance",
+      "span": 12,
+      "className": "app-collapsible",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "direction": "column",
+      "columns": 12,
+      "gap": 8,
+      "collapsible": true,
+      "defaultOpen": false,
+      "children": [
+        {
+          "type": "infoCard",
+          "id": "inspector_guidance_card",
+          "title": "Working with selections",
+          "span": 12,
+          "className": "app-info",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          },
+          "text": "Use the distribution chart for portfolio-level comparison and the registry for exact record selection. The inspector retains context while you move between workspace views.",
+          "intent": "neutral"
+        }
+      ]
+    },
+    {
+      "type": "drawer",
+      "id": "record_drawer",
+      "title": "Expanded record view",
+      "span": 12,
+      "className": "app-record-drawer",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "position": "right",
+      "width": 360,
+      "openWhen": "selectedRow",
+      "stateKey": "record_drawer_open",
+      "defaultOpen": false,
+      "collapsible": true,
+      "children": [
+        {
+          "type": "detailPanel",
+          "id": "drawer_domain_details",
+          "title": "Expanded Domain Context",
+          "span": 12,
+          "className": "app-details",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          },
+          "selectedRow": true,
+          "emptyText": "Select a domain to open the expanded record view.",
+          "groups": [
+            {
+              "title": "Selected Record",
+              "fields": [
+                {
+                  "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                  "label": "Business domain",
+                  "badge": true,
+                  "copyable": true,
+                  "format": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "spacer",
+      "id": "inspector_bottom_space",
+      "title": "Inspector Bottom Space",
+      "span": 12,
+      "className": "app-spacer",
+      "hidden": false,
+      "style": {
+        "height": 28,
+        "minHeight": 28
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ],
+  "components": [
+    {
+      "type": "html",
+      "id": "workspace_header",
+      "title": "Portfolio Operations",
+      "span": 12,
+      "className": "app-html",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "html": "<section class='app-page-header'><div><div class='app-breadcrumb'>Atlas Operations / Enterprise Portfolio</div><h2>Portfolio Operations</h2><p>Monitor business-domain activity, refine the working scope, and inspect records from a coordinated enterprise workspace.</p></div><div class='app-header-meta'><span class='app-meta-pill'><span class='app-meta-dot'></span>Connected</span><span class='app-meta-pill'>{{count}} records</span></div></section>"
+    },
+    {
+      "type": "tabs",
+      "id": "mainTabs",
+      "title": "Workspace Views",
+      "span": 12,
+      "className": "app-tabs",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "tabs": [
+        {
+          "id": "overview",
+          "title": "Command Center",
+          "children": [
+            {
+              "type": "grid",
+              "id": "overview_grid",
+              "title": "Command Center Layout",
+              "span": 12,
+              "className": "app-grid",
+              "hidden": false,
+              "style": {
+                "minWidth": 0
+              },
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              },
+              "direction": "column",
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "toolbar",
+                  "id": "scope_toolbar",
+                  "title": "Current Scope Controls",
+                  "span": 12,
+                  "className": "app-inline-toolbar",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "direction": "row",
+                  "columns": 12,
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "select",
+                      "id": "workspace_domain_select",
+                      "title": "Business Domain",
+                      "span": 5,
+                      "className": "app-select",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": true,
+                        "trigger": "change",
+                        "internalMode": "filter",
+                        "internalScope": "all",
+                        "externalMode": "filter",
+                        "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                        "operator": "=",
+                        "selectionMode": "replace",
+                        "multiSelect": false,
+                        "showSelector": false,
+                        "clearOnSecondClick": true
+                      },
+                      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                      "label": "Current domain scope",
+                      "placeholder": "All business domains",
+                      "defaultValue": "",
+                      "targets": [
+                        "domain_chart",
+                        "domain_table"
+                      ]
+                    },
+                    {
+                      "type": "filterChips",
+                      "id": "workspace_filter_chips",
+                      "title": "Active Scope",
+                      "span": 5,
+                      "className": "app-chips",
+                      "hidden": false,
+                      "style": {
+                        "display": "flex",
+                        "gap": 6,
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": true,
+                        "trigger": "change",
+                        "internalMode": "filter",
+                        "internalScope": "all",
+                        "externalMode": "auto",
+                        "selectionMode": "replace",
+                        "multiSelect": true,
+                        "showSelector": false,
+                        "clearOnSecondClick": true
+                      },
+                      "targets": [
+                        "domain_chart",
+                        "domain_table"
+                      ]
+                    },
+                    {
+                      "type": "button",
+                      "id": "workspace_clear_filters",
+                      "title": "Clear Filters",
+                      "span": 2,
+                      "className": "app-secondary-action",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "trigger": "change",
+                        "internalMode": "none",
+                        "internalScope": "self",
+                        "externalMode": "none",
+                        "selectionMode": "replace",
+                        "multiSelect": false,
+                        "showSelector": false,
+                        "clearOnSecondClick": false
+                      },
+                      "label": "Clear filters",
+                      "action": "clearFilters",
+                      "actionValue": ""
+                    }
+                  ]
+                },
+                {
+                  "type": "metricGrid",
+                  "id": "portfolio_metrics",
+                  "title": "Portfolio Indicators",
+                  "span": 12,
+                  "className": "app-metrics",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "metrics": [
+                    {
+                      "title": "Portfolio Records",
+                      "aggregation": "count",
+                      "format": "integer",
+                      "intent": "primary",
+                      "prefix": "",
+                      "suffix": ""
+                    },
+                    {
+                      "title": "Business Domains",
+                      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                      "aggregation": "distinctCount",
+                      "format": "integer",
+                      "intent": "success",
+                      "prefix": "",
+                      "suffix": ""
+                    },
+                    {
+                      "title": "Records in Scope",
+                      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                      "aggregation": "count",
+                      "format": "integer",
+                      "intent": "warning",
+                      "prefix": "",
+                      "suffix": ""
+                    }
+                  ]
+                },
+                {
+                  "type": "flex",
+                  "id": "executive_summary_strip",
+                  "title": "Executive Summary",
+                  "span": 12,
+                  "className": "app-flex",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "direction": "row",
+                  "columns": 12,
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "kpi",
+                      "id": "scope_record_kpi",
+                      "title": "Current Scope",
+                      "span": 4,
+                      "className": "app-kpi",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      },
+                      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                      "aggregation": "count",
+                      "format": "integer",
+                      "intent": "primary"
+                    },
+                    {
+                      "type": "infoCard",
+                      "id": "portfolio_summary_card",
+                      "title": "Portfolio Summary",
+                      "span": 8,
+                      "className": "app-info",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      },
+                      "text": "Use the business-domain controls to focus the analytical scope. Chart selections and registry selections stay synchronized with Power BI and the record inspector.",
+                      "intent": "neutral"
+                    }
+                  ]
+                },
+                {
+                  "type": "split",
+                  "id": "analysis_workspace",
+                  "title": "Analysis Workspace",
+                  "span": 12,
+                  "className": "app-split",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "direction": "row",
+                  "columns": 12,
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "section",
+                      "id": "distribution_section",
+                      "title": "Portfolio Distribution",
+                      "span": 8,
+                      "className": "app-section",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      },
+                      "direction": "column",
+                      "columns": 12,
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "horizontalBarChart",
+                          "id": "domain_chart",
+                          "title": "Records by Business Domain",
+                          "span": 12,
+                          "className": "domain-chart",
+                          "hidden": false,
+                          "style": {
+                            "minWidth": 0
+                          },
+                          "interaction": {
+                            "enabled": true,
+                            "trigger": "auto",
+                            "internalMode": "highlight",
+                            "internalScope": "self",
+                            "externalMode": "auto",
+                            "selectionMode": "replace",
+                            "multiSelect": true,
+                            "showSelector": false,
+                            "clearOnSecondClick": true
+                          },
+                          "category": "hyperpbi_general_enterprise_demo_dataset_category",
+                          "measure": "hyperpbi_general_enterprise_demo_dataset_category",
+                          "aggregation": "count",
+                          "height": 300,
+                          "maxDataRows": 30000,
+                          "initOptions": {
+                            "renderer": "canvas",
+                            "useDirtyRect": true
+                          },
+                          "setOption": {
+                            "notMerge": false,
+                            "lazyUpdate": true,
+                            "silent": false
+                          },
+                          "options": {
+                            "animation": true,
+                            "tooltip": {
+                              "trigger": "axis",
+                              "formatter": "{b}: {c}"
+                            },
+                            "legend": {
+                              "show": false
+                            },
+                            "grid": {
+                              "left": 20,
+                              "right": 32,
+                              "top": 18,
+                              "bottom": 20,
+                              "containLabel": true
+                            },
+                            "xAxis": {
+                              "axisLine": {
+                                "show": false
+                              },
+                              "splitLine": {
+                                "show": true
+                              }
+                            },
+                            "yAxis": {
+                              "axisLine": {
+                                "show": false
+                              },
+                              "axisTick": {
+                                "show": false
+                              },
+                              "axisLabel": {
+                                "width": 160,
+                                "overflow": "truncate"
+                              }
+                            },
+                            "series": [
+                              {
+                                "type": "bar",
+                                "barMaxWidth": 24,
+                                "label": {
+                                  "show": true,
+                                  "position": "right"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "id": "readiness_section",
+                      "title": "Workspace Readiness",
+                      "span": 4,
+                      "className": "app-section",
+                      "hidden": false,
+                      "style": {
+                        "minWidth": 0
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      },
+                      "direction": "column",
+                      "columns": 12,
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "statList",
+                          "id": "workspace_readiness",
+                          "title": "Environment Status",
+                          "span": 12,
+                          "className": "app-stats",
+                          "hidden": false,
+                          "style": {
+                            "minWidth": 0
+                          },
+                          "interaction": {
+                            "enabled": false,
+                            "internalMode": "none",
+                            "externalMode": "none"
+                          },
+                          "items": [
+                            {
+                              "label": "Data connection",
+                              "value": "Available"
+                            },
+                            {
+                              "label": "Portfolio filters",
+                              "value": "Enabled"
+                            },
+                            {
+                              "label": "External selection",
+                              "value": "Enabled"
+                            },
+                            {
+                              "label": "Record inspector",
+                              "value": "Ready"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "alert",
+                          "id": "selection_notice",
+                          "title": "Selection Behavior",
+                          "span": 12,
+                          "className": "app-alert",
+                          "hidden": false,
+                          "style": {
+                            "minWidth": 0
+                          },
+                          "interaction": {
+                            "enabled": false,
+                            "internalMode": "none",
+                            "externalMode": "none"
+                          },
+                          "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                          "aggregation": "count",
+                          "format": "integer",
+                          "intent": "warning",
+                          "text": "Select a domain to coordinate this workspace with other Power BI visuals.",
+                          "value": "Interactive selection active"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "directory",
+          "title": "Domain Registry",
+          "children": [
+            {
+              "type": "section",
+              "id": "registry_section",
+              "title": "Business Domain Registry",
+              "span": 12,
+              "className": "app-section",
+              "hidden": false,
+              "style": {
+                "minWidth": 0
+              },
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              },
+              "direction": "column",
+              "columns": 12,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "html",
+                  "id": "registry_intro",
+                  "title": "Registry Overview",
+                  "span": 12,
+                  "className": "app-html",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "html": "<div class='app-sidebar-note'>Review the complete domain registry, select exact records, and send the selected identity to other Power BI visuals.</div>"
+                },
+                {
+                  "type": "table",
+                  "id": "domain_table",
+                  "title": "Business Domain Registry",
+                  "span": 12,
+                  "className": "domain-table",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "auto",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": true,
+                    "clearOnSecondClick": true
+                  },
+                  "columns": [
+                    {
+                      "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                      "title": "Business Domain"
+                    }
+                  ],
+                  "pagination": true,
+                  "pageSize": 20,
+                  "search": true,
+                  "resizableColumns": true,
+                  "stickyHeader": true,
+                  "maxRows": 5000
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "review",
+          "title": "Review Workflow",
+          "children": [
+            {
+              "type": "stepper",
+              "id": "review_stepper",
+              "title": "Portfolio Review Workflow",
+              "span": 12,
+              "className": "app-stepper",
+              "hidden": false,
+              "style": {
+                "minWidth": 0
+              },
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              },
+              "direction": "column",
+              "columns": 12,
+              "gap": 10,
+              "defaultOpen": true,
+              "children": [
+                {
+                  "type": "infoCard",
+                  "id": "review_scope_step",
+                  "title": "1. Establish Scope",
+                  "span": 4,
+                  "className": "app-info",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "text": "Choose the business domains that belong in the current review and confirm the resulting portfolio size.",
+                  "intent": "primary"
+                },
+                {
+                  "type": "infoCard",
+                  "id": "review_compare_step",
+                  "title": "2. Compare Distribution",
+                  "span": 4,
+                  "className": "app-info",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "text": "Use the distribution view to identify concentration, imbalance, and records that need closer attention.",
+                  "intent": "success"
+                },
+                {
+                  "type": "infoCard",
+                  "id": "review_inspect_step",
+                  "title": "3. Inspect Records",
+                  "span": 4,
+                  "className": "app-info",
+                  "hidden": false,
+                  "style": {
+                    "minWidth": 0
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  },
+                  "text": "Select exact registry rows to review context in the inspector and coordinate the selection with the Power BI report.",
+                  "intent": "warning"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "workspace_divider",
+      "title": "Workspace Divider",
+      "span": 12,
+      "className": "app-divider",
+      "hidden": false,
+      "style": {
+        "marginTop": 2,
+        "marginBottom": 2
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "spacer",
+      "id": "workspace_bottom_space",
+      "title": "Workspace Bottom Space",
+      "span": 12,
+      "className": "app-spacer",
+      "hidden": false,
+      "style": {
+        "height": 12,
+        "minHeight": 12
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ]
+}
