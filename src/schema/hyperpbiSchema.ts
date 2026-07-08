@@ -1,5 +1,6 @@
 import { CalculationSpecification, ExpressionNode } from "../calculations/calculationTypes";
 import type { EChartsInitOpts, SetOptionOpts } from "echarts/core";
+import type { ComponentInteractionDefinition } from "../interactions/interactionTypes";
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
@@ -37,7 +38,10 @@ export interface ComponentBase {
     data?: Record<string, unknown>;
     visibility?: Record<string, unknown>;
     interactions?: Record<string, SafeInteraction>;
+    interaction?: ComponentInteractionDefinition;
+    /** @deprecated Use interaction.internalMode. */
     internal?: boolean;
+    /** @deprecated Use interaction.externalMode. */
     external?: boolean;
 }
 
@@ -155,7 +159,9 @@ export interface TableComponent extends ComponentBase {
     resizableColumns?: boolean;
     maxRows?: number;
     stickyHeader?: boolean;
+    /** @deprecated Use interaction.showSelector. */
     selectable?: boolean;
+    /** @deprecated Use interaction.internalMode and interaction.internalScope. */
     selectionMode?: "highlight" | "filter";
 }
 

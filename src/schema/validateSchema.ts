@@ -31,6 +31,7 @@ const schemaDefinition = {
                 id: { type: "string", nullable: true, pattern: "^[A-Za-z][A-Za-z0-9_-]{0,99}$" },
                 title: { type: "string", nullable: true, maxLength: 200 },
                 span: { type: "number", nullable: true, minimum: 1, maximum: 12 },
+                interaction: { type:"object", nullable:true, additionalProperties:false, properties:{ enabled:{type:"boolean",nullable:true}, trigger:{type:"string",enum:["auto","click","change"],nullable:true}, internalMode:{type:"string",enum:["none","highlight","filter"],nullable:true}, internalScope:{type:"string",enum:["self","others","all"],nullable:true}, externalMode:{type:"string",enum:["none","auto","selection","filter"],nullable:true}, field:{type:"string",nullable:true}, operator:{type:"string",enum:["=","!=",">",">=","<","<=","contains","in","between"],nullable:true}, value:{}, selectionMode:{type:"string",enum:["replace","toggle","add"],nullable:true}, multiSelect:{type:"boolean",nullable:true}, showSelector:{type:"boolean",nullable:true}, clearOnSecondClick:{type:"boolean",nullable:true} } },
                 children: { type: "array", nullable: true, maxItems: 200, items: { $ref: "#/definitions/component" } },
                 tabs: {
                     type: "array", nullable: true, maxItems: 30,

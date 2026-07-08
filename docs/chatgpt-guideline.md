@@ -10,12 +10,12 @@ Prefer proven recipes and normal components. New high-value types are `drawer`, 
 
 Use one named preset: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, or Map Command Center. Preserve strong hierarchy and compact spacing; avoid rainbow color, excessive gradients, giant empty cards, fixed widths, and overflow.
 
-Keep provider configuration in Runtime Config rather than every map. Do not request automatic geocoding. Normal field-bound controls use Power BI filters; row/data-point clicks use selection identities. For custom slicer-like lists use `repeat.distinctBy`, `selectWhere`, `valueFromRow`, `internal:false`, `external:true`, and `externalMode:"filter"`.
+Keep provider configuration in Runtime Config rather than every map. Do not request automatic geocoding. Every component includes universal `interaction`; auto filters controls and selects row/data-point identities. For custom slicers use `repeat.distinctBy`, `selectWhere`, and `valueFromRow` with component `interaction.internalMode:"none"`, `externalMode:"filter"`, and an explicit field. Never generate deprecated component interaction flags.
 
 Avoid toy gradients, excessive spacing, too many charts, missing IDs, display names in place of field keys, unsupported chart types, and unescaped JSON strings. Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` properties.
 
 Minimal output:
 
 ```json
-{"version":"1.0","title":"Operations","components":[{"type":"metricGrid","id":"summary","metrics":[{"title":"Records","aggregation":"count"}]},{"type":"table","id":"details","columns":["asset_id"],"pagination":true,"span":12}]}
+{"version":"1.0","title":"Operations","components":[{"type":"metricGrid","id":"summary","metrics":[{"title":"Records","aggregation":"count"}],"interaction":{"enabled":false,"internalMode":"none","externalMode":"none"}},{"type":"table","id":"details","columns":["asset_id"],"pagination":true,"span":12,"interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":true,"clearOnSecondClick":true}}]}
 ```

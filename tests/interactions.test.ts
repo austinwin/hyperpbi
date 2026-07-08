@@ -11,9 +11,10 @@ import { SimpleVirtualTable } from "../src/components/tables/TableBlock";
 import { InteractionsPanel } from "../src/editor/InteractionsPanel";
 import { defaultConfig } from "../src/config/hyperpbiConfig";
 import { RenderContext, RenderContextValue } from "../src/render/RenderContext";
-import { initialDashboardState } from "../src/render/stateStore";
+import { dashboardReducer, initialDashboardState } from "../src/render/stateStore";
 import { ContentComponent, HyperPbiSchema, TableComponent } from "../src/schema/hyperpbiSchema";
 import { validateReferences } from "../src/schema/validateReferences";
+import { componentRows } from "../src/interactions/componentInteraction";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
 
 const rows: DataRow[] = [{ leadby: "Pranav", status: "Open" }, { leadby: "Alex", status: "Open" }, { leadby: "Pranav", status: "Closed" }];
@@ -25,10 +26,7 @@ const data: NormalizedData = { rows, fields, aggregates: calculateAggregates(row
 
 function context() {
     const selectExternal = vi.fn(() => ({ sent: true as const })); const clearExternal = vi.fn(() => ({ sent: true as const }));const applyExternalFilter=vi.fn(()=>({sent:true as const,target:{table:"Work",column:"Status"}}));const clearExternalFilter=vi.fn(()=>({sent:true as const})); const reportInteraction = vi.fn();
-    const value: RenderContextValue = { data, rows, sourceRows: rows, schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {
-        if (action.type === "selectRows") value.state.selectedRows = action.rows;
-        if (action.type === "selectComponentRows") value.state.componentSelectedRows[action.id] = action.rows;
-    }, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false };
+    const value: RenderContextValue = { data, rows, sourceRows: rows, getRowsForComponent:()=>rows, componentRows:id=>componentRows(id,value), schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {value.state=dashboardReducer(value.state,action);}, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false };
     return { value, selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction };
 }
 
@@ -50,7 +48,7 @@ describe("safe row-level interactions", () => {
         expect(test.value.state.selectedRows).toEqual([]); expect(test.value.state.componentSelectedRows.leadby_toggle_filter).toEqual([0, 2]);
         render(h(RenderContext.Provider, { value: test.value }, h(CustomComponent, { component })), host);
         const pranav = Array.from(host.querySelectorAll(".hp-custom-repeat-row")).find(element => element.textContent?.includes("Pranav"));
-        expect(pranav?.classList.contains("is-selected")).toBe(true); expect(pranav?.classList.contains("hp-row-selected")).toBe(true);
+        expect(pranav?.classList.contains("is-selected")).toBe(false); expect(pranav?.classList.contains("hp-row-selected")).toBe(false);
     });
     it("supports replace, add, toggle, modifier behavior, and external:false", () => {
         expect(resolveSelection([0], [1], "replace")).toEqual([1]); expect(resolveSelection([0], [1], "add")).toEqual([0, 1]); expect(resolveSelection([0, 1], [1], "toggle")).toEqual([0]); expect(resolveSelection([0], [1], "replace", true)).toEqual([0, 1]);

@@ -37,7 +37,7 @@ ${JSON.stringify(samples, null, 2)}
 
 Every component needs a unique validation-friendly id. Components may use css and slots; custom components may use sanitized html, props, repeat, and predefined interactions only. Use compact enterprise spacing, restrained colors, useful tables/maps, and avoid decorative chart clutter.
 
-Interaction behavior: Runtime Config defaults externalMode to "filter", so every field-backed interactive component—including controls, tables, charts, maps, and timelines—filters other Power BI visuals. Use internal:false for an external-only interaction, external:false to keep a component local, externalMode:"auto" for slicer-filter/data-point-selection behavior, or externalMode:"selection" for row/data-point selection.
+Interaction behavior: every new component must include the universal interaction object. Auto externally filters controls/slicers and selects exact identities for rows, chart points, map features, timeline items, and custom row actions. Internal and external modes are independent. Use internalMode:"none" when the source must stay unchanged. Use externalMode:"filter" only with an explicit unambiguous model-column field. Never emit deprecated internal, external, selectable, or table selectionMode properties.
 
 Required output:
 - Return only one valid JSON object.

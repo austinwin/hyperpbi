@@ -41,11 +41,11 @@ Use calculations.fields and calculations.metrics. Expressions are JSON nodes con
 
 ## Custom components
 
-Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and predefined actions such as selectWhere and clearSelection. Repeated rows are engine-owned keyboard-accessible wrappers. For a safe slicer use repeat.distinctBy and selectWhere with valueFromRow; set internal:false, external:true, and externalMode:"filter" to retain all list values while filtering Power BI.
+Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and safe actions such as selectWhere. Resolved matches pass through the universal interaction engine. For a slicer, use repeat.distinctBy/selectWhere/valueFromRow plus component interaction with internalMode:"none", externalMode:"filter", and an explicit field.
 
 ## Table selection
 
-Selectable tables retain backward-compatible selectionMode filter behavior and expose Show all. Set selectionMode to highlight, or internal:false, to keep all rows visible. A normal click replaces selection; Ctrl/Cmd-click adds or removes rows. Internal HyperPBI filtering does not automatically mean external Power BI selection. External selection requires enabled formatting interactions, host permission, valid table identities, matching source rows, compatible model lineage/relationships, and Power BI Edit interactions configured to filter or highlight the target.
+Every component uses one interaction policy. Table clicks depend on interaction.enabled, not selector visibility. Use internalMode:"highlight" to retain and style rows, internalMode:"filter" with self/others/all scope to filter HyperPBI, and externalMode:"auto" or "selection" for exact Power BI identities. Runtime Config is only the external gate/fallback.
 
 ## Maps
 
@@ -104,11 +104,11 @@ Use a named preset and recipe. advancedChart options must be JSON-only and canno
 
 ## Map and interaction rules
 
-Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Use selectable tables/charts/maps where external Power BI interactions are useful. Internal HyperPBI filters and external Power BI selections are separate. External selection requires table identities, matching source rows, host permission, compatible model lineage/relationships, and Power BI Edit interactions.
+Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Universal interaction auto mode filters controls and selects exact identities for rows, chart points, map features, matrix cells, timelines, and custom row actions.
 
-Selectable tables filter to selected rows by default for compatibility. Use selectionMode "highlight", or internal:false, when the dashboard should retain every row while highlighting selection. For custom slicers use repeat.distinctBy with interactions.onClick action selectWhere, valueFromRow, internal:false, external:true, and externalMode:"filter".
+New components always use interaction. Internal and external modes are independent; scope internal filters with self, others, or all. Never guess table/map/chart filter fields. Legacy internal, external, selectable, and table selectionMode remain supported only for saved dashboards.
 
-Custom slicer interaction shape: {"type":"custom","id":"field_slicer","repeat":{"source":"rows","distinctBy":"field_key","sortBy":"field_key","template":"<span>{{row.field_key}}</span>"},"interactions":{"onClick":{"action":"selectWhere","selectionMode":"replace","internal":false,"external":true,"where":{"op":"=","left":{"field":"field_key"},"right":{"valueFromRow":"field_key"}}}}}.
+Custom slicer interaction shape: {"type":"custom","id":"field_slicer","repeat":{"source":"rows","distinctBy":"field_key","sortBy":"field_key","template":"<span>{{row.field_key}}</span>"},"interaction":{"enabled":true,"trigger":"click","internalMode":"none","internalScope":"self","externalMode":"filter","field":"field_key","operator":"=","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true},"interactions":{"onClick":{"action":"selectWhere","where":{"op":"=","left":{"field":"field_key"},"right":{"valueFromRow":"field_key"}}}}}.
 
 ## Common mistakes
 

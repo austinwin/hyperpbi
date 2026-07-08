@@ -15,7 +15,7 @@ export interface HyperPbiConfig {
 export const defaultConfig: HyperPbiConfig = {
     version: "1.0",
     bindings: { map: {} },
-    interactions: { crossFilter: true, multiSelect: true, externalMode: "filter" },
+    interactions: { crossFilter: true, multiSelect: true, externalMode: "auto" },
     renderer: { showHeader: false, showRowCount: false, showStudioButton: true },
     security: { cssMode: "scoped", htmlMode: "sanitized", showSanitizerWarnings: false },
     providers: defaultProviderConfig

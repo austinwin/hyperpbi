@@ -13,6 +13,8 @@ export interface RenderContextValue {
     data: NormalizedData;
     rows: DataRow[];
     sourceRows: DataRow[];
+    getRowsForComponent: (componentId: string) => DataRow[];
+    componentRows: (componentId: string) => number[];
     schema: HyperPbiSchema;
     settings: RuntimeSettings;
     state: DashboardState;

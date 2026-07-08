@@ -12,15 +12,15 @@ Use safe calculation field/value/operator nodes for logic. Use safe template loo
 
 Prefer compact enterprise layouts, restrained colors, clear hierarchy, useful KPIs, practical controls, limited decision-oriented charts, a detail table, and maps only when location fields exist. Avoid fixed widths and overflow.
 
-Provider settings belong in Runtime Config. Never request silent or automatic geocoding. Internal HyperPBI filters and external Power BI selections are distinct. External selection requires enabled formatting interactions, host permission, source table identities, matching source rows, compatible semantic-model lineage/relationships, and Power BI Edit interactions configured on target visuals.
+Provider settings belong in Runtime Config. Never request silent or automatic geocoding. Every new component must include the universal `interaction` object. Runtime Config is only a global external gate/fallback.
 
-For a custom slicer-like component, use `repeat.distinctBy`, optional `sortBy`/`sortDirection`, and `interactions.onClick` with `action:"selectWhere"`. Compare a normalized `{ "field": "field_key" }` with `{ "valueFromRow": "field_key" }`, and set `internal:false`, `external:true`, `externalMode:"filter"`. This keeps all values visible while applying a Power BI field filter. Use `externalMode:"selection"` only for explicit row/data-point selection. Selection modes are `replace`, `add`, and `toggle`; Ctrl/Cmd-click modifies replace into toggle behavior.
+Use `interaction` to independently set internal `none`/`highlight`/`filter`, internal scope `self`/`others`/`all`, and external `none`/`auto`/`selection`/`filter`. Auto filters controls/slicers and selects exact row/data-point identities. For a custom slicer, retain `repeat.distinctBy` and safe `selectWhere`/`valueFromRow`, then set component `interaction` to `internalMode:"none"`, `externalMode:"filter"`, and an explicit normalized field.
 
 Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.
 
 ## Professional generation standard
 
-Shared properties are `id`, `span`, `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `internal`, and `external`. Use `styles.globalCss` for the visual design system and `styles.components` for reusable `*`, type, and `#id` rules.
+Shared properties are `id`, `span`, `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, safe custom `interactions`, and universal `interaction`. Never generate deprecated component `internal`, `external`, `selectable`, or table `selectionMode`.
 
 Prefer the runtime component catalog: layout, controls, navigation/drawers, displays/timeline/detail, simple charts, table/matrix, map, safe custom HTML/CSS, small multiples, and JSON-only `advancedChart`. Use advanced ECharts only when a simple chart cannot communicate the decision. Never use functions, formatter callbacks, event keys, external URLs, or executable markup in chart options.
 

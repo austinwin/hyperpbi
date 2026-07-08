@@ -90,11 +90,11 @@ OSM attribution is displayed by Leaflet. Nominatim is user-triggered only, seque
 
 ## Power BI interactions
 
-HyperPBI uses Power BI JSON filters and row selections. Runtime Config defaults `interactions.externalMode` to `filter`, so all field-backed interactive components—controls, tables, charts, maps, timelines, and custom actions—filter other visuals by source table/column. Choose `auto` for slicer filters plus data-point selections, or `selection` for row/data-point Selection Manager behavior. See [interactions](docs/interactions.md).
+HyperPBI uses one universal `interaction` policy and engine for every component. Internal `none`/`highlight`/`filter` behavior and external Power BI `none`/`auto`/`selection`/`filter` behavior are independent, with `self`/`others`/`all` internal scope. Auto filters controls/slicers and selects exact identities for rows, points, map features, and items. Runtime Config defaults to `auto` and is only a global external gate/fallback; component policy wins. See [interactions](docs/interactions.md).
 
 HyperPBI requests 30,000-row Power BI windows and uses sequential aggregation-mode `fetchMoreData(true)` while `metadata.segment` indicates more data. Loaded rows and selection identities accumulate, while tables stay paginated and cap rendered rows. Power BI limits still apply: 30,000 rows per window, 1,048,576 total data-view rows, and 100 MB aggregation memory.
 
-Selectable tables retain backward-compatible `selectionMode: "filter"` behavior and expose **Show all**. Normal click replaces the selection; Ctrl/Cmd-click adds or removes rows. Set `selectionMode: "highlight"`, or `internal:false`, to keep all rows visible. External selection can be controlled independently with `external`. Filtering another Power BI visual also requires enabled formatting interactions, host permission, valid table identities, matching source rows, compatible semantic-model lineage/relationships, and enabled Power BI Edit interactions.
+Table row clicks are enabled by `interaction.enabled`; `showSelector` only controls visible selection UI. Use `internalMode:"highlight"` to retain and style rows, or `internalMode:"none"` to leave the source unchanged. Legacy `internal`, `external`, `selectable`, and table `selectionMode` remain normalized for saved dashboards but are deprecated for new specifications.
 
 ## Security
 

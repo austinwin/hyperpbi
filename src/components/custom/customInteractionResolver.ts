@@ -1,12 +1,16 @@
-import { SafeInteraction, SelectionMode } from "../../schema/hyperpbiSchema";
-import { DataRow, Primitive } from "../../data/normalizeData";
 import { evaluateCondition } from "../../calculations/conditionEvaluator";
-import { RenderContextValue } from "../../render/RenderContext";
+import { DataRow, Primitive } from "../../data/normalizeData";
+import { clearComponentInteraction, executeComponentInteraction, resolveInteractionSelection } from "../../interactions/componentInteraction";
+import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { InteractionDetails } from "../../powerbi/interactionDiagnostics";
-import { FilterOperator } from "../../schema/hyperpbiSchema";
+import { RenderContextValue } from "../../render/RenderContext";
+import { ComponentBase, SafeInteraction, SelectionMode } from "../../schema/hyperpbiSchema";
 
 export interface InteractionEventOptions extends InteractionDetails {
     multiSelect?: boolean;
+    event?: Event;
+    component?: ComponentBase;
 }
 
 export interface InteractionExecutionResult {
@@ -16,55 +20,40 @@ export interface InteractionExecutionResult {
     externalFilterSent: boolean;
 }
 
-export function resolveSelection(current: number[], matching: number[], mode: SelectionMode = "replace", modifier = false): number[] {
-    const selected = new Set(current); const matches = Array.from(new Set(matching.filter(Number.isInteger)));
-    const effectiveMode: SelectionMode = modifier && mode === "replace" ? "toggle" : mode;
-    if (effectiveMode === "replace") return matches;
-    if (effectiveMode === "add") { matches.forEach(index => selected.add(index)); return Array.from(selected); }
-    const remove = matches.length > 0 && matches.every(index => selected.has(index));
-    matches.forEach(index => remove ? selected.delete(index) : selected.add(index));
-    return Array.from(selected);
+/** @deprecated Use resolveInteractionSelection from the universal engine. */
+export const resolveSelection = (current:number[],matching:number[],mode:SelectionMode="replace",modifier=false):number[] => resolveInteractionSelection(current,matching,mode,modifier);
+
+function interactionField(interaction: SafeInteraction, options: InteractionEventOptions): string | undefined {
+    if (options.field) return options.field;
+    const where=interaction.where;
+    return where&&"left" in where&&where.left&&typeof where.left==="object"&&"field" in where.left?String(where.left.field):interaction.field;
 }
 
-function interactionDetails(options: InteractionEventOptions, interaction: SafeInteraction, clickedRow?: DataRow): InteractionDetails {
-    const field = options.field ?? (interaction.where && "left" in interaction.where && typeof interaction.where.left === "object" && interaction.where.left && "field" in interaction.where.left ? String(interaction.where.left.field) : undefined);
-    return { componentId: options.componentId, componentType: options.componentType, field, value: options.value ?? (field && clickedRow ? clickedRow[field] : undefined) as Primitive };
+function universalComponent(interaction: SafeInteraction, options: InteractionEventOptions, clickedRow?: DataRow): ComponentBase {
+    const original=options.component??{type:options.componentType??"custom",id:options.componentId??"custom"};
+    const field=interactionField(interaction,options);const value=options.value??(field&&clickedRow?clickedRow[field]:interaction.value) as Primitive;
+    return {...original,interaction:{...original.interaction,enabled:original.interaction?.enabled??true,trigger:"click",internalMode:interaction.internal===false?"none":original.interaction?.internalMode??(interaction.action==="setFilter"?"filter":"highlight"),externalMode:interaction.external===false?"none":interaction.externalMode??original.interaction?.externalMode??(interaction.action==="selectWhere"&&field?"filter":undefined),field:original.interaction?.field??field,value:original.interaction?.value!==undefined?original.interaction.value:value,selectionMode:interaction.selectionMode??original.interaction?.selectionMode}};
 }
 
 export function runSafeInteraction(interaction: SafeInteraction | undefined, context: RenderContextValue, clickedRow?: DataRow, clickedRowSourceIndex?: number, eventOptions: InteractionEventOptions = {}): InteractionExecutionResult {
-    const empty = { matchedRows: [], selectedRows: context.state.selectedRows, externalSelectionSent: false,externalFilterSent:false };
-    if (!interaction) { context.reportInteraction(eventOptions, "component did not call selectExternal"); return empty; }
-    const details = interactionDetails(eventOptions, interaction, clickedRow);
-    const componentId = eventOptions.componentId ?? "custom";
-    if (interaction.action === "clearSelection") {
-        if (interaction.internal !== false) context.dispatch({ type: "selectRows", rows: [] });
-        context.dispatch({ type: "selectComponentRows", id: componentId, rows: [] });
-        const externalMode=interaction.externalMode??(context.config.interactions?.externalMode==="selection"?"selection":details.field?"filter":"selection");const result = interaction.external === false ? (context.reportInteraction(details), { sent: false }) : externalMode==="filter"?context.clearExternalFilter(details):context.clearExternal(details);
-        return { matchedRows: [], selectedRows: [], externalSelectionSent: externalMode==="selection"&&result.sent,externalFilterSent:externalMode==="filter"&&result.sent };
+    const empty={matchedRows:[],selectedRows:context.state.selectedRows,externalSelectionSent:false,externalFilterSent:false};
+    if(!interaction){context.reportInteraction(eventOptions,"interaction payload unavailable");return empty;}
+    const component=universalComponent(interaction,eventOptions,clickedRow);const componentId=component.id??component.type;const policy=resolveInteractionPolicy(component,context.config,"custom");const field=policy.field;
+    if(interaction.action==="clearSelection"){const result=clearComponentInteraction(policy,componentId,context);return{matchedRows:[],selectedRows:[],externalSelectionSent:policy.externalMode==="selection"&&result.externalSent,externalFilterSent:policy.externalMode==="filter"&&result.externalSent};}
+    if(interaction.action==="selectWhere"||interaction.action==="selectRow"||interaction.action==="setFilter"){
+        const matchedRows=interaction.action==="selectWhere"?context.sourceRows.map((row,index)=>evaluateCondition(interaction.where,row,{clickedRow,knownFieldKeys:new Set(Object.keys(context.data.fields))})?index:-1).filter(index=>index>=0):interaction.action==="selectRow"?(Number.isInteger(clickedRowSourceIndex)?[clickedRowSourceIndex as number]:[]):field?context.sourceRows.map((row,index)=>row[field]===policy.value?index:-1).filter(index=>index>=0):[];
+        const values=field?Array.from(new Set(matchedRows.map(index=>context.sourceRows[index]?.[field]))).filter(value=>value!==undefined):[];const value=policy.value!==undefined?policy.value:values.length>1?values:values[0];
+        const result=executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:matchedRows,field,value,operator:interaction.action==="setFilter"?"=":undefined}),context,{trigger:"click",multiSelect:eventOptions.multiSelect,event:eventOptions.event});
+        return{matchedRows,selectedRows:result.selectedRows,externalSelectionSent:policy.externalMode==="selection"&&result.externalSent,externalFilterSent:policy.externalMode==="filter"&&result.externalSent};
     }
-    if (interaction.action === "selectWhere" || interaction.action === "selectRow") {
-        const matchedRows = interaction.action === "selectWhere"
-            ? context.sourceRows.map((row, index) => evaluateCondition(interaction.where, row, { clickedRow, knownFieldKeys: new Set(Object.keys(context.data.fields)) }) ? index : -1).filter(index => index >= 0)
-            : Number.isInteger(clickedRowSourceIndex) ? [clickedRowSourceIndex as number] : Number.isInteger(Number(interaction.value)) ? [Number(interaction.value)] : [];
-        const current = context.state.componentSelectedRows[componentId] ?? (interaction.internal === false ? [] : context.state.selectedRows);
-        const selectedRows = resolveSelection(current, matchedRows, interaction.selectionMode, eventOptions.multiSelect === true);
-        context.dispatch({ type: "selectComponentRows", id: componentId, rows: selectedRows });
-        if (interaction.internal !== false) context.dispatch({ type: "selectRows", rows: selectedRows });
-        if (interaction.external === false) { context.reportInteraction(details, "component did not call selectExternal", selectedRows); return { matchedRows, selectedRows, externalSelectionSent: false,externalFilterSent:false }; }
-        const externalMode=interaction.externalMode??(context.config.interactions?.externalMode==="selection"?"selection":interaction.action==="selectWhere"&&details.field?"filter":"selection");
-        if(externalMode==="filter"&&details.field){const values=Array.from(new Set(selectedRows.map(index=>context.sourceRows[index]?.[details.field as string]).filter(value=>value!==undefined)));const where=interaction.where as Record<string,unknown>|undefined;const candidate=where?.op;const supported=new Set<FilterOperator>(["=","!=",">",">=","<","<=","contains","in","between"]);const baseOperator=typeof candidate==="string"&&supported.has(candidate as FilterOperator)?candidate as FilterOperator:"=";const operator:FilterOperator=values.length>1?"in":baseOperator;const value=values.length>1?values:values[0];const filterDetails={...details,matchedRowCount:matchedRows.length,value};const result=values.length?context.applyExternalFilter(details.field,operator,value,filterDetails):context.clearExternalFilter(filterDetails);return{matchedRows,selectedRows,externalSelectionSent:false,externalFilterSent:result.sent};}
-        const multiSelect = eventOptions.multiSelect === true || interaction.selectionMode === "add" || interaction.selectionMode === "toggle";
-        const result = context.selectExternal(selectedRows, multiSelect, details);
-        return { matchedRows, selectedRows, externalSelectionSent: result.sent,externalFilterSent:false };
-    }
-    if (interaction.action === "setFilter" && interaction.field) { context.dispatch({ type: "filter", filter: { id: `custom-${interaction.field}`, field: interaction.field, operator: "=", value: interaction.value } }); context.reportInteraction(details); return empty; }
-    if (interaction.action === "clearFilter") { context.dispatch({ type: "clearFilters" }); context.reportInteraction(details); return empty; }
-    if (interaction.action === "setState" && interaction.target) { context.dispatch({ type: "value", id: interaction.target, value: interaction.value }); context.reportInteraction(details); return empty; }
-    if (interaction.action === "toggleState" && interaction.target) { context.dispatch({ type: "value", id: interaction.target, value: !context.state.values[interaction.target] }); context.reportInteraction(details); return empty; }
-    if (interaction.action === "openTab" && interaction.target) { context.dispatch({ type: "tab", id: interaction.target, value: String(interaction.value ?? "") }); context.reportInteraction(details); return empty; }
-    if (interaction.action === "toggleCollapse" && interaction.target) { context.dispatch({ type: "collapse", id: interaction.target }); context.reportInteraction(details); return empty; }
-    context.reportInteraction(details, "unsupported interaction action");
-    return empty;
+    if(interaction.action==="clearFilter"){const result=clearComponentInteraction(policy,componentId,context);return{...empty,externalFilterSent:result.externalSent};}
+    if(interaction.action==="setState"&&interaction.target)context.dispatch({type:"value",id:interaction.target,value:interaction.value});
+    else if(interaction.action==="toggleState"&&interaction.target)context.dispatch({type:"value",id:interaction.target,value:!context.state.values[interaction.target]});
+    else if(interaction.action==="openTab"&&interaction.target)context.dispatch({type:"tab",id:interaction.target,value:String(interaction.value??"")});
+    else if(interaction.action==="toggleCollapse"&&interaction.target)context.dispatch({type:"collapse",id:interaction.target});
+    else {context.reportInteraction(eventOptions,"unsupported interaction action");return empty;}
+    const result=executeComponentInteraction(policy,createInteractionPayload(component,{field,value:interaction.value}),context,{trigger:"click",event:eventOptions.event});
+    return{matchedRows:[],selectedRows:result.selectedRows,externalSelectionSent:policy.externalMode==="selection"&&result.externalSent,externalFilterSent:policy.externalMode==="filter"&&result.externalSent};
 }
 
 export const rowsMatching = (rows: DataRow[], interaction?: SafeInteraction, clickedRow?: DataRow, knownFieldKeys: ReadonlySet<string> = new Set()): number[] => interaction?.where ? rows.map((row, index) => evaluateCondition(interaction.where, row, { clickedRow, knownFieldKeys }) ? index : -1).filter(index => index >= 0) : [];

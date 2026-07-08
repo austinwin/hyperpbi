@@ -8,14 +8,15 @@ import { LayerControl } from "./LayerControl";
 import { LeafletMap } from "./LeafletMap";
 import { MapEmptyState } from "./MapEmptyState";
 import { MapLegend } from "./MapLegend";
+import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 
 export function MapBlock({ component }: { component: MapComponent }) {
-    const { data, sourceRows, settings, state } = useRenderContext(); const map = data.map; const layerNames = map.layers.map(layer => layer.name); const layerSignature = layerNames.join("\u0000");
+    const context=useRenderContext();const { data, sourceRows, settings } = context;const id=component.id??"map";const rows=context.getRowsForComponent(id);const map=useMemo(()=>normalizeMapBindings(rows,data.fields,context.config.bindings?.map,context.config.providers?.geocoder?.cacheEntries),[rows,data.fields,context.config.bindings?.map,context.config.providers?.geocoder?.cacheEntries]); const layerNames = map.layers.map(layer => layer.name); const layerSignature = layerNames.join("\u0000");
     const [visibleLayers, setVisibleLayers] = useState<Set<string>>(() => new Set(layerNames));
     useEffect(() => setVisibleLayers(new Set(layerNames)), [layerSignature]);
     const mapStyle = useMemo(() => resolveMapStyle(component, settings.theme.primary, map), [component, settings.theme.primary, map]);
     const sourceIndices=useMemo(()=>new Map(sourceRows.map((row,index)=>[row,index] as const)),[sourceRows]);
-    const selected = map.layers.flatMap(layer => layer.features).find(feature => sourceIndices.get(feature.row) === state.selectedMapFeature);
+    const selectedRows=context.componentRows(id);const selected = map.layers.flatMap(layer => layer.features).find(feature => selectedRows.includes(sourceIndices.get(feature.row)??-1));
     const coordinateSystem = component.settings?.coordinateSystem ?? "EPSG:4326";
     const toggleLayer = (name: string, enabled: boolean) => setVisibleLayers(current => { const next = new Set(current); if (enabled) next.add(name); else next.delete(name); return next; });
     let content;

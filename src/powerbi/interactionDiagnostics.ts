@@ -7,7 +7,9 @@ export type ExternalSelectionFailureReason =
     | "unsupported external filter operator"
     | "host filter failed"
     | "unsupported interaction action"
-    | "component did not call selectExternal";
+    | "component did not call selectExternal"
+    | "external interaction disabled"
+    | "interaction payload unavailable";
 
 export interface InteractionDetails {
     componentId?: string;
@@ -16,6 +18,7 @@ export interface InteractionDetails {
     value?: unknown;
     matchedRowCount?: number;
     filterOperator?: "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
+    externalMode?: "filter" | "selection";
 }
 
 export interface ExternalSelectionResult {

@@ -17,10 +17,11 @@ export interface ComponentMetadata {
     useWhen: string;
     level: "recommended" | "standard" | "advanced";
     capability: ComponentCapability;
+    interaction: { defaultEnabled: boolean; naturalTrigger: "click" | "change"; autoExternalMode: "filter" | "selection" };
 }
 
 const capabilities = (overrides: Partial<ComponentCapability> = {}): ComponentCapability => ({ fields: false, calculations: false, css: true, slots: true, interactions: false, externalSelection: false, customHtml: false, ...overrides });
-const item = (type: string, label: string, category: ComponentCategory, useWhen: string, level: ComponentMetadata["level"] = "standard", override: Partial<ComponentCapability> = {}): ComponentMetadata => ({ type, label, category, useWhen, level, capability: capabilities(override) });
+const item = (type: string, label: string, category: ComponentCategory, useWhen: string, level: ComponentMetadata["level"] = "standard", override: Partial<ComponentCapability> = {}): ComponentMetadata => {const control=category==="Controls";const dataPoint=category==="Charts"||category==="Tables"||category==="Maps"||type==="timeline"||type==="custom";return { type, label, category, useWhen, level, capability: capabilities(override), interaction:{defaultEnabled:control||dataPoint,naturalTrigger:control?"change":"click",autoExternalMode:control?"filter":"selection"} };};
 
 export const componentCatalog: ComponentMetadata[] = [
     item("grid", "Grid", "Layout", "Responsive 12-column dashboard sections", "recommended"), item("flex", "Flex row/column", "Layout", "Compact toolbars and flowing groups"), item("split", "Split layout", "Layout", "Two coordinated content regions"), item("section", "Section", "Layout", "Named content grouping", "recommended"), item("toolbar", "Toolbar", "Layout", "Compact controls above content"), item("leftPanel", "Left panel", "Layout", "Persistent filter rail"), item("rightPanel", "Right panel", "Layout", "Persistent details rail"), item("spacer", "Spacer", "Layout", "Small intentional separation", "advanced"), item("divider", "Divider", "Layout", "Subtle visual separation"),
@@ -38,4 +39,3 @@ export const componentTypeNames = componentCatalog.map(component => component.ty
 export const componentCategories: ComponentCategory[] = ["Layout", "Controls", "Navigation", "Display", "Charts", "Tables", "Maps", "Custom components", "Advanced components"];
 export const componentsByCategory = (category: ComponentCategory): ComponentMetadata[] => componentCatalog.filter(component => component.category === category);
 export const componentPromptReference = (): string => componentCategories.map(category => `${category}: ${componentsByCategory(category).map(component => `${component.type} (${component.useWhen})`).join("; ")}`).join("\n");
-

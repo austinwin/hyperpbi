@@ -9,15 +9,18 @@ import { createTooltipNode, resolveMapTooltip } from "../../maps/mapTooltipResol
 import { createMapPopup } from "./MapPopup";
 import { resolveProviderPolicy } from "../../providers/providerPolicy";
 import { getBasemapProvider } from "../../providers/basemapProviderRegistry";
+import { executeComponentInteraction } from "../../interactions/componentInteraction";
+import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 
-function bindInteractions(layer: L.Layer, feature: NormalizedMapFeature, mapData: NormalizedMapData, component: MapComponent, fields: ReturnType<typeof useRenderContext>["data"]["fields"], select: (rowIndex: number) => void): void {
+function bindInteractions(layer: L.Layer, feature: NormalizedMapFeature, mapData: NormalizedMapData, component: MapComponent, fields: ReturnType<typeof useRenderContext>["data"]["fields"], select: (rowIndex: number,event?:MouseEvent) => void): void {
     layer.bindTooltip(createTooltipNode(resolveMapTooltip(feature, mapData, fields)));
     if (component.popup?.html) layer.bindPopup(createMapPopup(component.popup.html, feature));
-    layer.on("click", () => select(feature.rowIndex));
+    layer.on("click", event => select(feature.rowIndex,(event as L.LeafletMouseEvent).originalEvent));
 }
 
 export function LeafletMap({ component, mapData, visibleLayers }: { component: MapComponent; mapData: NormalizedMapData; visibleLayers: Set<string> }) {
-    const ref = useRef<HTMLDivElement>(null); const { settings, dispatch, data, sourceRows, selectExternal, reportInteraction, config: runtimeConfig, webAccessAvailable } = useRenderContext();
+    const ref = useRef<HTMLDivElement>(null); const context=useRenderContext();const { settings, data, sourceRows, config: runtimeConfig, webAccessAvailable } = context;const id=component.id??"map";const interactionPolicy=resolveInteractionPolicy(component,runtimeConfig,"dataPoint");const selectedRows=context.componentRows(id);
     useEffect(() => {
         if (!ref.current) return;
         const sourceIndices = new Map(sourceRows.map((row,index)=>[row,index] as const));
@@ -30,25 +33,25 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
             const layerGroup = L.featureGroup().addTo(map); const cluster = (config.clusterPoints ?? settings.map.clusterPoints) ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 44 }) : null;
             if (cluster) layerGroup.addLayer(cluster);
             normalizedLayer.features.forEach(feature => {
-                const color = style.colorFor(feature); let layer: L.Layer | null = null;
+                const color = style.colorFor(feature);const sourceIndex=sourceIndices.get(feature.row);const selected=sourceIndex!==undefined&&selectedRows.includes(sourceIndex); let layer: L.Layer | null = null;
                 if (feature.type === "point" && feature.lat !== null && feature.lon !== null) {
-                    layer = L.circleMarker([feature.lat, feature.lon], { radius: style.radiusFor(feature), color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight: 1.5 });
+                    layer = L.circleMarker([feature.lat, feature.lon], { radius: style.radiusFor(feature)+(selected?3:0), color:selected?settings.theme.accent:color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight:selected?4:1.5 });
                     if (cluster) cluster.addLayer(layer); else layerGroup.addLayer(layer);
                     dataBounds.extend([feature.lat, feature.lon]);
                 } else if (feature.geometry) {
                     const geometryLayer = L.geoJSON(feature.geometry, {
-                        style: () => ({ color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight: style.weightFor(feature) }),
+                        style: () => ({ color:selected?settings.theme.accent:color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight: style.weightFor(feature)+(selected?3:0) }),
                         pointToLayer: (_geoFeature, latlng) => L.circleMarker(latlng, { radius: style.radiusFor(feature), color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight: 1.5 })
                     }).addTo(layerGroup);
                     layer = geometryLayer; const geometryBounds = geometryLayer.getBounds(); if (geometryBounds.isValid()) dataBounds.extend(geometryBounds);
                 }
-                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, () => { const sourceIndex = sourceIndices.get(feature.row); const indices=sourceIndex !== undefined ? [sourceIndex] : []; dispatch({ type: "selectMap", index: sourceIndex });const candidates=[mapData.bindings.layer,mapData.bindings.address,mapData.bindings.geometry,mapData.bindings.latitude,mapData.bindings.longitude,mapData.bindings.x,mapData.bindings.y,mapData.bindings.color,mapData.bindings.size,...mapData.bindings.details,...mapData.bindings.tooltip,...Object.keys(data.fields)];const field=candidates.find((key):key is string=>Boolean(key&&data.fields[key]?.sourceTable&&data.fields[key]?.sourceColumn&&data.fields[key]?.type!=="measure"&&feature.row[key]!==undefined)); const details={componentId:component.id,componentType:component.type,field,value:field?feature.row[field]:feature.id,matchedRowCount:indices.length}; if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details); });
+                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, (_rowIndex,event) => { const field=interactionPolicy.field;executeComponentInteraction(interactionPolicy,createInteractionPayload(component,{rowIndices:sourceIndex!==undefined?[sourceIndex]:[],field,value:field?feature.row[field]:undefined}),context,{trigger:"click",multiSelect:Boolean(event?.ctrlKey||event?.metaKey),event}); });
             });
         });
         if ((config.fitBounds ?? true) && dataBounds.isValid()) map.fitBounds(dataBounds.pad(.08), { maxZoom: 14 });
         const observer = new ResizeObserver(() => map.invalidateSize()); observer.observe(ref.current);
         return () => { observer.disconnect(); map.remove(); };
-    }, [mapData, component, settings.map, settings.theme.primary, visibleLayers, sourceRows, selectExternal, reportInteraction, runtimeConfig.providers,webAccessAvailable]);
+    }, [mapData, component, settings.map, settings.theme.primary, settings.theme.accent, visibleLayers, sourceRows, selectedRows.join("|"), runtimeConfig.providers,webAccessAvailable]);
     const external = resolveProviderPolicy(runtimeConfig.providers,webAccessAvailable).tilesAllowed;
     return <div ref={ref} class={`hp-map-canvas ${external ? "hp-map-tiled" : "hp-map-neutral"}`} style={{ height: `${component.height ?? 320}px` }} />;
 }

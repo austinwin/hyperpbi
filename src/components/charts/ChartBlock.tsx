@@ -9,9 +9,13 @@ import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 import { EChartRenderer } from "./EChartRenderer";
 import { mergeSafeEChartOptions } from "./safeEChartOptions";
+import { executeComponentInteraction } from "../../interactions/componentInteraction";
+import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 
 export function ChartBlock({ component }: { component: ChartComponent }) {
-    const { rows, sourceRows, data, settings, selectExternal, reportInteraction } = useRenderContext();
+    const context=useRenderContext();const { sourceRows, data, settings, getRowsForComponent, componentRows } = context;
+    const id=component.id??component.type;const rows=getRowsForComponent(id);const policy=resolveInteractionPolicy(component,context.config);const selectedRows=componentRows(id);
     const missing = [component.category, component.measure, component.x, component.y].filter((field): field is string => Boolean(field && !data.fields[field]));
     const sourceIndices = useMemo(() => new Map(sourceRows.map((row,index)=>[row,index] as const)), [sourceRows]);
     const grouped = useMemo(() => component.category ? groupAndAggregate(rows, component.category, component.measure, component.aggregation ?? "sum") : [], [rows, component.category, component.measure, component.aggregation]);
@@ -26,13 +30,13 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         const seriesType = component.type === "lineChart" || component.type === "areaChart" ? "line" : "bar";
         return mergeSafeEChartOptions({ ...base, xAxis: horizontal ? { type: "value" } : { type: "category", data: grouped.map(item => item.key), axisLabel: { hideOverlap: true } }, yAxis: horizontal ? { type: "category", data: grouped.map(item => item.key), axisLabel: { hideOverlap: true } } : { type: "value" }, series: [{ type: seriesType, data: grouped.map(item => item.value), areaStyle: component.type === "areaChart" ? {} : undefined, smooth: component.type === "lineChart" || component.type === "areaChart", itemStyle: { color: settings.theme.primary } }] }, component.options).option;
     }, [rows, component, settings.theme]);
-    const selectData = (dataIndex: number) => {
-        if (component.type === "scatterChart" || component.type === "advancedChart" && !component.category) { const row = rows[dataIndex]; const index = sourceIndices.get(row); const indices=index !== undefined ? [index] : [];const field=[component.x,component.y,...Object.keys(data.fields)].find(key=>Boolean(key&&data.fields[key]?.type!=="measure"&&data.fields[key]?.type!=="schema"&&data.fields[key]?.sourceTable&&data.fields[key]?.sourceColumn&&row?.[key]!==undefined)); const details={componentId:component.id,componentType:component.type,field,value:field?row?.[field]:undefined,matchedRowCount:indices.length}; if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details); return; }
-        if(component.type==="gauge"){const field=component.measure;const value=aggregateValue(rows,field,component.aggregation??"avg");const indices=rows.map(row=>sourceIndices.get(row)).filter((index):index is number=>index!==undefined);const details={componentId:component.id,componentType:component.type,field,value,matchedRowCount:indices.length};if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details);return;}
+    const selectData = (dataIndex: number,modifiers:{multiSelect:boolean;event?:Event}) => {
+        if (component.type === "scatterChart" || component.type === "advancedChart" && !component.category) { const row = rows[dataIndex]; const index = sourceIndices.get(row); const field=policy.field;executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:index!==undefined?[index]:[],field,value:field?row?.[field]:undefined}),context,{trigger:"click",...modifiers});return; }
+        if(component.type==="gauge"){if(!policy.explicit||!policy.enabled)return;const field=policy.field??component.measure;const value=policy.value!==undefined?policy.value:aggregateValue(rows,field,component.aggregation??"avg");const indices=rows.map(row=>sourceIndices.get(row)).filter((index):index is number=>index!==undefined);executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:indices,field,value}),context,{trigger:"click",...modifiers});return;}
         const group = grouped[dataIndex]; if (!group || !component.category) return;
         const indices=rows.reduce<number[]>((matches,row)=>{const index=sourceIndices.get(row);if(String(row[component.category!]??"(Blank)")===group.key&&index!==undefined)matches.push(index);return matches;},[]);
-        const details={componentId:component.id,componentType:component.type,field:component.category,value:group.key,matchedRowCount:indices.length};
-        if(component.external===false)reportInteraction(details,"component did not call selectExternal",indices);else selectExternal(indices,false,details);
+        executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:indices,field:component.category,value:group.key}),context,{trigger:"click",...modifiers});
     };
-    return <Card title={component.title}>{missing.length ? <EmptyState title="Chart fields are unavailable">Valid fields: {Object.keys(data.fields).join(", ")}</EmptyState> : rows.length ? <EChartRenderer option={option} height={component.height} initOptions={component.initOptions} setOptionOptions={component.setOption} onDataIndex={selectData} /> : <EmptyState title="No data for this chart" />}</Card>;
+    const selectedDataIndices=component.category?grouped.map((group,index)=>rows.some(row=>selectedRows.includes(sourceIndices.get(row)??-1)&&String(row[component.category!]??"(Blank)")===group.key)?index:-1).filter(index=>index>=0):rows.map((row,index)=>selectedRows.includes(sourceIndices.get(row)??-1)?index:-1).filter(index=>index>=0);
+    return <Card title={component.title}>{missing.length ? <EmptyState title="Chart fields are unavailable">Valid fields: {Object.keys(data.fields).join(", ")}</EmptyState> : rows.length ? <EChartRenderer option={option} height={component.height} initOptions={component.initOptions} setOptionOptions={component.setOption} selectedDataIndices={selectedDataIndices} onDataIndex={selectData} /> : <EmptyState title="No data for this chart" />}</Card>;
 }

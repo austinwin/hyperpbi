@@ -6,26 +6,26 @@ Runtime Config owns renderer and security behavior. Defaults are `renderer: { "s
 
 `styles.globalCss` is application-wide CSS scoped to the visual. `styles.components` provides defaults using `*`, a type such as `kpi`, or an id such as `#critical_kpi`. Rules support `className`, sanitized `style`, and component-scoped `css`. Local component values win.
 
-Shared component fields: `type`, `id`, `title`, `span` (1–12), `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, and `interactions`.
+Shared component fields: `type`, `id`, `title`, `span` (1–12), `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, safe custom `interactions`, and universal `interaction`.
 
 ## Fields
 
 JSON field references must use the normalized `key`, preferably a stable qualified key such as `workorders_status`. The field dictionary includes `key`, `displayName`, `queryName`, `sourceTable`, `sourceColumn`, `qualifiedName`, `type`, `format`, and `roles`. `displayName` is for visible labels only. Power BI `queryName` is parsed from forms including `Table.Column`, `'Table Name'.Column`, and `Table[Column]`; table and column are slugged separately. Numeric suffixes are only a final collision fallback.
 
-## Selection
+## Universal interaction
 
-Interactive components support `internal` and `external` booleans where applicable. Field-backed controls, tables, charts, maps, timelines, and custom actions externally filter by default; `internal:false` makes an interaction Power BI-only and `external:false` keeps it local. Tables support `selectionMode: "filter" | "highlight"`. Safe custom interactions support `selectionMode: "replace" | "add" | "toggle"` and `externalMode:"filter" | "selection"`. Custom row matching supports `{ "valueFromRow": "field_key" }`, which can only read a known normalized field from the clicked repeat row.
+`interaction` supports `enabled`, `trigger`, `internalMode`, `internalScope`, `externalMode`, `field`, `operator`, `value`, `selectionMode`, `multiSelect`, `showSelector`, and `clearOnSecondClick`. Internal and external behavior are independent. Internal modes are `none`, `highlight`, and `filter`; scope is `self`, `others`, or `all`. External modes are `none`, `auto`, `selection`, and `filter`. Auto means change/filter for controls and click/selection for data points. See [interactions](interactions.md) for family examples and migration rules.
 
 Custom `repeat` supports `source`, `as`, `limit`, `template`, `distinctBy`, `sortBy`, and `sortDirection`. Repeated content is sanitized HTML inside engine-owned accessible wrappers. Selected wrappers receive `is-selected` and `hp-row-selected`.
 
-Internal HyperPBI filtering, Power BI JSON filters, and Power BI selection are separate. Runtime Config defaults all field-backed interactive components to `general.filter`. Set `externalMode:"auto"` for slicer-filter/data-point-selection behavior or `"selection"` for explicit row/data-point selection. A field without `sourceTable` and `sourceColumn` cannot be an external filter target.
+Custom `repeat` actions resolve matches and pass a universal payload to the shared engine. A field without `sourceTable` and `sourceColumn` cannot be an external filter target. Table, matrix, map, scatter, and advanced-chart filters require explicit unambiguous fields; identity selection does not.
 
 ## Runtime Config GUI and JSON
 
 The Runtime Config tab provides GUI sections for renderer, interactions, security, providers, geocoder, and map bindings. GUI changes immediately normalize and update saved JSON. Advanced JSON is a separate draft: edit it, validate or format it, then select **Apply JSON** to update the GUI. Invalid JSON never mutates the applied form.
 
 ```json
-{"version":"1.0","renderer":{"showHeader":false,"showRowCount":false,"showStudioButton":true},"interactions":{"crossFilter":true,"multiSelect":true,"externalMode":"filter"},"security":{"cssMode":"scoped","htmlMode":"sanitized","showSanitizerWarnings":false}}
+{"version":"1.0","renderer":{"showHeader":false,"showRowCount":false,"showStudioButton":true},"interactions":{"crossFilter":true,"multiSelect":true,"externalMode":"auto"},"security":{"cssMode":"scoped","htmlMode":"sanitized","showSanitizerWarnings":false}}
 ```
 
 Types: `grid`, `flex`, `split`, `leftPanel`, `rightPanel`, `toolbar`, `section`, `spacer`, `divider`, `searchBox`, `textInput`, `numberInput`, `slider`, `select`, `multiSelect`, `toggle`, `button`, `buttonGroup`, `filterChips`, `dateRange`, `tabs`, `collapsible`, `accordion`, `kpi`, `metricGrid`, `infoCard`, `statusBadge`, `progressBar`, `alert`, `statList`, `detailPanel`, `barChart`, `horizontalBarChart`, `lineChart`, `areaChart`, `pieChart`, `donutChart`, `scatterChart`, `gauge`, `heatmap`, `table`, `map`, `html`, `text`, `markdown`, and `custom`.
@@ -52,7 +52,7 @@ The data-reduction window requests up to 30,000 rows per segment, the Power BI w
 
 - `drawer`: `position`, `width`, `openWhen`, `stateKey`, `defaultOpen`, and `children`.
 - `filterDrawer`: drawer behavior plus applied-filter count and clear filters.
-- `segmentedControl`: `field` or static `options`, internal filtering, optional `external:true`, and selected pills.
+- `segmentedControl`: `field` or static `options`, universal change payloads, optional internal filtering, and selected pills.
 - `timeline`: `dateField`, `titleField`, optional category/status/description fields, sort direction, and limit.
 - `matrix`: `rows`, optional `columns`, `values`, totals, heatmap, and row limit.
 - `smallMultiples`: `splitField`, child `chart`, max panels, shared-scale intent, and height.

@@ -44,10 +44,11 @@ interface EChartRendererProps {
     height?: number;
     initOptions?: EChartsInitOpts;
     setOptionOptions?: SetOptionOpts;
-    onDataIndex?: (dataIndex: number) => void;
+    selectedDataIndices?: number[];
+    onDataIndex?: (dataIndex: number, modifiers: { multiSelect: boolean; event?: Event }) => void;
 }
 
-export function EChartRenderer({ option, height = 260, initOptions, setOptionOptions, onDataIndex }: EChartRendererProps) {
+export function EChartRenderer({ option, height = 260, initOptions, setOptionOptions, selectedDataIndices = [], onDataIndex }: EChartRendererProps) {
     const ref = useRef<HTMLDivElement>(null);
     const chartRef = useRef<EChartsType | null>(null);
     const clickRef = useRef(onDataIndex);
@@ -56,11 +57,12 @@ export function EChartRenderer({ option, height = 260, initOptions, setOptionOpt
         if (!ref.current) return;
         const chart = echarts.init(ref.current, undefined, { renderer: "canvas", ...initOptions });
         chartRef.current = chart;
-        chart.on("click", params => { const index = Number(params.dataIndex); if (Number.isInteger(index)) clickRef.current?.(index); });
+        chart.on("click", params => { const index=Number(params.dataIndex);const nativeEvent=(params.event as unknown as {event?:Event&{ctrlKey?:boolean;metaKey?:boolean}}|undefined)?.event;if(Number.isInteger(index))clickRef.current?.(index,{multiSelect:Boolean(nativeEvent?.ctrlKey||nativeEvent?.metaKey),event:nativeEvent}); });
         const observer = new ResizeObserver(() => chart.resize());
         observer.observe(ref.current);
         return () => { observer.disconnect(); chartRef.current = null; chart.dispose(); };
     }, [initOptions]);
     useEffect(() => { chartRef.current?.setOption(option, setOptionOptions); }, [option, setOptionOptions]);
+    useEffect(() => { const chart=chartRef.current;if(!chart)return;chart.dispatchAction({type:"downplay"});selectedDataIndices.forEach(dataIndex=>chart.dispatchAction({type:"highlight",dataIndex})); }, [selectedDataIndices.join("|")]);
     return <div ref={ref} class="hp-chart-canvas" style={{ height: `${height}px` }} />;
 }
