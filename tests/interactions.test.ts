@@ -22,11 +22,11 @@ const fields: NormalizedData["fields"] = {
     leadby: { key: "leadby", displayName: "LeadBy", type: "dimension", roles: ["values"] },
     status: { key: "status", displayName: "Status", type: "dimension", roles: ["values"] }
 };
-const data: NormalizedData = { rows, fields, aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields) };
+const data: NormalizedData = { rows, rowKeys: rows.map((_, i) => `row-${i}`), fields, aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields, undefined, undefined, rows.map((_, i) => `row-${i}`)) };
 
 function context() {
     const selectExternal = vi.fn(() => ({ sent: true as const })); const clearExternal = vi.fn(() => ({ sent: true as const }));const applyExternalFilter=vi.fn(()=>({sent:true as const,target:{table:"Work",column:"Status"}}));const clearExternalFilter=vi.fn(()=>({sent:true as const})); const reportInteraction = vi.fn();
-    const value: RenderContextValue = { data, rows, sourceRows: rows, getRowsForComponent:()=>rows, componentRows:id=>componentRows(id,value), schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {value.state=dashboardReducer(value.state,action);}, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false };
+    const value: RenderContextValue = { data, rows: rows, sourceRows: rows, sourceRowKeys: data.rowKeys, getRowsForComponent:()=>rows, componentRows:id=>componentRows(id,value), schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {value.state=dashboardReducer(value.state,action);}, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false };
     return { value, selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction };
 }
 
@@ -34,7 +34,7 @@ afterEach(() => { document.body.replaceChildren(); });
 
 describe("safe row-level interactions", () => {
     it("prepares distinct, sorted repeat rows with source indices", () => {
-        const prepared = prepareCustomRepeatRows(rows, rows, { source: "rows", template: "", distinctBy: "leadby", sortBy: "leadby", sortDirection: "asc", limit: 200 });
+        const prepared = prepareCustomRepeatRows(rows, rows, data.rowKeys, { source: "rows", template: "", distinctBy: "leadby", sortBy: "leadby", sortDirection: "asc", limit: 200 });
         expect(prepared.map(item => [item.row.leadby, item.sourceIndex])).toEqual([["Alex", 1], ["Pranav", 0]]);
     });
     it("renders individual sanitized clickable rows and resolves valueFromRow", () => {

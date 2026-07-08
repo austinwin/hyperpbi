@@ -10,5 +10,23 @@ export function applyCalculations(data: NormalizedData, specification?: Calculat
     const validation = validateCalculations(specification, Object.keys(data.fields)); const errors = validation.filter(item => item.level === "error").map(item => `${item.path}: ${item.message}`);
     if (errors.length || !specification) return { data, errors, warnings: [] };
     const derived = applyDerivedFields(data.rows, data.fields, specification.fields);
-    return { data: { ...data, rows: derived.rows, fields: derived.fields, aggregates: calculateAggregates(derived.rows), calculatedMetrics: calculateDerivedMetrics(derived.rows, specification.metrics), map: normalizeMapBindings(derived.rows, derived.fields) }, errors: [], warnings: derived.warnings };
+    return {
+        data: {
+            ...data,
+            rows: derived.rows,
+            rowKeys: data.rowKeys,
+            fields: derived.fields,
+            aggregates: calculateAggregates(derived.rows),
+            calculatedMetrics: calculateDerivedMetrics(derived.rows, specification.metrics),
+            map: normalizeMapBindings(
+                derived.rows,
+                derived.fields,
+                undefined,
+                undefined,
+                data.rowKeys
+            )
+        },
+        errors: [],
+        warnings: derived.warnings
+    };
 }

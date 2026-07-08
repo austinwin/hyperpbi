@@ -22,7 +22,7 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
         setValue(next);
         dispatch({ type: "value", id, value: next });
         const rowIndices = interactionField ? resolveSourceRowIndicesForFilter(interactionField, operator, next, sourceRows, rows) : [];
-        executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices, field: interactionField, value: next, operator }), context, { trigger: policy.trigger, multiSelect: multiple, event });
+        executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }), context, { trigger: policy.trigger, multiSelect: multiple, event });
     };
 
     useEffect(() => { setValue(state.values[id] ?? initial); }, [state.values[id]]);

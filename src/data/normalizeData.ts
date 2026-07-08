@@ -37,6 +37,7 @@ export interface MapBindingKeys {
 export interface NormalizedMapFeature {
     id: string;
     rowIndex: number;
+    rowKey: string;
     type: MapFeatureType;
     geometry: GeoJSON.GeoJsonObject | null;
     lat: number | null;
@@ -77,6 +78,7 @@ export interface Aggregates {
 export interface NormalizedData {
     fields: Record<string, NormalizedField>;
     rows: DataRow[];
+    rowKeys: string[];
     aggregates: Aggregates;
     map: NormalizedMapData;
     schemaFromField?: string;

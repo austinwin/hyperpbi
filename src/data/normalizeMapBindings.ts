@@ -11,7 +11,7 @@ function propertiesFor(row: DataRow, fields: Record<string, NormalizedField>): R
     return properties;
 }
 
-export function normalizeMapBindings(rows: DataRow[], fields: Record<string, NormalizedField>, overrides?: Partial<MapBindingKeys>, geocodeCache: Record<string, GeocodeCacheEntry> = {}): NormalizedMapData {
+export function normalizeMapBindings(rows: DataRow[], fields: Record<string, NormalizedField>, overrides?: Partial<MapBindingKeys>, geocodeCache: Record<string, GeocodeCacheEntry> = {}, rowKeys: string[] = []): NormalizedMapData {
     const bindings = resolveMapBindings(fields, overrides); const mode = resolveMapMode(bindings); const grouped = new Map<string, NormalizedMapFeature[]>(); let invalidFeatureCount = 0; let unsupportedTypeCount = 0;
     rows.forEach((row, rowIndex) => {
         let location = resolveMapLocation(row, bindings, mode);
@@ -22,8 +22,11 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
         const typeOverride = bindings.type ? String(row[bindings.type] ?? "").trim().toLowerCase() : "";
         const resolvedType = location.type === "geometry" && ["point", "line", "polygon"].includes(typeOverride) ? typeOverride as NormalizedMapFeature["type"] : location.type;
         if ((mode === "latLon" || mode === "xy") && typeOverride && typeOverride !== "point") unsupportedTypeCount += 1;
+        const rowKey =
+            rowKeys[rowIndex] ??
+            `fallback-map-row:${rowIndex}`;
         const feature: NormalizedMapFeature = {
-            id: `row-${rowIndex + 1}`, rowIndex, ...location,
+            id: rowKey, rowIndex, rowKey, ...location,
             type: resolvedType,
             colorValue: bindings.color ? row[bindings.color] : null,
             sizeValue: Number.isFinite(size) ? size : null,

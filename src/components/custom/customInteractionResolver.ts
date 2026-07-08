@@ -43,7 +43,7 @@ export function runSafeInteraction(interaction: SafeInteraction | undefined, con
     if(interaction.action==="selectWhere"||interaction.action==="selectRow"||interaction.action==="setFilter"){
         const matchedRows=interaction.action==="selectWhere"?context.sourceRows.map((row,index)=>evaluateCondition(interaction.where,row,{clickedRow,knownFieldKeys:new Set(Object.keys(context.data.fields))})?index:-1).filter(index=>index>=0):interaction.action==="selectRow"?(Number.isInteger(clickedRowSourceIndex)?[clickedRowSourceIndex as number]:[]):field?context.sourceRows.map((row,index)=>row[field]===policy.value?index:-1).filter(index=>index>=0):[];
         const values=field?Array.from(new Set(matchedRows.map(index=>context.sourceRows[index]?.[field]))).filter(value=>value!==undefined):[];const value=policy.value!==undefined?policy.value:values.length>1?values:values[0];
-        const result=executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:matchedRows,field,value,operator:interaction.action==="setFilter"?"=":undefined}),context,{trigger:"click",multiSelect:eventOptions.multiSelect,event:eventOptions.event});
+        const result=executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:matchedRows,sourceRowKeys:context.sourceRowKeys,field,value,operator:interaction.action==="setFilter"?"=":undefined}),context,{trigger:"click",multiSelect:eventOptions.multiSelect,event:eventOptions.event});
         return{matchedRows,selectedRows:result.selectedRows,externalSelectionSent:policy.externalMode==="selection"&&result.externalSent,externalFilterSent:policy.externalMode==="filter"&&result.externalSent};
     }
     if(interaction.action==="clearFilter"){const result=clearComponentInteraction(policy,componentId,context);return{...empty,externalFilterSent:result.externalSent};}
@@ -52,7 +52,7 @@ export function runSafeInteraction(interaction: SafeInteraction | undefined, con
     else if(interaction.action==="openTab"&&interaction.target)context.dispatch({type:"tab",id:interaction.target,value:String(interaction.value??"")});
     else if(interaction.action==="toggleCollapse"&&interaction.target)context.dispatch({type:"collapse",id:interaction.target});
     else {context.reportInteraction(eventOptions,"unsupported interaction action");return empty;}
-    const result=executeComponentInteraction(policy,createInteractionPayload(component,{field,value:interaction.value}),context,{trigger:"click",event:eventOptions.event});
+    const result=executeComponentInteraction(policy,createInteractionPayload(component,{field,value:interaction.value,sourceRowKeys:context.sourceRowKeys}),context,{trigger:"click",event:eventOptions.event});
     return{matchedRows:[],selectedRows:result.selectedRows,externalSelectionSent:policy.externalMode==="selection"&&result.externalSent,externalFilterSent:policy.externalMode==="filter"&&result.externalSent};
 }
 

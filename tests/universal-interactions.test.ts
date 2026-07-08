@@ -17,13 +17,13 @@ import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/setting
 
 const rows:DataRow[]=[{status:"Open",amount:10},{status:"Closed",amount:20},{status:"Open",amount:30}];
 const fields:NormalizedData["fields"]={status:{key:"status",displayName:"Status",sourceTable:"Work",sourceColumn:"Status",type:"dimension",roles:["values"]},amount:{key:"amount",displayName:"Amount",sourceTable:"Work",sourceColumn:"Amount",type:"measure",roles:["measure"]}};
-const data:NormalizedData={rows,fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields)};
+const data:NormalizedData={rows,rowKeys:rows.map((_,i)=>`row-${i}`),fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields,undefined,undefined,rows.map((_,i)=>`row-${i}`))};
 
 function harness(config=defaultConfig){
     const selectExternal=vi.fn(()=>({sent:true as const}));const clearExternal=vi.fn(()=>({sent:true as const}));const applyExternalFilter=vi.fn(()=>({sent:true as const,target:{table:"Work",column:"Status"}}));const clearExternalFilter=vi.fn(()=>({sent:true as const}));const reportInteraction=vi.fn();
     const context={} as RenderContextValue;
-    Object.assign(context,{data,rows,sourceRows:rows,schema:{version:"1.0",components:[]},settings:toRuntimeSettings(new VisualFormattingSettingsModel()),state:initialDashboardState(),warnings:[],config,webAccessAvailable:false,selectExternal,clearExternal,applyExternalFilter,clearExternalFilter,reportInteraction});
-    context.dispatch=action=>{context.state=dashboardReducer(context.state,action);};context.componentRows=id=>componentRows(id,context);context.getRowsForComponent=id=>rowsForComponent(rows,rows,id,context);
+    Object.assign(context,{data,rows,sourceRows:rows,sourceRowKeys:data.rowKeys,schema:{version:"1.0",components:[]},settings:toRuntimeSettings(new VisualFormattingSettingsModel()),state:initialDashboardState(),warnings:[],config,webAccessAvailable:false,selectExternal,clearExternal,applyExternalFilter,clearExternalFilter,reportInteraction});
+    context.dispatch=action=>{context.state=dashboardReducer(context.state,action);};context.componentRows=id=>componentRows(id,context);context.getRowsForComponent=id=>rowsForComponent(rows,data.rowKeys,rows,id,context);
     return{context,selectExternal,clearExternal,applyExternalFilter,clearExternalFilter,reportInteraction};
 }
 const component=(interaction:NonNullable<ComponentBase["interaction"]>,type="table"):ComponentBase=>({type,id:"source",interaction});

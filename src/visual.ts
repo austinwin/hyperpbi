@@ -21,7 +21,7 @@ import { validateSchema } from "./schema/validateSchema";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "./settings";
 import { createInstanceId } from "./utils/ids";
 import { parseJson } from "./utils/safeJson";
-import { buildTableSelectionIds, persistVisualState, readVisualState } from "./powerbi/visualState";
+import { buildRowSelectionData, persistVisualState, readVisualState } from "./powerbi/visualState";
 import { applyCalculations } from "./calculations/calculationEngine";
 import { defaultStudioLayout } from "./editor/studioLayout";
 import { migrateFieldReferences } from "./schema/migrateFieldReferences";
@@ -41,7 +41,7 @@ export class Visual implements IVisual {
     private readonly formattingSettingsService = new FormattingSettingsService();
     private formattingSettings = new VisualFormattingSettingsModel();
     private data: NormalizedData = parseDataView();
-    private selectionIds: powerbi.visuals.ISelectionId[] = [];
+    private selectionIds: Array<powerbi.visuals.ISelectionId | undefined> = [];
     private specification = "";
     private configuration = defaultConfigJson;
     private editMode = powerbi.EditMode.Default;
@@ -72,10 +72,50 @@ export class Visual implements IVisual {
         } else {
             const persisted = readVisualState(dataView); if (persisted.specification !== undefined) this.specification = persisted.specification; if (persisted.configuration !== undefined) this.configuration = persisted.configuration || defaultConfigJson; if (persisted.studioLayout !== undefined) this.studioLayout = persisted.studioLayout;
         }
-        const wasFetching = this.fetchMoreDataInProgress; const incomingData = parseDataView(dataView); const incomingSelectionIds = buildTableSelectionIds(this.host, dataView);
+        const wasFetching = this.fetchMoreDataInProgress;
+        const parsedData = parseDataView(dataView);
+        const selectionData = buildRowSelectionData(this.host, dataView);
+
+        const incomingData: NormalizedData = {
+            ...parsedData,
+            rowKeys:
+                selectionData.rowKeys.length === parsedData.rows.length
+                    ? selectionData.rowKeys
+                    : parsedData.rowKeys
+        };
+
+        const incomingSelectionIds = selectionData.selectionIds;
+
         this.fetchMoreDataInProgress = false; this.moreRowsAvailable = Boolean(dataView?.metadata?.segment);
-        if (wasFetching && this.data.rows.length && incomingData.rows.length <= this.data.rows.length && !this.sameRows(this.data.rows, incomingData.rows)) { this.data = mergeNormalizedData(this.data, incomingData); this.selectionIds = [...this.selectionIds, ...incomingSelectionIds]; }
-        else { this.data = incomingData; this.selectionIds = incomingSelectionIds; }
+        if (wasFetching && this.data.rows.length && incomingData.rows.length <= this.data.rows.length && !this.sameRows(this.data.rows, incomingData.rows)) {
+            const previousSelectionByKey = new Map(
+                this.data.rowKeys.map((key, index) => [
+                    key,
+                    this.selectionIds[index]
+                ])
+            );
+
+            const incomingSelectionByKey = new Map(
+                incomingData.rowKeys.map((key, index) => [
+                    key,
+                    incomingSelectionIds[index]
+                ])
+            );
+
+            const merged = mergeNormalizedData(this.data, incomingData);
+
+            this.selectionIds = merged.rowKeys.map(
+                key =>
+                    previousSelectionByKey.get(key) ??
+                    incomingSelectionByKey.get(key)
+            );
+
+            this.data = merged;
+        }
+        else {
+            this.data = incomingData;
+            this.selectionIds = incomingSelectionIds;
+        }
         this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: this.moreRowsAvailable, fetchInProgress: false } }; this.editMode = nextEditMode;
         this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length };
         this.target.style.width = `${Math.max(0, options.viewport.width)}px`; this.target.style.height = `${Math.max(0, options.viewport.height)}px`;
@@ -130,7 +170,16 @@ export class Visual implements IVisual {
         else {
             const indices = Array.from(new Set(rowIndices)).filter(index => Number.isInteger(index) && index >= 0 && index < this.selectionIds.length);
             if (!indices.length) { void this.selectionManager.clear(); result = { sent: false, reason: "no matching source rows" }; }
-            else { const identities = indices.map(index => this.selectionIds[index]); void this.selectionManager.select(identities, multiSelect); result = { sent: true }; rowIndices = indices; }
+            else {
+                const identities = indices
+                    .map(index => this.selectionIds[index])
+                    .filter(
+                        (identity): identity is powerbi.visuals.ISelectionId =>
+                            identity !== undefined
+                    );
+                if (!identities.length) { result = { sent: false, reason: "no selection identities" }; }
+                else { void this.selectionManager.select(identities, multiSelect); result = { sent: true }; rowIndices = indices; }
+            }
         }
         this.updateInteractionDiagnostics(rowIndices, details, result); return result;
     };

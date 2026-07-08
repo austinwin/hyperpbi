@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useReducer } from "preact/hooks";
 import { calculateAggregates } from "../data/aggregations";
 import { normalizeMapBindings } from "../data/normalizeMapBindings";
 import { filterRows } from "../data/filtering";
@@ -22,14 +22,36 @@ const notSent = (): ExternalSelectionResult => ({ sent: false, reason: "componen
 const filterNotSent = (): ExternalFilterResult => ({ sent:false, reason:"component did not call selectExternal" });
 export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, referenceWarnings = [], config = defaultConfig, selectExternal = notSent, clearExternal = notSent, applyExternalFilter = filterNotSent, clearExternalFilter = filterNotSent, reportInteraction = () => undefined, webAccessAvailable = false }: { instanceId: string; schema: HyperPbiSchema; data: NormalizedData; settings: RuntimeSettings; renderMs: number; referenceWarnings?: string[]; config?: HyperPbiConfig; selectExternal?: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult; clearExternal?: (details?: InteractionDetails) => ExternalSelectionResult; applyExternalFilter?:(field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails)=>ExternalFilterResult;clearExternalFilter?:(details?:InteractionDetails)=>ExternalFilterResult; reportInteraction?: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void; webAccessAvailable?: boolean }) {
     const [state, dispatch] = useReducer(dashboardReducer, initialDashboardState(schema.state?.search, schema.state?.activeTab));
-    const previousSourceRows = useRef(data.rows);
-    useEffect(() => { if (previousSourceRows.current !== data.rows) { previousSourceRows.current = data.rows; dispatch({ type: "resetInteractions" }); } }, [data.rows]);
+    const rowKeySignature = useMemo(
+        () => JSON.stringify(data.rowKeys),
+        [data.rowKeys]
+    );
+    useEffect(() => {
+        dispatch({
+            type: "reconcileRowKeys",
+            rowKeys: data.rowKeys
+        });
+    }, [rowKeySignature]);
     const rows = useMemo(() => filterRows(data.rows, state.filters, state.search), [data.rows, state.filters, state.search]);
-    const filteredData = useMemo<NormalizedData>(() => ({ ...data, rows, aggregates: calculateAggregates(rows), calculatedMetrics: calculateDerivedMetrics(rows, schema.calculations?.metrics), map: normalizeMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries) }), [data, rows, schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
+    const filteredRowKeys = useMemo(() => {
+        const sourceIndexByRow = new Map(
+            data.rows.map((row, index) => [row, index] as const)
+        );
+
+        return rows
+            .map(row => {
+                const index = sourceIndexByRow.get(row);
+                return index === undefined
+                    ? undefined
+                    : data.rowKeys[index];
+            })
+            .filter((key): key is string => Boolean(key));
+    }, [data.rows, data.rowKeys, rows]);
+    const filteredData = useMemo<NormalizedData>(() => ({ ...data, rows, rowKeys: filteredRowKeys, aggregates: calculateAggregates(rows), calculatedMetrics: calculateDerivedMetrics(rows, schema.calculations?.metrics), map: normalizeMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries, filteredRowKeys) }), [data, rows, filteredRowKeys, schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
     const scope = `#${instanceId}`; const cssMode = config.security?.cssMode ?? "scoped"; const sanitizedCss = useMemo(() => sanitizeCss(`${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}\n${settings.customCss}`, scope, { mode: cssMode }), [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode]);
-    const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, rows, componentId, { state }), [data.rows, rows, state]);
+    const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }), [data.rows, data.rowKeys, rows, state]);
     const componentRows = useCallback((componentId:string) => selectedComponentRows(componentId, { state }), [state]);
-    const context = useMemo(() => ({ data: filteredData, rows, sourceRows: data.rows, getRowsForComponent, componentRows, schema, settings, state, dispatch, warnings: sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable }), [filteredData, rows, data.rows, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable]);
+    const context = useMemo(() => ({ data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, warnings: sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
     return <div id={instanceId} class={`hyperpbi-root hp-density-${schema.theme?.density ?? settings.layout.density} hp-theme-${schema.theme?.mode ?? settings.theme.mode} ${settings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`} style={style}>

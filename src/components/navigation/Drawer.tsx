@@ -6,7 +6,7 @@ import { createInteractionPayload } from "../../interactions/interactionPayload"
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 
 export function Drawer({ component, renderChildren }: { component: DrawerComponent; renderChildren: (children: DashboardComponent[]) => preact.ComponentChildren }) {
-    const context=useRenderContext();const { state, dispatch } = context; const id=component.id??component.type; const selected=selectedSourceRowIndex(state);const policy=resolveInteractionPolicy(component,context.config,"navigation");
+    const context=useRenderContext();const { state, sourceRowKeys, dispatch } = context; const id=component.id??component.type; const selected=selectedSourceRowIndex(state, sourceRowKeys);const policy=resolveInteractionPolicy(component,context.config,"navigation");
     const condition=component.openWhen??(component.type==="filterDrawer"?"always":"selectedRow"); const conditionOpen=condition==="always"||condition==="selectedRow"&&selected!==undefined||condition==="state"&&Boolean(state.values[component.stateKey??id]);
     const collapsed=state.collapsed[id]??!(component.defaultOpen??conditionOpen); const open=conditionOpen&&!collapsed; const filterDrawer=component.type==="filterDrawer";
     const toggle=(event:Event)=>{dispatch({type:"collapse",id,value:open});executeComponentInteraction(policy,createInteractionPayload(component,{value:!open}),context,{trigger:"click",event});};

@@ -6,7 +6,7 @@ import { calculateAggregates } from "../src/data/aggregations";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 import { NormalizedData } from "../src/data/normalizeData";
 
-const rows=[{risk_score:82,cost:10},{risk_score:40,cost:20}];const fields={risk_score:{key:"risk_score",displayName:"Risk Score",type:"measure" as const,roles:[]},cost:{key:"cost",displayName:"Cost",type:"measure" as const,roles:[]}};const data:NormalizedData={rows,fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields)};
+const rows=[{risk_score:82,cost:10},{risk_score:40,cost:20}];const fields={risk_score:{key:"risk_score",displayName:"Risk Score",type:"measure" as const,roles:[]},cost:{key:"cost",displayName:"Cost",type:"measure" as const,roles:[]}};const data:NormalizedData={rows,rowKeys:rows.map((_,i)=>`row-${i}`),fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields,undefined,undefined,rows.map((_,i)=>`row-${i}`))};
 describe("calculation DSL",()=>{
     it("evaluates case expressions",()=>expect(evaluateExpression({op:"case",cases:[{when:{op:">=",left:{field:"risk_score"},right:{value:80}},then:{value:"High"}}],else:{value:"Normal"}},rows[0])).toBe("High"));
     it("returns null for division by zero",()=>expect(evaluateExpression({op:"/",left:{value:10},right:{value:0}},{})).toBeNull());

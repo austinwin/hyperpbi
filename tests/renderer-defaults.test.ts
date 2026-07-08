@@ -7,7 +7,7 @@ import { HyperPbiRoot } from "../src/render/HyperPbiRoot";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
 import { defaultConfig } from "../src/config/hyperpbiConfig";
 
-const rows=[{name:"A"}]; const fields={name:{key:"name",displayName:"Name",type:"dimension" as const,roles:["values"],sourceTable:"Records",sourceColumn:"Name"}}; const data:NormalizedData={rows,fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields)};
+const rows=[{name:"A"}]; const fields={name:{key:"name",displayName:"Name",type:"dimension" as const,roles:["values"],sourceTable:"Records",sourceColumn:"Name"}}; const data:NormalizedData={rows,rowKeys:rows.map((_,i)=>`row-${i}`),fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields,undefined,undefined,rows.map((_,i)=>`row-${i}`))};
 afterEach(()=>document.body.replaceChildren());
 
 describe("rendered dashboard chrome",()=>{

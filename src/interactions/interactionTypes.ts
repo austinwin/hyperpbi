@@ -45,6 +45,7 @@ export interface InteractionPayload {
     componentId: string;
     componentType: string;
     rowIndices: number[];
+    rowKeys: string[];
     field?: string;
     value?: unknown;
     operator: FilterOperator;

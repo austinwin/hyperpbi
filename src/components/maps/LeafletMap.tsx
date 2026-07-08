@@ -13,10 +13,10 @@ import { executeComponentInteraction } from "../../interactions/componentInterac
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 
-function bindInteractions(layer: L.Layer, feature: NormalizedMapFeature, mapData: NormalizedMapData, component: MapComponent, fields: ReturnType<typeof useRenderContext>["data"]["fields"], select: (rowIndex: number,event?:MouseEvent) => void): void {
+function bindInteractions(layer: L.Layer, feature: NormalizedMapFeature, mapData: NormalizedMapData, component: MapComponent, fields: ReturnType<typeof useRenderContext>["data"]["fields"], select: (rowIndex: number, rowKey: string, event?:MouseEvent) => void): void {
     layer.bindTooltip(createTooltipNode(resolveMapTooltip(feature, mapData, fields)));
     if (component.popup?.html) layer.bindPopup(createMapPopup(component.popup.html, feature));
-    layer.on("click", event => select(feature.rowIndex,(event as L.LeafletMouseEvent).originalEvent));
+    layer.on("click", event => select(feature.rowIndex, feature.rowKey, (event as L.LeafletMouseEvent).originalEvent));
 }
 
 export function LeafletMap({ component, mapData, visibleLayers }: { component: MapComponent; mapData: NormalizedMapData; visibleLayers: Set<string> }) {
@@ -33,7 +33,7 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
             const layerGroup = L.featureGroup().addTo(map); const cluster = (config.clusterPoints ?? settings.map.clusterPoints) ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 44 }) : null;
             if (cluster) layerGroup.addLayer(cluster);
             normalizedLayer.features.forEach(feature => {
-                const color = style.colorFor(feature);const sourceIndex=sourceIndices.get(feature.row);const selected=sourceIndex!==undefined&&selectedRows.includes(sourceIndex); let layer: L.Layer | null = null;
+                const color = style.colorFor(feature);const sourceIndex=sourceIndices.get(feature.row);const selected=feature.rowKey && context.state.componentSelectedRowKeys[id]?.includes(feature.rowKey); let layer: L.Layer | null = null;
                 if (feature.type === "point" && feature.lat !== null && feature.lon !== null) {
                     layer = L.circleMarker([feature.lat, feature.lon], { radius: style.radiusFor(feature)+(selected?3:0), color:selected?settings.theme.accent:color, fillColor: color, fillOpacity: style.fillOpacity, opacity: style.opacity, weight:selected?4:1.5 });
                     if (cluster) cluster.addLayer(layer); else layerGroup.addLayer(layer);
@@ -45,13 +45,13 @@ export function LeafletMap({ component, mapData, visibleLayers }: { component: M
                     }).addTo(layerGroup);
                     layer = geometryLayer; const geometryBounds = geometryLayer.getBounds(); if (geometryBounds.isValid()) dataBounds.extend(geometryBounds);
                 }
-                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, (_rowIndex,event) => { const field=interactionPolicy.field;executeComponentInteraction(interactionPolicy,createInteractionPayload(component,{rowIndices:sourceIndex!==undefined?[sourceIndex]:[],field,value:field?feature.row[field]:undefined}),context,{trigger:"click",multiSelect:Boolean(event?.ctrlKey||event?.metaKey),event}); });
+                if (layer) bindInteractions(layer, feature, mapData, component, data.fields, (_rowIndex,rowKey,event) => { const field=interactionPolicy.field;executeComponentInteraction(interactionPolicy,createInteractionPayload(component,{rowIndices:sourceIndex!==undefined?[sourceIndex]:[],rowKeys:[rowKey],sourceRowKeys:context.sourceRowKeys,field,value:field?feature.row[field]:undefined}),context,{trigger:"click",multiSelect:Boolean(event?.ctrlKey||event?.metaKey),event}); });
             });
         });
         if ((config.fitBounds ?? true) && dataBounds.isValid()) map.fitBounds(dataBounds.pad(.08), { maxZoom: 14 });
         const observer = new ResizeObserver(() => map.invalidateSize()); observer.observe(ref.current);
         return () => { observer.disconnect(); map.remove(); };
-    }, [mapData, component, settings.map, settings.theme.primary, settings.theme.accent, visibleLayers, sourceRows, selectedRows.join("|"), runtimeConfig.providers,webAccessAvailable]);
+    }, [mapData, component, settings.map, settings.theme.primary, settings.theme.accent, visibleLayers, sourceRows, JSON.stringify(context.state.componentSelectedRowKeys[id]), runtimeConfig.providers,webAccessAvailable]);
     const external = resolveProviderPolicy(runtimeConfig.providers,webAccessAvailable).tilesAllowed;
     return <div ref={ref} class={`hp-map-canvas ${external ? "hp-map-tiled" : "hp-map-neutral"}`} style={{ height: `${component.height ?? 320}px` }} />;
 }

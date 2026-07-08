@@ -7,7 +7,7 @@ import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 
 export function DetailPanel({ component }: { component: DataDisplayComponent }) {
-    const context=useRenderContext();const { sourceRows, state, data }=context;const rows=context.getRowsForComponent(component.id??component.type);const selectedIndex=selectedSourceRowIndex(state);const row=component.selectedRow===true?(selectedIndex===undefined?undefined:sourceRows[selectedIndex]):rows[0];
+    const context=useRenderContext();const { sourceRows, sourceRowKeys, state, data }=context;const rows=context.getRowsForComponent(component.id??component.type);const selectedIndex=selectedSourceRowIndex(state, sourceRowKeys);const row=component.selectedRow===true?(selectedIndex===undefined?undefined:sourceRows[selectedIndex]):rows[0];
     if(!component.groups&&!component.items&&component.selectedRow!==true)return <Card title={component.title}><p class="hp-info-text">{component.text??formatValue(component.value??(component.field?row?.[component.field]:null),component.format)}</p></Card>;
     if(!row)return <Card title={component.title}><EmptyState title={component.emptyText??"Select a record"}>Choose a table row, chart item, map feature, or timeline event to inspect details.</EmptyState></Card>;
     type DetailEntry=string|{field:string;label?:string;badge?:boolean;copyable?:boolean;format?:string};const groups:Array<{title?:string;fields:DetailEntry[]}>=component.groups?.length?component.groups:[{fields:component.items?.map(item=>({field:item.field??"",label:item.label,format:item.format})).filter(item=>item.field)??Object.keys(data.fields).slice(0,8)}];

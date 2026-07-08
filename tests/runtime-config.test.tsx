@@ -9,7 +9,7 @@ import { NormalizedData } from "../src/data/normalizeData";
 import { calculateAggregates } from "../src/data/aggregations";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 
-const rows=[{status:"Open"}];const fields={status:{key:"status",displayName:"Status",sourceTable:"Work",sourceColumn:"Status",type:"dimension" as const,roles:["values"]}};const data:NormalizedData={rows,fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields)};
+const rows=[{status:"Open"}];const fields={status:{key:"status",displayName:"Status",sourceTable:"Work",sourceColumn:"Status",type:"dimension" as const,roles:["values"]}};const data:NormalizedData={rows,rowKeys:rows.map((_,i)=>`row-${i}`),fields,aggregates:calculateAggregates(rows),map:normalizeMapBindings(rows,fields,undefined,undefined,rows.map((_,i)=>`row-${i}`))};
 function Harness({changed}:{changed:(value:string)=>void}){const [value,setValue]=useState(defaultConfigJson);return <RuntimeConfigTab data={data} configuration={value} onChange={next=>{setValue(next);changed(next);}}/>;}
 const click=(host:HTMLElement,text:string)=>Array.from(host.querySelectorAll("button")).find(button=>button.textContent===text)?.dispatchEvent(new MouseEvent("click",{bubbles:true}));
 

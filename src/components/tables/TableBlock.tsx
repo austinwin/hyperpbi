@@ -63,7 +63,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
             {columns.map(column => <th style={{ width: column.width ? `${column.width}px` : undefined }}><button type="button" onClick={() => toggleSort(column.field)}>{column.title ?? data.fields[column.field]?.displayName ?? column.field}{sort?.field === column.field ? sort.direction === "asc" ? " ↑" : " ↓" : ""}</button></th>)}
         </tr></thead><tbody>{visible.map(row => {
             const index = sourceIndices.get(row) ?? -1; const selected = selectedRows.includes(index); const highlighted = highlightedRows.includes(index);
-            return <tr class={highlighted ? "hp-row-selected" : ""} onClick={event => { const field=policy.field; executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:index>=0?[index]:[],field,value:field?row[field]:undefined}),context,{trigger:"click",multiSelect:event.ctrlKey||event.metaKey,event}); }}>
+            return <tr class={highlighted ? "hp-row-selected" : ""} onClick={event => { const field=policy.field; executeComponentInteraction(policy,createInteractionPayload(component,{rowIndices:index>=0?[index]:[],sourceRowKeys:context.sourceRowKeys,field,value:field?row[field]:undefined}),context,{trigger:"click",multiSelect:event.ctrlKey||event.metaKey,event}); }}>
                 {policy.showSelector && <td><input type="checkbox" checked={selected} aria-label="Select row" /></td>}
                 {columns.map(column => <td class={column.hozAlign ? `text-${column.hozAlign}` : ""} style={cellStyle(column, row[column.field])}>{formatValue(row[column.field], column.format ?? data.fields[column.field]?.format)}</td>)}
             </tr>;

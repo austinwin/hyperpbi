@@ -17,7 +17,7 @@ describe("normalized data operations", () => {
     });
     it("only expands supported template tokens", () => {
         const fields: NormalizedData["fields"] = { cost: { key: "cost", displayName: "Cost", type: "measure", roles: ["measure"] } };
-        const data: NormalizedData = { fields, rows, aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields) };
+        const data: NormalizedData = { fields, rows, rowKeys: rows.map((_, i) => `row-${i}`), aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields, undefined, undefined, rows.map((_, i) => `row-${i}`)) };
         expect(renderTemplate("{{title}} {{count}} {{sum.cost}} {{field.cost.displayName}} {{constructor.constructor}}", data, {}, "Ops")).toBe("Ops 3 600 Cost ");
     });
 });
