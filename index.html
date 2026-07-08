@@ -128,14 +128,117 @@
     @media (max-width: 760px) { .container { width: min(calc(100% - 28px), var(--max)); }.nav-links, .nav-actions .btn:not(.btn-primary) { display: none; }.nav-actions .btn.menu-button { display: inline-flex; }.nav.open { flex-wrap: wrap; padding-bottom: 10px; }.nav.open .nav-links { width: 100%; display: grid; gap: 3px; order: 5; }.nav.open .nav-links a { padding: 8px; }.hero { padding-top: 58px; }.hero-copy h1 { font-size: clamp(42px, 13vw, 64px); }.studio-screen { grid-template-columns: 44% 5px minmax(0, 1fr); }.dash-body { grid-template-columns: 100px minmax(0, 1fr); }.kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }.visual-row { grid-template-columns: minmax(0, 1fr); }.map-visual { display: none; }.feature-grid, .steps, .build-modes { grid-template-columns: minmax(0, 1fr); }.inventory { grid-template-columns: minmax(0, 1fr); }.inventory-nav { position: static; display: flex; overflow-x: auto; }.inventory-nav button { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; }.token-list { grid-template-columns: minmax(0, 1fr); }.command-list, .faq { min-width: 0; }.command { min-width: 0; display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; }.command b { width: auto; }.cta-card { align-items: flex-start; flex-direction: column; }.cta-actions { margin-left: 0; }.footer-grid { grid-template-columns: minmax(0, 1fr); }.footer-bottom { flex-direction: column; }.product-screen, .screen-panel { min-height: 390px; } }
     @media (max-width: 480px) { .nav-actions .btn-primary { display: none; }.hero-actions .btn { width: 100%; }.trust-grid { grid-template-columns: repeat(2, 1fr); }.studio-screen { grid-template-columns: 1fr; grid-template-rows: 260px 5px 140px 110px; }.resize-rail { cursor: row-resize; }.studio-preview { grid-row: 3; }.studio-bottom { grid-column: 1; grid-row: 4; }.dashboard-screen { overflow: hidden; }.dash-side { display: none; }.dash-body { grid-template-columns: 1fr; }.component-chips span { font-size: 10px; }.cta-actions .btn { width: 100%; } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; }.btn, .feature-card { transition: none; } }
+
+
+    /* Dense documentation center */
+    .docs-section { background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%); border-block: 1px solid var(--line); }
+    .docs-section .section-heading { max-width: 850px; margin-bottom: 24px; }
+    .docs-kicker-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+    .docs-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid #ced9e5; border-radius: 999px; background: rgb(255 255 255 / 78%); color: #526278; font-size: 10px; font-weight: 750; }
+    .docs-kicker strong { color: var(--blue); }
+    .docs-overview { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .docs-link-card { min-width: 0; min-height: 86px; display: grid; align-content: space-between; gap: 8px; padding: 11px; border: 1px solid #d4dee9; border-radius: 8px; background: rgb(255 255 255 / 88%); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+    .docs-link-card:hover { border-color: #9fb6cf; box-shadow: 0 7px 18px rgb(16 35 63 / 7%); transform: translateY(-1px); }
+    .docs-link-card span { color: var(--blue); font-size: 8px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .docs-link-card strong { display: block; overflow: hidden; font-size: 12px; line-height: 1.25; text-overflow: ellipsis; }
+    .docs-link-card small { color: var(--muted); font-size: 9px; line-height: 1.35; }
+    .docs-layout { display: grid; grid-template-columns: 238px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .docs-sidebar { position: sticky; top: 82px; min-width: 0; padding: 10px; border: 1px solid #ccd8e5; border-radius: 10px; background: rgb(255 255 255 / 93%); box-shadow: 0 8px 24px rgb(16 35 63 / 6%); }
+    .docs-search { position: relative; margin-bottom: 8px; }
+    .docs-search input { width: 100%; min-height: 34px; padding: 7px 9px 7px 30px; border: 1px solid #cbd6e2; border-radius: 6px; background: #fff; color: var(--ink); font: inherit; font-size: 11px; }
+    .docs-search svg { position: absolute; top: 9px; left: 9px; width: 15px; height: 15px; color: #738298; }
+    .docs-nav { display: grid; gap: 3px; }
+    .docs-nav button { width: 100%; min-height: 34px; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #526278; text-align: left; font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
+    .docs-nav button span:first-child { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 5px; background: #edf2f7; color: #526278; font-size: 9px; }
+    .docs-nav button:hover { background: #f4f7fa; color: var(--ink); }
+    .docs-nav button.active { border-color: #bad0e7; background: #eaf2fb; color: #174f87; }
+    .docs-nav button.active span:first-child { background: var(--blue); color: #fff; }
+    .docs-sidebar-note { margin: 9px 2px 0; padding-top: 8px; border-top: 1px solid var(--line); color: #718096; font-size: 8px; line-height: 1.45; }
+    .docs-content { min-width: 0; }
+    .doc-panel { display: none; min-width: 0; overflow: hidden; border: 1px solid #cad6e3; border-radius: 10px; background: #fff; box-shadow: 0 10px 28px rgb(16 35 63 / 6%); }
+    .doc-panel.active { display: block; }
+    .doc-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px 18px 13px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #fff, #f9fbfd); }
+    .doc-panel > header h3 { margin: 0; font-size: 22px; line-height: 1.15; letter-spacing: -.025em; }
+    .doc-panel > header p { max-width: 720px; margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .doc-panel > header .btn { min-height: 34px; flex: 0 0 auto; padding: 6px 9px; font-size: 10px; }
+    .doc-body { display: grid; gap: 12px; padding: 14px 16px 17px; }
+    .doc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .doc-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .doc-card { min-width: 0; padding: 11px 12px; border: 1px solid #dbe3ec; border-radius: 7px; background: #fbfcfe; }
+    .doc-card h4 { margin: 0 0 5px; font-size: 12px; }
+    .doc-card p { margin: 0; color: #607086; font-size: 10px; line-height: 1.5; }
+    .doc-card code { color: #174f87; font-size: 9px; overflow-wrap: anywhere; }
+    .doc-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+    .doc-list li { position: relative; padding-left: 15px; color: #53647a; font-size: 10px; line-height: 1.45; }
+    .doc-list li::before { position: absolute; top: .58em; left: 1px; width: 5px; height: 5px; content: ""; border-radius: 50%; background: var(--blue); }
+    .doc-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; counter-reset: doc-step; }
+    .doc-flow article { min-width: 0; padding: 9px; border: 1px solid #d8e2ec; border-radius: 7px; background: #fff; }
+    .doc-flow article::before { counter-increment: doc-step; content: counter(doc-step); width: 20px; height: 20px; display: grid; place-items: center; margin-bottom: 6px; border-radius: 5px; background: #eaf2fb; color: var(--blue); font-size: 9px; font-weight: 850; }
+    .doc-flow strong { display: block; font-size: 10px; }
+    .doc-flow small { display: block; margin-top: 2px; color: #69788b; font-size: 8px; line-height: 1.35; }
+    .doc-callout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; padding: 10px 12px; border: 1px solid #bcd2e8; border-radius: 7px; background: #eef6fd; color: #36536f; font-size: 10px; }
+    .doc-callout.warning { border-color: #e3cd8d; background: #fff9e9; color: #75520a; }
+    .doc-callout strong { color: var(--ink); }
+    .doc-callout .mark { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; font-weight: 850; }
+    .doc-callout.warning .mark { background: var(--warning); }
+    .doc-code { min-width: 0; overflow: hidden; border: 1px solid #203a5b; border-radius: 8px; background: #10233f; }
+    .doc-code > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border-bottom: 1px solid rgb(255 255 255 / 10%); color: #b6c8dd; font-size: 8px; font-weight: 750; }
+    .doc-code button { padding: 3px 7px; border: 1px solid rgb(255 255 255 / 18%); border-radius: 4px; background: rgb(255 255 255 / 7%); color: #dce8f6; font: inherit; font-size: 8px; cursor: pointer; }
+    .doc-code pre { max-height: 360px; margin: 0; overflow: auto; padding: 12px; color: #d9e5f2; font-size: 9px; line-height: 1.6; tab-size: 2; white-space: pre; }
+    .doc-table-wrap { overflow: auto; border: 1px solid #d8e2ec; border-radius: 7px; }
+    .doc-table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: 9px; }
+    .doc-table th, .doc-table td { padding: 7px 8px; border-bottom: 1px solid #e3e9ef; text-align: left; vertical-align: top; }
+    .doc-table th { background: #f2f6fa; color: #40536a; font-size: 8px; text-transform: uppercase; letter-spacing: .04em; }
+    .doc-table td { color: #5b6b7f; }
+    .doc-table code { color: #174f87; }
+    .doc-links { display: flex; flex-wrap: wrap; gap: 6px; }
+    .doc-links a { display: inline-flex; align-items: center; gap: 5px; padding: 6px 8px; border: 1px solid #ccd8e5; border-radius: 6px; background: #fff; color: #36536f; font-size: 9px; font-weight: 750; }
+    .doc-links a:hover { border-color: #93aecb; color: var(--blue); }
+    .doc-mini-title { margin: 0; color: #40536a; font-size: 9px; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+    .doc-command-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .doc-command { min-width: 0; display: grid; grid-template-columns: 86px minmax(0, 1fr) auto; align-items: center; gap: 7px; padding: 8px; border: 1px solid #d8e2ec; border-radius: 6px; background: #fbfcfe; }
+    .doc-command strong { font-size: 9px; }
+    .doc-command code { min-width: 0; overflow: hidden; color: #174f87; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+    .doc-command button { padding: 3px 6px; border: 1px solid #cbd6e2; border-radius: 4px; background: #fff; color: #53647a; font-size: 8px; cursor: pointer; }
+    .docs-empty { display: none; margin-top: 8px; padding: 9px; border: 1px dashed #c7d3df; border-radius: 6px; color: #718096; font-size: 9px; text-align: center; }
+
+    @media (max-width: 1080px) {
+      .docs-overview { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .doc-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .doc-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      .docs-layout { grid-template-columns: minmax(0, 1fr); }
+      .docs-sidebar { position: static; }
+      .docs-nav { display: flex; overflow-x: auto; padding-bottom: 3px; scrollbar-width: thin; }
+      .docs-nav button { width: auto; min-width: max-content; flex: 0 0 auto; grid-template-columns: 22px auto; }
+      .docs-sidebar-note { display: none; }
+      .docs-search { max-width: 420px; }
+      .doc-command-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .docs-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .doc-panel > header { align-items: stretch; flex-direction: column; }
+      .doc-panel > header .btn { align-self: flex-start; }
+      .doc-grid, .doc-grid.three { grid-template-columns: minmax(0, 1fr); }
+      .doc-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .doc-body { padding: 11px; }
+      .doc-code pre { font-size: 8px; }
+    }
+    @media (max-width: 420px) {
+      .docs-overview { grid-template-columns: minmax(0, 1fr); }
+      .doc-flow { grid-template-columns: minmax(0, 1fr); }
+      .doc-command { grid-template-columns: 72px minmax(0, 1fr) auto; }
+    }
+
   </style>
 </head>
 <body>
   <header class="site-header">
     <nav class="nav container" id="siteNav" aria-label="Main navigation">
       <a class="brand" href="#top"><span class="brand-mark">H</span><span>HyperPBI<small>Power BI dashboard compiler</small></span></a>
-      <div class="nav-links"><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#security">Security</a><a href="#build">Build</a></div>
-      <div class="nav-actions"><a class="btn" href="./README.md">Documentation</a><a class="btn btn-primary" href="https://github.com/austinwin/hyperpbi">View on GitHub</a><button class="btn menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+      <div class="nav-links"><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#docs">Documentation</a><a href="#security">Security</a><a href="#build">Build</a></div>
+      <div class="nav-actions"><a class="btn" href="#docs">Documentation</a><a class="btn btn-primary" href="https://github.com/austinwin/hyperpbi">View on GitHub</a><button class="btn menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
     </nav>
   </header>
 
@@ -191,6 +294,292 @@
       <div class="inventory-panel" id="inventory-content"><h3>Handle detail, geography, and branded content</h3><p>Tables and maps are wrapped behind stable HyperPBI abstractions. HTML and CSS are sanitized.</p><div class="component-chips"><span>table</span><span>map</span><span>html</span><span>text</span><span>markdown</span><span>custom</span><span>slots</span><span>repeat</span><span>popup</span><span>tooltip</span></div></div>
     </div></div></div></section>
 
+
+    <section class="content docs-section" id="docs">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">Documentation center</span>
+          <h2>From first dashboard to production-grade extensions</h2>
+          <p>A compact, searchable reference for report authors, AI systems, visual developers, security reviewers, and map administrators. The key operating rules are embedded here; every topic also links to its complete Markdown document.</p>
+          <div class="docs-kicker-row">
+            <span class="docs-kicker"><strong>10</strong> focused guides</span>
+            <span class="docs-kicker"><strong>1</strong> universal interaction model</span>
+            <span class="docs-kicker"><strong>2</strong> package profiles</span>
+            <span class="docs-kicker"><strong>0</strong> user JavaScript execution</span>
+          </div>
+        </div>
+
+        <div class="docs-overview" aria-label="Primary documentation links">
+          <a class="docs-link-card" href="./docs/user-guide.md"><span>Start here</span><strong>User guide</strong><small>Simple Builder, Advanced mode, repair workflow, diagnostics, and saving.</small></a>
+          <a class="docs-link-card" href="./docs/ai-authoring.md"><span>AI workflow</span><strong>AI authoring</strong><small>Prompt privacy, import repair, field keys, presets, and advanced charts.</small></a>
+          <a class="docs-link-card" href="./docs/hyperpbi-ai-skill.md"><span>AI context</span><strong>HyperPBI AI skill</strong><small>The full engine contract to copy into ChatGPT, Copilot, or internal AI tools.</small></a>
+          <a class="docs-link-card" href="./docs/hyperpbi-spec-reference.md"><span>Reference</span><strong>Specification</strong><small>Root fields, components, Runtime Config, styling, and renderer contracts.</small></a>
+          <a class="docs-link-card" href="./docs/interactions.md"><span>Behavior</span><strong>Interactions</strong><small>Internal state, scoped filters, Power BI selection, JSON filters, and clearing.</small></a>
+          <a class="docs-link-card" href="./docs/custom-components.md"><span>Extension</span><strong>Custom components</strong><small>Sanitized HTML, repeat templates, slots, scoped CSS, and typed actions.</small></a>
+          <a class="docs-link-card" href="./docs/calculations-dsl.md"><span>Logic</span><strong>Calculation DSL</strong><small>Validated row expressions, metrics, operators, dependencies, and null safety.</small></a>
+          <a class="docs-link-card" href="./docs/map-services.md"><span>Location</span><strong>Map services</strong><small>Bindings, OSM, Nominatim, ArcGIS geocoding, privacy, and WebAccess.</small></a>
+          <a class="docs-link-card" href="./docs/security.md"><span>Governance</span><strong>Security</strong><small>Sanitization, scoped and trusted modes, blocked content, and provider policy.</small></a>
+          <a class="docs-link-card" href="./docs/chatgpt-guideline.md"><span>Generation rules</span><strong>AI guideline</strong><small>A concise contract for producing compact, valid, enterprise-ready JSON.</small></a>
+        </div>
+
+        <div class="docs-layout">
+          <aside class="docs-sidebar" aria-label="Documentation topics">
+            <label class="docs-search">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="docsSearch" type="search" placeholder="Filter documentation topics" aria-label="Filter documentation topics">
+            </label>
+            <nav class="docs-nav" id="docsNav" role="tablist" aria-label="Documentation topic tabs">
+              <button class="active" type="button" role="tab" aria-selected="true" data-doc="start" data-keywords="start user guide simple advanced workflow preview save diagnostics"><span>01</span><span>Start and operate</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="ai" data-keywords="ai authoring prompt privacy skill chatgpt copilot repair import json"><span>02</span><span>AI authoring</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="spec" data-keywords="specification runtime config fields styles components json gui"><span>03</span><span>Specification</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="interactions" data-keywords="interaction selection filter internal external self others all power bi"><span>04</span><span>Interactions</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="custom" data-keywords="custom html css repeat slots actions template slicer"><span>05</span><span>Custom components</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="calculations" data-keywords="calculation dsl fields metrics operators dependency ratio"><span>06</span><span>Calculations</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="maps" data-keywords="maps geometry latitude longitude address arcgis geocoder nominatim osm"><span>07</span><span>Maps and geocoding</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="security" data-keywords="security sanitizer scoped trusted html css dompurify webaccess"><span>08</span><span>Security</span></button>
+              <button type="button" role="tab" aria-selected="false" data-doc="build" data-keywords="build package core maps test lint typecheck audit pbiviz"><span>09</span><span>Build and distribute</span></button>
+            </nav>
+            <div class="docs-empty" id="docsEmpty">No documentation topic matches this search.</div>
+            <p class="docs-sidebar-note">Use the embedded summaries for fast decisions. Open the linked Markdown guides when implementing or reviewing exact JSON contracts.</p>
+          </aside>
+
+          <div class="docs-content">
+            <article class="doc-panel active" id="doc-start" role="tabpanel">
+              <header><div><h3>Start and operate HyperPBI</h3><p>Normal report authors stay in the guided Builder. Advanced mode exists for raw JSON, Runtime Config, calculations, providers, mappings, logs, and diagnostics.</p></div><a class="btn" href="./docs/user-guide.md">Open user guide</a></header>
+              <div class="doc-body">
+                <p class="doc-mini-title">Simple mode — eight compact steps</p>
+                <div class="doc-flow">
+                  <article><strong>Choose a goal</strong><small>Executive overview, operations, map-first, detail explorer, KPI, or reporting.</small></article>
+                  <article><strong>Set audience</strong><small>Executive, manager, analyst, field operations, or public-facing context.</small></article>
+                  <article><strong>Pick a layout</strong><small>Use a proven pattern instead of inventing a fragile page structure.</small></article>
+                  <article><strong>Select components</strong><small>Choose only the controls, metrics, charts, tables, and maps that support decisions.</small></article>
+                  <article><strong>Apply a preset</strong><small>Enterprise Light, Bright Modern, Futuristic Light, Dark Ops, Dense, or Map Command.</small></article>
+                  <article><strong>Copy AI prompt</strong><small>HyperPBI prepares engine rules, fields, dimensions, privacy choice, and requirements.</small></article>
+                  <article><strong>Validate and preview</strong><small>Paste the AI response, repair syntax if needed, validate references, then preview.</small></article>
+                  <article><strong>Save and return</strong><small>Persist the specification, Runtime Config, and pane layout with the Power BI report.</small></article>
+                </div>
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>Simple mode</h4><p>No JSON is required. The Builder is the default interface and does not send data to an AI service.</p></section>
+                  <section class="doc-card"><h4>Advanced mode</h4><p>Exposes JSON, Runtime Config, AI Skill, calculations, maps, field mapping, imports, and raw diagnostics.</p></section>
+                  <section class="doc-card"><h4>Diagnostics</h4><p>Data, Fields, Logs, Issues, Map Services, Geocode Results, and Interactions are independently inspectable and copyable.</p></section>
+                </div>
+                <div class="doc-callout"><span class="mark">i</span><div><strong>Field names matter.</strong> Use normalized keys from the Fields panel, preferably table-qualified keys such as <code>workorders_status</code>. Friendly display names are labels, not JSON references.</div></div>
+                <div class="doc-links"><a href="./docs/user-guide.md">User guide</a><a href="./README.md">Repository overview</a><a href="./examples/specs">Example specifications</a><a href="./examples/prompts">Example prompts</a></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-ai" role="tabpanel" hidden>
+              <header><div><h3>AI authoring and response repair</h3><p>HyperPBI compiles a self-contained instruction from the current fields, selected privacy mode, visual dimensions, requested components, calculations, interactions, map policy, and security boundaries.</p></div><a class="btn" href="./docs/ai-authoring.md">Open AI guide</a></header>
+              <div class="doc-body">
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>Field dictionary only</h4><p>Default. Sends normalized keys, labels, lineage, type, format, and roles without row values.</p></section>
+                  <section class="doc-card"><h4>Samples or masked samples</h4><p>Use up to 50 selected rows. Masked mode replaces text/date values and zeroes numeric values.</p></section>
+                  <section class="doc-card"><h4>Summary or types only</h4><p>Share numeric ranges, date ranges, categories, or only inferred types when raw examples are unnecessary.</p></section>
+                </div>
+                <div class="doc-callout warning"><span class="mark">!</span><div><strong>Review before sharing.</strong> HyperPBI never calls an AI API. The user explicitly copies the prompt to ChatGPT, DeepSeek, Copilot, or an approved internal model.</div></div>
+                <div class="doc-grid">
+                  <section class="doc-card"><h4>Generation contract</h4><ul class="doc-list"><li>Return one JSON object with <code>version:"1.0"</code> and <code>components</code>.</li><li>Use normalized field keys only and give every component a unique ASCII id.</li><li>Prefer compact enterprise layouts, bounded tables, restrained colors, and normal components first.</li><li>Never return JavaScript, functions, scripts, iframes, callbacks, URLs, or invented fields.</li></ul></section>
+                  <section class="doc-card"><h4>Importer and repair</h4><ul class="doc-list"><li>Accepts surrounding prose, Markdown fences, smart quotes, trailing commas, and export packages.</li><li>Repairs syntax only; schema, calculation, and field-reference validation still run.</li><li>Copy repair prompt includes the broken JSON, precise errors, fields, and supported contract.</li><li>The original saved dashboard is never replaced when validation fails.</li></ul></section>
+                </div>
+                <div class="doc-code"><header><span>Minimal AI output contract</span><button type="button" data-copy-target="code-ai-minimal">Copy</button></header><pre><code id="code-ai-minimal">{"version":"1.0","title":"Operations","components":[{"type":"metricGrid","id":"summary","metrics":[{"title":"Records","aggregation":"count"}],"interaction":{"enabled":false,"internalMode":"none","externalMode":"none"}},{"type":"table","id":"details","columns":["asset_id"],"pagination":true,"span":12,"interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true}}]}</code></pre></div>
+                <div class="doc-links"><a href="./docs/ai-authoring.md">AI authoring</a><a href="./docs/hyperpbi-ai-skill.md">Full AI skill</a><a href="./docs/chatgpt-guideline.md">Concise AI guideline</a></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-spec" role="tabpanel" hidden>
+              <header><div><h3>Specification and Runtime Config</h3><p>The Specification owns the visible application. Runtime Config owns renderer behavior, global interaction defaults, security modes, providers, geocoder settings, and map bindings.</p></div><a class="btn" href="./docs/hyperpbi-spec-reference.md">Open specification</a></header>
+              <div class="doc-body">
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>Specification roots</h4><p><code>version</code>, <code>title</code>, <code>theme</code>, <code>layout</code>, <code>state</code>, panels, <code>components</code>, <code>calculations</code>, <code>styles</code>, and <code>css</code>.</p></section>
+                  <section class="doc-card"><h4>Shared component fields</h4><p><code>type</code>, <code>id</code>, <code>title</code>, <code>span</code>, <code>className</code>, <code>props</code>, <code>style</code>, <code>css</code>, <code>slots</code>, <code>data</code>, and <code>interaction</code>.</p></section>
+                  <section class="doc-card"><h4>GUI-first Runtime Config</h4><p>Form changes update JSON immediately. Advanced JSON remains a draft until <strong>Apply JSON</strong>; invalid JSON never mutates the applied GUI.</p></section>
+                </div>
+                <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Concern</th><th>Specification</th><th>Runtime Config</th></tr></thead><tbody><tr><td>Layout and components</td><td>Grid, panels, toolbar, cards, charts, table, map, custom content</td><td>Not owned here</td></tr><tr><td>Visual design</td><td>Theme, global CSS, component defaults, local style and CSS</td><td>Security mode controls how CSS/HTML are accepted</td></tr><tr><td>Renderer chrome</td><td>Title remains metadata</td><td><code>showHeader</code>, <code>showRowCount</code>, <code>showStudioButton</code></td></tr><tr><td>Power BI behavior</td><td>Per-component <code>interaction</code> policy</td><td>Global gate/fallback and multi-select defaults</td></tr><tr><td>Maps</td><td>Presentation, layer UI, popups, legend, height</td><td>Bindings, providers, endpoint, privacy acknowledgement, cache</td></tr></tbody></table></div>
+                <div class="doc-code"><header><span>Minimal Runtime Config</span><button type="button" data-copy-target="code-runtime">Copy</button></header><pre><code id="code-runtime">{
+  "version": "1.0",
+  "renderer": {
+    "showHeader": false,
+    "showRowCount": false,
+    "showStudioButton": true
+  },
+  "interactions": {
+    "crossFilter": true,
+    "multiSelect": true,
+    "externalMode": "auto"
+  },
+  "security": {
+    "cssMode": "scoped",
+    "htmlMode": "sanitized",
+    "showSanitizerWarnings": false
+  }
+}</code></pre></div>
+                <div class="doc-callout"><span class="mark">i</span><div><strong>Style precedence:</strong> root <code>styles.globalCss</code> → <code>styles.components["*"]</code> → type rule → <code>#component_id</code> rule → local component style and CSS.</div></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-interactions" role="tabpanel" hidden>
+              <header><div><h3>Universal interactions</h3><p>Every component resolves the same policy. Internal HyperPBI behavior and external Power BI behavior are independent and can be combined deliberately.</p></div><a class="btn" href="./docs/interactions.md">Open interactions</a></header>
+              <div class="doc-body">
+                <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Setting</th><th>Values</th><th>Effect</th></tr></thead><tbody><tr><td><code>internalMode</code></td><td><code>none</code>, <code>highlight</code>, <code>filter</code></td><td>Controls local HyperPBI appearance or engine-owned filtering.</td></tr><tr><td><code>internalScope</code></td><td><code>self</code>, <code>others</code>, <code>all</code></td><td>Determines which HyperPBI components receive the internal filter/highlight.</td></tr><tr><td><code>externalMode</code></td><td><code>none</code>, <code>auto</code>, <code>selection</code>, <code>filter</code></td><td>Controls Power BI propagation. Auto filters controls and selects exact data identities.</td></tr><tr><td><code>selectionMode</code></td><td><code>replace</code>, <code>add</code>, <code>toggle</code></td><td>Defines how the next selection combines with current state.</td></tr><tr><td><code>showSelector</code></td><td>true / false</td><td>Only controls checkbox/radio visibility; click interaction remains independent.</td></tr></tbody></table></div>
+                <div class="doc-grid">
+                  <section class="doc-card"><h4>Use selection for data points</h4><p>Table rows, matrix cells, chart points, map features, and timeline items use exact Power BI selection identities in <code>auto</code> mode.</p></section>
+                  <section class="doc-card"><h4>Use filters for field values</h4><p>Controls and slicers use <code>applyJsonFilter</code>. Explicit filter mode requires a model column with <code>sourceTable</code> and <code>sourceColumn</code>.</p></section>
+                </div>
+                <div class="doc-code"><header><span>Clickable table with local highlight and external Power BI filtering</span><button type="button" data-copy-target="code-interaction">Copy</button></header><pre><code id="code-interaction">{
+  "type": "table",
+  "id": "details",
+  "columns": ["category"],
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "filter",
+    "field": "category",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  }
+}</code></pre></div>
+                <div class="doc-callout warning"><span class="mark">!</span><div><strong>Do not couple UI and behavior.</strong> <code>showSelector:false</code> removes the checkbox only. It must not disable click handling, local highlight, or external filtering.</div></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-custom" role="tabpanel" hidden>
+              <header><div><h3>Custom components, repeat templates, and slots</h3><p>Custom content is expressive without becoming an arbitrary web runtime. HyperPBI owns wrappers, keyboard behavior, state, selection, sanitization, and event execution.</p></div><a class="btn" href="./docs/custom-components.md">Open custom guide</a></header>
+              <div class="doc-body">
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>Safe templates</h4><p>Use tokens such as <code>{{row.field}}</code>, metrics, field metadata, props, state, and selected values.</p></section>
+                  <section class="doc-card"><h4>Repeat and slots</h4><p><code>repeat</code> supports distinct, sorting, limit, and row templates. Slots include header, actions, row, cell, popup, tooltip, legend, and badge.</p></section>
+                  <section class="doc-card"><h4>Typed actions</h4><p><code>selectRow</code>, <code>selectWhere</code>, filters, state changes, tabs, collapse, detail, highlight, and explicit clears.</p></section>
+                </div>
+                <div class="doc-code"><header><span>Distinct custom slicer pattern</span><button type="button" data-copy-target="code-custom">Copy</button></header><pre><code id="code-custom">{
+  "type": "custom",
+  "id": "category_filter",
+  "repeat": {
+    "source": "rows",
+    "as": "row",
+    "distinctBy": "category",
+    "sortBy": "category",
+    "limit": 200,
+    "template": "&lt;div class='filter-row'&gt;{{row.category}}&lt;/div&gt;"
+  },
+  "interactions": {
+    "onClick": {
+      "action": "selectWhere",
+      "where": {
+        "op": "=",
+        "left": { "field": "category" },
+        "right": { "valueFromRow": "category" }
+      }
+    }
+  },
+  "interaction": {
+    "enabled": true,
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "filter",
+    "field": "category",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  }
+}</code></pre></div>
+                <div class="doc-callout"><span class="mark">i</span><div>Each repeated item is rendered inside an engine-owned, accessible <code>.hp-custom-repeat-row</code>. User HTML never owns JavaScript event handlers.</div></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-calculations" role="tabpanel" hidden>
+              <header><div><h3>Calculation DSL</h3><p>Derived fields execute row-by-row in dependency order. Metrics execute over the current filtered row set. Invalid dependencies, unknown operators, and cycles are rejected before rendering.</p></div><a class="btn" href="./docs/calculations-dsl.md">Open DSL reference</a></header>
+              <div class="doc-body">
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>Expression nodes</h4><p>Field references use <code>{"field":"risk_score"}</code>; literals use <code>{"value":80}</code>.</p></section>
+                  <section class="doc-card"><h4>Operator families</h4><p>Arithmetic, comparison, boolean, text, date, null, conditional, and case operations.</p></section>
+                  <section class="doc-card"><h4>Metric families</h4><p>Count, conditional count, sum/average, min/max, distinct count, ratio, and percent of total.</p></section>
+                </div>
+                <div class="doc-code"><header><span>Derived risk band and metric</span><button type="button" data-copy-target="code-calc">Copy</button></header><pre><code id="code-calc">{
+  "fields": [{
+    "key": "risk_band",
+    "type": "text",
+    "expression": {
+      "op": "if",
+      "condition": {
+        "op": ">=",
+        "left": { "field": "risk_score" },
+        "right": { "value": 80 }
+      },
+      "then": { "value": "High" },
+      "else": { "value": "Normal" }
+    }
+  }],
+  "metrics": [{
+    "key": "high_risk_count",
+    "aggregation": "countWhere",
+    "where": {
+      "op": "=",
+      "left": { "field": "risk_band" },
+      "right": { "value": "High" }
+    }
+  }]
+}</code></pre></div>
+                <div class="doc-callout"><span class="mark">i</span><div>Divide-by-zero and invalid date operations return <code>null</code> instead of crashing the visual. Calculated values can feed metrics, charts, tables, maps, filters, and templates.</div></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-maps" role="tabpanel" hidden>
+              <header><div><h3>Maps, provider profiles, and geocoding</h3><p>Runtime Config owns field bindings and providers. Map components own only presentation. Location priority is Geometry → Latitude/Longitude → X/Y → Address.</p></div><a class="btn" href="./docs/map-services.md">Open map services</a></header>
+              <div class="doc-body">
+                <div class="doc-grid">
+                  <section class="doc-card"><h4>Core package</h4><p>No WebAccess privilege, neutral map background, and cached or already-bound coordinates only. Intended for certification-oriented distribution.</p></section>
+                  <section class="doc-card"><h4>Maps package</h4><p>OpenStreetMap tiles plus user-triggered Nominatim and declared ArcGIS geocoding domains through Power BI WebAccess.</p></section>
+                </div>
+                <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Provider</th><th>Behavior</th><th>Enterprise notes</th></tr></thead><tbody><tr><td>OpenStreetMap</td><td>Visible viewport raster tiles with Leaflet attribution</td><td>Requires the maps package and approved WebAccess.</td></tr><tr><td>Nominatim</td><td>User-triggered, sequential, maximum one request/second, cached, cancellable</td><td>No autocomplete. Use approved enterprise services or pre-geocode large datasets.</td></tr><tr><td>ArcGIS Geocoding Server</td><td><code>findAddressCandidates</code>, highest score, finite x/y, default minimum score 80</td><td>Endpoint domain must be declared in the package WebAccess privilege.</td></tr></tbody></table></div>
+                <div class="doc-code"><header><span>ArcGIS endpoint example</span><button type="button" data-copy-target="code-arcgis">Copy</button></header><pre><code id="code-arcgis">https://geosop1.houstontx.gov/arcgis/rest/services/Geocoders/COH_Locator_Compo/GeocodeServer</code></pre></div>
+                <div class="doc-callout warning"><span class="mark">!</span><div><strong>Privacy gate:</strong> Address data is never transmitted during normal rendering. Geocoding requires an explicit Studio action and privacy acknowledgement.</div></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-security" role="tabpanel" hidden>
+              <header><div><h3>Security model</h3><p>HyperPBI treats AI output as data, not code. The trusted-author modes broaden the accepted HTML/CSS vocabulary for controlled internal use without enabling scripts or event handlers.</p></div><a class="btn" href="./docs/security.md">Open security guide</a></header>
+              <div class="doc-body">
+                <div class="doc-grid">
+                  <section class="doc-card"><h4>Certification-oriented defaults</h4><p><code>cssMode:"scoped"</code>, <code>htmlMode:"sanitized"</code>, and <code>showSanitizerWarnings:false</code>.</p></section>
+                  <section class="doc-card"><h4>Trusted author mode</h4><p>Broader parsed declarations and HTML/SVG vocabulary for controlled dashboards—still no script execution, inline handlers, iframes, or executable CSS.</p></section>
+                </div>
+                <div class="doc-grid three">
+                  <section class="doc-card"><h4>HTML</h4><p>DOMPurify runs after template substitution for custom content, slots, popups, and tooltips.</p></section>
+                  <section class="doc-card"><h4>CSS</h4><p>CSS Tree parses rules. Selectors are scoped; imports, URLs, expressions, fixed positioning, and abusive z-index are blocked.</p></section>
+                  <section class="doc-card"><h4>Network</h4><p>External requests exist only in the maps build and only for configured providers on declared WebAccess domains.</p></section>
+                </div>
+                <div class="doc-callout warning"><span class="mark">!</span><div>Blocked in every mode: <code>eval</code>, <code>new Function</code>, scripts, inline event handlers, iframes, object/embed, unsafe links, external runtime scripts, and executable CSS.</div></div>
+                <div class="doc-links"><a href="./docs/security.md">Security reference</a><a href="./docs/custom-components.md">Custom component safety</a><a href="./docs/map-services.md">Provider policy</a></div>
+              </div>
+            </article>
+
+            <article class="doc-panel" id="doc-build" role="tabpanel" hidden>
+              <header><div><h3>Build, verify, package, and distribute</h3><p>HyperPBI uses local TypeScript/Preact dependencies, automated tests, two Power BI packaging profiles, and a certification-oriented audit.</p></div><a class="btn" href="./README.md">Open README</a></header>
+              <div class="doc-body">
+                <div class="doc-command-grid">
+                  <div class="doc-command"><strong>Install</strong><code>npm install</code><button type="button" data-copy="npm install">Copy</button></div>
+                  <div class="doc-command"><strong>Develop</strong><code>npm start</code><button type="button" data-copy="npm start">Copy</button></div>
+                  <div class="doc-command"><strong>Verify</strong><code>npm run typecheck &amp;&amp; npm test &amp;&amp; npm run lint</code><button type="button" data-copy="npm run typecheck && npm test && npm run lint">Copy</button></div>
+                  <div class="doc-command"><strong>Core</strong><code>npm run package:core</code><button type="button" data-copy="npm run package:core">Copy</button></div>
+                  <div class="doc-command"><strong>Maps</strong><code>npm run package:maps</code><button type="button" data-copy="npm run package:maps">Copy</button></div>
+                  <div class="doc-command"><strong>Audit</strong><code>npm run certification:audit</code><button type="button" data-copy="npm run certification:audit">Copy</button></div>
+                </div>
+                <div class="doc-grid">
+                  <section class="doc-card"><h4>Generated artifacts</h4><ul class="doc-list"><li><code>*-core.pbiviz</code>: no WebAccess privilege.</li><li><code>*-maps.pbiviz</code>: declared OSM/Nominatim/ArcGIS WebAccess.</li><li>The unsuffixed file is the most recently built profile; use suffixed artifacts to avoid ambiguity.</li></ul></section>
+                  <section class="doc-card"><h4>Operational limits</h4><ul class="doc-list"><li>Power BI window maximum: 30,000 rows.</li><li>Total data-view row limit: 1,048,576 rows.</li><li>Aggregation memory limit: 100 MB.</li><li>Tables remain independently paginated and render-capped.</li></ul></section>
+                </div>
+                <div class="doc-callout"><span class="mark">i</span><div>Import a package through <strong>Visualizations → … → Import a visual from a file</strong>, add HyperPBI, bind all required fields to <strong>Values</strong>, then open the visual’s <strong>Edit</strong> command.</div></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="content alt" id="design"><div class="container"><div class="design-grid"><div><span class="eyebrow">Enterprise design system</span><h2 style="font-size:clamp(30px,4vw,48px);line-height:1.08;letter-spacing:-.035em;margin:10px 0">Global styling with component-level control</h2><p style="color:var(--muted);font-size:17px">Define visual-wide CSS, reusable defaults by component type, and id-specific overrides. HyperPBI scopes every rule so the dashboard cannot leak styles into Power BI.</p><div class="token-list"><div class="token"><i class="swatch"></i>--hp-primary</div><div class="token"><i class="swatch"></i>--hp-success</div><div class="token"><i class="swatch"></i>--hp-warning</div><div class="token"><i class="swatch"></i>--hp-danger</div></div></div><div class="code-window"><div class="code-head">hyperpbi-dashboard.json <span>Scoped and sanitized</span></div><pre>{
   <span class="key">"version"</span>: <span class="str">"1.0"</span>,
   <span class="key">"styles"</span>: {
@@ -219,7 +608,7 @@
     <section class="cta"><div class="container"><div class="cta-card"><div><span class="eyebrow">Build with your own data</span><h2>One visual. A complete dashboard experience.</h2><p>Use HyperPBI to turn ordinary Power BI-bound data into compact, responsive, app-like dashboards designed through AI and rendered safely.</p></div><div class="cta-actions"><a class="btn btn-primary" href="https://github.com/austinwin/hyperpbi">Get the source</a><a class="btn" href="./docs/user-guide.md">Read the user guide</a></div></div></div></section>
   </main>
 
-  <footer><div class="container"><div class="footer-grid"><div><a class="brand" href="#top"><span class="brand-mark">H</span><span style="color:#fff">HyperPBI<small style="color:#91a6bd">AI-powered Power BI dashboards</small></span></a><p class="footer-copy">A schema-driven enterprise dashboard renderer with safe AI authoring, calculations, maps, interactions, and global styling.</p></div><div><h4>Product</h4><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#security">Security</a></div><div><h4>Documentation</h4><a href="./README.md">README</a><a href="./docs/user-guide.md">User guide</a><a href="./docs/hyperpbi-spec-reference.md">Specification</a><a href="./docs/hyperpbi-ai-skill.md">AI skill</a></div><div><h4>Engineering</h4><a href="./docs/calculations-dsl.md">Calculation DSL</a><a href="./docs/map-services.md">Map services</a><a href="./docs/interactions.md">Interactions</a><a href="./docs/security.md">Security</a></div></div><div class="footer-bottom"><span>HyperPBI · Apache-2.0 repository</span><span>Power BI is a trademark of Microsoft Corporation. HyperPBI is an independent project.</span></div></div></footer>
+  <footer><div class="container"><div class="footer-grid"><div><a class="brand" href="#top"><span class="brand-mark">H</span><span style="color:#fff">HyperPBI<small style="color:#91a6bd">AI-powered Power BI dashboards</small></span></a><p class="footer-copy">A schema-driven enterprise dashboard renderer with safe AI authoring, calculations, maps, interactions, and global styling.</p></div><div><h4>Product</h4><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#components">Components</a><a href="#security">Security</a></div><div><h4>Documentation</h4><a href="#docs">Documentation center</a><a href="./docs/user-guide.md">User guide</a><a href="./docs/ai-authoring.md">AI authoring</a><a href="./docs/hyperpbi-spec-reference.md">Specification</a><a href="./docs/hyperpbi-ai-skill.md">AI skill</a></div><div><h4>Engineering</h4><a href="./docs/interactions.md">Interactions</a><a href="./docs/custom-components.md">Custom components</a><a href="./docs/calculations-dsl.md">Calculation DSL</a><a href="./docs/map-services.md">Map services</a><a href="./docs/security.md">Security</a></div></div><div class="footer-bottom"><span>HyperPBI · Apache-2.0 repository</span><span>Power BI is a trademark of Microsoft Corporation. HyperPBI is an independent project.</span></div></div></footer>
 
   <script>
     const nav = document.getElementById('siteNav');
@@ -246,6 +635,50 @@
       catch { button.textContent = 'Select command'; }
       setTimeout(() => { button.textContent = 'Copy'; }, 1400);
     }));
+
+
+    const docsButtons = Array.from(document.querySelectorAll('#docsNav [data-doc]'));
+    const docsPanels = Array.from(document.querySelectorAll('.doc-panel'));
+    const docsSearch = document.getElementById('docsSearch');
+    const docsEmpty = document.getElementById('docsEmpty');
+    const activateDoc = key => {
+      docsButtons.forEach(button => {
+        const active = button.dataset.doc === key;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      docsPanels.forEach(panel => {
+        const active = panel.id === `doc-${key}`;
+        panel.classList.toggle('active', active);
+        panel.hidden = !active;
+      });
+    };
+    docsButtons.forEach(button => button.addEventListener('click', () => activateDoc(button.dataset.doc)));
+    docsSearch?.addEventListener('input', event => {
+      const query = event.currentTarget.value.trim().toLowerCase();
+      let visibleCount = 0;
+      docsButtons.forEach(button => {
+        const haystack = `${button.textContent} ${button.dataset.keywords || ''}`.toLowerCase();
+        const visible = !query || haystack.includes(query);
+        button.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+      docsEmpty.style.display = visibleCount ? 'none' : 'block';
+      const activeVisible = docsButtons.some(button => button.classList.contains('active') && !button.hidden);
+      if (!activeVisible) {
+        const next = docsButtons.find(button => !button.hidden);
+        if (next) activateDoc(next.dataset.doc);
+      }
+    });
+    document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', async () => {
+      const target = document.getElementById(button.dataset.copyTarget);
+      const text = target?.textContent || '';
+      const original = button.textContent;
+      try { await navigator.clipboard.writeText(text); button.textContent = 'Copied'; }
+      catch { button.textContent = 'Select text'; }
+      setTimeout(() => { button.textContent = original; }, 1400);
+    }));
+
   </script>
 </body>
 </html>
