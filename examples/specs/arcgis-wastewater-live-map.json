@@ -1,0 +1,79 @@
+{
+  "$schema": "https://austinwin.github.io/hyperpbi/schemas/dashboard.json",
+  "description": "ArcGIS Wastewater live map example - demonstrates ArcGIS feature reference source, viewport query, service renderer, popup, tooltips, layer panel, legend, and performance settings. No authentication required.",
+  "components": [
+    {
+      "id": "wastewater-map",
+      "type": "map",
+      "title": "Houston Wastewater Network",
+      "view": {
+        "center": [-95.35, 29.75],
+        "zoom": 12,
+        "minZoom": 8,
+        "maxZoom": 18,
+        "fitMode": "data"
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "layers": [
+        {
+          "id": "wastewater-layer",
+          "name": "Wastewater UN Public",
+          "source": {
+            "type": "arcgisFeature",
+            "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",
+            "useServiceRenderer": true,
+            "useServiceLabels": false,
+            "mode": "reference",
+            "outFields": ["OBJECTID", "FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE", "SHAPE"]
+          },
+          "performance": {
+            "maxFeatures": 2000,
+            "requestBatchSize": 500,
+            "viewportQuery": true,
+            "cacheMinutes": 5
+          },
+          "popup": {
+            "enabled": true,
+            "title": "Wastewater Pipe {FACILITYID}",
+            "fields": [
+              { "field": "FACILITYID", "label": "Facility ID", "display": "text" },
+              { "field": "DIAMETER", "label": "Diameter (in)", "display": "number" },
+              { "field": "MATERIAL", "label": "Material", "display": "badge" },
+              { "field": "INSTALLDATE", "label": "Install Date", "display": "date" }
+            ]
+          },
+          "tooltip": {
+            "fields": [
+              { "field": "FACILITYID", "label": "Facility" },
+              { "field": "DIAMETER", "label": "Diameter" }
+            ]
+          },
+          "labels": {
+            "enabled": false
+          },
+          "legend": {
+            "visible": true,
+            "title": "Pipe Material"
+          },
+          "opacity": 0.85,
+          "visible": true,
+          "order": 1
+        }
+      ],
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "selection": true,
+        "zoomToSelection": true
+      },
+      "settings": {
+        "showLayerControl": true,
+        "showLegend": true,
+        "clusterPoints": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://austinwin.github.io/hyperpbi/schemas/dashboard.json",
+  "description": "ArcGIS Wastewater join map example - demonstrates Power BI field joined to ArcGIS service field, service geometry, joined features, and correct Power BI row selection.",
+  "components": [
+    {
+      "id": "wastewater-join",
+      "type": "map",
+      "title": "Wastewater Join Map",
+      "view": {
+        "center": [-95.35, 29.75],
+        "zoom": 12
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "layers": [
+        {
+          "id": "powerbi-join-layer",
+          "name": "Work Orders with Pipe Geometry",
+          "source": {
+            "type": "arcgisFeature",
+            "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",
+            "mode": "join",
+            "outFields": ["FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE"]
+          },
+          "join": {
+            "enabled": true,
+            "powerBiField": "FacilityID",
+            "serviceField": "FACILITYID",
+            "cardinality": "manyToOne",
+            "keyType": "string",
+            "normalization": ["trim", "upper"],
+            "powerBiDuplicatePolicy": "first",
+            "serviceDuplicatePolicy": "first",
+            "unmatchedPolicy": "diagnose",
+            "queryStrategy": "keyBatches"
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "MATERIAL",
+            "fieldSource": "service",
+            "values": [
+              { "value": "CI", "symbol": { "color": "#2c3e50", "fillOpacity": 0.4, "weight": 2 } },
+              { "value": "PVC", "symbol": { "color": "#3498db", "fillOpacity": 0.4, "weight": 2 } },
+              { "value": "RCP", "symbol": { "color": "#95a5a6", "fillOpacity": 0.4, "weight": 2 } }
+            ],
+            "defaultSymbol": { "color": "#e74c3c", "fillOpacity": 0.3, "weight": 1 }
+          },
+          "performance": {
+            "maxFeatures": 2000,
+            "requestBatchSize": 100,
+            "viewportQuery": false,
+            "cacheMinutes": 10
+          },
+          "popup": {
+            "enabled": true,
+            "title": "Work Order + Pipe {FACILITYID}",
+            "fields": [
+              { "field": "FacilityID", "fieldSource": "powerbi", "label": "Work Order ID" },
+              { "field": "FACILITYID", "fieldSource": "service", "label": "Pipe ID" },
+              { "field": "MATERIAL", "fieldSource": "service", "label": "Material" },
+              { "field": "DIAMETER", "fieldSource": "service", "label": "Diameter" }
+            ]
+          },
+          "labels": {
+            "enabled": false
+          },
+          "legend": {
+            "visible": true,
+            "title": "Pipe Material"
+          },
+          "opacity": 0.85,
+          "visible": true,
+          "order": 1
+        }
+      ],
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "selection": true,
+        "zoomToSelection": true
+      },
+      "settings": {
+        "showLayerControl": true,
+        "showLegend": true
+      }
+    }
+  ]
+}
