@@ -6,6 +6,12 @@ import type {
     MenuItem, AppActionItem,
     ListGroupItem, DataGridItem, TrackingStage,
 } from "./uiSchema";
+import type {
+    MapViewDefinition, MapBasemapDefinition, MapLayerDefinition,
+} from "./mapSchema";
+
+// Re-export map types
+export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition };
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
@@ -230,6 +236,33 @@ export interface MatrixComponent extends ComponentBase {
 
 export interface MapComponent extends ComponentBase {
     type: "map";
+    engine?: "leaflet";
+
+    // ── New declarative map model ──
+    view?: MapViewDefinition;
+    basemap?: MapBasemapDefinition;
+    layers?: MapLayerDefinition[];
+
+    layerPanel?: {
+        visible?: boolean;
+        position?: "left" | "right";
+        defaultOpen?: boolean;
+        allowViewerReorder?: boolean;
+        allowViewerOpacity?: boolean;
+        allowViewerLabels?: boolean;
+    };
+
+    toolbar?: {
+        visible?: boolean;
+        home?: boolean;
+        layers?: boolean;
+        legend?: boolean;
+        clearSelection?: boolean;
+        zoomToSelection?: boolean;
+        fullscreenWithinVisual?: boolean;
+    };
+
+    // ── Legacy properties (still supported for backward compatibility) ──
     settings?: {
         fitBounds?: boolean;
         showLayerControl?: boolean;

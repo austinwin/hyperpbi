@@ -47,6 +47,14 @@ export interface DashboardState {
 
     // Toasts
     toasts: ToastMessage[];
+
+    // Map layer runtime state (viewer-controlled, not spec-level)
+    mapLayerState: Record<string, {
+        order?: string[];
+        visibility?: Record<string, boolean>;
+        opacity?: Record<string, number>;
+        labels?: Record<string, boolean>;
+    }>;
 }
 
 export type DashboardAction =
@@ -86,7 +94,13 @@ export type DashboardAction =
     | { type: "stepPrevious"; id: string }
     // Toasts
     | { type: "pushToast"; toast: ToastMessage }
-    | { type: "dismissToast"; id: string };
+    | { type: "dismissToast"; id: string }
+    // Map layer actions
+    | { type: "mapLayerOrder"; mapId: string; layerIds: string[] }
+    | { type: "mapLayerVisibility"; mapId: string; layerId: string; visible: boolean }
+    | { type: "mapLayerOpacity"; mapId: string; layerId: string; opacity: number }
+    | { type: "mapLayerLabels"; mapId: string; layerId: string; visible: boolean }
+    | { type: "resetMapLayers"; mapId: string };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
     return {
@@ -112,6 +126,7 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
         accordionOpenItems: {},
         activeSteps: {},
         toasts: [],
+        mapLayerState: {},
     };
 }
 
@@ -196,6 +211,63 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         return { ...state, toasts };
     }
     if (action.type === "dismissToast") return { ...state, toasts: state.toasts.filter(t => t.id !== action.id) };
+
+    // ── Map layer runtime state ──────────────────────────────────
+    if (action.type === "mapLayerOrder") {
+        return {
+            ...state,
+            mapLayerState: {
+                ...state.mapLayerState,
+                [action.mapId]: {
+                    ...(state.mapLayerState[action.mapId] ?? {}),
+                    order: action.layerIds,
+                },
+            },
+        };
+    }
+    if (action.type === "mapLayerVisibility") {
+        const existing = state.mapLayerState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapLayerState: {
+                ...state.mapLayerState,
+                [action.mapId]: {
+                    ...existing,
+                    visibility: { ...(existing.visibility ?? {}), [action.layerId]: action.visible },
+                },
+            },
+        };
+    }
+    if (action.type === "mapLayerOpacity") {
+        const existing = state.mapLayerState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapLayerState: {
+                ...state.mapLayerState,
+                [action.mapId]: {
+                    ...existing,
+                    opacity: { ...(existing.opacity ?? {}), [action.layerId]: action.opacity },
+                },
+            },
+        };
+    }
+    if (action.type === "mapLayerLabels") {
+        const existing = state.mapLayerState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapLayerState: {
+                ...state.mapLayerState,
+                [action.mapId]: {
+                    ...existing,
+                    labels: { ...(existing.labels ?? {}), [action.layerId]: action.visible },
+                },
+            },
+        };
+    }
+    if (action.type === "resetMapLayers") {
+        const { [action.mapId]: _removed, ...rest } = state.mapLayerState;
+        return { ...state, mapLayerState: rest };
+    }
 
     // Default: clearFilters fallback (shouldn't normally reach here)
     return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };

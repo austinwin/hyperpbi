@@ -1,0 +1,109 @@
+// ── ArcGIS Response Parser ───────────────────────────────────────────
+// Parses ArcGIS query responses (GeoJSON or Esri JSON) into a normalized form.
+
+import { esriToGeoJson } from "./arcGisGeometryConverter";
+import type {
+    ArcGisQueryResponse,
+    ArcGisGeoJsonResponse,
+    ArcGisFeature,
+} from "./arcGisServiceTypes";
+
+export interface ParsedArcGisFeature {
+    objectId?: number;
+    attributes: Record<string, unknown>;
+    geometry: GeoJSON.GeoJsonObject | null;
+}
+
+export interface ParsedArcGisResponse {
+    features: ParsedArcGisFeature[];
+    objectIdFieldName?: string;
+    exceededTransferLimit: boolean;
+    geometryType?: string;
+    spatialReference?: { wkid: number };
+}
+
+/**
+ * Parse an ArcGIS query response, whether GeoJSON or Esri JSON format.
+ */
+export function parseArcGisResponse(
+    response: unknown,
+    requestedFormat: "geojson" | "json"
+): ParsedArcGisResponse {
+    // Try GeoJSON format first
+    if (requestedFormat === "geojson" && isGeoJsonResponse(response)) {
+        return parseGeoJsonResponse(response as ArcGisGeoJsonResponse);
+    }
+
+    // Fallback to Esri JSON format
+    if (isEsriQueryResponse(response)) {
+        return parseEsriResponse(response as ArcGisQueryResponse);
+    }
+
+    // Unknown format
+    return {
+        features: [],
+        exceededTransferLimit: false,
+    };
+}
+
+function isGeoJsonResponse(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    const obj = value as Record<string, unknown>;
+    return obj.type === "FeatureCollection" && Array.isArray(obj.features);
+}
+
+function isEsriQueryResponse(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    const obj = value as Record<string, unknown>;
+    return Array.isArray(obj.features) || obj.objectIdFieldName !== undefined || obj.fields !== undefined;
+}
+
+function parseGeoJsonResponse(response: ArcGisGeoJsonResponse): ParsedArcGisResponse {
+    const features: ParsedArcGisFeature[] = [];
+
+    for (const feature of response.features) {
+        if (!feature) continue;
+
+        const attributes: Record<string, unknown> = {};
+        if (feature.properties) {
+            for (const [key, value] of Object.entries(feature.properties)) {
+                attributes[key] = value;
+            }
+        }
+
+        features.push({
+            objectId: attributes.OBJECTID as number,
+            attributes,
+            geometry: feature.geometry ?? null,
+        });
+    }
+
+    return {
+        features,
+        exceededTransferLimit: response.exceededTransferLimit ?? false,
+    };
+}
+
+function parseEsriResponse(response: ArcGisQueryResponse): ParsedArcGisResponse {
+    const features: ParsedArcGisFeature[] = [];
+
+    if (response.features) {
+        for (const esriFeature of response.features) {
+            const objectId = esriFeature.attributes?.[response.objectIdFieldName ?? "OBJECTID"] as number | undefined;
+
+            features.push({
+                objectId,
+                attributes: esriFeature.attributes ?? {},
+                geometry: esriToGeoJson(esriFeature.geometry),
+            });
+        }
+    }
+
+    return {
+        features,
+        objectIdFieldName: response.objectIdFieldName,
+        exceededTransferLimit: response.exceededTransferLimit ?? false,
+        geometryType: response.geometryType,
+        spatialReference: response.spatialReference,
+    };
+}
