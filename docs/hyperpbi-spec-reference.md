@@ -1,65 +1,151 @@
-# HyperPBI specification reference
+# HyperPBI Specification Reference
 
-Root fields: `version`, `title`, `theme`, `layout`, `state`, `toolbar`, `leftPanel`, `rightPanel`, `components`, `calculations`, `styles`, and `css`.
+Complete JSON schema reference for HyperPBI 1.0 dashboard specifications.
 
-Runtime Config owns renderer and security behavior. Defaults are `renderer: { "showHeader": false, "showRowCount": false, "showStudioButton": true }` and `security: { "cssMode": "scoped", "htmlMode": "sanitized", "showSanitizerWarnings": false }`. A schema `title` is metadata unless `showHeader` is explicitly true.
+## Root Document
 
-`styles.globalCss` is application-wide CSS scoped to the visual. `styles.components` provides defaults using `*`, a type such as `kpi`, or an id such as `#critical_kpi`. Rules support `className`, sanitized `style`, and component-scoped `css`. Local component values win.
+| Key | Required | Type | Description |
+|-----|----------|------|-------------|
+| `version` | Yes | `"1.0"` | Schema version |
+| `title` | No | string | Dashboard title (max 200 chars) |
+| `theme` | No | object | Theme configuration |
+| `layout` | No | object | Legacy layout configuration |
+| `state` | No | object | Initial state (search, activeTab, filters) |
+| `app` | No | object | Application shell configuration |
+| `toolbar` | No | array | Toolbar components (max 100) |
+| `leftPanel` | No | array | Left panel components (max 200) |
+| `rightPanel` | No | array | Right panel components (max 200) |
+| `components` | Yes | array | Dashboard components (max 500) |
+| `calculations` | No | object | Calculation specification |
+| `styles` | No | object | Global style system |
+| `css` | No | string | Deprecated global CSS (max 100k chars) |
 
-Shared component fields: `type`, `id`, `title`, `span` (1–12), `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, safe custom `interactions`, and universal `interaction`.
+## Theme
 
-## Fields
+| Key | Type | Default |
+|-----|------|---------|
+| `mode` | `"light"` \| `"dark"` \| `"auto"` | `"light"` |
+| `density` | `"compact"` \| `"normal"` \| `"spacious"` | `"normal"` |
+| `fontFamily` | string | System font |
+| `primaryColor` | string | `#206bc4` |
+| `surfaceColor` | string | `#ffffff` |
+| `textColor` | string | `#182433` |
+| `borderColor` | string | `#dce1e7` |
+| `radius` | number | `6` |
+| `cardPadding` | number | `12` |
+| `gap` | number | `12` |
 
-JSON field references must use the normalized `key`, preferably a stable qualified key such as `workorders_status`. The field dictionary includes `key`, `displayName`, `queryName`, `sourceTable`, `sourceColumn`, `qualifiedName`, `type`, `format`, and `roles`. `displayName` is for visible labels only. Power BI `queryName` is parsed from forms including `Table.Column`, `'Table Name'.Column`, and `Table[Column]`; table and column are slugged separately. Numeric suffixes are only a final collision fallback.
+## Application Shell
 
-## Universal interaction
+See `src/schema/uiSchema.ts` for the complete `AppShellConfig` interface.
 
-`interaction` supports `enabled`, `trigger`, `internalMode`, `internalScope`, `externalMode`, `field`, `operator`, `value`, `selectionMode`, `multiSelect`, `showSelector`, and `clearOnSecondClick`. Internal and external behavior are independent. Internal modes are `none`, `highlight`, and `filter`; scope is `self`, `others`, or `all`. External modes are `none`, `auto`, `selection`, and `filter`. Auto means change/filter for controls and click/selection for data points. See [interactions](interactions.md) for family examples and migration rules.
+**Brand:** `title`, `subtitle`, `icon`, `shortTitle`
+**Navbar:** `visible`, `showSidebarToggle`, `showSearch`, `actions[]`, `user`, `notifications`
+**Sidebar:** `visible`, `width`, `collapsedWidth`, `collapsible`, `defaultCollapsed`, `navigation[]`, `footer`
+**Page Header:** `visible`, `title`, `subtitle`, `breadcrumbs[]`, `meta[]`, `actions[]`
+**Footer:** `visible`, `text`, `secondaryText`
 
-Custom `repeat` supports `source`, `as`, `limit`, `template`, `distinctBy`, `sortBy`, and `sortDirection`. Repeated content is sanitized HTML inside engine-owned accessible wrappers. Selected wrappers receive `is-selected` and `hp-row-selected`.
+## Shared Component Properties
 
-Custom `repeat` actions resolve matches and pass a universal payload to the shared engine. A field without `sourceTable` and `sourceColumn` cannot be an external filter target. Table, matrix, map, scatter, and advanced-chart filters require explicit unambiguous fields; identity selection does not.
+All components support:
 
-## Runtime Config GUI and JSON
+| Property | Type | Description |
+|----------|------|-------------|
+| `type` | string | Component type (required) |
+| `id` | string | Unique stable ID |
+| `title` | string | Display title |
+| `subtitle` | string | Secondary text |
+| `span` | 1-12 | Grid column span |
+| `className` | string | CSS class |
+| `hidden` | boolean | Hide component |
+| `style` | object | Inline CSS (sanitized) |
+| `css` | string | Scoped CSS |
+| `slots` | object | Named HTML slot overrides |
+| `interaction` | object | Universal data interaction |
+| `interactions` | object | Safe custom interactions |
+| `ariaLabel` | string | Accessible label |
+| `icon` | string | Icon from bundled registry |
+| `variant` | string | UI variant |
+| `size` | string | UI size (xs/sm/md/lg) |
+| `disabled` | boolean | Disabled state |
+| `tooltip` | object | Tooltip definition |
+| `uiAction` | object/array | UI action(s) |
 
-The Runtime Config tab provides GUI sections for renderer, interactions, security, providers, geocoder, and map bindings. GUI changes immediately normalize and update saved JSON. Advanced JSON is a separate draft: edit it, validate or format it, then select **Apply JSON** to update the GUI. Invalid JSON never mutates the applied form.
+Three independent behavior systems:
+- **`interactions`** — safe custom event-to-data payloads
+- **`interaction`** — universal Power BI data policy
+- **`uiAction`** — interface/navigation/overlay behavior
+
+## UI Actions
+
+| Action | Required | Description |
+|--------|----------|-------------|
+| `clearFilters` | — | Clear all HyperPBI filters |
+| `setTab` | target, value | Set active tab |
+| `setState` | target, value | Set state value |
+| `toggleState` | target | Toggle Boolean state |
+| `toggleSidebar` | — | Toggle sidebar collapse |
+| `openOverlay` | target | Open overlay |
+| `closeOverlay` | target | Close overlay |
+| `toggleOverlay` | target | Toggle overlay |
+| `setStep` | target, value | Set active step |
+| `nextStep` | target | Advance step |
+| `previousStep` | target | Reverse step |
+| `showToast` | message, title?, intent?, durationMs? | Show toast (1-30s) |
+| `dismissToast` | target (toast ID) | Dismiss toast |
+| `scrollTo` | target (component ID) | Scroll to component |
+| `refresh` | — | Safe no-op |
+
+## Universal Data Interaction
 
 ```json
-{"version":"1.0","renderer":{"showHeader":false,"showRowCount":false,"showStudioButton":true},"interactions":{"crossFilter":true,"multiSelect":true,"externalMode":"auto"},"security":{"cssMode":"scoped","htmlMode":"sanitized","showSanitizerWarnings":false}}
+{
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  }
+}
 ```
 
-Types: `grid`, `flex`, `split`, `leftPanel`, `rightPanel`, `toolbar`, `section`, `spacer`, `divider`, `searchBox`, `textInput`, `numberInput`, `slider`, `select`, `multiSelect`, `toggle`, `button`, `buttonGroup`, `filterChips`, `dateRange`, `tabs`, `collapsible`, `accordion`, `kpi`, `metricGrid`, `infoCard`, `statusBadge`, `progressBar`, `alert`, `statList`, `detailPanel`, `barChart`, `horizontalBarChart`, `lineChart`, `areaChart`, `pieChart`, `donutChart`, `scatterChart`, `gauge`, `heatmap`, `table`, `map`, `html`, `text`, `markdown`, and `custom`.
+## Containers
 
-Additional types: `drawer`, `filterDrawer`, `segmentedControl`, `timeline`, `matrix`, `smallMultiples`, and `advancedChart`.
+Layout types: `grid`, `flex`, `split`, `section`, `toolbar`, `leftPanel`, `rightPanel`. All support `children`, `direction`, `gap`, `columns`.
 
-## Advanced ECharts
+## Overlays
 
-`advancedChart.options` is JSON-only ECharts 6 configuration. Every bundled declarative chart and component module is registered: bar, boxplot, candlestick, chord, custom, effectScatter, funnel, gauge, graph, heatmap, line/lines, map, parallel, pictorialBar, pie, radar, sankey, scatter, sunburst, themeRiver, tree, treemap, coordinate systems, dataset/transform, dataZoom/brush, visualMap, marks, toolbox, timeline, graphic, aria, Canvas, and SVG. Safe formatter strings are allowed; functions (including custom `renderItem`) and executable/remote content are removed. `initOptions`, `setOption`, and `maxDataRows` expose ECharts initialization, update, and dataset limits. Existing simple charts remain backward compatible and safely merge optional `options`.
+- **`modal`**: title, children, footer, size (sm/md/lg), backdropClose. Rendered by root OverlayHost.
+- **`offcanvas`**: title, children, position (left/right), width, openWhen (always/selectedRow/state). Renders through legacy Drawer adapter.
+- **`dropdown`**: trigger, items (with dividers, disabled, actions), placement. Schema defined; renderer in development.
+- **`popover`**: trigger, children, placement. Schema defined; renderer in development.
 
-The sanitizer removes functions, `formatter`, `renderItem`, event-handler keys, URL-bearing keys, external/data/javascript URLs, executable markup, and unsupported series types.
+Overlay targets must match component IDs. Opening a modal closes open dropdowns/popovers.
 
-## Safe and trusted author modes
+## Forms
 
-`cssMode: "scoped"` and `htmlMode: "sanitized"` are the certification-oriented defaults. Scoped CSS supports common dashboard layout, grid/flex, table, typography, pseudo-content, filter, and responsive properties while blocking imports, URLs, expressions, fixed positioning, and abusive z-index. Sanitized HTML removes active controls and executable/embed surfaces.
+`textarea`, `checkbox`, `checkboxGroup`, `radioGroup`, `inputGroup`. Shared properties: `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, prefix/suffix.
 
-`cssMode: "trusted"` accepts broader parsed CSS declarations for local/internal trusted-author dashboards while retaining visual scoping and the executable/escape checks. `htmlMode: "trusted"` permits a broader HTML/SVG vocabulary, but scripts, inline event handlers, iframes, object/embed, unsafe links, and executable JavaScript remain prohibited. Sanitizer warnings are collected in Studio Issues; rendered dashboards show them only when `showSanitizerWarnings` is explicitly true.
+## Tables
 
-## Power BI data limits
+Native table properties: `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`. Column properties: `sortable`, `resizable`, `visible`, `wrap`, `frozen`, `cellType`, `intentMap`. Tabulator is not bundled.
 
-The data-reduction window requests up to 30,000 rows per segment, the Power BI window maximum. When `metadata.segment` is present, HyperPBI calls `fetchMoreData(true)` sequentially, preserves accumulated rows and selection identities, and reports whether more rows remain. Power BI still imposes an overall data-view row maximum of 1,048,576 and a 100 MB aggregation memory limit. Loaded rows are separate from displayed rows: tables remain paginated and cap rendered rows to avoid DOM expansion.
+## Maps
 
-## High-value components
+See [map services documentation](map-services.md) for complete coverage. Legacy `settings`/`style`/`popup` fully supported. New `layers[]` schema is experimental.
 
-- `drawer`: `position`, `width`, `openWhen`, `stateKey`, `defaultOpen`, and `children`.
-- `filterDrawer`: drawer behavior plus applied-filter count and clear filters.
-- `segmentedControl`: `field` or static `options`, universal change payloads, optional internal filtering, and selected pills.
-- `timeline`: `dateField`, `titleField`, optional category/status/description fields, sort direction, and limit.
-- `matrix`: `rows`, optional `columns`, `values`, totals, heatmap, and row limit.
-- `smallMultiples`: `splitField`, child `chart`, max panels, shared-scale intent, and height.
-- `detailPanel`: `selectedRow`, grouped fields, badges, copyable values, formats, and empty text.
+## Compatibility
 
-Template tokens: `count`, `title`, aggregate namespaces, `metric.key`, `selected.key`, `row.key`, `field.key.displayName`, `prop.name`, and `state.name`. Tokens are lookups, not expressions.
-
-Tabs should use `tabs[].children`. AI output using `tabs[].components` or `tabs[].content` is migrated automatically.
-
-Properties named `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON are not implemented and produce non-blocking reference warnings. Use typed interactions or the implemented Runtime Config interaction switch.
+- Legacy `internal`/`external` → use `interaction.internalMode`/`interaction.externalMode`
+- Legacy `selectable`/`selectionMode` → use `interaction.showSelector`/`interaction.internalMode`
+- `drawer`/`filterDrawer` → supported; use `offcanvas` for new specs
+- `stepper` → supported; use `steps` for new workflows
+- `engine: "tabulator"` → normalized to native with warning
+- Legacy map properties → normalized to `layers[]` internally

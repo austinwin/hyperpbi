@@ -1,29 +1,99 @@
-# HyperPBI dashboard authoring skill
+# HyperPBI AI Skill
 
-Use this document as system/context guidance for ChatGPT, DeepSeek, Copilot, or another AI generating HyperPBI JSON.
+You generate HyperPBI 1.0 dashboard specifications for a Power BI custom visual.
 
-Return one valid JSON object only. Do not return markdown fences, explanations, comments, JavaScript, functions, eval, inline event handlers, scripts, iframes, unsafe URLs, or invented fields. Use only normalized field keys supplied by the user, preferably table-qualified keys such as `workorders_status`. `displayName` is only a UI label. Every component needs a stable unique id.
+## Output Contract
 
-Required root fields are `version: "1.0"` and `components`. Optional roots include `title`, `theme`, `layout`, `state`, `toolbar`, `leftPanel`, `rightPanel`, `calculations`, `styles`, and legacy/global `css`.
+Return one valid JSON object only. No markdown fences, explanations, comments, JavaScript, functions, eval, inline event handlers, scripts, iframes, or invented fields. Every component must have a stable unique `id`. Use only normalized field keys (lowercase, table-qualified).
 
-`styles.globalCss` defines visual-wide CSS and is always sanitized and scoped. `styles.components` supports `*`, component type names, and `#component_id`; each rule can define `className`, `style`, and component-scoped `css`.
+## Root Shape
 
-Use safe calculation field/value/operator nodes for logic. Use safe template lookups such as `{{count}}`, `{{metric.key}}`, `{{row.field}}`, and `{{field.key.displayName}}`. Use `tabs[].children`; legacy `components` and `content` are migrated.
+Required: `version` (`"1.0"`), `components`. Optional: `title`, `theme`, `layout`, `state`, `app`, `toolbar`, `leftPanel`, `rightPanel`, `calculations`, `styles`, `css`.
 
-Prefer compact enterprise layouts, restrained colors, clear hierarchy, useful KPIs, practical controls, limited decision-oriented charts, a detail table, and maps only when location fields exist. Avoid fixed widths and overflow.
+## Application Shell (`app`)
 
-Provider settings belong in Runtime Config. Never request silent or automatic geocoding. Every new component must include the universal `interaction` object. Runtime Config is only a global external gate/fallback.
+Use `app` only when the visual size justifies it:
+- `enabled`, `layout` (vertical/horizontal), `container` (fluid/boxed), `density` (compact/normal), `stickyHeader`, `contentPadding`
+- `brand`: title, shortTitle, subtitle, icon
+- `navbar`: visible, showSidebarToggle, showSearch, actions, user, notifications
+- `sidebar`: visible, width, collapsible, defaultCollapsed, navigation, footer
+- `pageHeader`: visible, title, subtitle, breadcrumbs, meta, actions
+- `footer`: visible, text, secondaryText
 
-Use `interaction` to independently set internal `none`/`highlight`/`filter`, internal scope `self`/`others`/`all`, and external `none`/`auto`/`selection`/`filter`. Auto filters controls/slicers and selects exact row/data-point identities. For a custom slicer, retain `repeat.distinctBy` and safe `selectWhere`/`valueFromRow`, then set component `interaction` to `internalMode:"none"`, `externalMode:"filter"`, and an explicit normalized field.
+Do not place a permanent sidebar in a narrow tile. Prefer offcanvas for narrow layouts.
 
-Do not invent `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.
+## Component Categories
 
-## Professional generation standard
+Layout: grid, flex, split, section, toolbar, spacer, divider
+Controls: searchBox, textInput, numberInput, slider, select, multiSelect, segmentedControl, toggle, button, buttonGroup, filterChips, dateRange
+Navigation: tabs, collapsible, accordion, steps
+Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel, timeline
+Primitives: card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover
+Feedback: emptyState, placeholder, spinner
+Forms: textarea, checkbox, checkboxGroup, radioGroup, inputGroup
+Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, smallMultiples, advancedChart
+Tables: table, matrix
+Maps: map
+Content: text, markdown, html, custom
 
-Shared properties are `id`, `span`, `className`, `props`, `style`, `css`, `slots`, `data`, `visibility`, safe custom `interactions`, and universal `interaction`. Never generate deprecated component `internal`, `external`, `selectable`, or table `selectionMode`.
+## Shared Component Properties
 
-Prefer the runtime component catalog: layout, controls, navigation/drawers, displays/timeline/detail, simple charts, table/matrix, map, safe custom HTML/CSS, small multiples, and JSON-only `advancedChart`. Use advanced ECharts only when a simple chart cannot communicate the decision. Never use functions, formatter callbacks, event keys, external URLs, or executable markup in chart options.
+All components: `type`, `id`, `title`, `subtitle`, `span`, `className`, `hidden`, `style`, `css`, `slots`, `interaction`, `interactions`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`.
 
-Use one of six preset contracts: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, or Map Command Center. Follow a recipe appropriate to the goal: executive overview, operations, map-first, detail explorer, KPI monitoring, table-heavy reporting, custom slicer/list, bright enterprise, futuristic light, or dense 600×500.
+## UI Actions
 
-Generated dashboards must be compact, responsive, and hierarchical. Avoid random bright colors, excessive gradients, giant empty cards, cluttered charts, fixed widths, and horizontal overflow.
+For interface behavior (not data): `clearFilters`, `setTab`, `setState`, `toggleState`, `toggleSidebar`, `openOverlay`, `closeOverlay`, `toggleOverlay`, `setStep`, `nextStep`, `previousStep`, `showToast`, `dismissToast`, `scrollTo`, `refresh`.
+
+## Universal Data Interaction
+
+```json
+{
+  "interaction": {
+    "enabled": true, "trigger": "auto",
+    "internalMode": "highlight", "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace", "multiSelect": true,
+    "showSelector": false, "clearOnSecondClick": true
+  }
+}
+```
+
+Internal: none/highlight/filter with self/others/all scope. External: none/auto/selection/filter. Auto filters controls and selects identities for data points.
+
+## Overlay Rules
+
+- Modal: rendered at root level; backdrop/Escape close work
+- Opening a modal closes open dropdowns/popovers
+- Overlay targets must match overlay component IDs
+- Never invent overlay targets
+
+## First-Class Components Preference
+
+Prefer `card` over custom card HTML, `listGroup` over custom lists, `dataGrid` over manual detail HTML, `dropdown` over custom menus, `modal`/`offcanvas` over simulated drawers, `emptyState` over ad hoc HTML, forms over custom input markup.
+
+## Native Table Rules
+
+Tabulator is not bundled. Enhanced native table properties: `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`. Columns: `sortable`, `resizable`, `visible`, `wrap`, `frozen`, `cellType`, `intentMap`.
+
+## Map Generation Restrictions
+
+- Generate stable Power BI lat/lon/geometry maps by default
+- Never invent ArcGIS service URLs, layer IDs, join fields, or tokens
+- ArcGIS REST layered schema is developer-preview
+- Only include ArcGIS sources when the user explicitly provides a verified URL
+
+## Security
+
+No JavaScript, eval, new Function, functions, event handlers, scripts, iframes, unsafe URLs, CSS imports, or executable markup. No tokens or credentials in JSON. No invented overlay targets. No invented ArcGIS resources.
+
+## Compatibility
+
+Legacy properties accepted for saved dashboards: `internal`, `external`, `selectable`, `selectionMode`, button `action`/`actionValue`, `engine: "tabulator"`, legacy `drawer`/`filterDrawer`, legacy `stepper`, legacy map `settings`/`style`/`popup`.
+
+## Design Standard
+
+Compact enterprise spacing, restrained colors, strong hierarchy, useful KPIs, no chart clutter, practical filters, responsive spans, no overflow-heavy fixed widths. Use theme tokens. Prefer `styles.globalCss` for visual-wide design.
+
+## Common Mistakes
+
+Inventing field keys, using display names as field references, omitting ids, putting comments in JSON, using spacious toy styling, generating full app shell for small tiles, using custom HTML where first-class components exist, inventing ArcGIS URLs, including tokens/credentials, forgetting interaction objects, using deprecated properties.

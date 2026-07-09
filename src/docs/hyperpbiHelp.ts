@@ -1,67 +1,36 @@
 export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
-HyperPBI is a Power BI custom visual that compiles safe JSON into complete dashboards. The default HyperPBI Builder prioritizes Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return. Optional guided settings for goal, audience, layout, components, style, privacy, and samples are available under Dashboard setup → Customize. JSON stays hidden unless Advanced mode is selected.
+HyperPBI is a Power BI custom visual that compiles safe JSON into professional dashboards and application-style interfaces. The Builder prioritizes Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return.
 
 ## Guided Builder
 
-The primary Simple-mode workflow is Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return. Optional guided setup for goal, audience, layout, components, style, privacy, samples, and fields is collapsed under Dashboard setup → Customize. Advanced mode retains JSON, Runtime Config, Skill, Calculations, Map Services, Field Mapping, and diagnostics.
+Simple-mode workflow: Copy AI Prompt → Paste AI response → Validate & Preview → Save & return. Optional guided setup (goal, audience, layout, components, style, privacy) under Dashboard setup → Customize.
 
-## Specification and Config
+## Application Shell
 
-- Specification: theme, global styles, layout, components, calculations, slots, HTML, and component interactions.
-- Runtime Config: GUI-first renderer, interaction, security, provider, geocoder, and map-binding settings, plus optional Advanced JSON with explicit Apply JSON.
-- Use normalized, preferably table-qualified field keys from the Fields panel. displayName is only a friendly UI label; never use it as a JSON field reference.
+Configure root \`app\` for professional layouts: brand, navbar, sidebar, page header, footer. Use only when visual size supports it. Prefer offcanvas for narrow views.
 
-## Global design system
+## Component Categories
 
-Use styles.globalCss for visual-wide CSS. HyperPBI parses, allowlists, and scopes it to the visual root. Use styles.components for defaults shared by all components, a component type, or a specific component id.
+Layout, Controls, Navigation, Display, Primitives (card, listGroup, dataGrid, modal, offcanvas, etc.), Feedback, Forms, Charts, Tables, Maps, Content, Advanced.
 
-~~~json
-{
-  "styles": {
-    "globalCss": ".hp-card { border: 1px solid var(--hp-border); }",
-    "components": {
-      "*": { "style": { "minWidth": 0 } },
-      "kpi": { "className": "app-kpi", "css": ".hp-metric-value { font-size: 22px; }" },
-      "#critical_kpi": { "css": ".hp-metric { border-left: 4px solid var(--hp-danger); }" }
-    }
-  }
-}
-~~~
+## UI Actions vs Data Interactions
 
-Existing root css remains supported as an alias for global visual CSS. Component css is scoped to data-hp-id and cannot leak to another component.
-
-## Tabs
-
-Use tabs[].children. For compatibility, HyperPBI also migrates tabs[].components and tabs[].content to children.
-
-## Safe calculations
-
-Use calculations.fields and calculations.metrics. Expressions are JSON nodes containing field, value, or op. JavaScript, functions, eval, and event handlers are forbidden.
-
-## Custom components
-
-Custom components support sanitized html, scoped css, props, slots, repeat templates, metric/row/state tokens, and safe actions such as selectWhere. Resolved matches pass through the universal interaction engine. For a slicer, use repeat.distinctBy/selectWhere/valueFromRow plus component interaction with internalMode:"none", externalMode:"filter", and an explicit field.
-
-## Table selection
-
-Every component uses one interaction policy. Table clicks depend on interaction.enabled, not selector visibility. Use internalMode:"highlight" to retain and style rows, internalMode:"filter" with self/others/all scope to filter HyperPBI, and externalMode:"auto" or "selection" for exact Power BI identities. Runtime Config is only the external gate/fallback.
+- \`uiAction\`: interface behavior (open modals, change tabs, show toasts)
+- \`interaction\`: data behavior (filter, highlight, Power BI selection)
+- Both may coexist on one component
 
 ## Maps
 
-Location priority is Geometry, Latitude/Longitude, X/Y, then Address. Core mode has no external access. Maps mode can use OSM and user-triggered Nominatim after WebAccess and privacy approval.
+Power BI spatial maps (lat/lon, geometry) are stable. ArcGIS REST layered maps are developer preview. Use Maps package for OSM tiles: \`npm run package:maps\`.
 
-## Validation and repair
+## Tables
 
-Validate reports structural, field, calculation, provider, and security errors. Validate & Preview updates only the Builder preview. Save & return persists properties and exits. When AI JSON fails, Copy repair prompt includes the broken JSON, errors, warnings, valid fields, component contract, and strict JSON-only output instruction.
-
-## Presets, recipes, and advanced components
-
-Presets: Enterprise Light, Bright Modern, Futuristic Light, Dark Ops Center, Dense Compact, and Map Command Center. Recipes cover executive, operations, map-first, detail explorer, KPI monitoring, table-heavy, custom slicer, theme, and dense 600x500 dashboards. High-value components include drawer, filterDrawer, segmentedControl, timeline, matrix, smallMultiples, improved detailPanel, and JSON-only advancedChart.
+Native table with enhanced features. Tabulator is not bundled.
 
 ## Security
 
-No user JavaScript is executed. HTML is sanitized with DOMPurify. CSS is parsed, allowlisted, and scoped. Scripts, iframes, inline handlers, CSS imports, unsafe URLs, fixed positioning, and abusive z-index are blocked.`;
+No user JavaScript. HTML sanitized. CSS allowlisted and scoped. No tokens in JSON. See security documentation for details.`;
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
@@ -69,47 +38,72 @@ You generate HyperPBI 1.0 dashboard specifications for a Power BI custom visual.
 
 ## Output contract
 
-Return one valid JSON object only. Do not return markdown fences, explanations, comments, JavaScript, functions, eval, inline event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use only normalized field keys provided by the user, preferably table-qualified keys such as workorders_status. displayName is only a UI label.
+Return one valid JSON object only. No markdown fences, explanations, comments, JavaScript, functions, eval, event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use normalized field keys only.
 
 ## Root shape
 
-Required: version and components. Optional: title, theme, layout, state, toolbar, leftPanel, rightPanel, calculations, styles, css.
+Required: \`version\` ("1.0"), \`components\`. Optional: \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`toolbar\`, \`leftPanel\`, \`rightPanel\`, \`calculations\`, \`styles\`, \`css\`.
+
+## Application shell
+
+Root \`app\` for professional layouts. Use only when visual size justifies it. Do not place permanent sidebar in narrow tile. Prefer offcanvas for narrow layouts.
 
 ## Components
 
-Layouts: grid, flex, split, leftPanel, rightPanel, toolbar, section, spacer, divider.
+Layout: grid, flex, split, section, toolbar, spacer, divider.
 Controls: searchBox, textInput, numberInput, slider, select, multiSelect, segmentedControl, toggle, button, buttonGroup, filterChips, dateRange.
-Navigation: tabs, collapsible, accordion, drawer, filterDrawer.
+Navigation: tabs, collapsible, accordion, steps.
 Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel, timeline.
+Primitives: card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover.
+Feedback: emptyState, placeholder, spinner.
+Forms: textarea, checkbox, checkboxGroup, radioGroup, inputGroup.
 Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, smallMultiples, advancedChart.
-Data/content: table, matrix, map, html, text, markdown, custom.
+Tables: table, matrix.
+Maps: map.
+Content: text, markdown, html, custom.
 
-## Global styling
+## Shared properties
 
-styles.globalCss is application-wide CSS scoped to the HyperPBI visual. styles.components supports keys *, component type names, and #component_id. Each rule may contain className, style, and css. Component-level css overrides global defaults and is scoped to that component.
+All components: type, id, title, subtitle, span, className, hidden, style, css, slots, interaction, interactions, ariaLabel, icon, variant, size, disabled, tooltip, uiAction.
 
-## Templates
+## UI actions
 
-Allowed tokens include count, title, sum.field, avg.field, min.field, max.field, distinctCount.field, metric.key, selected.field, row.field, field.key.displayName, prop.name, and state.name. Tokens are lookups, not executable expressions.
+For interface behavior: clearFilters, setTab, setState, toggleState, toggleSidebar, openOverlay, closeOverlay, toggleOverlay, setStep, nextStep, previousStep, showToast, dismissToast, scrollTo, refresh (safe no-op).
 
-## Calculations
+## Universal data interaction
 
-Use field/value nodes and safe operators: arithmetic, comparison, boolean, text, date, null, if, and case. Metrics support count, countWhere, sum, sumWhere, avg, avgWhere, min, max, distinctCount, ratio, and percentOfTotal.
+\`\`\`json
+{"interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true}}
+\`\`\`
+
+## Overlay rules
+
+Modal rendered at root level. Opening modal closes dropdowns/popovers. Targets must match overlay component IDs. Never invent overlay targets.
+
+## First-class component preference
+
+Prefer card over custom card HTML. Prefer listGroup over custom lists. Prefer dataGrid over manual detail HTML. Prefer modal/offcanvas over simulated drawers.
+
+## Map rules
+
+Generate stable Power BI spatial maps by default. Never invent ArcGIS service URLs, layer IDs, or tokens. ArcGIS REST layered schema is developer preview.
+
+## Table rules
+
+Tabulator is not bundled. Use enhanced native table properties: density, striped, hover, showRowCount, pageSizeOptions, rowActions, emptyState.
+
+## Security
+
+No JavaScript, eval, new Function, event handlers, scripts, iframes. No tokens or credentials. No invented overlay targets. No invented ArcGIS resources.
 
 ## Design standard
 
-Create a compact enterprise dashboard with restrained colors, strong hierarchy, useful KPIs, no chart clutter, practical filters, a detail table, and a map only when location fields exist. Ensure responsive 12-column spans and avoid fixed widths that overflow.
+Compact enterprise spacing, restrained colors, strong hierarchy, responsive spans. Use theme tokens. Prefer styles.globalCss for visual-wide design.
 
-Use a named preset and recipe. advancedChart options must be JSON-only and cannot contain functions, formatter callbacks, event keys, URLs, scripts, styles, or unsupported series types.
+## Compatibility
 
-## Map and interaction rules
-
-Provider settings belong in Runtime Config. Do not trigger geocoding automatically. Universal interaction auto mode filters controls and selects exact identities for rows, chart points, map features, matrix cells, timelines, and custom row actions.
-
-New components always use interaction. Internal and external modes are independent; scope internal filters with self, others, or all. Never guess table/map/chart filter fields. Legacy internal, external, selectable, and table selectionMode remain supported only for saved dashboards.
-
-Custom slicer interaction shape: {"type":"custom","id":"field_slicer","repeat":{"source":"rows","distinctBy":"field_key","sortBy":"field_key","template":"<span>{{row.field_key}}</span>"},"interaction":{"enabled":true,"trigger":"click","internalMode":"none","internalScope":"self","externalMode":"filter","field":"field_key","operator":"=","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true},"interactions":{"onClick":{"action":"selectWhere","where":{"op":"=","left":{"field":"field_key"},"right":{"valueFromRow":"field_key"}}}}}.
+Legacy properties accepted: internal, external, selectable, selectionMode, button action/actionValue, engine:"tabulator", legacy drawer/filterDrawer, legacy stepper, legacy map settings/style/popup.
 
 ## Common mistakes
 
-Do not invent fields, use display names instead of keys, omit ids, put comments in JSON, put provider settings on every map, use unsupported chart types, create tabs without children, or produce spacious toy styling. Do not invent externalSelection, selectionTarget, crossFilter, or powerBISelection properties in dashboard JSON.`;
+Inventing field keys, using display names as references, omitting ids, comments in JSON, spacious toy styling, full app shell for small tiles, custom HTML where first-class components exist, inventing ArcGIS URLs, tokens/credentials, forgetting interaction objects, deprecated properties.`;

@@ -9,6 +9,6 @@ describe("copyable AI skill", () => {
         const fields = { lead_by: { key: "lead_by", displayName: "LeadBy", type: "dimension" as const, roles: ["values"] } }; const rows = [{ lead_by: "Christian" }];
         const data: NormalizedData = { fields, rows, rowKeys: rows.map((_, i) => `row-${i}`), aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields, undefined, undefined, rows.map((_, i) => `row-${i}`)) };
         const skill = buildHyperPbiSkill(data);
-        expect(skill).toContain("styles.globalCss"); expect(skill).toContain("lead_by"); expect(skill).toContain("Do not return markdown fences");
+        expect(skill).toContain("styles.globalCss"); expect(skill).toContain("lead_by"); expect(skill).toContain("No markdown fences");
     });
 });

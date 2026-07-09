@@ -1,51 +1,94 @@
-# User guide
+# HyperPBI User Guide
 
-## Guided Builder (Simple mode)
+## 1. What HyperPBI Does
 
-Normal users do not need to edit JSON. Open the visual menu, choose **Edit**, and follow eight compact steps:
+HyperPBI turns declarative JSON specifications into professional Power BI dashboards. It renders application shells, responsive layouts, KPI cards, charts, tables, maps, forms, overlays, and custom components — without executing JavaScript.
 
-1. Choose a dashboard goal.
-2. Choose the audience.
-3. Choose a proven layout pattern.
-4. Select useful components only.
-5. Choose one professional style preset.
-6. Select **Copy AI Prompt** and paste it into an approved AI.
-7. Paste the AI response and select **Validate & Preview**.
-8. After the preview succeeds, select **Save & return**.
+## 2. Add the Visual and Bind Values
 
-The Builder never sends data to an AI service. Field-only mode is the default, and the prompt is copied only when the user requests it.
+1. Import the `.pbiviz` file into Power BI Desktop
+2. Add HyperPBI to your report canvas
+3. Drag columns and measures into the **Values** field well
+4. HyperPBI normalizes field keys (lowercase, table-qualified)
 
-## Advanced mode
+## 3. Open Edit Mode
 
-Use **Advanced** only when raw control is needed. It exposes JSON, Runtime Config, calculations, map providers, field mapping, interaction diagnostics, AI skill text, logs, data, and issues. Returning to Simple mode does not discard the saved specification.
+Select the visual, open the **…** menu (top-right), and choose **Edit**. HyperPBI opens in focus mode.
 
-## Style presets
+## 4. Guided Builder Workflow
 
-- Enterprise Light: neutral and audit-friendly.
-- Bright Modern: crisp white with blue/teal accents.
-- Futuristic Light: precise cyan technical styling without neon clutter.
-- Dark Ops Center: low-glare operational monitoring.
-- Dense Compact: maximum useful content for normal Power BI tiles.
-- Map Command Center: map-dominant layout with compact supporting panels.
+1. **Customize Dashboard Setup** (optional): goal, audience, layout pattern, components, style preset, privacy mode
+2. **Copy AI Prompt**: copies the complete prompt to clipboard
+3. **Paste AI response**: paste the JSON from ChatGPT/DeepSeek/Copilot
+4. **Validate & Preview**: checks JSON structure and renders a preview
+5. **Save & return**: saves to Power BI and exits
 
-## Recover from a bad AI response
+## 5. Dashboard Setup Options
 
-Select **Copy repair prompt** after validation fails. The repair prompt includes broken JSON, errors, warnings, the valid field dictionary, supported components, security rules, and an instruction to return one corrected JSON object only.
+| Setting | Purpose |
+|---------|---------|
+| Goal | What the dashboard should show |
+| Audience | Executive, Manager, Analyst, Field operations, Public viewer |
+| Layout | KPI row, left filter drawer, map+details, full table, app shell, etc. |
+| Components | KPI cards, charts, table, map, filters, app shell, detail panel, timeline, offcanvas |
+| Style | Enterprise Light, Bright Modern, Dark Ops Center, Dense Compact, Map Command Center |
+| Privacy | Field-only, sample, masked sample, summary, type-only |
 
-## Interaction troubleshooting
+## 6. Professional Application Layouts
 
-Open **Interaction status** in the Builder or Advanced mode. It reports the visual setting, host permission, identity count, last clicked component/field/value, matching source rows, send result, plain-language reason, and suggested fix. A sent selection still requires target **Edit interactions** and compatible model lineage/relationships.
+Use an app shell (`schema.app`) only when the visual size can support it:
+- **Wide (1100+ px):** Full navbar, sidebar, page header
+- **Standard (800-1100 px):** Navbar, collapsible sidebar or offcanvas
+- **Compact (600-800 px):** Navbar only, offcanvas for secondary content
+- **Mobile tile (<600 px):** No permanent sidebar, offcanvas panels, stacked cards
 
-Bind all dashboard columns and measures to **Values**. Select the visual, open its top-right **…** menu, and select **Edit**; manual JSON authoring is optional and hidden under Advanced.
+Prefer offcanvas panels instead of permanent sidebars on narrow visuals.
 
-The Builder persists the Specification, Runtime Config, and pane layout when **Save & return** succeeds. Runtime Config is edited through a compact form; use the Advanced JSON panel only when necessary. GUI changes update JSON immediately, while raw JSON remains a draft until **Apply JSON**. Invalid JSON leaves the GUI unchanged. **Validate & Preview** never replaces the last saved dashboard when validation fails.
+## 7. Choosing Components
 
-In Advanced mode, the builder/preview divider and bottom data panel are draggable. Data, Fields, Logs, Issues, map, geocode, and interaction output can be copied with **Copy output**.
+Prefer first-class components over custom HTML:
+- Container → `card`
+- Record list → `listGroup`
+- Detail layout → `dataGrid`
+- Menu → `dropdown`
+- Dialog → `modal`
+- Slide-over → `offcanvas`
+- Empty data → `emptyState`
+- Loading → `placeholder` or `spinner`
 
-Use **Skill** to copy the full engine contract and current field dictionary into an AI conversation. Use **Help / Docs** for a shorter copyable Markdown authoring guide.
+## 8. UI Actions vs Data Interactions
 
-Specification owns layout/components/theme/CSS. Config owns map field bindings, providers, renderer behavior, and interactions. Settings provides form-based map binding assistance; the Power BI format pane remains limited to theme, editor preferences, data limits, interactions, and version information.
+- Use `uiAction` for: opening modals, changing tabs, showing toasts, toggling sidebar, navigating steps
+- Use `interaction` for: filtering data, highlighting rows, selecting Power BI identities
+- Both can coexist on one component
 
-Use normalized keys shown in Fields. Do not guess display names. Imported AI answers may contain prose/fences; Extract & Validate locates the largest valid JSON object. Replace, Merge, and Preview-only actions are explicit.
+## 9. Advanced Mode
 
-Use `styles.globalCss` for app-wide visual CSS and `styles.components` for reusable defaults by `*`, component type, or `#id`. HyperPBI sanitizes and scopes every rule. AI-generated tab content may use `children`, `components`, or `content`; the latter two are migrated to `children`.
+Toggle **Advanced** to access: JSON editor, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, Interactions, Documentation, and full diagnostics panels.
+
+## 10. Maps
+
+Legacy Power BI spatial maps (lat/lon, geometry, addresses) are stable. ArcGIS REST layered maps are in developer preview — schema and service infrastructure exist but end-to-end rendering is not yet connected. See [map services](map-services.md).
+
+Use the Maps build profile for OSM tiles and geocoding:
+```bash
+npm run package:maps
+```
+
+## 11. Security and Privacy
+
+- No user JavaScript executes
+- HTML is sanitized; CSS is allowlisted and scoped
+- AI prompts may contain field names and sample data — review before sending
+- External services only available in Maps build profile
+
+## 12. Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| JSON won't validate | Check for trailing commas, missing quotes, invalid field keys |
+| Preview is empty | Verify field bindings match normalized keys |
+| Map shows grid | Install Maps package or set basemap |
+| No external tiles | Maps package + WebAccess required |
+| Component not visible | Check `hidden`, `span`, parent container |
+| Interaction not working | Verify `interaction.enabled: true` |

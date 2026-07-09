@@ -1,6 +1,60 @@
-# Universal interactions
+# UI Actions and Data Interactions
 
-Every component uses the same `interaction` policy and execution engine. Component adapters only provide a normalized payload (`componentId`, `componentType`, source `rowIndices`, `field`, `value`, and `operator`). The engine owns internal state, scoped filtering, Power BI selection/filter dispatch, clearing, and diagnostics.
+HyperPBI has three independent behavior systems on every component:
+
+| System | Property | Purpose |
+|--------|----------|---------|
+| UI Actions | `uiAction` | Interface behavior: navigation, overlays, toasts, sidebar, steps |
+| Data Interaction | `interaction` | Universal data policy: internal highlight/filter, Power BI selection/filter |
+| Custom Interactions | `interactions` | Safe event-to-data payload resolution (custom repeat rows) |
+
+They are independent and may coexist on one component. A list item can both filter data (`interaction`) and open a detail modal (`uiAction`).
+
+## UI Actions
+
+UI actions control interface behavior. They never execute strings, navigate the browser, open arbitrary URLs, or trigger Power BI filtering.
+
+| Action | Required Fields | Description |
+|--------|----------------|-------------|
+| `clearFilters` | — | Clears all HyperPBI internal filters |
+| `setTab` | target, value | Sets active tab in a tab container |
+| `setState` | target, value | Sets a named state value |
+| `toggleState` | target | Toggles a Boolean state value |
+| `toggleSidebar` | — | Toggles root sidebar collapsed state |
+| `openOverlay` | target | Opens a modal, dropdown, or popover |
+| `closeOverlay` | target | Closes an overlay |
+| `toggleOverlay` | target | Toggles an overlay |
+| `setStep` | target, value | Sets the active step in a steps component |
+| `nextStep` | target | Advances to the next step |
+| `previousStep` | target | Goes to the previous step |
+| `showToast` | message, title?, intent?, durationMs? | Shows a toast notification (1-30s duration) |
+| `dismissToast` | target (toast ID) | Dismisses a specific toast |
+| `scrollTo` | target (component ID) | Scrolls to a component by ID |
+| `refresh` | — | Safe no-op (Power BI owns data refresh) |
+
+### UI-Only Example
+
+```json
+{
+  "type": "iconButton",
+  "id": "open_filters",
+  "icon": "filter",
+  "ariaLabel": "Open filters",
+  "uiAction": {
+    "type": "openOverlay",
+    "target": "filters_panel"
+  },
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  }
+}
+```
+
+## Universal Data Interaction
+
+Every component supports the universal `interaction` object for Power BI data behavior:
 
 ```json
 {
@@ -12,7 +66,7 @@ Every component uses the same `interaction` policy and execution engine. Compone
     "externalMode": "auto",
     "field": "__field_key__",
     "operator": "=",
-    "value": "Open",
+    "value": "__value__",
     "selectionMode": "replace",
     "multiSelect": true,
     "showSelector": false,
@@ -21,62 +75,70 @@ Every component uses the same `interaction` policy and execution engine. Compone
 }
 ```
 
-`enabled` gates the component interaction. `trigger:"auto"` means change for controls and click for rows, points, features, items, navigation, content, and explicitly enabled layout/static components. `showSelector` only controls visible checkbox/radio UI; a table row remains clickable when it is false. Layout/background adapters support click and keyboard Enter/Space, and handled-event protection prevents a child action from triggering its parent.
+### Internal Behavior
+- `none` — No internal filtering/highlighting
+- `highlight` — Highlight matching items; keep all visible
+- `filter` — Filter to matching items only
+- `self` / `others` / `all` — Scope of internal effect
 
-## Internal behavior
+### External Behavior
+- `none` — No Power BI interaction
+- `auto` — Controls filter Power BI; data points select identities
+- `selection` — Select Power BI identities
+- `filter` — Filter Power BI by field value (requires explicit field)
 
-Internal behavior affects HyperPBI only:
+Runtime Config is only a global gate/fallback. Component interaction policy wins.
 
-- `none`: no source highlight or internal filtering.
-- `highlight`: retains data and displays selected styling.
-- `filter`: creates an engine-owned interaction filter.
+## Safe Custom Interactions
 
-`internalScope:"self"` applies the filter only to the source component; `"others"` applies it to every component except the source; `"all"` applies it everywhere. Each component requests its applicable rows independently. Report/dashboard filters are applied first. External Power BI re-queries replace the source data and clear stale local interaction state.
-
-If a source must remain visually unchanged, use `internalMode:"none"`. For Power BI data-point highlighting without a re-query, prefer `externalMode:"selection"`; an external JSON filter can cause Power BI to re-query HyperPBI, so local source preservation cannot be guaranteed.
-
-## External behavior
-
-External behavior affects Power BI only and is independent of internal behavior:
-
-- `none`: do not propagate.
-- `auto`: controls/slicers use JSON filters; table rows, matrix cells, chart points, map features, timelines, and other data items use exact selection identities.
-- `selection`: call Selection Manager with exact source-row identities.
-- `filter`: call `applyJsonFilter` with an explicit model-column field/value.
-
-Basic `In` filters implement `=` and `in`; Advanced filters implement `contains`, comparisons, and `between`. Empty/All removes the filter. Calculated, measure-only, display-only, or fields lacking `sourceTable`/`sourceColumn` cannot externally filter. Tables never guess the first visible column; matrix/map/scatter/advanced-chart filter mode also requires an explicit unambiguous `interaction.field`.
-
-Runtime Config defaults to `externalMode:"auto"`. Resolution priority is component `interaction.externalMode`, Runtime Config fallback, then the family auto default. `interactions.crossFilter:false` blocks external propagation only; internal behavior continues.
-
-## Family examples
-
-Control/slicer (Power BI filter, no local reaction):
+The `interactions` property resolves custom click/change events to data payloads for the universal engine. Used with custom repeat-row components:
 
 ```json
-{"type":"select","id":"status","field":"__field_key__","interaction":{"enabled":true,"trigger":"auto","internalMode":"none","internalScope":"all","externalMode":"auto","operator":"=","selectionMode":"replace","multiSelect":false,"showSelector":false,"clearOnSecondClick":false}}
+{
+  "interactions": {
+    "onClick": {
+      "action": "selectWhere",
+      "where": {
+        "op": "=",
+        "left": { "field": "category" },
+        "right": { "valueFromRow": "category" }
+      }
+    }
+  }
+}
 ```
 
-Table/data point (exact Power BI selection and local highlight):
+Supported actions: `selectRow`, `selectWhere`, `setFilter`, `clearFilter`, `clearSelection`, `setState`, `toggleState`, `openTab`, `toggleCollapse`, `openOverlay`, `closeOverlay`, `toggleOverlay`, `showToast`, `setStep`, `nextStep`, `previousStep`.
 
+## Combined Behavior
+
+When both `uiAction` and `interaction` are present, the UI action executes alongside the data interaction. Both fire on the same trigger event.
+
+## Overlay Examples
+
+### Open a Modal
 ```json
-{"type":"table","id":"details","columns":["__field_key__"],"interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":true,"clearOnSecondClick":true}}
+{
+  "type": "button",
+  "id": "open_settings",
+  "label": "Settings",
+  "uiAction": { "type": "openOverlay", "target": "settings_modal" },
+  "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+}
 ```
 
-Chart, matrix, map, and timeline use the same data-point policy. Static display/content/layout components use `{ "enabled": false, "internalMode": "none", "externalMode": "none" }` unless deliberately enabled with a usable field/value. Navigation retains its native action and optionally runs the universal interaction in addition.
-
-Additional family patterns:
-
+### Toggle an Offcanvas
 ```json
-{"type":"grid","id":"layout","interaction":{"enabled":true,"trigger":"click","internalMode":"none","internalScope":"self","externalMode":"none","selectionMode":"replace","multiSelect":false,"showSelector":false,"clearOnSecondClick":false},"children":[]}
-{"type":"tabs","id":"views","interaction":{"enabled":true,"trigger":"click","internalMode":"none","internalScope":"self","externalMode":"none","selectionMode":"replace","multiSelect":false,"showSelector":false,"clearOnSecondClick":false},"tabs":[{"id":"overview","title":"Overview","children":[]}]}
-{"type":"kpi","id":"metric","field":"__field_key__","aggregation":"first","interaction":{"enabled":false,"internalMode":"none","externalMode":"none"}}
-{"type":"barChart","id":"chart","category":"__field_key__","measure":"__measure_field_key__","interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true}}
-{"type":"map","id":"locations","interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true}}
-{"type":"text","id":"note","text":"Context","interaction":{"enabled":false,"internalMode":"none","externalMode":"none"}}
+{
+  "uiAction": { "type": "toggleOverlay", "target": "filter_panel" }
+}
 ```
 
-Custom components retain safe `interactions.onClick` actions such as `selectWhere`. The resolver converts matches to the universal payload and then invokes the same engine. Put internal/external policy in the component-level `interaction` object.
+Overlay targets must match the `id` of an existing `modal`, `dropdown`, `popover`, or `offcanvas` component. Opening a modal closes open dropdowns/popovers. Opening a dropdown closes other dropdowns.
 
-## Legacy migration
+## Compatibility
 
-Existing dashboards remain supported. When `interaction` is absent, HyperPBI normalizes legacy `external`, `internal`, table `selectable`, and table `selectionMode`. New specifications must use `interaction`; those legacy component properties are deprecated. Runtime Config is a global gate/fallback, not a component policy.
+Legacy properties normalized internally:
+- `button.action: "clearFilters"` → `uiAction: { type: "clearFilters" }`
+- `button.action: "setTab"` + `actionValue` → `uiAction: { type: "setTab", target: "mainTabs", value: "..." }`
+- Deprecated `internal`, `external`, `selectable`, `selectionMode` remain accepted

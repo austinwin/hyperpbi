@@ -1,71 +1,92 @@
-# Custom components and slots
+# Custom Components
 
-`custom` renders sanitized `html` once plus optional row `repeat`. Each repeated item is rendered in an engine-owned `.hp-custom-repeat-row` wrapper, so the wrapper—not user HTML—owns click and keyboard handling. `props`, calculated metrics, rows, selected values, and state are accessible through safe template tokens. Supported slots are header, subheader, body, footer, actions, empty, item, row, cell, popup, tooltip, legend, and badge.
+Custom components use sanitized HTML, scoped CSS, safe templates, and typed interactions. Use them only when first-class components cannot achieve the desired result.
 
-Each component renders under `[data-hp-id="component_id"]`. Its `css` is parsed and rewritten beneath that selector. Unsafe declarations are removed. Standard components can use slots and scoped CSS too.
+## Before Using Custom
 
-For app-wide design standards, use `styles.globalCss` and `styles.components` at the specification root. Global CSS remains confined to the HyperPBI visual; component defaults remain confined to each matching component.
+| Need | Prefer First-Class |
+|------|-------------------|
+| Container | `card` |
+| Record list | `listGroup` |
+| Detail layout | `dataGrid` |
+| Menu | `dropdown` |
+| Dialog | `modal` |
+| Slide-over | `offcanvas` |
+| Empty data | `emptyState` |
+| Loading | `placeholder` or `spinner` |
+| Workflow stage | `steps` or `tracking` |
+| Input | Form component |
 
-`repeat` supports `source: "rows"`, `as: "row"`, `limit`, `template`, `distinctBy`, `sortBy`, and `sortDirection`. Use normalized field keys for `distinctBy`, `sortBy`, template tokens, and interactions. `displayName` is only a friendly UI label.
+## Three Behavior Systems
 
-Safe actions: `selectRow`, `selectWhere`, `clearSelection`, `setFilter`, `clearFilter`, `setState`, `toggleState`, `openTab`, `toggleCollapse`, `drillToDetail`, `highlight`, and `clearHighlight`. `valueFromRow` reads only a known normalized field from the clicked repeated row and returns null without a clicked row. Unsupported actions produce diagnostics; event-handler JavaScript is never interpreted.
-
-Safe actions resolve matching rows and values, then pass a normalized payload to the universal interaction engine. Configure behavior on the component-level `interaction` object. Use `internalMode:"none"` for a slicer that stays visually unchanged, `externalMode:"filter"` plus an explicit field for a field-value slicer, or `externalMode:"selection"` for exact row identity. `selectionMode` is `replace`, `add`, or `toggle`; `clearOnSecondClick` optionally clears the same internal/external mechanisms.
-
-```json
-{"type":"custom","id":"risk_summary","html":"<div class='risk'><b>{{metric.high_risk_count}}</b></div>","css":".risk { padding: 12px; border: 1px solid var(--hp-border); }","interaction":{"enabled":true,"trigger":"click","internalMode":"none","internalScope":"self","externalMode":"filter","field":"risk_band","operator":"=","value":"High","selectionMode":"replace","multiSelect":false,"showSelector":false,"clearOnSecondClick":true},"interactions":{"onClick":{"action":"selectWhere","where":{"op":"=","left":{"field":"risk_band"},"right":{"value":"High"}}}}}
-```
-
-Complete slicer-style example:
-
+### `interactions` (Safe Custom Interactions)
+Resolves custom click/change events and row matches into data payloads:
 ```json
 {
-  "version": "1.0",
-  "components": [
-    {
-      "type": "custom",
-      "id": "leadby_toggle_filter",
-      "span": 12,
-      "repeat": {
-        "source": "rows",
-        "as": "row",
-        "distinctBy": "leadby",
-        "sortBy": "leadby",
-        "sortDirection": "asc",
-        "limit": 200,
-        "template": "<div class='leadby-row'><span class='leadby-switch'><span class='leadby-knob'></span></span><span class='leadby-label'>{{row.leadby}}</span></div>"
-      },
-      "interactions": {
-        "onClick": {
-          "action": "selectWhere",
-          "where": {
-            "op": "=",
-            "left": { "field": "leadby" },
-            "right": { "valueFromRow": "leadby" }
-          }
-        }
-      },
-      "interaction": {
-        "enabled": true,
-        "trigger": "click",
-        "internalMode": "none",
-        "internalScope": "self",
-        "externalMode": "filter",
-        "field": "leadby",
-        "operator": "=",
-        "selectionMode": "replace",
-        "multiSelect": true,
-        "showSelector": false,
-        "clearOnSecondClick": true
-      },
-      "css": ".hp-custom-body{display:flex;flex-direction:column;gap:6px}.hp-custom-repeat-row{cursor:pointer}.leadby-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid #d9e2ec;border-radius:10px;background:#fff}.leadby-switch{width:34px;height:18px;border:1px solid #94a3b8;border-radius:999px;background:#cbd5e1;position:relative}.leadby-knob{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:999px;background:#fff}.hp-custom-repeat-row.is-selected .leadby-row{background:#eef6ff;border-color:#1f4e79}.hp-custom-repeat-row.is-selected .leadby-switch{background:#1f4e79;border-color:#1f4e79}.hp-custom-repeat-row.is-selected .leadby-knob{left:18px}"
+  "interactions": {
+    "onClick": {
+      "action": "selectWhere",
+      "where": { "op": "=", "left": { "field": "category" }, "right": { "valueFromRow": "category" } }
     }
-  ]
+  }
 }
 ```
 
-No JavaScript, `eval`, functions, inline handlers, scripts, iframes, or unsafe URLs are accepted. HTML remains DOMPurify-sanitized and CSS remains parsed, allowlisted, and scoped.
+### `interaction` (Universal Data Policy)
+Controls internal filtering/highlighting and Power BI behavior:
+```json
+{
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "none",
+    "internalScope": "self",
+    "externalMode": "filter",
+    "field": "category",
+    "operator": "="
+  }
+}
+```
 
-## Builder template gallery
+### `uiAction` (Interface Actions)
+Controls overlays, navigation, toasts. Independent from data behavior.
 
-The Builder catalog exposes six copyable safe templates: custom KPI tile, slicer/list, status card, record card, alert banner, and compact filter chips. Every template includes an explicit universal `interaction`. The slicer/list and chips use `distinctBy`, `sortBy`, `selectWhere`, `valueFromRow`, `internalMode:"none"`, and `externalMode:"filter"`.
+## Template Tokens
+
+Safe lookup tokens available in custom HTML templates:
+- `{{row.field_key}}` — Row value
+- `{{field_key.displayName}}` — Field display name
+- `{{count}}` — Row count
+- `{{sum.field_key}}`, `{{avg.field_key}}`, `{{min.field_key}}`, `{{max.field_key}}`
+- `{{metric.key}}` — Calculated metric
+- `{{selected.field_key}}` — Selected row value
+- `{{prop.name}}` — Component prop value
+- `{{state.name}}` — Dashboard state value
+
+Tokens are lookups only — not executable expressions.
+
+## Repeat Templates
+
+Custom components can iterate over data rows:
+```json
+{
+  "type": "custom",
+  "id": "field_slicer",
+  "repeat": {
+    "source": "rows",
+    "distinctBy": "field_key",
+    "sortBy": "field_key",
+    "sortDirection": "asc",
+    "limit": 200,
+    "template": "<span>{{row.field_key}}</span>"
+  }
+}
+```
+
+## Security
+
+- HTML is sanitized with DOMPurify
+- CSS is parsed, allowlisted, and scoped to the component
+- No scripts, iframes, event handlers, or JavaScript URLs
+- Templates use safe token lookup — no code execution
+- Handled-event protection prevents parent/child conflicts
