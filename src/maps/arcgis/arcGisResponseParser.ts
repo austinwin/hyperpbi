@@ -24,19 +24,23 @@ export interface ParsedArcGisResponse {
 
 /**
  * Parse an ArcGIS query response, whether GeoJSON or Esri JSON format.
+ * @param response - Raw response body
+ * @param requestedFormat - Expected format ("geojson" or "json")
+ * @param objectIdFieldName - Override for object-ID field (from service metadata)
  */
 export function parseArcGisResponse(
     response: unknown,
-    requestedFormat: "geojson" | "json"
+    requestedFormat: "geojson" | "json",
+    objectIdFieldName?: string
 ): ParsedArcGisResponse {
     // Try GeoJSON format first
     if (requestedFormat === "geojson" && isGeoJsonResponse(response)) {
-        return parseGeoJsonResponse(response as ArcGisGeoJsonResponse);
+        return parseGeoJsonResponse(response as ArcGisGeoJsonResponse, objectIdFieldName);
     }
 
     // Fallback to Esri JSON format
     if (isEsriQueryResponse(response)) {
-        return parseEsriResponse(response as ArcGisQueryResponse);
+        return parseEsriResponse(response as ArcGisQueryResponse, objectIdFieldName);
     }
 
     // Unknown format
@@ -58,7 +62,11 @@ function isEsriQueryResponse(value: unknown): boolean {
     return Array.isArray(obj.features) || obj.objectIdFieldName !== undefined || obj.fields !== undefined;
 }
 
-function parseGeoJsonResponse(response: ArcGisGeoJsonResponse): ParsedArcGisResponse {
+function parseGeoJsonResponse(
+    response: ArcGisGeoJsonResponse,
+    objectIdFieldName?: string
+): ParsedArcGisResponse {
+    const oidField = objectIdFieldName ?? "OBJECTID";
     const features: ParsedArcGisFeature[] = [];
 
     for (const feature of response.features) {
@@ -72,7 +80,7 @@ function parseGeoJsonResponse(response: ArcGisGeoJsonResponse): ParsedArcGisResp
         }
 
         features.push({
-            objectId: attributes.OBJECTID as number,
+            objectId: (attributes[oidField] ?? attributes["OBJECTID"] ?? attributes["FID"]) as number | undefined,
             attributes,
             geometry: feature.geometry ?? null,
         });
@@ -80,16 +88,21 @@ function parseGeoJsonResponse(response: ArcGisGeoJsonResponse): ParsedArcGisResp
 
     return {
         features,
+        objectIdFieldName: oidField,
         exceededTransferLimit: response.exceededTransferLimit ?? false,
     };
 }
 
-function parseEsriResponse(response: ArcGisQueryResponse): ParsedArcGisResponse {
+function parseEsriResponse(
+    response: ArcGisQueryResponse,
+    objectIdFieldName?: string
+): ParsedArcGisResponse {
+    const oidField = objectIdFieldName ?? response.objectIdFieldName ?? "OBJECTID";
     const features: ParsedArcGisFeature[] = [];
 
     if (response.features) {
         for (const esriFeature of response.features) {
-            const objectId = esriFeature.attributes?.[response.objectIdFieldName ?? "OBJECTID"] as number | undefined;
+            const objectId = esriFeature.attributes?.[oidField] as number | undefined;
 
             features.push({
                 objectId,
@@ -101,7 +114,7 @@ function parseEsriResponse(response: ArcGisQueryResponse): ParsedArcGisResponse 
 
     return {
         features,
-        objectIdFieldName: response.objectIdFieldName,
+        objectIdFieldName: oidField,
         exceededTransferLimit: response.exceededTransferLimit ?? false,
         geometryType: response.geometryType,
         spatialReference: response.spatialReference,

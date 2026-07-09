@@ -1,6 +1,7 @@
 // ── Map Join Engine ──────────────────────────────────────────────────
 // Joins Power BI data rows with ArcGIS service features based on
 // configured join keys and normalization rules.
+// Supports duplicate policies: first, aggregate, all, error.
 
 import type { DataRow } from "../../data/normalizeData";
 import type { MapJoinDefinition } from "../../schema/mapSchema";
@@ -11,6 +12,7 @@ import { normalizeJoinKey } from "./mapJoinNormalizer";
 
 export interface MapJoinInput {
     powerBiRows: DataRow[];
+    powerBiRowIndices: number[];
     powerBiRowKeys: string[];
     serviceFeatures: ParsedArcGisFeature[];
     definition: MapJoinDefinition;
@@ -23,8 +25,10 @@ export interface MapJoinResult {
 }
 
 export function executeMapJoin(input: MapJoinInput): MapJoinResult {
-    const { powerBiRows, powerBiRowKeys, serviceFeatures, definition, layerId } = input;
+    const { powerBiRows, powerBiRowIndices, powerBiRowKeys, serviceFeatures, definition, layerId } = input;
     const normalization = definition.normalization ?? ["trim", "upper"];
+    const powerBiDupPolicy = definition.powerBiDuplicatePolicy ?? "aggregate";
+    const serviceDupPolicy = definition.serviceDuplicatePolicy ?? "first";
 
     // ── Build Power BI index ──────────────────────────────────────────
     const powerBiIndex = new Map<string, PowerBiMatch[]>();
@@ -44,7 +48,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         powerBiKeys.add(normalized);
         const match: PowerBiMatch = {
             row,
-            rowIndex: i,
+            rowIndex: powerBiRowIndices[i] ?? i,
             rowKey: powerBiRowKeys[i] ?? `row-${i}`,
             originalJoinValue: rawValue,
         };
@@ -52,6 +56,19 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         const existing = powerBiIndex.get(normalized) ?? [];
         existing.push(match);
         powerBiIndex.set(normalized, existing);
+    }
+
+    // ── Check Power BI duplicate policy ───────────────────────────────
+    for (const [key, matches] of powerBiIndex) {
+        if (matches.length > 1) {
+            if (powerBiDupPolicy === "error") {
+                const sample = matches.slice(0, 3).map(m => String(m.originalJoinValue)).join(", ");
+                throw new Error(
+                    `Duplicate Power BI join keys detected for "${key}" (values: ${sample}). ` +
+                    `Set powerBiDuplicatePolicy to "first" or "aggregate" to handle duplicates.`
+                );
+            }
+        }
     }
 
     // ── Build service index ───────────────────────────────────────────
@@ -74,6 +91,18 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         serviceIndex.set(normalized, existing);
     }
 
+    // ── Check service duplicate policy ────────────────────────────────
+    for (const [key, features] of serviceIndex) {
+        if (features.length > 1) {
+            if (serviceDupPolicy === "error") {
+                throw new Error(
+                    `Duplicate service join keys detected for "${key}". ` +
+                    `Set serviceDuplicatePolicy to "first" or "all" to handle duplicates.`
+                );
+            }
+        }
+    }
+
     // ── Match ─────────────────────────────────────────────────────────
     const features: ResolvedMapFeature[] = [];
     let matchedPowerBiRowCount = 0;
@@ -85,29 +114,44 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         if (!powerBiMatches || powerBiMatches.length === 0) continue;
 
         matchedPowerBiKeys.add(normalizedKey);
-        matchedServiceFeatureCount++;
 
-        for (const svcFeature of svcFeatures) {
-            matchedPowerBiRowCount += powerBiMatches.length;
+        // Apply service duplicate policy
+        const effectiveServiceFeatures = serviceDupPolicy === "first"
+            ? [svcFeatures[0]]
+            : svcFeatures;
+
+        for (const svcFeature of effectiveServiceFeatures) {
+            matchedServiceFeatureCount++;
+
+            // Apply Power BI duplicate policy
+            let effectivePowerBiMatches: PowerBiMatch[];
+            if (powerBiDupPolicy === "first") {
+                effectivePowerBiMatches = [powerBiMatches[0]];
+            } else {
+                effectivePowerBiMatches = powerBiMatches;
+            }
+
+            matchedPowerBiRowCount += effectivePowerBiMatches.length;
 
             // Aggregate joined fields
             const joinedAttributes = aggregateJoinedFields(
-                powerBiMatches,
+                effectivePowerBiMatches,
                 definition.aggregations ?? []
             );
 
+            const geometryType = mapGeometryType(svcFeature);
             const feature: ResolvedMapFeature = {
                 id: `${layerId}_${svcFeature.objectId ?? "unknown"}_${normalizedKey}`,
                 layerId,
-                geometryType: "unknown",
+                geometryType,
                 geometry: svcFeature.geometry,
                 lat: null,
                 lon: null,
                 serviceObjectId: svcFeature.objectId,
                 serviceAttributes: svcFeature.attributes,
-                powerBiAttributes: powerBiMatches[0].row as unknown as Record<string, unknown>,
-                powerBiRowIndices: powerBiMatches.map(m => m.rowIndex),
-                powerBiRowKeys: powerBiMatches.map(m => m.rowKey),
+                powerBiAttributes: effectivePowerBiMatches[0].row as unknown as Record<string, unknown>,
+                powerBiRowIndices: effectivePowerBiMatches.map(m => m.rowIndex),
+                powerBiRowKeys: effectivePowerBiMatches.map(m => m.rowKey),
                 joinedAttributes,
                 selected: false,
             };
@@ -122,7 +166,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         .filter(([, matches]) => matches.length > 1)
         .map(([key]) => key);
     const duplicateServiceKeys = [...serviceIndex.entries()]
-        .filter(([, features]) => features.length > 1)
+        .filter(([, feats]) => feats.length > 1)
         .map(([key]) => key);
 
     const diagnostics: MapJoinDiagnostics = {
@@ -147,6 +191,19 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
     };
 
     return { features, diagnostics };
+}
+
+function mapGeometryType(feature: ParsedArcGisFeature): "point" | "multipoint" | "polyline" | "polygon" | "unknown" {
+    if (!feature.geometry) return "unknown";
+    switch (feature.geometry.type) {
+        case "Point": return "point";
+        case "MultiPoint": return "multipoint";
+        case "LineString":
+        case "MultiLineString": return "polyline";
+        case "Polygon":
+        case "MultiPolygon": return "polygon";
+        default: return "unknown";
+    }
 }
 
 interface PowerBiMatch {

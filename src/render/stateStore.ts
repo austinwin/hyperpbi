@@ -31,6 +31,8 @@ export interface DashboardState {
     interactionFilters: InternalInteractionFilter[];
     interactionSignatures: Record<string, string>;
     selectedMapFeature?: number;
+    /** Map-local feature selection (reference layers without Power BI rows) */
+    mapSelectedFeatureIds: Record<string, string[]>;
     tableSearch: Record<string, string>;
 
     // Application shell
@@ -76,6 +78,8 @@ export type DashboardAction =
     | { type: "resetInteractions" }
     | { type: "reconcileRowKeys"; rowKeys: string[] }
     | { type: "selectMap"; index?: number }
+    | { type: "selectMapFeatures"; mapId: string; featureIds: string[] }
+    | { type: "clearMapFeatures"; mapId: string }
     | { type: "tableSearch"; id: string; value: string }
     | { type: "clearFilters" }
     // Application shell
@@ -118,6 +122,8 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
         interactionFilters: [],
         interactionSignatures: {},
         tableSearch: {},
+        selectedMapFeature: undefined,
+        mapSelectedFeatureIds: {},
         // App shell defaults
         sidebarCollapsed: false,
         mobileSidebarOpen: false,
@@ -147,7 +153,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "interactionFilter") return { ...state, interactionFilters: [...state.interactionFilters.filter(filter => filter.originComponentId !== action.filter.originComponentId), action.filter] };
     if (action.type === "clearInteractionFilter") return { ...state, interactionFilters: state.interactionFilters.filter(filter => filter.originComponentId !== action.id) };
     if (action.type === "interactionSignature") { const interactionSignatures = { ...state.interactionSignatures }; if (action.value === undefined) delete interactionSignatures[action.id]; else interactionSignatures[action.id] = action.value; return { ...state, interactionSignatures }; }
-    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
+    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {} };
     if (action.type === "reconcileRowKeys") {
         const indexByKey = new Map(
             action.rowKeys.map((key, index) => [key, index] as const)
@@ -164,9 +170,19 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         return { ...state, selectedRowKeys, selectedRows, componentSelectedRowKeys, componentSelectedRows };
     }
     if (action.type === "selectMap") return { ...state, selectedMapFeature: action.index };
+    if (action.type === "selectMapFeatures") {
+        const current = state.mapSelectedFeatureIds[action.mapId] ?? [];
+        // Toggle: if featureIds already selected, clear; otherwise add/select
+        const newIds = [...new Set([...current, ...action.featureIds])];
+        return { ...state, mapSelectedFeatureIds: { ...state.mapSelectedFeatureIds, [action.mapId]: newIds } };
+    }
+    if (action.type === "clearMapFeatures") {
+        const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
+        return { ...state, mapSelectedFeatureIds: rest };
+    }
     if (action.type === "tableSearch") return { ...state, tableSearch: { ...state.tableSearch, [action.id]: action.value } };
     // clearFilters does NOT reset app shell state
-    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
+    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {} };
 
     // ── Application shell ─────────────────────────────────────────
     if (action.type === "sidebarCollapsed") return { ...state, sidebarCollapsed: action.value, mobileSidebarOpen: action.value ? false : state.mobileSidebarOpen };

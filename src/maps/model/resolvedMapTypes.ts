@@ -228,6 +228,11 @@ export interface ResolvedMapLayer {
     labels?: ResolvedMapLabels;
     popup?: ResolvedMapPopup;
     interaction?: ComponentInteractionDefinition;
+    legend?: {
+        visible?: boolean;
+        title?: string;
+        collapsed?: boolean;
+    };
     extent?: GeoJSON.BBox;
     diagnostics: MapLayerDiagnostics;
     loading: boolean;

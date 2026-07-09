@@ -1,6 +1,8 @@
 // ── ArcGIS REST Client ───────────────────────────────────────────────
 // Handles HTTP requests to ArcGIS REST services using native fetch.
 // Never uses ArcGIS SDK. Public services only.
+// All external requests use credentials:"omit" and referrerPolicy:"no-referrer"
+// to prevent forwarding of cookies, auth headers, or other credentials.
 
 export interface ArcGisRequestOptions {
     signal?: AbortSignal;
@@ -12,11 +14,18 @@ const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 2;
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
 
+/** Security-hardened fetch defaults for all ArcGIS REST requests. */
+const SECURE_FETCH_DEFAULTS: RequestInit = {
+    credentials: "omit" as RequestCredentials,
+    referrerPolicy: "no-referrer" as ReferrerPolicy,
+    cache: "no-store" as RequestCache,
+};
+
 export async function getArcGisJson<T>(
     url: string,
     options: ArcGisRequestOptions = {}
 ): Promise<T> {
-    return arcGisRequest<T>(url, { method: "GET" }, options);
+    return arcGisRequest<T>(url, { ...SECURE_FETCH_DEFAULTS, method: "GET" }, options);
 }
 
 export async function postArcGisForm<T>(
@@ -26,6 +35,7 @@ export async function postArcGisForm<T>(
 ): Promise<T> {
     const body = new URLSearchParams(parameters);
     return arcGisRequest<T>(url, {
+        ...SECURE_FETCH_DEFAULTS,
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),

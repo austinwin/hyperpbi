@@ -8,11 +8,18 @@ import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import type { DataRow } from "../../data/normalizeData";
 
 export interface MapSourceContext {
+    /** Filtered component rows */
     rows: DataRow[];
+    /** Original source-row indices for each row (maps to sourceRows index) */
+    rowIndices: number[];
+    /** Stable source row keys */
     rowKeys: string[];
+    /** Field metadata */
     fields: Record<string, any>;
+    /** Runtime map bindings */
     runtimeBindings?: Partial<MapBindingKeys>;
-    geocodeCache?: Record<string, any>;
+    /** Geocode cache entries */
+    geocodeCache?: Record<string, unknown>;
 }
 
 export function resolvePowerBiLayer(
@@ -29,7 +36,7 @@ export function resolvePowerBiLayer(
         context.rows,
         context.fields,
         bindings,
-        context.geocodeCache ?? {},
+        (context.geocodeCache ?? {}) as Record<string, any>,
         context.rowKeys
     );
 
@@ -42,7 +49,11 @@ export function resolvePowerBiLayer(
         return createEmptyLayer(layer.id, layer.name, "powerbi");
     }
 
-    const features: ResolvedMapFeature[] = targetLayer.features.map((f: NormalizedMapFeature) => {
+    const features: ResolvedMapFeature[] = targetLayer.features.map((f: NormalizedMapFeature, featureIndex: number) => {
+        // Use the original source index stored during normalization, not the filtered index
+        const sourceRowIndex = context.rowIndices[f.rowIndex] ?? f.rowIndex;
+        const sourceRowKey = context.rowKeys[f.rowIndex] ?? f.rowKey;
+
         return {
             id: f.id,
             layerId: layer.id,
@@ -53,17 +64,22 @@ export function resolvePowerBiLayer(
             serviceObjectId: undefined,
             serviceAttributes: {},
             powerBiAttributes: f.row as unknown as Record<string, unknown>,
-            powerBiRowIndices: [f.rowIndex],
-            powerBiRowKeys: [f.rowKey],
+            powerBiRowIndices: [sourceRowIndex],
+            powerBiRowKeys: [sourceRowKey],
             joinedAttributes: {},
             renderValue: f.colorValue,
             sizeValue: f.sizeValue ?? undefined,
             selected: false,
             row: f.row,
-            rowIndex: f.rowIndex,
-            rowKey: f.rowKey,
+            rowIndex: sourceRowIndex,
+            rowKey: sourceRowKey,
         } as ResolvedMapFeature;
     });
+
+    // Resolve the configured renderer
+    const resolvedRenderer = layer.renderer
+        ? { ...layer.renderer, type: layer.renderer.type ?? "simple" } as any
+        : { type: "simple", symbol: {} };
 
     return {
         id: layer.id,
@@ -74,8 +90,43 @@ export function resolvePowerBiLayer(
         opacity: layer.opacity ?? 1,
         order: layer.order ?? 0,
         features,
-        renderer: { type: "simple", symbol: {} },
+        renderer: resolvedRenderer,
+        labels: layer.labels ? {
+            enabled: layer.labels.enabled ?? false,
+            field: layer.labels.field,
+            fieldSource: layer.labels.fieldSource,
+            template: layer.labels.template,
+            placement: layer.labels.placement ?? "center",
+            minZoom: layer.labels.minZoom,
+            maxZoom: layer.labels.maxZoom,
+            color: layer.labels.color ?? "#333333",
+            size: layer.labels.size ?? 12,
+            weight: layer.labels.weight ?? "normal",
+            haloColor: layer.labels.haloColor,
+            haloSize: layer.labels.haloSize,
+            collision: layer.labels.collision ?? "none",
+            maxLabels: layer.labels.maxLabels,
+        } : undefined,
+        popup: layer.popup ? {
+            enabled: layer.popup.enabled ?? true,
+            title: layer.popup.title,
+            fields: (layer.popup.fields ?? []).map(f => ({
+                field: f.field,
+                fieldSource: f.fieldSource ?? "powerbi",
+                label: f.label,
+                format: f.format,
+                display: f.display ?? "text",
+            })),
+            actions: (layer.popup.actions ?? []).map(a => ({
+                id: a.id,
+                label: a.label,
+                icon: a.icon,
+                uiAction: a.uiAction,
+            })),
+            html: layer.popup.html,
+        } : undefined,
         interaction: layer.interaction,
+        legend: layer.legend,
         diagnostics: {
             featureCount: features.length,
             requestCount: 0,

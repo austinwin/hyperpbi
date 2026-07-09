@@ -1,6 +1,14 @@
 // ── ArcGIS Host Policy ───────────────────────────────────────────────
 // Determines whether a given ArcGIS service host is permitted by the
 // HyperPBI package's Power BI WebAccess configuration.
+//
+// Supports:
+//   https://*        → any HTTPS host
+//   *                → any HTTPS host (sentinel)
+//   https://*.x      → x and all subdomains of x
+//   https://x        → exact host x
+//
+// Even with broad wildcard, always requires protocol === "https:".
 
 export interface HostPolicyResult {
     allowed: boolean;
@@ -19,7 +27,7 @@ const DEFAULT_PUBLIC_HOSTS = [
 let _allowedPatterns: string[] = [...DEFAULT_PUBLIC_HOSTS];
 
 export function setAllowedHostPatterns(patterns: string[]) {
-    _allowedPatterns = [...DEFAULT_PUBLIC_HOSTS, ...patterns];
+    _allowedPatterns = [...new Set([...DEFAULT_PUBLIC_HOSTS, ...patterns])];
 }
 
 export function getAllowedHostPatterns(): readonly string[] {
@@ -31,12 +39,21 @@ export function checkHostPolicy(url: string): HostPolicyResult {
         const parsed = new URL(url);
         const host = parsed.host;
 
-        // Check HTTPS requirement
+        // Check HTTPS requirement — always enforced
         if (parsed.protocol !== "https:") {
             return {
                 allowed: false,
                 host,
                 reason: `Only HTTPS services are supported. Got: ${parsed.protocol}`,
+            };
+        }
+
+        // Check for embedded credentials
+        if (parsed.username || parsed.password) {
+            return {
+                allowed: false,
+                host,
+                reason: "URLs with embedded credentials are not allowed.",
             };
         }
 
@@ -61,11 +78,16 @@ function matchesPattern(host: string, pattern: string): boolean {
     // Remove protocol from pattern before matching
     const cleanPattern = pattern.replace(/^https?:\/\//, "");
 
+    // Universal wildcard: "https://*" or "*" matches any HTTPS host
+    if (cleanPattern === "*") return true;
+
+    // Subdomain wildcard: "*.example.com"
     if (cleanPattern.startsWith("*.")) {
         const domain = cleanPattern.slice(2);
         return host === domain || host.endsWith("." + domain);
     }
 
+    // Exact host match
     return host === cleanPattern;
 }
 
