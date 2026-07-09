@@ -57,6 +57,7 @@ export interface MapLayerDefinition {
     renderer?: MapRendererDefinition;
     labels?: MapLabelDefinition;
     popup?: MapPopupDefinition;
+    tooltip?: MapTooltipDefinition;
     visibility?: MapVisibilityDefinition;
     performance?: MapPerformanceDefinition;
 
@@ -299,6 +300,21 @@ export interface MapPopupDefinition {
         uiAction?: UiAction;
     }>;
     html?: string;
+}
+
+// ── Tooltip ────────────────────────────────────────────────────────────
+
+export interface MapTooltipFieldDefinition {
+    field: string;
+    fieldSource?: "powerbi" | "service" | "joined";
+    label?: string;
+    format?: string;
+}
+
+export interface MapTooltipDefinition {
+    enabled?: boolean;
+    fields?: MapTooltipFieldDefinition[];
+    template?: string;
 }
 
 // ── Visibility ────────────────────────────────────────────────────────

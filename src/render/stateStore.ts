@@ -295,7 +295,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
                 ...state.mapLayerState,
                 [action.mapId]: {
                     ...existing,
-                    opacity: { ...(existing.opacity ?? {}), [action.layerId]: action.opacity },
+                    opacity: { ...(existing.opacity ?? {}), [action.layerId]: Math.max(0, Math.min(1, action.opacity)) },
                 },
             },
         };
