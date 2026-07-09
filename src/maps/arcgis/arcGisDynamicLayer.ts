@@ -10,7 +10,7 @@ import { checkHostPolicy } from "./arcGisHostPolicy";
 export interface ArcGisDynamicLayerOptions {
     url: string;
     layerIds?: number[];
-    definitionExpression?: string;
+    layerDefinitions?: Record<number, string>;
     opacity?: number;
     minZoom?: number;
     maxZoom?: number;
@@ -38,7 +38,7 @@ export function createArcGisDynamicLayer(
     const {
         url,
         layerIds,
-        definitionExpression,
+        layerDefinitions,
         opacity = 1,
         minZoom,
         maxZoom,
@@ -103,9 +103,7 @@ export function createArcGisDynamicLayer(
     const setupMapListeners = (map: L.Map) => {
         map.on("moveend", debouncedRefresh);
         map.on("resize", debouncedRefresh);
-        if (minZoom !== undefined) {
-            map.on("zoomend", checkZoomVisibility);
-        }
+        map.on("zoomend", checkZoomVisibility);
     };
 
     const removeMapListeners = (map: L.Map) => {
@@ -179,8 +177,8 @@ export function createArcGisDynamicLayer(
             if (layerIds && layerIds.length > 0) {
                 params.set("layers", `show:${layerIds.join(",")}`);
             }
-            if (definitionExpression) {
-                params.set("layerDefs", definitionExpression);
+            if (layerDefinitions && Object.keys(layerDefinitions).length > 0) {
+                params.set("layerDefs", JSON.stringify(layerDefinitions));
             }
 
             const fullUrl = `${exportUrl}?${params.toString()}`;
@@ -215,16 +213,25 @@ export function createArcGisDynamicLayer(
             const blob = await response.blob();
             const objectUrl = URL.createObjectURL(blob);
 
-            // Update the image overlay
-            imageOverlay.setUrl(objectUrl);
+            // Capture old URL before setting new one
+            const prevUrl = (imageOverlay as unknown as Record<string, unknown>)._url as string | undefined;
 
-            // Revoke old URL after a small delay
-            const prevUrl = (imageOverlay as any)._url;
-            setTimeout(() => {
-                if (prevUrl && prevUrl.startsWith("blob:")) {
-                    URL.revokeObjectURL(prevUrl);
-                }
-            }, 100);
+            // Preload image to ensure it's ready before swap
+            const img = new Image();
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error("Image preload failed"));
+                img.src = objectUrl;
+            });
+
+            // Swap: set new image, then revoke old
+            imageOverlay.setUrl(objectUrl);
+            imageOverlay.setBounds(map.getBounds());
+
+            // Revoke old blob URL after successful swap
+            if (prevUrl && prevUrl.startsWith("blob:")) {
+                URL.revokeObjectURL(prevUrl);
+            }
 
             isLoading = false;
             onStateChange?.({ loading: false, lastRequestTime: Date.now() });
