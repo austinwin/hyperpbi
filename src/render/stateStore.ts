@@ -57,6 +57,12 @@ export interface DashboardState {
         opacity?: Record<string, number>;
         labels?: Record<string, boolean>;
     }>;
+
+    // Map UI state (panel/legend toggles)
+    mapUiState: Record<string, {
+        layerPanelOpen?: boolean;
+        legendOpen?: boolean;
+    }>;
 }
 
 export type DashboardAction =
@@ -78,7 +84,7 @@ export type DashboardAction =
     | { type: "resetInteractions" }
     | { type: "reconcileRowKeys"; rowKeys: string[] }
     | { type: "selectMap"; index?: number }
-    | { type: "selectMapFeatures"; mapId: string; featureIds: string[] }
+    | { type: "selectMapFeatures"; mapId: string; featureIds: string[]; selectionMode?: "replace" | "add" | "toggle" }
     | { type: "clearMapFeatures"; mapId: string }
     | { type: "tableSearch"; id: string; value: string }
     | { type: "clearFilters" }
@@ -104,7 +110,10 @@ export type DashboardAction =
     | { type: "mapLayerVisibility"; mapId: string; layerId: string; visible: boolean }
     | { type: "mapLayerOpacity"; mapId: string; layerId: string; opacity: number }
     | { type: "mapLayerLabels"; mapId: string; layerId: string; visible: boolean }
-    | { type: "resetMapLayers"; mapId: string };
+    | { type: "resetMapLayers"; mapId: string }
+    // Map UI state toggles
+    | { type: "toggleMapLayerPanel"; mapId: string }
+    | { type: "toggleMapLegend"; mapId: string };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
     return {
@@ -133,6 +142,7 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
         activeSteps: {},
         toasts: [],
         mapLayerState: {},
+        mapUiState: {},
     };
 }
 
@@ -172,8 +182,31 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "selectMap") return { ...state, selectedMapFeature: action.index };
     if (action.type === "selectMapFeatures") {
         const current = state.mapSelectedFeatureIds[action.mapId] ?? [];
-        // Toggle: if featureIds already selected, clear; otherwise add/select
-        const newIds = [...new Set([...current, ...action.featureIds])];
+        const mode = action.selectionMode ?? "add";
+        let newIds: string[];
+        switch (mode) {
+            case "replace":
+                newIds = action.featureIds;
+                break;
+            case "add":
+                newIds = [...new Set([...current, ...action.featureIds])];
+                break;
+            case "toggle":
+                newIds = [...current];
+                for (const id of action.featureIds) {
+                    const idx = newIds.indexOf(id);
+                    if (idx >= 0) {
+                        newIds.splice(idx, 1);
+                    } else {
+                        newIds.push(id);
+                    }
+                }
+                break;
+        }
+        if (newIds.length === 0) {
+            const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
+            return { ...state, mapSelectedFeatureIds: rest };
+        }
         return { ...state, mapSelectedFeatureIds: { ...state.mapSelectedFeatureIds, [action.mapId]: newIds } };
     }
     if (action.type === "clearMapFeatures") {
@@ -283,6 +316,34 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "resetMapLayers") {
         const { [action.mapId]: _removed, ...rest } = state.mapLayerState;
         return { ...state, mapLayerState: rest };
+    }
+
+    // ── Map UI state toggles ──────────────────────────────────────
+    if (action.type === "toggleMapLayerPanel") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: {
+                    ...current,
+                    layerPanelOpen: !current.layerPanelOpen,
+                },
+            },
+        };
+    }
+    if (action.type === "toggleMapLegend") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: {
+                    ...current,
+                    legendOpen: !current.legendOpen,
+                },
+            },
+        };
     }
 
     // Default: clearFilters fallback (shouldn't normally reach here)

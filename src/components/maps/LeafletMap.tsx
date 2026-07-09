@@ -16,15 +16,26 @@ import { createArcGisDynamicLayer, buildArcGisTileUrl } from "../../maps/arcgis/
 import type { ResolvedMapLayer, ResolvedMapFeature, ResolvedMapRenderer } from "../../maps/model/resolvedMapTypes";
 import type { LeafletFeatureStyle } from "../../maps/renderers/mapFeatureSymbol";
 import { mergedFeatureAttributes } from "../../maps/model/mapFeatureValue";
+import type { MapViewportState } from "./MapBlock";
+
+export interface LeafletMapController {
+    home(): void;
+    zoomToSelection(): void;
+    invalidateSize(): void;
+}
 
 export function LeafletMap({
     component,
     mapData,
     resolvedLayers,
+    onViewportChange,
+    onControllerReady,
 }: {
     component: MapComponent;
     mapData: NormalizedMapData;
     resolvedLayers: ResolvedMapLayer[];
+    onViewportChange?: (viewport: MapViewportState) => void;
+    onControllerReady?: (controller: LeafletMapController) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);

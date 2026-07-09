@@ -99,6 +99,7 @@ export interface ArcGisTileLayerSource {
     type: "arcgisTile";
     url: string;
     attribution?: string;
+    minZoom?: number;
     maxZoom?: number;
 }
 
@@ -106,7 +107,13 @@ export interface ArcGisDynamicLayerSource {
     type: "arcgisDynamic";
     url: string;
     layerIds?: number[];
-    definitionExpression?: string;
+    layerDefinitions?: Record<number, string>;
+    format?: "png" | "png24" | "png32" | "jpg";
+    transparent?: boolean;
+    minZoom?: number;
+    maxZoom?: number;
+    attribution?: string;
+    debounceMs?: number;
 }
 
 // ── Join ──────────────────────────────────────────────────────────────
