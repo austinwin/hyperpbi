@@ -1,13 +1,29 @@
 // ── Map Toolbar ──────────────────────────────────────────────────────
-// Compact floating toolbar for map actions.
+// Compact floating toolbar for map actions. Receives explicit callbacks.
 
 import { h } from "preact";
 import { MapComponent } from "../../schema/hyperpbiSchema";
-import { useRenderContext } from "../../render/RenderContext";
 import { Icon } from "../icons/Icon";
 
-export function MapToolbar({ component, mapId }: { component: MapComponent; mapId: string }) {
-    const context = useRenderContext();
+interface MapToolbarProps {
+    component: MapComponent;
+    mapId: string;
+    onHome: () => void;
+    onZoomToSelection: () => void;
+    onToggleLayers: () => void;
+    onToggleLegend: () => void;
+    onClearSelection: () => void;
+}
+
+export function MapToolbar({
+    component,
+    mapId,
+    onHome,
+    onZoomToSelection,
+    onToggleLayers,
+    onToggleLegend,
+    onClearSelection,
+}: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
 
     const actions: Array<{ id: string; icon: string; label: string; show: boolean; action: () => void }> = [
@@ -16,45 +32,35 @@ export function MapToolbar({ component, mapId }: { component: MapComponent; mapI
             icon: "home",
             label: "Reset view",
             show: toolbar.home !== false,
-            action: () => {
-                // Home action handled by LeafletMap
-            },
+            action: onHome,
         },
         {
             id: "layers",
             icon: "layers",
             label: "Toggle layers",
             show: toolbar.layers !== false,
-            action: () => {
-                context.executeUiAction({ type: "toggleState", target: `${mapId}_layer_panel` });
-            },
+            action: onToggleLayers,
         },
         {
             id: "legend",
             icon: "list",
             label: "Toggle legend",
             show: toolbar.legend !== false,
-            action: () => {
-                context.executeUiAction({ type: "toggleState", target: `${mapId}_legend` });
-            },
+            action: onToggleLegend,
         },
         {
             id: "clearSelection",
             icon: "close",
             label: "Clear selection",
             show: toolbar.clearSelection !== false,
-            action: () => {
-                context.dispatch({ type: "resetInteractions" });
-            },
+            action: onClearSelection,
         },
         {
             id: "zoomToSelection",
             icon: "search",
             label: "Zoom to selection",
             show: toolbar.zoomToSelection !== false,
-            action: () => {
-                // Zoom handled by LeafletMap
-            },
+            action: onZoomToSelection,
         },
     ];
 

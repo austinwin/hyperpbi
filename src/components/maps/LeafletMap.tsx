@@ -39,11 +39,15 @@ export function LeafletMap({
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
-    const layerGroupRef = useRef<Map<string, L.LayerGroup>>(new Map());
-    const tileRef = useRef<L.TileLayer | null>(null);
-    const dynamicRef = useRef<Map<string, L.Layer>>(new Map());
-    const labelGroupRef = useRef<L.LayerGroup | null>(null);
+    const basemapRef = useRef<L.TileLayer | null>(null);
+    const vectorLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
+    const arcGisTileRefs = useRef<Map<string, L.TileLayer>>(new Map());
+    const dynamicLayerRefs = useRef<Map<string, L.Layer>>(new Map());
+    const labelLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
+    const paneNamesRef = useRef<Map<string, string>>(new Map());
     const hasFitRef = useRef(false);
+    const suppressViewportRef = useRef(false);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const context = useRenderContext();
     const { settings, data, config: runtimeConfig, webAccessAvailable } = context;
@@ -69,45 +73,121 @@ export function LeafletMap({
     useEffect(() => {
         if (!ref.current) return;
 
-        const config = component.settings ?? {};
+        const basemap = component.basemap ?? {};
+        const view = component.view ?? {};
+        const mapCenter: [number, number] = view.center ?? settings.map.center;
+        const mapZoom = view.zoom ?? settings.map.zoom;
         const policy = resolveProviderPolicy(runtimeConfig.providers, webAccessAvailable);
-        const providerConfig = runtimeConfig.providers?.basemap;
-        const provider = getBasemapProvider(providerConfig?.provider ?? "none");
-        const enableTiles = policy.tilesAllowed && provider.external;
-        const tileUrl = providerConfig?.tileUrl?.trim() || provider.defaults.tileUrl || "";
+        const enableTiles = policy.tilesAllowed;
 
         const map = L.map(ref.current, {
             zoomControl: true,
-            attributionControl: enableTiles,
+            attributionControl: true,
             preferCanvas: true,
-        }).setView(settings.map.center, settings.map.zoom);
+        }).setView(mapCenter, mapZoom);
 
-        if (enableTiles && /^https:\/\//i.test(tileUrl)) {
-            const tileLayer = L.tileLayer(tileUrl, {
-                maxZoom: providerConfig?.maxZoom ?? provider.defaults.maxZoom ?? 19,
-                attribution: providerConfig?.attribution ?? provider.defaults.attribution,
-            }).addTo(map);
-            tileRef.current = tileLayer;
+        // ── Basemap ─────────────────────────────────────────────
+        const basemapType = basemap.type ?? "osm";
+        if (basemapType !== "none" && enableTiles) {
+            let basemapUrl = "";
+            let basemapAttribution = basemap.attribution ?? "";
+            const bmMaxZoom = basemap.maxZoom ?? 19;
+
+            if (basemapType === "osm") {
+                basemapUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+                basemapAttribution = basemapAttribution || '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+            } else if (basemapType === "customTile" || basemapType === "arcgisTile") {
+                basemapUrl = basemap.url ?? "";
+            }
+
+            if (basemapUrl && /^https:\/\//i.test(basemapUrl)) {
+                const tileLayer = L.tileLayer(basemapUrl, {
+                    maxZoom: bmMaxZoom,
+                    attribution: basemapAttribution,
+                }).addTo(map);
+                basemapRef.current = tileLayer;
+            }
         }
 
         mapRef.current = map;
         hasFitRef.current = false;
+
+        // ── Controller ──────────────────────────────────────────
+        const controller: LeafletMapController = {
+            home() {
+                map.setView(mapCenter, mapZoom);
+            },
+            zoomToSelection() {
+                const selBounds = L.latLngBounds([]);
+                const selRowKeys = context.state.componentSelectedRowKeys[id] ?? [];
+                const selMapIds = context.state.mapSelectedFeatureIds[id] ?? [];
+                for (const layer of resolvedLayers) {
+                    for (const feat of layer.features) {
+                        const isPbSelected = feat.powerBiRowKeys.some(k => selRowKeys.includes(k));
+                        const isLocalSelected = selMapIds.includes(feat.id);
+                        if (!isPbSelected && !isLocalSelected) continue;
+                        if (feat.lat !== null && feat.lon !== null) {
+                            selBounds.extend([feat.lat, feat.lon]);
+                        } else if (feat.geometry) {
+                            const geoLayer = L.geoJSON(feat.geometry);
+                            const gb = geoLayer.getBounds();
+                            if (gb.isValid()) selBounds.extend(gb);
+                        }
+                    }
+                }
+                if (selBounds.isValid()) {
+                    const pad = view.fitPadding ?? 0.08;
+                    map.fitBounds(selBounds.pad(pad), { maxZoom: view.maxZoom ?? 18 });
+                }
+            },
+            invalidateSize() {
+                map.invalidateSize();
+            },
+        };
+        setTimeout(() => onControllerReady?.(controller), 0);
+
+        // ── Viewport emission ───────────────────────────────────
+        const emitViewport = () => {
+            if (suppressViewportRef.current) return;
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            debounceTimerRef.current = setTimeout(() => {
+                const bounds = map.getBounds();
+                const size = map.getSize ? map.getSize() : { x: 0, y: 0 };
+                onViewportChange?.({
+                    bounds: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+                    zoom: map.getZoom(),
+                    width: size.x,
+                    height: size.y,
+                });
+            }, 250);
+        };
+        map.on("moveend", emitViewport);
+        map.on("zoomend", emitViewport);
+        map.on("resize", emitViewport);
 
         const observer = new ResizeObserver(() => map.invalidateSize());
         observer.observe(ref.current);
 
         return () => {
             observer.disconnect();
-            // Clean up dynamic layers
-            for (const [, dl] of dynamicRef.current) {
+            map.off("moveend", emitViewport);
+            map.off("zoomend", emitViewport);
+            map.off("resize", emitViewport);
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            for (const [, dl] of dynamicLayerRefs.current) {
                 map.removeLayer(dl);
             }
-            dynamicRef.current.clear();
+            dynamicLayerRefs.current.clear();
+            for (const [, tl] of arcGisTileRefs.current) {
+                map.removeLayer(tl);
+            }
+            arcGisTileRefs.current.clear();
             map.remove();
             mapRef.current = null;
-            layerGroupRef.current.clear();
-            tileRef.current = null;
-            labelGroupRef.current = null;
+            vectorLayerRefs.current.clear();
+            basemapRef.current = null;
+            labelLayerRefs.current.clear();
+            paneNamesRef.current.clear();
         };
     }, []);
 
@@ -116,80 +196,126 @@ export function LeafletMap({
         const map = mapRef.current;
         if (!map) return;
 
-        const config = component.settings ?? {};
         const dataBounds = L.latLngBounds([]);
         let hasAnyFeatures = false;
 
         // Clear existing vector layer groups
-        for (const [, group] of layerGroupRef.current) {
+        for (const [, group] of vectorLayerRefs.current) {
             map.removeLayer(group);
         }
-        layerGroupRef.current.clear();
+        vectorLayerRefs.current.clear();
 
-        // Clear label group
-        if (labelGroupRef.current) {
-            map.removeLayer(labelGroupRef.current);
-            labelGroupRef.current = null;
+        // Clear all label groups
+        for (const [, group] of labelLayerRefs.current) {
+            map.removeLayer(group);
         }
+        labelLayerRefs.current.clear();
 
-        // Clear existing dynamic layers
-        for (const [key, dl] of dynamicRef.current) {
-            // Keep dynamic layers that should persist
+        // Clear dynamic layers that are no longer present
+        for (const [key, dl] of dynamicLayerRefs.current) {
             const shouldKeep = resolvedLayers.some(l => l.sourceType === "arcgisDynamic" && l.id === key);
             if (!shouldKeep) {
                 map.removeLayer(dl);
-                dynamicRef.current.delete(key);
+                dynamicLayerRefs.current.delete(key);
             }
         }
 
-        // Sort layers by order
-        const sortedLayers = [...resolvedLayers].sort((a, b) => a.order - b.order);
+        // Clear tile layers that are no longer present
+        for (const [key, tl] of arcGisTileRefs.current) {
+            const shouldKeep = resolvedLayers.some(l => l.sourceType === "arcgisTile" && l.id === key);
+            if (!shouldKeep) {
+                map.removeLayer(tl);
+                arcGisTileRefs.current.delete(key);
+            }
+        }
 
-        // Create label group (on top of all vector layers)
-        const labelsGroup = L.layerGroup().addTo(map);
-        labelGroupRef.current = labelsGroup;
+        // Resolve effective order (viewer order or layer order)
+        const mapState = context.state.mapLayerState[id];
+        const viewerOrder = mapState?.order;
+        const sortedLayers = [...resolvedLayers].sort((a, b) => {
+            if (viewerOrder) {
+                const aIdx = viewerOrder.indexOf(a.id);
+                const bIdx = viewerOrder.indexOf(b.id);
+                if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
+            }
+            return a.order - b.order;
+        });
+
+        // Create panes for z-ordering
+        let paneZ = 400;
+        for (const layer of sortedLayers) {
+            const paneName = `hp-${id}-${layer.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+            if (!paneNamesRef.current.has(layer.id)) {
+                map.createPane(paneName);
+                paneNamesRef.current.set(layer.id, paneName);
+            }
+            const pane = map.getPane(paneName);
+            if (pane) {
+                pane.style.zIndex = String(paneZ++);
+            }
+        }
+
+        // Create a label pane above all vector panes
+        const labelPaneName = `hp-${id}-labels`.replace(/[^a-zA-Z0-9_-]/g, "_");
+        map.createPane(labelPaneName);
+        const labelPane = map.getPane(labelPaneName);
+        if (labelPane) labelPane.style.zIndex = String(paneZ++);
 
         for (const layer of sortedLayers) {
-            // Check visibility
-            const mapState = context.state.mapLayerState[id];
             const isVisible = mapState?.visibility?.[layer.id] ?? layer.visible ?? true;
             if (!isVisible) continue;
 
             const layerOpacity = mapState?.opacity?.[layer.id] ?? layer.opacity ?? 1;
 
             // ── Handle tile layers ───────────────────────────────
-            if (layer.sourceType === "arcgisTile") {
-                const source = layer as any;
-                const url = source._sourceUrl || (source.source && (source as any).source?.url) || "";
-                if (url && !tileRef.current) {
-                    try {
-                        const tileUrl = buildArcGisTileUrl(url);
-                        const tileLayer = L.tileLayer(tileUrl, {
-                            maxZoom: 19,
-                            opacity: layerOpacity,
-                            attribution: "",
-                        }).addTo(map);
-                        dynamicRef.current.set(layer.id, tileLayer);
-                    } catch { /* silently skip invalid tile URLs */ }
+            if (layer.sourceType === "arcgisTile" && layer.tile) {
+                const existingTile = arcGisTileRefs.current.get(layer.id);
+                if (existingTile) {
+                    existingTile.setOpacity(layerOpacity);
+                    continue;
+                }
+                try {
+                    const tileUrl = buildArcGisTileUrl(layer.tile.url);
+                    const tileLayer = L.tileLayer(tileUrl, {
+                        maxZoom: layer.tile.maxZoom ?? 19,
+                        minZoom: layer.tile.minZoom,
+                        opacity: layerOpacity,
+                        attribution: layer.tile.attribution ?? "",
+                        pane: paneNamesRef.current.get(layer.id),
+                    }).addTo(map);
+                    arcGisTileRefs.current.set(layer.id, tileLayer);
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : String(err);
+                    layer.diagnostics.warnings.push(`Tile layer error: ${msg}`);
                 }
                 continue;
             }
 
             // ── Handle dynamic layers ────────────────────────────
-            if (layer.sourceType === "arcgisDynamic") {
-                const sourceUrl = (layer as any)._sourceUrl ||
-                    (layer as any).source?.url ||
-                    layer.diagnostics?.sourceUrl || "";
-                if (sourceUrl && !dynamicRef.current.has(layer.id)) {
+            if (layer.sourceType === "arcgisDynamic" && layer.dynamic) {
+                if (!dynamicLayerRefs.current.has(layer.id)) {
                     try {
                         const dynamicLayer = createArcGisDynamicLayer({
-                            url: sourceUrl,
+                            url: layer.dynamic.url,
+                            layerIds: layer.dynamic.layerIds,
+                            layerDefinitions: layer.dynamic.layerDefinitions,
+                            format: layer.dynamic.format ?? "png",
+                            transparent: layer.dynamic.transparent ?? true,
+                            minZoom: layer.dynamic.minZoom,
+                            maxZoom: layer.dynamic.maxZoom,
+                            attribution: layer.dynamic.attribution ?? "",
+                            debounceMs: layer.dynamic.debounceMs ?? 300,
                             opacity: layerOpacity,
-                            debounceMs: 300,
+                        }, (state) => {
+                            layer.diagnostics.loading = state.loading;
+                            if (state.error) layer.diagnostics.warnings.push(state.error);
                         });
                         dynamicLayer.addTo(map);
-                        dynamicRef.current.set(layer.id, dynamicLayer);
-                    } catch { /* silently skip */ }
+                        dynamicLayerRefs.current.set(layer.id, dynamicLayer);
+                    } catch (err) {
+                        const msg = err instanceof Error ? err.message : String(err);
+                        layer.diagnostics.warnings.push(`Dynamic layer error: ${msg}`);
+                    }
                 }
                 continue;
             }
@@ -197,23 +323,36 @@ export function LeafletMap({
             // ── Render vector features ───────────────────────────
             if (layer.features.length === 0) continue;
 
+            const layerPane = paneNamesRef.current.get(layer.id);
             const layerGroup = L.featureGroup().addTo(map);
             const renderer = layer.renderer as ResolvedMapRenderer;
             const domain = rendererDomains.get(layer.id) ?? null;
 
-            // Check for clustering
             const useCluster = renderer.type === "cluster" &&
-                (config.clusterPoints ?? settings.map.clusterPoints);
+                (component.settings?.clusterPoints ?? settings.map.clusterPoints);
 
             const cluster = useCluster
                 ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 44 })
                 : null;
             if (cluster) layerGroup.addLayer(cluster);
 
+            // Selection state
+            const selectedRowKeys = context.state.componentSelectedRowKeys[id] ?? [];
+            const selectedMapIds = context.state.mapSelectedFeatureIds[id] ?? [];
+
+            // ── Labels group for this layer ──────────────────────
+            const labelsEnabled = mapState?.labels?.[layer.id] ?? layer.labels?.enabled ?? false;
+            let labelsGroup: L.LayerGroup | null = null;
+            if (labelsEnabled && layer.labels) {
+                labelsGroup = L.layerGroup([], { pane: labelPaneName }).addTo(map);
+                labelLayerRefs.current.set(layer.id, labelsGroup);
+            }
+
             for (const feature of layer.features) {
-                // Check selection state
-                const selectedRowKeys = context.state.componentSelectedRowKeys[id] ?? [];
-                const isSelected = feature.powerBiRowKeys.some(k => selectedRowKeys.includes(k));
+                // Check selection: Power BI or map-local
+                const isPbSelected = feature.powerBiRowKeys.some(k => selectedRowKeys.includes(k));
+                const isLocalSelected = selectedMapIds.includes(feature.id);
+                const isSelected = isPbSelected || isLocalSelected;
 
                 // Compute style
                 let style: LeafletFeatureStyle;
@@ -223,36 +362,35 @@ export function LeafletMap({
                     style = featureStyle(feature, renderer);
                 }
 
-                // Apply selection highlight
                 if (isSelected) {
                     style = {
                         ...style,
                         color: settings.theme.accent,
                         weight: Math.max(style.weight + 2, 4),
-                        radius: style.radius + 3,
+                        radius: (style.radius || 6) + 3,
                     };
                 }
 
                 let leafletLayer: L.Layer | null = null;
 
-                // ── Point features ────────────────────────────────
-                if (feature.lat !== null && feature.lon !== null &&
-                    feature.geometryType === "point") {
+                // Point features
+                if (feature.lat !== null && feature.lon !== null && feature.geometryType === "point") {
                     leafletLayer = L.circleMarker([feature.lat, feature.lon], {
-                        radius: style.radius,
+                        radius: style.radius || 6,
                         color: style.color,
                         fillColor: style.fillColor,
                         fillOpacity: style.fillOpacity,
                         opacity: style.opacity * layerOpacity,
                         weight: style.weight,
                         dashArray: style.dashArray,
+                        pane: layerPane,
                     });
                     if (cluster) cluster.addLayer(leafletLayer);
                     else layerGroup.addLayer(leafletLayer);
                     dataBounds.extend([feature.lat, feature.lon]);
                     hasAnyFeatures = true;
                 }
-                // ── Geometry features ─────────────────────────────
+                // Geometry features
                 else if (feature.geometry) {
                     leafletLayer = L.geoJSON(feature.geometry, {
                         style: () => ({
@@ -265,42 +403,52 @@ export function LeafletMap({
                         }),
                         pointToLayer: (_geoFeature, latlng) =>
                             L.circleMarker(latlng, {
-                                radius: style.radius,
+                                radius: style.radius || 6,
                                 color: style.color,
                                 fillColor: style.fillColor,
                                 fillOpacity: style.fillOpacity,
                                 opacity: style.opacity * layerOpacity,
                                 weight: style.weight,
+                                pane: layerPane,
                             }),
+                        pane: layerPane,
                     }).addTo(layerGroup);
                     const geoBounds = (leafletLayer as L.GeoJSON).getBounds();
                     if (geoBounds.isValid()) dataBounds.extend(geoBounds);
                     hasAnyFeatures = true;
                 }
 
-                // ── Bind interactions ─────────────────────────────
-                if (leafletLayer) {
-                    // Tooltip
-                    const tooltipFields = layer.labels?.field
-                        ? [{ field: layer.labels.field, fieldSource: layer.labels.fieldSource ?? "service" as const, label: layer.labels.field }]
-                        : undefined;
+                // ── Tooltip ──────────────────────────────────────
+                if (leafletLayer && layer.tooltip?.enabled !== false) {
+                    const tipFields = layer.tooltip?.fields ?? layer.popup?.fields?.slice(0, 2);
                     leafletLayer.bindTooltip(
-                        createResolvedTooltipElement(feature, tooltipFields, layer.name)
+                        createResolvedTooltipElement(feature, tipFields, layer.name)
                     );
+                }
 
-                    // Popup
-                    if (layer.popup?.enabled) {
-                        leafletLayer.bindPopup(
-                            renderResolvedPopup(layer.popup, feature)
-                        );
-                    }
+                // ── Popup ────────────────────────────────────────
+                if (leafletLayer && layer.popup?.enabled) {
+                    const { element: popupEl, cleanup: popupCleanup } = renderResolvedPopup(
+                        layer.popup, feature,
+                        {
+                            executeAction: (action, _feat, _evt) => {
+                                if (action.uiAction) {
+                                    context.executeUiAction(action.uiAction);
+                                }
+                            },
+                        }
+                    );
+                    leafletLayer.bindPopup(popupEl);
+                    leafletLayer.on("popupclose", () => popupCleanup?.());
+                }
 
-                    // Click interaction
+                // ── Click interaction ────────────────────────────
+                if (leafletLayer) {
                     leafletLayer.on("click", (event: L.LeafletMouseEvent) => {
                         const multiSelect = Boolean(event.originalEvent?.ctrlKey || event.originalEvent?.metaKey);
 
-                        if (feature.powerBiRowIndices.length > 0) {
-                            // Joined or Power BI feature: select Power BI rows
+                        if (feature.powerBiRowIndices.length > 0 && feature.powerBiRowKeys.length > 0) {
+                            // Power BI or joined feature
                             const field = interactionPolicy.field;
                             executeComponentInteraction(
                                 interactionPolicy,
@@ -316,19 +464,19 @@ export function LeafletMap({
                             );
                         } else {
                             // Reference-only feature: map-local selection
+                            const mode = multiSelect ? "toggle" : "replace";
                             context.dispatch({
                                 type: "selectMapFeatures",
                                 mapId: id,
                                 featureIds: [feature.id],
+                                selectionMode: mode,
                             });
                         }
                     });
                 }
 
                 // ── Labels ────────────────────────────────────────
-                const labelsEnabled = context.state.mapLayerState[id]?.labels?.[layer.id] ??
-                    layer.labels?.enabled ?? false;
-                if (labelsEnabled && layer.labels && leafletLayer) {
+                if (labelsGroup && layer.labels && leafletLayer) {
                     const labelText = feature.labelValue ??
                         (layer.labels.field
                             ? String(mergedFeatureAttributes(feature)[layer.labels.field] ?? "")
@@ -340,23 +488,33 @@ export function LeafletMap({
                             iconSize: [0, 0],
                             iconAnchor: [0, 0],
                         });
-                        const labelMarker = L.marker(
-                            feature.lat && feature.lon ? [feature.lat, feature.lon] :
-                                feature.geometry ? getGeometryCenter(feature.geometry) : [0, 0],
-                            { icon: labelIcon, interactive: false, keyboard: false }
-                        );
+                        let labelPos: [number, number];
+                        if (feature.lat !== null && feature.lon !== null) {
+                            labelPos = [feature.lat, feature.lon];
+                        } else if (feature.geometry) {
+                            labelPos = getGeometryCenter(feature.geometry);
+                        } else {
+                            labelPos = [0, 0];
+                        }
+                        const labelMarker = L.marker(labelPos, {
+                            icon: labelIcon, interactive: false, keyboard: false,
+                        });
                         labelsGroup.addLayer(labelMarker);
                     }
                 }
             }
 
-            layerGroupRef.current.set(layer.id, layerGroup);
+            vectorLayerRefs.current.set(layer.id, layerGroup);
         }
 
         // ── Fit bounds ───────────────────────────────────────────
-        if ((config.fitBounds ?? true) && dataBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
-            map.fitBounds(dataBounds.pad(0.08), { maxZoom: 14 });
+        const viewDef = component.view ?? {};
+        const fitMode = viewDef.fitMode ?? "data";
+        if (fitMode !== "none" && dataBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
+            suppressViewportRef.current = true;
+            map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), { maxZoom: viewDef.maxZoom ?? 14 });
             hasFitRef.current = true;
+            setTimeout(() => { suppressViewportRef.current = false; }, 500);
         }
     }, [
         resolvedLayers,
@@ -364,21 +522,16 @@ export function LeafletMap({
         settings.map,
         settings.theme.primary,
         settings.theme.accent,
-        JSON.stringify(context.state.componentSelectedRowKeys[id]),
-        JSON.stringify(context.state.mapLayerState[id]),
+        context.state.componentSelectedRowKeys[id],
+        context.state.mapSelectedFeatureIds[id],
+        context.state.mapLayerState[id],
         runtimeConfig.providers,
         webAccessAvailable,
         rendererDomains,
     ]);
 
-    // ── Handle toolbar actions externally ────────────────────────────
-    // Store map reference for toolbar access
-    useEffect(() => {
-        if (mapRef.current) {
-            (mapRef.current as any).__hyperpbi_mapId = id;
-            (mapRef.current as any).__hyperpbi_component = component;
-        }
-    }, [id, component]);
+    // Cleanup no longer needed — map instance tracked via ref
+    // and cleaned up in the init effect's return.
 
     return <div ref={ref} class="hp-leaflet-container" />;
 }

@@ -1,24 +1,39 @@
 // ── Resolved Map Popup ────────────────────────────────────────────────
 // Renders popup content from ResolvedMapLayer popup configuration.
 // Supports title/HTML templates, structured fields, Power BI/service/joined
-// field sources with formatting, and safe HTML output.
+// field sources with formatting, safe HTML, and action execution.
 
-import type { ResolvedMapFeature, ResolvedMapPopup, ResolvedMapPopupField } from "../../maps/model/resolvedMapTypes";
+import type { ResolvedMapFeature, ResolvedMapPopup, ResolvedMapPopupField, ResolvedMapPopupAction } from "../../maps/model/resolvedMapTypes";
 import { resolvedFeatureValue, formatFeatureValue, mergedFeatureAttributes } from "../../maps/model/mapFeatureValue";
 import { sanitizeHtml } from "../../security/sanitizeHtml";
 
 const TOKEN_REGEX = /\{\{\s*([^{}]{1,120}?)\s*\}\}/g;
 
+export interface ResolvedPopupRuntime {
+    executeAction: (
+        action: ResolvedMapPopupAction,
+        feature: ResolvedMapFeature,
+        event: Event
+    ) => void;
+}
+
+export interface RenderedResolvedPopup {
+    element: HTMLElement;
+    cleanup: () => void;
+}
+
 /**
  * Render a popup HTML element for a resolved map feature.
- * Supports templates, structured fields, and safe HTML output.
+ * Supports templates, structured fields, safe HTML output, and bound action execution.
  */
 export function renderResolvedPopup(
     popup: ResolvedMapPopup,
-    feature: ResolvedMapFeature
-): HTMLElement {
+    feature: ResolvedMapFeature,
+    runtime?: ResolvedPopupRuntime
+): RenderedResolvedPopup {
     const container = document.createElement("div");
     container.className = "hp-map-popup hp-map-popup-resolved";
+    const cleanups: Array<() => void> = [];
 
     // ── Title ──────────────────────────────────────────────────────
     if (popup.title) {
@@ -91,15 +106,23 @@ export function renderResolvedPopup(
             if (action.icon) {
                 btn.setAttribute("data-icon", action.icon);
             }
-            // Actions are bound by the caller via DOM listeners
-            btn.setAttribute("data-action-id", action.id);
+            if (runtime) {
+                const handler = (e: Event) => runtime.executeAction(action, feature, e);
+                btn.addEventListener("click", handler);
+                cleanups.push(() => btn.removeEventListener("click", handler));
+            }
             actionsContainer.appendChild(btn);
         }
 
         container.appendChild(actionsContainer);
     }
 
-    return container;
+    return {
+        element: container,
+        cleanup: () => {
+            for (const fn of cleanups) fn();
+        },
+    };
 }
 
 /**
