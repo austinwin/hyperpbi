@@ -14,6 +14,9 @@ const originalBuild=await readFile(buildPath,"utf8");
 let originalHostPolicy="";
 try { originalHostPolicy=await readFile(hostPolicyPath,"utf8"); } catch {}
 
+// ── Read broad-host setting ──────────────────────────────────────────
+const allowAllHosts = process.env.HYPERPBI_ALLOW_ALL_MAP_HOSTS !== "false";
+
 // Default public ArcGIS hosts
 const defaultMapHosts = [
     "https://*.arcgis.com",
@@ -25,9 +28,45 @@ const extraHostsEnv = process.env.HYPERPBI_MAP_HOSTS ?? "";
 const extraHosts = extraHostsEnv
     .split(",")
     .map(h => h.trim())
-    .filter(h => h.startsWith("https://"));
+    .filter(h => {
+        // Validate: only HTTPS patterns, no credentials
+        if (!h.startsWith("https://")) {
+            console.warn(`Skipping non-HTTPS host pattern: ${h}`);
+            return false;
+        }
+        try {
+            const u = new URL(h);
+            if (u.username || u.password) {
+                console.warn(`Skipping credential-bearing host pattern: ${h}`);
+                return false;
+            }
+        } catch {
+            console.warn(`Skipping malformed host pattern: ${h}`);
+            return false;
+        }
+        return true;
+    });
 
 const allHosts = [...new Set([...defaultMapHosts, ...extraHosts])];
+
+// ── Determine WebAccess parameters ────────────────────────────────────
+let webAccessParams = [];
+if (profile === "maps") {
+    if (allowAllHosts) {
+        // Broad wildcard: https://* for all HTTPS hosts
+        webAccessParams = ["https://*"];
+        console.log("Maps package: using broad wildcard https://* for all HTTPS hosts.");
+    } else {
+        // Restricted: use only configured hosts
+        webAccessParams = [
+            "https://tile.openstreetmap.org",
+            "https://nominatim.openstreetmap.org",
+            "https://geocode-api.arcgis.com",
+            ...allHosts,
+        ];
+        console.log(`Maps package: using restricted host list (${webAccessParams.length} hosts).`);
+    }
+}
 
 try {
     const capabilities=JSON.parse(originalCapabilities);
@@ -36,12 +75,7 @@ try {
         capabilities.privileges = [{
             name: "WebAccess",
             essential: false,
-            parameters: [
-                "https://tile.openstreetmap.org",
-                "https://nominatim.openstreetmap.org",
-                "https://geocode-api.arcgis.com",
-                ...allHosts,
-            ]
+            parameters: webAccessParams,
         }];
     } else {
         capabilities.privileges = [];
@@ -57,9 +91,16 @@ try {
 
     // Inject hosts into arcGisHostPolicy if maps profile
     if (originalHostPolicy && profile === "maps") {
+        let injectedHosts;
+        if (allowAllHosts) {
+            // Include wildcard sentinel for runtime matching
+            injectedHosts = [...defaultMapHosts, "https://*"];
+        } else {
+            injectedHosts = allHosts;
+        }
         const injected = originalHostPolicy.replace(
             /const DEFAULT_PUBLIC_HOSTS = \[[\s\S]*?\];/,
-            `const DEFAULT_PUBLIC_HOSTS = ${JSON.stringify(allHosts)};`
+            `const DEFAULT_PUBLIC_HOSTS = ${JSON.stringify(injectedHosts)};`
         );
         await writeFile(hostPolicyPath, injected);
     }
