@@ -10,13 +10,19 @@ import { HyperPbiConfig, defaultConfig } from "../config/hyperpbiConfig";
 import { themeVariables } from "../styles/tokens";
 import { FieldDictionaryPanel } from "../components/system/FieldDictionaryPanel";
 import { DashboardRenderer } from "./DashboardRenderer";
-import { RenderContext } from "./RenderContext";
+import { RenderContext, RenderContextValue } from "./RenderContext";
 import { dashboardReducer, initialDashboardState } from "./stateStore";
 import { calculateDerivedMetrics } from "../calculations/derivedMetrics";
 import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails } from "../powerbi/interactionDiagnostics";
 import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { componentRows as selectedComponentRows, rowsForComponent } from "../interactions/componentInteraction";
+import { executeUiAction, executeUiActions } from "../actions/uiActions";
+import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
+import { resolveAppShell } from "../components/app/appShellResolver";
+import { AppShell } from "../components/app/AppShell";
+import { OverlayHost } from "../components/overlays/OverlayHost";
+import { ToastHost } from "../components/overlays/ToastHost";
 
 const notSent = (): ExternalSelectionResult => ({ sent: false, reason: "component did not call selectExternal" });
 const filterNotSent = (): ExternalFilterResult => ({ sent:false, reason:"component did not call selectExternal" });
@@ -51,19 +57,58 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
     const scope = `#${instanceId}`; const cssMode = config.security?.cssMode ?? "scoped"; const sanitizedCss = useMemo(() => sanitizeCss(`${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}\n${settings.customCss}`, scope, { mode: cssMode }), [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode]);
     const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }), [data.rows, data.rowKeys, rows, state]);
     const componentRows = useCallback((componentId:string) => selectedComponentRows(componentId, { state }), [state]);
-    const context = useMemo(() => ({ data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, warnings: sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable]);
+    const isOverlayOpen = useCallback((id: string) => state.openOverlays.includes(id), [state.openOverlays]);
+
+    // Build a context object that executeUiAction can read from
+    const execUiAction = useCallback((action: UiAction | UiAction[], event?: Event): UiActionResult => {
+        const ctx: RenderContextValue = {
+            data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
+            getRowsForComponent, componentRows, schema, settings, state, dispatch,
+            warnings: sanitizedCss.warnings,
+            selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
+            config, webAccessAvailable,
+            executeUiAction: (null as any), isOverlayOpen: (null as any),
+        };
+        return executeUiActions(action, ctx, event);
+    }, [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable]);
+
+    const context = useMemo((): RenderContextValue => ({
+        data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
+        getRowsForComponent, componentRows, schema, settings, state, dispatch,
+        warnings: sanitizedCss.warnings,
+        selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
+        config, webAccessAvailable,
+        executeUiAction: execUiAction,
+        isOverlayOpen,
+    }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
+    const resolvedApp = useMemo(() => resolveAppShell(schema, settings, state), [schema, settings, state]);
+
     return <div id={instanceId} class={`hyperpbi-root hp-density-${schema.theme?.density ?? settings.layout.density} hp-theme-${schema.theme?.mode ?? settings.theme.mode} ${settings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`} style={style}>
         <style>{sanitizedCss.css}</style>
         <RenderContext.Provider value={context}>
-            {config.renderer?.showHeader === true && <header class="hp-header"><div>{schema.title && <h1>{schema.title}</h1>}{config.renderer?.showRowCount === true && <span>{rows.length.toLocaleString()} of {data.rows.length.toLocaleString()} rows</span>}</div></header>}
-            {schema.toolbar?.length ? <div class={`hp-toolbar ${settings.layout.stickyToolbar ? "hp-sticky" : ""}`}><DashboardRenderer components={schema.toolbar} /></div> : null}
-            {hasSidePanel && sideCollapsible && <button type="button" class="hp-sidebar-toggle" onClick={() => dispatch({ type: "collapse", id: "__leftPanel", value: !sideCollapsed })}>{sideCollapsed ? "Show filters" : "Hide filters"}</button>}
-            <div class={`hp-shell ${hasSidePanel && !sideCollapsed ? "hp-with-sidebar" : ""}`} style={{ "--hp-panel-width": `${panelWidth}px` }}>
-                {hasSidePanel && !sideCollapsed && <aside class="hp-sidebar"><DashboardRenderer components={schema.leftPanel ?? []} /></aside>}
-                <main class="hp-main"><div class="hp-grid"><DashboardRenderer components={schema.components} /></div>{schema.rightPanel?.length ? <aside class="hp-right-panel"><DashboardRenderer components={schema.rightPanel} /></aside> : null}</main>
-            </div>
+            {resolvedApp.enabled ? (
+                <>
+                    <AppShell app={resolvedApp} schema={schema} settings={settings} state={state} dispatch={dispatch}>
+                        {schema.toolbar?.length ? <div class={`hp-toolbar ${settings.layout.stickyToolbar ? "hp-sticky" : ""}`}><DashboardRenderer components={schema.toolbar} /></div> : null}
+                        <div class="hp-grid"><DashboardRenderer components={schema.components} /></div>
+                        {schema.rightPanel?.length ? <aside class="hp-right-panel"><DashboardRenderer components={schema.rightPanel} /></aside> : null}
+                    </AppShell>
+                </>
+            ) : (
+                <>
+                    {config.renderer?.showHeader === true && <header class="hp-header"><div>{schema.title && <h1>{schema.title}</h1>}{config.renderer?.showRowCount === true && <span>{rows.length.toLocaleString()} of {data.rows.length.toLocaleString()} rows</span>}</div></header>}
+                    {schema.toolbar?.length ? <div class={`hp-toolbar ${settings.layout.stickyToolbar ? "hp-sticky" : ""}`}><DashboardRenderer components={schema.toolbar} /></div> : null}
+                    {hasSidePanel && sideCollapsible && <button type="button" class="hp-sidebar-toggle" onClick={() => dispatch({ type: "collapse", id: "__leftPanel", value: !sideCollapsed })}>{sideCollapsed ? "Show filters" : "Hide filters"}</button>}
+                    <div class={`hp-shell ${hasSidePanel && !sideCollapsed ? "hp-with-sidebar" : ""}`} style={{ "--hp-panel-width": `${panelWidth}px` }}>
+                        {hasSidePanel && !sideCollapsed && <aside class="hp-sidebar"><DashboardRenderer components={schema.leftPanel ?? []} /></aside>}
+                        <main class="hp-main"><div class="hp-grid"><DashboardRenderer components={schema.components} /></div>{schema.rightPanel?.length ? <aside class="hp-right-panel"><DashboardRenderer components={schema.rightPanel} /></aside> : null}</main>
+                    </div>
+                </>
+            )}
+            <OverlayHost />
+            <ToastHost />
             {settings.debug.showSchemaErrors && referenceWarnings.length > 0 && <details class="hp-reference-warning"><summary>{referenceWarnings.length} schema field warning(s)</summary><ul>{referenceWarnings.map(warning => <li>{warning}</li>)}</ul><div>Valid field keys: {Object.keys(data.fields).join(", ") || "No fields are bound."}</div></details>}
             {settings.debug.showFieldDictionary && <FieldDictionaryPanel data={filteredData} />}
             {settings.debug.showDataSample && <details class="hp-debug"><summary>Normalized data sample</summary><pre>{JSON.stringify(filteredData.rows.slice(0, 10), null, 2)}</pre></details>}

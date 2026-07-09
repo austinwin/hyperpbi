@@ -1,6 +1,21 @@
 import { ActiveFilter } from "../data/filtering";
 import type { InternalInteractionFilter } from "../interactions/interactionTypes";
 
+export interface ToastMessage {
+    id: string;
+    title?: string;
+    message: string;
+    intent: "neutral" | "primary" | "success" | "warning" | "danger";
+    durationMs?: number;
+}
+
+export interface OverlayAnchor {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+}
+
 export interface DashboardState {
     search: string;
     activeTabs: Record<string, string>;
@@ -17,6 +32,21 @@ export interface DashboardState {
     interactionSignatures: Record<string, string>;
     selectedMapFeature?: number;
     tableSearch: Record<string, string>;
+
+    // Application shell
+    sidebarCollapsed: boolean;
+    mobileSidebarOpen: boolean;
+
+    // Overlays
+    openOverlays: string[];
+    overlayAnchors: Record<string, OverlayAnchor>;
+
+    // Accordion & steps
+    accordionOpenItems: Record<string, string[]>;
+    activeSteps: Record<string, string>;
+
+    // Toasts
+    toasts: ToastMessage[];
 }
 
 export type DashboardAction =
@@ -39,13 +69,54 @@ export type DashboardAction =
     | { type: "reconcileRowKeys"; rowKeys: string[] }
     | { type: "selectMap"; index?: number }
     | { type: "tableSearch"; id: string; value: string }
-    | { type: "clearFilters" };
+    | { type: "clearFilters" }
+    // Application shell
+    | { type: "sidebarCollapsed"; value: boolean }
+    | { type: "mobileSidebar"; value: boolean }
+    // Overlays
+    | { type: "openOverlay"; id: string; anchor?: OverlayAnchor }
+    | { type: "closeOverlay"; id: string }
+    | { type: "toggleOverlay"; id: string; anchor?: OverlayAnchor }
+    | { type: "closeAllOverlays" }
+    | { type: "setOpenOverlays"; ids: string[] }
+    // Accordion & steps
+    | { type: "accordion"; id: string; items: string[] }
+    | { type: "step"; id: string; value: string }
+    | { type: "stepNext"; id: string }
+    | { type: "stepPrevious"; id: string }
+    // Toasts
+    | { type: "pushToast"; toast: ToastMessage }
+    | { type: "dismissToast"; id: string };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
-    return { search, activeTabs: activeTab ? { mainTabs: activeTab } : {}, collapsed: {}, filters: [], values: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, tableSearch: {} };
+    return {
+        search,
+        activeTabs: activeTab ? { mainTabs: activeTab } : {},
+        collapsed: {},
+        filters: [],
+        values: {},
+        selectedRows: [],
+        selectedRowKeys: [],
+        componentSelectedRows: {},
+        componentSelectedRowKeys: {},
+        componentSelectionScopes: {},
+        componentSelectionModes: {},
+        interactionFilters: [],
+        interactionSignatures: {},
+        tableSearch: {},
+        // App shell defaults
+        sidebarCollapsed: false,
+        mobileSidebarOpen: false,
+        openOverlays: [],
+        overlayAnchors: {},
+        accordionOpenItems: {},
+        activeSteps: {},
+        toasts: [],
+    };
 }
 
 export function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
+    // ── Existing actions ──────────────────────────────────────────
     if (action.type === "search") return { ...state, search: action.value };
     if (action.type === "tab") return { ...state, activeTabs: { ...state.activeTabs, [action.id]: action.value } };
     if (action.type === "collapse") return { ...state, collapsed: { ...state.collapsed, [action.id]: action.value ?? !state.collapsed[action.id] } };
@@ -79,5 +150,53 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     }
     if (action.type === "selectMap") return { ...state, selectedMapFeature: action.index };
     if (action.type === "tableSearch") return { ...state, tableSearch: { ...state.tableSearch, [action.id]: action.value } };
+    // clearFilters does NOT reset app shell state
+    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
+
+    // ── Application shell ─────────────────────────────────────────
+    if (action.type === "sidebarCollapsed") return { ...state, sidebarCollapsed: action.value, mobileSidebarOpen: action.value ? false : state.mobileSidebarOpen };
+    if (action.type === "mobileSidebar") return { ...state, mobileSidebarOpen: action.value };
+
+    // ── Overlays ──────────────────────────────────────────────────
+    if (action.type === "openOverlay") {
+        const openOverlays = [...state.openOverlays.filter(id => id !== action.id), action.id];
+        const overlayAnchors = action.anchor ? { ...state.overlayAnchors, [action.id]: action.anchor } : state.overlayAnchors;
+        return { ...state, openOverlays, overlayAnchors };
+    }
+    if (action.type === "closeOverlay") {
+        const overlayAnchors = { ...state.overlayAnchors };
+        delete overlayAnchors[action.id];
+        return { ...state, openOverlays: state.openOverlays.filter(id => id !== action.id), overlayAnchors };
+    }
+    if (action.type === "toggleOverlay") {
+        if (state.openOverlays.includes(action.id)) {
+            const overlayAnchors = { ...state.overlayAnchors };
+            delete overlayAnchors[action.id];
+            return { ...state, openOverlays: state.openOverlays.filter(id => id !== action.id), overlayAnchors };
+        }
+        const overlayAnchors = action.anchor ? { ...state.overlayAnchors, [action.id]: action.anchor } : state.overlayAnchors;
+        return { ...state, openOverlays: [...state.openOverlays.filter(id => id !== action.id), action.id], overlayAnchors };
+    }
+    if (action.type === "closeAllOverlays") return { ...state, openOverlays: [], overlayAnchors: {} };
+    if (action.type === "setOpenOverlays") return { ...state, openOverlays: action.ids };
+
+    // ── Accordion & steps ─────────────────────────────────────────
+    if (action.type === "accordion") return { ...state, accordionOpenItems: { ...state.accordionOpenItems, [action.id]: action.items } };
+    if (action.type === "step") return { ...state, activeSteps: { ...state.activeSteps, [action.id]: action.value } };
+    if (action.type === "stepNext") {
+        // stepNext/stepPrevious are placeholders — the Steps component reads state and computes progression
+        return state;
+    }
+    if (action.type === "stepPrevious") return state;
+
+    // ── Toasts ────────────────────────────────────────────────────
+    if (action.type === "pushToast") {
+        const toasts = [...state.toasts, action.toast];
+        if (toasts.length > 5) toasts.shift(); // cap at 5
+        return { ...state, toasts };
+    }
+    if (action.type === "dismissToast") return { ...state, toasts: state.toasts.filter(t => t.id !== action.id) };
+
+    // Default: clearFilters fallback (shouldn't normally reach here)
     return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
 }

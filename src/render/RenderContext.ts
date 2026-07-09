@@ -8,6 +8,7 @@ import { HyperPbiConfig } from "../config/hyperpbiConfig";
 import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails } from "../powerbi/interactionDiagnostics";
 import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
+import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 
 export interface RenderContextValue {
     data: NormalizedData;
@@ -28,6 +29,9 @@ export interface RenderContextValue {
     reportInteraction: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void;
     config: HyperPbiConfig;
     webAccessAvailable: boolean;
+    // ── UI Actions ──
+    executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
+    isOverlayOpen: (id: string) => boolean;
 }
 
 export const RenderContext = createContext<RenderContextValue | undefined>(undefined);

@@ -16,7 +16,7 @@ export function buildAiPrompt(data: NormalizedData, settings: AiPromptSettings, 
 return this exact shape expanded, not markdown.
 ${minimalDashboardJson}
 
-HyperPBI renders full enterprise dashboards from JSON. It supports layouts, KPI cards, metric grids, safe controls, tabs, collapsibles, tables, ECharts charts, Leaflet maps, sanitized HTML/CSS, safe JSON calculations, custom components, slots, and Power BI report selections. It does not execute JavaScript.
+HyperPBI renders full enterprise dashboards from JSON. It supports professional application shells (root \`app\`), layouts, KPI cards, metric grids, safe controls, tabs, collapsibles, tables, ECharts charts, Leaflet maps, sanitized HTML/CSS, safe JSON calculations, custom components, slots, Power BI report selections, declarative UI actions, cards, dropdowns, modals, offcanvas panels, list groups, data grids, empty/loading states, accordions, steps, toasts, and more. It does not execute JavaScript.
 
 Follow this HyperPBI engine skill exactly:
 ${skill}
@@ -36,6 +36,16 @@ Sample rows or safe summaries (${settings.privacyMode} mode):
 ${JSON.stringify(samples, null, 2)}
 
 Every component needs a unique validation-friendly id. Components may use css and slots; custom components may use sanitized html, props, repeat, and predefined interactions only. Use compact enterprise spacing, restrained colors, useful tables/maps, and avoid decorative chart clutter.
+
+Key guidance:
+- Use \`app\` for professional application layout (navbar, sidebar, page header). Do not rebuild navbar/sidebar through custom HTML or enormous styles.globalCss blocks.
+- Prefer first-class card, list, data grid, offcanvas, and menu primitives.
+- Use custom HTML only for genuinely custom data presentations.
+- Use UI actions for navigation/overlay behavior (openOverlay, setTab, showToast, etc.).
+- Use universal interactions for data filtering and Power BI selection.
+- Keep Power BI dashboards compact and enterprise-grade.
+- Do not generate irrelevant web-app functionality.
+- Tabulator is not bundled; HyperPBI native tables are the supported table engine.
 
 Interaction behavior: every new component must include the universal interaction object. Auto externally filters controls/slicers and selects exact identities for rows, chart points, map features, timeline items, and custom row actions. Internal and external modes are independent. Use internalMode:"none" when the source must stay unchanged. Use externalMode:"filter" only with an explicit unambiguous model-column field. Never emit deprecated internal, external, selectable, or table selectionMode properties.
 

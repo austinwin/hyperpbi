@@ -20,6 +20,61 @@ export function migrateSchema(value: unknown): unknown {
                     return tab;
                 });
             }
+
+            // ── New migrations ─────────────────────────────────────────
+
+            // Legacy accordion with children but no items → wrap into one item
+            if (component.type === "accordion" && Array.isArray(component.children) && !Array.isArray(component.items)) {
+                const childArr = component.children as unknown[];
+                if (childArr.length > 0) {
+                    component.items = [{
+                        id: `${component.id ?? "accordion"}_item`,
+                        title: (component.title as string) ?? "Section",
+                        children: migrateComponents(component.children),
+                    }];
+                }
+                delete component.children;
+            }
+
+            // Legacy drawer → keep type but normalize for offcanvas compatibility
+            if (component.type === "drawer" || component.type === "filterDrawer") {
+                // Preserves original type; offcanvas behavior handled by renderer
+                if (Array.isArray(component.children)) {
+                    component.children = migrateComponents(component.children);
+                }
+            }
+
+            // Legacy stepper with children → normalize to steps where possible
+            if (component.type === "stepper") {
+                if (Array.isArray(component.children) && component.children.length > 0) {
+                    // Keep stepper as-is (rendered through Collapsible for backward compat)
+                    component.children = migrateComponents(component.children);
+                }
+            }
+
+            // Legacy button action → uiAction
+            if ((component.type === "button" || component.type === "buttonGroup") && typeof component.action === "string" && !component.uiAction) {
+                const action = component.action as string;
+                const actionValue = component.actionValue as string | undefined;
+                if (action === "clearFilters") {
+                    component.uiAction = { type: "clearFilters" };
+                } else if (action === "setTab") {
+                    component.uiAction = { type: "setTab", target: "mainTabs", value: actionValue ?? "" };
+                }
+                // Keep legacy action/actionValue for backward compat
+            }
+
+            // Table engine: "tabulator" → normalize to native with warning
+            if (component.type === "table" && component.engine === "tabulator") {
+                component.engine = "native";
+                // Warning emitted at render time
+            }
+
+            // Migrate card footer, modal children, offcanvas children recursively
+            if (Array.isArray(component.footer)) {
+                component.footer = migrateComponents(component.footer);
+            }
+
             return component;
         });
     };
@@ -29,3 +84,4 @@ export function migrateSchema(value: unknown): unknown {
     candidate.rightPanel = migrateComponents(candidate.rightPanel);
     return candidate as unknown as HyperPbiSchema;
 }
+

@@ -1,11 +1,22 @@
 import { CalculationSpecification, ExpressionNode } from "../calculations/calculationTypes";
 import type { EChartsInitOpts, SetOptionOpts } from "echarts/core";
 import type { ComponentInteractionDefinition } from "../interactions/interactionTypes";
+import type {
+    AppShellConfig, UiVariant, UiSize, IconName, UiAction, UiIntent, TooltipDefinition,
+    MenuItem, AppActionItem,
+    ListGroupItem, DataGridItem, TrackingStage,
+} from "./uiSchema";
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
 export type FilterOperator = "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
 export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap" | "advancedChart";
+
+// Re-export UI types for convenience
+export type { AppShellConfig, UiVariant, UiSize, IconName, UiAction, UiIntent, TooltipDefinition,
+    MenuItem, AppActionItem,
+    ListGroupItem, DataGridItem, TrackingStage,
+};
 
 export interface HyperPbiTheme {
     mode?: ThemeMode;
@@ -28,6 +39,7 @@ export interface ComponentBase {
     type: string;
     id?: string;
     title?: string;
+    subtitle?: string;
     span?: number;
     className?: string;
     hidden?: boolean;
@@ -43,6 +55,14 @@ export interface ComponentBase {
     internal?: boolean;
     /** @deprecated Use interaction.externalMode. */
     external?: boolean;
+    // ── New shared properties ──
+    ariaLabel?: string;
+    icon?: IconName;
+    variant?: UiVariant;
+    size?: UiSize;
+    disabled?: boolean;
+    tooltip?: TooltipDefinition;
+    uiAction?: UiAction | UiAction[];
 }
 
 export interface GlobalComponentStyle {
@@ -87,6 +107,18 @@ export interface ControlComponent extends ComponentBase {
     action?: "clearFilters" | "setTab";
     actionValue?: string;
     buttons?: Array<{ id: string; label: string; value?: unknown; action?: string }>;
+    // ── New form properties ──
+    description?: string;
+    helpText?: string;
+    errorText?: string;
+    required?: boolean;
+    orientation?: "vertical" | "horizontal";
+    rows?: number;
+    maxLength?: number;
+    prefixText?: string;
+    prefixIcon?: IconName;
+    suffixText?: string;
+    suffixIcon?: IconName;
 }
 
 export interface MetricDefinition {
@@ -123,7 +155,8 @@ export interface ChartComponent extends ComponentBase {
     aggregation?: MetricDefinition["aggregation"];
     x?: string;
     y?: string;
-    size?: string;
+    /** Scatter chart point size field name */
+    pointSize?: string;
     height?: number;
     maxDataRows?: number;
     initOptions?: EChartsInitOpts;
@@ -147,6 +180,13 @@ export interface TableColumn {
     format?: string;
     hozAlign?: "left" | "center" | "right";
     conditional?: Array<{ operator: FilterOperator; value: unknown; color?: string; background?: string }>;
+    sortable?: boolean;
+    resizable?: boolean;
+    visible?: boolean;
+    wrap?: boolean;
+    frozen?: "left" | "right";
+    cellType?: "text" | "badge" | "progress";
+    intentMap?: Record<string, "neutral" | "primary" | "success" | "warning" | "danger">;
 }
 
 export interface TableComponent extends ComponentBase {
@@ -163,6 +203,19 @@ export interface TableComponent extends ComponentBase {
     selectable?: boolean;
     /** @deprecated Use interaction.internalMode and interaction.internalScope. */
     selectionMode?: "highlight" | "filter";
+    // ── New table properties ──
+    density?: "compact" | "normal";
+    striped?: boolean;
+    hover?: boolean;
+    showRowCount?: boolean;
+    pageSizeOptions?: number[];
+    rowActions?: MenuItem[];
+    emptyState?: {
+        icon?: IconName;
+        title?: string;
+        description?: string;
+    };
+    /** Tabulator is not bundled; this is normalized to native with a warning. */
 }
 
 export interface MatrixComponent extends ComponentBase {
@@ -241,7 +294,212 @@ export interface TimelineComponent extends ComponentBase {
     limit?: number;
 }
 
-export type DashboardComponent = ContainerComponent | ControlComponent | DataDisplayComponent | ChartComponent | SmallMultiplesComponent | TableComponent | MatrixComponent | MapComponent | ContentComponent | TabsComponent | DrawerComponent | TimelineComponent;
+// ── New component types (defined here, not in uiSchema, to extend ComponentBase) ──
+
+export interface CardComponent extends ComponentBase {
+    type: "card";
+    children?: DashboardComponent[];
+    padding?: "none" | "compact" | "normal";
+    header?: { title?: string; subtitle?: string; icon?: IconName; };
+    actions?: AppActionItem[];
+    footer?: DashboardComponent[];
+    status?: { intent?: UiIntent; position?: "top" | "left"; };
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
+}
+
+export interface DropdownComponent extends ComponentBase {
+    type: "dropdown";
+    trigger?: { label?: string; icon?: IconName; variant?: UiVariant; };
+    items: MenuItem[];
+    placement?: "bottom-start" | "bottom-end" | "top-start" | "top-end";
+    closeOnSelect?: boolean;
+}
+
+export interface ModalComponent extends ComponentBase {
+    type: "modal";
+    children?: DashboardComponent[];
+    size?: "sm" | "md" | "lg";
+    backdropClose?: boolean;
+    footer?: DashboardComponent[];
+}
+
+export interface OffcanvasComponent extends ComponentBase {
+    type: "offcanvas";
+    children?: DashboardComponent[];
+    position?: "left" | "right";
+    width?: number;
+    openWhen?: "always" | "selectedRow" | "state";
+    stateKey?: string;
+    defaultOpen?: boolean;
+}
+
+export interface PopoverComponent extends ComponentBase {
+    type: "popover";
+    children?: DashboardComponent[];
+    trigger?: { label?: string; icon?: IconName; };
+    placement?: string;
+}
+
+export interface ListGroupComponent extends ComponentBase {
+    type: "listGroup";
+    items?: ListGroupItem[];
+    source?: "rows";
+    primaryField?: string;
+    secondaryField?: string;
+    badgeField?: string;
+    valueField?: string;
+    icon?: IconName;
+    maxItems?: number;
+    compact?: boolean;
+}
+
+export interface DataGridComponent extends ComponentBase {
+    type: "dataGrid";
+    items?: DataGridItem[];
+    source?: "rows";
+    columns?: 1 | 2 | 3 | 4;
+    selectedRow?: boolean;
+}
+
+export interface EmptyStateComponent extends ComponentBase {
+    type: "emptyState";
+    icon?: IconName;
+    title?: string;
+    description?: string;
+    primaryAction?: UiAction;
+    secondaryAction?: UiAction;
+    compact?: boolean;
+}
+
+export interface PlaceholderComponent extends ComponentBase {
+    type: "placeholder";
+    lines?: number;
+    /** Skeleton variant: "text", "card", or "table". Use this instead of ComponentBase.variant which is for UI intent. */
+    placeholderVariant?: "text" | "card" | "table";
+}
+
+export interface SpinnerComponent extends ComponentBase {
+    type: "spinner";
+    label?: string;
+    inline?: boolean;
+}
+
+export interface CountUpComponent extends ComponentBase {
+    type: "countUp";
+    field?: string;
+    aggregation?: "sum" | "avg" | "min" | "max" | "count" | "distinctCount";
+    value?: number;
+    prefix?: string;
+    suffix?: string;
+    duration?: number;
+    format?: string;
+}
+
+export interface TrackingComponent extends ComponentBase {
+    type: "tracking";
+    stages: TrackingStage[];
+    activeStage?: string;
+    stageField?: string;
+    orientation?: "horizontal" | "vertical";
+    compact?: boolean;
+}
+
+export interface AccordionComponent extends ComponentBase {
+    type: "accordion";
+    multiple?: boolean;
+    defaultOpenItems?: string[];
+    children?: DashboardComponent[];
+    items: Array<{
+        id: string;
+        title: string;
+        subtitle?: string;
+        icon?: IconName;
+        disabled?: boolean;
+        children: DashboardComponent[];
+    }>;
+}
+
+export interface StepsComponent extends ComponentBase {
+    type: "steps";
+    orientation?: "horizontal" | "vertical";
+    activeStep?: string;
+    stateKey?: string;
+    clickable?: boolean;
+    items: Array<{
+        id: string;
+        label: string;
+        description?: string;
+        icon?: IconName;
+        disabled?: boolean;
+    }>;
+}
+
+export interface IconComponent extends ComponentBase {
+    type: "icon";
+    icon: IconName;
+    size?: UiSize;
+}
+
+export interface IconButtonComponent extends ComponentBase {
+    type: "iconButton";
+    icon: IconName;
+    ariaLabel: string;
+    variant?: UiVariant;
+    size?: UiSize;
+    disabled?: boolean;
+    tooltip?: TooltipDefinition;
+    uiAction?: UiAction | UiAction[];
+}
+
+export interface AvatarComponent extends ComponentBase {
+    type: "avatar";
+    initials?: string;
+    label?: string;
+    subtitle?: string;
+    size?: UiSize;
+    shape?: "circle" | "rounded";
+    status?: "online" | "away" | "busy" | "offline";
+}
+
+export interface AvatarGroupComponent extends ComponentBase {
+    type: "avatarGroup";
+    avatars: AvatarComponent[];
+    max?: number;
+}
+
+export type DashboardComponent =
+    | ContainerComponent
+    | ControlComponent
+    | DataDisplayComponent
+    | ChartComponent
+    | SmallMultiplesComponent
+    | TableComponent
+    | MatrixComponent
+    | MapComponent
+    | ContentComponent
+    | TabsComponent
+    | DrawerComponent
+    | TimelineComponent
+    // ── New primitives and overlays ──
+    | CardComponent
+    | DropdownComponent
+    | ModalComponent
+    | OffcanvasComponent
+    | PopoverComponent
+    | ListGroupComponent
+    | DataGridComponent
+    | EmptyStateComponent
+    | PlaceholderComponent
+    | SpinnerComponent
+    | CountUpComponent
+    | TrackingComponent
+    | AccordionComponent
+    | StepsComponent
+    | IconComponent
+    | IconButtonComponent
+    | AvatarComponent
+    | AvatarGroupComponent;
 
 export interface HyperPbiSchema {
     version: "1.0";
@@ -255,6 +513,8 @@ export interface HyperPbiSchema {
         main?: { type?: "grid" | "flex"; columns?: number; gap?: number };
     };
     state?: { search?: string; activeTab?: string; filters?: Record<string, unknown> };
+    /** Application shell config — rendered by HyperPbiRoot at the root level */
+    app?: AppShellConfig;
     leftPanel?: DashboardComponent[];
     rightPanel?: DashboardComponent[];
     toolbar?: DashboardComponent[];

@@ -1,0 +1,370 @@
+{
+  "version": "1.0",
+  "title": "Operations Portal",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#206bc4",
+    "surfaceColor": "#ffffff",
+    "textColor": "#182433",
+    "borderColor": "#dce1e7",
+    "radius": 8,
+    "cardPadding": 12,
+    "gap": 10
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "HyperPBI",
+      "shortTitle": "HP",
+      "subtitle": "Operations Analytics",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search dashboard...",
+      "actions": [
+        {
+          "id": "refresh_action",
+          "ariaLabel": "Refresh view",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "Dashboard",
+            "message": "The current Power BI data is displayed.",
+            "intent": "primary",
+            "durationMs": 3000
+          }
+        }
+      ],
+      "user": {
+        "name": "Operations Team",
+        "subtitle": "Dashboard Viewer",
+        "initials": "OT",
+        "status": "online",
+        "menu": [
+          {
+            "id": "settings_item",
+            "label": "Dashboard settings",
+            "icon": "settings",
+            "action": {
+              "type": "openOverlay",
+              "target": "settings_modal"
+            }
+          }
+        ]
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 248,
+      "collapsedWidth": 64,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "navigation": [
+        {
+          "id": "overview_nav",
+          "label": "Overview",
+          "icon": "dashboard",
+          "action": {
+            "type": "setTab",
+            "target": "main_tabs",
+            "value": "overview"
+          }
+        },
+        {
+          "id": "analysis_nav",
+          "label": "Analysis",
+          "icon": "chart",
+          "children": [
+            {
+              "id": "trends_nav",
+              "label": "Trends",
+              "icon": "activity",
+              "action": {
+                "type": "setTab",
+                "target": "main_tabs",
+                "value": "trends"
+              }
+            },
+            {
+              "id": "records_nav",
+              "label": "Records",
+              "icon": "table",
+              "action": {
+                "type": "setTab",
+                "target": "main_tabs",
+                "value": "records"
+              }
+            }
+          ]
+        }
+      ],
+      "footer": {
+        "title": "Operations Workspace",
+        "subtitle": "Power BI"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Executive Overview",
+      "subtitle": "Current operational performance and exceptions",
+      "breadcrumbs": [
+        { "id": "home_crumb", "label": "Home" },
+        { "id": "operations_crumb", "label": "Operations" }
+      ],
+      "meta": [
+        { "label": "Status", "value": "Current", "icon": "check", "intent": "success" }
+      ],
+      "actions": [
+        {
+          "id": "filter_action",
+          "label": "Filters",
+          "icon": "filter",
+          "variant": "outline",
+          "action": {
+            "type": "openOverlay",
+            "target": "filter_panel"
+          }
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "HyperPBI Operations Dashboard",
+      "secondaryText": "Data is controlled by the Power BI semantic model."
+    }
+  },
+  "toolbar": [
+    {
+      "type": "filterChips",
+      "id": "active_filters",
+      "span": 12,
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    }
+  ],
+  "components": [
+    {
+      "type": "tabs",
+      "id": "main_tabs",
+      "span": 12,
+      "tabs": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "children": [
+            {
+              "type": "metricGrid",
+              "id": "executive_metrics",
+              "span": 12,
+              "metrics": [
+                { "title": "Records", "aggregation": "count", "format": "integer", "intent": "primary" }
+              ],
+              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+            },
+            {
+              "type": "card",
+              "id": "performance_card",
+              "span": 7,
+              "header": {
+                "title": "Performance",
+                "subtitle": "Current distribution",
+                "icon": "chart"
+              },
+              "padding": "compact",
+              "children": [
+                {
+                  "type": "barChart",
+                  "id": "performance_chart",
+                  "span": 12,
+                  "category": "__category_field_key__",
+                  "measure": "__measure_field_key__",
+                  "aggregation": "sum",
+                  "height": 300,
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "others",
+                    "externalMode": "auto",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  }
+                }
+              ],
+              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+            },
+            {
+              "type": "card",
+              "id": "exceptions_card",
+              "span": 5,
+              "header": {
+                "title": "Exceptions",
+                "subtitle": "Items requiring attention",
+                "icon": "alert"
+              },
+              "padding": "none",
+              "children": [
+                {
+                  "type": "listGroup",
+                  "id": "exception_list",
+                  "span": 12,
+                  "source": "rows",
+                  "primaryField": "__record_field_key__",
+                  "secondaryField": "__description_field_key__",
+                  "badgeField": "__status_field_key__",
+                  "maxItems": 8,
+                  "compact": true,
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "click",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "auto",
+                    "selectionMode": "replace",
+                    "multiSelect": false,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  }
+                }
+              ],
+              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+            }
+          ]
+        },
+        {
+          "id": "records",
+          "title": "Records",
+          "children": [
+            {
+              "type": "table",
+              "id": "record_table",
+              "title": "Record Details",
+              "span": 12,
+              "columns": ["__record_field_key__", "__category_field_key__", "__status_field_key__", "__measure_field_key__"],
+              "pagination": true,
+              "pageSize": 25,
+              "pageSizeOptions": [10, 25, 50, 100],
+              "search": true,
+              "stickyHeader": true,
+              "showRowCount": true,
+              "density": "compact",
+              "rowActions": [
+                {
+                  "id": "open_details",
+                  "label": "View details",
+                  "icon": "eye",
+                  "action": {
+                    "type": "openOverlay",
+                    "target": "record_details"
+                  }
+                }
+              ],
+              "interaction": {
+                "enabled": true,
+                "trigger": "click",
+                "internalMode": "highlight",
+                "internalScope": "self",
+                "externalMode": "auto",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": true,
+                "clearOnSecondClick": true
+              }
+            }
+          ]
+        }
+      ],
+      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+    },
+    {
+      "type": "offcanvas",
+      "id": "filter_panel",
+      "title": "Filters",
+      "position": "left",
+      "width": 320,
+      "openWhen": "state",
+      "stateKey": "filter_panel",
+      "children": [
+        {
+          "type": "select",
+          "id": "category_filter",
+          "field": "__category_field_key__",
+          "label": "Category",
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "internalScope": "all",
+            "externalMode": "filter",
+            "field": "__category_field_key__",
+            "operator": "=",
+            "selectionMode": "replace",
+            "multiSelect": false,
+            "showSelector": false,
+            "clearOnSecondClick": false
+          }
+        }
+      ],
+      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+    },
+    {
+      "type": "offcanvas",
+      "id": "record_details",
+      "title": "Record Details",
+      "position": "right",
+      "width": 420,
+      "openWhen": "selectedRow",
+      "children": [
+        {
+          "type": "dataGrid",
+          "id": "selected_record_grid",
+          "selectedRow": true,
+          "columns": 2,
+          "items": [
+            { "label": "Record", "field": "__record_field_key__", "copyable": true },
+            { "label": "Status", "field": "__status_field_key__", "badge": true },
+            { "label": "Value", "field": "__measure_field_key__", "format": "currency" }
+          ],
+          "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+        }
+      ],
+      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+    },
+    {
+      "type": "modal",
+      "id": "settings_modal",
+      "title": "Dashboard Settings",
+      "size": "md",
+      "children": [
+        {
+          "type": "toggle",
+          "id": "compact_mode_toggle",
+          "label": "Compact presentation",
+          "defaultValue": true,
+          "uiAction": { "type": "setState", "target": "compact_mode" },
+          "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+        }
+      ],
+      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { createInteractionPayload } from "../../interactions/interactionPayload"
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { useRenderContext } from "../../render/RenderContext";
 import { ControlComponent } from "../../schema/hyperpbiSchema";
+import type { UiAction } from "../../actions/uiActionTypes";
 
 export function ControlBlock({ component }: { component: ControlComponent }) {
     const context = useRenderContext();
@@ -18,6 +19,15 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     const multiple = component.type === "multiSelect" || component.multiple === true;
     const operator = component.interaction?.operator ?? component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : component.type === "dateRange" ? "between" : "=");
     const interactionField=policy.field??component.field;
+
+    // Normalize legacy action to UiAction
+    const legacyUiAction = useMemo((): UiAction | undefined => {
+        if (!component.action) return undefined;
+        if (component.action === "clearFilters") return { type: "clearFilters" };
+        if (component.action === "setTab") return { type: "setTab", target: "mainTabs", value: component.actionValue ?? "" };
+        return undefined;
+    }, [component.action, component.actionValue]);
+
     const changeValue = (next: unknown, event?: Event) => {
         setValue(next);
         dispatch({ type: "value", id, value: next });
@@ -28,8 +38,12 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     useEffect(() => { setValue(state.values[id] ?? initial); }, [state.values[id]]);
 
     if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" onClick={event => {
-        if (component.action === "clearFilters") { dispatch({ type: "clearFilters" }); clearComponentInteraction(policy, id, context); }
-        else if (component.action === "setTab") dispatch({ type: "tab", id: "mainTabs", value: component.actionValue ?? "" });
+        // Execute UI action (legacy or new)
+        if (component.uiAction) {
+            context.executeUiAction(component.uiAction, event);
+        } else if (legacyUiAction) {
+            context.executeUiAction(legacyUiAction, event);
+        }
         executeComponentInteraction(policy, createInteractionPayload(component, { value: component.actionValue ?? component.interaction?.value }), context, { trigger: policy.trigger==="click"?"click":"change", event });
     }}>{component.title ?? component.label ?? "Action"}</button>;
     if (component.type === "buttonGroup") return <div class="btn-group">{component.buttons?.map(button => <button type="button" class="btn btn-sm" onClick={event => changeValue(button.value ?? button.id, event)}>{button.label}</button>)}</div>;

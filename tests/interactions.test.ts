@@ -26,7 +26,7 @@ const data: NormalizedData = { rows, rowKeys: rows.map((_, i) => `row-${i}`), fi
 
 function context() {
     const selectExternal = vi.fn(() => ({ sent: true as const })); const clearExternal = vi.fn(() => ({ sent: true as const }));const applyExternalFilter=vi.fn(()=>({sent:true as const,target:{table:"Work",column:"Status"}}));const clearExternalFilter=vi.fn(()=>({sent:true as const})); const reportInteraction = vi.fn();
-    const value: RenderContextValue = { data, rows: rows, sourceRows: rows, sourceRowKeys: data.rowKeys, getRowsForComponent:()=>rows, componentRows:id=>componentRows(id,value), schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {value.state=dashboardReducer(value.state,action);}, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false };
+    const value: RenderContextValue = { data, rows: rows, sourceRows: rows, sourceRowKeys: data.rowKeys, getRowsForComponent:()=>rows, componentRows:id=>componentRows(id,value), schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: action => {value.state=dashboardReducer(value.state,action);}, warnings: [], selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction, config: defaultConfig, webAccessAvailable: false, executeUiAction: () => ({ success: true }), isOverlayOpen: () => false };
     return { value, selectExternal, clearExternal,applyExternalFilter,clearExternalFilter, reportInteraction };
 }
 
