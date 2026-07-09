@@ -17,6 +17,7 @@ import { buildInWhereClause, inferArcGisFieldType } from "./arcGisWhereBuilder";
 import type { ArcGisFieldType } from "./arcGisWhereBuilder";
 import type { ArcGisLayerMetadata, ArcGisQueryResponse, ArcGisGeoJsonResponse } from "./arcGisServiceTypes";
 import type { MapJoinNormalization } from "../../schema/mapSchema";
+import { normalizeJoinKey } from "../join/mapJoinNormalizer";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -63,6 +64,10 @@ export interface ArcGisFeatureQueryRequest {
     queryStrategy?: "auto" | "keyBatches";
     /** Output spatial reference WKID */
     outputSpatialReference?: number;
+    /** Whether to collect service renderer fields from metadata */
+    useServiceRenderer?: boolean;
+    /** Whether to collect service label fields from metadata */
+    useServiceLabels?: boolean;
 }
 
 export interface ArcGisFeatureQueryResult {

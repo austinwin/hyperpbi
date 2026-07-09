@@ -9,7 +9,7 @@ import type {
 } from "./arcGisServiceTypes";
 
 export interface ParsedArcGisFeature {
-    objectId?: number;
+    objectId?: string | number;
     attributes: Record<string, unknown>;
     geometry: GeoJSON.GeoJsonObject | null;
 }
@@ -80,6 +80,17 @@ function isEsriQueryResponse(value: unknown): boolean {
     return Array.isArray(obj.features) || obj.objectIdFieldName !== undefined || obj.fields !== undefined;
 }
 
+function resolveObjectId(
+    attributes: Record<string, unknown>,
+    field: string
+): string | number | undefined {
+    const value = attributes[field];
+    if (typeof value === "string" || typeof value === "number") {
+        return value;
+    }
+    return undefined;
+}
+
 function parseGeoJsonResponse(
     response: ArcGisGeoJsonResponse,
     objectIdFieldName: string
@@ -111,8 +122,8 @@ function parseGeoJsonResponse(
             if (!feature.geometry) continue;
         }
 
-        // Use the metadata-derived OID field, not a hardcoded fallback
-        const oid = attributes[objectIdFieldName] as number | undefined;
+        // Use the metadata-derived OID field via type-safe helper
+        const oid = resolveObjectId(attributes, objectIdFieldName);
 
         features.push({
             objectId: oid,
@@ -156,7 +167,7 @@ function parseEsriResponse(
         }
 
         const attrs = esriFeature.attributes ?? {};
-        const objectId = attrs[oidField] as number | undefined;
+        const objectId = resolveObjectId(attrs, oidField);
 
         features.push({
             objectId,

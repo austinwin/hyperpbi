@@ -48,7 +48,7 @@ describe("Map Layer State Reducer", () => {
             expect(next.mapLayerState.map1?.opacity?.layerA).toBe(0.5);
         });
 
-        it("clamps opacity from 0 to 1 (caller responsibility)", () => {
+        it("clamps opacity from 0 to 1 in the reducer", () => {
             const s = state();
             const action: DashboardAction = {
                 type: "mapLayerOpacity",
@@ -57,7 +57,19 @@ describe("Map Layer State Reducer", () => {
                 opacity: 1.5,
             };
             const next = dashboardReducer(s, action);
-            expect(next.mapLayerState.map1?.opacity?.layerA).toBe(1.5);
+            expect(next.mapLayerState.map1?.opacity?.layerA).toBe(1);
+        });
+
+        it("clamps negative opacity to 0", () => {
+            const s = state();
+            const action: DashboardAction = {
+                type: "mapLayerOpacity",
+                mapId: "map1",
+                layerId: "layerA",
+                opacity: -0.5,
+            };
+            const next = dashboardReducer(s, action);
+            expect(next.mapLayerState.map1?.opacity?.layerA).toBe(0);
         });
     });
 

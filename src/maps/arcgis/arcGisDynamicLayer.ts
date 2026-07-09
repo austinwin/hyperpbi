@@ -19,6 +19,11 @@ export interface ArcGisDynamicLayerOptions {
     transparent?: boolean;
     debounceMs?: number;
     signal?: AbortSignal;
+    pane?: string;
+}
+
+export interface ArcGisDynamicLeafletLayer extends L.Layer {
+    setOpacity(value: number): this;
 }
 
 export interface ArcGisDynamicLayerState {
@@ -34,7 +39,7 @@ export interface ArcGisDynamicLayerState {
 export function createArcGisDynamicLayer(
     options: ArcGisDynamicLayerOptions,
     onStateChange?: (state: ArcGisDynamicLayerState) => void
-): L.Layer {
+): ArcGisDynamicLeafletLayer {
     const {
         url,
         layerIds,
@@ -47,6 +52,7 @@ export function createArcGisDynamicLayer(
         transparent = true,
         debounceMs = 300,
         signal: externalSignal,
+        pane,
     } = options;
 
     // Normalize URL: get MapServer export endpoint
@@ -73,12 +79,15 @@ export function createArcGisDynamicLayer(
         opacity,
         attribution,
         className: "hp-arcgis-dynamic-overlay",
+        pane,
     });
 
     let currentAbortController: AbortController | null = null;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let mapRef: L.Map | null = null;
     let isLoading = false;
+    let activeObjectUrl: string | null = null;
+    let pendingObjectUrl: string | null = null;
 
     // Extend the layer with map event binding
     const originalOnAdd = imageOverlay.onAdd;
@@ -92,10 +101,29 @@ export function createArcGisDynamicLayer(
         return imageOverlay.getElement() || undefined;
     };
 
-    (imageOverlay as any).onRemove = function (map: L.Map) {
+    const onExternalAbort = () => {
+        cancelCurrentRequest();
+    };
+    if (externalSignal) {
+        externalSignal.addEventListener("abort", onExternalAbort);
+    }
+
+    (imageOverlay as unknown as Record<string, unknown>).onRemove = function (map: L.Map) {
         if (originalOnRemove) originalOnRemove.call(imageOverlay, map);
         removeMapListeners(map);
         cancelCurrentRequest();
+        if (externalSignal) {
+            externalSignal.removeEventListener("abort", onExternalAbort);
+        }
+        if (debounceTimer) clearTimeout(debounceTimer);
+        if (activeObjectUrl) {
+            URL.revokeObjectURL(activeObjectUrl);
+            activeObjectUrl = null;
+        }
+        if (pendingObjectUrl) {
+            URL.revokeObjectURL(pendingObjectUrl);
+            pendingObjectUrl = null;
+        }
         mapRef = null;
         return imageOverlay;
     };
@@ -212,9 +240,7 @@ export function createArcGisDynamicLayer(
 
             const blob = await response.blob();
             const objectUrl = URL.createObjectURL(blob);
-
-            // Capture old URL before setting new one
-            const prevUrl = (imageOverlay as unknown as Record<string, unknown>)._url as string | undefined;
+            pendingObjectUrl = objectUrl;
 
             // Preload image to ensure it's ready before swap
             const img = new Image();
@@ -224,13 +250,15 @@ export function createArcGisDynamicLayer(
                 img.src = objectUrl;
             });
 
-            // Swap: set new image, then revoke old
+            // Swap: capture old URL, set new image, then revoke old
+            const previous = activeObjectUrl;
             imageOverlay.setUrl(objectUrl);
             imageOverlay.setBounds(map.getBounds());
+            activeObjectUrl = objectUrl;
+            pendingObjectUrl = null;
 
-            // Revoke old blob URL after successful swap
-            if (prevUrl && prevUrl.startsWith("blob:")) {
-                URL.revokeObjectURL(prevUrl);
+            if (previous) {
+                URL.revokeObjectURL(previous);
             }
 
             isLoading = false;
@@ -238,9 +266,18 @@ export function createArcGisDynamicLayer(
 
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
-                // Request was cancelled, which is expected
                 isLoading = false;
+                if (pendingObjectUrl) {
+                    URL.revokeObjectURL(pendingObjectUrl);
+                    pendingObjectUrl = null;
+                }
                 return;
+            }
+
+            // Revoke pending URL on preload failure
+            if (pendingObjectUrl) {
+                URL.revokeObjectURL(pendingObjectUrl);
+                pendingObjectUrl = null;
             }
 
             const message = error instanceof Error ? error.message : String(error);
@@ -253,7 +290,7 @@ export function createArcGisDynamicLayer(
         }
     };
 
-    return imageOverlay;
+    return imageOverlay as unknown as ArcGisDynamicLeafletLayer;
 }
 
 /**
