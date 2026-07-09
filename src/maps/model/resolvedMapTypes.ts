@@ -4,6 +4,8 @@
 import type { MapLayerSourceType, MapGeometryType } from "../../schema/mapSchema";
 import type { ComponentInteractionDefinition } from "../../interactions/interactionTypes";
 import type { DataRow } from "../../data/normalizeData";
+import type { UiAction } from "../../schema/uiSchema";
+import type { ArcGisQueryStrategy } from "../arcgis/arcGisFeatureQuery";
 
 // ── Resolved Feature ──────────────────────────────────────────────────
 
@@ -77,6 +79,8 @@ export interface ResolvedMapRenderer {
     minColor?: string;
     maxColor?: string;
     clamp?: boolean;
+    domainMin?: number;
+    domainMax?: number;
 
     // Proportional
     minSize?: number;
@@ -160,7 +164,7 @@ export interface ResolvedMapPopupAction {
     id: string;
     label: string;
     icon?: string;
-    uiAction?: any;
+    uiAction?: UiAction;
 }
 
 // ── Map Layer Diagnostics ─────────────────────────────────────────────
@@ -190,6 +194,10 @@ export interface MapLayerDiagnostics {
     usedServiceSymbology: boolean;
     /** Whether service labels were used */
     usedServiceLabels: boolean;
+    /** Whether the result was served from cache */
+    cacheUsed?: boolean;
+    /** Query strategy used */
+    queryStrategy?: string;
     /** Warning messages */
     warnings: string[];
 }
@@ -207,10 +215,43 @@ export interface MapJoinDiagnostics {
     blankServiceKeyCount: number;
     duplicatePowerBiKeyCount: number;
     duplicateServiceKeyCount: number;
+    /** Count of service features suppressed due to duplicate policy */
+    suppressedDuplicateServiceCount?: number;
     matchRate: number;
     sampleUnmatchedPowerBiKeys: string[];
     sampleDuplicatePowerBiKeys: string[];
     sampleDuplicateServiceKeys: string[];
+}
+
+// ── Resolved Tile Configuration ───────────────────────────────────────
+
+export interface ResolvedTileConfig {
+    url: string;
+    attribution?: string;
+    minZoom?: number;
+    maxZoom?: number;
+}
+
+// ── Resolved Dynamic Configuration ────────────────────────────────────
+
+export interface ResolvedDynamicConfig {
+    url: string;
+    layerIds?: number[];
+    layerDefinitions?: Record<number, string>;
+    format?: "png" | "png24" | "png32" | "jpg";
+    transparent?: boolean;
+    minZoom?: number;
+    maxZoom?: number;
+    attribution?: string;
+    debounceMs?: number;
+}
+
+// ── Resolved Tooltip ──────────────────────────────────────────────────
+
+export interface ResolvedMapTooltip {
+    enabled: boolean;
+    fields?: ResolvedMapPopupField[];
+    template?: string;
 }
 
 // ── Resolved Layer ────────────────────────────────────────────────────
@@ -227,6 +268,7 @@ export interface ResolvedMapLayer {
     renderer: ResolvedMapRenderer;
     labels?: ResolvedMapLabels;
     popup?: ResolvedMapPopup;
+    tooltip?: ResolvedMapTooltip;
     interaction?: ComponentInteractionDefinition;
     legend?: {
         visible?: boolean;
@@ -237,12 +279,8 @@ export interface ResolvedMapLayer {
     diagnostics: MapLayerDiagnostics;
     loading: boolean;
     error?: string;
-}
-
-// ── Resolved Map Document ─────────────────────────────────────────────
-
-export interface ResolvedMapDocument {
-    layers: ResolvedMapLayer[];
-    warnings: string[];
-    errors: string[];
+    /** Source-specific tile configuration */
+    tile?: ResolvedTileConfig;
+    /** Source-specific dynamic configuration */
+    dynamic?: ResolvedDynamicConfig;
 }

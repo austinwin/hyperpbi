@@ -15,7 +15,7 @@ describe("ArcGIS Response Parser", () => {
                     },
                 ],
             };
-            const result = parseArcGisResponse(response, "geojson");
+            const result = parseArcGisResponse(response, "geojson", "OBJECTID");
             expect(result.features).toHaveLength(1);
             expect(result.features[0].objectId).toBe(1);
             expect(result.features[0].attributes.NAME).toBe("Test");
@@ -43,7 +43,7 @@ describe("ArcGIS Response Parser", () => {
                 features: [],
                 exceededTransferLimit: true,
             };
-            const result = parseArcGisResponse(response, "geojson");
+            const result = parseArcGisResponse(response, "geojson", "OBJECTID");
             expect(result.exceededTransferLimit).toBe(true);
         });
 
@@ -54,7 +54,7 @@ describe("ArcGIS Response Parser", () => {
                     { type: "Feature", properties: { OBJECTID: 1 } },
                 ],
             };
-            const result = parseArcGisResponse(response, "geojson");
+            const result = parseArcGisResponse(response, "geojson", "OBJECTID");
             expect(result.features[0].geometry).toBeNull();
         });
     });
@@ -71,7 +71,7 @@ describe("ArcGIS Response Parser", () => {
                     },
                 ],
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.features).toHaveLength(1);
             expect(result.features[0].objectId).toBe(1);
             expect(result.features[0].geometry?.type).toBe("Point");
@@ -90,7 +90,7 @@ describe("ArcGIS Response Parser", () => {
                     },
                 ],
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.features[0].geometry?.type).toBe("LineString");
         });
 
@@ -107,7 +107,7 @@ describe("ArcGIS Response Parser", () => {
                     },
                 ],
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.features[0].geometry?.type).toBe("Polygon");
         });
 
@@ -122,7 +122,7 @@ describe("ArcGIS Response Parser", () => {
                     },
                 ],
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.features[0].geometry?.type).toBe("MultiPoint");
         });
 
@@ -142,24 +142,24 @@ describe("ArcGIS Response Parser", () => {
                 features: [],
                 exceededTransferLimit: true,
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.exceededTransferLimit).toBe(true);
         });
     });
 
     describe("edge cases", () => {
         it("returns empty for null response", () => {
-            const result = parseArcGisResponse(null, "json");
+            const result = parseArcGisResponse(null, "json", "OBJECTID");
             expect(result.features).toHaveLength(0);
         });
 
         it("returns empty for unknown format", () => {
-            const result = parseArcGisResponse({ foo: "bar" }, "json");
+            const result = parseArcGisResponse({ foo: "bar" }, "json", "OBJECTID");
             expect(result.features).toHaveLength(0);
         });
 
         it("handles empty features array", () => {
-            const result = parseArcGisResponse({ features: [] }, "json");
+            const result = parseArcGisResponse({ features: [] }, "json", "OBJECTID");
             expect(result.features).toHaveLength(0);
         });
 
@@ -169,7 +169,7 @@ describe("ArcGIS Response Parser", () => {
                     { attributes: { OBJECTID: 1 } },
                 ],
             };
-            const result = parseArcGisResponse(response, "json");
+            const result = parseArcGisResponse(response, "json", "OBJECTID");
             expect(result.features[0].geometry).toBeNull();
         });
     });

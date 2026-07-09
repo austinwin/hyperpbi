@@ -105,8 +105,9 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
 
     // ── Match ─────────────────────────────────────────────────────────
     const features: ResolvedMapFeature[] = [];
-    let matchedPowerBiRowCount = 0;
-    let matchedServiceFeatureCount = 0;
+    const matchedPowerBiRowIndices = new Set<number>();
+    const matchedServiceFeatureIds = new Set<string | number>();
+    let suppressedDuplicateCount = 0;
     const matchedPowerBiKeys = new Set<string>();
 
     for (const [normalizedKey, svcFeatures] of serviceIndex) {
@@ -120,8 +121,16 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
             ? [svcFeatures[0]]
             : svcFeatures;
 
+        // Track suppressed duplicates
+        if (serviceDupPolicy === "first" && svcFeatures.length > 1) {
+            suppressedDuplicateCount += svcFeatures.length - 1;
+        }
+
         for (const svcFeature of effectiveServiceFeatures) {
-            matchedServiceFeatureCount++;
+            const svcOid = svcFeature.objectId ?? svcFeature.attributes?.["OBJECTID"];
+            if (svcOid !== undefined && svcOid !== null) {
+                matchedServiceFeatureIds.add(String(svcOid));
+            }
 
             // Apply Power BI duplicate policy
             let effectivePowerBiMatches: PowerBiMatch[];
@@ -131,7 +140,9 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
                 effectivePowerBiMatches = powerBiMatches;
             }
 
-            matchedPowerBiRowCount += effectivePowerBiMatches.length;
+            for (const pm of effectivePowerBiMatches) {
+                matchedPowerBiRowIndices.add(pm.rowIndex);
+            }
 
             // Aggregate joined fields
             const joinedAttributes = aggregateJoinedFields(
@@ -174,10 +185,11 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         powerBiDistinctKeyCount: powerBiKeys.size,
         serviceFeatureCount: serviceFeatures.length,
         serviceDistinctKeyCount: serviceKeys.size,
-        matchedPowerBiRowCount,
-        matchedServiceFeatureCount,
+        matchedPowerBiRowCount: matchedPowerBiRowIndices.size,
+        matchedServiceFeatureCount: matchedServiceFeatureIds.size,
+        suppressedDuplicateServiceCount: suppressedDuplicateCount > 0 ? suppressedDuplicateCount : undefined,
         unmatchedPowerBiKeyCount: unmatchedPowerBiKeys.length,
-        unmatchedServiceFeatureCount: serviceFeatures.length - matchedServiceFeatureCount,
+        unmatchedServiceFeatureCount: serviceFeatures.length - matchedServiceFeatureIds.size,
         blankPowerBiKeyCount: blankPowerBiKeys,
         blankServiceKeyCount: blankServiceKeys,
         duplicatePowerBiKeyCount: duplicatePowerBiKeys.length,

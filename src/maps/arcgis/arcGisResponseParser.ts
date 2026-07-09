@@ -20,18 +20,19 @@ export interface ParsedArcGisResponse {
     exceededTransferLimit: boolean;
     geometryType?: string;
     spatialReference?: { wkid: number };
+    warnings: string[];
 }
 
 /**
  * Parse an ArcGIS query response, whether GeoJSON or Esri JSON format.
  * @param response - Raw response body
  * @param requestedFormat - Expected format ("geojson" or "json")
- * @param objectIdFieldName - Override for object-ID field (from service metadata)
+ * @param objectIdFieldName - The OID field from metadata (required)
  */
 export function parseArcGisResponse(
     response: unknown,
     requestedFormat: "geojson" | "json",
-    objectIdFieldName?: string
+    objectIdFieldName: string
 ): ParsedArcGisResponse {
     // Try GeoJSON format first
     if (requestedFormat === "geojson" && isGeoJsonResponse(response)) {
@@ -43,11 +44,28 @@ export function parseArcGisResponse(
         return parseEsriResponse(response as ArcGisQueryResponse, objectIdFieldName);
     }
 
-    // Unknown format
+    // Unknown/malformed response — report diagnostics
+    const respObj = response as Record<string, unknown> | null;
+    const maybeError = respObj?.error as Record<string, unknown> | undefined;
+
     return {
         features: [],
         exceededTransferLimit: false,
+        warnings: [`Malformed response from service. Requested format: ${requestedFormat}.` +
+            (maybeError ? ` ArcGIS error: ${JSON.stringify(maybeError)}` : "") +
+            ` Missing expected properties: ${describeMissing(response)}`],
     };
+}
+
+function describeMissing(response: unknown): string {
+    if (!response || typeof response !== "object") return "response is not an object";
+    const obj = response as Record<string, unknown>;
+    const missing: string[] = [];
+    if (!Array.isArray(obj.features)) missing.push("features array");
+    if (obj.type !== "FeatureCollection" && !obj.objectIdFieldName && !obj.fields) {
+        missing.push("type (FeatureCollection), objectIdFieldName, or fields");
+    }
+    return missing.length > 0 ? missing.join(", ") : "unknown structure";
 }
 
 function isGeoJsonResponse(value: unknown): boolean {
@@ -64,23 +82,40 @@ function isEsriQueryResponse(value: unknown): boolean {
 
 function parseGeoJsonResponse(
     response: ArcGisGeoJsonResponse,
-    objectIdFieldName?: string
+    objectIdFieldName: string
 ): ParsedArcGisResponse {
-    const oidField = objectIdFieldName ?? "OBJECTID";
+    const warnings: string[] = [];
     const features: ParsedArcGisFeature[] = [];
+
+    if (!Array.isArray(response.features)) {
+        return {
+            features: [],
+            objectIdFieldName,
+            exceededTransferLimit: response.exceededTransferLimit ?? false,
+            warnings: ["GeoJSON response missing features array."],
+        };
+    }
 
     for (const feature of response.features) {
         if (!feature) continue;
 
+        // Skip malformed features with a warning
         const attributes: Record<string, unknown> = {};
         if (feature.properties) {
             for (const [key, value] of Object.entries(feature.properties)) {
                 attributes[key] = value;
             }
+        } else {
+            warnings.push("Skipping GeoJSON feature without properties.");
+            // Still allow the feature if it has geometry
+            if (!feature.geometry) continue;
         }
 
+        // Use the metadata-derived OID field, not a hardcoded fallback
+        const oid = attributes[objectIdFieldName] as number | undefined;
+
         features.push({
-            objectId: (attributes[oidField] ?? attributes["OBJECTID"] ?? attributes["FID"]) as number | undefined,
+            objectId: oid,
             attributes,
             geometry: feature.geometry ?? null,
         });
@@ -88,28 +123,46 @@ function parseGeoJsonResponse(
 
     return {
         features,
-        objectIdFieldName: oidField,
+        objectIdFieldName,
         exceededTransferLimit: response.exceededTransferLimit ?? false,
+        warnings,
     };
 }
 
 function parseEsriResponse(
     response: ArcGisQueryResponse,
-    objectIdFieldName?: string
+    objectIdFieldName: string
 ): ParsedArcGisResponse {
-    const oidField = objectIdFieldName ?? response.objectIdFieldName ?? "OBJECTID";
+    const warnings: string[] = [];
+    // Prefer metadata OID field over response OID field
+    const oidField = objectIdFieldName || response.objectIdFieldName || "OBJECTID";
     const features: ParsedArcGisFeature[] = [];
 
-    if (response.features) {
-        for (const esriFeature of response.features) {
-            const objectId = esriFeature.attributes?.[oidField] as number | undefined;
+    if (!Array.isArray(response.features)) {
+        return {
+            features: [],
+            objectIdFieldName: oidField,
+            exceededTransferLimit: response.exceededTransferLimit ?? false,
+            geometryType: response.geometryType,
+            spatialReference: response.spatialReference,
+            warnings: ["Esri JSON response missing features array."],
+        };
+    }
 
-            features.push({
-                objectId,
-                attributes: esriFeature.attributes ?? {},
-                geometry: esriToGeoJson(esriFeature.geometry),
-            });
+    for (const esriFeature of response.features) {
+        if (!esriFeature) {
+            warnings.push("Skipping null Esri feature.");
+            continue;
         }
+
+        const attrs = esriFeature.attributes ?? {};
+        const objectId = attrs[oidField] as number | undefined;
+
+        features.push({
+            objectId,
+            attributes: attrs,
+            geometry: esriToGeoJson(esriFeature.geometry),
+        });
     }
 
     return {
@@ -118,5 +171,6 @@ function parseEsriResponse(
         exceededTransferLimit: response.exceededTransferLimit ?? false,
         geometryType: response.geometryType,
         spatialReference: response.spatialReference,
+        warnings,
     };
 }
