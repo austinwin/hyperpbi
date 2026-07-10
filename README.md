@@ -15,7 +15,7 @@ The repository includes a responsive, dependency-free [product landing page](ind
 | Data | Power BI Values field, calculations, identity selection |
 | Charts | Simple and advanced ECharts (10 chart types + JSON-only advanced) |
 | Tables | Native paginated, sortable, resizable, frozen columns |
-| Maps | Stable Power BI spatial maps; ArcGIS REST developer foundations |
+| Maps | Power BI spatial maps plus practical public ArcGIS feature, join, tile, and dynamic layers |
 | Security | No user JavaScript, sanitized HTML, scoped CSS |
 | Packaging | Core and Maps profiles |
 
@@ -129,14 +129,15 @@ The native table engine supports: `density` (compact/normal), `striped`, `hover`
 ### Stable: Power BI Spatial Maps
 Location priority: Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and legend.
 
-### Developer Preview: ArcGIS REST Foundations
-Declarative layered-map schema and ArcGIS REST service infrastructure exist (URL parsing, host policy, service inspection, query planning, safe WHERE generation, GeoJSON/Esri JSON parsing, geometry conversion, join engine). End-to-end ArcGIS feature rendering is not yet connected to the report renderer.
+### Practical ArcGIS REST runtime
+Public query-capable FeatureServer/MapServer layers render end to end through the resolved-layer architecture. The runtime supports Power BI geometry joins, viewport queries, configured or opt-in service renderers/labels, tile overlays, basic dynamic images, labels, tooltips, popups/actions, selection, diagnostics, layer controls, legends, Home, and Zoom to Selection. It intentionally excludes secured-service authentication, editing, 3D, relationship/tracing workflows, non-4326 output, density grids, and advanced label collision.
 
 ### Build Profiles
 ```bash
 npm run package:core   # No WebAccess, certification posture
-npm run package:maps   # WebAccess for OSM/Nominatim/ArcGIS
-HYPERPBI_MAP_HOSTS="https://gis.example.org" npm run package:maps
+HYPERPBI_ALLOW_ALL_MAP_HOSTS=true npm run package:maps
+HYPERPBI_ALLOW_ALL_MAP_HOSTS=false HYPERPBI_MAP_HOSTS="https://gis.example.org" npm run package:maps
+npm run package:verify # Inspect capabilities inside actual PBIVIZ ZIPs
 ```
 Only HTTPS; user URLs cannot bypass package privileges. No tokens in JSON. Public services only.
 
@@ -171,7 +172,7 @@ npm run docs:generate  # Generate catalog docs
 npm run docs:check     # Verify docs up to date
 ```
 
-Generated files: `dist/*-core.pbiviz`, `dist/*-maps.pbiviz`.
+Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-maps-restricted.pbiviz`.
 
 ## Documentation
 
@@ -197,7 +198,5 @@ Generated files: `dist/*-core.pbiviz`, `dist/*-maps.pbiviz`.
 - Tabulator is not bundled; native table is the supported engine
 - Nominatim unsuitable for bulk production geocoding
 - Maps package requires organizational WebAccess approval
-- ArcGIS REST layered rendering is developer preview; end-to-end not connected
+- ArcGIS support is limited to public HTTPS services and output SR 4326; secured services, editing, 3D, relationships, tracing, density grids, and advanced label collision are unsupported
 - Dropdown, popover, and dedicated offcanvas renderers are in development
-- Map toolbar Home and Zoom-to-selection are placeholder handlers
-- Layer panel reorder/opacity/label toggle UI not fully exposed

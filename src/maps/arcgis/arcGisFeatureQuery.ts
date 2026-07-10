@@ -6,13 +6,11 @@
 import {
     getArcGisJson,
     postArcGisForm,
-    ArcGisAuthError,
     ArcGisServiceError,
 } from "./arcGisRestClient";
 import { parseArcGisUrl, buildArcGisQueryUrl } from "./arcGisUrl";
 import { checkHostPolicy } from "./arcGisHostPolicy";
 import { parseArcGisResponse, type ParsedArcGisFeature } from "./arcGisResponseParser";
-import { resolveArcGisError } from "./arcGisErrorResolver";
 import { buildInWhereClause, inferArcGisFieldType } from "./arcGisWhereBuilder";
 import type { ArcGisFieldType } from "./arcGisWhereBuilder";
 import type { ArcGisLayerMetadata, ArcGisQueryResponse, ArcGisGeoJsonResponse } from "./arcGisServiceTypes";
@@ -88,6 +86,7 @@ export interface ArcGisFeatureQueryResult {
 
 interface CacheEntry {
     features: ParsedArcGisFeature[];
+    warnings: string[];
     timestamp: number;
     etag?: string;
 }
@@ -122,7 +121,7 @@ function buildCacheKey(
     return parts.filter(p => p.length > 0).join("|");
 }
 
-function getFromCache(key: string, cacheMinutes: number): ParsedArcGisFeature[] | null {
+function getFromCache(key: string, cacheMinutes: number): CacheEntry | null {
     if (cacheMinutes <= 0) return null;
     const entry = queryCache.get(key);
     if (!entry) return null;
@@ -133,16 +132,16 @@ function getFromCache(key: string, cacheMinutes: number): ParsedArcGisFeature[] 
         if (idx >= 0) cacheInsertionOrder.splice(idx, 1);
         return null;
     }
-    return entry.features;
+    return entry;
 }
 
-function putInCache(key: string, features: ParsedArcGisFeature[]): void {
+function putInCache(key: string, features: ParsedArcGisFeature[], warnings: string[]): void {
     // Evict oldest entries if at capacity
     while (cacheInsertionOrder.length >= MAX_CACHE_SIZE) {
         const oldest = cacheInsertionOrder.shift();
         if (oldest) queryCache.delete(oldest);
     }
-    queryCache.set(key, { features, timestamp: Date.now() });
+    queryCache.set(key, { features, warnings, timestamp: Date.now() });
     // Track insertion order for eviction
     const idx = cacheInsertionOrder.indexOf(key);
     if (idx >= 0) cacheInsertionOrder.splice(idx, 1);
@@ -156,6 +155,10 @@ export async function executeArcGisFeatureQuery(
 ): Promise<ArcGisFeatureQueryResult> {
     const warnings: string[] = [];
     const { signal } = request;
+    const outputSpatialReference = request.outputSpatialReference ?? 4326;
+    if (outputSpatialReference !== 4326) {
+        throw new Error(`Only output spatial reference 4326 is supported. Requested: ${outputSpatialReference}.`);
+    }
 
     // 1. Normalize URL
     const parsed = parseArcGisUrl(request.url);
@@ -187,9 +190,6 @@ export async function executeArcGisFeatureQuery(
 
     // 5. Load layer metadata (single metadata path)
     const metadata = await loadLayerMetadata(layerUrl, signal);
-    if (!metadata) {
-        throw new Error(`Could not load layer metadata from ${layerUrl}`);
-    }
 
     // 6. Verify query capability
     const caps = (metadata.capabilities ?? "").toLowerCase();
@@ -204,6 +204,7 @@ export async function executeArcGisFeatureQuery(
     const supportedFormats = (metadata.supportedQueryFormats ?? "JSON").toUpperCase();
     const supportsGeoJson = supportedFormats.includes("GEOJSON");
     const queryFormat = supportsGeoJson ? "geojson" : "json";
+    const supportsPagination = metadata.advancedQueryCapabilities?.supportsPagination ?? false;
 
     // 9. Build combined WHERE clause
     let where = request.where ?? "1=1";
@@ -211,43 +212,63 @@ export async function executeArcGisFeatureQuery(
         where = `(${request.definitionExpression}) AND (${where})`;
     }
 
-    // 10. Build outFields
-    const outFields = buildOutFields(request.outFields ?? [], objectIdField);
+    // 10. Collect opt-in service renderer/label fields before building outFields.
+    const metadataFields = collectMetadataQueryFields(metadata, {
+        renderer: request.useServiceRenderer === true,
+        labels: request.useServiceLabels === true,
+    });
+
+    const normalizedJoinValues = request.joinKeys
+        ? [...new Set(request.joinKeys.values
+            .map(value => normalizeJoinKey(value, request.joinKeys?.normalization ?? ["trim", "upper"]))
+            .filter((value): value is string => value !== null))]
+        : [];
+    const joinKeys = request.joinKeys ? { ...request.joinKeys, values: normalizedJoinValues } : undefined;
+
+    const requestedFields = [
+        ...(request.outFields ?? []),
+        ...metadataFields,
+        ...(joinKeys ? [joinKeys.field] : []),
+    ];
+    const outFields = buildOutFields(requestedFields, objectIdField);
 
     // 11. Determine query strategy
     const isViewportQuery = request.viewportQuery && request.viewport !== undefined && request.viewport.length === 4;
-    const isJoinQuery = request.joinKeys !== undefined && request.joinKeys.values.length > 0;
+    const joinStrategyAllowed = request.queryStrategy === undefined ||
+        request.queryStrategy === "auto" || request.queryStrategy === "keyBatches";
+    const hasJoinConfiguration = joinKeys !== undefined && joinStrategyAllowed;
+    const isJoinQuery = hasJoinConfiguration && joinKeys.values.length > 0;
     let queryStrategy: ArcGisQueryStrategy;
     if (isJoinQuery) {
         queryStrategy = "joinKeys";
     } else if (isViewportQuery) {
         queryStrategy = "viewport";
     } else {
-        queryStrategy = "pagination";
+        queryStrategy = supportsPagination ? "pagination" : "objectIds";
     }
 
     // 12. Build join-key signature for cache
     let joinKeySignature: string | undefined;
     if (isJoinQuery) {
-        joinKeySignature = `${request.joinKeys!.field}:${request.joinKeys!.values.map(v => String(v)).sort().join(",")}`;
+        joinKeySignature = `${joinKeys!.field}:${[...normalizedJoinValues].sort().join(",")}`;
     }
 
     // 13. Check cache
     const cacheKey = buildCacheKey(
         layerUrl, where, outFields, queryStrategy,
-        joinKeySignature, request.viewport, request.outputSpatialReference, request.layerId
+        joinKeySignature, request.viewport, outputSpatialReference, request.layerId
     );
     const cached = getFromCache(cacheKey, request.cacheMinutes ?? 0);
     if (cached) {
         return {
-            features: cached,
+            features: cached.features,
             metadata,
             requestCount: 0,
             truncated: false,
             objectIdField,
             geometryType: metadata.geometryType ?? "unknown",
-            spatialReference: metadata.spatialReference ?? { wkid: 4326 },
-            warnings: [],
+            spatialReference: { wkid: outputSpatialReference },
+            warnings: cached.warnings,
             sourceUrl: layerUrl,
             usedCache: true,
             queryStrategy,
@@ -257,11 +278,18 @@ export async function executeArcGisFeatureQuery(
     // 14. Execute query based on strategy
     const maxFeatures = request.maxFeatures ?? 1000;
     const requestBatchSize = request.requestBatchSize ?? metadata.maxRecordCount ?? 1000;
-    const supportsPagination = metadata.advancedQueryCapabilities?.supportsPagination ?? false;
-
     let allFeatures: ParsedArcGisFeature[] = [];
     let requestCount = 0;
     let truncated = false;
+
+    if (hasJoinConfiguration && normalizedJoinValues.length === 0) {
+        return {
+            features: [], metadata, requestCount: 0, truncated: false, objectIdField,
+            geometryType: metadata.geometryType ?? "unknown",
+            spatialReference: { wkid: outputSpatialReference }, warnings, sourceUrl: layerUrl,
+            usedCache: false, queryStrategy: "joinKeys",
+        };
+    }
 
     try {
         if (isJoinQuery) {
@@ -269,14 +297,16 @@ export async function executeArcGisFeatureQuery(
             const result = await queryWithJoinKeys(
                 layerUrl, queryFormat, objectIdField,
                 where, outFields,
-                request.joinKeys!,
+                joinKeys!,
                 maxFeatures, requestBatchSize,
                 metadata,
-                signal
+                signal,
+                outputSpatialReference
             );
             allFeatures = result.features;
             requestCount = result.requestCount;
             truncated = result.truncated;
+            warnings.push(...result.warnings);
         } else if (isViewportQuery && request.viewport) {
             // Viewport query with pagination
             const result = await queryViewport(
@@ -284,11 +314,13 @@ export async function executeArcGisFeatureQuery(
                 where, outFields,
                 request.viewport,
                 maxFeatures, requestBatchSize,
-                signal
+                signal,
+                outputSpatialReference
             );
             requestCount++;
             allFeatures = result.features;
             truncated = result.exceededTransferLimit ?? false;
+            warnings.push(...result.warnings);
 
             // Paginate remaining viewport features
             if (truncated && supportsPagination && allFeatures.length < maxFeatures) {
@@ -296,11 +328,12 @@ export async function executeArcGisFeatureQuery(
                     layerUrl, queryFormat, objectIdField,
                     where, outFields,
                     allFeatures.length, requestBatchSize, maxFeatures - allFeatures.length,
-                    signal, request.viewport
+                    signal, request.viewport, outputSpatialReference
                 );
                 allFeatures = allFeatures.concat(paginated.features);
                 requestCount += paginated.requestCount;
                 truncated = paginated.truncated;
+                warnings.push(...paginated.warnings);
             }
         } else if (supportsPagination) {
             // Standard paginated query
@@ -308,22 +341,24 @@ export async function executeArcGisFeatureQuery(
                 layerUrl, queryFormat, objectIdField,
                 where, outFields,
                 0, requestBatchSize, maxFeatures,
-                signal
+                signal, undefined, outputSpatialReference
             );
             allFeatures = paginated.features;
             requestCount = paginated.requestCount;
             truncated = paginated.truncated;
+            warnings.push(...paginated.warnings);
         } else {
             // Non-paginated: use ID batching strategy
             const result = await queryWithIdBatching(
                 layerUrl, queryFormat, objectIdField,
                 where, outFields,
                 maxFeatures, requestBatchSize,
-                signal
+                signal, outputSpatialReference
             );
             allFeatures = result.features;
             requestCount = result.requestCount;
             truncated = result.truncated;
+            warnings.push(...result.warnings);
         }
 
         // Deduplicate by object ID
@@ -331,7 +366,7 @@ export async function executeArcGisFeatureQuery(
 
         // Cache results only on success
         if (request.cacheMinutes && request.cacheMinutes > 0) {
-            putInCache(cacheKey, allFeatures);
+            putInCache(cacheKey, allFeatures, warnings);
         }
     } catch (err) {
         // Do not cache failures or aborted requests
@@ -349,7 +384,7 @@ export async function executeArcGisFeatureQuery(
         truncated,
         objectIdField,
         geometryType: metadata.geometryType ?? "unknown",
-        spatialReference: metadata.spatialReference ?? { wkid: 4326 },
+        spatialReference: { wkid: outputSpatialReference },
         warnings,
         sourceUrl: layerUrl,
         usedCache: false,
@@ -362,12 +397,51 @@ export async function executeArcGisFeatureQuery(
 async function loadLayerMetadata(
     layerUrl: string,
     signal?: AbortSignal
-): Promise<ArcGisLayerMetadata | null> {
-    try {
-        return await getArcGisJson<ArcGisLayerMetadata>(`${layerUrl}?f=pjson`, { signal });
-    } catch {
-        return null;
+): Promise<ArcGisLayerMetadata> {
+    return getArcGisJson<ArcGisLayerMetadata>(`${layerUrl}?f=pjson`, { signal });
+}
+
+export function collectMetadataQueryFields(
+    metadata: ArcGisLayerMetadata,
+    options: { renderer: boolean; labels: boolean }
+): string[] {
+    const actualFields = new Map(
+        (metadata.fields ?? []).map(field => [field.name.toLowerCase(), field.name] as const)
+    );
+    const candidates = new Set<string>();
+    const add = (value: unknown) => {
+        if (typeof value !== "string" || value.trim().length === 0) return;
+        const actual = actualFields.get(value.trim().toLowerCase());
+        if (actual) candidates.add(actual);
+    };
+
+    if (options.renderer) {
+        const renderer = metadata.drawingInfo?.renderer;
+        add(renderer?.field);
+        add(renderer?.field1);
+        add(renderer?.field2);
+        add(renderer?.field3);
+        add(renderer?.normalizationField);
+        add(renderer?.sizeInfo?.field);
+        add(renderer?.colorInfo?.field);
+        for (const visualVariable of renderer?.visualVariables ?? []) add(visualVariable.field);
     }
+
+    if (options.labels) {
+        for (const label of metadata.drawingInfo?.labelingInfo ?? []) {
+            const expression = label.labelExpressionInfo?.expression ?? label.labelExpression ?? "";
+            const patterns = [
+                /\[([^\]]+)\]/g,
+                /\$feature\.([A-Za-z_][A-Za-z0-9_]*)/g,
+                /\$feature\[\s*["']([^"']+)["']\s*\]/g,
+            ];
+            for (const pattern of patterns) {
+                for (const match of expression.matchAll(pattern)) add(match[1]);
+            }
+        }
+    }
+
+    return [...candidates];
 }
 
 function buildOutFields(userFields: string[], objectIdField: string): string[] {
@@ -381,6 +455,7 @@ function buildOutFields(userFields: string[], objectIdField: string): string[] {
 interface BatchResult {
     features: ParsedArcGisFeature[];
     exceededTransferLimit?: boolean;
+    warnings: string[];
 }
 
 async function queryBatch(
@@ -391,7 +466,8 @@ async function queryBatch(
     outFields: string[],
     pagination: { offset: number; limit: number },
     signal?: AbortSignal,
-    viewport?: [number, number, number, number]
+    viewport?: [number, number, number, number],
+    outputSpatialReference = 4326
 ): Promise<BatchResult> {
     const queryUrl = buildArcGisQueryUrl(layerUrl);
 
@@ -402,17 +478,17 @@ async function queryBatch(
             outFields: outFields.join(","),
             resultOffset: String(pagination.offset),
             resultRecordCount: String(pagination.limit),
-            outSR: "4326",
+            outSR: String(outputSpatialReference),
             returnGeometry: "true",
         };
         if (viewport) {
             params.geometry = JSON.stringify({
                 xmin: viewport[0], ymin: viewport[1],
                 xmax: viewport[2], ymax: viewport[3],
-                spatialReference: { wkid: 4326 },
+                spatialReference: { wkid: outputSpatialReference },
             });
             params.geometryType = "esriGeometryEnvelope";
-            params.inSR = "4326";
+            params.inSR = String(outputSpatialReference);
             params.spatialRel = "esriSpatialRelIntersects";
         }
 
@@ -425,6 +501,7 @@ async function queryBatch(
         return {
             features: parsed.features,
             exceededTransferLimit: parsed.exceededTransferLimit,
+            warnings: parsed.warnings,
         };
     }
 
@@ -435,17 +512,17 @@ async function queryBatch(
         outFields: outFields.join(","),
         resultOffset: String(pagination.offset),
         resultRecordCount: String(pagination.limit),
-        outSR: "4326",
+        outSR: String(outputSpatialReference),
         returnGeometry: "true",
     };
     if (viewport) {
         params.geometry = JSON.stringify({
             xmin: viewport[0], ymin: viewport[1],
             xmax: viewport[2], ymax: viewport[3],
-            spatialReference: { wkid: 4326 },
+            spatialReference: { wkid: outputSpatialReference },
         });
         params.geometryType = "esriGeometryEnvelope";
-        params.inSR = "4326";
+        params.inSR = String(outputSpatialReference);
         params.spatialRel = "esriSpatialRelIntersects";
     }
 
@@ -458,6 +535,7 @@ async function queryBatch(
     return {
         features: parsed.features,
         exceededTransferLimit: parsed.exceededTransferLimit,
+        warnings: parsed.warnings,
     };
 }
 
@@ -471,13 +549,15 @@ async function paginateQuery(
     batchSize: number,
     maxTotal: number,
     signal?: AbortSignal,
-    viewport?: [number, number, number, number]
-): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean }> {
+    viewport?: [number, number, number, number],
+    outputSpatialReference = 4326
+): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean; warnings: string[] }> {
     const allFeatures: ParsedArcGisFeature[] = [];
     let requestCount = 0;
     let offset = startOffset;
     let truncated = false;
     const seen = new Set<string | number>();
+    const warnings: string[] = [];
 
     while (allFeatures.length < maxTotal) {
         // Check abort before each page
@@ -486,8 +566,9 @@ async function paginateQuery(
         const remaining = maxTotal - allFeatures.length;
         const limit = Math.min(batchSize, remaining);
 
-        const result = await queryBatch(layerUrl, format, objectIdField, where, outFields, { offset, limit }, signal, viewport);
+        const result = await queryBatch(layerUrl, format, objectIdField, where, outFields, { offset, limit }, signal, viewport, outputSpatialReference);
         requestCount++;
+        warnings.push(...result.warnings);
 
         if (result.features.length === 0) break;
 
@@ -506,7 +587,7 @@ async function paginateQuery(
         if (!truncated || result.features.length < limit) break;
     }
 
-    return { features: allFeatures, requestCount, truncated };
+    return { features: allFeatures, requestCount, truncated, warnings };
 }
 
 async function queryViewport(
@@ -518,13 +599,14 @@ async function queryViewport(
     viewport: [number, number, number, number],
     maxFeatures: number,
     batchSize: number,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    outputSpatialReference = 4326
 ): Promise<BatchResult> {
     return queryBatch(
         layerUrl, format, objectIdField,
         where, outFields,
         { offset: 0, limit: Math.min(batchSize, maxFeatures) },
-        signal, viewport
+        signal, viewport, outputSpatialReference
     );
 }
 
@@ -542,15 +624,16 @@ async function queryWithJoinKeys(
     maxFeatures: number,
     batchSize: number,
     metadata: ArcGisLayerMetadata,
-    signal?: AbortSignal
-): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean }> {
-    // 1. Collect distinct, nonblank, normalized join values
-    const rawValues = joinKeys.values
-        .filter(v => v !== null && v !== undefined && String(v).trim() !== "");
-    const uniqueValues = [...new Set(rawValues.map(v => String(v).trim()))];
+    signal?: AbortSignal,
+    outputSpatialReference = 4326
+): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean; warnings: string[] }> {
+    // Values were normalized before cache signature and batching.
+    const uniqueValues = [...new Set(joinKeys.values
+        .map(value => normalizeJoinKey(value, joinKeys.normalization ?? ["trim", "upper"]))
+        .filter((value): value is string => value !== null))];
 
     if (uniqueValues.length === 0) {
-        return { features: [], requestCount: 0, truncated: false };
+        return { features: [], requestCount: 0, truncated: false, warnings: [] };
     }
 
     // 2. Determine field type from metadata
@@ -571,6 +654,9 @@ async function queryWithJoinKeys(
     const allFeatures: ParsedArcGisFeature[] = [];
     let requestCount = 0;
     const seen = new Set<string | number>();
+    const warnings: string[] = [];
+    const supportsPagination = metadata.advancedQueryCapabilities?.supportsPagination ?? false;
+    let serviceTruncated = false;
 
     for (const batch of valueBatches) {
         if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -578,13 +664,19 @@ async function queryWithJoinKeys(
         const whereIn = buildInWhereClause(joinKeys.field, fieldType, batch);
         const batchWhere = where === "1=1" ? whereIn : `(${where}) AND ${whereIn}`;
 
-        const result = await queryBatch(
-            layerUrl, format, objectIdField,
-            batchWhere, outFields,
-            { offset: 0, limit: batchSize },
-            signal
-        );
-        requestCount++;
+        const remaining = maxFeatures - allFeatures.length;
+        const result = supportsPagination
+            ? await paginateQuery(
+                layerUrl, format, objectIdField, batchWhere, outFields,
+                0, batchSize, remaining, signal, undefined, outputSpatialReference
+            )
+            : await queryWithIdBatching(
+                layerUrl, format, objectIdField, batchWhere, outFields,
+                remaining, batchSize, signal, outputSpatialReference
+            );
+        requestCount += result.requestCount;
+        warnings.push(...result.warnings);
+        serviceTruncated = serviceTruncated || result.truncated;
 
         for (const f of result.features) {
             const oid = f.objectId;
@@ -596,7 +688,12 @@ async function queryWithJoinKeys(
         if (allFeatures.length >= maxFeatures) break;
     }
 
-    return { features: allFeatures, requestCount, truncated: allFeatures.length >= maxFeatures };
+    return {
+        features: allFeatures,
+        requestCount,
+        truncated: serviceTruncated || allFeatures.length >= maxFeatures,
+        warnings,
+    };
 }
 
 async function queryWithIdBatching(
@@ -607,8 +704,9 @@ async function queryWithIdBatching(
     outFields: string[],
     maxFeatures: number,
     batchSize: number,
-    signal?: AbortSignal
-): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean }> {
+    signal?: AbortSignal,
+    outputSpatialReference = 4326
+): Promise<{ features: ParsedArcGisFeature[]; requestCount: number; truncated: boolean; warnings: string[] }> {
     let requestCount = 0;
 
     // Step 1: Get all object IDs
@@ -619,7 +717,7 @@ async function queryWithIdBatching(
         returnIdsOnly: "true",
     };
 
-    const idResponse = await postArcGisForm<{ objectIds?: number[]; objectIdFieldName?: string; error?: Record<string, unknown> }>(queryUrl, idParams, { signal });
+    const idResponse = await postArcGisForm<{ objectIds?: Array<string | number>; objectIdFieldName?: string; error?: Record<string, unknown> }>(queryUrl, idParams, { signal });
     requestCount++;
 
     // Check for ArcGIS error in response
@@ -632,7 +730,7 @@ async function queryWithIdBatching(
     }
 
     if (!idResponse.objectIds || idResponse.objectIds.length === 0) {
-        return { features: [], requestCount, truncated: false };
+        return { features: [], requestCount, truncated: false, warnings: [] };
     }
 
     const allIds = idResponse.objectIds.slice(0, maxFeatures);
@@ -641,7 +739,8 @@ async function queryWithIdBatching(
 
     // Step 2: Batch the IDs and query each batch
     const allFeatures: ParsedArcGisFeature[] = [];
-    const idBatches: number[][] = [];
+    const idBatches: Array<Array<string | number>> = [];
+    const warnings: string[] = [];
     for (let i = 0; i < allIds.length; i += batchSize) {
         idBatches.push(allIds.slice(i, i + batchSize));
     }
@@ -652,15 +751,19 @@ async function queryWithIdBatching(
         const whereIn = buildInWhereClause(oidField, "oid", batch);
         const batchWhere = `(${where}) AND ${whereIn}`;
 
-        const result = await queryBatch(layerUrl, format, objectIdField, batchWhere, outFields, { offset: 0, limit: batch.length }, signal);
+        const result = await queryBatch(
+            layerUrl, format, objectIdField, batchWhere, outFields,
+            { offset: 0, limit: batch.length }, signal, undefined, outputSpatialReference
+        );
         requestCount++;
+        warnings.push(...result.warnings);
 
         for (const f of result.features) {
             allFeatures.push(f);
         }
     }
 
-    return { features: allFeatures, requestCount, truncated };
+    return { features: allFeatures, requestCount, truncated, warnings };
 }
 
 function deduplicateFeatures(

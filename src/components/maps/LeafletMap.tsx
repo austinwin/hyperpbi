@@ -12,10 +12,12 @@ import { createInteractionPayload } from "../../interactions/interactionPayload"
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { featureStyle, featureStyleWithDomain, computeFeatureDomain } from "../../maps/renderers/mapFeatureSymbol";
 import { createResolvedTooltipElement, renderResolvedPopup } from "./ResolvedMapPopup";
-import { createArcGisDynamicLayer, buildArcGisTileUrl } from "../../maps/arcgis/arcGisDynamicLayer";
+import { createResolvedMapLabels, type ResolvedMapLabelRuntime } from "./ResolvedMapLabels";
+import { createArcGisDynamicLayer, buildArcGisTileUrl, type ArcGisDynamicLeafletLayer } from "../../maps/arcgis/arcGisDynamicLayer";
+import { checkHostPolicy } from "../../maps/arcgis/arcGisHostPolicy";
+import type { HostPolicyResult } from "../../maps/arcgis/arcGisHostPolicy";
 import type { ResolvedMapLayer, ResolvedMapFeature, ResolvedMapRenderer } from "../../maps/model/resolvedMapTypes";
 import type { LeafletFeatureStyle } from "../../maps/renderers/mapFeatureSymbol";
-import { mergedFeatureAttributes } from "../../maps/model/mapFeatureValue";
 import type { MapViewportState } from "./MapBlock";
 
 export interface LeafletMapController {
@@ -30,29 +32,50 @@ export function LeafletMap({
     resolvedLayers,
     onViewportChange,
     onControllerReady,
+    onLayerRuntimeStateChange,
 }: {
     component: MapComponent;
     mapData: NormalizedMapData;
     resolvedLayers: ResolvedMapLayer[];
     onViewportChange?: (viewport: MapViewportState) => void;
     onControllerReady?: (controller: LeafletMapController) => void;
+    onLayerRuntimeStateChange?: (
+        layerId: string,
+        update: { loading?: boolean; error?: string; warning?: string }
+    ) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const basemapRef = useRef<L.TileLayer | null>(null);
     const vectorLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
     const arcGisTileRefs = useRef<Map<string, L.TileLayer>>(new Map());
-    const dynamicLayerRefs = useRef<Map<string, L.Layer>>(new Map());
-    const labelLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
+    const dynamicLayerRefs = useRef<Map<string, ArcGisDynamicLeafletLayer>>(new Map());
+    const labelLayerRefs = useRef<Map<string, ResolvedMapLabelRuntime>>(new Map());
     const paneNamesRef = useRef<Map<string, string>>(new Map());
     const hasFitRef = useRef(false);
-    const suppressViewportRef = useRef(false);
+    const programmaticMoveCountRef = useRef(0);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const context = useRenderContext();
     const { settings, data, config: runtimeConfig, webAccessAvailable } = context;
     const id = component.id ?? "map";
-    const interactionPolicy = resolveInteractionPolicy(component, runtimeConfig, "dataPoint");
+    const resolvedLayersRef = useRef(resolvedLayers);
+    const componentRef = useRef(component);
+    const selectedRowKeysRef = useRef(context.state.componentSelectedRowKeys[id] ?? []);
+    const selectedMapIdsRef = useRef(context.state.mapSelectedFeatureIds[id] ?? []);
+    const mapLayerStateRef = useRef(context.state.mapLayerState[id]);
+    const onViewportChangeRef = useRef(onViewportChange);
+    const onControllerReadyRef = useRef(onControllerReady);
+    const onLayerRuntimeStateChangeRef = useRef(onLayerRuntimeStateChange);
+
+    resolvedLayersRef.current = resolvedLayers;
+    componentRef.current = component;
+    selectedRowKeysRef.current = context.state.componentSelectedRowKeys[id] ?? [];
+    selectedMapIdsRef.current = context.state.mapSelectedFeatureIds[id] ?? [];
+    mapLayerStateRef.current = context.state.mapLayerState[id];
+    onViewportChangeRef.current = onViewportChange;
+    onControllerReadyRef.current = onControllerReady;
+    onLayerRuntimeStateChangeRef.current = onLayerRuntimeStateChange;
 
     // ── Precompute renderer domains ──────────────────────────────────
     const rendererDomains = useMemo(() => {
@@ -100,12 +123,23 @@ export function LeafletMap({
                 basemapUrl = basemap.url ?? "";
             }
 
-            if (basemapUrl && /^https:\/\//i.test(basemapUrl)) {
+            const hostPolicy: HostPolicyResult = basemapType === "customTile" || basemapType === "arcgisTile"
+                ? checkHostPolicy(basemapUrl)
+                : { allowed: true, host: "" };
+            if (basemapUrl && /^https:\/\//i.test(basemapUrl) && hostPolicy.allowed) {
                 const tileLayer = L.tileLayer(basemapUrl, {
                     maxZoom: bmMaxZoom,
                     attribution: basemapAttribution,
                 }).addTo(map);
                 basemapRef.current = tileLayer;
+            } else if (basemapUrl && !hostPolicy.allowed) {
+                onLayerRuntimeStateChangeRef.current?.("__basemap__", {
+                    warning: hostPolicy.reason ?? "Basemap host is blocked by the map host policy.",
+                });
+            } else if (basemapUrl && !/^https:\/\//i.test(basemapUrl)) {
+                onLayerRuntimeStateChangeRef.current?.("__basemap__", {
+                    warning: "Only HTTPS custom and ArcGIS tile basemaps are supported.",
+                });
             }
         }
 
@@ -115,45 +149,71 @@ export function LeafletMap({
         // ── Controller ──────────────────────────────────────────
         const controller: LeafletMapController = {
             home() {
-                map.setView(mapCenter, mapZoom);
+                const currentComponent = componentRef.current;
+                const center = currentComponent.view?.center ?? settings.map.center;
+                const zoom = currentComponent.view?.zoom ?? settings.map.zoom;
+                runProgrammaticMove(map, programmaticMoveCountRef, () => {
+                    map.setView(center, zoom, { animate: false });
+                });
             },
             zoomToSelection() {
                 const selBounds = L.latLngBounds([]);
-                const selRowKeys = context.state.componentSelectedRowKeys[id] ?? [];
-                const selMapIds = context.state.mapSelectedFeatureIds[id] ?? [];
-                for (const layer of resolvedLayers) {
+                const selectedPoints: Array<[number, number]> = [];
+                let selectedGeometryCount = 0;
+                const selRowKeys = selectedRowKeysRef.current;
+                const selMapIds = selectedMapIdsRef.current;
+                for (const layer of resolvedLayersRef.current) {
                     for (const feat of layer.features) {
                         const isPbSelected = feat.powerBiRowKeys.some(k => selRowKeys.includes(k));
                         const isLocalSelected = selMapIds.includes(feat.id);
                         if (!isPbSelected && !isLocalSelected) continue;
                         if (feat.lat !== null && feat.lon !== null) {
                             selBounds.extend([feat.lat, feat.lon]);
+                            selectedPoints.push([feat.lat, feat.lon]);
+                            selectedGeometryCount++;
                         } else if (feat.geometry) {
                             const geoLayer = L.geoJSON(feat.geometry);
                             const gb = geoLayer.getBounds();
-                            if (gb.isValid()) selBounds.extend(gb);
+                            if (gb.isValid()) {
+                                selBounds.extend(gb);
+                                selectedGeometryCount++;
+                                if (feat.geometry.type === "Point") {
+                                    const coordinates = (feat.geometry as GeoJSON.Point).coordinates;
+                                    selectedPoints.push([coordinates[1], coordinates[0]]);
+                                }
+                            }
                         }
                     }
                 }
                 if (selBounds.isValid()) {
-                    const pad = view.fitPadding ?? 0.08;
-                    map.fitBounds(selBounds.pad(pad), { maxZoom: view.maxZoom ?? 18 });
+                    const currentView = componentRef.current.view ?? {};
+                    const maxZoom = currentView.maxZoom ?? 18;
+                    runProgrammaticMove(map, programmaticMoveCountRef, () => {
+                        if (selectedGeometryCount === 1 && selectedPoints.length === 1) {
+                            map.setView(selectedPoints[0], Math.min(maxZoom, Math.max(map.getZoom(), 14)), { animate: false });
+                        } else {
+                            map.fitBounds(selBounds.pad(currentView.fitPadding ?? 0.08), { maxZoom, animate: false });
+                        }
+                    });
                 }
             },
             invalidateSize() {
                 map.invalidateSize();
             },
         };
-        setTimeout(() => onControllerReady?.(controller), 0);
+        setTimeout(() => onControllerReadyRef.current?.(controller), 0);
 
         // ── Viewport emission ───────────────────────────────────
         const emitViewport = () => {
-            if (suppressViewportRef.current) return;
+            if (programmaticMoveCountRef.current > 0) {
+                programmaticMoveCountRef.current--;
+                return;
+            }
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             debounceTimerRef.current = setTimeout(() => {
                 const bounds = map.getBounds();
                 const size = map.getSize ? map.getSize() : { x: 0, y: 0 };
-                onViewportChange?.({
+                onViewportChangeRef.current?.({
                     bounds: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
                     zoom: map.getZoom(),
                     width: size.x,
@@ -162,8 +222,8 @@ export function LeafletMap({
             }, 250);
         };
         map.on("moveend", emitViewport);
-        map.on("zoomend", emitViewport);
         map.on("resize", emitViewport);
+        const initialViewportTimer = setTimeout(emitViewport, 0);
 
         const observer = new ResizeObserver(() => map.invalidateSize());
         observer.observe(ref.current);
@@ -171,8 +231,8 @@ export function LeafletMap({
         return () => {
             observer.disconnect();
             map.off("moveend", emitViewport);
-            map.off("zoomend", emitViewport);
             map.off("resize", emitViewport);
+            clearTimeout(initialViewportTimer);
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             for (const [, dl] of dynamicLayerRefs.current) {
                 map.removeLayer(dl);
@@ -186,6 +246,7 @@ export function LeafletMap({
             mapRef.current = null;
             vectorLayerRefs.current.clear();
             basemapRef.current = null;
+            for (const [, runtime] of labelLayerRefs.current) runtime.cleanup();
             labelLayerRefs.current.clear();
             paneNamesRef.current.clear();
         };
@@ -206,14 +267,14 @@ export function LeafletMap({
         vectorLayerRefs.current.clear();
 
         // Clear all label groups
-        for (const [, group] of labelLayerRefs.current) {
-            map.removeLayer(group);
-        }
+        for (const [, runtime] of labelLayerRefs.current) runtime.cleanup();
         labelLayerRefs.current.clear();
 
         // Clear dynamic layers that are no longer present
         for (const [key, dl] of dynamicLayerRefs.current) {
-            const shouldKeep = resolvedLayers.some(l => l.sourceType === "arcgisDynamic" && l.id === key);
+            const definition = resolvedLayers.find(l => l.sourceType === "arcgisDynamic" && l.id === key);
+            const shouldKeep = definition &&
+                (mapLayerStateRef.current?.visibility?.[key] ?? definition.visible ?? true);
             if (!shouldKeep) {
                 map.removeLayer(dl);
                 dynamicLayerRefs.current.delete(key);
@@ -222,7 +283,9 @@ export function LeafletMap({
 
         // Clear tile layers that are no longer present
         for (const [key, tl] of arcGisTileRefs.current) {
-            const shouldKeep = resolvedLayers.some(l => l.sourceType === "arcgisTile" && l.id === key);
+            const definition = resolvedLayers.find(l => l.sourceType === "arcgisTile" && l.id === key);
+            const shouldKeep = definition &&
+                (mapLayerStateRef.current?.visibility?.[key] ?? definition.visible ?? true);
             if (!shouldKeep) {
                 map.removeLayer(tl);
                 arcGisTileRefs.current.delete(key);
@@ -232,16 +295,21 @@ export function LeafletMap({
         // Resolve effective order (viewer order or layer order)
         const mapState = context.state.mapLayerState[id];
         const viewerOrder = mapState?.order;
+        const completeViewerOrder = viewerOrder
+            ? [
+                ...viewerOrder.filter(layerId => resolvedLayers.some(layer => layer.id === layerId)),
+                ...resolvedLayers
+                    .filter(layer => !viewerOrder.includes(layer.id))
+                    .sort((a, b) => a.order - b.order)
+                    .map(layer => layer.id),
+            ]
+            : undefined;
         const sortedLayers = [...resolvedLayers].sort((a, b) => {
-            if (viewerOrder) {
-                const aIdx = viewerOrder.indexOf(a.id);
-                const bIdx = viewerOrder.indexOf(b.id);
-                if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
-            }
-            return a.order - b.order;
+            if (!completeViewerOrder) return a.order - b.order;
+            return completeViewerOrder.indexOf(a.id) - completeViewerOrder.indexOf(b.id);
         });
 
-        // Create panes for z-ordering
+        // Create deterministic layer and label panes for z-ordering.
         let paneZ = 400;
         for (const layer of sortedLayers) {
             const paneName = `hp-${id}-${layer.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -253,13 +321,11 @@ export function LeafletMap({
             if (pane) {
                 pane.style.zIndex = String(paneZ++);
             }
+            const labelPaneName = `${paneName}-labels`;
+            if (!map.getPane(labelPaneName)) map.createPane(labelPaneName);
+            const labelPane = map.getPane(labelPaneName);
+            if (labelPane) labelPane.style.zIndex = String(paneZ++);
         }
-
-        // Create a label pane above all vector panes
-        const labelPaneName = `hp-${id}-labels`.replace(/[^a-zA-Z0-9_-]/g, "_");
-        map.createPane(labelPaneName);
-        const labelPane = map.getPane(labelPaneName);
-        if (labelPane) labelPane.style.zIndex = String(paneZ++);
 
         for (const layer of sortedLayers) {
             const isVisible = mapState?.visibility?.[layer.id] ?? layer.visible ?? true;
@@ -272,9 +338,12 @@ export function LeafletMap({
                 const existingTile = arcGisTileRefs.current.get(layer.id);
                 if (existingTile) {
                     existingTile.setOpacity(layerOpacity);
+                    if (!map.hasLayer(existingTile)) existingTile.addTo(map);
                     continue;
                 }
                 try {
+                    const policy = checkHostPolicy(layer.tile.url);
+                    if (!policy.allowed) throw new Error(policy.reason ?? "Tile host is blocked.");
                     const tileUrl = buildArcGisTileUrl(layer.tile.url);
                     const tileLayer = L.tileLayer(tileUrl, {
                         maxZoom: layer.tile.maxZoom ?? 19,
@@ -286,14 +355,18 @@ export function LeafletMap({
                     arcGisTileRefs.current.set(layer.id, tileLayer);
                 } catch (err) {
                     const msg = err instanceof Error ? err.message : String(err);
-                    layer.diagnostics.warnings.push(`Tile layer error: ${msg}`);
+                    onLayerRuntimeStateChangeRef.current?.(layer.id, { warning: `Tile layer error: ${msg}` });
                 }
                 continue;
             }
 
             // ── Handle dynamic layers ────────────────────────────
             if (layer.sourceType === "arcgisDynamic" && layer.dynamic) {
-                if (!dynamicLayerRefs.current.has(layer.id)) {
+                const existingDynamic = dynamicLayerRefs.current.get(layer.id);
+                if (existingDynamic) {
+                    existingDynamic.setOpacity(layerOpacity);
+                    if (!map.hasLayer(existingDynamic)) existingDynamic.addTo(map);
+                } else {
                     try {
                         const dynamicLayer = createArcGisDynamicLayer({
                             url: layer.dynamic.url,
@@ -306,15 +379,18 @@ export function LeafletMap({
                             attribution: layer.dynamic.attribution ?? "",
                             debounceMs: layer.dynamic.debounceMs ?? 300,
                             opacity: layerOpacity,
+                            pane: paneNamesRef.current.get(layer.id),
                         }, (state) => {
-                            layer.diagnostics.loading = state.loading;
-                            if (state.error) layer.diagnostics.warnings.push(state.error);
+                            onLayerRuntimeStateChangeRef.current?.(layer.id, {
+                                loading: state.loading,
+                                ...(state.error ? { error: state.error, warning: state.error } : {}),
+                            });
                         });
                         dynamicLayer.addTo(map);
                         dynamicLayerRefs.current.set(layer.id, dynamicLayer);
                     } catch (err) {
                         const msg = err instanceof Error ? err.message : String(err);
-                        layer.diagnostics.warnings.push(`Dynamic layer error: ${msg}`);
+                        onLayerRuntimeStateChangeRef.current?.(layer.id, { error: msg, warning: `Dynamic layer error: ${msg}` });
                     }
                 }
                 continue;
@@ -340,13 +416,10 @@ export function LeafletMap({
             const selectedRowKeys = context.state.componentSelectedRowKeys[id] ?? [];
             const selectedMapIds = context.state.mapSelectedFeatureIds[id] ?? [];
 
-            // ── Labels group for this layer ──────────────────────
-            const labelsEnabled = mapState?.labels?.[layer.id] ?? layer.labels?.enabled ?? false;
-            let labelsGroup: L.LayerGroup | null = null;
-            if (labelsEnabled && layer.labels) {
-                labelsGroup = L.layerGroup([], { pane: labelPaneName }).addTo(map);
-                labelLayerRefs.current.set(layer.id, labelsGroup);
-            }
+            const layerInteractionPolicy = resolveInteractionPolicy({
+                ...component,
+                interaction: layer.interaction ?? component.interaction,
+            }, runtimeConfig, "dataPoint");
 
             for (const feature of layer.features) {
                 // Check selection: Power BI or map-local
@@ -420,26 +493,28 @@ export function LeafletMap({
 
                 // ── Tooltip ──────────────────────────────────────
                 if (leafletLayer && layer.tooltip?.enabled !== false) {
-                    const tipFields = layer.tooltip?.fields ?? layer.popup?.fields?.slice(0, 2);
                     leafletLayer.bindTooltip(
-                        createResolvedTooltipElement(feature, tipFields, layer.name)
+                        createResolvedTooltipElement(feature, layer.tooltip, layer.name)
                     );
                 }
 
                 // ── Popup ────────────────────────────────────────
                 if (leafletLayer && layer.popup?.enabled) {
-                    const { element: popupEl, cleanup: popupCleanup } = renderResolvedPopup(
-                        layer.popup, feature,
-                        {
-                            executeAction: (action, _feat, _evt) => {
-                                if (action.uiAction) {
-                                    context.executeUiAction(action.uiAction);
-                                }
+                    let popupCleanup: (() => void) | undefined;
+                    leafletLayer.bindPopup(() => {
+                        popupCleanup?.();
+                        const rendered = renderResolvedPopup(layer.popup!, feature, {
+                            executeAction: (action) => {
+                                if (action.uiAction) context.executeUiAction(action.uiAction);
                             },
-                        }
-                    );
-                    leafletLayer.bindPopup(popupEl);
-                    leafletLayer.on("popupclose", () => popupCleanup?.());
+                        });
+                        popupCleanup = rendered.cleanup;
+                        return rendered.element;
+                    });
+                    leafletLayer.on("popupclose", () => {
+                        popupCleanup?.();
+                        popupCleanup = undefined;
+                    });
                 }
 
                 // ── Click interaction ────────────────────────────
@@ -449,9 +524,9 @@ export function LeafletMap({
 
                         if (feature.powerBiRowIndices.length > 0 && feature.powerBiRowKeys.length > 0) {
                             // Power BI or joined feature
-                            const field = interactionPolicy.field;
+                            const field = layerInteractionPolicy.field;
                             executeComponentInteraction(
-                                interactionPolicy,
+                                layerInteractionPolicy,
                                 createInteractionPayload(component, {
                                     rowIndices: feature.powerBiRowIndices,
                                     rowKeys: feature.powerBiRowKeys,
@@ -464,7 +539,8 @@ export function LeafletMap({
                             );
                         } else {
                             // Reference-only feature: map-local selection
-                            const mode = multiSelect ? "toggle" : "replace";
+                            const alreadySelected = selectedMapIdsRef.current.includes(feature.id);
+                            const mode = multiSelect || alreadySelected ? "toggle" : "replace";
                             context.dispatch({
                                 type: "selectMapFeatures",
                                 mapId: id,
@@ -475,46 +551,35 @@ export function LeafletMap({
                     });
                 }
 
-                // ── Labels ────────────────────────────────────────
-                if (labelsGroup && layer.labels && leafletLayer) {
-                    const labelText = feature.labelValue ??
-                        (layer.labels.field
-                            ? String(mergedFeatureAttributes(feature)[layer.labels.field] ?? "")
-                            : feature.id);
-                    if (labelText) {
-                        const labelIcon = L.divIcon({
-                            className: "hp-map-label",
-                            html: `<span style="color:${layer.labels.color};font-size:${layer.labels.size}px;font-weight:${layer.labels.weight}">${escapeHtml(String(labelText))}</span>`,
-                            iconSize: [0, 0],
-                            iconAnchor: [0, 0],
-                        });
-                        let labelPos: [number, number];
-                        if (feature.lat !== null && feature.lon !== null) {
-                            labelPos = [feature.lat, feature.lon];
-                        } else if (feature.geometry) {
-                            labelPos = getGeometryCenter(feature.geometry);
-                        } else {
-                            labelPos = [0, 0];
-                        }
-                        const labelMarker = L.marker(labelPos, {
-                            icon: labelIcon, interactive: false, keyboard: false,
-                        });
-                        labelsGroup.addLayer(labelMarker);
-                    }
-                }
             }
 
             vectorLayerRefs.current.set(layer.id, layerGroup);
+
+            if (layer.labels) {
+                const labelsEnabled = mapState?.labels?.[layer.id] ?? layer.labels.enabled;
+                const paneName = `${paneNamesRef.current.get(layer.id)}-labels`;
+                const labelRuntime = createResolvedMapLabels(map, layer, {
+                    pane: paneName,
+                    visible: labelsEnabled,
+                });
+                labelLayerRefs.current.set(layer.id, labelRuntime);
+                for (const warning of labelRuntime.warnings) {
+                    onLayerRuntimeStateChangeRef.current?.(layer.id, { warning });
+                }
+            }
         }
 
         // ── Fit bounds ───────────────────────────────────────────
         const viewDef = component.view ?? {};
         const fitMode = viewDef.fitMode ?? "data";
         if (fitMode !== "none" && dataBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
-            suppressViewportRef.current = true;
-            map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), { maxZoom: viewDef.maxZoom ?? 14 });
+            runProgrammaticMove(map, programmaticMoveCountRef, () => {
+                map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), {
+                    maxZoom: viewDef.maxZoom ?? 14,
+                    animate: false,
+                });
+            });
             hasFitRef.current = true;
-            setTimeout(() => { suppressViewportRef.current = false; }, 500);
         }
     }, [
         resolvedLayers,
@@ -538,32 +603,17 @@ export function LeafletMap({
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-function getGeometryCenter(geometry: GeoJSON.GeoJsonObject): [number, number] {
-    if (!geometry) return [0, 0];
-    switch (geometry.type) {
-        case "Point": {
-            const coords = (geometry as GeoJSON.Point).coordinates;
-            return [coords[1], coords[0]];
-        }
-        case "Polygon": {
-            const coords = (geometry as GeoJSON.Polygon).coordinates[0];
-            if (coords) {
-                const lats = coords.map(c => c[1]);
-                const lons = coords.map(c => c[0]);
-                return [
-                    (Math.min(...lats) + Math.max(...lats)) / 2,
-                    (Math.min(...lons) + Math.max(...lons)) / 2,
-                ];
-            }
-            return [0, 0];
-        }
-        default:
-            return [0, 0];
+function runProgrammaticMove(
+    map: L.Map,
+    counter: { current: number },
+    move: () => void
+): void {
+    const beforeCenter = map.getCenter();
+    const beforeZoom = map.getZoom();
+    counter.current++;
+    move();
+    const afterCenter = map.getCenter();
+    if (beforeZoom === map.getZoom() && beforeCenter.equals(afterCenter) && counter.current > 0) {
+        counter.current--;
     }
-}
-
-function escapeHtml(text: string): string {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
 }

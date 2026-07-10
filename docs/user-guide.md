@@ -68,11 +68,12 @@ Toggle **Advanced** to access: JSON editor, Runtime Config, AI Skill, Calculatio
 
 ## 10. Maps
 
-Legacy Power BI spatial maps (lat/lon, geometry, addresses) are stable. ArcGIS REST layered maps are in developer preview — schema and service infrastructure exist but end-to-end rendering is not yet connected. See [map services](map-services.md).
+Power BI spatial maps and practical public ArcGIS feature/reference layers, Power BI geometry joins, viewport queries, tile overlays, and basic dynamic images render end to end. Labels, tooltip/popup content, selection, layer visibility/opacity/order, inline diagnostics, legends, Home, Zoom to Selection, and Clear Selection are available. Map centers use `[latitude, longitude]`. See [map services](map-services.md) for the exact supported scope and limitations.
 
-Use the Maps build profile for OSM tiles and geocoding:
+Use a Maps build profile for external tiles, geocoding, and ArcGIS requests:
 ```bash
 npm run package:maps
+npm run package:verify
 ```
 
 ## 11. Security and Privacy

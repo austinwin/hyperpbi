@@ -3,7 +3,7 @@
 // Renders PNG image overlays on Leaflet maps, refreshing on move/resize.
 
 import * as L from "leaflet";
-import { getArcGisJson, ArcGisServiceError } from "./arcGisRestClient";
+import { ArcGisServiceError } from "./arcGisRestClient";
 import { parseArcGisUrl } from "./arcGisUrl";
 import { checkHostPolicy } from "./arcGisHostPolicy";
 
@@ -85,19 +85,21 @@ export function createArcGisDynamicLayer(
     let currentAbortController: AbortController | null = null;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let mapRef: L.Map | null = null;
-    let isLoading = false;
     let activeObjectUrl: string | null = null;
     let pendingObjectUrl: string | null = null;
+    let wasWithinZoom = false;
 
     // Extend the layer with map event binding
     const originalOnAdd = imageOverlay.onAdd;
     const originalOnRemove = imageOverlay.onRemove;
 
-    (imageOverlay as any).onAdd = function (map: L.Map) {
+    (imageOverlay as unknown as { onAdd: (map: L.Map) => HTMLElement | undefined }).onAdd = function (map: L.Map) {
         if (originalOnAdd) originalOnAdd.call(imageOverlay, map);
         mapRef = map;
         setupMapListeners(map);
-        refreshImage(map);
+        wasWithinZoom = isWithinZoom(map);
+        checkZoomVisibility();
+        if (wasWithinZoom && !externalSignal?.aborted) void refreshImage(map);
         return imageOverlay.getElement() || undefined;
     };
 
@@ -105,7 +107,8 @@ export function createArcGisDynamicLayer(
         cancelCurrentRequest();
     };
     if (externalSignal) {
-        externalSignal.addEventListener("abort", onExternalAbort);
+        if (externalSignal.aborted) onExternalAbort();
+        else externalSignal.addEventListener("abort", onExternalAbort);
     }
 
     (imageOverlay as unknown as Record<string, unknown>).onRemove = function (map: L.Map) {
@@ -115,7 +118,10 @@ export function createArcGisDynamicLayer(
         if (externalSignal) {
             externalSignal.removeEventListener("abort", onExternalAbort);
         }
-        if (debounceTimer) clearTimeout(debounceTimer);
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
         if (activeObjectUrl) {
             URL.revokeObjectURL(activeObjectUrl);
             activeObjectUrl = null;
@@ -142,34 +148,38 @@ export function createArcGisDynamicLayer(
 
     const checkZoomVisibility = () => {
         if (!mapRef) return;
-        const zoom = mapRef.getZoom();
         const el = imageOverlay.getElement();
-        if (!el) return;
-
-        if (minZoom !== undefined && zoom < minZoom) {
-            el.style.display = "none";
-        } else if (maxZoom !== undefined && zoom > maxZoom) {
-            el.style.display = "none";
-        } else {
-            el.style.display = "";
+        const withinZoom = isWithinZoom(mapRef);
+        if (el) el.style.display = withinZoom ? "" : "none";
+        if (!withinZoom) {
+            cancelCurrentRequest();
+        } else if (!wasWithinZoom && !externalSignal?.aborted) {
+            void refreshImage(mapRef);
         }
+        wasWithinZoom = withinZoom;
     };
 
     const debouncedRefresh = () => {
-        if (debounceTimer) clearTimeout(debounceTimer);
+        if (!mapRef || !isWithinZoom(mapRef) || externalSignal?.aborted) return;
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
         debounceTimer = setTimeout(() => {
-            if (mapRef) refreshImage(mapRef);
+            debounceTimer = null;
+            if (mapRef && isWithinZoom(mapRef) && !externalSignal?.aborted) void refreshImage(mapRef);
         }, debounceMs);
     };
 
-    const cancelCurrentRequest = () => {
+    function cancelCurrentRequest() {
         if (currentAbortController) {
             currentAbortController.abort();
             currentAbortController = null;
         }
-    };
+    }
 
     const refreshImage = async (map: L.Map) => {
+        if (!isWithinZoom(map) || externalSignal?.aborted) return;
         cancelCurrentRequest();
         const controller = new AbortController();
         currentAbortController = controller;
@@ -177,7 +187,6 @@ export function createArcGisDynamicLayer(
         if (externalSignal?.aborted || controller.signal.aborted) return;
 
         try {
-            isLoading = true;
             onStateChange?.({ loading: true });
 
             const mapBounds = map.getBounds();
@@ -261,12 +270,10 @@ export function createArcGisDynamicLayer(
                 URL.revokeObjectURL(previous);
             }
 
-            isLoading = false;
             onStateChange?.({ loading: false, lastRequestTime: Date.now() });
 
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
-                isLoading = false;
                 if (pendingObjectUrl) {
                     URL.revokeObjectURL(pendingObjectUrl);
                     pendingObjectUrl = null;
@@ -281,7 +288,6 @@ export function createArcGisDynamicLayer(
             }
 
             const message = error instanceof Error ? error.message : String(error);
-            isLoading = false;
             onStateChange?.({ loading: false, error: message });
         } finally {
             if (currentAbortController === controller) {
@@ -289,6 +295,12 @@ export function createArcGisDynamicLayer(
             }
         }
     };
+
+    function isWithinZoom(map: L.Map): boolean {
+        const zoom = map.getZoom();
+        return (minZoom === undefined || zoom >= minZoom) &&
+            (maxZoom === undefined || zoom <= maxZoom);
+    }
 
     return imageOverlay as unknown as ArcGisDynamicLeafletLayer;
 }

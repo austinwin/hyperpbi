@@ -115,7 +115,7 @@ export const componentDocs: Record<string, ComponentDocMeta> = {
     // ── Maps ──────────────────────────────────────────────────────────
     map: {
         status: "stable",
-        statusNote: "Power BI spatial maps (lat/lon, WKT, GeoJSON, geometry, addresses) are stable. ArcGIS REST layered schema and service foundations exist but end-to-end ArcGIS rendering is not yet connected.",
+        statusNote: "Power BI spatial maps and the practical public ArcGIS REST runtime are connected. Supported ArcGIS sources are feature layers, tile overlays, and basic dynamic MapServer images; secured services, editing, 3D, non-4326 output, advanced label collision, and density grids are outside scope.",
         keyProperties: ["view", "basemap", "layers", "layerPanel", "toolbar", "settings", "style", "popup", "height"],
         supportsUiAction: false,
         supportsDataInteraction: true,

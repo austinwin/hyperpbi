@@ -193,6 +193,10 @@ function generateMarkdownCatalog(types, categories) {
             lines.push("");
             lines.push(`<!-- component:${type} -->`);
             lines.push("");
+            if (type === "map") {
+                lines.push("Practical runtime support includes Power BI geometry, public ArcGIS feature layers and joins, viewport queries, tile and basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection. External ArcGIS requests require a Maps package whose WebAccess hosts match the service.");
+                lines.push("");
+            }
         }
     }
 
@@ -290,6 +294,7 @@ ${categories.map(cat => {
     });
     if(catTypes.length===0)return"";
     return `<h2>${cat}</h2>` + catTypes.map(t => {
+        const practicalMapNote = t === "map" ? "<p>Supports Power BI geometry plus public ArcGIS feature layers and joins, viewport queries, tile/basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection.</p>" : "";
         return `<div class="component-card" data-type="${t}" data-category="${cat}">
 <div class="component-card-header" onclick="this.parentElement.classList.toggle('open')" aria-expanded="false">
 <strong>${t}</strong>
@@ -297,6 +302,7 @@ ${categories.map(cat => {
 </div>
 <div class="component-card-body">
 <p>Component type: <code>${t}</code></p>
+${practicalMapNote}
 <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.textContent)">Copy JSON</button>
 <pre>See componentJsonExamples for ${t}</pre>
 </div></div>`;

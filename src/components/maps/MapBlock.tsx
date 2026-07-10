@@ -12,7 +12,7 @@ import { MapToolbar } from "./MapToolbar";
 import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import { resolveLegacyMapLayers } from "../../maps/model/legacyMapResolver";
 import { resolvePowerBiLayer, type MapSourceContext } from "../../maps/sources/mapSourceResolver";
-import { executeArcGisFeatureQuery } from "../../maps/arcgis/arcGisFeatureQuery";
+import { executeArcGisFeatureQuery, type ArcGisFeatureQueryRequest } from "../../maps/arcgis/arcGisFeatureQuery";
 import { executeMapJoin } from "../../maps/join/mapJoinEngine";
 import { adaptArcGisRenderer, adaptArcGisLabels } from "../../maps/renderers/arcGisRendererAdapter";
 import { resolveRenderer } from "../../maps/renderers/mapRendererResolver";
@@ -25,6 +25,32 @@ export interface MapViewportState {
     zoom: number;
     width: number;
     height: number;
+}
+
+export interface ArcGisFeatureRuntimeEntry {
+    layer?: ResolvedMapLayer;
+    loading: boolean;
+    error?: string;
+    requestVersion: number;
+}
+
+export function roundViewportBounds(
+    bounds: MapViewportState["bounds"]
+): MapViewportState["bounds"] {
+    return bounds.map(value => Math.round(value * 1000) / 1000) as MapViewportState["bounds"];
+}
+
+export function viewportEqual(
+    left: MapViewportState | null,
+    right: MapViewportState
+): boolean {
+    if (!left) return false;
+    const leftBounds = roundViewportBounds(left.bounds);
+    const rightBounds = roundViewportBounds(right.bounds);
+    return leftBounds.every((value, index) => value === rightBounds[index]) &&
+        left.zoom === right.zoom &&
+        left.width === right.width &&
+        left.height === right.height;
 }
 
 export function MapBlock({ component }: { component: MapComponent }) {
@@ -84,9 +110,12 @@ export function MapBlock({ component }: { component: MapComponent }) {
     // ── Viewport state ───────────────────────────────────────────────
     const [viewport, setViewport] = useState<MapViewportState | null>(null);
     const viewportRef = useRef<MapViewportState | null>(null);
-    const handleViewportChange = useCallback((vp: MapViewportState) => {
-        viewportRef.current = vp;
-        setViewport(vp);
+    const handleViewportChange = useCallback((next: MapViewportState) => {
+        setViewport(previous => {
+            if (viewportEqual(previous, next)) return previous;
+            viewportRef.current = next;
+            return next;
+        });
     }, []);
 
     // ── Map controller ref ───────────────────────────────────────────
@@ -97,134 +126,251 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
     // ── UI state from reducer (maps to mapUiState[id]) ───────────────
     const mapUiState = context.state.mapUiState[id] ?? {};
+    const layerPanelEnabled = component.settings?.showLayerControl !== false &&
+        component.layerPanel?.visible !== false;
     const layerPanelOpen = mapUiState.layerPanelOpen ?? component.layerPanel?.defaultOpen ?? false;
-    const legendOpen = mapUiState.legendOpen ?? false;
+    const legendEnabled = component.settings?.showLegend !== false;
+    const legendOpen = mapUiState.legendOpen ?? component.settings?.showLegend ?? false;
 
     // ── Per-layer abort controllers and refresh timers ───────────────
     const layerAbortControllersRef = useRef<Map<string, AbortController>>(new Map());
+    const requestVersionsRef = useRef<Map<string, number>>(new Map());
     const layerRefreshTimersRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
-    // ── Asynchronous ArcGIS layer resolution ─────────────────────────
-    const [arcGisLayers, setArcGisLayers] = useState<ResolvedMapLayer[]>([]);
-    const [arcGisLoading, setArcGisLoading] = useState(false);
-    const [arcGisError, setArcGisError] = useState<string | null>(null);
+    const [arcGisFeatureState, setArcGisFeatureState] =
+        useState<Record<string, ArcGisFeatureRuntimeEntry>>({});
+    const [layerRuntimeState, setLayerRuntimeState] = useState<Record<
+        string,
+        { loading?: boolean; error?: string; warnings: string[] }
+    >>({});
 
-    const arcGisDefs = useMemo(
-        () => layerDefinitions.filter(def => def.source.type !== "powerbi"),
+    const arcGisFeatureDefinitions = useMemo(
+        () => layerDefinitions.filter(definition => definition.source.type === "arcgisFeature"),
+        [layerDefinitions]
+    );
+
+    const staticExternalLayers = useMemo(
+        () => layerDefinitions
+            .filter(definition =>
+                definition.source.type === "arcgisTile" ||
+                definition.source.type === "arcgisDynamic"
+            )
+            .map(definition => definition.source.type === "arcgisTile"
+                ? createArcGisTileShell(definition)
+                : createArcGisDynamicShell(definition)),
         [layerDefinitions]
     );
 
     // ── Stable viewport signature (rounded for dependency comparison) ──
     const viewportSig = useMemo(() => {
         if (!viewport) return null;
-        return viewport.bounds.map(c => Math.round(c * 1000) / 1000).join(",");
+        return [
+            ...roundViewportBounds(viewport.bounds),
+            viewport.zoom,
+            viewport.width,
+            viewport.height,
+        ].join(",");
     }, [viewport]);
 
-    useEffect(() => {
-        if (arcGisDefs.length === 0) {
-            setArcGisLayers([]);
-            setArcGisLoading(false);
-            return;
-        }
+    const resolveArcGisFeatureDefinition = useCallback(async (
+        definition: MapLayerDefinition,
+        reason: "initial" | "viewport" | "refresh"
+    ) => {
+        const previousController = layerAbortControllersRef.current.get(definition.id);
+        previousController?.abort();
 
-        setArcGisLoading(true);
-        setArcGisError(null);
+        const controller = new AbortController();
+        layerAbortControllersRef.current.set(definition.id, controller);
+        const requestVersion = (requestVersionsRef.current.get(definition.id) ?? 0) + 1;
+        requestVersionsRef.current.set(definition.id, requestVersion);
 
-        let cancelled = false;
-        const startedForViewport = viewportSig;
-
-        async function resolveAll() {
-            const resolved: ResolvedMapLayer[] = [];
-
-            for (const def of arcGisDefs) {
-                if (cancelled) break;
-
-                // ── Per-layer abort ───────────────────────────────
-                const prevAbort = layerAbortControllersRef.current.get(def.id);
-                if (prevAbort) prevAbort.abort();
-                const layerController = new AbortController();
-                layerAbortControllersRef.current.set(def.id, layerController);
-
-                // ── Clear old refresh timer ───────────────────────
-                const oldTimer = layerRefreshTimersRef.current.get(def.id);
-                if (oldTimer) clearInterval(oldTimer);
-
-                try {
-                    if (!webAccessAvailable) {
-                        resolved.push(createCorePackageErrorShell(def));
-                        continue;
-                    }
-
-                    if (def.source.type === "arcgisFeature") {
-                        const perf = def.performance;
-                        const isViewportLayer = perf?.viewportQuery === true;
-                        const currentViewport = isViewportLayer ? viewportRef.current : null;
-
-                        const layer = await resolveArcGisFeatureLayer(
-                            def, sourceContext, layerController.signal,
-                            currentViewport
-                        );
-                        if (layer) {
-                            resolved.push(layer);
-                            const src = def.source as ArcGisFeatureLayerSource;
-                            const refreshMin = src.refreshIntervalMinutes;
-                            if (refreshMin && refreshMin >= 1) {
-                                const timer = setInterval(async () => {
-                                    try {
-                                        const refreshed = await resolveArcGisFeatureLayer(
-                                            def, sourceContext, new AbortController().signal,
-                                            viewportRef.current
-                                        );
-                                        if (refreshed && !cancelled) {
-                                            setArcGisLayers(prev => {
-                                                const others = prev.filter(l => l.id !== refreshed.id);
-                                                return [...others, refreshed];
-                                            });
-                                        }
-                                    } catch {
-                                        // Keep last successful layer
-                                    }
-                                }, refreshMin * 60_000);
-                                layerRefreshTimersRef.current.set(def.id, timer);
-                            }
-                        }
-                    } else if (def.source.type === "arcgisTile") {
-                        resolved.push(createArcGisTileShell(def));
-                    } else if (def.source.type === "arcgisDynamic") {
-                        resolved.push(createArcGisDynamicShell(def));
-                    }
-                } catch (err) {
-                    if (layerController.signal.aborted) continue;
-                    const msg = err instanceof Error ? err.message : String(err);
-                    resolved.push(createArcGisErrorShell(def, msg));
+        setArcGisFeatureState(previous => {
+            const current = previous[definition.id];
+            const retainedLayer = current?.layer
+                ? {
+                    ...current.layer,
+                    loading: true,
+                    diagnostics: { ...current.layer.diagnostics, loading: true },
                 }
-            }
+                : undefined;
+            return {
+                ...previous,
+                [definition.id]: {
+                    layer: retainedLayer,
+                    loading: true,
+                    error: undefined,
+                    requestVersion,
+                },
+            };
+        });
 
-            if (!cancelled && startedForViewport === viewportSig) {
-                setArcGisLayers(resolved);
-                setArcGisLoading(false);
+        try {
+            const layer = webAccessAvailable
+                ? await resolveArcGisFeatureLayer(
+                    definition,
+                    sourceContext,
+                    controller.signal,
+                    definition.performance?.viewportQuery === true
+                        ? viewportRef.current
+                        : null
+                )
+                : createCorePackageErrorShell(definition);
+
+            if (controller.signal.aborted ||
+                requestVersionsRef.current.get(definition.id) !== requestVersion) return;
+
+            setArcGisFeatureState(previous => ({
+                ...previous,
+                [definition.id]: {
+                    layer,
+                    loading: false,
+                    error: layer.diagnostics.error,
+                    requestVersion,
+                },
+            }));
+        } catch (error) {
+            if (controller.signal.aborted ||
+                requestVersionsRef.current.get(definition.id) !== requestVersion) return;
+            const message = error instanceof Error ? error.message : String(error);
+            setArcGisFeatureState(previous => {
+                const current = previous[definition.id];
+                const fallback = current?.layer ?? createArcGisErrorShell(definition, message);
+                const warnings = fallback.diagnostics.warnings.includes(message)
+                    ? fallback.diagnostics.warnings
+                    : [...fallback.diagnostics.warnings, message];
+                const retainedLayer: ResolvedMapLayer = {
+                    ...fallback,
+                    loading: false,
+                    error: message,
+                    diagnostics: {
+                        ...fallback.diagnostics,
+                        loading: false,
+                        error: message,
+                        warnings,
+                    },
+                };
+                return {
+                    ...previous,
+                    [definition.id]: {
+                        layer: retainedLayer,
+                        loading: false,
+                        error: message,
+                        requestVersion,
+                    },
+                };
+            });
+        } finally {
+            if (layerAbortControllersRef.current.get(definition.id) === controller) {
+                layerAbortControllersRef.current.delete(definition.id);
             }
         }
+        void reason;
+    }, [sourceContext, webAccessAvailable]);
 
-        resolveAll();
+    // Initial/data path: resolve every feature definition, independent of viewport changes.
+    useEffect(() => {
+        const activeIds = new Set(arcGisFeatureDefinitions.map(definition => definition.id));
+        for (const [layerId, controller] of layerAbortControllersRef.current) {
+            if (!activeIds.has(layerId)) {
+                controller.abort();
+                layerAbortControllersRef.current.delete(layerId);
+                requestVersionsRef.current.delete(layerId);
+            }
+        }
+        setArcGisFeatureState(previous => Object.fromEntries(
+            Object.entries(previous).filter(([layerId]) => activeIds.has(layerId))
+        ));
+        for (const definition of arcGisFeatureDefinitions) {
+            void resolveArcGisFeatureDefinition(definition, "initial");
+        }
+    }, [arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
 
+    // Viewport path: only layers explicitly configured for viewport queries rerun.
+    useEffect(() => {
+        if (viewportSig === null) return;
+        for (const definition of arcGisFeatureDefinitions) {
+            if (definition.performance?.viewportQuery === true) {
+                void resolveArcGisFeatureDefinition(definition, "viewport");
+            }
+        }
+    }, [viewportSig, arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
+
+    // Refresh path: one managed timer for each configured feature layer.
+    useEffect(() => {
+        for (const [, timer] of layerRefreshTimersRef.current) clearInterval(timer);
+        layerRefreshTimersRef.current.clear();
+        for (const definition of arcGisFeatureDefinitions) {
+            const refreshMinutes = (definition.source as ArcGisFeatureLayerSource).refreshIntervalMinutes;
+            if (refreshMinutes === undefined || refreshMinutes < 1) continue;
+            const timer = setInterval(() => {
+                void resolveArcGisFeatureDefinition(definition, "refresh");
+            }, refreshMinutes * 60_000);
+            layerRefreshTimersRef.current.set(definition.id, timer);
+        }
         return () => {
-            cancelled = true;
-            for (const [, ctrl] of layerAbortControllersRef.current) {
-                ctrl.abort();
-            }
-            layerAbortControllersRef.current.clear();
-            for (const [, timer] of layerRefreshTimersRef.current) {
-                clearInterval(timer);
-            }
+            for (const [, timer] of layerRefreshTimersRef.current) clearInterval(timer);
             layerRefreshTimersRef.current.clear();
         };
-    }, [arcGisDefs, sourceContext, webAccessAvailable, viewportSig]);
+    }, [arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
+
+    // Unmount-only cleanup for outstanding requests and managed timers.
+    useEffect(() => () => {
+        for (const [, controller] of layerAbortControllersRef.current) controller.abort();
+        for (const [, timer] of layerRefreshTimersRef.current) clearInterval(timer);
+        layerAbortControllersRef.current.clear();
+        requestVersionsRef.current.clear();
+        layerRefreshTimersRef.current.clear();
+    }, []);
+
+    const handleLayerRuntimeStateChange = useCallback((
+        layerId: string,
+        update: { loading?: boolean; error?: string; warning?: string }
+    ) => {
+        setLayerRuntimeState(previous => {
+            const current = previous[layerId] ?? { warnings: [] };
+            const warnings = update.warning && !current.warnings.includes(update.warning)
+                ? [...current.warnings, update.warning]
+                : current.warnings;
+            return {
+                ...previous,
+                [layerId]: {
+                    ...current,
+                    ...(update.loading !== undefined ? { loading: update.loading } : {}),
+                    ...(update.error !== undefined ? { error: update.error } : {}),
+                    warnings,
+                },
+            };
+        });
+    }, []);
 
     // ── Merge all resolved layers ────────────────────────────────────
+    const resolvedArcGisFeatureLayers = useMemo(() => Object.values(arcGisFeatureState)
+        .map(entry => entry.layer)
+        .filter((layer): layer is ResolvedMapLayer => Boolean(layer)), [arcGisFeatureState]);
+
     const allResolvedLayers: ResolvedMapLayer[] = useMemo(() => {
-        return [...syncedLayers, ...arcGisLayers].sort((a, b) => a.order - b.order);
-    }, [syncedLayers, arcGisLayers]);
+        return [...syncedLayers, ...resolvedArcGisFeatureLayers, ...staticExternalLayers]
+            .map(layer => {
+                const runtime = layerRuntimeState[layer.id];
+                if (!runtime) return layer;
+                const warnings = [...layer.diagnostics.warnings];
+                for (const warning of runtime.warnings) {
+                    if (!warnings.includes(warning)) warnings.push(warning);
+                }
+                return {
+                    ...layer,
+                    loading: runtime.loading ?? layer.loading,
+                    error: runtime.error ?? layer.error,
+                    diagnostics: {
+                        ...layer.diagnostics,
+                        loading: runtime.loading ?? layer.diagnostics.loading,
+                        error: runtime.error ?? layer.diagnostics.error,
+                        warnings,
+                    },
+                };
+            })
+            .sort((a, b) => a.order - b.order);
+    }, [syncedLayers, resolvedArcGisFeatureLayers, staticExternalLayers, layerRuntimeState]);
 
     const mapStyle = useMemo(() => resolveMapStyle(component, settings.theme.primary, map),
         [component, settings.theme.primary, map]);
@@ -234,6 +380,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const hasTileOrDynamicLayers = allResolvedLayers.some(
         l => l.sourceType === "arcgisTile" || l.sourceType === "arcgisDynamic"
     );
+    const arcGisLoading = Object.values(arcGisFeatureState).some(entry => entry.loading);
+    const arcGisError = Object.values(arcGisFeatureState).find(entry => entry.error)?.error;
+    const mapRuntimeWarnings = layerRuntimeState.__basemap__?.warnings ?? [];
 
     const coordinateSystem = component.settings?.coordinateSystem ?? "EPSG:4326";
 
@@ -254,14 +403,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
         content = <MapEmptyState reason={arcGisError} />;
     } else {
         const showToolbar = component.toolbar?.visible !== false;
-        const showLegend = component.settings?.showLegend !== false;
-
         content = <>
             <div class="hp-map-frame">
                 {showToolbar && (
                     <MapToolbar
-                        mapId={id}
                         component={component}
+                        layerPanelOpen={layerPanelOpen}
+                        legendOpen={legendOpen}
+                        layerControlEnabled={layerPanelEnabled}
+                        legendEnabled={legendEnabled}
                         onHome={() => mapControllerRef.current?.home()}
                         onZoomToSelection={() => mapControllerRef.current?.zoomToSelection()}
                         onToggleLayers={() => context.dispatch({ type: "toggleMapLayerPanel", mapId: id })}
@@ -278,17 +428,20 @@ export function MapBlock({ component }: { component: MapComponent }) {
                     resolvedLayers={allResolvedLayers}
                     onViewportChange={handleViewportChange}
                     onControllerReady={handleControllerReady}
+                    onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
                 />
-                {showLegend && legendOpen && (
+                {legendEnabled && legendOpen && (
                     <MapLegendPanel mapId={id} layers={allResolvedLayers} />
                 )}
             </div>
-            {map.warnings.length > 0 && <div class="hp-map-warning">{map.warnings.join(" ")}</div>}
+            {[...map.warnings, ...mapRuntimeWarnings].length > 0 && (
+                <div class="hp-map-warning">{[...map.warnings, ...mapRuntimeWarnings].join(" ")}</div>
+            )}
         </>;
     }
 
     // ── Show layer panel only when enabled, layers exist, and panel is open ──
-    const showLayerPanel = component.settings?.showLayerControl !== false &&
+    const showLayerPanel = layerPanelEnabled &&
         allResolvedLayers.length > 0 && layerPanelOpen;
 
     return (
@@ -307,12 +460,12 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
 // ── ArcGIS Feature Layer Resolution ───────────────────────────────────
 
-async function resolveArcGisFeatureLayer(
+export async function resolveArcGisFeatureLayer(
     def: MapLayerDefinition,
     context: MapSourceContext,
     signal: AbortSignal,
     viewport?: MapViewportState | null
-): Promise<ResolvedMapLayer | null> {
+): Promise<ResolvedMapLayer> {
     const source = def.source as ArcGisFeatureLayerSource;
     const warnings: string[] = [];
     let usedServiceSymbology = false;
@@ -326,18 +479,19 @@ async function resolveArcGisFeatureLayer(
     const isViewportQuery = perf?.viewportQuery === true && viewport !== null;
     
     // Build join-key config for join-mode layers
-    const joinConfig: Record<string, unknown> = {};
+    let joinKeys: ArcGisFeatureQueryRequest["joinKeys"];
+    let queryStrategy: ArcGisFeatureQueryRequest["queryStrategy"];
     if (source.mode === "join" && def.join) {
         const joinValues = context.rows.map(row => row[def.join!.powerBiField]);
-        joinConfig.joinKeys = {
+        joinKeys = {
             field: def.join.serviceField,
             values: joinValues,
             normalization: def.join.normalization,
         };
-        joinConfig.queryStrategy = def.join.queryStrategy ?? "auto";
+        queryStrategy = def.join.queryStrategy ?? "auto";
     }
-    
-    const queryResult = await executeArcGisFeatureQuery({
+
+    const queryRequest: ArcGisFeatureQueryRequest = {
         url: source.url,
         layerId: source.layerId,
         where: source.mode === "reference" ? "1=1" : undefined,
@@ -349,8 +503,12 @@ async function resolveArcGisFeatureLayer(
         viewport: isViewportQuery ? viewport!.bounds : undefined,
         cacheMinutes: perf?.cacheMinutes,
         signal,
-        ...joinConfig,
-    });
+        joinKeys,
+        queryStrategy,
+        useServiceRenderer: source.useServiceRenderer === true || def.renderer?.type === "service",
+        useServiceLabels: source.useServiceLabels === true && !def.labels,
+    };
+    const queryResult = await executeArcGisFeatureQuery(queryRequest);
 
     const metadata = queryResult.metadata;
     const objectIdField = queryResult.objectIdField;
@@ -374,9 +532,6 @@ async function resolveArcGisFeatureLayer(
     } else if (shouldUseServiceRenderer && rendererAdaptation.renderer.type !== "simple") {
         resolvedRenderer = rendererAdaptation.renderer;
         usedServiceSymbology = rendererAdaptation.usedServiceSymbology;
-    } else if (rendererAdaptation.usedServiceSymbology) {
-        resolvedRenderer = rendererAdaptation.renderer;
-        usedServiceSymbology = true;
     } else {
         resolvedRenderer = { type: "simple" as const, symbol: {} };
     }
@@ -494,6 +649,17 @@ async function resolveArcGisFeatureLayer(
             })),
             html: def.popup.html,
         } : undefined,
+        tooltip: def.tooltip ? {
+            enabled: def.tooltip.enabled ?? true,
+            template: def.tooltip.template,
+            fields: (def.tooltip.fields ?? []).map(field => ({
+                field: field.field,
+                fieldSource: field.fieldSource ?? (source.mode === "join" ? "joined" : "service"),
+                label: field.label,
+                format: field.format,
+                display: "text" as const,
+            })),
+        } : undefined,
         interaction: def.interaction ?? {
             trigger: "click",
             internalMode: "highlight",
@@ -525,7 +691,7 @@ async function resolveArcGisFeatureLayer(
 
 // ── ArcGIS Query Field Collection ─────────────────────────────────────
 
-function collectArcGisQueryFields(
+export function collectArcGisQueryFields(
     def: MapLayerDefinition,
     source: ArcGisFeatureLayerSource
 ): string[] {
@@ -540,6 +706,7 @@ function collectArcGisQueryFields(
 
     // Label fields
     if (def.labels?.field) fields.add(def.labels.field);
+    if (def.labels?.template) collectTemplateFields(def.labels.template, fields);
 
     // Popup fields
     if (def.popup?.fields) {
@@ -550,12 +717,30 @@ function collectArcGisQueryFields(
         }
     }
 
+    // Tooltip fields and templates that are resolved from service/joined data
+    if (def.tooltip?.fields) {
+        for (const field of def.tooltip.fields) {
+            if (field.fieldSource === "service" || field.fieldSource === "joined" ||
+                field.fieldSource === undefined) {
+                fields.add(field.field);
+            }
+        }
+    }
+    if (def.tooltip?.template) collectTemplateFields(def.tooltip.template, fields);
+
     // Explicit outFields
     if (source.outFields) {
         for (const f of source.outFields) fields.add(f);
     }
 
     return [...fields];
+}
+
+function collectTemplateFields(template: string, fields: Set<string>): void {
+    for (const match of template.matchAll(/\{\{\s*([^{}]{1,120}?)\s*\}\}/g)) {
+        const field = match[1]?.trim();
+        if (field) fields.add(field);
+    }
 }
 
 function collectRendererFields(
@@ -573,7 +758,7 @@ function collectRendererFields(
 
 // ── Tile/Dynamic Layer Shells ─────────────────────────────────────────
 
-function createArcGisTileShell(def: MapLayerDefinition): ResolvedMapLayer {
+export function createArcGisTileShell(def: MapLayerDefinition): ResolvedMapLayer {
     const source = def.source as ArcGisTileLayerSource;
     return {
         id: def.id,
@@ -606,7 +791,7 @@ function createArcGisTileShell(def: MapLayerDefinition): ResolvedMapLayer {
     };
 }
 
-function createArcGisDynamicShell(def: MapLayerDefinition): ResolvedMapLayer {
+export function createArcGisDynamicShell(def: MapLayerDefinition): ResolvedMapLayer {
     const source = def.source as ArcGisDynamicLayerSource;
     return {
         id: def.id,
@@ -639,18 +824,24 @@ function createArcGisDynamicShell(def: MapLayerDefinition): ResolvedMapLayer {
             minZoom: source.minZoom,
             maxZoom: source.maxZoom,
             attribution: source.attribution,
+            debounceMs: source.debounceMs,
         },
     };
 }
 
-function createArcGisErrorShell(def: MapLayerDefinition, error: string): ResolvedMapLayer {
-    return {
+export function createArcGisErrorShell(def: MapLayerDefinition, error: string): ResolvedMapLayer {
+    const sourceType = def.source.type;
+    const shell: ResolvedMapLayer = sourceType === "arcgisTile"
+        ? createArcGisTileShell(def)
+        : sourceType === "arcgisDynamic"
+            ? createArcGisDynamicShell(def)
+            : {
         id: def.id,
         name: def.name,
-        sourceType: "arcgisFeature",
+        sourceType,
         geometryType: "unknown",
-        visible: true,
-        opacity: 1,
+        visible: def.visible ?? true,
+        opacity: def.opacity ?? 1,
         order: def.order ?? 10,
         features: [],
         renderer: { type: "simple", symbol: {} },
@@ -659,7 +850,7 @@ function createArcGisErrorShell(def: MapLayerDefinition, error: string): Resolve
             requestCount: 0,
             loading: false,
             error,
-            sourceType: "arcgisFeature",
+            sourceType,
             geometryType: "unknown",
             usedServiceSymbology: false,
             usedServiceLabels: false,
@@ -667,33 +858,23 @@ function createArcGisErrorShell(def: MapLayerDefinition, error: string): Resolve
         },
         loading: false,
     };
+    return {
+        ...shell,
+        error,
+        diagnostics: {
+            ...shell.diagnostics,
+            loading: false,
+            error,
+            warnings: shell.diagnostics.warnings.includes(error)
+                ? shell.diagnostics.warnings
+                : [...shell.diagnostics.warnings, error],
+        },
+    };
 }
 
-function createCorePackageErrorShell(def: MapLayerDefinition): ResolvedMapLayer {
+export function createCorePackageErrorShell(def: MapLayerDefinition): ResolvedMapLayer {
     const msg = "External ArcGIS layers require the HyperPBI Maps package. Power BI geometry layers remain available in the Core package.";
-    return {
-        id: def.id,
-        name: def.name,
-        sourceType: "arcgisFeature",
-        geometryType: "unknown",
-        visible: true,
-        opacity: 1,
-        order: def.order ?? 10,
-        features: [],
-        renderer: { type: "simple", symbol: {} },
-        diagnostics: {
-            featureCount: 0,
-            requestCount: 0,
-            loading: false,
-            error: msg,
-            sourceType: "arcgisFeature",
-            geometryType: "unknown",
-            usedServiceSymbology: false,
-            usedServiceLabels: false,
-            warnings: [msg],
-        },
-        loading: false,
-    };
+    return createArcGisErrorShell(def, msg);
 }
 
 function mapGeometryFromGeoJson(geometry: GeoJSON.GeoJsonObject | null): "point" | "multipoint" | "polyline" | "polygon" | "unknown" {

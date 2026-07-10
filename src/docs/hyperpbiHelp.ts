@@ -22,7 +22,7 @@ Layout, Controls, Navigation, Display, Primitives (card, listGroup, dataGrid, mo
 
 ## Maps
 
-Power BI spatial maps (lat/lon, geometry) are stable. ArcGIS REST layered maps are developer preview. Use Maps package for OSM tiles: \`npm run package:maps\`.
+Power BI spatial maps and practical public ArcGIS REST feature, join, tile, and dynamic layers are connected. Home, Zoom to Selection, Layers, Legend, and Clear Selection are functional. Use the Maps package for external requests: \`npm run package:maps\`.
 
 ## Tables
 
@@ -86,7 +86,7 @@ Prefer card over custom card HTML. Prefer listGroup over custom lists. Prefer da
 
 ## Map rules
 
-Generate stable Power BI spatial maps by default. Never invent ArcGIS service URLs, layer IDs, or tokens. ArcGIS REST layered schema is developer preview.
+Generate Power BI spatial maps by default. Use public ArcGIS feature/tile/dynamic sources only when the user supplies a verified HTTPS URL, layer ID, and real fields. Center order is [latitude, longitude]. Never invent ArcGIS resources or credentials. Secured services, editing, 3D, relationships, tracing, non-4326 output, density grids, and advanced label collision are unsupported.
 
 ## Table rules
 

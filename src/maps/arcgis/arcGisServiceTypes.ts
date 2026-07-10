@@ -79,6 +79,7 @@ export interface ArcGisExtent {
 export interface ArcGisRendererDef {
     type: string;
     symbol?: ArcGisSymbolDef;
+    field?: string;
     field1?: string;
     field2?: string;
     field3?: string;
@@ -90,6 +91,9 @@ export interface ArcGisRendererDef {
     maxValue?: number;
     classificationMethod?: string;
     normalizationField?: string;
+    visualVariables?: Array<{ type?: string; field?: string }>;
+    sizeInfo?: { field?: string };
+    colorInfo?: { field?: string };
     colorRamp?: ArcGisColorRamp;
     rotationType?: string;
     rotationExpression?: string;

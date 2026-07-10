@@ -79,8 +79,9 @@ Tabulator is not bundled. Enhanced native table properties: `density`, `striped`
 
 - Generate stable Power BI lat/lon/geometry maps by default
 - Never invent ArcGIS service URLs, layer IDs, join fields, or tokens
-- ArcGIS REST layered schema is developer-preview
-- Only include ArcGIS sources when the user explicitly provides a verified URL
+- Practical public ArcGIS feature/reference and Power BI join layers, viewport queries, tile overlays, basic dynamic images, labels, tooltips/popups, selection, layer controls, legends, Home, and Zoom to Selection are supported
+- Only include ArcGIS sources when the user supplies a verified public HTTPS URL, layer ID, and real fields; map centers use `[latitude, longitude]`
+- Do not generate secured authentication, editing, 3D, relationships, tracing, density grids, advanced collision, or output spatial references other than 4326
 
 ## Security
 

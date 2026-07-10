@@ -1,102 +1,68 @@
-# HyperPBI Maps and Map Services
+# Map services
 
-## Current Support Status
+HyperPBI renders Power BI spatial data and a practical subset of public ArcGIS REST services with Leaflet. It does not bundle the ArcGIS JavaScript SDK.
+
+## Runtime support
 
 | Capability | Status |
-|-----------|--------|
-| Power BI lat/lon | Stable |
-| Power BI WKT/GeoJSON geometry | Stable |
-| Power BI X/Y coordinates | Stable |
-| Cached address geocoding | Stable |
-| OSM basemap | Stable in Maps build |
-| Nominatim geocoding | Stable, user-triggered |
-| ArcGIS geocoder | Stable where configured |
-| Declarative layered map schema | Experimental |
-| Power BI layered source | Stable |
-| ArcGIS REST URL parsing | Foundation |
-| ArcGIS host policy checking | Foundation |
-| ArcGIS service inspection | Foundation |
-| ArcGIS feature query client | Foundation |
-| ArcGIS geometry conversion | Foundation |
-| Power BI/service join engine | Foundation |
-| ArcGIS layer rendering | Not end-to-end |
-| Runtime layer reorder | Not connected |
-| Runtime opacity control | Not exposed |
-| Runtime label toggle | Not exposed |
-| Map toolbar Home | Placeholder |
-| Map toolbar Zoom to selection | Placeholder |
-| Dedicated Map Builder tab | Not implemented |
+|---|---|
+| Power BI latitude/longitude, X/Y, WKT, GeoJSON, cached addresses | Supported |
+| Public FeatureServer/MapServer feature layers | Supported |
+| Power BI-to-service geometry joins | Supported |
+| Full-layer and viewport feature queries | Supported |
+| Simple, unique-value, class-break, continuous-color, proportional-size, cluster rendering | Supported |
+| Opt-in ArcGIS service renderer and service labels | Supported |
+| OSM, custom HTTPS, and ArcGIS tile basemaps | Supported in Maps packages |
+| Multiple ArcGIS tile overlays | Supported |
+| Basic ArcGIS dynamic MapServer image overlays | Supported |
+| Labels, tooltips, popups, safe popup actions | Supported |
+| Power BI and map-local selection | Supported |
+| Layer visibility, opacity, labels, order, diagnostics, legend | Supported |
+| Home, Zoom to Selection, Clear Selection, Layers, Legend | Supported |
 
-## Legacy Power BI Spatial Maps (Stable)
+Map `view.center` is always `[latitude, longitude]`, matching the value passed to Leaflet. ArcGIS queries request output spatial reference 4326.
 
-Location priority: Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon supported. All legacy `settings`, `style`, and `popup` properties continue working.
+## Layer sources
 
-## Core and Maps Packages
+- `powerbi`: geometry and attributes from bound Power BI rows.
+- `arcgisFeature`: a public FeatureServer layer or query-capable MapServer layer. `mode: "reference"` loads service features; `mode: "join"` joins service geometry to a Power BI field.
+- `arcgisTile`: an HTTPS cached MapServer tile overlay.
+- `arcgisDynamic`: a basic MapServer `/export` image overlay refreshed for the current map view.
 
-- **Core** (`npm run package:core`): No WebAccess. Certification posture.
-- **Maps** (`npm run package:maps`): WebAccess for OSM/Nominatim/ArcGIS hosts.
+Configured renderers override service renderers. Service symbology is used only with `renderer.type: "service"` or `source.useServiceRenderer: true`. Configured labels override service labels; service labels require `source.useServiceLabels: true`. Tooltip configuration is independent of popup configuration and supports `template`, `fields`, `fieldSource`, and formatting.
 
-Add custom ArcGIS hosts:
+Viewport-query layers requery after meaningful user view changes. Non-viewport feature layers and tile/dynamic shells do not. Requests, loading, errors, refresh intervals, and stale-response protection are isolated by layer ID, so a slow or failing layer does not replace successful siblings.
+
+## Controls and diagnostics
+
+The toolbar can expose Home, Zoom to Selection, Clear Selection, Layers, and Legend. Layer-panel state supports visibility, opacity, label visibility, viewer order, Reset, and inline diagnostics. Diagnostics include source type/URL, feature and request counts, OID field, strategy, cache use, join field, match counts, warnings, and errors.
+
+## Packages and hosts
+
 ```bash
-HYPERPBI_MAP_HOSTS="https://gis.example.org,https://*.agency.gov" npm run package:maps
-```
-Only HTTPS; user URLs cannot bypass package privileges. ArcGIS Online wildcards included by default.
-
-## Basemaps
-
-| Provider | Maps Build Required |
-|----------|-------------------|
-| `none` | No |
-| `osm` | Yes |
-| `customTile` | Yes |
-| `arcgisTile` | Yes |
-
-## Geocoding
-
-User-triggered in Studio only. Address data never sent automatically. Cached by normalized address.
-
-## Declarative Map Layers (Experimental)
-
-The `layers[]` schema supports Power BI, ArcGIS feature, ArcGIS tile, and ArcGIS dynamic sources. See specification reference for complete schema.
-
-**ArcGIS feature rendering is not yet end-to-end connected.** The schema and service infrastructure (URL parsing, host policy, inspection, query planning, WHERE generation, GeoJSON/Esri JSON parsing, geometry conversion, join engine) are in place. Runtime integration is in progress.
-
-## Public ArcGIS REST Services
-
-HyperPBI accesses public services through native `fetch`. No ArcGIS SDK. No ArcGIS account required for public layers.
-
-### URL Forms
-```
-https://<host>/arcgis/rest/services/<folder>/<service>/FeatureServer
-https://<host>/arcgis/rest/services/<folder>/<service>/FeatureServer/0
-https://<host>/arcgis/rest/services/<folder>/<service>/MapServer
+npm run package:core
+HYPERPBI_ALLOW_ALL_MAP_HOSTS=true npm run package:maps
+HYPERPBI_ALLOW_ALL_MAP_HOSTS=false HYPERPBI_MAP_HOSTS="https://*.houstontx.gov,https://example.com" npm run package:maps
+npm run package:verify
 ```
 
-### Public vs Secured
-- **Public:** Accessible without auth. Query capability available.
-- **Secured:** Error 498/499 or HTTP 401/403. Clear unsupported message displayed. No token field exposed.
+- Core has no `WebAccess` privilege. Power BI geometry remains available; external ArcGIS layers show package diagnostics.
+- Broad Maps has `https://*` WebAccess but still enforces HTTPS, no embedded credentials, and the runtime host policy.
+- Restricted Maps contains only built-in OSM/ArcGIS hosts plus normalized `HYPERPBI_MAP_HOSTS` entries.
+- Host patterns cannot contain HTTP, credentials, paths, queries, or hashes. Only exact HTTPS hosts and leading subdomain wildcards are valid in restricted mode.
 
-## Join Privacy
+`package:verify` opens the actual PBIVIZ ZIP archives and reads the packaged capabilities payload for Core, broad Maps, and restricted Maps.
 
-A geometry join transmits distinct configured join-key values to the service host. No other Power BI fields are transmitted.
+## Public ArcGIS URL examples
 
-## Troubleshooting
+```text
+https://host.example/arcgis/rest/services/folder/service/FeatureServer/0
+https://host.example/arcgis/rest/services/folder/service/MapServer/9
+https://host.example/arcgis/rest/services/folder/service/MapServer
+```
 
-| Symptom | Likely Cause |
-|---------|-------------|
-| Map shows neutral grid | Maps package not installed |
-| No tiles | WebAccess not granted |
-| "Host not permitted" | Host not in HYPERPBI_MAP_HOSTS |
-| "Service requires authentication" | Layer is secured |
-| "Could not access service" | CORS/network/WebAccess |
-| Map empty with bound fields | Check field roles |
+Never put tokens or credentials in dashboard JSON. HyperPBI sends external requests with credentials omitted and no referrer.
 
-## Current Limitations
+## Intentional limitations
 
-- ArcGIS REST layered rendering not yet end-to-end connected
-- Map toolbar Home/Zoom-to-selection are placeholder handlers
-- Layer panel reorder/opacity/label toggle UI not fully exposed
-- Dedicated Map Builder Studio tab not implemented
-- Only EPSG:4326 output spatial reference supported
-- No secured-service authentication flow
-- No ArcGIS SDK bundled (intentional)
+The practical runtime does not support secured-service authentication, editing, 3D, relationship queries, network tracing, non-4326 output, advanced label collision, density grids, or fullscreen workarounds. `hideOverlaps` produces an explicit warning and renders labels without collision suppression. Large joins remain subject to the configured feature limit and the source service's query capabilities.

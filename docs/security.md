@@ -73,11 +73,13 @@ UI actions are declarative and safe:
 - External request call sites removed by SDK certification-fix
 - No external tiles, geocoding, or ArcGIS requests possible
 
-### Maps Package
-- WebAccess for declared hosts only
-- Hosts specified at package build time via `HYPERPBI_MAP_HOSTS`
+### Maps Packages
+- Broad Maps uses `https://*` WebAccess while the runtime still requires HTTPS and rejects credentials
+- Restricted Maps uses built-in provider hosts plus exact/subdomain-wildcard hosts specified through `HYPERPBI_MAP_HOSTS`
 - User-entered URLs cannot bypass package privileges
 - ArcGIS Online wildcards included by default
+- HTTP, credential-bearing, path, query, hash, and malformed host patterns fail the package build
+- `npm run package:verify` opens each PBIVIZ ZIP and verifies the packaged capabilities payload
 
 ## ArcGIS REST Security
 
@@ -138,4 +140,4 @@ For controlled internal dashboards:
 - No Content Security Policy header control (Power BI host responsibility)
 - No request signing or HMAC for ArcGIS queries
 - No encrypted storage for cached metadata
-- ArcGIS REST layered rendering is developer preview — runtime integration incomplete
+- ArcGIS runtime scope is public read-only feature/tile/basic-dynamic services; secured authentication, editing, 3D, relationships, tracing, and non-4326 output are intentionally unsupported

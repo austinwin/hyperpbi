@@ -51,10 +51,11 @@ Prefer first-class components over custom HTML:
 ## Map Generation Rules
 
 - Always prefer stable Power BI lat/lon/geometry maps by default
-- Only generate ArcGIS layers when the user explicitly provides a service URL and confirms runtime support
+- Only generate ArcGIS layers when the user explicitly provides a verified public HTTPS service URL, layer ID, and real fields
 - Never invent ArcGIS service URLs, layer IDs, join fields, or tokens
 - Never include credentials in any form
-- The layered ArcGIS REST schema is developer-preview
+- Practical ArcGIS feature/reference and Power BI join layers, viewport queries, tiles, basic dynamic images, labels, tooltips/popups, selection, layer controls, legends, Home, and Zoom to Selection are supported
+- Use `[latitude, longitude]` for map centers and output SR 4326; do not generate authentication, editing, 3D, relationship/tracing, density-grid, advanced-collision, or non-4326 configurations
 
 ## Sharing Component Properties
 

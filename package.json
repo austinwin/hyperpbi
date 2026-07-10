@@ -14,6 +14,7 @@
     "package": "npm run package:core",
     "package:core": "node scripts/package-profile.mjs core",
     "package:maps": "node scripts/package-profile.mjs maps",
+    "package:verify": "node scripts/verify-package-capabilities.mjs",
     "docs:generate": "node scripts/generate-documentation.mjs",
     "docs:check": "node scripts/generate-documentation.mjs --check",
     "build": "npm run typecheck",

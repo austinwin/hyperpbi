@@ -26,15 +26,17 @@ export function MapLegendPanel({ mapId, layers }: MapLegendPanelProps) {
     return (
         <div class="hp-map-legend">
             {visibleLayers.map(layer => (
-                <div key={layer.id} class="hp-map-legend-layer">
-                    {layer.legend?.title && (
-                        <strong class="hp-map-legend-title">{layer.legend.title}</strong>
-                    )}
-                    {!layer.legend?.title && (
-                        <strong class="hp-map-legend-title">{layer.name}</strong>
-                    )}
-                    {renderLegendEntries(layer.renderer)}
-                </div>
+                layer.legend?.collapsed ? (
+                    <details key={layer.id} class="hp-map-legend-layer">
+                        <summary class="hp-map-legend-title">{layer.legend?.title ?? layer.name}</summary>
+                        {renderLegendEntries(layer.renderer)}
+                    </details>
+                ) : (
+                    <div key={layer.id} class="hp-map-legend-layer">
+                        <strong class="hp-map-legend-title">{layer.legend?.title ?? layer.name}</strong>
+                        {renderLegendEntries(layer.renderer)}
+                    </div>
+                )
             ))}
         </div>
     );
@@ -78,7 +80,7 @@ function renderSimpleLegend(symbol?: ResolvedMapSymbol): h.JSX.Element {
     const weight = symbol?.weight ?? symbol?.outlineWidth ?? 2;
     return (
         <div class="hp-map-legend-entry">
-            <span class="hp-map-legend-swatch" style={{
+            <span class="hp-map-legend-swatch" title={symbol?.shape ?? "default symbol"} style={{
                 background: color,
                 border: `${weight}px solid ${outlineColor}`,
             }} />
@@ -92,20 +94,24 @@ function renderUniqueValueLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
     if (renderer.valueMap) {
         for (const [value, symbol] of renderer.valueMap) {
             const color = symbol.fillColor ?? symbol.color ?? "#3388ff";
+            const outlineColor = symbol.outlineColor ?? symbol.color ?? color;
+            const outlineWidth = symbol.outlineWidth ?? symbol.weight ?? 1;
             entries.push(
                 <div key={value} class="hp-map-legend-entry">
-                    <span class="hp-map-legend-swatch" style={{ background: color }} />
+                    <span class="hp-map-legend-swatch" title={String(value)} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
                     <span>{String(value)}</span>
                 </div>
             );
         }
     }
-    if (renderer.defaultSymbol && renderer.defaultLabel) {
+    if (renderer.defaultSymbol) {
         const color = renderer.defaultSymbol.fillColor ?? renderer.defaultSymbol.color ?? "#ccc";
+        const outlineColor = renderer.defaultSymbol.outlineColor ?? renderer.defaultSymbol.color ?? color;
+        const outlineWidth = renderer.defaultSymbol.outlineWidth ?? renderer.defaultSymbol.weight ?? 1;
         entries.push(
             <div key="__default__" class="hp-map-legend-entry">
-                <span class="hp-map-legend-swatch" style={{ background: color }} />
-                <span>{renderer.defaultLabel}</span>
+                <span class="hp-map-legend-swatch" title={renderer.defaultLabel ?? "Other"} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
+                <span>{renderer.defaultLabel ?? "Other"}</span>
             </div>
         );
     }
@@ -117,10 +123,13 @@ function renderClassBreaksLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
     if (renderer.breaks) {
         for (const brk of renderer.breaks) {
             const color = brk.symbol?.fillColor ?? brk.symbol?.color ?? "#3388ff";
+            const outlineColor = brk.symbol?.outlineColor ?? brk.symbol?.color ?? color;
+            const outlineWidth = brk.symbol?.outlineWidth ?? brk.symbol?.weight ?? 1;
+            const label = brk.label ?? `${brk.min} – ${brk.max}`;
             entries.push(
                 <div key={`${brk.min}-${brk.max}`} class="hp-map-legend-entry">
-                    <span class="hp-map-legend-swatch" style={{ background: color }} />
-                    <span>{brk.label ?? `${brk.min} – ${brk.max}`}</span>
+                    <span class="hp-map-legend-swatch" title={label} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
+                    <span>{label}</span>
                 </div>
             );
         }
@@ -135,7 +144,7 @@ function renderContinuousLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
     const domainMax = renderer.domainMax ?? 1;
     return (
         <div class="hp-map-legend-entry">
-            <div class="hp-map-gradient" style={{
+            <div class="hp-map-gradient" title={`${domainMin} to ${domainMax}`} style={{
                 background: `linear-gradient(90deg, ${minColor}, ${maxColor})`,
                 width: "100%", height: "12px", borderRadius: "2px",
             }} />
@@ -151,21 +160,25 @@ function renderProportionalLegend(renderer: ResolvedMapRenderer): h.JSX.Element 
     const minSize = renderer.minSize ?? 4;
     const maxSize = renderer.maxSize ?? 24;
     const color = renderer.baseColor ?? "#3388ff";
+    const minValue = renderer.domainMin ?? 0;
+    const maxValue = renderer.domainMax ?? 1;
+    const midValue = (minValue + maxValue) / 2;
     return (
         <div class="hp-map-legend-entry">
             <div class="hp-map-legend-sizes">
-                <span class="hp-map-legend-size-dot" style={{
+                <span class="hp-map-legend-size-dot" title={`Minimum: ${minValue}`} style={{
                     width: `${minSize}px`, height: `${minSize}px`, background: color,
                 }} />
-                <span class="hp-map-legend-size-dot" style={{
+                <span class="hp-map-legend-size-dot" title={`Middle: ${midValue}`} style={{
                     width: `${Math.round((minSize + maxSize) / 2)}px`,
                     height: `${Math.round((minSize + maxSize) / 2)}px`,
                     background: color,
                 }} />
-                <span class="hp-map-legend-size-dot" style={{
+                <span class="hp-map-legend-size-dot" title={`Maximum: ${maxValue}`} style={{
                     width: `${maxSize}px`, height: `${maxSize}px`, background: color,
                 }} />
             </div>
+            <div class="hp-map-legend-range"><span>{minValue.toLocaleString()}</span><span>{midValue.toLocaleString()}</span><span>{maxValue.toLocaleString()}</span></div>
         </div>
     );
 }

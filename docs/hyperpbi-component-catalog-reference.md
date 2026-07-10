@@ -387,6 +387,8 @@ Three independent behavior systems:
 
 <!-- component:map -->
 
+Practical runtime support includes Power BI geometry, public ArcGIS feature layers and joins, viewport queries, tile and basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection. External ArcGIS requests require a Maps package whose WebAccess hosts match the service.
+
 ## Compatibility
 
 Legacy properties and types remain supported for existing dashboards:

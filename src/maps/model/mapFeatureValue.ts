@@ -80,7 +80,31 @@ export function formatFeatureValue(
 ): string {
     if (rawValue === null || rawValue === undefined) return "—";
 
-    switch (display) {
+    if (Array.isArray(rawValue)) {
+        return rawValue.map(value => formatFeatureValue(value)).join(", ");
+    }
+
+    if (rawValue instanceof Date) {
+        return display === "date" || format === "date"
+            ? rawValue.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+            : rawValue.toISOString();
+    }
+
+    if (typeof rawValue === "object") {
+        try {
+            return JSON.stringify(rawValue);
+        } catch {
+            return "—";
+        }
+    }
+
+    const effectiveDisplay = display ?? (
+        ["integer", "decimal2", "decimal4", "percent", "currency"].includes(format ?? "")
+            ? "number"
+            : format === "date" ? "date" : "text"
+    );
+
+    switch (effectiveDisplay) {
         case "number": {
             const num = Number(rawValue);
             if (isNaN(num)) return String(rawValue);

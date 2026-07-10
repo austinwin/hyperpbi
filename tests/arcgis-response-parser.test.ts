@@ -148,6 +148,25 @@ describe("ArcGIS Response Parser", () => {
     });
 
     describe("edge cases", () => {
+        it("keeps string and numeric object IDs", () => {
+            const value = parseArcGisResponse({ features: [
+                { attributes: { OBJECTID: "OID-1" }, geometry: { x: 1, y: 2 } },
+                { attributes: { OBJECTID: 2 }, geometry: { x: 3, y: 4 } },
+            ] }, "json", "OBJECTID");
+            expect(value.features.map(feature => feature.objectId)).toEqual(["OID-1", 2]);
+        });
+
+        it("retains attributes and later features when one Esri geometry is malformed", () => {
+            const value = parseArcGisResponse({ features: [
+                { attributes: { OBJECTID: 1, NAME: "Broken" }, geometry: { paths: null } },
+                { attributes: { OBJECTID: 2, NAME: "Good" }, geometry: { x: 3, y: 4 } },
+            ] }, "json", "OBJECTID");
+            expect(value.features).toHaveLength(2);
+            expect(value.features[0]).toMatchObject({ objectId: 1, attributes: { NAME: "Broken" }, geometry: null });
+            expect(value.features[1].geometry?.type).toBe("Point");
+            expect(value.warnings.join(" ")).toMatch(/malformed geometry/);
+        });
+
         it("returns empty for null response", () => {
             const result = parseArcGisResponse(null, "json", "OBJECTID");
             expect(result.features).toHaveLength(0);

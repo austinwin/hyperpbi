@@ -24,6 +24,7 @@ export type MapGeometryType =
 // ── View & Basemap ────────────────────────────────────────────────────
 
 export interface MapViewDefinition {
+    /** Leaflet center order: [latitude, longitude]. */
     center?: [number, number];
     zoom?: number;
     minZoom?: number;

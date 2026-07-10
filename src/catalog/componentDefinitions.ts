@@ -159,7 +159,7 @@ export const componentDefinitions: ComponentDefinition[] = [
     def("matrix", "Matrix / pivot", "Tables", "Summarized row-by-column comparison", "recommended", { fields: true, calculations: true, interactions: true }),
 
     // Maps
-    def("map", "Map", "Maps", "Spatial patterns and selectable features", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("map", "Map", "Maps", "Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
 
     // Content
     def("text", "Text", "Custom components", "Safe plain text"),

@@ -1,13 +1,13 @@
 {
   "$schema": "https://austinwin.github.io/hyperpbi/schemas/dashboard.json",
-  "description": "ArcGIS Wastewater join map example - demonstrates Power BI field joined to ArcGIS service field, service geometry, joined features, and correct Power BI row selection.",
+  "description": "ArcGIS Wastewater join map example - demonstrates Power BI field joined to ArcGIS service field, service geometry, joined features, and correct Power BI row selection. Bind the Power BI FacilityID field so it can join to the service FACILITYID field.",
   "components": [
     {
       "id": "wastewater-join",
       "type": "map",
       "title": "Wastewater Join Map",
       "view": {
-        "center": [-95.35, 29.75],
+        "center": [29.75, -95.35],
         "zoom": 12
       },
       "basemap": {
@@ -54,12 +54,19 @@
           },
           "popup": {
             "enabled": true,
-            "title": "Work Order + Pipe {FACILITYID}",
+            "title": "Work Order + Pipe {{FACILITYID}}",
             "fields": [
               { "field": "FacilityID", "fieldSource": "powerbi", "label": "Work Order ID" },
               { "field": "FACILITYID", "fieldSource": "service", "label": "Pipe ID" },
               { "field": "MATERIAL", "fieldSource": "service", "label": "Material" },
               { "field": "DIAMETER", "fieldSource": "service", "label": "Diameter" }
+            ]
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              { "field": "FacilityID", "fieldSource": "powerbi", "label": "Power BI Facility" },
+              { "field": "FACILITYID", "fieldSource": "service", "label": "Service Facility" }
             ]
           },
           "labels": {
@@ -74,11 +81,20 @@
           "order": 1
         }
       ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
         "layers": true,
-        "selection": true,
+        "legend": true,
+        "clearSelection": true,
         "zoomToSelection": true
       },
       "settings": {

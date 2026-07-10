@@ -411,4 +411,85 @@ describe("ArcGIS Feature Query Executor", () => {
 
         expect(result.features.length).toBeLessThanOrEqual(50);
     });
+
+    it("collects only actual opt-in service renderer and label metadata fields", async () => {
+        mockFetch
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockMetadata({
+                supportedQueryFormats: "GEOJSON",
+                fields: ["OBJECTID", "STATUS", "CATEGORY", "NORMALIZER", "SIZE_FIELD", "COLOR_FIELD", "LABEL_A", "LABEL_B", "LABEL_C", "LABEL_D"].map(name => ({ name, type: name === "OBJECTID" ? "esriFieldTypeOID" : "esriFieldTypeString" })),
+                drawingInfo: {
+                    renderer: { type: "uniqueValue", field: "STATUS", field1: "CATEGORY", field2: "NOT_REAL", normalizationField: "NORMALIZER", visualVariables: [{ field: "SIZE_FIELD" }], sizeInfo: { field: "SIZE_FIELD" }, colorInfo: { field: "COLOR_FIELD" } },
+                    labelingInfo: [
+                        { labelExpression: "[LABEL_A]" },
+                        { labelExpressionInfo: { expression: "$feature.LABEL_B" } },
+                        { labelExpressionInfo: { expression: '$feature["LABEL_C"]' } },
+                        { labelExpressionInfo: { expression: "$feature['LABEL_D'] + $feature.NOT_REAL" } },
+                    ],
+                },
+            })) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockGeoJsonResponse([])) });
+        const { executeArcGisFeatureQuery } = await getModule();
+        await executeArcGisFeatureQuery({
+            url: "https://services.arcgis.com/example/ArcGIS/rest/services/MetadataFields/FeatureServer/0",
+            useServiceRenderer: true,
+            useServiceLabels: true,
+        });
+        const body = new URLSearchParams(String((mockFetch.mock.calls[1][1] as RequestInit).body));
+        const outFields = body.get("outFields")?.split(",") ?? [];
+        expect(outFields).toEqual(expect.arrayContaining(["STATUS", "CATEGORY", "NORMALIZER", "SIZE_FIELD", "COLOR_FIELD", "LABEL_A", "LABEL_B", "LABEL_C", "LABEL_D"]));
+        expect(outFields).not.toContain("NOT_REAL");
+    });
+
+    it("normalizes and deduplicates join keys before the cache signature and IN clause", async () => {
+        mockFetch
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockMetadata({ supportedQueryFormats: "GEOJSON", fields: [{ name: "OBJECTID", type: "esriFieldTypeOID" }, { name: "CODE", type: "esriFieldTypeString" }] })) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockGeoJsonResponse([])) });
+        const { executeArcGisFeatureQuery } = await getModule();
+        await executeArcGisFeatureQuery({
+            url: "https://services.arcgis.com/example/ArcGIS/rest/services/NormalizedJoin/FeatureServer/0",
+            joinKeys: { field: "CODE", values: [" a-1 ", "A-1", ""], normalization: ["trim", "upper"] },
+            queryStrategy: "keyBatches",
+        });
+        const body = new URLSearchParams(String((mockFetch.mock.calls[1][1] as RequestInit).body));
+        expect(body.get("where")).toContain("'A-1'");
+        expect(body.get("where")?.match(/A-1/g)).toHaveLength(1);
+    });
+
+    it("paginates every join-key batch using the same batch WHERE clause", async () => {
+        mockFetch
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockMetadata({ supportedQueryFormats: "GEOJSON", maxRecordCount: 2, advancedQueryCapabilities: { supportsPagination: true }, fields: [{ name: "OBJECTID", type: "esriFieldTypeOID" }, { name: "CODE", type: "esriFieldTypeString" }] })) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockGeoJsonResponse([{ properties: { OBJECTID: 1, CODE: "A" } }, { properties: { OBJECTID: 2, CODE: "A" } }], { exceededTransferLimit: true })) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockGeoJsonResponse([{ properties: { OBJECTID: 3, CODE: "A" } }], { exceededTransferLimit: false })) });
+        const { executeArcGisFeatureQuery } = await getModule();
+        const value = await executeArcGisFeatureQuery({
+            url: "https://services.arcgis.com/example/ArcGIS/rest/services/PagedJoin/FeatureServer/0",
+            joinKeys: { field: "CODE", values: ["A"], normalization: ["trim", "upper"] },
+            queryStrategy: "auto", requestBatchSize: 2, maxFeatures: 10,
+        });
+        expect(value.features).toHaveLength(3);
+        expect(value.requestCount).toBe(2);
+        const whereClauses = mockFetch.mock.calls.slice(1).map(call => new URLSearchParams(String((call[1] as RequestInit).body)).get("where"));
+        expect(new Set(whereClauses).size).toBe(1);
+        expect(whereClauses[0]).toContain("CODE IN ('A')");
+    });
+
+    it("propagates parser warnings and enforces the practical 4326 output SR", async () => {
+        mockFetch
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockMetadata({ supportedQueryFormats: "JSON" })) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ objectIdFieldName: "OBJECTID", features: [{ attributes: { OBJECTID: "OID-1" }, geometry: { paths: null } }] }) });
+        const { executeArcGisFeatureQuery } = await getModule();
+        const value = await executeArcGisFeatureQuery({ url: "https://services.arcgis.com/example/ArcGIS/rest/services/Warnings/FeatureServer/0" });
+        expect(value.features[0].objectId).toBe("OID-1");
+        expect(value.features[0].geometry).toBeNull();
+        expect(value.warnings.join(" ")).toMatch(/malformed geometry/);
+        await expect(executeArcGisFeatureQuery({ url: "https://services.arcgis.com/example/ArcGIS/rest/services/Warnings/FeatureServer/0", outputSpatialReference: 3857 })).rejects.toThrow(/4326/);
+    });
+
+    it("preserves ArcGIS metadata error context instead of replacing it with null", async () => {
+        mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ error: { code: 499, message: "Token required", details: ["Public access disabled"] } }) });
+        const { executeArcGisFeatureQuery } = await getModule();
+        await expect(executeArcGisFeatureQuery({
+            url: "https://services.arcgis.com/example/ArcGIS/rest/services/MetadataError/FeatureServer/0",
+        })).rejects.toMatchObject({ name: "ArcGisAuthError", code: 499, url: expect.stringContaining("MetadataError") });
+    });
 });

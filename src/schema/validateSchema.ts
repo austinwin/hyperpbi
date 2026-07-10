@@ -60,6 +60,22 @@ function formatError(error: ErrorObject): string {
 
 function componentContractErrors(value: unknown): string[] {
     const errors:string[]=[];
+    const validateMapTooltip=(tooltip:unknown,path:string)=>{
+        if(!tooltip||typeof tooltip!=="object"||Array.isArray(tooltip)){errors.push(`${path} must be an object`);return;}
+        const definition=tooltip as Record<string,unknown>;
+        if(definition.enabled!==undefined&&typeof definition.enabled!=="boolean")errors.push(`${path}/enabled must be a boolean`);
+        if(definition.template!==undefined&&typeof definition.template!=="string")errors.push(`${path}/template must be a string`);
+        if(definition.fields!==undefined&&!Array.isArray(definition.fields))errors.push(`${path}/fields must be an array`);
+        if(Array.isArray(definition.fields))definition.fields.forEach((field,index)=>{
+            const fieldPath=`${path}/fields/${index}`;
+            if(!field||typeof field!=="object"||Array.isArray(field)){errors.push(`${fieldPath} must be an object`);return;}
+            const item=field as Record<string,unknown>;
+            if(typeof item.field!=="string"||item.field.trim().length===0)errors.push(`${fieldPath}/field must be a nonblank string`);
+            if(item.fieldSource!==undefined&&!(["powerbi","service","joined"] as unknown[]).includes(item.fieldSource))errors.push(`${fieldPath}/fieldSource must be powerbi, service, or joined`);
+            if(item.label!==undefined&&typeof item.label!=="string")errors.push(`${fieldPath}/label must be a string`);
+            if(item.format!==undefined&&typeof item.format!=="string")errors.push(`${fieldPath}/format must be a string`);
+        });
+    };
     const visit=(component:Record<string,unknown>,path:string)=>{
         const type=component.type;
         if(type==="advancedChart"&&(!component.options||typeof component.options!=="object"||Array.isArray(component.options)))errors.push(`${path}/options must be a JSON object for advancedChart`);
@@ -67,6 +83,11 @@ function componentContractErrors(value: unknown): string[] {
         if(type==="matrix"&&(!Array.isArray(component.rows)||!component.rows.length||!Array.isArray(component.values)||!component.values.length))errors.push(`${path} matrix requires non-empty rows and values arrays`);
         if(type==="smallMultiples"&&(typeof component.splitField!=="string"||!component.chart||typeof component.chart!=="object"))errors.push(`${path} smallMultiples requires splitField and chart`);
         if(type==="segmentedControl"&&typeof component.field!=="string"&&!Array.isArray(component.options))errors.push(`${path} segmentedControl requires field or options`);
+        if(type==="map"&&Array.isArray(component.layers))component.layers.forEach((layer,index)=>{
+            if(!layer||typeof layer!=="object")return;
+            const tooltip=(layer as Record<string,unknown>).tooltip;
+            if(tooltip!==undefined)validateMapTooltip(tooltip,`${path}/layers/${index}/tooltip`);
+        });
         if(Array.isArray(component.children))component.children.forEach((child,index)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/children/${index}`);});
         if(Array.isArray(component.tabs))component.tabs.forEach((tab,index)=>{if(!tab||typeof tab!=="object")return;const children=(tab as Record<string,unknown>).children;if(Array.isArray(children))children.forEach((child,childIndex)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/tabs/${index}/children/${childIndex}`);});});
         if(component.chart&&typeof component.chart==="object")visit(component.chart as Record<string,unknown>,`${path}/chart`);

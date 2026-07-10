@@ -1,6 +1,11 @@
 import { copyFile, readFile, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
+import {
+    DEFAULT_MAP_HOSTS,
+    buildWebAccessParameters,
+    parseMapHostPatterns,
+} from "./package-profile-utils.mjs";
 
 const profile=process.argv[2]==="maps"?"maps":"core";
 const audit=process.argv.includes("audit");
@@ -17,58 +22,19 @@ try { originalHostPolicy=await readFile(hostPolicyPath,"utf8"); } catch {}
 // ── Read broad-host setting ──────────────────────────────────────────
 const allowAllHosts = process.env.HYPERPBI_ALLOW_ALL_MAP_HOSTS !== "false";
 
-// Default public ArcGIS hosts
-const defaultMapHosts = [
-    "https://*.arcgis.com",
-    "https://*.arcgisonline.com",
-];
-
-// Read additional hosts from HYPERPBI_MAP_HOSTS env var
-const extraHostsEnv = process.env.HYPERPBI_MAP_HOSTS ?? "";
-const extraHosts = extraHostsEnv
-    .split(",")
-    .map(h => h.trim())
-    .filter(h => {
-        // Validate: only HTTPS patterns, no credentials
-        if (!h.startsWith("https://")) {
-            console.warn(`Skipping non-HTTPS host pattern: ${h}`);
-            return false;
-        }
-        try {
-            const u = new URL(h);
-            if (u.username || u.password) {
-                console.warn(`Skipping credential-bearing host pattern: ${h}`);
-                return false;
-            }
-        } catch {
-            console.warn(`Skipping malformed host pattern: ${h}`);
-            return false;
-        }
-        return true;
-    });
-
-const allHosts = [...new Set([...defaultMapHosts, ...extraHosts])];
-
-// ── Determine WebAccess parameters ────────────────────────────────────
-let webAccessParams = [];
-if (profile === "maps") {
-    if (allowAllHosts) {
-        // Broad wildcard: https://* for all HTTPS hosts
-        webAccessParams = ["https://*"];
-        console.log("Maps package: using broad wildcard https://* for all HTTPS hosts.");
-    } else {
-        // Restricted: use only configured hosts
-        webAccessParams = [
-            "https://tile.openstreetmap.org",
-            "https://nominatim.openstreetmap.org",
-            "https://geocode-api.arcgis.com",
-            ...allHosts,
-        ];
-        console.log(`Maps package: using restricted host list (${webAccessParams.length} hosts).`);
-    }
-}
-
 try {
+    const extraHosts = parseMapHostPatterns(process.env.HYPERPBI_MAP_HOSTS ?? "");
+    const webAccessParams = buildWebAccessParameters({
+        profile,
+        allowAllHosts,
+        configuredHosts: extraHosts,
+    });
+    if (profile === "maps") {
+        console.log(allowAllHosts
+            ? "Maps package: using broad wildcard https://* for all HTTPS hosts."
+            : `Maps package: using restricted host list (${webAccessParams.length} hosts).`);
+    }
+
     const capabilities=JSON.parse(originalCapabilities);
 
     if (profile === "maps") {
@@ -94,9 +60,9 @@ try {
         let injectedHosts;
         if (allowAllHosts) {
             // Include wildcard sentinel for runtime matching
-            injectedHosts = [...defaultMapHosts, "https://*"];
+            injectedHosts = ["https://*"];
         } else {
-            injectedHosts = allHosts;
+            injectedHosts = [...DEFAULT_MAP_HOSTS, ...extraHosts];
         }
         const injected = originalHostPolicy.replace(
             /const DEFAULT_PUBLIC_HOSTS = \[[\s\S]*?\];/,
@@ -122,13 +88,28 @@ try {
         const { readdir } = await import("node:fs/promises");
         const dist = join(root, "dist");
         const files = await readdir(dist);
+        const packageLabel = profile === "maps"
+            ? allowAllHosts ? "maps-broad" : "maps-restricted"
+            : "core";
         for (const file of files) {
             if (file.endsWith(".pbiviz") && !/-(?:core|maps)(?:-|\.pbiviz$)/.test(file)) {
                 const source = join(dist, file);
-                const target = join(dist, file.replace(".pbiviz", `-${profile}.pbiviz`));
+                const target = join(dist, file.replace(".pbiviz", `-${packageLabel}.pbiviz`));
                 await copyFile(source, target);
+                if (profile === "maps") {
+                    await copyFile(source, join(dist, file.replace(".pbiviz", "-maps.pbiviz")));
+                }
             }
         }
+        const profileManifestPath = join(dist, "package-capability-profiles.json");
+        let profileManifest = {};
+        try {
+            profileManifest = JSON.parse(await readFile(profileManifestPath, "utf8"));
+        } catch {
+            // The first package in a validation run creates the manifest.
+        }
+        profileManifest[packageLabel] = { webAccessParameters: webAccessParams };
+        await writeFile(profileManifestPath, JSON.stringify(profileManifest, null, 2) + "\n");
     }
 } finally {
     await writeFile(capabilitiesPath, originalCapabilities);

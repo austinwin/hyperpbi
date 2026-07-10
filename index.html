@@ -532,9 +532,10 @@
               <div class="doc-body">
                 <div class="doc-grid">
                   <section class="doc-card"><h4>Core package</h4><p>No WebAccess privilege, neutral map background, and cached or already-bound coordinates only. Intended for certification-oriented distribution.</p></section>
-                  <section class="doc-card"><h4>Maps package</h4><p>OpenStreetMap tiles plus user-triggered Nominatim and declared ArcGIS geocoding domains through Power BI WebAccess.</p></section>
+                  <section class="doc-card"><h4>Maps packages</h4><p>Broad or restricted WebAccess for OpenStreetMap, user-triggered geocoding, and practical public ArcGIS feature, tile, and basic dynamic layers.</p></section>
                 </div>
                 <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Provider</th><th>Behavior</th><th>Enterprise notes</th></tr></thead><tbody><tr><td>OpenStreetMap</td><td>Visible viewport raster tiles with Leaflet attribution</td><td>Requires the maps package and approved WebAccess.</td></tr><tr><td>Nominatim</td><td>User-triggered, sequential, maximum one request/second, cached, cancellable</td><td>No autocomplete. Use approved enterprise services or pre-geocode large datasets.</td></tr><tr><td>ArcGIS Geocoding Server</td><td><code>findAddressCandidates</code>, highest score, finite x/y, default minimum score 80</td><td>Endpoint domain must be declared in the package WebAccess privilege.</td></tr></tbody></table></div>
+                <div class="doc-callout"><span class="mark">i</span><div>Public ArcGIS FeatureServer/MapServer layers support joins, viewport queries, configured or service rendering/labels, tile/basic dynamic overlays, tooltips/popups, selection, diagnostics, layer controls, legends, Home, and Zoom to Selection. Map centers use <code>[latitude, longitude]</code>.</div></div>
                 <div class="doc-code"><header><span>ArcGIS endpoint example</span><button type="button" data-copy-target="code-arcgis">Copy</button></header><pre><code id="code-arcgis">https://geosop1.houstontx.gov/arcgis/rest/services/Geocoders/COH_Locator_Compo/GeocodeServer</code></pre></div>
                 <div class="doc-callout warning"><span class="mark">!</span><div><strong>Privacy gate:</strong> Address data is never transmitted during normal rendering. Geocoding requires an explicit Studio action and privacy acknowledgement.</div></div>
               </div>
@@ -566,10 +567,11 @@
                   <div class="doc-command"><strong>Verify</strong><code>npm run typecheck &amp;&amp; npm test &amp;&amp; npm run lint</code><button type="button" data-copy="npm run typecheck && npm test && npm run lint">Copy</button></div>
                   <div class="doc-command"><strong>Core</strong><code>npm run package:core</code><button type="button" data-copy="npm run package:core">Copy</button></div>
                   <div class="doc-command"><strong>Maps</strong><code>npm run package:maps</code><button type="button" data-copy="npm run package:maps">Copy</button></div>
+                  <div class="doc-command"><strong>Inspect packages</strong><code>npm run package:verify</code><button type="button" data-copy="npm run package:verify">Copy</button></div>
                   <div class="doc-command"><strong>Audit</strong><code>npm run certification:audit</code><button type="button" data-copy="npm run certification:audit">Copy</button></div>
                 </div>
                 <div class="doc-grid">
-                  <section class="doc-card"><h4>Generated artifacts</h4><ul class="doc-list"><li><code>*-core.pbiviz</code>: no WebAccess privilege.</li><li><code>*-maps.pbiviz</code>: declared OSM/Nominatim/ArcGIS WebAccess.</li><li>The unsuffixed file is the most recently built profile; use suffixed artifacts to avoid ambiguity.</li></ul></section>
+                  <section class="doc-card"><h4>Generated artifacts</h4><ul class="doc-list"><li><code>*-core.pbiviz</code>: no WebAccess privilege.</li><li><code>*-maps-broad.pbiviz</code>: <code>https://*</code> WebAccess.</li><li><code>*-maps-restricted.pbiviz</code>: only built-in/configured hosts.</li><li><code>package:verify</code> inspects capabilities inside all three archives.</li></ul></section>
                   <section class="doc-card"><h4>Operational limits</h4><ul class="doc-list"><li>Power BI window maximum: 30,000 rows.</li><li>Total data-view row limit: 1,048,576 rows.</li><li>Aggregation memory limit: 100 MB.</li><li>Tables remain independently paginated and render-capped.</li></ul></section>
                 </div>
                 <div class="doc-callout"><span class="mark">i</span><div>Import a package through <strong>Visualizations → … → Import a visual from a file</strong>, add HyperPBI, bind all required fields to <strong>Values</strong>, then open the visual’s <strong>Edit</strong> command.</div></div>

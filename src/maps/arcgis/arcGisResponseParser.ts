@@ -169,11 +169,15 @@ function parseEsriResponse(
         const attrs = esriFeature.attributes ?? {};
         const objectId = resolveObjectId(attrs, oidField);
 
-        features.push({
-            objectId,
-            attributes: attrs,
-            geometry: esriToGeoJson(esriFeature.geometry),
-        });
+        let geometry: GeoJSON.GeoJsonObject | null = null;
+        try {
+            geometry = esriToGeoJson(esriFeature.geometry);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            warnings.push(`Feature ${String(objectId ?? "without an object ID")} has malformed geometry: ${message}`);
+        }
+
+        features.push({ objectId, attributes: attrs, geometry });
     }
 
     return {

@@ -134,6 +134,17 @@ export function resolvePowerBiLayer(
             })),
             html: layer.popup.html,
         } : undefined,
+        tooltip: layer.tooltip ? {
+            enabled: layer.tooltip.enabled ?? true,
+            template: layer.tooltip.template,
+            fields: (layer.tooltip.fields ?? []).map(field => ({
+                field: field.field,
+                fieldSource: field.fieldSource ?? "powerbi",
+                label: field.label,
+                format: field.format,
+                display: "text",
+            })),
+        } : undefined,
         interaction: layer.interaction,
         legend: layer.legend,
         diagnostics: {

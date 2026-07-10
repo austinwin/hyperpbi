@@ -3,6 +3,7 @@
 // feature count, loading/error/warning indicators, and diagnostics.
 
 import { h } from "preact";
+import { useState } from "preact/hooks";
 import type { ResolvedMapLayer } from "../../maps/model/resolvedMapTypes";
 import type { MapComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
@@ -12,13 +13,17 @@ interface MapLayerPanelProps {
     mapId: string;
     layers: ResolvedMapLayer[];
     configuration?: MapComponent["layerPanel"];
-    onShowDiagnostics?: (layerId: string) => void;
 }
 
-export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics }: MapLayerPanelProps) {
+export function MapLayerPanel({ mapId, layers, configuration }: MapLayerPanelProps) {
     const context = useRenderContext();
     const mapState = context.state.mapLayerState[mapId];
-    const layerOrder = mapState?.order ?? layers.map(l => l.id);
+    const [expandedDiagnostics, setExpandedDiagnostics] = useState<Record<string, boolean>>({});
+    const currentIds = new Set(layers.map(layer => layer.id));
+    const layerOrder = [
+        ...(mapState?.order ?? []).filter(layerId => currentIds.has(layerId)),
+        ...layers.map(layer => layer.id).filter(layerId => !(mapState?.order ?? []).includes(layerId)),
+    ];
     const visibility = mapState?.visibility ?? {};
     const layerOpacity = mapState?.opacity ?? {};
     const labels = mapState?.labels ?? {};
@@ -50,6 +55,13 @@ export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics 
         <div class="hp-map-layer-panel">
             <div class="hp-map-layer-panel-header">
                 <span class="hp-map-layer-panel-title">Layers</span>
+                <button
+                    type="button"
+                    class="hp-map-layer-reset"
+                    onClick={() => context.dispatch({ type: "resetMapLayers", mapId })}
+                >
+                    Reset
+                </button>
             </div>
             <div class="hp-map-layer-list">
                 {orderedLayers.map(layer => {
@@ -64,6 +76,8 @@ export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics 
                     const hasWarnings = (layer.diagnostics.warnings?.length ?? 0) > 0 && !hasError;
                     const isFirst = orderedLayers.indexOf(layer) === 0;
                     const isLast = orderedLayers.indexOf(layer) === orderedLayers.length - 1;
+                    const diagnosticsOpen = expandedDiagnostics[layer.id] === true;
+                    const isLoading = layer.loading || layer.diagnostics.loading;
 
                     return (
                         <div key={layer.id} class={`hp-map-layer-row ${!isVisible ? "hp-layer-hidden" : ""}`}>
@@ -147,7 +161,7 @@ export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics 
                                 )}
                             </div>
 
-                            {layer.loading && (
+                            {isLoading && (
                                 <div class="hp-map-layer-loading" title="Loading…" />
                             )}
 
@@ -157,7 +171,10 @@ export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics 
                                     class="hp-map-layer-error"
                                     title={layer.error ?? layer.diagnostics.error}
                                     aria-label={`${layer.name} error: ${layer.error ?? layer.diagnostics.error}`}
-                                    onClick={() => onShowDiagnostics?.(layer.id)}
+                                    aria-expanded={diagnosticsOpen}
+                                    onClick={() => setExpandedDiagnostics(previous => ({
+                                        ...previous, [layer.id]: !previous[layer.id]
+                                    }))}
                                 >
                                     ⚠️ Error
                                 </button>
@@ -169,10 +186,38 @@ export function MapLayerPanel({ mapId, layers, configuration, onShowDiagnostics 
                                     class="hp-map-layer-warning"
                                     title={layer.diagnostics.warnings.join("; ")}
                                     aria-label={`${layer.name} has ${layer.diagnostics.warnings.length} warning${layer.diagnostics.warnings.length !== 1 ? "s" : ""}`}
-                                    onClick={() => onShowDiagnostics?.(layer.id)}
+                                    aria-expanded={diagnosticsOpen}
+                                    onClick={() => setExpandedDiagnostics(previous => ({
+                                        ...previous, [layer.id]: !previous[layer.id]
+                                    }))}
                                 >
                                     ⚡ {layer.diagnostics.warnings.length}
                                 </button>
+                            )}
+
+                            {diagnosticsOpen && (hasError || hasWarnings) && (
+                                <div class="hp-map-layer-diagnostics" role="status">
+                                    {(layer.error ?? layer.diagnostics.error) && (
+                                        <div><strong>Error:</strong> {layer.error ?? layer.diagnostics.error}</div>
+                                    )}
+                                    {layer.diagnostics.warnings.length > 0 && (
+                                        <div><strong>Warnings:</strong> {layer.diagnostics.warnings.join("; ")}</div>
+                                    )}
+                                    <dl>
+                                        <dt>Source type</dt><dd>{layer.diagnostics.sourceType}</dd>
+                                        {layer.diagnostics.sourceUrl && <><dt>Source URL</dt><dd>{layer.diagnostics.sourceUrl}</dd></>}
+                                        <dt>Feature count</dt><dd>{layer.diagnostics.featureCount}</dd>
+                                        <dt>Request count</dt><dd>{layer.diagnostics.requestCount}</dd>
+                                        {layer.diagnostics.objectIdField && <><dt>OID field</dt><dd>{layer.diagnostics.objectIdField}</dd></>}
+                                        {layer.diagnostics.queryStrategy && <><dt>Query strategy</dt><dd>{layer.diagnostics.queryStrategy}</dd></>}
+                                        {layer.diagnostics.cacheUsed !== undefined && <><dt>Cache used</dt><dd>{layer.diagnostics.cacheUsed ? "Yes" : "No"}</dd></>}
+                                        {layer.diagnostics.joinField && <><dt>Join field</dt><dd>{layer.diagnostics.joinField}</dd></>}
+                                        {layer.diagnostics.joinDiagnostics && <>
+                                            <dt>Join diagnostics</dt>
+                                            <dd>{layer.diagnostics.joinDiagnostics.matchedPowerBiRowCount} Power BI rows and {layer.diagnostics.joinDiagnostics.matchedServiceFeatureCount} service features matched; {layer.diagnostics.joinDiagnostics.unmatchedPowerBiKeyCount} Power BI keys and {layer.diagnostics.joinDiagnostics.unmatchedServiceFeatureCount} service features unmatched.</dd>
+                                        </>}
+                                    </dl>
+                                </div>
                             )}
                         </div>
                     );

@@ -139,7 +139,14 @@ Native table properties: `density`, `striped`, `hover`, `showRowCount`, `pageSiz
 
 ## Maps
 
-See [map services documentation](map-services.md) for complete coverage. Legacy `settings`/`style`/`popup` fully supported. New `layers[]` schema is experimental.
+See [map services documentation](map-services.md) for complete coverage. Legacy `settings`/`style`/`popup` remain supported and normalize into the resolved `layers[]` model.
+
+- `view.center` is `[latitude, longitude]`; practical ArcGIS query output is SR 4326.
+- `layers[].source.type` supports `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`.
+- Feature sources support reference or Power BI join mode, definition expressions, explicit output fields, opt-in service renderer/labels, viewport queries, cache/feature/batch limits, and managed refresh intervals.
+- Tooltip definitions validate `enabled`, `template`, and `fields[]` (`field`, `fieldSource`, `label`, `format`). Tooltip configuration is not inferred from popup fields.
+- Layer panels support viewer visibility, opacity, labels, order, Reset, and inline diagnostics. Toolbar controls support Home, Layers, Legend, Clear Selection, and Zoom to Selection.
+- The practical runtime excludes secured authentication, editing, 3D, relationships, tracing, density grids, advanced label collision, and non-4326 output.
 
 ## Compatibility
 

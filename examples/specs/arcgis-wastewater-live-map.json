@@ -7,7 +7,7 @@
       "type": "map",
       "title": "Houston Wastewater Network",
       "view": {
-        "center": [-95.35, 29.75],
+        "center": [29.75, -95.35],
         "zoom": 12,
         "minZoom": 8,
         "maxZoom": 18,
@@ -26,7 +26,7 @@
             "useServiceRenderer": true,
             "useServiceLabels": false,
             "mode": "reference",
-            "outFields": ["OBJECTID", "FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE", "SHAPE"]
+            "outFields": ["OBJECTID", "FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE"]
           },
           "performance": {
             "maxFeatures": 2000,
@@ -36,7 +36,7 @@
           },
           "popup": {
             "enabled": true,
-            "title": "Wastewater Pipe {FACILITYID}",
+            "title": "Wastewater Pipe {{FACILITYID}}",
             "fields": [
               { "field": "FACILITYID", "label": "Facility ID", "display": "text" },
               { "field": "DIAMETER", "label": "Diameter (in)", "display": "number" },
@@ -45,9 +45,10 @@
             ]
           },
           "tooltip": {
+            "enabled": true,
             "fields": [
-              { "field": "FACILITYID", "label": "Facility" },
-              { "field": "DIAMETER", "label": "Diameter" }
+              { "field": "FACILITYID", "fieldSource": "service", "label": "Facility" },
+              { "field": "DIAMETER", "fieldSource": "service", "label": "Diameter" }
             ]
           },
           "labels": {
@@ -62,11 +63,20 @@
           "order": 1
         }
       ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
         "layers": true,
-        "selection": true,
+        "legend": true,
+        "clearSelection": true,
         "zoomToSelection": true
       },
       "settings": {

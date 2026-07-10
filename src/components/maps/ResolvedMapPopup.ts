@@ -3,8 +3,9 @@
 // Supports title/HTML templates, structured fields, Power BI/service/joined
 // field sources with formatting, safe HTML, and action execution.
 
-import type { ResolvedMapFeature, ResolvedMapPopup, ResolvedMapPopupField, ResolvedMapPopupAction } from "../../maps/model/resolvedMapTypes";
+import type { ResolvedMapFeature, ResolvedMapPopup, ResolvedMapPopupAction, ResolvedMapTooltip } from "../../maps/model/resolvedMapTypes";
 import { resolvedFeatureValue, formatFeatureValue, mergedFeatureAttributes } from "../../maps/model/mapFeatureValue";
+import type { FeatureFieldSource } from "../../maps/model/mapFeatureValue";
 import { sanitizeHtml } from "../../security/sanitizeHtml";
 
 const TOKEN_REGEX = /\{\{\s*([^{}]{1,120}?)\s*\}\}/g;
@@ -39,13 +40,13 @@ export function renderResolvedPopup(
     if (popup.title) {
         const title = document.createElement("h4");
         title.className = "hp-map-popup-title";
-        title.textContent = resolveTemplate(popup.title, feature);
+        title.textContent = resolveSafeTemplate(popup.title, feature);
         container.appendChild(title);
     }
 
     // ── HTML template ──────────────────────────────────────────────
     if (popup.html) {
-        const rendered = resolveTemplate(popup.html, feature);
+        const rendered = resolveSafeTemplate(popup.html, feature, undefined, true);
         const sanitized = sanitizeHtml(rendered, {
             allowInlineSvg: false,
             allowSafeImages: false,
@@ -130,9 +131,13 @@ export function renderResolvedPopup(
  */
 export function renderResolvedTooltip(
     feature: ResolvedMapFeature,
-    fields?: Array<{ field: string; fieldSource: "powerbi" | "service" | "joined"; label?: string }>,
+    tooltip?: ResolvedMapTooltip,
     layerName?: string
 ): string {
+    if (tooltip?.template) {
+        return resolveSafeTemplate(tooltip.template, feature);
+    }
+    const fields = tooltip?.fields;
     if (!fields || fields.length === 0) {
         // Fallback: layer name + feature ID
         const id = feature.serviceObjectId ?? feature.id;
@@ -143,7 +148,7 @@ export function renderResolvedTooltip(
     for (const f of fields) {
         const value = resolvedFeatureValue(feature, f.field, f.fieldSource);
         const label = f.label ?? f.field;
-        const display = value !== null && value !== undefined ? String(value) : "—";
+        const display = formatFeatureValue(value, f.format, f.display);
         parts.push(`${label}: ${display}`);
     }
     return parts.join("\n");
@@ -153,18 +158,32 @@ export function renderResolvedTooltip(
  * Substitute {{field}} tokens in a template string with feature attribute values.
  * Uses textContent-safe substitution (no HTML injection).
  */
-function resolveTemplate(template: string, feature: ResolvedMapFeature): string {
+export function resolveSafeTemplate(
+    template: string,
+    feature: ResolvedMapFeature,
+    fieldSource?: FeatureFieldSource,
+    escapeValues = false
+): string {
     const merged = mergedFeatureAttributes(feature);
 
     return template.replace(TOKEN_REGEX, (_match, token: string) => {
         const key = token.trim();
-        if (Object.prototype.hasOwnProperty.call(merged, key)) {
-            // Safe: return as text content, not HTML
-            const value = merged[key];
-            return value !== null && value !== undefined ? String(value) : "";
-        }
-        return "";
+        const value = fieldSource
+            ? resolvedFeatureValue(feature, key, fieldSource)
+            : Object.prototype.hasOwnProperty.call(merged, key) ? merged[key] : undefined;
+        const formatted = formatFeatureValue(value);
+        const text = formatted === "—" ? "—" : formatted;
+        return escapeValues ? escapeHtml(text) : text;
     });
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 /**
@@ -172,12 +191,18 @@ function resolveTemplate(template: string, feature: ResolvedMapFeature): string 
  */
 export function createResolvedTooltipElement(
     feature: ResolvedMapFeature,
-    tooltipFields?: Array<{ field: string; fieldSource: "powerbi" | "service" | "joined"; label?: string }>,
+    tooltip?: ResolvedMapTooltip,
     layerName?: string
 ): HTMLElement {
     const node = document.createElement("div");
     node.className = "hp-map-tooltip";
 
+    if (tooltip?.template) {
+        node.textContent = resolveSafeTemplate(tooltip.template, feature);
+        return node;
+    }
+
+    const tooltipFields = tooltip?.fields;
     if (!tooltipFields || tooltipFields.length === 0) {
         const id = feature.serviceObjectId ?? feature.id;
         node.textContent = `${layerName ?? "Feature"}: ${id}`;
@@ -189,7 +214,7 @@ export function createResolvedTooltipElement(
         const label = document.createElement("strong");
         label.textContent = `${f.label ?? f.field}: `;
         const value = resolvedFeatureValue(feature, f.field, f.fieldSource);
-        const displayText = value !== null && value !== undefined ? String(value) : "—";
+        const displayText = formatFeatureValue(value, f.format, f.display);
         line.append(label, document.createTextNode(displayText));
         node.appendChild(line);
     }

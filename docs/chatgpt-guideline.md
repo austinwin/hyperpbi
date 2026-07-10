@@ -74,7 +74,7 @@ For interface behavior: `openOverlay`, `closeOverlay`, `setTab`, `showToast`, `s
 
 - Use stable Power BI spatial maps by default (lat/lon, geometry)
 - Never invent ArcGIS service URLs, layer IDs, or tokens
-- ArcGIS REST layered maps are developer preview
+- Practical public ArcGIS feature/join, viewport, tile, basic dynamic, label, tooltip/popup, selection, layer-control, legend, Home, and Zoom-to-Selection behavior is supported; use only verified HTTPS resources and output SR 4326
 
 ## Tables
 

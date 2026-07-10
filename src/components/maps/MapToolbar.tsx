@@ -7,7 +7,10 @@ import { Icon } from "../icons/Icon";
 
 interface MapToolbarProps {
     component: MapComponent;
-    mapId: string;
+    layerPanelOpen: boolean;
+    legendOpen: boolean;
+    layerControlEnabled: boolean;
+    legendEnabled: boolean;
     onHome: () => void;
     onZoomToSelection: () => void;
     onToggleLayers: () => void;
@@ -17,7 +20,10 @@ interface MapToolbarProps {
 
 export function MapToolbar({
     component,
-    mapId,
+    layerPanelOpen,
+    legendOpen,
+    layerControlEnabled,
+    legendEnabled,
     onHome,
     onZoomToSelection,
     onToggleLayers,
@@ -26,7 +32,7 @@ export function MapToolbar({
 }: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
 
-    const actions: Array<{ id: string; icon: string; label: string; show: boolean; action: () => void }> = [
+    const actions: Array<{ id: string; icon: string; label: string; show: boolean; action: () => void; pressed?: boolean }> = [
         {
             id: "home",
             icon: "home",
@@ -38,15 +44,17 @@ export function MapToolbar({
             id: "layers",
             icon: "layers",
             label: "Toggle layers",
-            show: toolbar.layers !== false,
+            show: layerControlEnabled && toolbar.layers !== false,
             action: onToggleLayers,
+            pressed: layerPanelOpen,
         },
         {
             id: "legend",
             icon: "list",
             label: "Toggle legend",
-            show: toolbar.legend !== false,
+            show: legendEnabled && toolbar.legend !== false,
             action: onToggleLegend,
+            pressed: legendOpen,
         },
         {
             id: "clearSelection",
@@ -76,6 +84,7 @@ export function MapToolbar({
                     class="hp-map-toolbar-btn"
                     aria-label={action.label}
                     title={action.label}
+                    aria-pressed={action.pressed}
                     onClick={action.action}
                 >
                     <Icon name={action.icon} size="xs" decorative />

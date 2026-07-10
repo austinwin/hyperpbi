@@ -106,7 +106,8 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
     // ── Match ─────────────────────────────────────────────────────────
     const features: ResolvedMapFeature[] = [];
     const matchedPowerBiRowIndices = new Set<number>();
-    const matchedServiceFeatureIds = new Set<string | number>();
+    const matchedServiceFeatureIds = new Set<string>();
+    const matchedServiceKeys = new Set<string>();
     let suppressedDuplicateCount = 0;
     const matchedPowerBiKeys = new Set<string>();
 
@@ -115,6 +116,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         if (!powerBiMatches || powerBiMatches.length === 0) continue;
 
         matchedPowerBiKeys.add(normalizedKey);
+        matchedServiceKeys.add(normalizedKey);
 
         // Apply service duplicate policy
         const effectiveServiceFeatures = serviceDupPolicy === "first"
@@ -189,7 +191,9 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         matchedServiceFeatureCount: matchedServiceFeatureIds.size,
         suppressedDuplicateServiceCount: suppressedDuplicateCount > 0 ? suppressedDuplicateCount : undefined,
         unmatchedPowerBiKeyCount: unmatchedPowerBiKeys.length,
-        unmatchedServiceFeatureCount: serviceFeatures.length - matchedServiceFeatureIds.size,
+        unmatchedServiceFeatureCount: [...serviceIndex.entries()]
+            .filter(([key]) => !matchedServiceKeys.has(key))
+            .reduce((count, [, serviceMatches]) => count + serviceMatches.length, 0),
         blankPowerBiKeyCount: blankPowerBiKeys,
         blankServiceKeyCount: blankServiceKeys,
         duplicatePowerBiKeyCount: duplicatePowerBiKeys.length,

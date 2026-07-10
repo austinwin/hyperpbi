@@ -263,6 +263,18 @@ describe("Map Join Engine", () => {
     });
 
     describe("diagnostics", () => {
+        it("does not count suppressed matched service duplicates or blank keys as unmatched", () => {
+            const result = executeMapJoin({
+                powerBiRows: makePowerBiRows([{ code: "ABC" }]),
+                powerBiRowIndices: [7], powerBiRowKeys: ["row-7"],
+                serviceFeatures: makeServiceFeatures([{ CODE: "ABC" }, { CODE: "ABC" }, { CODE: "XYZ" }, { CODE: "" }]),
+                definition: makeJoinDef({ serviceDuplicatePolicy: "first" }), layerId: "test",
+            });
+            expect(result.diagnostics.suppressedDuplicateServiceCount).toBe(1);
+            expect(result.diagnostics.unmatchedServiceFeatureCount).toBe(1);
+            expect(result.diagnostics.blankServiceKeyCount).toBe(1);
+        });
+
         it("reports accurate match statistics", () => {
             const rows = makePowerBiRows([
                 { code: "ABC", name: "Alpha" },

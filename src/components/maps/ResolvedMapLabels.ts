@@ -5,7 +5,8 @@
 
 import * as L from "leaflet";
 import type { ResolvedMapLayer, ResolvedMapFeature } from "../../maps/model/resolvedMapTypes";
-import { resolvedFeatureValue, mergedFeatureAttributes } from "../../maps/model/mapFeatureValue";
+import { resolvedFeatureValue } from "../../maps/model/mapFeatureValue";
+import { resolveSafeTemplate } from "./ResolvedMapPopup";
 
 export interface ResolvedMapLabelRuntime {
     group: L.LayerGroup;
@@ -64,7 +65,6 @@ function buildLabelIcon(
     labelText: string,
     labels: Exclude<ResolvedMapLayer["labels"], undefined>,
     placement: string,
-    warnings: string[]
 ): L.DivIcon | null {
     const span = document.createElement("span");
     span.className = "hp-map-label-text";
@@ -124,19 +124,15 @@ export function createResolvedMapLabels(
 
     const group = L.layerGroup([], { pane: options.pane });
 
-    if (!options.visible) {
-        return { group, cleanup: () => {}, warnings };
-    }
-
-    const placements = (labels.placement ?? "center").split(",").map((s: string) => s.trim());
-    const primaryPlacement = placements[0] ?? "center";
+    const primaryPlacement = labels.placement ?? "center";
 
     // Collect label values
     const labelEntries: Array<{ feature: ResolvedMapFeature; text: string; pos: [number, number] | null }> = [];
 
     for (const feature of layer.features) {
-        const labelText = feature.labelValue ??
-            (labels.field
+        const labelText = labels.template
+            ? resolveSafeTemplate(labels.template, feature, labels.fieldSource ?? "service")
+            : feature.labelValue ?? (labels.field
                 ? String(resolvedFeatureValue(feature, labels.field, labels.fieldSource ?? "service") ?? "")
                 : feature.id);
 
@@ -164,7 +160,7 @@ export function createResolvedMapLabels(
     for (const entry of finalEntries) {
         if (!entry.pos) continue;
 
-        const icon = buildLabelIcon(entry.text, labels, primaryPlacement, warnings);
+        const icon = buildLabelIcon(entry.text, labels, primaryPlacement);
         if (!icon) continue;
 
         const marker = L.marker(entry.pos, {
@@ -179,14 +175,13 @@ export function createResolvedMapLabels(
     // Zoom visibility
     const handleZoom = () => {
         const zoom = map.getZoom();
-        const el = group.getPane() ?? (map.getPane(options.pane));
-        if (!el) return;
         const belowMin = labels.minZoom !== undefined && zoom < labels.minZoom;
         const aboveMax = labels.maxZoom !== undefined && zoom > labels.maxZoom;
-        // Toggle display via CSS on the pane or group container
-        const container = (group as unknown as { _container?: HTMLElement })._container;
-        if (container) {
-            container.style.display = (belowMin || aboveMax) ? "none" : "";
+        const shouldShow = options.visible && !belowMin && !aboveMax;
+        if (shouldShow && !map.hasLayer(group)) {
+            group.addTo(map);
+        } else if (!shouldShow && map.hasLayer(group)) {
+            map.removeLayer(group);
         }
     };
 
@@ -198,6 +193,7 @@ export function createResolvedMapLabels(
         cleanup: () => {
             map.off("zoomend", handleZoom);
             map.removeLayer(group);
+            group.clearLayers();
         },
         warnings,
     };
