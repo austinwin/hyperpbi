@@ -1,0 +1,172 @@
+{
+  "dataset_rows": 240,
+  "dataset_columns": [
+    "RecordID",
+    "CaseNumber",
+    "ReportDate",
+    "MonthLabel",
+    "MonthIndex",
+    "Quarter",
+    "FiscalYear",
+    "Weekday",
+    "Department",
+    "Program",
+    "ServiceType",
+    "Category",
+    "Status",
+    "Stage",
+    "Priority",
+    "RiskBand",
+    "Region",
+    "CouncilDistrict",
+    "Neighborhood",
+    "Owner",
+    "Team",
+    "Vendor",
+    "Channel",
+    "AssetType",
+    "AssetID",
+    "Description",
+    "Latitude",
+    "Longitude",
+    "Budget",
+    "ActualCost",
+    "Variance",
+    "ProgressPct",
+    "RiskScore",
+    "ResponseHours",
+    "TargetHours",
+    "DurationDays",
+    "SatisfactionScore",
+    "WithinSLA",
+    "Overdue",
+    "OpenFlag",
+    "IncidentCount",
+    "WorkOrderCount",
+    "Quantity",
+    "AssetAge",
+    "Severity",
+    "TargetPct"
+  ],
+  "period": {
+    "start": "2025-01-02",
+    "end": "2026-06-23"
+  },
+  "locations": 20,
+  "implemented_component_families": {
+    "layout": [
+      "grid",
+      "section",
+      "card",
+      "collapsible"
+    ],
+    "controls": [
+      "searchBox",
+      "textInput",
+      "numberInput",
+      "slider",
+      "select",
+      "multiSelect",
+      "segmentedControl",
+      "toggle",
+      "button",
+      "buttonGroup",
+      "filterChips",
+      "dateRange",
+      "textarea",
+      "checkbox",
+      "checkboxGroup",
+      "radioGroup",
+      "inputGroup"
+    ],
+    "navigation": [
+      "tabs",
+      "accordion",
+      "drawer",
+      "steps"
+    ],
+    "display": [
+      "kpi",
+      "metricGrid",
+      "infoCard",
+      "statusBadge",
+      "progressBar",
+      "alert",
+      "statList",
+      "detailPanel",
+      "timeline"
+    ],
+    "primitives": [
+      "card",
+      "icon",
+      "iconButton",
+      "avatar",
+      "avatarGroup",
+      "listGroup",
+      "dataGrid",
+      "countUp",
+      "tracking",
+      "modal"
+    ],
+    "feedback": [
+      "emptyState",
+      "placeholder",
+      "spinner"
+    ],
+    "charts": [
+      "barChart",
+      "horizontalBarChart",
+      "lineChart",
+      "areaChart",
+      "pieChart",
+      "donutChart",
+      "scatterChart",
+      "gauge",
+      "heatmap",
+      "smallMultiples",
+      "advancedChart"
+    ],
+    "advanced_chart_examples": [
+      "combo",
+      "waterfall",
+      "radar",
+      "treemap",
+      "funnel",
+      "sankey",
+      "calendar heatmap",
+      "boxplot"
+    ],
+    "tables": [
+      "table",
+      "matrix"
+    ],
+    "maps": [
+      "powerbi point",
+      "cluster",
+      "uniqueValue",
+      "proportionalSize",
+      "continuousColor"
+    ],
+    "content": [
+      "text",
+      "markdown",
+      "html",
+      "custom"
+    ],
+    "calculations": [
+      "derived fields",
+      "calculated metrics",
+      "ratio metric"
+    ]
+  },
+  "excluded_todo_renderers": [
+    "dropdown",
+    "offcanvas",
+    "popover"
+  ],
+  "map_center": [
+    29.76,
+    -95.37
+  ],
+  "basemap": "OpenStreetMap customTile"
+}

@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "bindings": {
+    "map": {}
+  },
+  "interactions": {
+    "crossFilter": true,
+    "multiSelect": true,
+    "externalMode": "auto"
+  },
+  "renderer": {
+    "showHeader": false,
+    "showRowCount": false,
+    "showStudioButton": true
+  },
+  "security": {
+    "cssMode": "trusted",
+    "htmlMode": "trusted",
+    "showSanitizerWarnings": false
+  },
+  "providers": {
+    "mode": "maps",
+    "basemap": {
+      "provider": "customTile",
+      "enabled": true,
+      "tileUrl": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "attribution": "\u00a9 OpenStreetMap contributors",
+      "maxZoom": 19
+    },
+    "geocoder": {
+      "provider": "nominatim",
+      "enabled": false,
+      "endpoint": "https://nominatim.openstreetmap.org/search",
+      "rateLimitPerSecond": 1,
+      "cache": true,
+      "autocomplete": false,
+      "userTriggeredOnly": true,
+      "resultLimit": 1,
+      "minScore": 80
+    },
+    "privacyAcknowledged": true
+  }
+}

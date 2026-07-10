@@ -1,0 +1,5492 @@
+{
+  "version": "1.0",
+  "title": "Houston Operations Intelligence Center",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "fontFamily": "Inter, Segoe UI, Arial, sans-serif",
+    "primaryColor": "#005ea8",
+    "accentColor": "#00a6a6",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ec",
+    "dangerColor": "#c1121f",
+    "warningColor": "#d97706",
+    "successColor": "#15803d",
+    "radius": 10,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 12,
+    "leftPanel": {
+      "width": 286,
+      "collapsible": true,
+      "defaultCollapsed": false
+    },
+    "main": {
+      "type": "grid",
+      "columns": 12,
+      "gap": 12
+    }
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "Houston Operations",
+      "subtitle": "HyperPBI Component Showcase",
+      "icon": "dashboard",
+      "shortTitle": "HOU Ops"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": false,
+      "actions": [
+        {
+          "id": "refresh_app",
+          "label": "Refresh",
+          "ariaLabel": "Refresh the dashboard",
+          "icon": "refresh",
+          "variant": "ghost",
+          "action": {
+            "type": "refresh"
+          }
+        },
+        {
+          "id": "open_about",
+          "label": "About",
+          "ariaLabel": "Show demo information",
+          "icon": "info",
+          "variant": "outline",
+          "action": {
+            "type": "showToast",
+            "title": "HyperPBI intensive demo",
+            "message": "This app demonstrates the currently implemented HyperPBI component families.",
+            "intent": "primary",
+            "durationMs": 4500
+          }
+        }
+      ]
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "City Operations Command Center",
+      "subtitle": "Interactive executive analytics, advanced charts, maps, records and component laboratory",
+      "breadcrumbs": [
+        {
+          "label": "HyperPBI"
+        },
+        {
+          "label": "Demos"
+        },
+        {
+          "label": "Houston Operations"
+        }
+      ],
+      "meta": [
+        {
+          "label": "Rows",
+          "value": "240",
+          "icon": "database",
+          "intent": "primary"
+        },
+        {
+          "label": "Period",
+          "value": "Jan 2025\u2013Jun 2026",
+          "icon": "calendar",
+          "intent": "neutral"
+        },
+        {
+          "label": "Map",
+          "value": "Houston EPSG:4326",
+          "icon": "map",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "HyperPBI intensive web-app demonstration",
+      "secondaryText": "Synthetic Houston operations data \u2022 Safe JSON runtime"
+    }
+  },
+  "calculations": {
+    "fields": [
+      {
+        "key": "cost_variance_calc",
+        "label": "Calculated Cost Variance",
+        "type": "number",
+        "expression": {
+          "op": "-",
+          "left": {
+            "field": "ActualCost"
+          },
+          "right": {
+            "field": "Budget"
+          }
+        }
+      },
+      {
+        "key": "budget_utilization_calc",
+        "label": "Budget Utilization %",
+        "type": "number",
+        "expression": {
+          "op": "/",
+          "left": {
+            "field": "ActualCost"
+          },
+          "right": {
+            "field": "Budget"
+          }
+        }
+      },
+      {
+        "key": "sla_margin_calc",
+        "label": "SLA Margin Hours",
+        "type": "number",
+        "expression": {
+          "op": "-",
+          "left": {
+            "field": "TargetHours"
+          },
+          "right": {
+            "field": "ResponseHours"
+          }
+        }
+      },
+      {
+        "key": "risk_cost_index_calc",
+        "label": "Risk Cost Index",
+        "type": "number",
+        "expression": {
+          "op": "*",
+          "left": {
+            "field": "RiskScore"
+          },
+          "right": {
+            "field": "ActualCost"
+          }
+        }
+      },
+      {
+        "key": "risk_status_calc",
+        "label": "Calculated Risk Status",
+        "type": "text",
+        "expression": {
+          "op": "if",
+          "condition": {
+            "op": ">=",
+            "left": {
+              "field": "RiskScore"
+            },
+            "right": {
+              "value": 70
+            }
+          },
+          "then": {
+            "value": "Escalate"
+          },
+          "else": {
+            "value": "Monitor"
+          }
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "key": "total_cases",
+        "label": "Total Cases",
+        "aggregation": "count",
+        "format": "integer"
+      },
+      {
+        "key": "total_budget",
+        "label": "Total Budget",
+        "aggregation": "sum",
+        "field": "Budget",
+        "format": "currency"
+      },
+      {
+        "key": "total_actual",
+        "label": "Actual Cost",
+        "aggregation": "sum",
+        "field": "ActualCost",
+        "format": "currency"
+      },
+      {
+        "key": "open_cases",
+        "label": "Open Cases",
+        "aggregation": "sum",
+        "field": "OpenFlag",
+        "format": "integer"
+      },
+      {
+        "key": "sla_rate",
+        "label": "SLA Rate",
+        "aggregation": "ratio",
+        "format": "percent",
+        "numerator": {
+          "key": "sla_yes",
+          "aggregation": "countWhere",
+          "field": "WithinSLA",
+          "where": {
+            "field": "WithinSLA",
+            "equals": "Yes"
+          }
+        },
+        "denominator": {
+          "key": "all_cases",
+          "aggregation": "count"
+        }
+      },
+      {
+        "key": "critical_cases",
+        "label": "Critical Cases",
+        "aggregation": "countWhere",
+        "field": "Priority",
+        "where": {
+          "field": "Priority",
+          "equals": "Critical"
+        }
+      },
+      {
+        "key": "avg_progress",
+        "label": "Average Progress",
+        "aggregation": "avg",
+        "field": "ProgressPct",
+        "format": "percent"
+      },
+      {
+        "key": "avg_satisfaction",
+        "label": "Satisfaction",
+        "aggregation": "avg",
+        "field": "SatisfactionScore",
+        "format": "decimal2"
+      }
+    ]
+  },
+  "leftPanel": [
+    {
+      "type": "markdown",
+      "id": "filter_intro",
+      "title": "Global Filters",
+      "span": 12,
+      "text": "Filters affect the executive views, chart gallery, map, timeline, matrix and table.",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "searchBox",
+      "id": "filter_search",
+      "title": "Search",
+      "span": 12,
+      "field": "Description",
+      "label": "Search cases",
+      "placeholder": "Search descriptions\u2026",
+      "filter": {
+        "operator": "contains",
+        "value": ""
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Description",
+        "operator": "contains",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "select",
+      "id": "filter_department",
+      "title": "Department",
+      "span": 12,
+      "field": "Department",
+      "label": "Department",
+      "defaultValue": "",
+      "options": [
+        {
+          "label": "Houston Water",
+          "value": "Houston Water"
+        },
+        {
+          "label": "Public Works",
+          "value": "Public Works"
+        },
+        {
+          "label": "Solid Waste",
+          "value": "Solid Waste"
+        },
+        {
+          "label": "Parks & Recreation",
+          "value": "Parks & Recreation"
+        },
+        {
+          "label": "Transportation",
+          "value": "Transportation"
+        },
+        {
+          "label": "Emergency Management",
+          "value": "Emergency Management"
+        }
+      ],
+      "filter": {
+        "operator": "=",
+        "value": ""
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Department",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "multiSelect",
+      "id": "filter_status",
+      "title": "Status",
+      "span": 12,
+      "field": "Status",
+      "label": "Statuses",
+      "multiple": true,
+      "defaultValue": [],
+      "options": [
+        {
+          "label": "New",
+          "value": "New"
+        },
+        {
+          "label": "Assigned",
+          "value": "Assigned"
+        },
+        {
+          "label": "In Progress",
+          "value": "In Progress"
+        },
+        {
+          "label": "QA Review",
+          "value": "QA Review"
+        },
+        {
+          "label": "Complete",
+          "value": "Complete"
+        },
+        {
+          "label": "On Hold",
+          "value": "On Hold"
+        }
+      ],
+      "filter": {
+        "operator": "in",
+        "value": []
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Status",
+        "operator": "in",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "segmentedControl",
+      "id": "filter_priority",
+      "title": "Priority",
+      "span": 12,
+      "field": "Priority",
+      "label": "Priority",
+      "defaultValue": "",
+      "options": [
+        {
+          "label": "Critical",
+          "value": "Critical"
+        },
+        {
+          "label": "High",
+          "value": "High"
+        },
+        {
+          "label": "Medium",
+          "value": "Medium"
+        },
+        {
+          "label": "Low",
+          "value": "Low"
+        }
+      ],
+      "filter": {
+        "operator": "=",
+        "value": ""
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Priority",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "slider",
+      "id": "filter_risk",
+      "title": "Minimum Risk",
+      "span": 12,
+      "field": "RiskScore",
+      "label": "Minimum Risk Score",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "defaultValue": 0,
+      "filter": {
+        "operator": ">=",
+        "value": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "RiskScore",
+        "operator": ">=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "numberInput",
+      "id": "filter_budget",
+      "title": "Minimum Budget",
+      "span": 12,
+      "field": "Budget",
+      "label": "Minimum Budget",
+      "min": 0,
+      "max": 100000,
+      "step": 1000,
+      "defaultValue": 0,
+      "filter": {
+        "operator": ">=",
+        "value": 0
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Budget",
+        "operator": ">=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "dateRange",
+      "id": "filter_date",
+      "title": "Reporting Period",
+      "span": 12,
+      "field": "ReportDate",
+      "label": "Report Date",
+      "defaultValue": [
+        "2025-01-01",
+        "2026-06-30"
+      ],
+      "filter": {
+        "operator": "between",
+        "value": [
+          "2025-01-01",
+          "2026-06-30"
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "ReportDate",
+        "operator": "between",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "checkboxGroup",
+      "id": "filter_sla",
+      "title": "SLA Result",
+      "span": 12,
+      "field": "WithinSLA",
+      "label": "SLA Result",
+      "options": [
+        {
+          "label": "Within SLA",
+          "value": "Yes"
+        },
+        {
+          "label": "Outside SLA",
+          "value": "No"
+        }
+      ],
+      "multiple": true,
+      "defaultValue": [],
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "WithinSLA",
+        "operator": "in",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "button",
+      "id": "clear_filters",
+      "title": "Clear",
+      "span": 12,
+      "label": "Clear All Filters",
+      "action": "clearFilters",
+      "variant": "outline",
+      "icon": "filter-off",
+      "interaction": {
+        "enabled": true,
+        "trigger": "change",
+        "internalMode": "none",
+        "internalScope": "all",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "filterChips",
+      "id": "filter_chips",
+      "title": "Active Filters",
+      "span": 12,
+      "targets": [
+        "operations_table"
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "Department",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    }
+  ],
+  "rightPanel": [
+    {
+      "type": "detailPanel",
+      "id": "selected_case_panel",
+      "title": "Selected Case",
+      "span": 12,
+      "selectedRow": true,
+      "emptyText": "Select a chart point, map feature, list item, timeline event, matrix cell or table row.",
+      "groups": [
+        {
+          "title": "Identity",
+          "fields": [
+            {
+              "field": "CaseNumber",
+              "label": "Case",
+              "badge": true,
+              "copyable": true
+            },
+            {
+              "field": "RecordID",
+              "label": "Record ID",
+              "copyable": true
+            },
+            {
+              "field": "AssetID",
+              "label": "Asset",
+              "copyable": true
+            }
+          ]
+        },
+        {
+          "title": "Operations",
+          "fields": [
+            {
+              "field": "Department",
+              "label": "Department"
+            },
+            {
+              "field": "Program",
+              "label": "Program"
+            },
+            {
+              "field": "Status",
+              "label": "Status",
+              "badge": true
+            },
+            {
+              "field": "Priority",
+              "label": "Priority",
+              "badge": true
+            },
+            {
+              "field": "Owner",
+              "label": "Owner"
+            }
+          ]
+        },
+        {
+          "title": "Performance",
+          "fields": [
+            {
+              "field": "RiskScore",
+              "label": "Risk",
+              "format": "decimal2"
+            },
+            {
+              "field": "ProgressPct",
+              "label": "Progress (%)",
+              "format": "decimal2"
+            },
+            {
+              "field": "ResponseHours",
+              "label": "Response Hours",
+              "format": "decimal2"
+            },
+            {
+              "field": "ActualCost",
+              "label": "Actual Cost",
+              "format": "currency"
+            },
+            {
+              "field": "WithinSLA",
+              "label": "Within SLA",
+              "badge": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "listGroup",
+      "id": "recent_case_list",
+      "title": "Recent Cases",
+      "span": 12,
+      "source": "rows",
+      "primaryField": "CaseNumber",
+      "secondaryField": "Description",
+      "badgeField": "Priority",
+      "maxItems": 8,
+      "compact": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "highlight",
+        "internalScope": "self",
+        "externalMode": "selection",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "field": "CaseNumber"
+      }
+    }
+  ],
+  "components": [
+    {
+      "type": "alert",
+      "id": "demo_notice",
+      "title": "Interactive Demonstration",
+      "span": 12,
+      "intent": "primary",
+      "text": "Use the left filters and select marks, map points, timeline events, matrix cells or table rows. The right detail rail updates from the selected record.",
+      "value": "Ready",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "tracking",
+      "id": "workflow_tracking",
+      "title": "Operational Lifecycle",
+      "span": 12,
+      "stages": [
+        {
+          "id": "intake",
+          "label": "Intake",
+          "state": "complete"
+        },
+        {
+          "id": "triage",
+          "label": "Triage",
+          "state": "complete"
+        },
+        {
+          "id": "assignment",
+          "label": "Assignment",
+          "state": "complete"
+        },
+        {
+          "id": "field",
+          "label": "Field Work",
+          "state": "current"
+        },
+        {
+          "id": "qa",
+          "label": "Quality Review",
+          "state": "upcoming"
+        },
+        {
+          "id": "close",
+          "label": "Close",
+          "state": "upcoming"
+        }
+      ],
+      "activeStage": "field",
+      "orientation": "horizontal",
+      "compact": false,
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "metricGrid",
+      "id": "executive_metric_grid",
+      "title": "Executive Metrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Cases",
+          "metric": "total_cases",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Open Cases",
+          "metric": "open_cases",
+          "format": "integer",
+          "intent": "warning"
+        },
+        {
+          "title": "Total Budget",
+          "metric": "total_budget",
+          "format": "currency",
+          "intent": "neutral"
+        },
+        {
+          "title": "Actual Cost",
+          "metric": "total_actual",
+          "format": "currency",
+          "intent": "success"
+        },
+        {
+          "title": "SLA Rate",
+          "metric": "sla_rate",
+          "format": "percent",
+          "intent": "success"
+        },
+        {
+          "title": "Critical",
+          "metric": "critical_cases",
+          "format": "integer",
+          "intent": "danger"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "tabs",
+      "id": "main_demo_tabs",
+      "title": "Houston Operations Application",
+      "span": 12,
+      "tabs": [
+        {
+          "id": "executive",
+          "title": "Executive",
+          "children": [
+            {
+              "type": "grid",
+              "id": "executive_cards",
+              "title": "Executive Cards",
+              "span": 12,
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "kpi",
+                  "id": "kpi_open_cases",
+                  "title": "Open Cases",
+                  "span": 3,
+                  "field": "OpenFlag",
+                  "aggregation": "sum",
+                  "format": "integer",
+                  "intent": "warning",
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "countUp",
+                  "id": "countup_actual_cost",
+                  "title": "Animated Actual Cost",
+                  "span": 3,
+                  "field": "ActualCost",
+                  "aggregation": "sum",
+                  "prefix": "",
+                  "suffix": "",
+                  "duration": 1800,
+                  "format": "currency",
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "progressBar",
+                  "id": "progress_target",
+                  "title": "Portfolio Progress (%)",
+                  "span": 3,
+                  "value": 63.5,
+                  "max": 100,
+                  "format": "integer",
+                  "intent": "primary",
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "statusBadge",
+                  "id": "portfolio_status",
+                  "title": "Portfolio Status",
+                  "span": 3,
+                  "value": "Operational",
+                  "intent": "success",
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "id": "executive_charts",
+              "title": "Executive Visuals",
+              "span": 12,
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "barChart",
+                  "id": "executive_department_cost",
+                  "title": "Actual Cost by Department",
+                  "span": 6,
+                  "category": "Department",
+                  "measure": "ActualCost",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Department"
+                  }
+                },
+                {
+                  "type": "lineChart",
+                  "id": "executive_monthly_cases",
+                  "title": "Monthly Case Trend",
+                  "span": 6,
+                  "category": "MonthLabel",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "MonthLabel"
+                  }
+                },
+                {
+                  "type": "donutChart",
+                  "id": "executive_status_share",
+                  "title": "Status Distribution",
+                  "span": 6,
+                  "category": "Status",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Status"
+                  }
+                },
+                {
+                  "type": "scatterChart",
+                  "id": "executive_risk_response",
+                  "title": "Risk vs. Response Hours",
+                  "span": 6,
+                  "x": "RiskScore",
+                  "y": "ResponseHours",
+                  "pointSize": "ActualCost",
+                  "height": 320,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item"
+                    },
+                    "xAxis": {
+                      "name": "Risk Score",
+                      "scale": true
+                    },
+                    "yAxis": {
+                      "name": "Response Hours",
+                      "scale": true
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "id": "executive_insight_row",
+              "title": "Insight Row",
+              "span": 12,
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "card",
+                  "id": "leadership_card",
+                  "title": "Leadership Snapshot",
+                  "span": 4,
+                  "header": {
+                    "title": "Leadership Snapshot",
+                    "subtitle": "Current filtered portfolio",
+                    "icon": "dashboard"
+                  },
+                  "padding": "compact",
+                  "status": {
+                    "intent": "primary",
+                    "position": "top"
+                  },
+                  "children": [
+                    {
+                      "type": "statList",
+                      "id": "leadership_stats",
+                      "title": "Key Values",
+                      "span": 12,
+                      "items": [
+                        {
+                          "label": "First Department",
+                          "field": "Department"
+                        },
+                        {
+                          "label": "First Owner",
+                          "field": "Owner"
+                        },
+                        {
+                          "label": "First Status",
+                          "field": "Status"
+                        },
+                        {
+                          "label": "First Cost",
+                          "field": "ActualCost",
+                          "format": "currency"
+                        }
+                      ],
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ],
+                  "footer": [
+                    {
+                      "type": "text",
+                      "id": "leadership_footer",
+                      "span": 12,
+                      "text": "Values respond to active filters.",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "card",
+                  "id": "team_card",
+                  "title": "Response Team",
+                  "span": 4,
+                  "header": {
+                    "title": "Response Team",
+                    "subtitle": "Active leadership",
+                    "icon": "users"
+                  },
+                  "children": [
+                    {
+                      "type": "avatarGroup",
+                      "id": "leadership_avatars",
+                      "title": "Leadership",
+                      "span": 12,
+                      "avatars": [
+                        {
+                          "type": "avatar",
+                          "id": "avatar_an",
+                          "initials": "AN",
+                          "label": "A. Nguyen",
+                          "size": "md",
+                          "shape": "circle",
+                          "status": "online"
+                        },
+                        {
+                          "type": "avatar",
+                          "id": "avatar_bs",
+                          "initials": "BS",
+                          "label": "B. Smith",
+                          "size": "md",
+                          "shape": "circle",
+                          "status": "online"
+                        },
+                        {
+                          "type": "avatar",
+                          "id": "avatar_cg",
+                          "initials": "CG",
+                          "label": "C. Garcia",
+                          "size": "md",
+                          "shape": "circle",
+                          "status": "away"
+                        },
+                        {
+                          "type": "avatar",
+                          "id": "avatar_dp",
+                          "initials": "DP",
+                          "label": "D. Patel",
+                          "size": "md",
+                          "shape": "circle",
+                          "status": "online"
+                        }
+                      ],
+                      "max": 5,
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "infoCard",
+                      "id": "team_note",
+                      "title": "Team Note",
+                      "span": 12,
+                      "text": "The avatar, card, info-card and status primitives are rendered inside one reusable card.",
+                      "intent": "neutral",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "card",
+                  "id": "calculation_card",
+                  "title": "Calculation DSL",
+                  "span": 4,
+                  "header": {
+                    "title": "Calculation DSL",
+                    "subtitle": "Derived fields and metrics",
+                    "icon": "calculator"
+                  },
+                  "children": [
+                    {
+                      "type": "kpi",
+                      "id": "calculated_variance_kpi",
+                      "title": "Calculated Variance",
+                      "span": 12,
+                      "field": "cost_variance_calc",
+                      "aggregation": "sum",
+                      "format": "currency",
+                      "intent": "warning",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "kpi",
+                      "id": "calculated_utilization_kpi",
+                      "title": "Budget Utilization",
+                      "span": 12,
+                      "field": "budget_utilization_calc",
+                      "aggregation": "avg",
+                      "format": "percent",
+                      "intent": "primary",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "basic_charts",
+          "title": "Chart Gallery",
+          "children": [
+            {
+              "type": "markdown",
+              "id": "chart_gallery_note",
+              "title": "Basic Charts",
+              "span": 12,
+              "text": "## Basic chart gallery\nThese visuals use HyperPBI's built-in aggregation and ECharts renderer. Select a mark to highlight the related rows.",
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
+            },
+            {
+              "type": "grid",
+              "id": "basic_chart_grid",
+              "title": "Basic Charts",
+              "span": 12,
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "barChart",
+                  "id": "basic_department_cost",
+                  "title": "Actual Cost by Department",
+                  "span": 6,
+                  "category": "Department",
+                  "measure": "ActualCost",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Department"
+                  }
+                },
+                {
+                  "type": "horizontalBarChart",
+                  "id": "basic_neighborhood_cases",
+                  "title": "Cases by Neighborhood",
+                  "span": 6,
+                  "category": "Neighborhood",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Neighborhood"
+                  }
+                },
+                {
+                  "type": "lineChart",
+                  "id": "basic_monthly_cases",
+                  "title": "Monthly Case Trend",
+                  "span": 6,
+                  "category": "MonthLabel",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "MonthLabel"
+                  }
+                },
+                {
+                  "type": "areaChart",
+                  "id": "basic_monthly_cost",
+                  "title": "Monthly Cost Area",
+                  "span": 6,
+                  "category": "MonthLabel",
+                  "measure": "ActualCost",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "MonthLabel"
+                  }
+                },
+                {
+                  "type": "pieChart",
+                  "id": "basic_priority_share",
+                  "title": "Priority Composition",
+                  "span": 6,
+                  "category": "Priority",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Priority"
+                  }
+                },
+                {
+                  "type": "donutChart",
+                  "id": "basic_status_share",
+                  "title": "Status Distribution",
+                  "span": 6,
+                  "category": "Status",
+                  "measure": "IncidentCount",
+                  "aggregation": "sum",
+                  "height": 310,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Status"
+                  }
+                },
+                {
+                  "type": "scatterChart",
+                  "id": "basic_risk_response",
+                  "title": "Risk vs. Response Hours",
+                  "span": 6,
+                  "x": "RiskScore",
+                  "y": "ResponseHours",
+                  "pointSize": "ActualCost",
+                  "height": 320,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item"
+                    },
+                    "xAxis": {
+                      "name": "Risk Score",
+                      "scale": true
+                    },
+                    "yAxis": {
+                      "name": "Response Hours",
+                      "scale": true
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  }
+                },
+                {
+                  "type": "gauge",
+                  "id": "basic_progress_gauge",
+                  "title": "Average Completion",
+                  "span": 6,
+                  "measure": "ProgressPct",
+                  "aggregation": "avg",
+                  "height": 320,
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "heatmap",
+                  "id": "basic_department_risk_heatmap",
+                  "title": "Department Risk Intensity",
+                  "span": 12,
+                  "category": "Department",
+                  "measure": "RiskScore",
+                  "aggregation": "avg",
+                  "height": 330,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "useDirtyRect": true
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false
+                  },
+                  "options": {
+                    "animation": true,
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "grid": {
+                      "left": 48,
+                      "right": 18,
+                      "top": 28,
+                      "bottom": 48,
+                      "containLabel": true
+                    },
+                    "legend": {
+                      "show": false
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Department"
+                  }
+                },
+                {
+                  "type": "smallMultiples",
+                  "id": "regional_small_multiples",
+                  "title": "Status by Region",
+                  "span": 12,
+                  "splitField": "Region",
+                  "maxPanels": 6,
+                  "sharedScale": true,
+                  "height": 210,
+                  "chart": {
+                    "type": "barChart",
+                    "id": "regional_status_child",
+                    "title": "Status",
+                    "span": 12,
+                    "category": "Status",
+                    "measure": "IncidentCount",
+                    "aggregation": "sum",
+                    "height": 210,
+                    "interaction": {
+                      "enabled": true,
+                      "trigger": "auto",
+                      "internalMode": "highlight",
+                      "internalScope": "self",
+                      "externalMode": "selection",
+                      "selectionMode": "replace",
+                      "multiSelect": true,
+                      "showSelector": false,
+                      "clearOnSecondClick": true,
+                      "field": "Status"
+                    }
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true,
+                    "field": "Status"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "advanced",
+          "title": "Advanced Analytics",
+          "children": [
+            {
+              "type": "markdown",
+              "id": "advanced_note",
+              "title": "Advanced ECharts",
+              "span": 12,
+              "text": "## Advanced ECharts\nCombo, waterfall, radar, treemap, funnel, Sankey, calendar heatmap and box plot configurations are supplied as sanitized JSON\u2014no JavaScript callbacks.",
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
+            },
+            {
+              "type": "grid",
+              "id": "advanced_chart_grid",
+              "title": "Advanced Charts",
+              "span": 12,
+              "columns": 12,
+              "gap": 12,
+              "children": [
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_combo",
+                  "title": "Monthly Operations \u2014 Cost, Volume and SLA",
+                  "span": 12,
+                  "height": 430,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "aria": {
+                      "enabled": true
+                    },
+                    "dataset": {
+                      "source": [
+                        {
+                          "Month": "2025-01 Jan",
+                          "Cases": 16,
+                          "Budget": 500451.95,
+                          "ActualCost": 278030.67,
+                          "AverageRisk": 52.2,
+                          "SLA": 56.2,
+                          "Variance": -222421.28
+                        },
+                        {
+                          "Month": "2025-02 Feb",
+                          "Cases": 11,
+                          "Budget": 314229.65,
+                          "ActualCost": 177986.6,
+                          "AverageRisk": 58.3,
+                          "SLA": 63.6,
+                          "Variance": -136243.05
+                        },
+                        {
+                          "Month": "2025-03 Mar",
+                          "Cases": 16,
+                          "Budget": 264477.44,
+                          "ActualCost": 158356.03,
+                          "AverageRisk": 54,
+                          "SLA": 50.0,
+                          "Variance": -106121.41
+                        },
+                        {
+                          "Month": "2025-04 Apr",
+                          "Cases": 14,
+                          "Budget": 384070.09,
+                          "ActualCost": 286141.02,
+                          "AverageRisk": 58,
+                          "SLA": 57.1,
+                          "Variance": -97929.07
+                        },
+                        {
+                          "Month": "2025-05 May",
+                          "Cases": 14,
+                          "Budget": 302126.47,
+                          "ActualCost": 180731.74,
+                          "AverageRisk": 56.2,
+                          "SLA": 57.1,
+                          "Variance": -121394.73
+                        },
+                        {
+                          "Month": "2025-06 Jun",
+                          "Cases": 17,
+                          "Budget": 486119.05,
+                          "ActualCost": 315916.57,
+                          "AverageRisk": 47,
+                          "SLA": 70.6,
+                          "Variance": -170202.48
+                        },
+                        {
+                          "Month": "2025-07 Jul",
+                          "Cases": 11,
+                          "Budget": 361399.46,
+                          "ActualCost": 200983.53,
+                          "AverageRisk": 56.2,
+                          "SLA": 54.5,
+                          "Variance": -160415.93
+                        },
+                        {
+                          "Month": "2025-08 Aug",
+                          "Cases": 17,
+                          "Budget": 489402.01,
+                          "ActualCost": 358939.85,
+                          "AverageRisk": 47.6,
+                          "SLA": 70.6,
+                          "Variance": -130462.16
+                        },
+                        {
+                          "Month": "2025-09 Sep",
+                          "Cases": 16,
+                          "Budget": 393783.9,
+                          "ActualCost": 311318.25,
+                          "AverageRisk": 52.3,
+                          "SLA": 62.5,
+                          "Variance": -82465.65
+                        },
+                        {
+                          "Month": "2025-10 Oct",
+                          "Cases": 13,
+                          "Budget": 262246.24,
+                          "ActualCost": 138090.28,
+                          "AverageRisk": 55,
+                          "SLA": 69.2,
+                          "Variance": -124155.96
+                        },
+                        {
+                          "Month": "2025-11 Nov",
+                          "Cases": 11,
+                          "Budget": 352981.37,
+                          "ActualCost": 182105.41,
+                          "AverageRisk": 41.3,
+                          "SLA": 81.8,
+                          "Variance": -170875.96
+                        },
+                        {
+                          "Month": "2025-12 Dec",
+                          "Cases": 12,
+                          "Budget": 361361.04,
+                          "ActualCost": 313423.48,
+                          "AverageRisk": 58.7,
+                          "SLA": 58.3,
+                          "Variance": -47937.56
+                        },
+                        {
+                          "Month": "2026-01 Jan",
+                          "Cases": 13,
+                          "Budget": 464227.63,
+                          "ActualCost": 215286.44,
+                          "AverageRisk": 44.9,
+                          "SLA": 76.9,
+                          "Variance": -248941.19
+                        },
+                        {
+                          "Month": "2026-02 Feb",
+                          "Cases": 10,
+                          "Budget": 236710.53,
+                          "ActualCost": 176169.9,
+                          "AverageRisk": 34.1,
+                          "SLA": 100.0,
+                          "Variance": -60540.63
+                        },
+                        {
+                          "Month": "2026-03 Mar",
+                          "Cases": 13,
+                          "Budget": 396389.84,
+                          "ActualCost": 272905.26,
+                          "AverageRisk": 52.8,
+                          "SLA": 69.2,
+                          "Variance": -123484.58
+                        },
+                        {
+                          "Month": "2026-04 Apr",
+                          "Cases": 14,
+                          "Budget": 367396.24,
+                          "ActualCost": 227786.67,
+                          "AverageRisk": 40.9,
+                          "SLA": 85.7,
+                          "Variance": -139609.57
+                        },
+                        {
+                          "Month": "2026-05 May",
+                          "Cases": 13,
+                          "Budget": 320690.72,
+                          "ActualCost": 210981.9,
+                          "AverageRisk": 44,
+                          "SLA": 61.5,
+                          "Variance": -109708.82
+                        },
+                        {
+                          "Month": "2026-06 Jun",
+                          "Cases": 9,
+                          "Budget": 220339.06,
+                          "ActualCost": 188430.92,
+                          "AverageRisk": 40.6,
+                          "SLA": 77.8,
+                          "Variance": -31908.14
+                        }
+                      ]
+                    },
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "legend": {
+                      "type": "scroll",
+                      "bottom": 0
+                    },
+                    "toolbox": {
+                      "show": true,
+                      "feature": {
+                        "dataZoom": {},
+                        "restore": {},
+                        "saveAsImage": {}
+                      }
+                    },
+                    "grid": {
+                      "left": 60,
+                      "right": 58,
+                      "top": 42,
+                      "bottom": 72,
+                      "containLabel": true
+                    },
+                    "xAxis": {
+                      "type": "category",
+                      "axisLabel": {
+                        "rotate": 35,
+                        "hideOverlap": true
+                      }
+                    },
+                    "yAxis": [
+                      {
+                        "type": "value",
+                        "name": "Cost"
+                      },
+                      {
+                        "type": "value",
+                        "name": "Cases / SLA",
+                        "min": 0,
+                        "max": 100
+                      }
+                    ],
+                    "series": [
+                      {
+                        "name": "Actual Cost",
+                        "type": "bar",
+                        "encode": {
+                          "x": "Month",
+                          "y": "ActualCost"
+                        },
+                        "barMaxWidth": 26
+                      },
+                      {
+                        "name": "Cases",
+                        "type": "line",
+                        "yAxisIndex": 1,
+                        "encode": {
+                          "x": "Month",
+                          "y": "Cases"
+                        },
+                        "smooth": true,
+                        "showSymbol": false
+                      },
+                      {
+                        "name": "SLA %",
+                        "type": "line",
+                        "yAxisIndex": 1,
+                        "encode": {
+                          "x": "Month",
+                          "y": "SLA"
+                        },
+                        "smooth": true,
+                        "showSymbol": false
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_waterfall",
+                  "title": "Monthly Cost Variance Waterfall",
+                  "span": 6,
+                  "height": 390,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "axis"
+                    },
+                    "legend": {
+                      "data": [
+                        "Over Budget",
+                        "Under Budget"
+                      ],
+                      "bottom": 0
+                    },
+                    "grid": {
+                      "left": 58,
+                      "right": 20,
+                      "top": 36,
+                      "bottom": 68,
+                      "containLabel": true
+                    },
+                    "xAxis": {
+                      "type": "category",
+                      "data": [
+                        "2025-01 Jan",
+                        "2025-02 Feb",
+                        "2025-03 Mar",
+                        "2025-04 Apr",
+                        "2025-05 May",
+                        "2025-06 Jun",
+                        "2025-07 Jul",
+                        "2025-08 Aug",
+                        "2025-09 Sep",
+                        "2025-10 Oct",
+                        "2025-11 Nov",
+                        "2025-12 Dec",
+                        "2026-01 Jan",
+                        "2026-02 Feb",
+                        "2026-03 Mar",
+                        "2026-04 Apr",
+                        "2026-05 May",
+                        "2026-06 Jun"
+                      ],
+                      "axisLabel": {
+                        "rotate": 35
+                      }
+                    },
+                    "yAxis": {
+                      "type": "value",
+                      "name": "Variance"
+                    },
+                    "series": [
+                      {
+                        "type": "bar",
+                        "stack": "variance",
+                        "silent": true,
+                        "itemStyle": {
+                          "borderColor": "transparent",
+                          "color": "transparent"
+                        },
+                        "data": [
+                          -222421.28,
+                          -358664.32999999996,
+                          -464785.74,
+                          -562714.81,
+                          -684109.54,
+                          -854312.02,
+                          -1014727.95,
+                          -1145190.1099999999,
+                          -1227655.7599999998,
+                          -1351811.7199999997,
+                          -1522687.6799999997,
+                          -1570625.2399999998,
+                          -1819566.4299999997,
+                          -1880107.0599999996,
+                          -2003591.6399999997,
+                          -2143201.2099999995,
+                          -2252910.0299999993,
+                          -2284818.1699999995
+                        ]
+                      },
+                      {
+                        "name": "Over Budget",
+                        "type": "bar",
+                        "stack": "variance",
+                        "data": [
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-",
+                          "-"
+                        ]
+                      },
+                      {
+                        "name": "Under Budget",
+                        "type": "bar",
+                        "stack": "variance",
+                        "data": [
+                          222421.28,
+                          136243.05,
+                          106121.41,
+                          97929.07,
+                          121394.73,
+                          170202.48,
+                          160415.93,
+                          130462.16,
+                          82465.65,
+                          124155.96,
+                          170875.96,
+                          47937.56,
+                          248941.19,
+                          60540.63,
+                          123484.58,
+                          139609.57,
+                          109708.82,
+                          31908.14
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_radar",
+                  "title": "Department Performance Radar",
+                  "span": 6,
+                  "height": 390,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item"
+                    },
+                    "legend": {
+                      "type": "scroll",
+                      "bottom": 0
+                    },
+                    "radar": {
+                      "indicator": [
+                        {
+                          "name": "SLA",
+                          "max": 100
+                        },
+                        {
+                          "name": "Progress",
+                          "max": 100
+                        },
+                        {
+                          "name": "Satisfaction",
+                          "max": 100
+                        },
+                        {
+                          "name": "Budget",
+                          "max": 100
+                        },
+                        {
+                          "name": "Risk Control",
+                          "max": 100
+                        }
+                      ],
+                      "radius": "64%"
+                    },
+                    "series": [
+                      {
+                        "type": "radar",
+                        "data": [
+                          {
+                            "name": "Houston Water",
+                            "value": [
+                              71.1,
+                              62.3,
+                              79.1,
+                              64.6,
+                              50.3
+                            ]
+                          },
+                          {
+                            "name": "Public Works",
+                            "value": [
+                              65.1,
+                              59.6,
+                              76.3,
+                              59.7,
+                              50.5
+                            ]
+                          },
+                          {
+                            "name": "Solid Waste",
+                            "value": [
+                              55.3,
+                              62.4,
+                              75.0,
+                              63.7,
+                              48.9
+                            ]
+                          },
+                          {
+                            "name": "Parks & Recreation",
+                            "value": [
+                              70.2,
+                              63.1,
+                              76.3,
+                              59.9,
+                              52.3
+                            ]
+                          },
+                          {
+                            "name": "Transportation",
+                            "value": [
+                              70.0,
+                              70.6,
+                              79.2,
+                              76.0,
+                              45.6
+                            ]
+                          },
+                          {
+                            "name": "Emergency Management",
+                            "value": [
+                              70.6,
+                              63.3,
+                              74.6,
+                              64.7,
+                              52.4
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_treemap",
+                  "title": "Program Cost Treemap",
+                  "span": 6,
+                  "height": 390,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item",
+                      "formatter": "{b}: {c}"
+                    },
+                    "series": [
+                      {
+                        "type": "treemap",
+                        "roam": false,
+                        "nodeClick": "zoomToNode",
+                        "breadcrumb": {
+                          "show": true
+                        },
+                        "label": {
+                          "show": true
+                        },
+                        "data": [
+                          {
+                            "name": "Houston Water",
+                            "children": [
+                              {
+                                "name": "Water Leak Response",
+                                "value": 295790.17
+                              },
+                              {
+                                "name": "Sewer Maintenance",
+                                "value": 190034.71
+                              },
+                              {
+                                "name": "Lift Station Support",
+                                "value": 401029.05
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Public Works",
+                            "children": [
+                              {
+                                "name": "Street Repair",
+                                "value": 147975.19
+                              },
+                              {
+                                "name": "Drainage Response",
+                                "value": 274589.89
+                              },
+                              {
+                                "name": "Traffic Signal Support",
+                                "value": 466255.64
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Solid Waste",
+                            "children": [
+                              {
+                                "name": "Collection Service",
+                                "value": 109242.62
+                              },
+                              {
+                                "name": "Illegal Dumping",
+                                "value": 110798.18
+                              },
+                              {
+                                "name": "Fleet Support",
+                                "value": 257094.68
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Parks & Recreation",
+                            "children": [
+                              {
+                                "name": "Park Maintenance",
+                                "value": 164027.68
+                              },
+                              {
+                                "name": "Tree Care",
+                                "value": 180012.31
+                              },
+                              {
+                                "name": "Facility Repair",
+                                "value": 154862.72
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Transportation",
+                            "children": [
+                              {
+                                "name": "Mobility Safety",
+                                "value": 310967.66
+                              },
+                              {
+                                "name": "Signal Timing",
+                                "value": 213054.21
+                              },
+                              {
+                                "name": "Sidewalk Access",
+                                "value": 318456.63
+                              }
+                            ]
+                          },
+                          {
+                            "name": "Emergency Management",
+                            "children": [
+                              {
+                                "name": "Incident Coordination",
+                                "value": 70611.41
+                              },
+                              {
+                                "name": "Flood Readiness",
+                                "value": 131377.97
+                              },
+                              {
+                                "name": "Public Alerts",
+                                "value": 397403.8
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_funnel",
+                  "title": "Service Delivery Funnel",
+                  "span": 6,
+                  "height": 390,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item",
+                      "formatter": "{b}: {c}"
+                    },
+                    "legend": {
+                      "bottom": 0
+                    },
+                    "series": [
+                      {
+                        "type": "funnel",
+                        "left": "10%",
+                        "top": 24,
+                        "bottom": 48,
+                        "width": "80%",
+                        "min": 0,
+                        "max": 240,
+                        "minSize": "10%",
+                        "maxSize": "100%",
+                        "sort": "descending",
+                        "gap": 3,
+                        "label": {
+                          "show": true,
+                          "position": "inside"
+                        },
+                        "data": [
+                          {
+                            "name": "Reported",
+                            "value": 240
+                          },
+                          {
+                            "name": "Triaged",
+                            "value": 223
+                          },
+                          {
+                            "name": "Assigned",
+                            "value": 202
+                          },
+                          {
+                            "name": "Field Work",
+                            "value": 166
+                          },
+                          {
+                            "name": "Quality Review",
+                            "value": 115
+                          },
+                          {
+                            "name": "Complete",
+                            "value": 87
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_sankey",
+                  "title": "Channel \u2192 Department \u2192 Status Flow",
+                  "span": 12,
+                  "height": 520,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item"
+                    },
+                    "series": [
+                      {
+                        "type": "sankey",
+                        "layout": "none",
+                        "emphasis": {
+                          "focus": "adjacency"
+                        },
+                        "lineStyle": {
+                          "color": "gradient",
+                          "curveness": 0.5
+                        },
+                        "data": [
+                          {
+                            "name": "311"
+                          },
+                          {
+                            "name": "Assigned"
+                          },
+                          {
+                            "name": "Citizen App"
+                          },
+                          {
+                            "name": "Complete"
+                          },
+                          {
+                            "name": "Emergency Management"
+                          },
+                          {
+                            "name": "Field Inspection"
+                          },
+                          {
+                            "name": "Houston Water"
+                          },
+                          {
+                            "name": "In Progress"
+                          },
+                          {
+                            "name": "Internal Audit"
+                          },
+                          {
+                            "name": "New"
+                          },
+                          {
+                            "name": "On Hold"
+                          },
+                          {
+                            "name": "Operations Center"
+                          },
+                          {
+                            "name": "Parks & Recreation"
+                          },
+                          {
+                            "name": "Public Works"
+                          },
+                          {
+                            "name": "QA Review"
+                          },
+                          {
+                            "name": "Sensor Alert"
+                          },
+                          {
+                            "name": "Solid Waste"
+                          },
+                          {
+                            "name": "Transportation"
+                          }
+                        ],
+                        "links": [
+                          {
+                            "source": "Citizen App",
+                            "target": "Solid Waste",
+                            "value": 6
+                          },
+                          {
+                            "source": "Solid Waste",
+                            "target": "In Progress",
+                            "value": 10
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Transportation",
+                            "value": 9
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "Complete",
+                            "value": 19
+                          },
+                          {
+                            "source": "311",
+                            "target": "Emergency Management",
+                            "value": 8
+                          },
+                          {
+                            "source": "Emergency Management",
+                            "target": "Complete",
+                            "value": 14
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Emergency Management",
+                            "value": 8
+                          },
+                          {
+                            "source": "Emergency Management",
+                            "target": "In Progress",
+                            "value": 9
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Public Works",
+                            "value": 4
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "Complete",
+                            "value": 12
+                          },
+                          {
+                            "source": "Citizen App",
+                            "target": "Parks & Recreation",
+                            "value": 8
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "In Progress",
+                            "value": 17
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Emergency Management",
+                            "value": 5
+                          },
+                          {
+                            "source": "Emergency Management",
+                            "target": "New",
+                            "value": 3
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Public Works",
+                            "value": 9
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "New",
+                            "value": 4
+                          },
+                          {
+                            "source": "311",
+                            "target": "Solid Waste",
+                            "value": 5
+                          },
+                          {
+                            "source": "Solid Waste",
+                            "target": "New",
+                            "value": 4
+                          },
+                          {
+                            "source": "Emergency Management",
+                            "target": "Assigned",
+                            "value": 5
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Transportation",
+                            "value": 6
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "In Progress",
+                            "value": 10
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Parks & Recreation",
+                            "value": 9
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "Complete",
+                            "value": 14
+                          },
+                          {
+                            "source": "311",
+                            "target": "Public Works",
+                            "value": 8
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "In Progress",
+                            "value": 14
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Houston Water",
+                            "value": 8
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "Assigned",
+                            "value": 5
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Solid Waste",
+                            "value": 9
+                          },
+                          {
+                            "source": "Solid Waste",
+                            "target": "Complete",
+                            "value": 15
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Parks & Recreation",
+                            "value": 8
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "QA Review",
+                            "value": 6
+                          },
+                          {
+                            "source": "Citizen App",
+                            "target": "Houston Water",
+                            "value": 8
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "Complete",
+                            "value": 13
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Houston Water",
+                            "value": 6
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "In Progress",
+                            "value": 11
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Solid Waste",
+                            "value": 7
+                          },
+                          {
+                            "source": "Solid Waste",
+                            "target": "QA Review",
+                            "value": 3
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Public Works",
+                            "value": 4
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "Assigned",
+                            "value": 6
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Solid Waste",
+                            "value": 5
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Solid Waste",
+                            "value": 6
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "New",
+                            "value": 3
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Transportation",
+                            "value": 9
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Parks & Recreation",
+                            "value": 7
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "Assigned",
+                            "value": 5
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "QA Review",
+                            "value": 5
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Parks & Recreation",
+                            "value": 10
+                          },
+                          {
+                            "source": "Sensor Alert",
+                            "target": "Emergency Management",
+                            "value": 6
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "QA Review",
+                            "value": 3
+                          },
+                          {
+                            "source": "311",
+                            "target": "Transportation",
+                            "value": 6
+                          },
+                          {
+                            "source": "Field Inspection",
+                            "target": "Houston Water",
+                            "value": 2
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Emergency Management",
+                            "value": 4
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Houston Water",
+                            "value": 5
+                          },
+                          {
+                            "source": "311",
+                            "target": "Parks & Recreation",
+                            "value": 5
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "QA Review",
+                            "value": 5
+                          },
+                          {
+                            "source": "Internal Audit",
+                            "target": "Public Works",
+                            "value": 9
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "New",
+                            "value": 4
+                          },
+                          {
+                            "source": "311",
+                            "target": "Houston Water",
+                            "value": 9
+                          },
+                          {
+                            "source": "Citizen App",
+                            "target": "Transportation",
+                            "value": 5
+                          },
+                          {
+                            "source": "Citizen App",
+                            "target": "Public Works",
+                            "value": 9
+                          },
+                          {
+                            "source": "Public Works",
+                            "target": "On Hold",
+                            "value": 2
+                          },
+                          {
+                            "source": "Operations Center",
+                            "target": "Transportation",
+                            "value": 5
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "On Hold",
+                            "value": 3
+                          },
+                          {
+                            "source": "Emergency Management",
+                            "target": "QA Review",
+                            "value": 3
+                          },
+                          {
+                            "source": "Solid Waste",
+                            "target": "Assigned",
+                            "value": 6
+                          },
+                          {
+                            "source": "Parks & Recreation",
+                            "target": "On Hold",
+                            "value": 1
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "New",
+                            "value": 2
+                          },
+                          {
+                            "source": "Citizen App",
+                            "target": "Emergency Management",
+                            "value": 3
+                          },
+                          {
+                            "source": "Transportation",
+                            "target": "Assigned",
+                            "value": 3
+                          },
+                          {
+                            "source": "Houston Water",
+                            "target": "On Hold",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_calendar",
+                  "title": "Daily Case Calendar Heatmap",
+                  "span": 12,
+                  "height": 370,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "position": "top"
+                    },
+                    "visualMap": {
+                      "min": 0,
+                      "max": 3,
+                      "calculable": true,
+                      "orient": "horizontal",
+                      "left": "center",
+                      "bottom": 8
+                    },
+                    "calendar": [
+                      {
+                        "range": "2025",
+                        "top": 34,
+                        "cellSize": [
+                          "auto",
+                          14
+                        ],
+                        "yearLabel": {
+                          "show": true
+                        }
+                      },
+                      {
+                        "range": "2026",
+                        "top": 190,
+                        "cellSize": [
+                          "auto",
+                          14
+                        ],
+                        "yearLabel": {
+                          "show": true
+                        }
+                      }
+                    ],
+                    "series": [
+                      {
+                        "type": "heatmap",
+                        "coordinateSystem": "calendar",
+                        "calendarIndex": 0,
+                        "data": [
+                          [
+                            "2025-01-02",
+                            2
+                          ],
+                          [
+                            "2025-01-04",
+                            1
+                          ],
+                          [
+                            "2025-01-05",
+                            1
+                          ],
+                          [
+                            "2025-01-09",
+                            1
+                          ],
+                          [
+                            "2025-01-12",
+                            1
+                          ],
+                          [
+                            "2025-01-13",
+                            1
+                          ],
+                          [
+                            "2025-01-15",
+                            1
+                          ],
+                          [
+                            "2025-01-22",
+                            1
+                          ],
+                          [
+                            "2025-01-25",
+                            1
+                          ],
+                          [
+                            "2025-01-26",
+                            1
+                          ],
+                          [
+                            "2025-01-28",
+                            1
+                          ],
+                          [
+                            "2025-01-29",
+                            2
+                          ],
+                          [
+                            "2025-01-30",
+                            1
+                          ],
+                          [
+                            "2025-01-31",
+                            1
+                          ],
+                          [
+                            "2025-02-01",
+                            2
+                          ],
+                          [
+                            "2025-02-02",
+                            1
+                          ],
+                          [
+                            "2025-02-03",
+                            1
+                          ],
+                          [
+                            "2025-02-12",
+                            1
+                          ],
+                          [
+                            "2025-02-15",
+                            1
+                          ],
+                          [
+                            "2025-02-19",
+                            1
+                          ],
+                          [
+                            "2025-02-24",
+                            2
+                          ],
+                          [
+                            "2025-02-25",
+                            1
+                          ],
+                          [
+                            "2025-02-26",
+                            1
+                          ],
+                          [
+                            "2025-03-01",
+                            1
+                          ],
+                          [
+                            "2025-03-02",
+                            1
+                          ],
+                          [
+                            "2025-03-03",
+                            3
+                          ],
+                          [
+                            "2025-03-04",
+                            1
+                          ],
+                          [
+                            "2025-03-05",
+                            1
+                          ],
+                          [
+                            "2025-03-06",
+                            1
+                          ],
+                          [
+                            "2025-03-09",
+                            1
+                          ],
+                          [
+                            "2025-03-13",
+                            1
+                          ],
+                          [
+                            "2025-03-17",
+                            1
+                          ],
+                          [
+                            "2025-03-20",
+                            1
+                          ],
+                          [
+                            "2025-03-23",
+                            1
+                          ],
+                          [
+                            "2025-03-24",
+                            1
+                          ],
+                          [
+                            "2025-03-25",
+                            1
+                          ],
+                          [
+                            "2025-03-26",
+                            1
+                          ],
+                          [
+                            "2025-04-03",
+                            1
+                          ],
+                          [
+                            "2025-04-05",
+                            1
+                          ],
+                          [
+                            "2025-04-06",
+                            1
+                          ],
+                          [
+                            "2025-04-08",
+                            2
+                          ],
+                          [
+                            "2025-04-09",
+                            1
+                          ],
+                          [
+                            "2025-04-10",
+                            1
+                          ],
+                          [
+                            "2025-04-11",
+                            1
+                          ],
+                          [
+                            "2025-04-13",
+                            1
+                          ],
+                          [
+                            "2025-04-16",
+                            1
+                          ],
+                          [
+                            "2025-04-17",
+                            1
+                          ],
+                          [
+                            "2025-04-22",
+                            1
+                          ],
+                          [
+                            "2025-04-25",
+                            1
+                          ],
+                          [
+                            "2025-04-26",
+                            1
+                          ],
+                          [
+                            "2025-05-05",
+                            1
+                          ],
+                          [
+                            "2025-05-07",
+                            2
+                          ],
+                          [
+                            "2025-05-09",
+                            1
+                          ],
+                          [
+                            "2025-05-12",
+                            2
+                          ],
+                          [
+                            "2025-05-14",
+                            2
+                          ],
+                          [
+                            "2025-05-18",
+                            1
+                          ],
+                          [
+                            "2025-05-19",
+                            1
+                          ],
+                          [
+                            "2025-05-20",
+                            2
+                          ],
+                          [
+                            "2025-05-23",
+                            1
+                          ],
+                          [
+                            "2025-05-30",
+                            1
+                          ],
+                          [
+                            "2025-06-01",
+                            1
+                          ],
+                          [
+                            "2025-06-03",
+                            2
+                          ],
+                          [
+                            "2025-06-06",
+                            2
+                          ],
+                          [
+                            "2025-06-09",
+                            1
+                          ],
+                          [
+                            "2025-06-10",
+                            1
+                          ],
+                          [
+                            "2025-06-15",
+                            1
+                          ],
+                          [
+                            "2025-06-17",
+                            1
+                          ],
+                          [
+                            "2025-06-18",
+                            2
+                          ],
+                          [
+                            "2025-06-21",
+                            1
+                          ],
+                          [
+                            "2025-06-22",
+                            2
+                          ],
+                          [
+                            "2025-06-23",
+                            1
+                          ],
+                          [
+                            "2025-06-25",
+                            1
+                          ],
+                          [
+                            "2025-06-28",
+                            1
+                          ],
+                          [
+                            "2025-07-04",
+                            1
+                          ],
+                          [
+                            "2025-07-06",
+                            1
+                          ],
+                          [
+                            "2025-07-09",
+                            1
+                          ],
+                          [
+                            "2025-07-12",
+                            1
+                          ],
+                          [
+                            "2025-07-17",
+                            1
+                          ],
+                          [
+                            "2025-07-18",
+                            1
+                          ],
+                          [
+                            "2025-07-20",
+                            1
+                          ],
+                          [
+                            "2025-07-21",
+                            2
+                          ],
+                          [
+                            "2025-07-25",
+                            1
+                          ],
+                          [
+                            "2025-07-28",
+                            1
+                          ],
+                          [
+                            "2025-08-01",
+                            1
+                          ],
+                          [
+                            "2025-08-02",
+                            2
+                          ],
+                          [
+                            "2025-08-03",
+                            1
+                          ],
+                          [
+                            "2025-08-05",
+                            1
+                          ],
+                          [
+                            "2025-08-08",
+                            2
+                          ],
+                          [
+                            "2025-08-10",
+                            1
+                          ],
+                          [
+                            "2025-08-13",
+                            1
+                          ],
+                          [
+                            "2025-08-14",
+                            1
+                          ],
+                          [
+                            "2025-08-18",
+                            1
+                          ],
+                          [
+                            "2025-08-21",
+                            1
+                          ],
+                          [
+                            "2025-08-23",
+                            1
+                          ],
+                          [
+                            "2025-08-27",
+                            1
+                          ],
+                          [
+                            "2025-08-28",
+                            1
+                          ],
+                          [
+                            "2025-08-30",
+                            1
+                          ],
+                          [
+                            "2025-08-31",
+                            1
+                          ],
+                          [
+                            "2025-09-02",
+                            3
+                          ],
+                          [
+                            "2025-09-03",
+                            1
+                          ],
+                          [
+                            "2025-09-07",
+                            1
+                          ],
+                          [
+                            "2025-09-11",
+                            1
+                          ],
+                          [
+                            "2025-09-18",
+                            1
+                          ],
+                          [
+                            "2025-09-19",
+                            1
+                          ],
+                          [
+                            "2025-09-21",
+                            1
+                          ],
+                          [
+                            "2025-09-22",
+                            1
+                          ],
+                          [
+                            "2025-09-24",
+                            1
+                          ],
+                          [
+                            "2025-09-27",
+                            2
+                          ],
+                          [
+                            "2025-09-29",
+                            1
+                          ],
+                          [
+                            "2025-09-30",
+                            2
+                          ],
+                          [
+                            "2025-10-04",
+                            1
+                          ],
+                          [
+                            "2025-10-06",
+                            1
+                          ],
+                          [
+                            "2025-10-09",
+                            1
+                          ],
+                          [
+                            "2025-10-19",
+                            1
+                          ],
+                          [
+                            "2025-10-25",
+                            1
+                          ],
+                          [
+                            "2025-10-26",
+                            1
+                          ],
+                          [
+                            "2025-10-27",
+                            2
+                          ],
+                          [
+                            "2025-10-29",
+                            3
+                          ],
+                          [
+                            "2025-10-30",
+                            2
+                          ],
+                          [
+                            "2025-11-01",
+                            1
+                          ],
+                          [
+                            "2025-11-13",
+                            2
+                          ],
+                          [
+                            "2025-11-18",
+                            3
+                          ],
+                          [
+                            "2025-11-21",
+                            2
+                          ],
+                          [
+                            "2025-11-23",
+                            1
+                          ],
+                          [
+                            "2025-11-28",
+                            1
+                          ],
+                          [
+                            "2025-11-30",
+                            1
+                          ],
+                          [
+                            "2025-12-04",
+                            1
+                          ],
+                          [
+                            "2025-12-05",
+                            1
+                          ],
+                          [
+                            "2025-12-10",
+                            1
+                          ],
+                          [
+                            "2025-12-14",
+                            1
+                          ],
+                          [
+                            "2025-12-15",
+                            1
+                          ],
+                          [
+                            "2025-12-17",
+                            1
+                          ],
+                          [
+                            "2025-12-19",
+                            1
+                          ],
+                          [
+                            "2025-12-22",
+                            1
+                          ],
+                          [
+                            "2025-12-25",
+                            1
+                          ],
+                          [
+                            "2025-12-26",
+                            1
+                          ],
+                          [
+                            "2025-12-27",
+                            1
+                          ],
+                          [
+                            "2025-12-31",
+                            1
+                          ]
+                        ]
+                      },
+                      {
+                        "type": "heatmap",
+                        "coordinateSystem": "calendar",
+                        "calendarIndex": 1,
+                        "data": [
+                          [
+                            "2026-01-02",
+                            1
+                          ],
+                          [
+                            "2026-01-05",
+                            1
+                          ],
+                          [
+                            "2026-01-07",
+                            1
+                          ],
+                          [
+                            "2026-01-08",
+                            1
+                          ],
+                          [
+                            "2026-01-11",
+                            1
+                          ],
+                          [
+                            "2026-01-17",
+                            1
+                          ],
+                          [
+                            "2026-01-19",
+                            1
+                          ],
+                          [
+                            "2026-01-20",
+                            2
+                          ],
+                          [
+                            "2026-01-28",
+                            2
+                          ],
+                          [
+                            "2026-01-30",
+                            1
+                          ],
+                          [
+                            "2026-01-31",
+                            1
+                          ],
+                          [
+                            "2026-02-01",
+                            1
+                          ],
+                          [
+                            "2026-02-04",
+                            1
+                          ],
+                          [
+                            "2026-02-05",
+                            1
+                          ],
+                          [
+                            "2026-02-07",
+                            1
+                          ],
+                          [
+                            "2026-02-08",
+                            1
+                          ],
+                          [
+                            "2026-02-09",
+                            1
+                          ],
+                          [
+                            "2026-02-13",
+                            1
+                          ],
+                          [
+                            "2026-02-15",
+                            1
+                          ],
+                          [
+                            "2026-02-19",
+                            1
+                          ],
+                          [
+                            "2026-02-23",
+                            1
+                          ],
+                          [
+                            "2026-03-01",
+                            2
+                          ],
+                          [
+                            "2026-03-02",
+                            1
+                          ],
+                          [
+                            "2026-03-04",
+                            1
+                          ],
+                          [
+                            "2026-03-05",
+                            1
+                          ],
+                          [
+                            "2026-03-09",
+                            1
+                          ],
+                          [
+                            "2026-03-15",
+                            1
+                          ],
+                          [
+                            "2026-03-19",
+                            3
+                          ],
+                          [
+                            "2026-03-23",
+                            1
+                          ],
+                          [
+                            "2026-03-24",
+                            1
+                          ],
+                          [
+                            "2026-03-31",
+                            1
+                          ],
+                          [
+                            "2026-04-02",
+                            2
+                          ],
+                          [
+                            "2026-04-08",
+                            1
+                          ],
+                          [
+                            "2026-04-09",
+                            2
+                          ],
+                          [
+                            "2026-04-12",
+                            1
+                          ],
+                          [
+                            "2026-04-17",
+                            1
+                          ],
+                          [
+                            "2026-04-18",
+                            1
+                          ],
+                          [
+                            "2026-04-19",
+                            1
+                          ],
+                          [
+                            "2026-04-21",
+                            1
+                          ],
+                          [
+                            "2026-04-22",
+                            1
+                          ],
+                          [
+                            "2026-04-23",
+                            1
+                          ],
+                          [
+                            "2026-04-26",
+                            1
+                          ],
+                          [
+                            "2026-04-28",
+                            1
+                          ],
+                          [
+                            "2026-05-03",
+                            1
+                          ],
+                          [
+                            "2026-05-05",
+                            1
+                          ],
+                          [
+                            "2026-05-08",
+                            1
+                          ],
+                          [
+                            "2026-05-09",
+                            1
+                          ],
+                          [
+                            "2026-05-10",
+                            1
+                          ],
+                          [
+                            "2026-05-14",
+                            1
+                          ],
+                          [
+                            "2026-05-15",
+                            1
+                          ],
+                          [
+                            "2026-05-17",
+                            1
+                          ],
+                          [
+                            "2026-05-18",
+                            2
+                          ],
+                          [
+                            "2026-05-24",
+                            2
+                          ],
+                          [
+                            "2026-05-31",
+                            1
+                          ],
+                          [
+                            "2026-06-06",
+                            1
+                          ],
+                          [
+                            "2026-06-08",
+                            2
+                          ],
+                          [
+                            "2026-06-10",
+                            1
+                          ],
+                          [
+                            "2026-06-12",
+                            2
+                          ],
+                          [
+                            "2026-06-17",
+                            1
+                          ],
+                          [
+                            "2026-06-22",
+                            1
+                          ],
+                          [
+                            "2026-06-23",
+                            1
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "advancedChart",
+                  "id": "advanced_boxplot",
+                  "title": "Response-Time Distribution by Department",
+                  "span": 12,
+                  "height": 420,
+                  "maxDataRows": 30000,
+                  "initOptions": {
+                    "renderer": "canvas",
+                    "devicePixelRatio": 2,
+                    "useDirtyRect": true,
+                    "useCoarsePointer": true,
+                    "pointerSize": 44,
+                    "locale": "EN"
+                  },
+                  "setOption": {
+                    "notMerge": false,
+                    "lazyUpdate": true,
+                    "silent": false,
+                    "replaceMerge": [
+                      "series"
+                    ]
+                  },
+                  "options": {
+                    "tooltip": {
+                      "trigger": "item"
+                    },
+                    "grid": {
+                      "left": 80,
+                      "right": 20,
+                      "top": 30,
+                      "bottom": 95,
+                      "containLabel": true
+                    },
+                    "xAxis": {
+                      "type": "category",
+                      "data": [
+                        "Houston Water",
+                        "Public Works",
+                        "Solid Waste",
+                        "Parks & Recreation",
+                        "Transportation",
+                        "Emergency Management"
+                      ],
+                      "axisLabel": {
+                        "rotate": 25
+                      }
+                    },
+                    "yAxis": {
+                      "type": "value",
+                      "name": "Hours"
+                    },
+                    "series": [
+                      {
+                        "name": "Response Hours",
+                        "type": "boxplot",
+                        "data": [
+                          [
+                            6.9,
+                            15.2,
+                            42.3,
+                            65.5,
+                            203.8
+                          ],
+                          [
+                            2.1,
+                            14.0,
+                            29.6,
+                            63.6,
+                            228.1
+                          ],
+                          [
+                            1.4,
+                            16.1,
+                            40.8,
+                            67.5,
+                            226.5
+                          ],
+                          [
+                            1.9,
+                            17.1,
+                            34.0,
+                            57.8,
+                            170.6
+                          ],
+                          [
+                            3.2,
+                            12.9,
+                            31.3,
+                            53.9,
+                            129.0
+                          ],
+                          [
+                            3.8,
+                            17.6,
+                            31.0,
+                            78.4,
+                            114.0
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "map",
+          "title": "Houston Map",
+          "children": [
+            {
+              "type": "markdown",
+              "id": "map_note",
+              "title": "Map Instructions",
+              "span": 12,
+              "text": "## Houston map laboratory\nUse the Layers button to switch among clustered cases, priority symbols, proportional risk and continuous response-time coloring. Click a point to select it and update the detail rail.",
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
+            },
+            {
+              "type": "map",
+              "id": "houston_operations_map",
+              "title": "Houston Operations Map \u2014 Cluster, Priority, Risk and Selection",
+              "span": 12,
+              "height": 620,
+              "view": {
+                "center": [
+                  29.76,
+                  -95.37
+                ],
+                "zoom": 10,
+                "minZoom": 7,
+                "maxZoom": 19,
+                "fitMode": "data",
+                "fitPadding": 0.08,
+                "preserveView": true
+              },
+              "basemap": {
+                "type": "customTile",
+                "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "attribution": "\u00a9 OpenStreetMap contributors",
+                "maxZoom": 19
+              },
+              "layers": [
+                {
+                  "id": "clustered_cases",
+                  "name": "Clustered Service Cases",
+                  "source": {
+                    "type": "powerbi",
+                    "bindings": {
+                      "latitude": "Latitude",
+                      "longitude": "Longitude",
+                      "category": "Priority",
+                      "size": "RiskScore",
+                      "label": "CaseNumber"
+                    }
+                  },
+                  "renderer": {
+                    "type": "cluster",
+                    "radius": 46,
+                    "disableAtZoom": 15,
+                    "showCoverageOnHover": true,
+                    "clusterLabel": "count",
+                    "aggregateField": "RecordID"
+                  },
+                  "tooltip": {
+                    "enabled": true,
+                    "fields": [
+                      {
+                        "field": "CaseNumber",
+                        "fieldSource": "powerbi",
+                        "label": "Case"
+                      },
+                      {
+                        "field": "Department",
+                        "fieldSource": "powerbi",
+                        "label": "Department"
+                      },
+                      {
+                        "field": "Priority",
+                        "fieldSource": "powerbi",
+                        "label": "Priority"
+                      },
+                      {
+                        "field": "RiskScore",
+                        "fieldSource": "powerbi",
+                        "label": "Risk",
+                        "format": "decimal2"
+                      }
+                    ]
+                  },
+                  "popup": {
+                    "enabled": true,
+                    "title": "{{CaseNumber}} \u2014 {{Neighborhood}}",
+                    "fields": [
+                      {
+                        "field": "Department",
+                        "fieldSource": "powerbi",
+                        "label": "Department",
+                        "display": "badge"
+                      },
+                      {
+                        "field": "Program",
+                        "fieldSource": "powerbi",
+                        "label": "Program"
+                      },
+                      {
+                        "field": "Status",
+                        "fieldSource": "powerbi",
+                        "label": "Status",
+                        "display": "badge"
+                      },
+                      {
+                        "field": "Priority",
+                        "fieldSource": "powerbi",
+                        "label": "Priority",
+                        "display": "badge"
+                      },
+                      {
+                        "field": "RiskScore",
+                        "fieldSource": "powerbi",
+                        "label": "Risk Score",
+                        "format": "decimal2",
+                        "display": "number"
+                      },
+                      {
+                        "field": "ActualCost",
+                        "fieldSource": "powerbi",
+                        "label": "Actual Cost",
+                        "format": "currency",
+                        "display": "number"
+                      },
+                      {
+                        "field": "ProgressPct",
+                        "fieldSource": "powerbi",
+                        "label": "Progress (%)",
+                        "format": "decimal2",
+                        "display": "number"
+                      },
+                      {
+                        "field": "Owner",
+                        "fieldSource": "powerbi",
+                        "label": "Owner"
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "id": "open_case_detail",
+                        "label": "Open Case Detail",
+                        "icon": "eye",
+                        "uiAction": {
+                          "type": "openOverlay",
+                          "target": "case_detail_modal"
+                        }
+                      },
+                      {
+                        "id": "map_toast",
+                        "label": "Confirm Selection",
+                        "icon": "check",
+                        "uiAction": {
+                          "type": "showToast",
+                          "title": "Map interaction",
+                          "message": "The map popup action executed successfully.",
+                          "intent": "success",
+                          "durationMs": 3200
+                        }
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  },
+                  "legend": {
+                    "visible": true,
+                    "title": "Clustered Cases"
+                  },
+                  "visible": true,
+                  "opacity": 0.9,
+                  "order": 1
+                },
+                {
+                  "id": "priority_points",
+                  "name": "Priority Symbols",
+                  "source": {
+                    "type": "powerbi",
+                    "bindings": {
+                      "latitude": "Latitude",
+                      "longitude": "Longitude",
+                      "category": "Priority",
+                      "label": "CaseNumber"
+                    }
+                  },
+                  "renderer": {
+                    "type": "uniqueValue",
+                    "field": "Priority",
+                    "fieldSource": "powerbi",
+                    "values": [
+                      {
+                        "value": "Critical",
+                        "label": "Critical",
+                        "symbol": {
+                          "shape": "circle",
+                          "fillColor": "#b91c1c",
+                          "color": "#ffffff",
+                          "radius": 10,
+                          "weight": 2,
+                          "fillOpacity": 0.9
+                        }
+                      },
+                      {
+                        "value": "High",
+                        "label": "High",
+                        "symbol": {
+                          "shape": "circle",
+                          "fillColor": "#ea580c",
+                          "color": "#ffffff",
+                          "radius": 8,
+                          "weight": 2,
+                          "fillOpacity": 0.88
+                        }
+                      },
+                      {
+                        "value": "Medium",
+                        "label": "Medium",
+                        "symbol": {
+                          "shape": "circle",
+                          "fillColor": "#eab308",
+                          "color": "#ffffff",
+                          "radius": 7,
+                          "weight": 2,
+                          "fillOpacity": 0.86
+                        }
+                      },
+                      {
+                        "value": "Low",
+                        "label": "Low",
+                        "symbol": {
+                          "shape": "circle",
+                          "fillColor": "#16a34a",
+                          "color": "#ffffff",
+                          "radius": 6,
+                          "weight": 2,
+                          "fillOpacity": 0.84
+                        }
+                      }
+                    ],
+                    "defaultSymbol": {
+                      "shape": "circle",
+                      "fillColor": "#64748b",
+                      "color": "#ffffff",
+                      "radius": 5,
+                      "weight": 1
+                    },
+                    "defaultLabel": "Other"
+                  },
+                  "labels": {
+                    "enabled": true,
+                    "field": "CaseNumber",
+                    "fieldSource": "powerbi",
+                    "template": "{{CaseNumber}}",
+                    "placement": "right",
+                    "minZoom": 15,
+                    "color": "#172033",
+                    "size": 10,
+                    "weight": "700",
+                    "haloColor": "#ffffff",
+                    "haloSize": 2,
+                    "collision": "none",
+                    "maxLabels": 180
+                  },
+                  "tooltip": {
+                    "enabled": true,
+                    "template": "{{CaseNumber}} \u2022 {{Priority}} \u2022 Risk {{RiskScore}}"
+                  },
+                  "popup": {
+                    "enabled": true,
+                    "title": "{{CaseNumber}}",
+                    "fields": [
+                      {
+                        "field": "Neighborhood",
+                        "fieldSource": "powerbi",
+                        "label": "Neighborhood"
+                      },
+                      {
+                        "field": "Priority",
+                        "fieldSource": "powerbi",
+                        "label": "Priority",
+                        "display": "badge"
+                      },
+                      {
+                        "field": "Status",
+                        "fieldSource": "powerbi",
+                        "label": "Status",
+                        "display": "badge"
+                      },
+                      {
+                        "field": "Description",
+                        "fieldSource": "powerbi",
+                        "label": "Description"
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  },
+                  "legend": {
+                    "visible": true,
+                    "title": "Priority"
+                  },
+                  "visible": false,
+                  "opacity": 0.95,
+                  "order": 2
+                },
+                {
+                  "id": "risk_proportional",
+                  "name": "Risk Proportional Symbols",
+                  "source": {
+                    "type": "powerbi",
+                    "bindings": {
+                      "latitude": "Latitude",
+                      "longitude": "Longitude",
+                      "size": "RiskScore",
+                      "label": "RecordID"
+                    }
+                  },
+                  "renderer": {
+                    "type": "proportionalSize",
+                    "field": "RiskScore",
+                    "fieldSource": "powerbi",
+                    "minSize": 4,
+                    "maxSize": 18,
+                    "color": "#7c3aed"
+                  },
+                  "tooltip": {
+                    "enabled": true,
+                    "fields": [
+                      {
+                        "field": "CaseNumber",
+                        "fieldSource": "powerbi",
+                        "label": "Case"
+                      },
+                      {
+                        "field": "RiskScore",
+                        "fieldSource": "powerbi",
+                        "label": "Risk",
+                        "format": "decimal2"
+                      },
+                      {
+                        "field": "ResponseHours",
+                        "fieldSource": "powerbi",
+                        "label": "Response Hours",
+                        "format": "decimal2"
+                      }
+                    ]
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  },
+                  "legend": {
+                    "visible": true,
+                    "title": "Risk Score"
+                  },
+                  "visible": false,
+                  "opacity": 0.78,
+                  "order": 3
+                },
+                {
+                  "id": "response_continuous",
+                  "name": "Response Time Continuous Color",
+                  "source": {
+                    "type": "powerbi",
+                    "bindings": {
+                      "latitude": "Latitude",
+                      "longitude": "Longitude",
+                      "category": "ResponseHours",
+                      "label": "RecordID"
+                    }
+                  },
+                  "renderer": {
+                    "type": "continuousColor",
+                    "field": "ResponseHours",
+                    "fieldSource": "powerbi",
+                    "minColor": "#dbeafe",
+                    "maxColor": "#7f1d1d",
+                    "clamp": true
+                  },
+                  "tooltip": {
+                    "enabled": true,
+                    "template": "{{CaseNumber}} \u2022 {{ResponseHours}} hours"
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "trigger": "auto",
+                    "internalMode": "highlight",
+                    "internalScope": "self",
+                    "externalMode": "selection",
+                    "selectionMode": "replace",
+                    "multiSelect": true,
+                    "showSelector": false,
+                    "clearOnSecondClick": true
+                  },
+                  "legend": {
+                    "visible": true,
+                    "title": "Response Hours"
+                  },
+                  "visible": false,
+                  "opacity": 0.86,
+                  "order": 4
+                }
+              ],
+              "layerPanel": {
+                "visible": true,
+                "position": "right",
+                "defaultOpen": false,
+                "allowViewerReorder": true,
+                "allowViewerOpacity": true,
+                "allowViewerLabels": true
+              },
+              "toolbar": {
+                "visible": true,
+                "home": true,
+                "layers": true,
+                "legend": true,
+                "clearSelection": true,
+                "zoomToSelection": true,
+                "fullscreenWithinVisual": false
+              },
+              "settings": {
+                "showLayerControl": true,
+                "showLegend": true,
+                "clusterPoints": true,
+                "coordinateSystem": "EPSG:4326"
+              },
+              "interaction": {
+                "enabled": true,
+                "trigger": "auto",
+                "internalMode": "highlight",
+                "internalScope": "self",
+                "externalMode": "selection",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": false,
+                "clearOnSecondClick": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "records",
+          "title": "Records & Matrix",
+          "children": [
+            {
+              "type": "table",
+              "id": "operations_table",
+              "title": "Operations Records",
+              "span": 12,
+              "engine": "native",
+              "columns": [
+                {
+                  "field": "CaseNumber",
+                  "title": "Case",
+                  "width": 125,
+                  "frozen": "left",
+                  "sortable": true
+                },
+                {
+                  "field": "ReportDate",
+                  "title": "Report Date",
+                  "width": 110,
+                  "format": "date"
+                },
+                {
+                  "field": "Department",
+                  "title": "Department",
+                  "width": 155
+                },
+                {
+                  "field": "Program",
+                  "title": "Program",
+                  "width": 165
+                },
+                {
+                  "field": "Neighborhood",
+                  "title": "Neighborhood",
+                  "width": 135
+                },
+                {
+                  "field": "Status",
+                  "title": "Status",
+                  "width": 105,
+                  "cellType": "badge",
+                  "intentMap": {
+                    "New": "neutral",
+                    "Assigned": "primary",
+                    "In Progress": "warning",
+                    "QA Review": "warning",
+                    "Complete": "success",
+                    "On Hold": "danger"
+                  }
+                },
+                {
+                  "field": "Priority",
+                  "title": "Priority",
+                  "width": 90,
+                  "cellType": "badge",
+                  "intentMap": {
+                    "Low": "success",
+                    "Medium": "neutral",
+                    "High": "warning",
+                    "Critical": "danger"
+                  }
+                },
+                {
+                  "field": "RiskScore",
+                  "title": "Risk",
+                  "width": 80,
+                  "format": "decimal2",
+                  "hozAlign": "right",
+                  "conditional": [
+                    {
+                      "operator": ">=",
+                      "value": 80,
+                      "color": "#991b1b",
+                      "background": "#fee2e2"
+                    },
+                    {
+                      "operator": ">=",
+                      "value": 60,
+                      "color": "#9a3412",
+                      "background": "#ffedd5"
+                    }
+                  ]
+                },
+                {
+                  "field": "ProgressPct",
+                  "title": "Progress %",
+                  "width": 110,
+                  "format": "decimal2",
+                  "cellType": "progress"
+                },
+                {
+                  "field": "Budget",
+                  "title": "Budget",
+                  "width": 115,
+                  "format": "currency",
+                  "hozAlign": "right"
+                },
+                {
+                  "field": "ActualCost",
+                  "title": "Actual",
+                  "width": 115,
+                  "format": "currency",
+                  "hozAlign": "right"
+                },
+                {
+                  "field": "ResponseHours",
+                  "title": "Response Hrs",
+                  "width": 110,
+                  "format": "decimal2",
+                  "hozAlign": "right"
+                },
+                {
+                  "field": "WithinSLA",
+                  "title": "SLA",
+                  "width": 75,
+                  "cellType": "badge",
+                  "intentMap": {
+                    "Yes": "success",
+                    "No": "danger"
+                  }
+                },
+                {
+                  "field": "Owner",
+                  "title": "Owner",
+                  "width": 110
+                },
+                {
+                  "field": "Team",
+                  "title": "Team",
+                  "width": 115
+                }
+              ],
+              "pagination": true,
+              "pageSize": 25,
+              "pageSizeOptions": [
+                10,
+                25,
+                50,
+                100
+              ],
+              "search": true,
+              "resizableColumns": true,
+              "maxRows": 2000,
+              "stickyHeader": true,
+              "density": "compact",
+              "striped": true,
+              "hover": true,
+              "showRowCount": true,
+              "emptyState": {
+                "icon": "filter",
+                "title": "No matching cases",
+                "description": "Clear or adjust the filters."
+              },
+              "interaction": {
+                "enabled": true,
+                "trigger": "auto",
+                "internalMode": "highlight",
+                "internalScope": "self",
+                "externalMode": "selection",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": true,
+                "clearOnSecondClick": true
+              }
+            },
+            {
+              "type": "matrix",
+              "id": "department_status_matrix",
+              "title": "Department \u00d7 Status Matrix",
+              "span": 12,
+              "rows": [
+                "Department",
+                "Program"
+              ],
+              "columns": [
+                "Status"
+              ],
+              "values": [
+                {
+                  "field": "ActualCost",
+                  "title": "Actual Cost",
+                  "aggregation": "sum",
+                  "format": "currency"
+                },
+                {
+                  "title": "Cases",
+                  "aggregation": "count",
+                  "format": "integer"
+                }
+              ],
+              "showTotals": true,
+              "heatmap": true,
+              "maxRows": 200,
+              "interaction": {
+                "enabled": true,
+                "trigger": "auto",
+                "internalMode": "highlight",
+                "internalScope": "self",
+                "externalMode": "selection",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": false,
+                "clearOnSecondClick": true,
+                "field": "Department"
+              }
+            },
+            {
+              "type": "timeline",
+              "id": "case_timeline",
+              "title": "Recent Case Activity",
+              "span": 12,
+              "dateField": "ReportDate",
+              "titleField": "CaseNumber",
+              "categoryField": "Department",
+              "statusField": "Status",
+              "descriptionField": "Description",
+              "sortDirection": "desc",
+              "limit": 40,
+              "interaction": {
+                "enabled": true,
+                "trigger": "auto",
+                "internalMode": "highlight",
+                "internalScope": "self",
+                "externalMode": "selection",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": false,
+                "clearOnSecondClick": true,
+                "field": "CaseNumber"
+              }
+            }
+          ]
+        },
+        {
+          "id": "component_lab",
+          "title": "Component Lab",
+          "children": [
+            {
+              "type": "section",
+              "id": "navigation_section",
+              "title": "Navigation and Workflow",
+              "span": 12,
+              "children": [
+                {
+                  "type": "steps",
+                  "id": "workflow_steps",
+                  "title": "Workflow Steps",
+                  "span": 12,
+                  "orientation": "horizontal",
+                  "activeStep": "review",
+                  "stateKey": "workflow_steps",
+                  "clickable": true,
+                  "items": [
+                    {
+                      "id": "draft",
+                      "label": "Draft",
+                      "description": "Prepare"
+                    },
+                    {
+                      "id": "review",
+                      "label": "Review",
+                      "description": "Quality check"
+                    },
+                    {
+                      "id": "approve",
+                      "label": "Approve",
+                      "description": "Manager signoff"
+                    },
+                    {
+                      "id": "publish",
+                      "label": "Publish",
+                      "description": "Release"
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                },
+                {
+                  "type": "accordion",
+                  "id": "component_accordion",
+                  "title": "Accordion Example",
+                  "span": 12,
+                  "collapsible": true,
+                  "defaultOpen": false,
+                  "children": [
+                    {
+                      "type": "markdown",
+                      "id": "accordion_text",
+                      "span": 12,
+                      "text": "This accordion demonstrates compact secondary content.",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "dataGrid",
+                      "id": "accordion_grid",
+                      "title": "Selected Record Summary",
+                      "span": 12,
+                      "selectedRow": true,
+                      "columns": 3,
+                      "items": [
+                        {
+                          "label": "Case",
+                          "field": "CaseNumber",
+                          "copyable": true
+                        },
+                        {
+                          "label": "Department",
+                          "field": "Department",
+                          "badge": true
+                        },
+                        {
+                          "label": "Cost",
+                          "field": "ActualCost",
+                          "format": "currency"
+                        }
+                      ],
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "collapsible",
+                  "id": "collapsible_example",
+                  "title": "Collapsible Notes",
+                  "span": 12,
+                  "collapsible": true,
+                  "defaultOpen": true,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "collapsible_text",
+                      "span": 12,
+                      "text": "Collapsible sections help keep an intensive dashboard manageable.",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "id": "forms_section",
+              "title": "Forms and Controls",
+              "span": 12,
+              "children": [
+                {
+                  "type": "grid",
+                  "id": "form_grid",
+                  "title": "Form Controls",
+                  "span": 12,
+                  "columns": 12,
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "textInput",
+                      "id": "lab_text",
+                      "title": "Text Input",
+                      "span": 4,
+                      "field": "Description",
+                      "label": "Text Input",
+                      "placeholder": "Enter sample text",
+                      "defaultValue": "",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "textarea",
+                      "id": "lab_textarea",
+                      "title": "Textarea",
+                      "span": 4,
+                      "field": "Description",
+                      "label": "Notes",
+                      "rows": 4,
+                      "maxLength": 500,
+                      "placeholder": "Enter notes\u2026",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "radioGroup",
+                      "id": "lab_radio",
+                      "title": "Radio Group",
+                      "span": 4,
+                      "field": "Priority",
+                      "label": "Priority",
+                      "options": [
+                        {
+                          "label": "Critical",
+                          "value": "Critical"
+                        },
+                        {
+                          "label": "High",
+                          "value": "High"
+                        },
+                        {
+                          "label": "Medium",
+                          "value": "Medium"
+                        },
+                        {
+                          "label": "Low",
+                          "value": "Low"
+                        }
+                      ],
+                      "defaultValue": "Medium",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "checkbox",
+                      "id": "lab_checkbox",
+                      "title": "Checkbox",
+                      "span": 3,
+                      "field": "Overdue",
+                      "label": "Include overdue",
+                      "defaultValue": false,
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "toggle",
+                      "id": "lab_toggle",
+                      "title": "Toggle",
+                      "span": 3,
+                      "field": "WithinSLA",
+                      "label": "SLA only",
+                      "defaultValue": false,
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "inputGroup",
+                      "id": "lab_input_group",
+                      "title": "Input Group",
+                      "span": 3,
+                      "field": "CaseNumber",
+                      "placeholder": "Case number",
+                      "prefixIcon": "search",
+                      "suffixText": "cases",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "buttonGroup",
+                      "id": "lab_button_group",
+                      "title": "Button Group",
+                      "span": 3,
+                      "label": "View",
+                      "defaultValue": "summary",
+                      "buttons": [
+                        {
+                          "id": "summary",
+                          "label": "Summary",
+                          "value": "summary",
+                          "action": "setTab"
+                        },
+                        {
+                          "id": "detail",
+                          "label": "Detail",
+                          "value": "detail",
+                          "action": "setTab"
+                        }
+                      ],
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "id": "primitive_section",
+              "title": "Primitives and Feedback",
+              "span": 12,
+              "children": [
+                {
+                  "type": "grid",
+                  "id": "primitive_grid",
+                  "title": "Primitives",
+                  "span": 12,
+                  "columns": 12,
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "lab_icon",
+                      "title": "Icon",
+                      "span": 1,
+                      "icon": "info",
+                      "size": "lg",
+                      "ariaLabel": "Information",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "iconButton",
+                      "id": "lab_icon_button",
+                      "title": "Icon Button",
+                      "span": 2,
+                      "icon": "refresh",
+                      "ariaLabel": "Show refresh toast",
+                      "variant": "ghost",
+                      "size": "md",
+                      "uiAction": {
+                        "type": "showToast",
+                        "title": "Icon button",
+                        "message": "The icon button action works.",
+                        "intent": "primary",
+                        "durationMs": 2500
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "avatar",
+                      "id": "lab_avatar",
+                      "title": "Avatar",
+                      "span": 1,
+                      "initials": "HO",
+                      "label": "Houston Operations",
+                      "size": "lg",
+                      "shape": "circle",
+                      "status": "online",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "statusBadge",
+                      "id": "lab_badge",
+                      "title": "Status Badge",
+                      "span": 2,
+                      "value": "Active",
+                      "intent": "success",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "spinner",
+                      "id": "lab_spinner",
+                      "title": "Spinner",
+                      "span": 2,
+                      "label": "Loading sample\u2026",
+                      "inline": false,
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "placeholder",
+                      "id": "lab_placeholder",
+                      "title": "Placeholder",
+                      "span": 4,
+                      "lines": 3,
+                      "placeholderVariant": "text",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "emptyState",
+                      "id": "lab_empty_state",
+                      "title": "Empty State",
+                      "span": 4,
+                      "icon": "info",
+                      "description": "This is a compact empty-state example.",
+                      "compact": true,
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "alert",
+                      "id": "lab_alert",
+                      "title": "Warning Alert",
+                      "span": 4,
+                      "intent": "warning",
+                      "text": "Alerts communicate actionable exceptions.",
+                      "value": "Warning",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "infoCard",
+                      "id": "lab_info",
+                      "title": "Information Card",
+                      "span": 4,
+                      "text": "Information cards provide short contextual guidance.",
+                      "intent": "neutral",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "id": "content_section",
+              "title": "Content and Custom Components",
+              "span": 12,
+              "children": [
+                {
+                  "type": "grid",
+                  "id": "content_grid",
+                  "title": "Content",
+                  "span": 12,
+                  "columns": 12,
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "plain_text_demo",
+                      "title": "Text",
+                      "span": 4,
+                      "text": "Plain text component for concise dashboard copy.",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "markdown",
+                      "id": "markdown_demo",
+                      "title": "Markdown",
+                      "span": 4,
+                      "text": "### Markdown\n- Structured text\n- Emphasis\n- Lists\n\n**Selected case:** {{CaseNumber}}",
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "html",
+                      "id": "html_demo",
+                      "title": "Sanitized HTML",
+                      "span": 4,
+                      "html": "<section class=\"demo-summary\"><strong>Sanitized HTML</strong><span>Selected: {{CaseNumber}}</span></section>",
+                      "slots": {
+                        "footer": "<small>No scripts or inline event handlers.</small>"
+                      },
+                      "interaction": {
+                        "enabled": false,
+                        "internalMode": "none",
+                        "externalMode": "none"
+                      }
+                    },
+                    {
+                      "type": "custom",
+                      "id": "critical_case_cards",
+                      "title": "Custom Repeating Cards",
+                      "span": 12,
+                      "html": "<header class=\"custom-list-head\"><strong>Highest-risk filtered cases</strong><span>Click a card to select it</span></header>",
+                      "repeat": {
+                        "source": "rows",
+                        "as": "row",
+                        "limit": 8,
+                        "template": "<article class=\"custom-case\"><strong>{{CaseNumber}}</strong><span>{{Department}} \u00b7 {{Neighborhood}}</span><small>{{Priority}} \u00b7 Risk {{RiskScore}} \u00b7 {{Status}}</small></article>",
+                        "distinctBy": "RecordID",
+                        "sortBy": "RiskScore",
+                        "sortDirection": "desc"
+                      },
+                      "slots": {
+                        "empty": "<p>No matching cases.</p>",
+                        "footer": "<small>Sorted by risk score.</small>"
+                      },
+                      "data": {
+                        "variant": "card-grid"
+                      },
+                      "interactions": {
+                        "onClick": {
+                          "action": "selectWhere",
+                          "where": {
+                            "op": "=",
+                            "left": {
+                              "field": "RecordID"
+                            },
+                            "right": {
+                              "valueFromRow": "RecordID"
+                            }
+                          }
+                        }
+                      },
+                      "interaction": {
+                        "enabled": true,
+                        "trigger": "click",
+                        "internalMode": "none",
+                        "internalScope": "self",
+                        "externalMode": "selection",
+                        "field": "RecordID",
+                        "operator": "=",
+                        "selectionMode": "replace",
+                        "multiSelect": true,
+                        "showSelector": false,
+                        "clearOnSecondClick": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "drawer",
+              "id": "selected_case_drawer",
+              "title": "Selected Case Drawer",
+              "span": 12,
+              "position": "right",
+              "width": 380,
+              "openWhen": "selectedRow",
+              "stateKey": "selected_case_drawer",
+              "defaultOpen": false,
+              "collapsible": true,
+              "children": [
+                {
+                  "type": "dataGrid",
+                  "id": "drawer_case_grid",
+                  "title": "Case Detail",
+                  "span": 12,
+                  "selectedRow": true,
+                  "columns": 2,
+                  "items": [
+                    {
+                      "label": "Case",
+                      "field": "CaseNumber",
+                      "copyable": true
+                    },
+                    {
+                      "label": "Status",
+                      "field": "Status",
+                      "badge": true
+                    },
+                    {
+                      "label": "Priority",
+                      "field": "Priority",
+                      "badge": true
+                    },
+                    {
+                      "label": "Department",
+                      "field": "Department"
+                    },
+                    {
+                      "label": "Risk",
+                      "field": "RiskScore",
+                      "format": "decimal2"
+                    },
+                    {
+                      "label": "Cost",
+                      "field": "ActualCost",
+                      "format": "currency"
+                    }
+                  ],
+                  "interaction": {
+                    "enabled": false,
+                    "internalMode": "none",
+                    "externalMode": "none"
+                  }
+                }
+              ],
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
+            }
+          ]
+        }
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "none",
+        "internalScope": "self",
+        "externalMode": "none",
+        "selectionMode": "replace",
+        "multiSelect": false,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      }
+    },
+    {
+      "type": "modal",
+      "id": "case_detail_modal",
+      "title": "Selected Case Detail",
+      "span": 12,
+      "size": "lg",
+      "backdropClose": true,
+      "children": [
+        {
+          "type": "dataGrid",
+          "id": "modal_case_grid",
+          "title": "Selected Case",
+          "span": 12,
+          "selectedRow": true,
+          "columns": 3,
+          "items": [
+            {
+              "label": "Case",
+              "field": "CaseNumber",
+              "copyable": true
+            },
+            {
+              "label": "Department",
+              "field": "Department",
+              "badge": true
+            },
+            {
+              "label": "Program",
+              "field": "Program"
+            },
+            {
+              "label": "Status",
+              "field": "Status",
+              "badge": true
+            },
+            {
+              "label": "Priority",
+              "field": "Priority",
+              "badge": true
+            },
+            {
+              "label": "Risk",
+              "field": "RiskScore",
+              "format": "decimal2"
+            },
+            {
+              "label": "Budget",
+              "field": "Budget",
+              "format": "currency"
+            },
+            {
+              "label": "Actual",
+              "field": "ActualCost",
+              "format": "currency"
+            },
+            {
+              "label": "Progress (%)",
+              "field": "ProgressPct",
+              "format": "decimal2"
+            },
+            {
+              "label": "Response",
+              "field": "ResponseHours",
+              "format": "decimal2"
+            },
+            {
+              "label": "Neighborhood",
+              "field": "Neighborhood"
+            },
+            {
+              "label": "Owner",
+              "field": "Owner"
+            }
+          ],
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ],
+      "footer": [
+        {
+          "type": "button",
+          "id": "close_case_modal",
+          "span": 2,
+          "label": "Close",
+          "variant": "primary",
+          "uiAction": {
+            "type": "closeOverlay",
+            "target": "case_detail_modal"
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "styles": {
+    "globalCss": ".hp-app-main {\n  background: #f4f7fb;\n}\n\n.hp-component-tabs > div {\n  min-width: 0;\n}\n\n.hp-tabs > .nav-tabs {\n  display: flex;\n  flex-wrap: nowrap;\n  overflow-x: auto;\n  gap: 4px;\n  padding: 6px;\n  border: 1px solid #dbe3ec;\n  border-radius: 10px;\n  background: #ffffff;\n}\n\n.hp-tabs > .nav-tabs .nav-link {\n  white-space: nowrap;\n  border-radius: 7px;\n}\n\n.hp-tab-content {\n  padding-top: 10px;\n}\n\n.hp-metric-grid {\n  grid-template-columns: repeat(6, minmax(0, 1fr));\n  gap: 10px;\n}\n\n.hp-metric {\n  min-height: 84px;\n  padding: 12px;\n  border: 1px solid #dbe3ec;\n  border-radius: 10px;\n  background: #ffffff;\n  box-shadow: 0 2px 8px rgb(15 23 42 / 6%);\n}\n\n.hp-card-block,\n.hp-component-table > div,\n.hp-component-matrix > div,\n.hp-component-timeline > div,\n.hp-component-advancedChart > div {\n  border-radius: 10px;\n}\n\n.hp-small-multiples > div {\n  display: grid;\n  grid-template-columns: repeat(3, minmax(0, 1fr));\n  gap: 10px;\n}\n\n.demo-summary {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  min-height: 90px;\n  padding: 14px;\n  border: 1px solid #dbe3ec;\n  border-radius: 10px;\n  background: #f8fafc;\n}\n\n.custom-list-head {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  margin-bottom: 10px;\n}\n\n.custom-list-head span {\n  color: #64748b;\n  font-size: 11px;\n}\n\n.hp-custom-repeat {\n  display: grid;\n  grid-template-columns: repeat(4, minmax(0, 1fr));\n  gap: 8px;\n}\n\n.custom-case {\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n  min-width: 0;\n  padding: 10px;\n  border: 1px solid #dbe3ec;\n  border-radius: 9px;\n  background: #ffffff;\n  box-shadow: 0 1px 4px rgb(15 23 42 / 5%);\n  cursor: pointer;\n}\n\n.custom-case:hover {\n  border-color: #75b7e6;\n  background: #f6fbff;\n}\n\n.custom-case span,\n.custom-case small {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.custom-case small {\n  color: #64748b;\n}\n\n.hp-map-frame {\n  width: 100%;\n  min-height: 620px;\n  overflow: hidden;\n  border: 1px solid #dbe3ec;\n  border-radius: 12px;\n  background: #eef3f7;\n  box-shadow: 0 2px 10px rgb(15 23 42 / 7%);\n}\n\n.hp-leaflet-container,\n.hp-leaflet-container.leaflet-container {\n  width: 100%;\n  height: 620px;\n  min-height: 620px;\n  background: #eef3f7;\n}\n\n@media (max-width: 1100px) {\n  .hp-metric-grid {\n    grid-template-columns: repeat(3, minmax(0, 1fr));\n  }\n\n  .hp-small-multiples > div,\n  .hp-custom-repeat {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n  }\n}\n\n@media (max-width: 720px) {\n  .hp-metric-grid,\n  .hp-small-multiples > div,\n  .hp-custom-repeat {\n    grid-template-columns: 1fr;\n  }\n\n  .hp-map-frame {\n    min-height: 480px;\n  }\n\n  .hp-leaflet-container,\n  .hp-leaflet-container.leaflet-container {\n    height: 480px;\n    min-height: 480px;\n  }\n}"
+  }
+}
