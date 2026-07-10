@@ -6,6 +6,9 @@ The repository includes a responsive, dependency-free [product landing page](ind
 
 ## Capability Summary
 
+Full demo:  
+https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo.pbix  
+
 | Area | Capability |
 |------|-----------|
 | Authoring | Guided Builder, AI prompt, validation, preview, repair |
