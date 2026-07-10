@@ -46,6 +46,10 @@ Key guidance:
 - Keep Power BI dashboards compact and enterprise-grade.
 - Do not generate irrelevant web-app functionality.
 - Tabulator is not bundled; HyperPBI native tables are the supported table engine.
+- Never set ECharts useDirtyRect=true; the Power BI runtime forces dirty rectangles and lazy updates off. Built-in charts replace complete options on update.
+- Map Layers, Legend, and Location Search are compact mutually exclusive toolbar popovers. Location Search uses the Runtime Config geocoder and is separate from Zoom to Selection.
+- Map search is user-triggered only: never geocode on render or keystrokes. Maps-package WebAccess and explicit privacy acknowledgment are required; the Core package never performs external geocoding.
+- Viewer layer opacity is entered from 0 through 100 percent and stored in specifications/runtime state from 0 through 1.
 
 Interaction behavior: every new component must include the universal interaction object. Auto externally filters controls/slicers and selects exact identities for rows, chart points, map features, timeline items, and custom row actions. Internal and external modes are independent. Use internalMode:"none" when the source must stay unchanged. Use externalMode:"filter" only with an explicit unambiguous model-column field. Never emit deprecated internal, external, selectable, or table selectionMode properties.
 

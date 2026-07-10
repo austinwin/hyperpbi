@@ -18,7 +18,7 @@ HyperPBI renders Power BI spatial data and a practical subset of public ArcGIS R
 | Labels, tooltips, popups, safe popup actions | Supported |
 | Power BI and map-local selection | Supported |
 | Layer visibility, opacity, labels, order, diagnostics, legend | Supported |
-| Home, Zoom to Selection, Clear Selection, Layers, Legend | Supported |
+| Home, Zoom to Selection, Clear Selection, Layers, Legend, Location Search | Supported |
 
 Map `view.center` is always `[latitude, longitude]`, matching the value passed to Leaflet. ArcGIS queries request output spatial reference 4326.
 
@@ -33,9 +33,17 @@ Configured renderers override service renderers. Service symbology is used only 
 
 Viewport-query layers requery after meaningful user view changes. Non-viewport feature layers and tile/dynamic shells do not. Requests, loading, errors, refresh intervals, and stale-response protection are isolated by layer ID, so a slow or failing layer does not replace successful siblings.
 
+## Toolbar popovers and location search
+
+Layers, Legend, and Location Search open as compact, mutually exclusive popovers anchored inside the map frame. `settings.showLegend` makes the legend feature available; it does not permanently open it. Use `layerPanel.defaultOpen` or `legend.defaultOpen` for the initial popover. Viewer opacity is entered as `0` through `100` percent and stored as `0` through `1`. Location Search and Zoom to Selection are separate toolbar actions.
+
+Location Search uses the geocoder selected in Runtime Config. Nominatim remains the default free provider in the Maps package; ArcGIS and compatible custom HTTPS endpoints are also supported. Search sends a request only after the user presses Enter or clicks Search—there is no automatic geocoding or autocomplete. The Maps package, Power BI WebAccess permission, an enabled valid provider, and explicit privacy acknowledgment are all required. The Core package never performs external geocoding and shows an availability reason instead. Search result markers are nonselectable and never enter Power BI selection state.
+
+A custom geocoder may return one object, an array, or `{ "results": [...] }`. Each result uses `latitude`/`longitude` (or `lat`/`lon`), optional `label`, and optional GeoJSON-order `bounds: [west, south, east, north]`. Existing single-result custom endpoints continue to work through `geocode(...)` fallback behavior.
+
 ## Controls and diagnostics
 
-The toolbar can expose Home, Zoom to Selection, Clear Selection, Layers, and Legend. Layer-panel state supports visibility, opacity, label visibility, viewer order, Reset, and inline diagnostics. Diagnostics include source type/URL, feature and request counts, OID field, strategy, cache use, join field, match counts, warnings, and errors.
+The toolbar can expose Home, Layers, Legend, Location Search, Zoom to Selection, and Clear Selection. Layer-panel state supports visibility, opacity, label visibility, viewer order, Reset, and expandable diagnostics. Diagnostics include source type/URL, feature and request counts, OID field, strategy, cache use, join field, match counts, warnings, and errors.
 
 ## Packages and hosts
 

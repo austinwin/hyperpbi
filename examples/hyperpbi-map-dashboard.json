@@ -10,6 +10,10 @@
       "title": "Asset Locations",
       "height": 420,
       "span": 8,
+      "search": { "enabled": true, "placeholder": "Search for a place or address", "zoom": 16, "showResultMarker": true },
+      "legend": { "defaultOpen": false },
+      "layerPanel": { "visible": true, "defaultOpen": false, "allowViewerReorder": true, "allowViewerOpacity": true, "allowViewerLabels": true },
+      "toolbar": { "visible": true, "home": true, "layers": true, "legend": true, "search": true, "zoomToSelection": true, "clearSelection": true },
       "settings": {
         "fitBounds": true,
         "showLayerControl": true,

@@ -24,9 +24,12 @@ export function resolveRenderer(
 
         case "uniqueValue": {
             const valueMap = new Map<string, ResolvedMapSymbol>();
+            const valueLabels = new Map<string, string>();
             if (definition.values) {
                 for (const entry of definition.values) {
-                    valueMap.set(String(entry.value), resolveSymbol(entry.symbol));
+                    const key = String(entry.value);
+                    valueMap.set(key, resolveSymbol(entry.symbol));
+                    if (entry.label) valueLabels.set(key, entry.label);
                 }
             }
             return {
@@ -34,6 +37,7 @@ export function resolveRenderer(
                 field: definition.field,
                 fieldSource: definition.fieldSource,
                 valueMap,
+                valueLabels: valueLabels.size > 0 ? valueLabels : undefined,
                 defaultSymbol: definition.defaultSymbol ? resolveSymbol(definition.defaultSymbol) : undefined,
                 defaultLabel: definition.defaultLabel,
             };
@@ -94,6 +98,7 @@ export function resolveRenderer(
                 type: "cluster",
                 clusterRadius: definition.radius,
                 disableAtZoom: definition.disableAtZoom,
+                showCoverageOnHover: definition.showCoverageOnHover,
                 clusterLabel: definition.clusterLabel,
                 aggregateField: definition.aggregateField,
             };

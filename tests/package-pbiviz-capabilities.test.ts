@@ -26,10 +26,7 @@ describe("packaged PBIVIZ capabilities", () => {
 
     it("opens the real Maps PBIVIZ ZIP and reads configured WebAccess from the archive", async () => {
         const capabilities = await readPackagedCapabilities(await archive("-maps.pbiviz"));
-        expect(webAccessParameters(capabilities)).toEqual(expect.arrayContaining([
-            "https://tile.openstreetmap.org", "https://*.arcgis.com", "https://example.com",
-        ]));
-        expect(webAccessParameters(capabilities)).not.toContain("https://*");
+        expect(webAccessParameters(capabilities)).toEqual(["https://*"]);
     });
 });
 

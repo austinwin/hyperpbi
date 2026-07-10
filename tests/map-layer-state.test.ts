@@ -1,6 +1,8 @@
 // ── Map Layer State Tests ────────────────────────────────────────────
 import { describe, it, expect } from "vitest";
 import { dashboardReducer, initialDashboardState, type DashboardState, type DashboardAction } from "../src/render/stateStore";
+import { toggleMapToolbarPopover } from "../src/components/maps/MapToolbar";
+import { resolveMapToolbarPopover } from "../src/components/maps/MapBlock";
 
 function state(overrides: Partial<DashboardState> = {}): DashboardState {
     return { ...initialDashboardState(), ...overrides };
@@ -70,6 +72,11 @@ describe("Map Layer State Reducer", () => {
             };
             const next = dashboardReducer(s, action);
             expect(next.mapLayerState.map1?.opacity?.layerA).toBe(0);
+        });
+
+        it("rejects non-finite opacity", () => {
+            const next = dashboardReducer(state(), { type: "mapLayerOpacity", mapId: "map1", layerId: "layerA", opacity: Number.NaN });
+            expect(next.mapLayerState.map1?.opacity?.layerA).toBe(1);
         });
     });
 
@@ -222,25 +229,37 @@ describe("Map Layer State Reducer", () => {
         });
     });
 
-    describe("map UI state toggles", () => {
-        it("toggleMapLayerPanel opens and closes", () => {
-            const s = state();
-            const action: DashboardAction = { type: "toggleMapLayerPanel", mapId: "map1" };
-            const next1 = dashboardReducer(s, action);
-            expect(next1.mapUiState.map1?.layerPanelOpen).toBe(true);
-
-            const next2 = dashboardReducer(next1, action);
-            expect(next2.mapUiState.map1?.layerPanelOpen).toBe(false);
+    describe("map toolbar popover state", () => {
+        it("closes a Layers panel resolved from the component default", () => {
+            const resolvedDefault = resolveMapToolbarPopover(undefined, true, false);
+            const next = dashboardReducer(state(), { type: "setMapToolbarPopover", mapId: "map1", popover: toggleMapToolbarPopover(resolvedDefault, "layers") });
+            expect(next.mapUiState.map1?.toolbarPopover).toBeNull();
         });
 
-        it("toggleMapLegend opens and closes", () => {
-            const s = state();
-            const action: DashboardAction = { type: "toggleMapLegend", mapId: "map1" };
-            const next1 = dashboardReducer(s, action);
-            expect(next1.mapUiState.map1?.legendOpen).toBe(true);
+        it("the first click closes a default-open Legend", () => {
+            const resolvedDefault = resolveMapToolbarPopover(undefined, false, true);
+            expect(toggleMapToolbarPopover(resolvedDefault, "legend")).toBeNull();
+        });
 
-            const next2 = dashboardReducer(next1, action);
-            expect(next2.mapUiState.map1?.legendOpen).toBe(false);
+        it("switches directly from Legend to Layers", () => {
+            expect(toggleMapToolbarPopover("legend", "layers")).toBe("layers");
+        });
+
+        it("clicking an active toolbar button closes it", () => {
+            expect(toggleMapToolbarPopover("search", "search")).toBeNull();
+        });
+
+        it("retains null as explicit closed state", () => {
+            const next = dashboardReducer(state(), { type: "setMapToolbarPopover", mapId: "map1", popover: null });
+            expect(next.mapUiState.map1).toEqual({ toolbarPopover: null });
+            expect(resolveMapToolbarPopover(next.mapUiState.map1?.toolbarPopover, true, true)).toBeNull();
+        });
+
+        it("resetting layer overrides keeps Layers open", () => {
+            const s = state({ mapLayerState: { map1: { opacity: { a: .5 } } }, mapUiState: { map1: { toolbarPopover: "layers" } } });
+            const next = dashboardReducer(s, { type: "resetMapLayers", mapId: "map1" });
+            expect(next.mapLayerState.map1).toBeUndefined();
+            expect(next.mapUiState.map1?.toolbarPopover).toBe("layers");
         });
     });
 });

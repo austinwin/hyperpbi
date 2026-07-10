@@ -42,11 +42,20 @@ describe("MapLayerPanel", () => {
         const { host, dispatch } = mount();
         click(host, "Hide Assets");
         const opacity = host.querySelector<HTMLInputElement>('input[aria-label="Assets opacity"]')!;
-        act(() => { opacity.value = "0.35"; opacity.dispatchEvent(new Event("input", { bubbles: true })); });
+        act(() => { opacity.value = "35"; opacity.dispatchEvent(new Event("input", { bubbles: true })); opacity.dispatchEvent(new FocusEvent("blur", { bubbles: true })); });
         click(host, "Hide labels for Assets");
         expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerVisibility", mapId: "map", layerId: "a", visible: false });
         expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerOpacity", mapId: "map", layerId: "a", opacity: 0.35 });
         expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerLabels", mapId: "map", layerId: "a", visible: false });
+    });
+
+    it("commits zero opacity but does not convert a temporary blank draft to zero", () => {
+        const { host, dispatch } = mount([layer("a")]);
+        const opacity = host.querySelector<HTMLInputElement>('input[aria-label="Assets opacity"]')!;
+        act(() => { opacity.value = ""; opacity.dispatchEvent(new Event("input", { bubbles: true })); opacity.dispatchEvent(new FocusEvent("blur", { bubbles: true })); });
+        expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: "mapLayerOpacity" }));
+        act(() => { opacity.value = "0"; opacity.dispatchEvent(new Event("input", { bubbles: true })); opacity.dispatchEvent(new FocusEvent("blur", { bubbles: true })); });
+        expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerOpacity", mapId: "map", layerId: "a", opacity: 0 });
     });
 
     it("reorders with a complete order containing newly added layer IDs", () => {
@@ -59,7 +68,7 @@ describe("MapLayerPanel", () => {
 
     it("respects viewer restriction flags", () => {
         const { host } = mount(undefined, { allowViewerOpacity: false, allowViewerLabels: false, allowViewerReorder: false });
-        expect(host.querySelector('input[type="range"]')).toBeNull();
+        expect(host.querySelector('input[type="number"]')).toBeNull();
         expect(host.querySelector(".hp-map-layer-label-toggle")).toBeNull();
         expect(host.querySelector(".hp-map-layer-reorder")).toBeNull();
     });
@@ -81,5 +90,10 @@ describe("MapLayerPanel", () => {
         expect(host.querySelector(".hp-map-layer-loading")).not.toBeNull();
         click(host, "Reset");
         expect(dispatch).toHaveBeenCalledWith({ type: "resetMapLayers", mapId: "map" });
+    });
+
+    it("shows an explicit no-layers state", () => {
+        const { host } = mount([]);
+        expect(host.textContent).toContain("No map layers are available.");
     });
 });

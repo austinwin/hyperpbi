@@ -37,3 +37,14 @@ function mergeNode(base: unknown, override: unknown): unknown {
 export function mergeSafeEChartOptions(base: EChartsCoreOption, input: unknown): SanitizedEChartOptions {
     const sanitized = sanitizeEChartOptions(input); return { option: mergeNode(base, sanitized.option) as EChartsCoreOption, warnings: sanitized.warnings };
 }
+
+export function mergeSafeBuiltInEChartOptions(base: EChartsCoreOption, input: unknown): SanitizedEChartOptions {
+    const sanitized = sanitizeEChartOptions(input);
+    const option = mergeNode(base, sanitized.option) as Record<string, unknown>;
+    const baseSeries = (base as { series?: unknown }).series;
+    const overrideSeries = (sanitized.option as { series?: unknown }).series;
+    if (Array.isArray(baseSeries) && Array.isArray(overrideSeries)) {
+        option.series = baseSeries.map((series, index) => mergeNode(series, overrideSeries[index]));
+    }
+    return { option: option as EChartsCoreOption, warnings: sanitized.warnings };
+}

@@ -16,6 +16,8 @@ export interface OverlayAnchor {
     height: number;
 }
 
+export type MapToolbarPopover = "layers" | "legend" | "search" | null;
+
 export interface DashboardState {
     search: string;
     activeTabs: Record<string, string>;
@@ -58,10 +60,9 @@ export interface DashboardState {
         labels?: Record<string, boolean>;
     }>;
 
-    // Map UI state (panel/legend toggles)
+    // Map UI state. undefined means component defaults apply; null is explicitly closed.
     mapUiState: Record<string, {
-        layerPanelOpen?: boolean;
-        legendOpen?: boolean;
+        toolbarPopover?: MapToolbarPopover;
     }>;
 }
 
@@ -111,9 +112,8 @@ export type DashboardAction =
     | { type: "mapLayerOpacity"; mapId: string; layerId: string; opacity: number }
     | { type: "mapLayerLabels"; mapId: string; layerId: string; visible: boolean }
     | { type: "resetMapLayers"; mapId: string }
-    // Map UI state toggles
-    | { type: "toggleMapLayerPanel"; mapId: string }
-    | { type: "toggleMapLegend"; mapId: string };
+    // Map toolbar popover state
+    | { type: "setMapToolbarPopover"; mapId: string; popover: MapToolbarPopover };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
     return {
@@ -295,7 +295,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
                 ...state.mapLayerState,
                 [action.mapId]: {
                     ...existing,
-                    opacity: { ...(existing.opacity ?? {}), [action.layerId]: Math.max(0, Math.min(1, action.opacity)) },
+                    opacity: { ...(existing.opacity ?? {}), [action.layerId]: Math.max(0, Math.min(1, Number.isFinite(action.opacity) ? action.opacity : 1)) },
                 },
             },
         };
@@ -318,8 +318,8 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         return { ...state, mapLayerState: rest };
     }
 
-    // ── Map UI state toggles ──────────────────────────────────────
-    if (action.type === "toggleMapLayerPanel") {
+    // ── Map toolbar popover state ─────────────────────────────────
+    if (action.type === "setMapToolbarPopover") {
         const current = state.mapUiState[action.mapId] ?? {};
         return {
             ...state,
@@ -327,20 +327,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
                 ...state.mapUiState,
                 [action.mapId]: {
                     ...current,
-                    layerPanelOpen: !current.layerPanelOpen,
-                },
-            },
-        };
-    }
-    if (action.type === "toggleMapLegend") {
-        const current = state.mapUiState[action.mapId] ?? {};
-        return {
-            ...state,
-            mapUiState: {
-                ...state.mapUiState,
-                [action.mapId]: {
-                    ...current,
-                    legendOpen: !current.legendOpen,
+                    toolbarPopover: action.popover,
                 },
             },
         };

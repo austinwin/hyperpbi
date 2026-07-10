@@ -97,6 +97,8 @@ The catalog includes approximately 60 first-class component types across 11 cate
 
 See the [component catalog](hyperpbi-component-catalog-reference.html) for complete details.
 
+ECharts uses Canvas by default in Power BI. The runtime forces `useDirtyRect: false` and `lazyUpdate: false` to prevent host repaint corruption; authors should not add `useDirtyRect: true`. Built-in charts submit complete replacement options so removed series, labels, axes, and visual maps do not remain stale.
+
 ### Shared Properties
 
 All components support: `type`, `id`, `title`, `subtitle`, `span`, `className`, `hidden`, `style`, `css`, `slots`, `data`, `visibility`, `interaction`, `interactions`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`.
@@ -151,10 +153,10 @@ The native table engine supports: `density` (compact/normal), `striped`, `hover`
 ## Maps
 
 ### Stable: Power BI Spatial Maps
-Location priority: Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and legend.
+Location priority: Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and compact Layers, Legend, and Location Search toolbar popovers.
 
 ### Practical ArcGIS REST runtime
-Public query-capable FeatureServer/MapServer layers render end to end through the resolved-layer architecture. The runtime supports Power BI geometry joins, viewport queries, configured or opt-in service renderers/labels, tile overlays, basic dynamic images, labels, tooltips, popups/actions, selection, diagnostics, layer controls, legends, Home, and Zoom to Selection. It intentionally excludes secured-service authentication, editing, 3D, relationship/tracing workflows, non-4326 output, density grids, and advanced label collision.
+Public query-capable FeatureServer/MapServer layers render end to end through the resolved-layer architecture. The runtime supports Power BI geometry joins, viewport queries, configured or opt-in service renderers/labels, tile overlays, basic dynamic images, labels, tooltips, popups/actions, selection, diagnostics, layer controls, legends, Home, user-triggered Location Search, and Zoom to Selection. Search uses the Runtime Config geocoder (Nominatim by default in Maps), requires WebAccess and privacy acknowledgment, never runs on render or keystrokes, and is unavailable in Core. Viewer opacity is entered as 0–100 percent and stored as 0–1. It intentionally excludes secured-service authentication, editing, 3D, relationship/tracing workflows, non-4326 output, density grids, and advanced label collision.
 
 ### Build Profiles
 ```bash

@@ -42,6 +42,18 @@ export interface MapBasemapDefinition {
     visible?: boolean;
 }
 
+export interface MapSearchDefinition {
+    enabled?: boolean;
+    placeholder?: string;
+    zoom?: number;
+    showResultMarker?: boolean;
+    clearMarkerOnClose?: boolean;
+}
+
+export interface MapLegendDefinition {
+    defaultOpen?: boolean;
+}
+
 // ── Layer Definition ──────────────────────────────────────────────────
 
 export interface MapLayerDefinition {

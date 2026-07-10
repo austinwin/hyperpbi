@@ -952,11 +952,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1000,11 +1000,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1048,11 +1048,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1096,11 +1096,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true
+                    "lazyUpdate": false
                   },
                   "options": {
                     "tooltip": {
@@ -1372,11 +1372,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1420,11 +1420,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1468,11 +1468,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1516,11 +1516,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1564,11 +1564,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1612,11 +1612,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1660,11 +1660,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true
+                    "lazyUpdate": false
                   },
                   "options": {
                     "tooltip": {
@@ -1717,11 +1717,11 @@
                   "maxDataRows": 30000,
                   "initOptions": {
                     "renderer": "canvas",
-                    "useDirtyRect": true
+                    "useDirtyRect": false
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false
                   },
                   "options": {
@@ -1835,14 +1835,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -2109,14 +2109,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -2268,14 +2268,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -2398,14 +2398,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -2550,14 +2550,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -2633,14 +2633,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -3088,14 +3088,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"
@@ -3966,14 +3966,14 @@
                   "initOptions": {
                     "renderer": "canvas",
                     "devicePixelRatio": 2,
-                    "useDirtyRect": true,
+                    "useDirtyRect": false,
                     "useCoarsePointer": true,
                     "pointerSize": 44,
                     "locale": "EN"
                   },
                   "setOption": {
                     "notMerge": false,
-                    "lazyUpdate": true,
+                    "lazyUpdate": false,
                     "silent": false,
                     "replaceMerge": [
                       "series"

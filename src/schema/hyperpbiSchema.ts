@@ -7,11 +7,11 @@ import type {
     ListGroupItem, DataGridItem, TrackingStage,
 } from "./uiSchema";
 import type {
-    MapViewDefinition, MapBasemapDefinition, MapLayerDefinition,
+    MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition,
 } from "./mapSchema";
 
 // Re-export map types
-export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition };
+export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition };
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
@@ -242,6 +242,8 @@ export interface MapComponent extends ComponentBase {
     view?: MapViewDefinition;
     basemap?: MapBasemapDefinition;
     layers?: MapLayerDefinition[];
+    search?: MapSearchDefinition;
+    legend?: MapLegendDefinition;
 
     layerPanel?: {
         visible?: boolean;
@@ -257,9 +259,9 @@ export interface MapComponent extends ComponentBase {
         home?: boolean;
         layers?: boolean;
         legend?: boolean;
+        search?: boolean;
         clearSelection?: boolean;
         zoomToSelection?: boolean;
-        fullscreenWithinVisual?: boolean;
     };
 
     // ── Legacy properties (still supported for backward compatibility) ──

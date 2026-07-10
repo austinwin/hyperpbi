@@ -1070,11 +1070,11 @@
                           "maxDataRows": 30000,
                           "initOptions": {
                             "renderer": "canvas",
-                            "useDirtyRect": true
+                            "useDirtyRect": false
                           },
                           "setOption": {
-                            "notMerge": false,
-                            "lazyUpdate": true,
+                            "notMerge": true,
+                            "lazyUpdate": false,
                             "silent": false
                           },
                           "options": {

@@ -2,7 +2,7 @@ import { NormalizedData } from "../data/normalizeData";
 
 export function SetupExperience({ data }: { data: NormalizedData }) {
     return <div class="hp-product-page hp-setup hp-setup-ai">
-        <header><div class="hp-product-mark">H</div><div><h1>HyperPBI</h1><p>Designed, Developed and Maintained by H.Nguyen - WWO · {data.rows.length.toLocaleString()} rows · {Object.keys(data.fields).length} fields ready</p></div></header>
+        <header><div class="hp-product-mark">H</div><div><h1>HyperPBI</h1><p>Designed, Developed and Maintained by H.Nguyen - WWO - <a href="https://austinwin.github.io/hyperpbi" target="_blank" rel="noreferrer">HyperPBI Page: https://austinwin.github.io/hyperpbi</a> · {data.rows.length.toLocaleString()} rows · {Object.keys(data.fields).length} fields ready</p></div></header>
         <main>
             <span class="hp-eyebrow">YOUR DATA IS READY</span>
             <h2>Open HyperPBI Designer from the visual menu</h2>

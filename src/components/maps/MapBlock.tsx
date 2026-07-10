@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from "preact/hooks";
 import { MapComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
-import { resolveMapStyle } from "../../maps/mapStyleResolver";
 import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 import { MapLayerPanel } from "./MapLayerPanel";
@@ -9,6 +8,9 @@ import { LeafletMap, type LeafletMapController } from "./LeafletMap";
 import { MapEmptyState } from "./MapEmptyState";
 import { MapLegendPanel } from "./MapLegendPanel";
 import { MapToolbar } from "./MapToolbar";
+import { mapToolbarPopoverId } from "./MapToolbar";
+import { MapToolbarPopover } from "./MapToolbarPopover";
+import { MapSearchPanel } from "./MapSearchPanel";
 import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import { resolveLegacyMapLayers } from "../../maps/model/legacyMapResolver";
 import { resolvePowerBiLayer, type MapSourceContext } from "../../maps/sources/mapSourceResolver";
@@ -19,6 +21,7 @@ import { resolveRenderer } from "../../maps/renderers/mapRendererResolver";
 import type { ResolvedMapLayer, ResolvedMapFeature, MapJoinDiagnostics } from "../../maps/model/resolvedMapTypes";
 import type { MapLayerDefinition, ArcGisFeatureLayerSource, ArcGisTileLayerSource, ArcGisDynamicLayerSource } from "../../schema/mapSchema";
 import { resolvedFeatureValue } from "../../maps/model/mapFeatureValue";
+import type { MapToolbarPopover as MapToolbarPopoverState } from "../../render/stateStore";
 
 export interface MapViewportState {
     bounds: [number, number, number, number];
@@ -32,6 +35,17 @@ export interface ArcGisFeatureRuntimeEntry {
     loading: boolean;
     error?: string;
     requestVersion: number;
+}
+
+export function resolveMapToolbarPopover(
+    stored: MapToolbarPopoverState | undefined,
+    layerDefaultOpen: boolean | undefined,
+    legendDefaultOpen: boolean | undefined
+): MapToolbarPopoverState {
+    if (stored !== undefined) return stored;
+    if (layerDefaultOpen) return "layers";
+    if (legendDefaultOpen) return "legend";
+    return null;
 }
 
 export function roundViewportBounds(
@@ -128,9 +142,17 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const mapUiState = context.state.mapUiState[id] ?? {};
     const layerPanelEnabled = component.settings?.showLayerControl !== false &&
         component.layerPanel?.visible !== false;
-    const layerPanelOpen = mapUiState.layerPanelOpen ?? component.layerPanel?.defaultOpen ?? false;
     const legendEnabled = component.settings?.showLegend !== false;
-    const legendOpen = mapUiState.legendOpen ?? component.settings?.showLegend ?? false;
+    const configuredGeocoder = config.providers?.geocoder;
+    const searchEnabled = component.search?.enabled === true || (
+        component.search?.enabled !== false &&
+        Boolean(configuredGeocoder?.enabled && configuredGeocoder.provider !== "none")
+    );
+    const activeToolbarPopover = resolveMapToolbarPopover(
+        mapUiState.toolbarPopover,
+        component.layerPanel?.defaultOpen,
+        component.legend?.defaultOpen
+    );
 
     // ── Per-layer abort controllers and refresh timers ───────────────
     const layerAbortControllersRef = useRef<Map<string, AbortController>>(new Map());
@@ -372,9 +394,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
             .sort((a, b) => a.order - b.order);
     }, [syncedLayers, resolvedArcGisFeatureLayers, staticExternalLayers, layerRuntimeState]);
 
-    const mapStyle = useMemo(() => resolveMapStyle(component, settings.theme.primary, map),
-        [component, settings.theme.primary, map]);
-
     // ── Determine if we should show map or empty state ───────────────
     const hasAnyFeatures = allResolvedLayers.some(l => l.features.length > 0);
     const hasTileOrDynamicLayers = allResolvedLayers.some(
@@ -403,19 +422,54 @@ export function MapBlock({ component }: { component: MapComponent }) {
         content = <MapEmptyState reason={arcGisError} />;
     } else {
         const showToolbar = component.toolbar?.visible !== false;
+        const closePopover = () => context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
+        const popoverContent = activeToolbarPopover === "layers" ? (
+            <MapToolbarPopover
+                id={mapToolbarPopoverId(id, "layers")}
+                title="Layers"
+                subtitle={`${allResolvedLayers.length.toLocaleString()} total`}
+                onClose={closePopover}
+            >
+                <MapLayerPanel mapId={id} layers={allResolvedLayers} configuration={component.layerPanel} />
+            </MapToolbarPopover>
+        ) : activeToolbarPopover === "legend" ? (
+            <MapToolbarPopover
+                id={mapToolbarPopoverId(id, "legend")}
+                title="Legend"
+                subtitle="Visible layers"
+                onClose={closePopover}
+            >
+                <MapLegendPanel mapId={id} layers={allResolvedLayers} />
+            </MapToolbarPopover>
+        ) : activeToolbarPopover === "search" ? (
+            <MapToolbarPopover
+                id={mapToolbarPopoverId(id, "search")}
+                title="Location search"
+                subtitle="User-triggered geocoding"
+                onClose={closePopover}
+            >
+                <MapSearchPanel
+                    mapId={id}
+                    definition={component.search}
+                    onResult={result => mapControllerRef.current?.showSearchResult(result)}
+                    onClearResult={() => mapControllerRef.current?.clearSearchResult()}
+                />
+            </MapToolbarPopover>
+        ) : undefined;
         content = <>
             <div class="hp-map-frame">
                 {showToolbar && (
                     <MapToolbar
+                        mapId={id}
                         component={component}
-                        layerPanelOpen={layerPanelOpen}
-                        legendOpen={legendOpen}
+                        activePopover={activeToolbarPopover}
                         layerControlEnabled={layerPanelEnabled}
                         legendEnabled={legendEnabled}
+                        searchEnabled={searchEnabled}
+                        popoverContent={popoverContent}
                         onHome={() => mapControllerRef.current?.home()}
                         onZoomToSelection={() => mapControllerRef.current?.zoomToSelection()}
-                        onToggleLayers={() => context.dispatch({ type: "toggleMapLayerPanel", mapId: id })}
-                        onToggleLegend={() => context.dispatch({ type: "toggleMapLegend", mapId: id })}
+                        onSetPopover={popover => context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover })}
                         onClearSelection={() => {
                             context.dispatch({ type: "resetInteractions" });
                             context.dispatch({ type: "clearMapFeatures", mapId: id });
@@ -424,15 +478,11 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 )}
                 <LeafletMap
                     component={component}
-                    mapData={map}
                     resolvedLayers={allResolvedLayers}
                     onViewportChange={handleViewportChange}
                     onControllerReady={handleControllerReady}
                     onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
                 />
-                {legendEnabled && legendOpen && (
-                    <MapLegendPanel mapId={id} layers={allResolvedLayers} />
-                )}
             </div>
             {[...map.warnings, ...mapRuntimeWarnings].length > 0 && (
                 <div class="hp-map-warning">{[...map.warnings, ...mapRuntimeWarnings].join(" ")}</div>
@@ -440,19 +490,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
         </>;
     }
 
-    // ── Show layer panel only when enabled, layers exist, and panel is open ──
-    const showLayerPanel = layerPanelEnabled &&
-        allResolvedLayers.length > 0 && layerPanelOpen;
-
     return (
         <Card title={component.title}>
-            {showLayerPanel && (
-                <MapLayerPanel
-                    mapId={id}
-                    layers={allResolvedLayers}
-                    configuration={component.layerPanel}
-                />
-            )}
             {content}
         </Card>
     );

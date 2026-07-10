@@ -1,184 +1,84 @@
-// ── Map Legend Panel ─────────────────────────────────────────────────
-// Shows per-layer legends from resolved layers. Supports simple,
-// unique-value, class-break, continuous color, and proportional size.
-
 import { h } from "preact";
-import type { ResolvedMapLayer, ResolvedMapRenderer, ResolvedMapSymbol, ResolvedClassBreak } from "../../maps/model/resolvedMapTypes";
+import type { ResolvedMapLayer, ResolvedMapRenderer, ResolvedMapSymbol } from "../../maps/model/resolvedMapTypes";
 import { useRenderContext } from "../../render/RenderContext";
 
-interface MapLegendPanelProps {
-    mapId: string;
-    layers: ResolvedMapLayer[];
-}
-
-export function MapLegendPanel({ mapId, layers }: MapLegendPanelProps) {
+export function MapLegendPanel({ mapId, layers }: { mapId: string; layers: ResolvedMapLayer[] }) {
     const context = useRenderContext();
-    const mapState = context.state.mapLayerState[mapId];
-    const visibility = mapState?.visibility ?? {};
-
-    const visibleLayers = layers.filter(l => {
-        const isVisible = visibility[l.id] ?? l.visible ?? true;
-        return isVisible && l.legend?.visible !== false && hasMeaningfulLegend(l);
-    });
-
-    if (visibleLayers.length === 0) return null;
+    const visibility = context.state.mapLayerState[mapId]?.visibility ?? {};
+    const visibleLayers = layers.filter(layer => (visibility[layer.id] ?? layer.visible ?? true) && layer.legend?.visible !== false && hasMeaningfulLegend(layer.renderer));
 
     return (
         <div class="hp-map-legend">
-            {visibleLayers.map(layer => (
-                layer.legend?.collapsed ? (
-                    <details key={layer.id} class="hp-map-legend-layer">
-                        <summary class="hp-map-legend-title">{layer.legend?.title ?? layer.name}</summary>
-                        {renderLegendEntries(layer.renderer)}
+            {visibleLayers.length === 0 ? (
+                <div class="hp-map-panel-empty">No legend entries are available for the currently visible layers.</div>
+            ) : visibleLayers.map(layer => {
+                const title = layer.legend?.title ?? layer.name;
+                return layer.legend?.collapsed ? (
+                    <details key={layer.id} class="hp-map-legend-group">
+                        <summary class="hp-map-legend-title" title={title}>{title}</summary>
+                        <div class="hp-map-legend-entries">{renderLegendEntries(layer.renderer, layer.name)}</div>
                     </details>
                 ) : (
-                    <div key={layer.id} class="hp-map-legend-layer">
-                        <strong class="hp-map-legend-title">{layer.legend?.title ?? layer.name}</strong>
-                        {renderLegendEntries(layer.renderer)}
-                    </div>
-                )
-            ))}
+                    <section key={layer.id} class="hp-map-legend-group">
+                        <strong class="hp-map-legend-title" title={title}>{title}</strong>
+                        <div class="hp-map-legend-entries">{renderLegendEntries(layer.renderer, layer.name)}</div>
+                    </section>
+                );
+            })}
         </div>
     );
 }
 
-function hasMeaningfulLegend(layer: ResolvedMapLayer): boolean {
-    const r = layer.renderer as ResolvedMapRenderer;
-    if (r.type === "simple" && !r.symbol) return false;
-    if (r.type === "heatmap" || r.type === "densityGrid") return false;
-    if (r.type === "cluster") return true;
-    if (r.type === "simple") return true;
-    if (r.type === "uniqueValue" && r.valueMap && r.valueMap.size > 0) return true;
-    if (r.type === "classBreaks" && r.breaks && r.breaks.length > 0) return true;
-    if (r.type === "continuousColor") return true;
-    if (r.type === "proportionalSize") return true;
-    return false;
+function hasMeaningfulLegend(renderer: ResolvedMapRenderer): boolean {
+    if (renderer.type === "heatmap" || renderer.type === "densityGrid" || renderer.type === "service") return false;
+    if (renderer.type === "uniqueValue") return Boolean(renderer.valueMap?.size || renderer.defaultSymbol);
+    if (renderer.type === "classBreaks") return Boolean(renderer.breaks?.length);
+    return ["simple", "continuousColor", "proportionalSize", "cluster"].includes(renderer.type);
 }
 
-function renderLegendEntries(renderer: ResolvedMapRenderer): h.JSX.Element | null {
-    switch (renderer.type) {
-        case "simple":
-            return renderSimpleLegend(renderer.symbol);
-        case "uniqueValue":
-            return renderUniqueValueLegend(renderer);
-        case "classBreaks":
-            return renderClassBreaksLegend(renderer);
-        case "continuousColor":
-            return renderContinuousLegend(renderer);
-        case "proportionalSize":
-            return renderProportionalLegend(renderer);
-        case "cluster":
-            return <div class="hp-map-legend-entry">Clustered points</div>;
-        default:
-            return null;
-    }
-}
-
-function renderSimpleLegend(symbol?: ResolvedMapSymbol): h.JSX.Element {
+function swatch(symbol: ResolvedMapSymbol | undefined, label: string): h.JSX.Element {
     const color = symbol?.fillColor ?? symbol?.color ?? "#3388ff";
-    const outlineColor = symbol?.outlineColor ?? symbol?.color ?? color;
-    const weight = symbol?.weight ?? symbol?.outlineWidth ?? 2;
-    return (
-        <div class="hp-map-legend-entry">
-            <span class="hp-map-legend-swatch" title={symbol?.shape ?? "default symbol"} style={{
-                background: color,
-                border: `${weight}px solid ${outlineColor}`,
-            }} />
-            <span>{symbol?.shape ?? "default"}</span>
-        </div>
-    );
+    const outline = symbol?.outlineColor ?? symbol?.color ?? color;
+    const width = symbol?.outlineWidth ?? symbol?.weight ?? 1;
+    return <span class="hp-map-legend-swatch" title={label} style={{ background: color, border: `${width}px solid ${outline}` }} />;
 }
 
-function renderUniqueValueLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
-    const entries: h.JSX.Element[] = [];
-    if (renderer.valueMap) {
-        for (const [value, symbol] of renderer.valueMap) {
-            const color = symbol.fillColor ?? symbol.color ?? "#3388ff";
-            const outlineColor = symbol.outlineColor ?? symbol.color ?? color;
-            const outlineWidth = symbol.outlineWidth ?? symbol.weight ?? 1;
-            entries.push(
-                <div key={value} class="hp-map-legend-entry">
-                    <span class="hp-map-legend-swatch" title={String(value)} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
-                    <span>{String(value)}</span>
-                </div>
-            );
-        }
+function entry(label: string, symbol?: ResolvedMapSymbol): h.JSX.Element {
+    return <div class="hp-map-legend-entry">{swatch(symbol, label)}<span title={label}>{label}</span></div>;
+}
+
+function renderLegendEntries(renderer: ResolvedMapRenderer, layerName: string): h.JSX.Element | h.JSX.Element[] {
+    if (renderer.type === "simple") return entry(layerName || "Features", renderer.symbol);
+    if (renderer.type === "uniqueValue") {
+        const entries: h.JSX.Element[] = [];
+        for (const [value, symbol] of renderer.valueMap ?? []) entries.push(<div key={value}>{entry(renderer.valueLabels?.get(value) ?? String(value), symbol)}</div>);
+        if (renderer.defaultSymbol) entries.push(<div key="__other__">{entry(renderer.defaultLabel ?? "Other", renderer.defaultSymbol)}</div>);
+        return entries;
     }
-    if (renderer.defaultSymbol) {
-        const color = renderer.defaultSymbol.fillColor ?? renderer.defaultSymbol.color ?? "#ccc";
-        const outlineColor = renderer.defaultSymbol.outlineColor ?? renderer.defaultSymbol.color ?? color;
-        const outlineWidth = renderer.defaultSymbol.outlineWidth ?? renderer.defaultSymbol.weight ?? 1;
-        entries.push(
-            <div key="__default__" class="hp-map-legend-entry">
-                <span class="hp-map-legend-swatch" title={renderer.defaultLabel ?? "Other"} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
-                <span>{renderer.defaultLabel ?? "Other"}</span>
-            </div>
-        );
+    if (renderer.type === "classBreaks") {
+        return (renderer.breaks ?? []).map(brk => {
+            const label = brk.label ?? `${brk.min.toLocaleString()} – ${brk.max.toLocaleString()}`;
+            return <div key={`${brk.min}-${brk.max}`}>{entry(label, brk.symbol)}</div>;
+        });
     }
-    return <div>{entries}</div>;
-}
-
-function renderClassBreaksLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
-    const entries: h.JSX.Element[] = [];
-    if (renderer.breaks) {
-        for (const brk of renderer.breaks) {
-            const color = brk.symbol?.fillColor ?? brk.symbol?.color ?? "#3388ff";
-            const outlineColor = brk.symbol?.outlineColor ?? brk.symbol?.color ?? color;
-            const outlineWidth = brk.symbol?.outlineWidth ?? brk.symbol?.weight ?? 1;
-            const label = brk.label ?? `${brk.min} – ${brk.max}`;
-            entries.push(
-                <div key={`${brk.min}-${brk.max}`} class="hp-map-legend-entry">
-                    <span class="hp-map-legend-swatch" title={label} style={{ background: color, border: `${outlineWidth}px solid ${outlineColor}` }} />
-                    <span>{label}</span>
-                </div>
-            );
-        }
+    if (renderer.type === "continuousColor") {
+        const min = renderer.domainMin ?? 0;
+        const max = renderer.domainMax ?? 1;
+        return <div class="hp-map-legend-continuous"><div class="hp-map-legend-gradient" title={`${min} to ${max}`} style={{ background: `linear-gradient(90deg, ${renderer.minColor ?? "#f0f0f0"}, ${renderer.maxColor ?? "#3388ff"})` }} /><div class="hp-map-legend-range"><span>{min.toLocaleString()}</span><span>{max.toLocaleString()}</span></div></div>;
     }
-    return <div>{entries}</div>;
-}
-
-function renderContinuousLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
-    const minColor = renderer.minColor ?? "#f0f0f0";
-    const maxColor = renderer.maxColor ?? "#3388ff";
-    const domainMin = renderer.domainMin ?? 0;
-    const domainMax = renderer.domainMax ?? 1;
-    return (
-        <div class="hp-map-legend-entry">
-            <div class="hp-map-gradient" title={`${domainMin} to ${domainMax}`} style={{
-                background: `linear-gradient(90deg, ${minColor}, ${maxColor})`,
-                width: "100%", height: "12px", borderRadius: "2px",
-            }} />
-            <div class="hp-map-legend-range">
-                <span>{domainMin.toLocaleString()}</span>
-                <span>{domainMax.toLocaleString()}</span>
-            </div>
-        </div>
-    );
-}
-
-function renderProportionalLegend(renderer: ResolvedMapRenderer): h.JSX.Element {
-    const minSize = renderer.minSize ?? 4;
-    const maxSize = renderer.maxSize ?? 24;
-    const color = renderer.baseColor ?? "#3388ff";
-    const minValue = renderer.domainMin ?? 0;
-    const maxValue = renderer.domainMax ?? 1;
-    const midValue = (minValue + maxValue) / 2;
-    return (
-        <div class="hp-map-legend-entry">
-            <div class="hp-map-legend-sizes">
-                <span class="hp-map-legend-size-dot" title={`Minimum: ${minValue}`} style={{
-                    width: `${minSize}px`, height: `${minSize}px`, background: color,
-                }} />
-                <span class="hp-map-legend-size-dot" title={`Middle: ${midValue}`} style={{
-                    width: `${Math.round((minSize + maxSize) / 2)}px`,
-                    height: `${Math.round((minSize + maxSize) / 2)}px`,
-                    background: color,
-                }} />
-                <span class="hp-map-legend-size-dot" title={`Maximum: ${maxValue}`} style={{
-                    width: `${maxSize}px`, height: `${maxSize}px`, background: color,
-                }} />
-            </div>
-            <div class="hp-map-legend-range"><span>{minValue.toLocaleString()}</span><span>{midValue.toLocaleString()}</span><span>{maxValue.toLocaleString()}</span></div>
-        </div>
-    );
+    if (renderer.type === "proportionalSize") {
+        const minValue = renderer.domainMin ?? 0;
+        const maxValue = renderer.domainMax ?? 1;
+        const midValue = (minValue + maxValue) / 2;
+        const minSize = renderer.minSize ?? 4;
+        const maxSize = renderer.maxSize ?? 24;
+        const midSize = Math.round((minSize + maxSize) / 2);
+        const values = [[minValue, minSize], [midValue, midSize], [maxValue, maxSize]];
+        return <div class="hp-map-legend-proportional">{values.map(([value, size]) => <div class="hp-map-legend-size" key={String(value)}><span style={{ width: `${size}px`, height: `${size}px`, background: renderer.baseColor ?? "#3388ff" }} /><b>{value.toLocaleString()}</b></div>)}</div>;
+    }
+    if (renderer.type === "cluster") {
+        const label = renderer.clusterLabel === "sum" ? "Cluster sum" : renderer.clusterLabel === "count" ? "Cluster count" : "Clustered points";
+        return <div class="hp-map-legend-entry hp-map-legend-cluster"><span class="hp-map-cluster-swatch"><b>3</b></span><span title={label}>{label}</span></div>;
+    }
+    return <span />;
 }

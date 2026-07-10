@@ -175,10 +175,17 @@ describe("MapBlock ArcGIS runtime", () => {
         expect(tileError.tile?.url).toContain("MapServer");
     });
 
-    it("uses layer panel and legend defaults from both settings and component configuration", async () => {
-        const { host } = mount(component([featureLayer("ui")], { layerPanel: { visible: true, defaultOpen: true } }));
+    it("uses one resolved toolbar default and switches directly between panels", async () => {
+        const mapComponent = component([featureLayer("ui")], { layerPanel: { visible: true, defaultOpen: true }, legend: { defaultOpen: true } });
+        const { host, value } = mount(mapComponent);
         await settle();
         expect(host.querySelector(".hp-map-layer-panel")).not.toBeNull();
+        expect(host.querySelector(".hp-map-legend")).toBeNull();
+        act(() => (host.querySelector('[aria-label="Legend"]') as HTMLButtonElement).click());
+        expect(value.dispatch).toHaveBeenCalledWith({ type: "setMapToolbarPopover", mapId: "map", popover: "legend" });
+        value.state.mapUiState.map = { toolbarPopover: "legend" };
+        act(() => render(h(RenderContext.Provider, { value }, h(MapBlock, { component: mapComponent })), host));
+        expect(host.querySelector(".hp-map-layer-panel")).toBeNull();
         expect(host.querySelector(".hp-map-legend")).not.toBeNull();
     });
 

@@ -24,20 +24,21 @@ describe("MapLegendPanel", () => {
     it("renders all supported renderer types across multiple layers", () => {
         const host = mount([
             layer("Simple", { type: "simple", symbol: { shape: "circle", fillColor: "#111", outlineColor: "#fff", outlineWidth: 2 } }),
-            layer("Unique", { type: "uniqueValue", valueMap: new Map([["Open", { fillColor: "#0f0", outlineColor: "#030", outlineWidth: 3 }]]) }),
+            layer("Unique", { type: "uniqueValue", valueMap: new Map([["Open", { fillColor: "#0f0", outlineColor: "#030", outlineWidth: 3 }]]), valueLabels: new Map([["Open", "Open facilities"]]) }),
             layer("Breaks", { type: "classBreaks", breaks: [{ min: 0, max: 10, symbol: { fillColor: "#f00", outlineColor: "#300", outlineWidth: 2 } }] }),
             layer("Continuous", { type: "continuousColor", minColor: "#fff", maxColor: "#000", domainMin: 5, domainMax: 25 }),
             layer("Proportional", { type: "proportionalSize", minSize: 4, maxSize: 20, baseColor: "#00f", domainMin: 10, domainMax: 30 }),
             layer("Cluster", { type: "cluster" }),
         ]);
-        expect(host.querySelectorAll(".hp-map-legend-layer")).toHaveLength(6);
-        expect(host.textContent).toContain("Open");
+        expect(host.querySelectorAll(".hp-map-legend-group")).toHaveLength(6);
+        expect(host.textContent).toContain("Open facilities");
         expect(host.textContent).toContain("0 – 10");
         expect(host.textContent).toContain("Clustered points");
         expect(host.textContent).toContain("10");
         expect(host.textContent).toContain("20");
         expect(host.textContent).toContain("30");
-        expect(host.querySelector('[title="Open"]')?.getAttribute("style")).toContain("3px solid");
+        expect(host.textContent).not.toContain("default");
+        expect(host.querySelector('[title="Open facilities"]')?.getAttribute("style")).toContain("3px solid");
     });
 
     it("renders an Other category when a default symbol has no label", () => {
@@ -60,7 +61,12 @@ describe("MapLegendPanel", () => {
             layer("Density", { type: "densityGrid" }),
             layer("Shown", { type: "simple", symbol: { fillColor: "#123" } }),
         ], ["Hidden"]);
-        expect(host.querySelectorAll(".hp-map-legend-layer")).toHaveLength(1);
+        expect(host.querySelectorAll(".hp-map-legend-group")).toHaveLength(1);
         expect(host.textContent).toContain("Shown");
+    });
+
+    it("shows an explicit empty state when no visible layer has legend entries", () => {
+        const host = mount([layer("Hidden", { type: "simple", symbol: {} })], ["Hidden"]);
+        expect(host.textContent).toContain("No legend entries are available for the currently visible layers.");
     });
 });

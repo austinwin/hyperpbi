@@ -67,6 +67,7 @@ export interface ResolvedMapRenderer {
     field?: string;
     fieldSource?: "powerbi" | "service" | "joined";
     valueMap?: Map<string, ResolvedMapSymbol>;
+    valueLabels?: Map<string, string>;
     defaultSymbol?: ResolvedMapSymbol;
     defaultLabel?: string;
 
@@ -97,6 +98,7 @@ export interface ResolvedMapRenderer {
     // Cluster
     clusterRadius?: number;
     disableAtZoom?: number;
+    showCoverageOnHover?: boolean;
     clusterLabel?: "count" | "sum";
     aggregateField?: string;
 }

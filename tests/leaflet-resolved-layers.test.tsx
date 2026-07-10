@@ -155,13 +155,13 @@ function testContext() {
 }
 
 function renderMap(host: HTMLElement, context: RenderContextValue, component: MapComponent, layers: ResolvedMapLayer[], callbacks: { onControllerReady?: (controller: LeafletMapController) => void; onViewportChange?: (viewport: unknown) => void; onLayerRuntimeStateChange?: (layerId: string, update: unknown) => void } = {}) {
-    act(() => render(h(RenderContext.Provider, { value: context }, h(LeafletMap, { component, mapData: data.map, resolvedLayers: layers, ...callbacks })), host));
+    act(() => render(h(RenderContext.Provider, { value: context }, h(LeafletMap, { component, resolvedLayers: layers, ...callbacks })), host));
 }
 
 beforeEach(() => {
     vi.useFakeTimers();
     for (const collection of [mocks.maps, mocks.tiles, mocks.circles, mocks.geoLayers, mocks.dynamicLayers, mocks.labelCleanups]) collection.length = 0;
-    for (const fn of [mocks.map, mocks.tileLayer, mocks.circleMarker, mocks.geoJSON, mocks.featureGroup, mocks.createDynamic, mocks.createLabels]) fn.mockClear();
+    for (const fn of [mocks.map, mocks.tileLayer, mocks.circleMarker, mocks.geoJSON, mocks.featureGroup, mocks.markerClusterGroup, mocks.createDynamic, mocks.createLabels]) fn.mockClear();
     vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
 });
 afterEach(() => { vi.useRealTimers(); document.body.replaceChildren(); });
@@ -248,6 +248,55 @@ describe("LeafletMap external layer lifecycle", () => {
         test.value.state.mapLayerState.map = { visibility: { dynamic: true } };
         renderMap(host, test.value, component, [dynamic], { onLayerRuntimeStateChange: runtimeState });
         expect(mocks.dynamicLayers).toHaveLength(2);
+    });
+});
+
+describe("LeafletMap rendering safety", () => {
+    it("applies the component height with a safe minimum", () => {
+        const host = document.createElement("div"); const test = testContext();
+        renderMap(host, test.value, { type: "map", id: "map", height: 180, basemap: { type: "none" }, view: { fitMode: "none" } }, []);
+        const container = host.querySelector<HTMLElement>(".hp-leaflet-container")!;
+        expect(container.style.height).toBe("220px");
+        expect(container.style.width).toBe("100%");
+    });
+
+    it("multiplies point and GeoJSON stroke and fill opacity by layer opacity", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const renderer = { type: "simple" as const, symbol: { opacity: .8, fillOpacity: .4, color: "#111", fillColor: "#222" } };
+        const points = layer("points", { opacity: .5, renderer });
+        const polygons = layer("polygons", { opacity: .5, renderer, features: [feature("polygon", { layerId: "polygons", lat: null, lon: null, geometryType: "polygon", geometry: { type: "Polygon", coordinates: [[[-96, 29], [-94, 29], [-94, 31], [-96, 29]]] } })] });
+        renderMap(host, test.value, { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } }, [points, polygons]);
+        expect(mocks.circles[0].options).toMatchObject({ opacity: .4, fillOpacity: .2 });
+        const style = (mocks.geoLayers[0].options.style as () => Record<string, number>)();
+        expect(style).toMatchObject({ opacity: .4, fillOpacity: .2 });
+    });
+
+    it("uses configured cluster radius, coverage, and disable zoom", () => {
+        const host = document.createElement("div"); const test = testContext();
+        renderMap(host, test.value, { type: "map", id: "map", settings: { clusterPoints: true }, basemap: { type: "none" }, view: { fitMode: "none" } }, [layer("clusters", { renderer: { type: "cluster", clusterRadius: 60, disableAtZoom: 15, showCoverageOnHover: true } })]);
+        expect(mocks.markerClusterGroup).toHaveBeenCalledWith({ showCoverageOnHover: true, maxClusterRadius: 60, disableClusteringAtZoom: 15 });
+    });
+});
+
+describe("LeafletMap search result controller", () => {
+    it("fits valid bounds, falls back to configured zoom, replaces and clears a noninteractive marker", async () => {
+        const host = document.createElement("div"); const test = testContext(); let controller: LeafletMapController | undefined;
+        renderMap(host, test.value, { type: "map", id: "map", search: { zoom: 15 }, basemap: { type: "none" }, view: { fitMode: "none" } }, [], { onControllerReady: value => { controller = value; } });
+        await vi.runAllTimersAsync();
+        controller!.showSearchResult({ latitude: 29.76, longitude: -95.37, label: "Houston", bounds: [-95.8, 29.5, -94.9, 30.1], provider: "nominatim" });
+        expect(mocks.maps[0].fitBoundsCalls).toHaveLength(1);
+        const firstMarker = mocks.circles[0];
+        expect(firstMarker.options).toMatchObject({ interactive: false, pane: "hp-map-search-result" });
+        expect(firstMarker.tooltip).toBe("Houston");
+        firstMarker.fire("click", { originalEvent: {} });
+        expect(test.dispatchSpy).not.toHaveBeenCalled();
+
+        controller!.showSearchResult({ latitude: 32.78, longitude: -96.8, label: "Dallas", provider: "nominatim" });
+        expect(firstMarker.removed).toBe(true);
+        expect(mocks.maps[0].setViewCalls.at(-1)).toEqual({ center: [32.78, -96.8], zoom: 15 });
+        const secondMarker = mocks.circles[1];
+        controller!.clearSearchResult();
+        expect(secondMarker.removed).toBe(true);
     });
 });
 

@@ -79,12 +79,14 @@ function adaptUniqueValueRenderer(
     warnings: string[]
 ): ArcGisRendererAdaptResult {
     const valueMap = new Map<string, ResolvedMapSymbol>();
+    const valueLabels = new Map<string, string>();
 
     if (def.uniqueValueInfos) {
         for (const info of def.uniqueValueInfos) {
             const symbol = arcGisSymbolToResolved(info.symbol);
             const key = String(info.value);
             valueMap.set(key, { ...symbol });
+            if (info.label) valueLabels.set(key, info.label);
         }
     }
 
@@ -94,6 +96,7 @@ function adaptUniqueValueRenderer(
             field: def.field1 ?? def.field2 ?? def.field3,
             fieldSource: "service",
             valueMap: valueMap.size > 0 ? valueMap : undefined,
+            valueLabels: valueLabels.size > 0 ? valueLabels : undefined,
             defaultSymbol: def.defaultSymbol
                 ? arcGisSymbolToResolved(def.defaultSymbol)
                 : undefined,

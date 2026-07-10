@@ -6,4 +6,5 @@ export interface GeocoderConfig { provider: GeocoderProviderId; enabled: boolean
 export interface ProviderConfiguration { mode?: "core" | "maps"; basemap?: BasemapConfig; geocoder?: GeocoderConfig; privacyAcknowledged?: boolean; }
 export interface BasemapProvider { id: BasemapProviderId; label: string; external: boolean; defaults: BasemapConfig; }
 export interface GeocodeResult { sourceAddress: string; normalizedAddress: string; status: "pending" | "success" | "failed" | "cached" | "skipped"; latitude?: number; longitude?: number; provider: string; error?: string; timestamp: string; cacheHit: boolean; }
-export interface GeocoderProvider { id: GeocoderProviderId; label: string; external: boolean; defaults: GeocoderConfig; geocode(address:string,config:GeocoderConfig,signal?:AbortSignal):Promise<{latitude:number;longitude:number}|null>; }
+export interface GeocoderSearchResult { latitude: number; longitude: number; label?: string; /** [west, south, east, north] */ bounds?: [number, number, number, number]; provider: string; }
+export interface GeocoderProvider { id: GeocoderProviderId; label: string; external: boolean; defaults: GeocoderConfig; geocode(address:string,config:GeocoderConfig,signal?:AbortSignal):Promise<{latitude:number;longitude:number}|null>; search?(query:string,config:GeocoderConfig,signal?:AbortSignal):Promise<GeocoderSearchResult[]>; }

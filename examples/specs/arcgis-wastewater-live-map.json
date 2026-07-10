@@ -71,11 +71,19 @@
         "allowViewerOpacity": true,
         "allowViewerLabels": true
       },
+      "search": {
+        "enabled": true,
+        "placeholder": "Search for a place or address",
+        "zoom": 16,
+        "showResultMarker": true
+      },
+      "legend": { "defaultOpen": false },
       "toolbar": {
         "visible": true,
         "home": true,
         "layers": true,
         "legend": true,
+        "search": true,
         "clearSelection": true,
         "zoomToSelection": true
       },

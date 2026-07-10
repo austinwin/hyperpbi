@@ -1,12 +1,9 @@
 import * as L from "leaflet";
 import "leaflet.markercluster";
 import { useEffect, useRef, useMemo } from "preact/hooks";
-import { NormalizedMapData } from "../../data/normalizeData";
 import { MapComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
-import { resolveMapStyle } from "../../maps/mapStyleResolver";
 import { resolveProviderPolicy } from "../../providers/providerPolicy";
-import { getBasemapProvider } from "../../providers/basemapProviderRegistry";
 import { executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
@@ -19,23 +16,24 @@ import type { HostPolicyResult } from "../../maps/arcgis/arcGisHostPolicy";
 import type { ResolvedMapLayer, ResolvedMapFeature, ResolvedMapRenderer } from "../../maps/model/resolvedMapTypes";
 import type { LeafletFeatureStyle } from "../../maps/renderers/mapFeatureSymbol";
 import type { MapViewportState } from "./MapBlock";
+import type { GeocoderSearchResult } from "../../providers/providerTypes";
 
 export interface LeafletMapController {
     home(): void;
     zoomToSelection(): void;
+    showSearchResult(result: GeocoderSearchResult): void;
+    clearSearchResult(): void;
     invalidateSize(): void;
 }
 
 export function LeafletMap({
     component,
-    mapData,
     resolvedLayers,
     onViewportChange,
     onControllerReady,
     onLayerRuntimeStateChange,
 }: {
     component: MapComponent;
-    mapData: NormalizedMapData;
     resolvedLayers: ResolvedMapLayer[];
     onViewportChange?: (viewport: MapViewportState) => void;
     onControllerReady?: (controller: LeafletMapController) => void;
@@ -51,13 +49,14 @@ export function LeafletMap({
     const arcGisTileRefs = useRef<Map<string, L.TileLayer>>(new Map());
     const dynamicLayerRefs = useRef<Map<string, ArcGisDynamicLeafletLayer>>(new Map());
     const labelLayerRefs = useRef<Map<string, ResolvedMapLabelRuntime>>(new Map());
+    const searchMarkerRef = useRef<L.CircleMarker | null>(null);
     const paneNamesRef = useRef<Map<string, string>>(new Map());
     const hasFitRef = useRef(false);
     const programmaticMoveCountRef = useRef(0);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const context = useRenderContext();
-    const { settings, data, config: runtimeConfig, webAccessAvailable } = context;
+    const { settings, config: runtimeConfig, webAccessAvailable } = context;
     const id = component.id ?? "map";
     const resolvedLayersRef = useRef(resolvedLayers);
     const componentRef = useRef(component);
@@ -145,6 +144,10 @@ export function LeafletMap({
 
         mapRef.current = map;
         hasFitRef.current = false;
+        const searchPaneName = `hp-${id}-search-result`.replace(/[^a-zA-Z0-9_-]/g, "_");
+        if (!map.getPane(searchPaneName)) map.createPane(searchPaneName);
+        const searchPane = map.getPane(searchPaneName);
+        if (searchPane) searchPane.style.zIndex = "900";
 
         // ── Controller ──────────────────────────────────────────
         const controller: LeafletMapController = {
@@ -197,6 +200,44 @@ export function LeafletMap({
                     });
                 }
             },
+            showSearchResult(result) {
+                if (!Number.isFinite(result.latitude) || !Number.isFinite(result.longitude)) return;
+                if (searchMarkerRef.current) map.removeLayer(searchMarkerRef.current);
+                searchMarkerRef.current = null;
+                if (componentRef.current.search?.showResultMarker !== false) {
+                    const marker = L.circleMarker([result.latitude, result.longitude], {
+                        radius: 7,
+                        color: "#ffffff",
+                        weight: 2,
+                        fillColor: "#d63939",
+                        fillOpacity: 1,
+                        opacity: 1,
+                        interactive: false,
+                        pane: searchPaneName,
+                    }).addTo(map);
+                    if (result.label) marker.bindTooltip(result.label, { direction: "top", permanent: true, offset: [0, -8] });
+                    searchMarkerRef.current = marker;
+                }
+                const bounds = result.bounds;
+                const validBounds = bounds && bounds.length === 4 && bounds.every(Number.isFinite) && bounds[0] < bounds[2] && bounds[1] < bounds[3];
+                runProgrammaticMove(map, programmaticMoveCountRef, () => {
+                    if (validBounds) {
+                        const resultBounds = L.latLngBounds([]);
+                        resultBounds.extend([bounds[1], bounds[0]]);
+                        resultBounds.extend([bounds[3], bounds[2]]);
+                        map.fitBounds(resultBounds, { animate: false, maxZoom: componentRef.current.view?.maxZoom ?? 18 });
+                    } else {
+                        const requestedZoom = componentRef.current.search?.zoom ?? 16;
+                        const minZoom = componentRef.current.view?.minZoom ?? 0;
+                        const maxZoom = componentRef.current.view?.maxZoom ?? 18;
+                        map.setView([result.latitude, result.longitude], Math.max(minZoom, Math.min(maxZoom, requestedZoom)), { animate: false });
+                    }
+                });
+            },
+            clearSearchResult() {
+                if (searchMarkerRef.current) map.removeLayer(searchMarkerRef.current);
+                searchMarkerRef.current = null;
+            },
             invalidateSize() {
                 map.invalidateSize();
             },
@@ -210,6 +251,8 @@ export function LeafletMap({
                 return;
             }
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            if (searchMarkerRef.current) map.removeLayer(searchMarkerRef.current);
+            searchMarkerRef.current = null;
             debounceTimerRef.current = setTimeout(() => {
                 const bounds = map.getBounds();
                 const size = map.getSize ? map.getSize() : { x: 0, y: 0 };
@@ -331,7 +374,7 @@ export function LeafletMap({
             const isVisible = mapState?.visibility?.[layer.id] ?? layer.visible ?? true;
             if (!isVisible) continue;
 
-            const layerOpacity = mapState?.opacity?.[layer.id] ?? layer.opacity ?? 1;
+            const layerOpacity = clampOpacity(mapState?.opacity?.[layer.id] ?? layer.opacity ?? 1);
 
             // ── Handle tile layers ───────────────────────────────
             if (layer.sourceType === "arcgisTile" && layer.tile) {
@@ -408,7 +451,11 @@ export function LeafletMap({
                 (component.settings?.clusterPoints ?? settings.map.clusterPoints);
 
             const cluster = useCluster
-                ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 44 })
+                ? L.markerClusterGroup({
+                    showCoverageOnHover: renderer.showCoverageOnHover ?? false,
+                    maxClusterRadius: renderer.clusterRadius ?? 44,
+                    disableClusteringAtZoom: renderer.disableAtZoom,
+                })
                 : null;
             if (cluster) layerGroup.addLayer(cluster);
 
@@ -452,8 +499,8 @@ export function LeafletMap({
                         radius: style.radius || 6,
                         color: style.color,
                         fillColor: style.fillColor,
-                        fillOpacity: style.fillOpacity,
-                        opacity: style.opacity * layerOpacity,
+                        fillOpacity: clampOpacity(style.fillOpacity * layerOpacity),
+                        opacity: clampOpacity(style.opacity * layerOpacity),
                         weight: style.weight,
                         dashArray: style.dashArray,
                         pane: layerPane,
@@ -469,8 +516,8 @@ export function LeafletMap({
                         style: () => ({
                             color: style.color,
                             fillColor: style.fillColor,
-                            fillOpacity: style.fillOpacity,
-                            opacity: style.opacity * layerOpacity,
+                            fillOpacity: clampOpacity(style.fillOpacity * layerOpacity),
+                            opacity: clampOpacity(style.opacity * layerOpacity),
                             weight: style.weight,
                             dashArray: style.dashArray,
                         }),
@@ -479,8 +526,8 @@ export function LeafletMap({
                                 radius: style.radius || 6,
                                 color: style.color,
                                 fillColor: style.fillColor,
-                                fillOpacity: style.fillOpacity,
-                                opacity: style.opacity * layerOpacity,
+                                fillOpacity: clampOpacity(style.fillOpacity * layerOpacity),
+                                opacity: clampOpacity(style.opacity * layerOpacity),
                                 weight: style.weight,
                                 pane: layerPane,
                             }),
@@ -598,7 +645,8 @@ export function LeafletMap({
     // Cleanup no longer needed — map instance tracked via ref
     // and cleaned up in the init effect's return.
 
-    return <div ref={ref} class="hp-leaflet-container" />;
+    const height = Math.max(220, Math.min(2000, component.height ?? 420));
+    return <div ref={ref} class="hp-leaflet-container" style={{ height: `${height}px`, minHeight: "220px", width: "100%" }} />;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -616,4 +664,8 @@ function runProgrammaticMove(
     if (beforeZoom === map.getZoom() && beforeCenter.equals(afterCenter) && counter.current > 0) {
         counter.current--;
     }
+}
+
+function clampOpacity(value: number): number {
+    return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 1));
 }
