@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "title": "Houston Operations Intelligence Center \u2014 Expected Power BI Keys",
+  "title": "Houston Operations Intelligence Center \u2014 Current Raw Field Keys",
   "theme": {
     "mode": "light",
     "density": "compact",
@@ -127,10 +127,10 @@
         "expression": {
           "op": "-",
           "left": {
-            "field": "sum_hyperpbi_houston_demo_data_actualcost"
+            "field": "hyperpbi_houston_demo_data_actualcost"
           },
           "right": {
-            "field": "sum_hyperpbi_houston_demo_data_budget"
+            "field": "hyperpbi_houston_demo_data_budget"
           }
         }
       },
@@ -141,10 +141,10 @@
         "expression": {
           "op": "/",
           "left": {
-            "field": "sum_hyperpbi_houston_demo_data_actualcost"
+            "field": "hyperpbi_houston_demo_data_actualcost"
           },
           "right": {
-            "field": "sum_hyperpbi_houston_demo_data_budget"
+            "field": "hyperpbi_houston_demo_data_budget"
           }
         }
       },
@@ -155,10 +155,10 @@
         "expression": {
           "op": "-",
           "left": {
-            "field": "sum_hyperpbi_houston_demo_data_targethours"
+            "field": "hyperpbi_houston_demo_data_targethours"
           },
           "right": {
-            "field": "sum_hyperpbi_houston_demo_data_responsehours"
+            "field": "hyperpbi_houston_demo_data_responsehours"
           }
         }
       },
@@ -169,10 +169,10 @@
         "expression": {
           "op": "*",
           "left": {
-            "field": "sum_hyperpbi_houston_demo_data_riskscore"
+            "field": "hyperpbi_houston_demo_data_riskscore"
           },
           "right": {
-            "field": "sum_hyperpbi_houston_demo_data_actualcost"
+            "field": "hyperpbi_houston_demo_data_actualcost"
           }
         }
       },
@@ -185,7 +185,7 @@
           "condition": {
             "op": ">=",
             "left": {
-              "field": "sum_hyperpbi_houston_demo_data_riskscore"
+              "field": "hyperpbi_houston_demo_data_riskscore"
             },
             "right": {
               "value": 70
@@ -211,21 +211,21 @@
         "key": "total_budget",
         "label": "Total Budget",
         "aggregation": "sum",
-        "field": "sum_hyperpbi_houston_demo_data_budget",
+        "field": "hyperpbi_houston_demo_data_budget",
         "format": "currency"
       },
       {
         "key": "total_actual",
         "label": "Actual Cost",
         "aggregation": "sum",
-        "field": "sum_hyperpbi_houston_demo_data_actualcost",
+        "field": "hyperpbi_houston_demo_data_actualcost",
         "format": "currency"
       },
       {
         "key": "open_cases",
         "label": "Open Cases",
         "aggregation": "sum",
-        "field": "sum_hyperpbi_houston_demo_data_openflag",
+        "field": "hyperpbi_houston_demo_data_openflag",
         "format": "integer"
       },
       {
@@ -261,14 +261,14 @@
         "key": "avg_progress",
         "label": "Average Progress",
         "aggregation": "avg",
-        "field": "sum_hyperpbi_houston_demo_data_progresspct",
+        "field": "hyperpbi_houston_demo_data_progresspct",
         "format": "percent"
       },
       {
         "key": "avg_satisfaction",
         "label": "Satisfaction",
         "aggregation": "avg",
-        "field": "sum_hyperpbi_houston_demo_data_satisfactionscore",
+        "field": "hyperpbi_houston_demo_data_satisfactionscore",
         "format": "decimal2"
       }
     ]
@@ -466,7 +466,7 @@
       "id": "filter_risk",
       "title": "Minimum Risk",
       "span": 12,
-      "field": "sum_hyperpbi_houston_demo_data_riskscore",
+      "field": "hyperpbi_houston_demo_data_riskscore",
       "label": "Minimum Risk Score",
       "min": 0,
       "max": 100,
@@ -482,7 +482,7 @@
         "internalMode": "filter",
         "internalScope": "all",
         "externalMode": "auto",
-        "field": "sum_hyperpbi_houston_demo_data_riskscore",
+        "field": "hyperpbi_houston_demo_data_riskscore",
         "operator": ">=",
         "selectionMode": "replace",
         "multiSelect": true,
@@ -495,7 +495,7 @@
       "id": "filter_budget",
       "title": "Minimum Budget",
       "span": 12,
-      "field": "sum_hyperpbi_houston_demo_data_budget",
+      "field": "hyperpbi_houston_demo_data_budget",
       "label": "Minimum Budget",
       "min": 0,
       "max": 100000,
@@ -511,7 +511,7 @@
         "internalMode": "filter",
         "internalScope": "all",
         "externalMode": "auto",
-        "field": "sum_hyperpbi_houston_demo_data_budget",
+        "field": "hyperpbi_houston_demo_data_budget",
         "operator": ">=",
         "selectionMode": "replace",
         "multiSelect": true,
@@ -689,22 +689,22 @@
           "title": "Performance",
           "fields": [
             {
-              "field": "sum_hyperpbi_houston_demo_data_riskscore",
+              "field": "hyperpbi_houston_demo_data_riskscore",
               "label": "Risk",
               "format": "decimal2"
             },
             {
-              "field": "sum_hyperpbi_houston_demo_data_progresspct",
+              "field": "hyperpbi_houston_demo_data_progresspct",
               "label": "Progress (%)",
               "format": "decimal2"
             },
             {
-              "field": "sum_hyperpbi_houston_demo_data_responsehours",
+              "field": "hyperpbi_houston_demo_data_responsehours",
               "label": "Response Hours",
               "format": "decimal2"
             },
             {
-              "field": "sum_hyperpbi_houston_demo_data_actualcost",
+              "field": "hyperpbi_houston_demo_data_actualcost",
               "label": "Actual Cost",
               "format": "currency"
             },
@@ -749,7 +749,7 @@
       "title": "Interactive Demonstration",
       "span": 12,
       "intent": "primary",
-      "text": "Use the left filters and select marks, map points, timeline events, matrix cells or table rows. The right detail rail updates from the selected record.",
+      "text": "This version uses the exact raw-dimension keys currently exposed by Power BI. Numeric fields intentionally have no sum_ prefix. Use filters and select charts, map points, matrix cells, timeline events, or table rows to update the detail rail.",
       "value": "Ready",
       "interaction": {
         "enabled": false,
@@ -875,7 +875,7 @@
                   "id": "kpi_open_cases",
                   "title": "Open Cases",
                   "span": 3,
-                  "field": "sum_hyperpbi_houston_demo_data_openflag",
+                  "field": "hyperpbi_houston_demo_data_openflag",
                   "aggregation": "sum",
                   "format": "integer",
                   "intent": "warning",
@@ -890,7 +890,7 @@
                   "id": "countup_actual_cost",
                   "title": "Animated Actual Cost",
                   "span": 3,
-                  "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "field": "hyperpbi_houston_demo_data_actualcost",
                   "aggregation": "sum",
                   "prefix": "",
                   "suffix": "",
@@ -946,7 +946,7 @@
                   "title": "Actual Cost by Department",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_department",
-                  "measure": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "measure": "hyperpbi_houston_demo_data_actualcost",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -994,7 +994,7 @@
                   "title": "Monthly Case Trend",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_monthlabel",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1042,7 +1042,7 @@
                   "title": "Status Distribution",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_status",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1089,9 +1089,9 @@
                   "id": "executive_risk_response",
                   "title": "Risk vs. Response Hours",
                   "span": 6,
-                  "x": "sum_hyperpbi_houston_demo_data_riskscore",
-                  "y": "sum_hyperpbi_houston_demo_data_responsehours",
-                  "pointSize": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "x": "hyperpbi_houston_demo_data_riskscore",
+                  "y": "hyperpbi_houston_demo_data_responsehours",
+                  "pointSize": "hyperpbi_houston_demo_data_actualcost",
                   "height": 320,
                   "maxDataRows": 30000,
                   "initOptions": {
@@ -1173,7 +1173,7 @@
                         },
                         {
                           "label": "First Cost",
-                          "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                          "field": "hyperpbi_houston_demo_data_actualcost",
                           "format": "currency"
                         }
                       ],
@@ -1366,7 +1366,7 @@
                   "title": "Actual Cost by Department",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_department",
-                  "measure": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "measure": "hyperpbi_houston_demo_data_actualcost",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1414,7 +1414,7 @@
                   "title": "Cases by Neighborhood",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_neighborhood",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1462,7 +1462,7 @@
                   "title": "Monthly Case Trend",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_monthlabel",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1510,7 +1510,7 @@
                   "title": "Monthly Cost Area",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_monthlabel",
-                  "measure": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "measure": "hyperpbi_houston_demo_data_actualcost",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1558,7 +1558,7 @@
                   "title": "Priority Composition",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_priority",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1606,7 +1606,7 @@
                   "title": "Status Distribution",
                   "span": 6,
                   "category": "hyperpbi_houston_demo_data_status",
-                  "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                  "measure": "hyperpbi_houston_demo_data_incidentcount",
                   "aggregation": "sum",
                   "height": 310,
                   "maxDataRows": 30000,
@@ -1653,9 +1653,9 @@
                   "id": "basic_risk_response",
                   "title": "Risk vs. Response Hours",
                   "span": 6,
-                  "x": "sum_hyperpbi_houston_demo_data_riskscore",
-                  "y": "sum_hyperpbi_houston_demo_data_responsehours",
-                  "pointSize": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "x": "hyperpbi_houston_demo_data_riskscore",
+                  "y": "hyperpbi_houston_demo_data_responsehours",
+                  "pointSize": "hyperpbi_houston_demo_data_actualcost",
                   "height": 320,
                   "maxDataRows": 30000,
                   "initOptions": {
@@ -1696,7 +1696,7 @@
                   "id": "basic_progress_gauge",
                   "title": "Average Completion",
                   "span": 6,
-                  "measure": "sum_hyperpbi_houston_demo_data_progresspct",
+                  "measure": "hyperpbi_houston_demo_data_progresspct",
                   "aggregation": "avg",
                   "height": 320,
                   "interaction": {
@@ -1711,7 +1711,7 @@
                   "title": "Department Risk Intensity",
                   "span": 12,
                   "category": "hyperpbi_houston_demo_data_department",
-                  "measure": "sum_hyperpbi_houston_demo_data_riskscore",
+                  "measure": "hyperpbi_houston_demo_data_riskscore",
                   "aggregation": "avg",
                   "height": 330,
                   "maxDataRows": 30000,
@@ -1768,7 +1768,7 @@
                     "title": "Status",
                     "span": 12,
                     "category": "hyperpbi_houston_demo_data_status",
-                    "measure": "sum_hyperpbi_houston_demo_data_incidentcount",
+                    "measure": "hyperpbi_houston_demo_data_incidentcount",
                     "aggregation": "sum",
                     "height": 210,
                     "interaction": {
@@ -2065,7 +2065,7 @@
                         "type": "bar",
                         "encode": {
                           "x": "Month",
-                          "y": "sum_hyperpbi_houston_demo_data_actualcost"
+                          "y": "ActualCost"
                         },
                         "barMaxWidth": 26
                       },
@@ -4116,10 +4116,10 @@
                   "source": {
                     "type": "powerbi",
                     "bindings": {
-                      "latitude": "sum_hyperpbi_houston_demo_data_latitude",
-                      "longitude": "sum_hyperpbi_houston_demo_data_longitude",
+                      "latitude": "hyperpbi_houston_demo_data_latitude",
+                      "longitude": "hyperpbi_houston_demo_data_longitude",
                       "category": "hyperpbi_houston_demo_data_priority",
-                      "size": "sum_hyperpbi_houston_demo_data_riskscore",
+                      "size": "hyperpbi_houston_demo_data_riskscore",
                       "label": "hyperpbi_houston_demo_data_casenumber"
                     }
                   },
@@ -4150,7 +4150,7 @@
                         "label": "Priority"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                        "field": "hyperpbi_houston_demo_data_riskscore",
                         "fieldSource": "powerbi",
                         "label": "Risk",
                         "format": "decimal2"
@@ -4185,21 +4185,21 @@
                         "display": "badge"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                        "field": "hyperpbi_houston_demo_data_riskscore",
                         "fieldSource": "powerbi",
                         "label": "Risk Score",
                         "format": "decimal2",
                         "display": "number"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                        "field": "hyperpbi_houston_demo_data_actualcost",
                         "fieldSource": "powerbi",
                         "label": "Actual Cost",
                         "format": "currency",
                         "display": "number"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_progresspct",
+                        "field": "hyperpbi_houston_demo_data_progresspct",
                         "fieldSource": "powerbi",
                         "label": "Progress (%)",
                         "format": "decimal2",
@@ -4260,8 +4260,8 @@
                   "source": {
                     "type": "powerbi",
                     "bindings": {
-                      "latitude": "sum_hyperpbi_houston_demo_data_latitude",
-                      "longitude": "sum_hyperpbi_houston_demo_data_longitude",
+                      "latitude": "hyperpbi_houston_demo_data_latitude",
+                      "longitude": "hyperpbi_houston_demo_data_longitude",
                       "category": "hyperpbi_houston_demo_data_priority",
                       "label": "hyperpbi_houston_demo_data_casenumber"
                     }
@@ -4346,7 +4346,7 @@
                   },
                   "tooltip": {
                     "enabled": true,
-                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{hyperpbi_houston_demo_data_priority}} \u2022 Risk {{sum_hyperpbi_houston_demo_data_riskscore}}"
+                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{hyperpbi_houston_demo_data_priority}} \u2022 Risk {{hyperpbi_houston_demo_data_riskscore}}"
                   },
                   "popup": {
                     "enabled": true,
@@ -4401,15 +4401,15 @@
                   "source": {
                     "type": "powerbi",
                     "bindings": {
-                      "latitude": "sum_hyperpbi_houston_demo_data_latitude",
-                      "longitude": "sum_hyperpbi_houston_demo_data_longitude",
-                      "size": "sum_hyperpbi_houston_demo_data_riskscore",
+                      "latitude": "hyperpbi_houston_demo_data_latitude",
+                      "longitude": "hyperpbi_houston_demo_data_longitude",
+                      "size": "hyperpbi_houston_demo_data_riskscore",
                       "label": "hyperpbi_houston_demo_data_recordid"
                     }
                   },
                   "renderer": {
                     "type": "proportionalSize",
-                    "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                    "field": "hyperpbi_houston_demo_data_riskscore",
                     "fieldSource": "powerbi",
                     "minSize": 4,
                     "maxSize": 18,
@@ -4424,13 +4424,13 @@
                         "label": "Case"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                        "field": "hyperpbi_houston_demo_data_riskscore",
                         "fieldSource": "powerbi",
                         "label": "Risk",
                         "format": "decimal2"
                       },
                       {
-                        "field": "sum_hyperpbi_houston_demo_data_responsehours",
+                        "field": "hyperpbi_houston_demo_data_responsehours",
                         "fieldSource": "powerbi",
                         "label": "Response Hours",
                         "format": "decimal2"
@@ -4462,15 +4462,15 @@
                   "source": {
                     "type": "powerbi",
                     "bindings": {
-                      "latitude": "sum_hyperpbi_houston_demo_data_latitude",
-                      "longitude": "sum_hyperpbi_houston_demo_data_longitude",
-                      "category": "sum_hyperpbi_houston_demo_data_responsehours",
+                      "latitude": "hyperpbi_houston_demo_data_latitude",
+                      "longitude": "hyperpbi_houston_demo_data_longitude",
+                      "category": "hyperpbi_houston_demo_data_responsehours",
                       "label": "hyperpbi_houston_demo_data_recordid"
                     }
                   },
                   "renderer": {
                     "type": "continuousColor",
-                    "field": "sum_hyperpbi_houston_demo_data_responsehours",
+                    "field": "hyperpbi_houston_demo_data_responsehours",
                     "fieldSource": "powerbi",
                     "minColor": "#dbeafe",
                     "maxColor": "#7f1d1d",
@@ -4478,7 +4478,7 @@
                   },
                   "tooltip": {
                     "enabled": true,
-                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{sum_hyperpbi_houston_demo_data_responsehours}} hours"
+                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{hyperpbi_houston_demo_data_responsehours}} hours"
                   },
                   "interaction": {
                     "enabled": true,
@@ -4603,7 +4603,7 @@
                   }
                 },
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                  "field": "hyperpbi_houston_demo_data_riskscore",
                   "title": "Risk",
                   "width": 80,
                   "format": "decimal2",
@@ -4624,28 +4624,28 @@
                   ]
                 },
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_progresspct",
+                  "field": "hyperpbi_houston_demo_data_progresspct",
                   "title": "Progress %",
                   "width": 110,
                   "format": "decimal2",
                   "cellType": "progress"
                 },
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_budget",
+                  "field": "hyperpbi_houston_demo_data_budget",
                   "title": "Budget",
                   "width": 115,
                   "format": "currency",
                   "hozAlign": "right"
                 },
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "field": "hyperpbi_houston_demo_data_actualcost",
                   "title": "Actual",
                   "width": 115,
                   "format": "currency",
                   "hozAlign": "right"
                 },
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_responsehours",
+                  "field": "hyperpbi_houston_demo_data_responsehours",
                   "title": "Response Hrs",
                   "width": 110,
                   "format": "decimal2",
@@ -4719,7 +4719,7 @@
               ],
               "values": [
                 {
-                  "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                  "field": "hyperpbi_houston_demo_data_actualcost",
                   "title": "Actual Cost",
                   "aggregation": "sum",
                   "format": "currency"
@@ -4859,7 +4859,7 @@
                         },
                         {
                           "label": "Cost",
-                          "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                          "field": "hyperpbi_houston_demo_data_actualcost",
                           "format": "currency"
                         }
                       ],
@@ -5263,9 +5263,9 @@
                         "source": "rows",
                         "as": "row",
                         "limit": 8,
-                        "template": "<article class=\"custom-case\"><strong>{{hyperpbi_houston_demo_data_casenumber}}</strong><span>{{hyperpbi_houston_demo_data_department}} \u00b7 {{hyperpbi_houston_demo_data_neighborhood}}</span><small>{{hyperpbi_houston_demo_data_priority}} \u00b7 Risk {{sum_hyperpbi_houston_demo_data_riskscore}} \u00b7 {{hyperpbi_houston_demo_data_status}}</small></article>",
+                        "template": "<article class=\"custom-case\"><strong>{{hyperpbi_houston_demo_data_casenumber}}</strong><span>{{hyperpbi_houston_demo_data_department}} \u00b7 {{hyperpbi_houston_demo_data_neighborhood}}</span><small>{{hyperpbi_houston_demo_data_priority}} \u00b7 Risk {{hyperpbi_houston_demo_data_riskscore}} \u00b7 {{hyperpbi_houston_demo_data_status}}</small></article>",
                         "distinctBy": "hyperpbi_houston_demo_data_recordid",
-                        "sortBy": "sum_hyperpbi_houston_demo_data_riskscore",
+                        "sortBy": "hyperpbi_houston_demo_data_riskscore",
                         "sortDirection": "desc"
                       },
                       "slots": {
@@ -5348,12 +5348,12 @@
                     },
                     {
                       "label": "Risk",
-                      "field": "sum_hyperpbi_houston_demo_data_riskscore",
+                      "field": "hyperpbi_houston_demo_data_riskscore",
                       "format": "decimal2"
                     },
                     {
                       "label": "Cost",
-                      "field": "sum_hyperpbi_houston_demo_data_actualcost",
+                      "field": "hyperpbi_houston_demo_data_actualcost",
                       "format": "currency"
                     }
                   ],
@@ -5427,27 +5427,27 @@
             },
             {
               "label": "Risk",
-              "field": "sum_hyperpbi_houston_demo_data_riskscore",
+              "field": "hyperpbi_houston_demo_data_riskscore",
               "format": "decimal2"
             },
             {
               "label": "Budget",
-              "field": "sum_hyperpbi_houston_demo_data_budget",
+              "field": "hyperpbi_houston_demo_data_budget",
               "format": "currency"
             },
             {
               "label": "Actual",
-              "field": "sum_hyperpbi_houston_demo_data_actualcost",
+              "field": "hyperpbi_houston_demo_data_actualcost",
               "format": "currency"
             },
             {
               "label": "Progress (%)",
-              "field": "sum_hyperpbi_houston_demo_data_progresspct",
+              "field": "hyperpbi_houston_demo_data_progresspct",
               "format": "decimal2"
             },
             {
               "label": "Response",
-              "field": "sum_hyperpbi_houston_demo_data_responsehours",
+              "field": "hyperpbi_houston_demo_data_responsehours",
               "format": "decimal2"
             },
             {
