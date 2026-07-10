@@ -18,6 +18,27 @@ The repository includes a responsive, dependency-free [product landing page](ind
 | Maps | Power BI spatial maps plus practical public ArcGIS feature, join, tile, and dynamic layers |
 | Security | No user JavaScript, sanitized HTML, scoped CSS |
 | Packaging | Core and Maps profiles |
+<img width="1380" height="785" alt="image" src="https://github.com/user-attachments/assets/77d7f490-3b5a-46a2-be62-1420b8741e4e" />  
+
+<img width="1406" height="644" alt="image" src="https://github.com/user-attachments/assets/c4f2cd54-c0e1-4999-9c47-adb05c743858" />  
+
+<img width="1288" height="742" alt="image" src="https://github.com/user-attachments/assets/2856696d-9c31-4a99-a30c-836a946f369c" />  
+
+<img width="1389" height="705" alt="image" src="https://github.com/user-attachments/assets/0321292d-6da9-4c77-9a6e-6c6dc31284f7" />  
+
+<img width="1383" height="729" alt="image" src="https://github.com/user-attachments/assets/056d3f2a-eb89-4d0c-8607-11cf3d444464" />  
+
+
+<img width="1405" height="783" alt="image" src="https://github.com/user-attachments/assets/c7799f63-e0a6-4d8a-8e4a-cd8bb842e690" />  
+
+
+<img width="1453" height="732" alt="image" src="https://github.com/user-attachments/assets/cf897e7c-fc66-4f46-9b86-3f623c0cc2d9" />  
+
+<img width="1404" height="796" alt="image" src="https://github.com/user-attachments/assets/3152f582-374c-4f2d-91d8-ab4bfdaf9886" />  
+
+
+
+
 
 ## Workflow
 
