@@ -1,0 +1,25 @@
+﻿RecordType,RecordOrder,AssetId,AssetName,AssetType,Region,Status,CompletionPct,TargetPct,FlowMgd,CapacityMgd,PressurePsi,RiskScore,XPosition,YPosition,StageOrder,StageProgress,ProgressDashOffset,CompletionWidth,AlertLevel,InspectionCount,TargetCount,EnergyPct,UptimePct,LastUpdated,ColorHex,DetailText
+Summary,0,SYS-ALL,North Water Network,Network,Systemwide,Watch,78,90,92.4,120,67,42,0,0,0,0,124.41,260.52,Watch,84,108,64,99.3,2026-07-11,#f59e0b,One booster station and two distribution assets require attention.
+Station,101,ST-101,River Intake,Intake,North,Healthy,92,90,18.4,22,71,18,90,165,0,0,0,0,Healthy,0,0,59,99.56,2026-07-11,#22c55e,River Intake operating at 18.4 MGD with 71 PSI.
+Station,102,ST-102,Treatment Plant,Treatment,Central,Healthy,88,90,17.9,22,69,22,285,95,0,0,0,0,Healthy,0,0,63,99.42,2026-07-11,#22c55e,Treatment Plant operating at 17.9 MGD with 69 PSI.
+Station,103,ST-103,East Booster,Booster,East,Watch,76,90,14.6,20,64,58,480,165,0,0,0,0,Watch,0,0,67,99.28,2026-07-11,#f59e0b,East Booster operating at 14.6 MGD with 64 PSI.
+Station,104,ST-104,Elevated Storage,Storage,Central,Healthy,84,90,13.8,18,66,27,675,95,0,0,0,0,Healthy,0,0,71,99.14,2026-07-11,#22c55e,Elevated Storage operating at 13.8 MGD with 66 PSI.
+Station,105,ST-105,South Distribution,Distribution,South,At Risk,61,90,12.1,20,55,81,870,165,0,0,0,0,At Risk,0,0,75,99.0,2026-07-11,#ef4444,South Distribution operating at 12.1 MGD with 55 PSI.
+Station,106,ST-106,Customer Zone,Distribution,West,Healthy,79,90,15.6,18,68,34,1065,95,0,0,0,0,Healthy,0,0,79,98.86,2026-07-11,#22c55e,Customer Zone operating at 15.6 MGD with 68 PSI.
+Stage,201,PG-01,Intake,Process Stage,Systemwide,Complete,100,100,0,0,0,20,90,145,1,100,0,0,Complete,0,0,0,0,2026-07-11,#22c55e,Stage 1: Intake is complete at 100% complete.
+Stage,202,PG-02,Treatment,Process Stage,Systemwide,Complete,100,100,0,0,0,20,340,145,2,100,0,0,Complete,0,0,0,0,2026-07-11,#22c55e,Stage 2: Treatment is complete at 100% complete.
+Stage,203,PG-03,Storage,Process Stage,Systemwide,In Progress,72,100,0,0,0,48,590,145,3,72,0,0,In Progress,0,0,0,0,2026-07-11,#3b82f6,Stage 3: Storage is in progress at 72% complete.
+Stage,204,PG-04,Distribution,Process Stage,Systemwide,Planned,28,100,0,0,0,30,840,145,4,28,0,0,Planned,0,0,0,0,2026-07-11,#94a3b8,Stage 4: Distribution is planned at 28% complete.
+Stage,205,PG-05,Customer Delivery,Process Stage,Systemwide,Planned,10,100,0,0,0,30,1090,145,5,10,0,0,Planned,0,0,0,0,2026-07-11,#94a3b8,Stage 5: Customer Delivery is planned at 10% complete.
+Asset,301,A-201,Intake Screen 1,Screen,North,Healthy,96,90,3.5,5.8,49,12,20,45,0,0,0,0,Healthy,5,12,53,99.72,2026-07-11,#22c55e,"Screen in North; condition healthy, risk score 12."
+Asset,302,A-202,Raw Pump 2,Pump,North,Watch,74,90,4.2,6.6,50,55,230,45,0,0,0,0,Watch,6,12,56,99.64,2026-07-11,#f59e0b,"Pump in North; condition watch, risk score 55."
+Asset,303,A-203,Clarifier 3,Clarifier,Central,Healthy,89,90,4.9,7.4,51,24,440,45,0,0,0,0,Healthy,7,12,59,99.56,2026-07-11,#22c55e,"Clarifier in Central; condition healthy, risk score 24."
+Asset,304,A-204,Filter Bank 4,Filter,Central,At Risk,62,90,5.6,8.2,52,84,20,170,0,0,0,0,At Risk,8,12,62,99.48,2026-07-11,#ef4444,"Filter in Central; condition at risk, risk score 84."
+Asset,305,A-205,Booster Pump 5,Pump,East,Watch,71,90,6.3,9.0,53,67,230,170,0,0,0,0,Watch,9,12,65,99.4,2026-07-11,#f59e0b,"Pump in East; condition watch, risk score 67."
+Asset,306,A-206,Tank Sensor 6,Sensor,Central,Healthy,93,90,7.0,9.8,54,16,440,170,0,0,0,0,Healthy,10,12,68,99.32,2026-07-11,#22c55e,"Sensor in Central; condition healthy, risk score 16."
+Asset,307,A-207,Valve Cluster 7,Valve,South,Healthy,87,90,7.7,10.6,55,29,20,295,0,0,0,0,Healthy,11,12,71,99.24,2026-07-11,#22c55e,"Valve in South; condition healthy, risk score 29."
+Asset,308,A-208,Meter Vault 8,Meter,West,Watch,78,90,8.4,11.4,56,52,230,295,0,0,0,0,Watch,12,12,74,99.16,2026-07-11,#f59e0b,"Meter in West; condition watch, risk score 52."
+Asset,309,A-209,PRV Station 9,Valve,South,At Risk,58,90,9.1,12.2,57,91,440,295,0,0,0,0,At Risk,13,12,77,99.08,2026-07-11,#ef4444,"Valve in South; condition at risk, risk score 91."
+Asset,310,A-210,Chlorine Analyzer,Analyzer,Central,Healthy,91,90,9.8,13.0,58,19,20,420,0,0,0,0,Healthy,14,12,80,99.0,2026-07-11,#22c55e,"Analyzer in Central; condition healthy, risk score 19."
+Asset,311,A-211,Backup Generator,Generator,East,Watch,69,90,10.5,13.8,59,63,230,420,0,0,0,0,Watch,15,12,83,98.92,2026-07-11,#f59e0b,"Generator in East; condition watch, risk score 63."
+Asset,312,A-212,Telemetry Gateway,Gateway,West,Healthy,95,90,11.2,14.6,60,14,440,420,0,0,0,0,Healthy,16,12,86,98.84,2026-07-11,#22c55e,"Gateway in West; condition healthy, risk score 14."

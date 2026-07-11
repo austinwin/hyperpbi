@@ -1,0 +1,2162 @@
+{
+  "version": "2.0",
+  "title": "HyperPBI SVG Operations Experience — Professional Animated (Budget Safe v3)",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "fontFamily": "Segoe UI, Arial, sans-serif",
+    "primaryColor": "rgb(14, 84, 170)",
+    "accentColor": "rgb(10, 153, 194)",
+    "surfaceColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(16, 36, 66)",
+    "borderColor": "rgb(215, 226, 237)",
+    "dangerColor": "rgb(220, 62, 76)",
+    "warningColor": "rgb(234, 136, 26)",
+    "successColor": "rgb(22, 163, 74)",
+    "radius": 18,
+    "cardPadding": 14,
+    "gap": 14
+  },
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "gap": 14
+  },
+  "data": {
+    "datasets": {
+      "summary": {
+        "source": "powerbi",
+        "filter": {
+          "field": "hyperpbi_svg_demo_data_recordtype",
+          "operator": "=",
+          "value": "Summary"
+        },
+        "sort": [
+          {
+            "field": "sum_hyperpbi_svg_demo_data_recordorder",
+            "direction": "ascending"
+          }
+        ],
+        "limit": 1
+      },
+      "stations": {
+        "source": "powerbi",
+        "filter": {
+          "field": "hyperpbi_svg_demo_data_recordtype",
+          "operator": "=",
+          "value": "Station"
+        },
+        "sort": [
+          {
+            "field": "sum_hyperpbi_svg_demo_data_recordorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "stages": {
+        "source": "powerbi",
+        "filter": {
+          "field": "hyperpbi_svg_demo_data_recordtype",
+          "operator": "=",
+          "value": "Stage"
+        },
+        "sort": [
+          {
+            "field": "sum_hyperpbi_svg_demo_data_stageorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "assets": {
+        "source": "powerbi",
+        "filter": {
+          "field": "hyperpbi_svg_demo_data_recordtype",
+          "operator": "=",
+          "value": "Asset"
+        },
+        "sort": [
+          {
+            "field": "sum_hyperpbi_svg_demo_data_recordorder",
+            "direction": "ascending"
+          }
+        ]
+      }
+    }
+  },
+  "styles": {
+    "globalCss": ".hp-svg-block {\n  background: rgb(255, 255, 255);\n  border: 1px solid rgb(215, 226, 237);\n  border-radius: 18px;\n  box-shadow: 0 10px 22px rgba(16, 36, 66, 0.06);\n  overflow: hidden;\n}\n.hp-svg-heading {\n  padding: 14px 18px 2px;\n  color: rgb(16, 36, 66);\n  font-size: 15px;\n  font-weight: 760;\n}\n.hp-svg-interactive {\n  cursor: pointer;\n}\n.hp-svg-interactive:focus {\n  outline: 3px solid rgba(37, 99, 235, 0.28);\n  outline-offset: 3px;\n}"
+  },
+  "components": [
+    {
+      "type": "svg",
+      "id": "ops-overview-banner",
+      "dataset": "summary",
+      "span": 12,
+      "title": "Digital operations overview",
+      "viewBox": "0 0 1200 300",
+      "height": 300,
+      "ariaLabel": "Executive operations overview with live metrics and animated equipment summary",
+      "description": "Professional summary banner using data-bound KPIs and meaningful motion.",
+      "dataContext": {
+        "mode": "first",
+        "sortBy": "sum_hyperpbi_svg_demo_data_recordorder",
+        "sortDirection": "asc"
+      },
+      "motion": {
+        "enabled": true,
+        "reducedMotion": "respect-system",
+        "maxConcurrentAnimations": 8
+      },
+      "performance": {
+        "maxElements": 180,
+        "maxAnimatedElements": 8,
+        "maxRepeatedRows": 12
+      },
+      "elements": [
+        {
+          "type": "defs",
+          "children": [
+            {
+              "type": "linearGradient",
+              "id": "bannerSurface",
+              "x1": "0%",
+              "y1": "0%",
+              "x2": "100%",
+              "y2": "100%",
+              "children": [
+                {
+                  "type": "stop",
+                  "offset": "0%",
+                  "stopColor": "rgb(236, 248, 255)"
+                },
+                {
+                  "type": "stop",
+                  "offset": "58%",
+                  "stopColor": "rgb(247, 252, 255)"
+                },
+                {
+                  "type": "stop",
+                  "offset": "100%",
+                  "stopColor": "rgb(240, 253, 250)"
+                }
+              ]
+            },
+            {
+              "type": "linearGradient",
+              "id": "bannerProgress",
+              "x1": "0%",
+              "y1": "0%",
+              "x2": "100%",
+              "y2": "0%",
+              "children": [
+                {
+                  "type": "stop",
+                  "offset": "0%",
+                  "stopColor": "rgb(14, 84, 170)"
+                },
+                {
+                  "type": "stop",
+                  "offset": "100%",
+                  "stopColor": "rgb(10, 153, 194)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 300,
+          "rx": 22,
+          "fill": "url(#bannerSurface)"
+        },
+        {
+          "type": "circle",
+          "cx": 1080,
+          "cy": 8,
+          "r": 150,
+          "fill": "rgb(191, 219, 254)",
+          "opacity": 0.55
+        },
+        {
+          "type": "circle",
+          "cx": 1190,
+          "cy": 290,
+          "r": 125,
+          "fill": "rgb(187, 247, 208)",
+          "opacity": 0.42
+        },
+        {
+          "type": "circle",
+          "cx": 940,
+          "cy": 300,
+          "r": 100,
+          "fill": "rgb(224, 231, 255)",
+          "opacity": 0.5
+        },
+        {
+          "type": "text",
+          "x": 48,
+          "y": 48,
+          "text": "NORTH WATER NETWORK",
+          "fontSize": 13,
+          "fontWeight": 800,
+          "letterSpacing": 2,
+          "fill": "rgb(14, 84, 170)"
+        },
+        {
+          "type": "text",
+          "x": 48,
+          "y": 96,
+          "text": {
+            "template": "{{sum_hyperpbi_svg_demo_data_completionpct}}%"
+          },
+          "fontSize": 50,
+          "fontWeight": 800,
+          "fill": "rgb(16, 36, 66)"
+        },
+        {
+          "type": "text",
+          "x": 176,
+          "y": 93,
+          "text": "program completion",
+          "fontSize": 18,
+          "fontWeight": 650,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "rect",
+          "x": 48,
+          "y": 120,
+          "width": 540,
+          "height": 16,
+          "rx": 8,
+          "fill": "rgb(215, 226, 237)"
+        },
+        {
+          "type": "rect",
+          "x": 48,
+          "y": 120,
+          "width": {
+            "bind": "sum_hyperpbi_svg_demo_data_completionpct",
+            "scale": {
+              "domain": [
+                0,
+                100
+              ],
+              "range": [
+                0,
+                540
+              ],
+              "clamp": true
+            }
+          },
+          "height": 16,
+          "rx": 8,
+          "fill": "url(#bannerProgress)",
+          "animation": {
+            "preset": "progress-fill",
+            "durationMs": 900,
+            "easing": "ease-out",
+            "iterationCount": 1
+          }
+        },
+        {
+          "type": "text",
+          "x": 48,
+          "y": 166,
+          "text": {
+            "template": "Target {{sum_hyperpbi_svg_demo_data_targetpct}}%  ·  {{sum_hyperpbi_svg_demo_data_inspectioncount}} of {{sum_hyperpbi_svg_demo_data_targetcount}} inspections  ·  Updated {{hyperpbi_svg_demo_data_lastupdated}}"
+          },
+          "fontSize": 14.5,
+          "fontWeight": 600,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "rect",
+          "x": 48,
+          "y": 200,
+          "width": 170,
+          "height": 60,
+          "rx": 14,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 64,
+          "y": 222,
+          "text": "THROUGHPUT",
+          "fontSize": 10.5,
+          "fontWeight": 800,
+          "fill": "rgb(14, 84, 170)"
+        },
+        {
+          "type": "text",
+          "x": 64,
+          "y": 248,
+          "text": {
+            "template": "{{sum_hyperpbi_svg_demo_data_flowmgd}} MGD"
+          },
+          "fontSize": 22,
+          "fontWeight": 800,
+          "fill": "rgb(16, 36, 66)"
+        },
+        {
+          "type": "rect",
+          "x": 232,
+          "y": 200,
+          "width": 160,
+          "height": 60,
+          "rx": 14,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 248,
+          "y": 222,
+          "text": "PRESSURE",
+          "fontSize": 10.5,
+          "fontWeight": 800,
+          "fill": "rgb(14, 84, 170)"
+        },
+        {
+          "type": "text",
+          "x": 248,
+          "y": 248,
+          "text": {
+            "template": "{{sum_hyperpbi_svg_demo_data_pressurepsi}} PSI"
+          },
+          "fontSize": 22,
+          "fontWeight": 800,
+          "fill": "rgb(16, 36, 66)"
+        },
+        {
+          "type": "rect",
+          "x": 406,
+          "y": 200,
+          "width": 160,
+          "height": 60,
+          "rx": 14,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 422,
+          "y": 222,
+          "text": "UPTIME",
+          "fontSize": 10.5,
+          "fontWeight": 800,
+          "fill": "rgb(14, 84, 170)"
+        },
+        {
+          "type": "text",
+          "x": 422,
+          "y": 248,
+          "text": {
+            "template": "{{sum_hyperpbi_svg_demo_data_uptimepct}}%"
+          },
+          "fontSize": 22,
+          "fontWeight": 800,
+          "fill": "rgb(16, 36, 66)"
+        },
+        {
+          "type": "rect",
+          "x": 690,
+          "y": 40,
+          "width": 110,
+          "height": 94,
+          "rx": 16,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 745,
+          "y": 118,
+          "text": "Pump",
+          "textAnchor": "middle",
+          "fontSize": 12.5,
+          "fontWeight": 700,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "circle",
+          "cx": 745,
+          "cy": 76,
+          "r": 18,
+          "fill": "rgb(236, 253, 245)",
+          "stroke": "rgb(22, 163, 74)",
+          "strokeWidth": 2
+        },
+        {
+          "type": "g",
+          "animation": {
+            "preset": "rotate",
+            "durationMs": 4200,
+            "iterationCount": "infinite",
+            "easing": "linear"
+          },
+          "children": [
+            {
+              "type": "line",
+              "x1": 745,
+              "y1": 58,
+              "x2": 745,
+              "y2": 67,
+              "stroke": "rgb(22, 163, 74)",
+              "strokeWidth": 2,
+              "strokeLinecap": "round"
+            },
+            {
+              "type": "line",
+              "x1": 763,
+              "y1": 76,
+              "x2": 754,
+              "y2": 76,
+              "stroke": "rgb(22, 163, 74)",
+              "strokeWidth": 2,
+              "strokeLinecap": "round"
+            },
+            {
+              "type": "line",
+              "x1": 745,
+              "y1": 94,
+              "x2": 745,
+              "y2": 85,
+              "stroke": "rgb(22, 163, 74)",
+              "strokeWidth": 2,
+              "strokeLinecap": "round"
+            },
+            {
+              "type": "line",
+              "x1": 727,
+              "y1": 76,
+              "x2": 736,
+              "y2": 76,
+              "stroke": "rgb(22, 163, 74)",
+              "strokeWidth": 2,
+              "strokeLinecap": "round"
+            }
+          ]
+        },
+        {
+          "type": "circle",
+          "cx": 745,
+          "cy": 76,
+          "r": 6,
+          "fill": "rgb(22, 163, 74)"
+        },
+        {
+          "type": "rect",
+          "x": 818,
+          "y": 40,
+          "width": 110,
+          "height": 94,
+          "rx": 16,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 873,
+          "y": 118,
+          "text": "Treatment",
+          "textAnchor": "middle",
+          "fontSize": 12.5,
+          "fontWeight": 700,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "rect",
+          "x": 856,
+          "y": 63,
+          "width": 34,
+          "height": 25,
+          "rx": 4,
+          "fill": "rgb(239, 246, 255)",
+          "stroke": "rgb(37, 99, 235)",
+          "strokeWidth": 2
+        },
+        {
+          "type": "circle",
+          "cx": 864,
+          "cy": 77,
+          "r": 3.4,
+          "fill": "rgb(37, 99, 235)",
+          "animation": {
+            "preset": "pulse",
+            "durationMs": 1600,
+            "iterationCount": "infinite"
+          }
+        },
+        {
+          "type": "circle",
+          "cx": 873,
+          "cy": 70,
+          "r": 2.8,
+          "fill": "rgb(10, 153, 194)",
+          "animation": {
+            "preset": "float",
+            "durationMs": 2300,
+            "iterationCount": "infinite"
+          }
+        },
+        {
+          "type": "circle",
+          "cx": 882,
+          "cy": 79,
+          "r": 3.1,
+          "fill": "rgb(37, 99, 235)",
+          "animation": {
+            "preset": "pulse",
+            "durationMs": 1800,
+            "iterationCount": "infinite"
+          }
+        },
+        {
+          "type": "rect",
+          "x": 946,
+          "y": 40,
+          "width": 110,
+          "height": 94,
+          "rx": 16,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 1001,
+          "y": 118,
+          "text": "Storage",
+          "textAnchor": "middle",
+          "fontSize": 12.5,
+          "fontWeight": 700,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "rect",
+          "x": 987,
+          "y": 59,
+          "width": 28,
+          "height": 34,
+          "rx": 6,
+          "fill": "rgb(248, 250, 252)",
+          "stroke": "rgb(22, 163, 74)",
+          "strokeWidth": 2
+        },
+        {
+          "type": "rect",
+          "x": 990,
+          "y": 72,
+          "width": 22,
+          "height": 18,
+          "rx": 4,
+          "fill": "rgb(110, 231, 183)",
+          "animation": {
+            "preset": "shimmer",
+            "durationMs": 2500,
+            "iterationCount": "infinite"
+          }
+        },
+        {
+          "type": "line",
+          "x1": 1001,
+          "y1": 55,
+          "x2": 1001,
+          "y2": 59,
+          "stroke": "rgb(22, 163, 74)",
+          "strokeWidth": 2
+        },
+        {
+          "type": "rect",
+          "x": 1074,
+          "y": 40,
+          "width": 110,
+          "height": 94,
+          "rx": 16,
+          "fill": "rgb(255, 255, 255)",
+          "stroke": "rgb(215, 226, 237)",
+          "strokeWidth": 1
+        },
+        {
+          "type": "text",
+          "x": 1129,
+          "y": 118,
+          "text": "Clarifier",
+          "textAnchor": "middle",
+          "fontSize": 12.5,
+          "fontWeight": 700,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "circle",
+          "cx": 1129,
+          "cy": 77,
+          "r": 18,
+          "fill": "rgb(255, 247, 237)",
+          "stroke": "rgb(234, 136, 26)",
+          "strokeWidth": 2
+        },
+        {
+          "type": "g",
+          "animation": {
+            "preset": "rotate",
+            "durationMs": 5600,
+            "iterationCount": "infinite",
+            "easing": "linear"
+          },
+          "children": [
+            {
+              "type": "line",
+              "x1": 1129,
+              "y1": 77,
+              "x2": 1143,
+              "y2": 77,
+              "stroke": "rgb(234, 136, 26)",
+              "strokeWidth": 2.5,
+              "strokeLinecap": "round"
+            }
+          ]
+        },
+        {
+          "type": "circle",
+          "cx": 1129,
+          "cy": 77,
+          "r": 3.6,
+          "fill": "rgb(234, 136, 26)"
+        }
+      ]
+    },
+    {
+      "type": "svg",
+      "id": "ops-chain-stations",
+      "dataset": "summary",
+      "span": 7,
+      "title": "Animated operations chain",
+      "viewBox": "0 0 900 470",
+      "height": 470,
+      "ariaLabel": "Structured station chain with live status and meaningful equipment animation",
+      "description": "Stations are rendered as operational cards on a connected process chain.",
+      "dataContext": {
+        "mode": "first",
+        "sortBy": "sum_hyperpbi_svg_demo_data_recordorder",
+        "sortDirection": "asc"
+      },
+      "motion": {
+        "enabled": true,
+        "reducedMotion": "respect-system",
+        "maxConcurrentAnimations": 13
+      },
+      "performance": {
+        "maxElements": 260,
+        "maxAnimatedElements": 13,
+        "maxRepeatedRows": 20
+      },
+      "css": ".station-info { pointer-events: none; }\n.station-icon-button:hover { opacity: .88; }",
+      "elements": [
+        {
+          "type": "defs",
+          "children": [
+            {
+              "type": "linearGradient",
+              "id": "opsFlowLine",
+              "x1": "0%",
+              "y1": "0%",
+              "x2": "100%",
+              "y2": "0%",
+              "children": [
+                {
+                  "type": "stop",
+                  "offset": "0%",
+                  "stopColor": "rgb(10, 153, 194)"
+                },
+                {
+                  "type": "stop",
+                  "offset": "100%",
+                  "stopColor": "rgb(14, 84, 170)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "width": 900,
+          "height": 470,
+          "rx": 20,
+          "fill": "rgb(248, 251, 254)"
+        },
+        {
+          "type": "line",
+          "x1": 66,
+          "y1": 300,
+          "x2": 834,
+          "y2": 300,
+          "stroke": "rgb(211, 225, 237)",
+          "strokeWidth": 20,
+          "strokeLinecap": "round"
+        },
+        {
+          "type": "line",
+          "x1": 66,
+          "y1": 300,
+          "x2": 834,
+          "y2": 300,
+          "stroke": "url(#opsFlowLine)",
+          "strokeWidth": 6,
+          "strokeDasharray": "18 14",
+          "strokeLinecap": "round",
+          "animation": {
+            "preset": "flow-dash",
+            "durationMs": 2400,
+            "iterationCount": "infinite",
+            "easing": "linear"
+          }
+        },
+        {
+          "type": "text",
+          "x": 34,
+          "y": 40,
+          "text": "Click the circular icon on any station card to inspect that record.",
+          "fontSize": 13,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "g",
+          "repeat": {
+            "dataset": "stations",
+            "limit": 6,
+            "keyField": "hyperpbi_svg_demo_data_assetid",
+            "children": [
+              {
+                "type": "g",
+                "position": {
+                  "x": {
+                    "bind": "sum_hyperpbi_svg_demo_data_xposition",
+                    "scale": {
+                      "domain": [
+                        165,
+                        1065
+                      ],
+                      "range": [
+                        90,
+                        810
+                      ],
+                      "clamp": true
+                    }
+                  },
+                  "y": 158
+                },
+                "children": [
+                  {
+                    "type": "line",
+                    "x1": 0,
+                    "y1": 112,
+                    "x2": 0,
+                    "y2": 142,
+                    "stroke": "rgb(194, 206, 220)",
+                    "strokeWidth": 3
+                  },
+                  {
+                    "type": "rect",
+                    "x": -72,
+                    "y": 0,
+                    "width": 144,
+                    "height": 112,
+                    "rx": 16,
+                    "fill": "rgb(255, 255, 255)",
+                    "stroke": "rgb(215, 226, 237)",
+                    "strokeWidth": 1.2
+                  },
+                  {
+                    "type": "rect",
+                    "x": -72,
+                    "y": 0,
+                    "width": 144,
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    }
+                  },
+                  {
+                    "type": "circle",
+                    "cx": -42,
+                    "cy": 36,
+                    "r": 27,
+                    "fill": "none",
+                    "stroke": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    },
+                    "strokeWidth": 2,
+                    "strokeOpacity": 0.2,
+                    "animation": {
+                      "preset": "pulse",
+                      "durationMs": 2600,
+                      "iterationCount": "infinite",
+                      "easing": "ease-in-out"
+                    }
+                  },
+                  {
+                    "type": "circle",
+                    "className": "station-icon-button",
+                    "cx": -42,
+                    "cy": 36,
+                    "r": 22,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(236, 253, 245)",
+                        "Watch": "rgb(255, 247, 237)",
+                        "At Risk": "rgb(255, 241, 242)",
+                        "Complete": "rgb(236, 253, 245)",
+                        "In Progress": "rgb(239, 246, 255)",
+                        "Planned": "rgb(248, 250, 252)"
+                      },
+                      "fallback": "rgb(241, 245, 249)"
+                    },
+                    "stroke": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    },
+                    "strokeWidth": 2.5,
+                    "ariaLabel": "Select station",
+                    "interaction": {
+                      "enabled": true,
+                      "internalMode": "highlight",
+                      "internalScope": "all",
+                      "externalMode": "selection",
+                      "field": "hyperpbi_svg_demo_data_assetid",
+                      "selectionMode": "replace",
+                      "clearOnSecondClick": true
+                    }
+                  },
+                  {
+                    "type": "circle",
+                    "cx": -42,
+                    "cy": 36,
+                    "r": {
+                      "bind": "sum_hyperpbi_svg_demo_data_riskscore",
+                      "scale": {
+                        "domain": [
+                          0,
+                          100
+                        ],
+                        "range": [
+                          6,
+                          12
+                        ],
+                        "clamp": true
+                      }
+                    },
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    },
+                    "animation": {
+                      "preset": "scale-in",
+                      "trigger": "selected",
+                      "durationMs": 360,
+                      "iterationCount": 1
+                    }
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Booster"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "line",
+                        "x1": -42,
+                        "y1": 22,
+                        "x2": -42,
+                        "y2": 28,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.8,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": -28,
+                        "y1": 36,
+                        "x2": -34,
+                        "y2": 36,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.8,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": -42,
+                        "y1": 50,
+                        "x2": -42,
+                        "y2": 44,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.8,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": -56,
+                        "y1": 36,
+                        "x2": -50,
+                        "y2": 36,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.8,
+                        "strokeLinecap": "round"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Treatment"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "circle",
+                        "cx": -48,
+                        "cy": 40,
+                        "r": 3,
+                        "fill": "rgb(10, 153, 194)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": -41,
+                        "cy": 31,
+                        "r": 2.8,
+                        "fill": "rgb(37, 99, 235)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": -34,
+                        "cy": 39,
+                        "r": 2.8,
+                        "fill": "rgb(10, 153, 194)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Storage"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "rect",
+                        "x": -48,
+                        "y": 27,
+                        "width": 12,
+                        "height": 16,
+                        "rx": 3,
+                        "fill": "rgb(255, 255, 255)",
+                        "stroke": "rgb(22, 163, 74)",
+                        "strokeWidth": 1.3
+                      },
+                      {
+                        "type": "rect",
+                        "x": -47,
+                        "y": 35,
+                        "width": 10,
+                        "height": 8,
+                        "rx": 2,
+                        "fill": "rgb(110, 231, 183)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Intake"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "line",
+                        "x1": -53,
+                        "y1": 36,
+                        "x2": -31,
+                        "y2": 36,
+                        "stroke": "rgb(22, 163, 74)",
+                        "strokeWidth": 2
+                      },
+                      {
+                        "type": "path",
+                        "d": "M-35 32 L-29 36 L-35 40",
+                        "fill": "none",
+                        "stroke": "rgb(22, 163, 74)",
+                        "strokeWidth": 2,
+                        "strokeLinecap": "round",
+                        "strokeLinejoin": "round"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Distribution"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "circle",
+                        "cx": -48,
+                        "cy": 36,
+                        "r": 2.5,
+                        "fill": "rgb(22, 163, 74)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": -37,
+                        "cy": 29,
+                        "r": 2.5,
+                        "fill": "rgb(22, 163, 74)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": -35,
+                        "cy": 43,
+                        "r": 2.5,
+                        "fill": "rgb(22, 163, 74)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "x": -8,
+                    "y": 34,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_assetname}}"
+                    },
+                    "fontSize": 12.4,
+                    "fontWeight": 800,
+                    "fill": "rgb(16, 36, 66)",
+                    "className": "station-info"
+                  },
+                  {
+                    "type": "text",
+                    "x": -8,
+                    "y": 54,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_assettype}} · {{hyperpbi_svg_demo_data_region}}"
+                    },
+                    "fontSize": 10.3,
+                    "fill": "rgb(71, 94, 121)",
+                    "className": "station-info"
+                  },
+                  {
+                    "type": "text",
+                    "x": -56,
+                    "y": 81,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_status}}"
+                    },
+                    "fontSize": 11,
+                    "fontWeight": 800,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(71, 94, 121)"
+                    },
+                    "className": "station-info"
+                  },
+                  {
+                    "type": "text",
+                    "x": 56,
+                    "y": 81,
+                    "text": {
+                      "template": "{{sum_hyperpbi_svg_demo_data_flowmgd}} MGD"
+                    },
+                    "textAnchor": "end",
+                    "fontSize": 11,
+                    "fontWeight": 700,
+                    "fill": "rgb(71, 94, 121)",
+                    "className": "station-info"
+                  },
+                  {
+                    "type": "rect",
+                    "x": -56,
+                    "y": 91,
+                    "width": 112,
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": "rgb(215, 226, 237)"
+                  },
+                  {
+                    "type": "rect",
+                    "x": -56,
+                    "y": 91,
+                    "width": {
+                      "bind": "sum_hyperpbi_svg_demo_data_completionpct",
+                      "scale": {
+                        "domain": [
+                          0,
+                          100
+                        ],
+                        "range": [
+                          0,
+                          112
+                        ],
+                        "clamp": true
+                      }
+                    },
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "x": 34,
+          "y": 438,
+          "text": "Only the circular icon is interactive, so selection focus stays compact and the card no longer gets the ugly full-box outline.",
+          "fontSize": 11.5,
+          "fill": "rgb(100, 116, 139)"
+        }
+      ]
+    },
+    {
+      "type": "detailPanel",
+      "id": "selected-record-panel",
+      "span": 5,
+      "title": "Selected operational record",
+      "subtitle": "Select a station icon, asset icon, stage icon, or a table row.",
+      "selectedRow": true,
+      "emptyText": "No record selected yet. Use the compact circular selectors in the SVG visuals.",
+      "groups": [
+        {
+          "title": "Identity",
+          "fields": [
+            {
+              "field": "hyperpbi_svg_demo_data_assetid",
+              "label": "Record ID",
+              "copyable": true
+            },
+            {
+              "field": "hyperpbi_svg_demo_data_assetname",
+              "label": "Name"
+            },
+            {
+              "field": "hyperpbi_svg_demo_data_assettype",
+              "label": "Type"
+            },
+            {
+              "field": "hyperpbi_svg_demo_data_region",
+              "label": "Region"
+            },
+            {
+              "field": "hyperpbi_svg_demo_data_lastupdated",
+              "label": "Last updated"
+            }
+          ]
+        },
+        {
+          "title": "Condition and delivery",
+          "fields": [
+            {
+              "field": "hyperpbi_svg_demo_data_status",
+              "label": "Status",
+              "badge": true
+            },
+            {
+              "field": "sum_hyperpbi_svg_demo_data_completionpct",
+              "label": "Completion",
+              "format": "0"
+            },
+            {
+              "field": "sum_hyperpbi_svg_demo_data_riskscore",
+              "label": "Risk score",
+              "format": "0"
+            },
+            {
+              "field": "sum_hyperpbi_svg_demo_data_uptimepct",
+              "label": "Uptime",
+              "format": "0.0"
+            }
+          ]
+        },
+        {
+          "title": "Operations",
+          "fields": [
+            {
+              "field": "sum_hyperpbi_svg_demo_data_flowmgd",
+              "label": "Flow (MGD)",
+              "format": "0.0"
+            },
+            {
+              "field": "sum_hyperpbi_svg_demo_data_capacitymgd",
+              "label": "Capacity (MGD)",
+              "format": "0.0"
+            },
+            {
+              "field": "sum_hyperpbi_svg_demo_data_pressurepsi",
+              "label": "Pressure (PSI)",
+              "format": "0"
+            },
+            {
+              "field": "hyperpbi_svg_demo_data_detailtext",
+              "label": "Details"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "svg",
+      "id": "program-stage-flow",
+      "dataset": "summary",
+      "span": 12,
+      "title": "Program stage flow",
+      "viewBox": "0 0 1200 280",
+      "height": 280,
+      "ariaLabel": "Animated program stage flow with interactive stage selectors",
+      "description": "Stage icons remain compactly interactive and the progress bars stay data-driven.",
+      "dataContext": {
+        "mode": "first",
+        "sortBy": "sum_hyperpbi_svg_demo_data_recordorder",
+        "sortDirection": "asc"
+      },
+      "motion": {
+        "enabled": true,
+        "reducedMotion": "respect-system",
+        "maxConcurrentAnimations": 11
+      },
+      "performance": {
+        "maxElements": 220,
+        "maxAnimatedElements": 11,
+        "maxRepeatedRows": 10
+      },
+      "elements": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 280,
+          "rx": 20,
+          "fill": "rgb(248, 251, 254)"
+        },
+        {
+          "type": "line",
+          "x1": 94,
+          "y1": 118,
+          "x2": 1106,
+          "y2": 118,
+          "stroke": "rgb(211, 225, 237)",
+          "strokeWidth": 12,
+          "strokeLinecap": "round"
+        },
+        {
+          "type": "line",
+          "x1": 94,
+          "y1": 118,
+          "x2": 1106,
+          "y2": 118,
+          "stroke": "rgb(10, 153, 194)",
+          "strokeWidth": 4,
+          "strokeDasharray": "16 12",
+          "strokeLinecap": "round",
+          "animation": {
+            "preset": "flow-dash",
+            "durationMs": 2600,
+            "iterationCount": "infinite",
+            "easing": "linear"
+          }
+        },
+        {
+          "type": "g",
+          "repeat": {
+            "dataset": "stages",
+            "limit": 5,
+            "keyField": "hyperpbi_svg_demo_data_assetid",
+            "children": [
+              {
+                "type": "g",
+                "position": {
+                  "x": {
+                    "bind": "sum_hyperpbi_svg_demo_data_xposition",
+                    "scale": {
+                      "domain": [
+                        90,
+                        1090
+                      ],
+                      "range": [
+                        100,
+                        1100
+                      ],
+                      "clamp": true
+                    }
+                  },
+                  "y": 118
+                },
+                "children": [
+                  {
+                    "type": "circle",
+                    "cx": 0,
+                    "cy": 0,
+                    "r": 33,
+                    "fill": "none",
+                    "stroke": "rgb(37, 99, 235)",
+                    "strokeWidth": 2,
+                    "strokeOpacity": 0.22,
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_status",
+                        "operator": "=",
+                        "value": "In Progress"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "animation": {
+                      "preset": "pulse",
+                      "durationMs": 2200,
+                      "iterationCount": "infinite",
+                      "easing": "ease-in-out"
+                    }
+                  },
+                  {
+                    "type": "circle",
+                    "cx": 0,
+                    "cy": 0,
+                    "r": 26,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(236, 253, 245)",
+                        "Watch": "rgb(255, 247, 237)",
+                        "At Risk": "rgb(255, 241, 242)",
+                        "Complete": "rgb(236, 253, 245)",
+                        "In Progress": "rgb(239, 246, 255)",
+                        "Planned": "rgb(248, 250, 252)"
+                      },
+                      "fallback": "rgb(248, 250, 252)"
+                    },
+                    "stroke": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(148, 163, 184)"
+                    },
+                    "strokeWidth": 3
+                  },
+                  {
+                    "type": "circle",
+                    "cx": 0,
+                    "cy": 0,
+                    "r": 12,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(148, 163, 184)"
+                    },
+                    "ariaLabel": "Select stage",
+                    "interaction": {
+                      "enabled": true,
+                      "internalMode": "highlight",
+                      "internalScope": "all",
+                      "externalMode": "selection",
+                      "field": "hyperpbi_svg_demo_data_assetid",
+                      "selectionMode": "replace",
+                      "clearOnSecondClick": true
+                    },
+                    "animation": {
+                      "preset": "scale-in",
+                      "trigger": "selected",
+                      "durationMs": 350,
+                      "iterationCount": 1
+                    }
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "sum_hyperpbi_svg_demo_data_stageorder",
+                        "operator": "=",
+                        "value": 2
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "circle",
+                        "cx": -7,
+                        "cy": -2,
+                        "r": 2.6,
+                        "fill": "rgb(10, 153, 194)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": 0,
+                        "cy": -9,
+                        "r": 2.4,
+                        "fill": "rgb(37, 99, 235)"
+                      },
+                      {
+                        "type": "circle",
+                        "cx": 7,
+                        "cy": -1,
+                        "r": 2.4,
+                        "fill": "rgb(10, 153, 194)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "sum_hyperpbi_svg_demo_data_stageorder",
+                        "operator": "=",
+                        "value": 3
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "rect",
+                        "x": -7,
+                        "y": -8,
+                        "width": 14,
+                        "height": 16,
+                        "rx": 3,
+                        "fill": "rgb(255, 255, 255)",
+                        "stroke": "rgb(22, 163, 74)",
+                        "strokeWidth": 1.3
+                      },
+                      {
+                        "type": "rect",
+                        "x": -6,
+                        "y": -1,
+                        "width": 12,
+                        "height": 8,
+                        "rx": 2,
+                        "fill": "rgb(110, 231, 183)"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 56,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_assetname}}"
+                    },
+                    "textAnchor": "middle",
+                    "fontSize": 12.8,
+                    "fontWeight": 800,
+                    "fill": "rgb(16, 36, 66)"
+                  },
+                  {
+                    "type": "rect",
+                    "x": -52,
+                    "y": 72,
+                    "width": 104,
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": "rgb(215, 226, 237)"
+                  },
+                  {
+                    "type": "rect",
+                    "x": -52,
+                    "y": 72,
+                    "width": {
+                      "bind": "sum_hyperpbi_svg_demo_data_stageprogress",
+                      "scale": {
+                        "domain": [
+                          0,
+                          100
+                        ],
+                        "range": [
+                          0,
+                          104
+                        ],
+                        "clamp": true
+                      }
+                    },
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(148, 163, 184)"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 101,
+                    "text": {
+                      "template": "{{sum_hyperpbi_svg_demo_data_stageprogress}}% · {{hyperpbi_svg_demo_data_status}}"
+                    },
+                    "textAnchor": "middle",
+                    "fontSize": 11,
+                    "fill": "rgb(71, 94, 121)"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "svg",
+      "id": "asset-condition-board",
+      "dataset": "summary",
+      "span": 8,
+      "title": "Animated asset condition board",
+      "viewBox": "0 0 690 570",
+      "height": 570,
+      "ariaLabel": "Professional animated asset cards with compact selectors",
+      "description": "Asset cards use equipment-specific icons and subtle motion without hover jitter.",
+      "dataContext": {
+        "mode": "first",
+        "sortBy": "sum_hyperpbi_svg_demo_data_recordorder",
+        "sortDirection": "asc"
+      },
+      "motion": {
+        "enabled": true,
+        "reducedMotion": "respect-system",
+        "maxConcurrentAnimations": 13
+      },
+      "performance": {
+        "maxElements": 320,
+        "maxAnimatedElements": 13,
+        "maxRepeatedRows": 12
+      },
+      "css": ".asset-muted { pointer-events: none; }\n.asset-icon-button:hover { opacity: .88; }",
+      "elements": [
+        {
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "width": 690,
+          "height": 570,
+          "rx": 20,
+          "fill": "rgb(248, 251, 254)"
+        },
+        {
+          "type": "circle",
+          "cx": 650,
+          "cy": 24,
+          "r": 7,
+          "fill": "rgb(22, 163, 74)",
+          "animation": {
+            "preset": "pulse",
+            "durationMs": 2400,
+            "iterationCount": "infinite",
+            "easing": "ease-in-out"
+          }
+        },
+        {
+          "type": "text",
+          "x": 634,
+          "y": 29,
+          "text": "LIVE",
+          "textAnchor": "end",
+          "fontSize": 10,
+          "fontWeight": 800,
+          "letterSpacing": 1.2,
+          "fill": "rgb(71, 94, 121)"
+        },
+        {
+          "type": "g",
+          "repeat": {
+            "dataset": "assets",
+            "limit": 12,
+            "keyField": "hyperpbi_svg_demo_data_assetid",
+            "children": [
+              {
+                "type": "g",
+                "position": {
+                  "x": {
+                    "bind": "sum_hyperpbi_svg_demo_data_xposition",
+                    "scale": {
+                      "domain": [
+                        20,
+                        440
+                      ],
+                      "range": [
+                        22,
+                        472
+                      ],
+                      "clamp": true
+                    }
+                  },
+                  "y": {
+                    "bind": "sum_hyperpbi_svg_demo_data_yposition",
+                    "scale": {
+                      "domain": [
+                        45,
+                        420
+                      ],
+                      "range": [
+                        26,
+                        432
+                      ],
+                      "clamp": true
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "type": "rect",
+                    "x": 0,
+                    "y": 0,
+                    "width": 196,
+                    "height": 112,
+                    "rx": 16,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(236, 253, 245)",
+                        "Watch": "rgb(255, 247, 237)",
+                        "At Risk": "rgb(255, 241, 242)",
+                        "Complete": "rgb(236, 253, 245)",
+                        "In Progress": "rgb(239, 246, 255)",
+                        "Planned": "rgb(248, 250, 252)"
+                      },
+                      "fallback": "rgb(248, 250, 252)"
+                    },
+                    "stroke": "rgb(215, 226, 237)",
+                    "strokeWidth": 1.2
+                  },
+                  {
+                    "type": "rect",
+                    "x": 0,
+                    "y": 0,
+                    "width": 196,
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    }
+                  },
+                  {
+                    "type": "circle",
+                    "className": "asset-icon-button",
+                    "cx": 31,
+                    "cy": 40,
+                    "r": {
+                      "bind": "sum_hyperpbi_svg_demo_data_riskscore",
+                      "scale": {
+                        "domain": [
+                          0,
+                          100
+                        ],
+                        "range": [
+                          17,
+                          22
+                        ],
+                        "clamp": true
+                      }
+                    },
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(236, 253, 245)",
+                        "Watch": "rgb(255, 247, 237)",
+                        "At Risk": "rgb(255, 241, 242)",
+                        "Complete": "rgb(236, 253, 245)",
+                        "In Progress": "rgb(239, 246, 255)",
+                        "Planned": "rgb(248, 250, 252)"
+                      },
+                      "fallback": "rgb(241, 245, 249)"
+                    },
+                    "stroke": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    },
+                    "strokeWidth": 2.2,
+                    "ariaLabel": "Select asset",
+                    "interaction": {
+                      "enabled": true,
+                      "internalMode": "highlight",
+                      "internalScope": "all",
+                      "externalMode": "selection",
+                      "field": "hyperpbi_svg_demo_data_assetid",
+                      "selectionMode": "toggle",
+                      "clearOnSecondClick": true,
+                      "multiSelect": true
+                    },
+                    "animation": {
+                      "preset": "scale-in",
+                      "trigger": "selected",
+                      "durationMs": 340,
+                      "iterationCount": 1
+                    }
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Pump"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "line",
+                        "x1": 31,
+                        "y1": 25,
+                        "x2": 31,
+                        "y2": 31,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.7,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": 46,
+                        "y1": 40,
+                        "x2": 40,
+                        "y2": 40,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.7,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": 31,
+                        "y1": 55,
+                        "x2": 31,
+                        "y2": 49,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.7,
+                        "strokeLinecap": "round"
+                      },
+                      {
+                        "type": "line",
+                        "x1": 16,
+                        "y1": 40,
+                        "x2": 22,
+                        "y2": 40,
+                        "stroke": "rgb(234, 136, 26)",
+                        "strokeWidth": 1.7,
+                        "strokeLinecap": "round"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Clarifier"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "circle",
+                        "cx": 31,
+                        "cy": 40,
+                        "r": 13,
+                        "fill": "none",
+                        "stroke": "rgb(14, 84, 170)",
+                        "strokeWidth": 1.4
+                      },
+                      {
+                        "type": "g",
+                        "children": [
+                          {
+                            "type": "line",
+                            "x1": 31,
+                            "y1": 40,
+                            "x2": 42,
+                            "y2": 40,
+                            "stroke": "rgb(14, 84, 170)",
+                            "strokeWidth": 1.8,
+                            "strokeLinecap": "round"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Filter"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "line",
+                        "x1": 24,
+                        "y1": 33,
+                        "x2": 38,
+                        "y2": 33,
+                        "stroke": "rgb(220, 62, 76)",
+                        "strokeWidth": 1.6
+                      },
+                      {
+                        "type": "line",
+                        "x1": 24,
+                        "y1": 40,
+                        "x2": 38,
+                        "y2": 40,
+                        "stroke": "rgb(220, 62, 76)",
+                        "strokeWidth": 1.6
+                      },
+                      {
+                        "type": "line",
+                        "x1": 24,
+                        "y1": 47,
+                        "x2": 38,
+                        "y2": 47,
+                        "stroke": "rgb(220, 62, 76)",
+                        "strokeWidth": 1.6
+                      }
+                    ]
+                  },
+                  {
+                    "type": "g",
+                    "hidden": {
+                      "when": {
+                        "field": "hyperpbi_svg_demo_data_assettype",
+                        "operator": "=",
+                        "value": "Sensor"
+                      },
+                      "then": false,
+                      "else": true
+                    },
+                    "children": [
+                      {
+                        "type": "circle",
+                        "cx": 31,
+                        "cy": 36,
+                        "r": 3.4,
+                        "fill": "rgb(22, 163, 74)"
+                      },
+                      {
+                        "type": "line",
+                        "x1": 31,
+                        "y1": 40,
+                        "x2": 31,
+                        "y2": 50,
+                        "stroke": "rgb(22, 163, 74)",
+                        "strokeWidth": 1.8
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "x": 60,
+                    "y": 34,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_assetname}}"
+                    },
+                    "fontSize": 12.4,
+                    "fontWeight": 800,
+                    "fill": "rgb(16, 36, 66)",
+                    "className": "asset-muted"
+                  },
+                  {
+                    "type": "text",
+                    "x": 60,
+                    "y": 54,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_assettype}} · {{hyperpbi_svg_demo_data_region}}"
+                    },
+                    "fontSize": 10.4,
+                    "fill": "rgb(71, 94, 121)",
+                    "className": "asset-muted"
+                  },
+                  {
+                    "type": "text",
+                    "x": 14,
+                    "y": 83,
+                    "text": {
+                      "template": "{{hyperpbi_svg_demo_data_status}}"
+                    },
+                    "fontSize": 11.5,
+                    "fontWeight": 800,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(71, 94, 121)"
+                    },
+                    "className": "asset-muted"
+                  },
+                  {
+                    "type": "text",
+                    "x": 182,
+                    "y": 83,
+                    "text": {
+                      "template": "Risk {{sum_hyperpbi_svg_demo_data_riskscore}}"
+                    },
+                    "textAnchor": "end",
+                    "fontSize": 11.5,
+                    "fontWeight": 800,
+                    "fill": "rgb(71, 94, 121)",
+                    "className": "asset-muted"
+                  },
+                  {
+                    "type": "rect",
+                    "x": 14,
+                    "y": 94,
+                    "width": 168,
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": "rgb(215, 226, 237)"
+                  },
+                  {
+                    "type": "rect",
+                    "x": 14,
+                    "y": 94,
+                    "width": {
+                      "bind": "sum_hyperpbi_svg_demo_data_completionpct",
+                      "scale": {
+                        "domain": [
+                          0,
+                          100
+                        ],
+                        "range": [
+                          0,
+                          168
+                        ],
+                        "clamp": true
+                      }
+                    },
+                    "height": 7,
+                    "rx": 3.5,
+                    "fill": {
+                      "bind": "hyperpbi_svg_demo_data_status",
+                      "map": {
+                        "Healthy": "rgb(22, 163, 74)",
+                        "Watch": "rgb(234, 136, 26)",
+                        "At Risk": "rgb(220, 62, 76)",
+                        "Complete": "rgb(22, 163, 74)",
+                        "In Progress": "rgb(37, 99, 235)",
+                        "Planned": "rgb(148, 163, 184)"
+                      },
+                      "fallback": "rgb(100, 116, 139)"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "operations-data-table",
+      "dataset": "assets",
+      "span": 4,
+      "title": "Operational records",
+      "subtitle": "Bottom-line asset list. Use search or select a row.",
+      "columns": [
+        {
+          "field": "hyperpbi_svg_demo_data_assetid",
+          "title": "ID",
+          "sortable": true
+        },
+        {
+          "field": "hyperpbi_svg_demo_data_assetname",
+          "title": "Asset",
+          "sortable": true
+        },
+        {
+          "field": "hyperpbi_svg_demo_data_status",
+          "title": "Status",
+          "cellType": "badge",
+          "intentMap": {
+            "Healthy": "success",
+            "Watch": "warning",
+            "At Risk": "danger"
+          },
+          "sortable": true
+        },
+        {
+          "field": "sum_hyperpbi_svg_demo_data_riskscore",
+          "title": "Risk",
+          "format": "0",
+          "sortable": true
+        },
+        {
+          "field": "sum_hyperpbi_svg_demo_data_completionpct",
+          "title": "Progress",
+          "cellType": "progress",
+          "format": "0",
+          "sortable": true
+        }
+      ],
+      "pagination": false,
+      "search": true,
+      "resizableColumns": true,
+      "stickyHeader": true,
+      "density": "compact",
+      "striped": true,
+      "hover": true,
+      "showRowCount": true,
+      "maxRows": 12,
+      "interaction": {
+        "enabled": true,
+        "internalMode": "highlight",
+        "internalScope": "all",
+        "externalMode": "selection",
+        "field": "hyperpbi_svg_demo_data_assetid",
+        "selectionMode": "toggle",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ]
+}
