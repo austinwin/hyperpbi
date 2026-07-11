@@ -4,6 +4,8 @@ HyperPBI is a schema-driven Power BI custom visual that compiles declarative JSO
 
 HyperPBI 2.0 adds one AI-friendly authoring language on top of the same renderer: stable field aliases, strict diagnostics, safe AI-response extraction, logical named datasets with source-row lineage, reusable definitions, four application patterns, relevance-aware prompts, and a canonical-JSON visual inspector. Existing 1.0 specifications and normalized field keys remain supported.
 
+HyperPBI  provide an AI-friendly, schema-driven syntax that compiles declarative JSON into secure, enterprise-grade layouts and rich visualizations—allowing developers and AI agents to build complex analytical applications safely inside Power BI without executing user JavaScript.
+
 The repository includes a responsive, dependency-free [product landing page](index.html) ready for GitHub Pages, and a standalone [component catalog](hyperpbi-component-catalog-reference.html).
 
 ## Capability Summary
