@@ -4,6 +4,8 @@
 
 HyperPBI specifications are static JSON objects. HyperPBI never executes user-supplied code:
 
+SVG follows the same rule. Declarative SVG renders only allowlisted native nodes. Raw `svgMarkup` is parsed by a dedicated sanitizer, blocks script/event attributes, `foreignObject`, embedded HTML/media, image/use, style elements, and every external/data/blob/JavaScript URL, then isolates local IDs and applies final sanitization. Legacy HTML/custom components do not gain inline SVG permission.
+
 - No `eval`, `new Function`, or `Function` constructor
 - No inline event handlers (`onclick`, `onerror`, etc.)
 - No `<script>`, `<iframe>`, `<object>`, or `<embed>` tags

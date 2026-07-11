@@ -1,0 +1,10 @@
+{
+  "version": "2.0", "title": "Pictorial status", "components": [{
+    "type": "svg", "id": "status-marks", "dataset": "statusSummary", "title": "Status summary", "viewBox": "0 0 800 280", "height": 280, "ariaLabel": "Status counts shown as selectable marks",
+    "elements": [{ "type": "g", "repeat": { "dataset": "statusSummary", "limit": 50, "keyField": "status", "children": [{
+      "type": "circle", "id": "statusDot", "cx": { "bind": "$index", "scale": { "domain": [0, 49], "range": [40, 760] } }, "cy": { "bind": "count", "scale": { "domain": "auto", "range": [230, 40], "clamp": true } }, "r": 10,
+      "fill": { "bind": "status", "map": { "On Track": "#16a34a", "Watch": "#d97706", "At Risk": "#dc2626" }, "fallback": "#64748b" }, "ariaLabel": "Status mark", "interaction": { "enabled": true, "internalMode": "highlight", "externalMode": "selection", "field": "status", "selectionMode": "replace" }
+    }] } }]
+  }],
+  "data": { "datasets": { "statusSummary": { "source": "powerbi", "groupBy": ["status"], "metrics": { "count": { "op": "count" } }, "sort": [{ "field": "status", "direction": "asc" }], "limit": 50 } } }
+}

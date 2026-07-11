@@ -7,6 +7,7 @@ import type {
     ListGroupComponent, DataGridComponent, EmptyStateComponent,
     PlaceholderComponent, SpinnerComponent, CountUpComponent, TrackingComponent,
     StepsComponent, IconComponent, IconButtonComponent, AvatarComponent, AvatarGroupComponent,
+    SvgComponent, SvgMarkupComponent,
 } from "../schema/hyperpbiSchema";
 import { ChartBlock } from "../components/charts/ChartBlock";
 import { ControlBlock } from "../components/controls/Controls";
@@ -36,6 +37,8 @@ import { Icon } from "../components/icons/Icon";
 import { IconButton } from "../components/display/IconButton";
 import { Avatar, AvatarGroup } from "../components/display/Avatar";
 import { OverlayTrigger } from "../components/overlays/OverlayTrigger";
+import { SvgBlock } from "../components/svg/SvgBlock";
+import { SvgMarkupBlock } from "../components/svg/SvgMarkupBlock";
 
 type RenderChildren = (children: DashboardComponent[]) => ComponentChildren;
 type ComponentRenderer = (component: DashboardComponent, renderChildren: RenderChildren) => ComponentChildren;
@@ -55,6 +58,8 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     text: c => h(TextBlock, { component: c as ContentComponent }),
     markdown: c => h(MarkdownBlock, { component: c as ContentComponent }),
     custom: c => h(CustomComponent, { component: c as ContentComponent }),
+    svg: c => h(SvgBlock, { component: c as SvgComponent }),
+    svgMarkup: c => h(SvgMarkupBlock, { component: c as SvgMarkupComponent }),
     divider: () => h(Divider, {}),
     spacer: () => h(Spacer, {}),
     // Layout containers

@@ -1,0 +1,11 @@
+.hp-svg-block { position: relative; width: 100%; min-width: 0; }
+.hp-svg-block svg { display: block; width: 100%; max-width: 100%; overflow: visible; }
+.hp-svg-heading { margin-bottom: var(--hp-space-2, 8px); font-weight: 600; color: var(--hp-text); }
+.hp-svg-interactive { cursor: pointer; outline: none; }
+.hp-svg-interactive:focus-visible { outline: 3px solid var(--hp-primary); outline-offset: 3px; }
+.hp-svg-paused * { animation-play-state: paused !important; }
+.hp-svg-markup-host > svg { display: block; width: 100%; max-width: 100%; }
+.hp-svg-diagnostics { margin-top: 6px; color: var(--hp-text-muted); font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+    .hp-svg-block * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}

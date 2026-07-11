@@ -64,25 +64,25 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
     // Build a context object that executeUiAction can read from
     const execUiAction = useCallback((action: UiAction | UiAction[], event?: Event): UiActionResult => {
         const ctx: RenderContextValue = {
-            data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
+            instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
             getRowsForComponent, componentRows, schema, settings, state, dispatch,
             warnings: sanitizedCss.warnings,
-            selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
+            selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
             config, webAccessAvailable, datasets:datasetEvaluation.datasets,
             executeUiAction: (null as any), isOverlayOpen: (null as any),
         };
         return executeUiActions(action, ctx, event);
-    }, [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable]);
+    }, [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable, datasetEvaluation.datasets]);
 
     const context = useMemo((): RenderContextValue => ({
-        data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
+        instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
         getRowsForComponent, componentRows, schema, settings, state, dispatch,
         warnings: sanitizedCss.warnings,
-        selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
+        selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
         config, webAccessAvailable, datasets:datasetEvaluation.datasets,
         executeUiAction: execUiAction,
         isOverlayOpen,
-    }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
+    }), [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
     const resolvedApp = useMemo(() => resolveAppShell(schema, settings, state), [schema, settings, state]);

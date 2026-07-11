@@ -1,0 +1,11 @@
+{
+  "version": "2.0", "title": "SVG process flow", "components": [{
+    "type": "svg", "id": "process-flow", "title": "Review process", "viewBox": "0 0 900 300", "height": 300, "ariaLabel": "Three-stage review process",
+    "elements": [
+      { "type": "line", "x1": 150, "y1": 140, "x2": 750, "y2": 140, "stroke": "#cbd5e1", "strokeWidth": 8, "strokeLinecap": "round" },
+      { "type": "g", "id": "submitted", "position": { "x": 150, "y": 140 }, "children": [{ "type": "circle", "cx": 0, "cy": 0, "r": 46, "fill": "#16a34a" }, { "type": "text", "x": 0, "y": 78, "text": "Submitted", "textAnchor": "middle", "fontSize": 18 }] },
+      { "type": "g", "id": "review", "position": { "x": 450, "y": 140 }, "animation": { "preset": "pulse", "durationMs": 1800, "iterationCount": "infinite" }, "children": [{ "type": "circle", "cx": 0, "cy": 0, "r": 46, "fill": "#2563eb" }, { "type": "text", "x": 0, "y": 78, "text": "Review", "textAnchor": "middle", "fontSize": 18 }] },
+      { "type": "g", "id": "approved", "position": { "x": 750, "y": 140 }, "children": [{ "type": "circle", "cx": 0, "cy": 0, "r": 46, "fill": "#e2e8f0" }, { "type": "text", "x": 0, "y": 78, "text": "Approved", "textAnchor": "middle", "fontSize": 18 }] }
+    ]
+  }]
+}

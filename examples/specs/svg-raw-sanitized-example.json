@@ -1,0 +1,7 @@
+{
+  "version": "2.0", "title": "Sanitized raw SVG", "components": [{
+    "type": "svgMarkup", "id": "pump-station-diagram", "title": "Pump Station", "viewBox": "0 0 1000 600", "height": 420, "ariaLabel": "Pump station operating diagram",
+    "svg": "<svg viewBox=\"0 0 1000 600\" role=\"img\"><defs><linearGradient id=\"pumpGradient\"><stop offset=\"0%\" stop-color=\"#2563eb\"/><stop offset=\"100%\" stop-color=\"#16a34a\"/></linearGradient></defs><rect id=\"pump\" class=\"pump\" x=\"280\" y=\"180\" width=\"440\" height=\"220\" rx=\"36\" fill=\"url(#pumpGradient)\"/><text x=\"500\" y=\"300\" text-anchor=\"middle\" fill=\"white\">{{status}}</text></svg>",
+    "css": ".pump { stroke: #0f172a; stroke-width: 6; }"
+  }]
+}

@@ -1,0 +1,11 @@
+{
+  "version": "2.0", "title": "Flowing pipeline", "components": [{
+    "type": "svg", "id": "pipeline-flow", "title": "Pipeline flow", "viewBox": "0 0 900 260", "height": 260, "ariaLabel": "Pipeline operating flow",
+    "elements": [
+      { "type": "defs", "children": [{ "type": "marker", "id": "arrow", "markerWidth": 10, "markerHeight": 10, "refX": 8, "refY": 3, "orient": "auto", "children": [{ "type": "path", "d": "M0,0 L0,6 L9,3 z", "fill": "#2563eb" }] }] },
+      { "type": "path", "id": "pipe", "d": "M60 130 C220 20 360 240 520 130 S760 30 840 130", "fill": "none", "stroke": "#cbd5e1", "strokeWidth": 18, "strokeLinecap": "round" },
+      { "type": "path", "id": "flow", "d": "M60 130 C220 20 360 240 520 130 S760 30 840 130", "fill": "none", "stroke": "#2563eb", "strokeWidth": 5, "strokeDasharray": "14 10", "markerEnd": "url(#arrow)", "animation": { "preset": "flow-dash", "durationMs": 1800, "easing": "linear", "iterationCount": "infinite" } },
+      { "type": "text", "x": 60, "y": 220, "text": { "template": "Current throughput: {{throughput}}" }, "fontSize": 22, "fill": "#0f172a" }
+    ]
+  }]
+}

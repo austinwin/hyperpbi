@@ -172,6 +172,8 @@ export const componentDefinitions: ComponentDefinition[] = [
     def("markdown", "Markdown", "Custom components", "Structured explanatory content"),
     def("html", "Sanitized HTML", "Custom components", "Branded static content", "advanced", { customHtml: true }),
     def("custom", "Custom HTML/CSS", "Custom components", "Safe app-like cards, lists, and slicers", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true, customHtml: true }),
+    def("svg", "Declarative SVG", "Custom components", "Animated KPI cards, diagrams, gauges, pictorial marks, and schematics", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("svgMarkup", "Sanitized SVG markup", "Advanced components", "Strictly sanitized raw SVG when declarative SVG cannot express the design", "advanced", { fields: true, interactions: true }),
     def("advancedChart", "Advanced ECharts", "Advanced components", "JSON-only ECharts escape hatch for uncommon configurations not represented by a first-class HyperPBI chart", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true }),
 ];
 

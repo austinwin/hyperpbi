@@ -28,6 +28,10 @@ Power BI spatial maps and practical public ArcGIS REST feature, join, tile, and 
 
 Native table with enhanced features. Tabulator is not bundled.
 
+## SVG visuals
+
+Use declarative \`svg\` for animated cards, custom gauges, diagrams, pictorial marks, and schematics. It supports safe field bindings, scales, maps, conditions, state, repeats, normal HyperPBI interactions, scoped keyframe presets, reduced motion, and deterministic local-ID isolation. \`svgMarkup\` is a strictly sanitized advanced fallback. Standard analytical charts remain ECharts components.
+
 ## Security
 
 No user JavaScript. HTML sanitized. CSS allowlisted and scoped. No tokens in JSON. See security documentation for details.`;
@@ -64,7 +68,9 @@ Forms: textarea, checkbox, checkboxGroup, radioGroup, inputGroup.
 Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, radarChart, smallMultiples, advancedChart. Prefer a first-class chart; use advancedChart only when no semantic chart fits. Semantic chart options cannot replace generated data.
 Tables: table, matrix.
 Maps: map.
-Content: text, markdown, html, custom.
+Content: text, markdown, html, custom, svg. Advanced escape hatch: svgMarkup.
+
+Use declarative \`svg\` only for animated KPI cards, custom gauges, diagrams, process flows, pictorial marks, and schematics. Use ECharts for standard analytical charts. SVG uses approved elements, field aliases, bounded repeats, normal interaction policies, scoped animation presets, stable IDs, ariaLabel, and reduced-motion-safe final states. Never emit JavaScript, event attributes, foreignObject, external resources or libraries, image/use, or arbitrary URLs. Prefer \`svg\` over \`svgMarkup\`.
 
 ## Shared properties
 

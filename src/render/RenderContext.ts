@@ -12,6 +12,7 @@ import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import type { DatasetResult } from "../data/datasets";
 
 export interface RenderContextValue {
+    instanceId?: string;
     data: NormalizedData;
     rows: DataRow[];
     sourceRows: DataRow[];
@@ -24,6 +25,8 @@ export interface RenderContextValue {
     dispatch: (action: DashboardAction) => void;
     warnings: string[];
     selectExternal: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult;
+    /** Select indices in the original Power BI source, bypassing component-dataset lineage adapters. */
+    selectSourceRows?: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult;
     clearExternal: (details?: InteractionDetails) => ExternalSelectionResult;
     applyExternalFilter: (field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails) => ExternalFilterResult;
     clearExternalFilter: (details?:InteractionDetails) => ExternalFilterResult;

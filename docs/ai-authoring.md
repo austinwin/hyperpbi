@@ -3,6 +3,10 @@
 ## Prompt Composition
 
 Generated prompts contain only relevant modules:
+
+- SVG grammar is included only for SVG, animation, illustration, diagram, pictorial, gauge, pipeline, schematic, or moving-marker intent.
+- AI guidance prefers declarative `type: "svg"`, approved presets, field aliases, bounded repeats, stable interactive IDs, and `ariaLabel`.
+- Raw `svgMarkup` is not recommended unless the request explicitly needs raw SVG; JavaScript, events, external resources, `foreignObject`, and external libraries are always forbidden.
 - Semantic field manifest (stable aliases, types, roles, formats, source capabilities, privacy-aware profiles)
 - Privacy-selected sample rows
 - Visual dimensions

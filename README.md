@@ -231,6 +231,7 @@ Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-m
 | [ChatGPT guideline](docs/chatgpt-guideline.md) | Concise authoring rules |
 | [Interactions](docs/interactions.md) | UI actions + data interactions |
 | [Custom components](docs/custom-components.md) | Sanitized HTML, repeats |
+| [SVG visuals](docs/svg-visuals.md) | Declarative data-bound SVG, animation, repetition, and sanitized raw SVG |
 | [Map services](docs/map-services.md) | Maps, ArcGIS REST, hosts |
 | [Calculation DSL](docs/calculations-dsl.md) | Derived fields, metrics |
 | [Logical data model](docs/data-model.md) | Named datasets, caching, source-row lineage |
@@ -248,3 +249,4 @@ Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-m
 - Maps package requires organizational WebAccess approval
 - ArcGIS support is limited to public HTTPS services and output SR 4326; secured services, editing, 3D, relationships, tracing, density grids, and advanced label collision are unsupported
 - Overlay components require explicit unique IDs. Legacy drawer and filterDrawer specifications are normalized through offcanvas.
+- SVG intentionally excludes external assets, embedded HTML, JavaScript, path morphing, nested repetition, and full drawing/path editing.

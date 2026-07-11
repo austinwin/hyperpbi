@@ -4,6 +4,10 @@ Reference for strict HyperPBI 2.0 authoring and compatible HyperPBI 1.0 dashboar
 
 Version 2.0 rejects unknown properties and requires stable component IDs. Version 1.0 remains lenient and supports normalized/legacy field keys. Both use the same renderer; patterns and definitions are compiled before rendering.
 
+## SVG components
+
+`svg` requires `viewBox` and `elements`; optional properties include width, height, preserveAspectRatio, role, ariaLabel, description, dataContext, motion, performance, and scoped CSS. `svgMarkup` requires raw `svg` text and uses the dedicated sanitizer. The complete element/attribute, binding, animation, repeat, security, and limit reference is in [SVG visuals](svg-visuals.md).
+
 ## Root Document
 
 | Key | Required | Type | Description |

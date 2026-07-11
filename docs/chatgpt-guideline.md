@@ -4,6 +4,8 @@ Use the self-contained prompt copied from the Guided Builder. Return exactly one
 
 For improvements, preserve stable IDs and unrelated working behavior and return the complete updated specification. For repairs, address the structured diagnostics without changing field choice, aggregation meaning, interactions, filters, or business logic unless the requested change explicitly requires it.
 
+For custom SVG illustrations, prefer declarative `type: "svg"` and the allowlisted element, binding, repeat, interaction, and animation contracts in the generated prompt. Use ECharts components for standard analytical charts. Never emit JavaScript, event attributes, external URLs/libraries, `foreignObject`, external images, `use`, or unbounded repetition. Include an accessible label and a reduced-motion-safe final state.
+
 Use this as a concise reference when generating HyperPBI dashboard JSON with ChatGPT or similar AI tools.
 
 ## Output Format

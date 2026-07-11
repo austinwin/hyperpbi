@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "title": "SVG progress card",
+  "components": [{
+    "type": "svg", "id": "inspection-progress", "title": "Inspection Progress", "viewBox": "0 0 800 240", "height": 240,
+    "ariaLabel": "Inspection completion progress", "description": "Completion is shown as a filled track with a moving marker.",
+    "dataContext": { "mode": "aggregate" },
+    "elements": [
+      { "type": "defs", "children": [{ "type": "linearGradient", "id": "progressGradient", "x1": 0, "y1": 0, "x2": 1, "y2": 0, "children": [{ "type": "stop", "offset": "0%", "stopColor": "#2563eb" }, { "type": "stop", "offset": "100%", "stopColor": "#16a34a" }] }] },
+      { "type": "rect", "id": "track", "x": 40, "y": 120, "width": 720, "height": 22, "rx": 11, "fill": "#e2e8f0" },
+      { "type": "rect", "id": "progress", "x": 40, "y": 120, "width": { "bind": "completionPct", "scale": { "type": "linear", "domain": [0, 100], "range": [0, 720], "clamp": true } }, "height": 22, "rx": 11, "fill": "url(#progressGradient)", "animation": { "preset": "progress-fill", "durationMs": 1000, "easing": "ease-out" } },
+      { "type": "text", "x": 40, "y": 82, "text": { "template": "{{completionPct}}%" }, "fontSize": 30, "fontWeight": 700, "fill": "#0f172a" },
+      { "type": "circle", "id": "marker", "cx": { "bind": "completionPct", "scale": { "domain": [0, 100], "range": [40, 760], "clamp": true } }, "cy": 131, "r": 13, "fill": "#ffffff", "stroke": "#16a34a", "strokeWidth": 4, "animation": { "preset": "follow-progress", "durationMs": 1000 } }
+    ]
+  }]
+}

@@ -2,6 +2,10 @@
 
 > New dashboards use strict schema 2.0 with field aliases, application patterns, logical data views, reusable styles, structured repair diagnostics, and a post-import visual inspector. Existing 1.0 dashboards continue to work.
 
+## SVG visuals
+
+Use first-class `svg` components for custom gauges, animated progress cards, process flows, pictorial marks, and schematics. Attributes bind through normal field aliases and logical datasets; repeated marks preserve source-row selection lineage. `svgMarkup` is an advanced, strictly sanitized fallback. See [SVG visuals](svg-visuals.md).
+
 ## 1. What HyperPBI Does
 
 HyperPBI turns declarative JSON specifications into professional Power BI dashboards. It renders application shells, responsive layouts, KPI cards, charts, tables, maps, forms, overlays, and custom components — without executing JavaScript.

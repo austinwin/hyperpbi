@@ -1,9 +1,11 @@
 import * as csstree from "css-tree";
 
 export function scopeCssAst(ast: csstree.CssNode, scopeSelector: string): void {
+    let keyframeDepth = 0;
     csstree.walk(ast, {
-        visit: "Rule",
-        enter(node) {
+        enter(node: csstree.CssNode) {
+            if (node.type === "Atrule" && /^(?:-webkit-)?keyframes$/i.test(node.name)) { keyframeDepth++; return; }
+            if (keyframeDepth > 0) return;
             if (node.type !== "Rule" || node.prelude.type !== "SelectorList") return;
             const raw = csstree.generate(node.prelude);
             const selectors = raw.split(",").map(selector => selector.trim()).filter(Boolean);
@@ -12,6 +14,9 @@ export function scopeCssAst(ast: csstree.CssNode, scopeSelector: string): void {
                 return normalized.startsWith(scopeSelector) ? normalized : `${scopeSelector} ${normalized || "*"}`;
             }).join(", ");
             node.prelude = csstree.parse(scoped, { context: "selectorList" }) as csstree.SelectorList;
+        },
+        leave(node: csstree.CssNode) {
+            if (node.type === "Atrule" && /^(?:-webkit-)?keyframes$/i.test(node.name)) keyframeDepth--;
         }
     });
 }

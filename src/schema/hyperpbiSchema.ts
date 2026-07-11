@@ -9,6 +9,7 @@ import type {
 import type {
     MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition,
 } from "./mapSchema";
+import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
 
 // Re-export map types
 export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition };
@@ -611,6 +612,34 @@ export interface AvatarGroupComponent extends ComponentBase {
     max?: number;
 }
 
+export interface SvgComponent extends ComponentBase {
+    type: "svg";
+    viewBox: string;
+    width?: number | string;
+    height?: number | string;
+    preserveAspectRatio?: string;
+    role?: "img" | "group";
+    description?: string;
+    elements: SvgElementDefinition[];
+    dataContext?: SvgDataContextDefinition;
+    motion?: SvgMotionOptions;
+    performance?: SvgPerformanceOptions;
+}
+
+export interface SvgMarkupComponent extends ComponentBase {
+    type: "svgMarkup";
+    viewBox?: string;
+    width?: number | string;
+    height?: number | string;
+    preserveAspectRatio?: string;
+    role?: "img" | "group";
+    description?: string;
+    svg: string;
+    dataContext?: SvgDataContextDefinition;
+    motion?: SvgMotionOptions;
+    performance?: SvgPerformanceOptions;
+}
+
 export type DashboardComponent =
     | ContainerComponent
     | ControlComponent
@@ -642,7 +671,9 @@ export type DashboardComponent =
     | IconComponent
     | IconButtonComponent
     | AvatarComponent
-    | AvatarGroupComponent;
+    | AvatarGroupComponent
+    | SvgComponent
+    | SvgMarkupComponent;
 
 export interface HyperPbiSchema {
     version: "1.0" | "2.0";

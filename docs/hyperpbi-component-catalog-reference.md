@@ -10,7 +10,7 @@ Patterns are AI-friendly authoring constructs compiled into the existing compone
 - `map-and-details`
 
 > Generated from canonical component definitions. Do not edit manually.
-> Component count: 82
+> Component count: 84
 
 ## Universal interaction
 

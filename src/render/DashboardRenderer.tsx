@@ -23,7 +23,8 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const typeRule = rules[component.type] ?? {};
         const idRule = rules[`#${componentId}`] ?? {};
         const cssMode = config.security?.cssMode ?? "scoped";
-        const scoped = scopeComponentCss([globalRule.css, typeRule.css, idRule.css, component.css].filter(Boolean).join("\n"), componentId, cssMode);
+        const svgOwnCss = component.type === "svg" || component.type === "svgMarkup";
+        const scoped = scopeComponentCss([globalRule.css, typeRule.css, idRule.css, svgOwnCss ? undefined : component.css].filter(Boolean).join("\n"), componentId, cssMode);
         const localContainerStyle = component.type === "map" ? undefined : component.style as Record<string,string|number> | undefined;
         const safeStyle = sanitizeStyleObject({ ...globalRule.style, ...typeRule.style, ...idRule.style, ...localContainerStyle }, cssMode);
         const classes = [globalRule.className, typeRule.className, idRule.className, component.className].filter(Boolean).join(" ");
