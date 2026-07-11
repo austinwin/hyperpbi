@@ -1,7 +1,7 @@
 # HyperPBI component catalog reference
 
 > Generated from canonical component definitions. Do not edit manually.
-> Component count: 76
+> Component count: 82
 
 ## Universal interaction
 
@@ -35,7 +35,7 @@ UI actions control interface behavior (navigation, overlays, toasts). They are s
 | `setState` | target, value | Sets a named state value |
 | `toggleState` | target | Toggles a Boolean state |
 | `toggleSidebar` | — | Toggles the root sidebar collapsed state |
-| `openOverlay` | target | Opens a modal, dropdown, or popover |
+| `openOverlay` | target | Opens a modal, offcanvas, dropdown, popover, or legacy drawer |
 | `closeOverlay` | target | Closes an overlay |
 | `toggleOverlay` | target | Toggles an overlay |
 | `setStep` | target, value | Sets the active step |
@@ -366,6 +366,30 @@ Three independent behavior systems:
 ### heatmap
 
 <!-- component:heatmap -->
+
+### comboChart
+
+<!-- component:comboChart -->
+
+### waterfallChart
+
+<!-- component:waterfallChart -->
+
+### sankeyChart
+
+<!-- component:sankeyChart -->
+
+### treemapChart
+
+<!-- component:treemapChart -->
+
+### funnelChart
+
+<!-- component:funnelChart -->
+
+### radarChart
+
+<!-- component:radarChart -->
 
 ### smallMultiples
 

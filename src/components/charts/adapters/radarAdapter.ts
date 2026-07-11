@@ -1,0 +1,7 @@
+import { aggregateValue } from "../../../data/aggregations";
+import type { DataRow } from "../../../data/normalizeData";
+import type { RadarChartComponent } from "../../../schema/hyperpbiSchema";
+import type { ChartAdapter } from "./types";
+import { baseOption, semanticResult, sourceIndices } from "./shared";
+
+export const radarAdapter: ChartAdapter<RadarChartComponent>={type:"radarChart",fields:component=>[component.groupField,...component.indicators.map(indicator=>indicator.field)].filter((field):field is string=>Boolean(field)),build(component,rows,context){const groups=new Map<string,DataRow[]>();for(const row of rows){const name=component.groupField?String(row[component.groupField]??"(Blank)"):"All";const group=groups.get(name)??[];group.push(row);groups.set(name,group);}const entries=Array.from(groups.entries());const series=entries.map(([name,group])=>({type:"radar" as const,name,selectedMode:"multiple",data:[{name,value:component.indicators.map(indicator=>Number(aggregateValue(group,indicator.field,indicator.aggregation??"avg")??0))}]}));return semanticResult({...baseOption(context),legend:{data:entries.map(([name])=>name)},radar:{indicator:component.indicators.map(indicator=>({name:indicator.label??indicator.field,min:indicator.min??0,max:indicator.max}))},series},component,entries.map(([name,group],seriesIndex)=>({seriesIndex,dataIndex:0,sourceRowIndices:sourceIndices(group,context),field:component.groupField,value:name})));}};

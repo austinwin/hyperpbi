@@ -1,0 +1,18 @@
+import type { EChartsCoreOption } from "echarts/core";
+import { aggregateValue } from "../../../data/aggregations";
+import type { DataRow, Primitive } from "../../../data/normalizeData";
+import type { BaseChartComponent, MetricDefinition, UiIntent } from "../../../schema/hyperpbiSchema";
+import { mergeSemanticChartOptions } from "../safeEChartOptions";
+import type { ChartBuildContext, ChartBuildResult, ChartDatumBinding } from "./types";
+
+type TooltipParam = { name?: unknown; value?: unknown; marker?: string; seriesName?: string };
+const numberFormat = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 });
+export function formatBuiltInChartValue(value: unknown): string { if (typeof value === "number" && Number.isFinite(value)) return numberFormat.format(value); if (value instanceof Date) return value.toLocaleDateString(); if (value == null) return ""; if (Array.isArray(value)) return value.map(formatBuiltInChartValue).filter(Boolean).join(", "); if (typeof value === "object") return ""; return String(value); }
+export function formatBuiltInChartTooltip(input: TooltipParam | TooltipParam[]): string { return (Array.isArray(input) ? input : [input]).map(param => { const name=formatBuiltInChartValue(param.name);const value=formatBuiltInChartValue(param.value);const series=!name?formatBuiltInChartValue(param.seriesName):"";return `${param.marker??""}${name||series}${name||series?": ":""}${value}`; }).filter(Boolean).join("<br/>"); }
+export function scaleScatterPointSizes(values: number[]): number[] { if(!values.length)return[];const valid=values.filter(Number.isFinite);if(!valid.length)return values.map(()=>12);const min=Math.min(...valid),max=Math.max(...valid);if(min===max)return values.map(()=>14);return values.map(value=>!Number.isFinite(value)?8:Math.round(8+Math.sqrt(Math.max(0,Math.min(1,(value-min)/(max-min))))*28)); }
+
+export function baseOption(context: ChartBuildContext): EChartsCoreOption { return { animation:false,textStyle:{fontFamily:context.theme.fontFamily,color:context.theme.text},tooltip:{trigger:"item",confine:true,formatter:formatBuiltInChartTooltip},color:[context.theme.primary,context.theme.accent,context.theme.success,context.theme.warning],grid:{left:44,right:16,top:24,bottom:40,containLabel:true} }; }
+export function sourceIndices(rows: DataRow[], context: ChartBuildContext): number[] { return Array.from(new Set(rows.map(row=>context.sourceIndex.get(row)).filter((index):index is number=>index!==undefined))); }
+export function groupRows(rows: DataRow[], category: string, measure: string|undefined, aggregation: MetricDefinition["aggregation"] = "sum") { const groups=new Map<string,{key:string;rawKey:Primitive;rows:DataRow[]}>();for(const row of rows){const rawKey=row[category];const key=String(rawKey??"(Blank)");const group=groups.get(key)??{key,rawKey,rows:[]};group.rows.push(row);groups.set(key,group);}return Array.from(groups.values()).map(group=>({...group,value:Number(aggregateValue(group.rows,measure,aggregation)??0)})); }
+export function semanticResult(base: EChartsCoreOption, component: BaseChartComponent, bindings: ChartDatumBinding[], warnings: string[] = []): ChartBuildResult { const merged=mergeSemanticChartOptions(base,component.options);return{option:merged.option,bindings,warnings:Array.from(new Set([...warnings,...merged.warnings]))}; }
+export function intentColor(intent: UiIntent|undefined, context: ChartBuildContext, fallback: string): string { if(intent==="success")return context.theme.success;if(intent==="warning")return context.theme.warning;if(intent==="danger")return context.theme.danger;if(intent==="primary")return context.theme.primary;return fallback; }

@@ -129,6 +129,12 @@ export const componentJsonExamples: Record<string, JsonObject> = {
     gauge: { ...base("gauge", "Target attainment", 4), measure: measureField, aggregation: "avg", height: 300, maxDataRows: 30000, initOptions: { renderer: "canvas", useDirtyRect: false }, setOption: { notMerge: true, lazyUpdate: false }, options: { series: [{ type: "gauge", min: 0, max: 100, progress: { show: true, width: 14 }, axisLine: { lineStyle: { width: 14 } }, detail: { formatter: "{value}%" } }] } },
     heatmap: categoryChart("heatmap", "Category intensity", { visualMap: { min: 0, max: 100, calculable: true, orient: "horizontal", bottom: 0 }, series: [{ type: "heatmap", label: { show: true }, emphasis: { itemStyle: { shadowBlur: 8 } } }] }),
     smallMultiples: { ...base("smallMultiples", "Regional comparisons"), splitField: "__split_field_key__", maxPanels: 6, sharedScale: true, height: 200, ...chartInteraction, chart: { ...categoryChart("barChart", "Value by category"), id: "small_multiple_chart", span: 12, height: 200 } },
+    comboChart: { ...base("comboChart", "Actual vs. target", 8), category: categoryField, series: [{ field: measureField, label: "Actual", chartType: "bar", aggregation: "sum", axis: "left" }, { field: "__target_measure_field_key__", label: "Target", chartType: "line", aggregation: "sum", axis: "left" }, { field: "__rate_measure_field_key__", label: "Completion", chartType: "line", aggregation: "avg", axis: "right", format: "percent" }], height: 340, options: { legend: { top: 0 }, animation: true }, ...chartInteraction },
+    waterfallChart: { ...base("waterfallChart", "Budget variance", 6), category: categoryField, measure: measureField, aggregation: "sum", showStart: true, showEnd: true, positiveIntent: "success", negativeIntent: "danger", totalIntent: "primary", height: 320, ...chartInteraction },
+    sankeyChart: { ...base("sankeyChart", "Work order flow", 8), sourceField: "__source_field_key__", targetField: "__target_field_key__", valueField: measureField, aggregation: "sum", orientation: "horizontal", nodeAlign: "justify", selectionTarget: "both", height: 380, ...chartInteraction },
+    treemapChart: { ...base("treemapChart", "Cost hierarchy", 8), pathFields: ["__department_field_key__", "__program_field_key__", "__project_field_key__"], valueField: measureField, aggregation: "sum", labelField: "__project_field_key__", maxDepth: 3, height: 380, ...chartInteraction },
+    funnelChart: { ...base("funnelChart", "Project pipeline", 6), category: categoryField, measure: measureField, aggregation: "sum", sort: "descending", gap: 3, height: 340, ...chartInteraction },
+    radarChart: { ...base("radarChart", "Team performance", 6), groupField: categoryField, indicators: [{ field: "__safety_measure_field_key__", label: "Safety", max: 100 }, { field: "__quality_measure_field_key__", label: "Quality", max: 100 }, { field: "__schedule_measure_field_key__", label: "Schedule", max: 100 }], height: 360, ...chartInteraction },
 
     table: { ...base("table", "Record details"), engine: "native", columns: [{ field, title: "Record", width: 180, format: "", hozAlign: "left", conditional: [{ operator: "=", value: "Critical", color: "#991b1b", background: "#fee2e2" }] }, { field: measureField, title: "Amount", width: 120, format: "currency", hozAlign: "right", conditional: [{ operator: ">=", value: 1000, color: "#166534", background: "#dcfce7" }] }], pagination: true, pageSize: 25, search: true, resizableColumns: true, maxRows: 1000, stickyHeader: true, interaction: { enabled: true, trigger: "auto", internalMode: "highlight", internalScope: "self", externalMode: "auto", selectionMode: "replace", multiSelect: true, showSelector: true, clearOnSecondClick: true } },
     matrix: { ...base("matrix", "Category matrix"), rows: [categoryField, field], columns: ["__column_field_key__"], values: [{ field: measureField, title: "Total amount", aggregation: "sum", format: "currency" }, { title: "Records", aggregation: "count", format: "integer" }], showTotals: true, heatmap: true, maxRows: 200, interaction: { enabled: true, trigger: "auto", internalMode: "highlight", internalScope: "self", externalMode: "auto", selectionMode: "replace", multiSelect: true, showSelector: false, clearOnSecondClick: true } },
@@ -170,6 +176,24 @@ export const componentJsonExamples: Record<string, JsonObject> = {
 
     advancedChart: { ...base("advancedChart", "Advanced ECharts dashboard", 12), category: categoryField, measure: measureField, x: "__x_measure_field_key__", y: "__y_measure_field_key__", pointSize: "__size_measure_field_key__", height: 420, maxDataRows: 30000, initOptions: { renderer: "canvas", devicePixelRatio: 2, useDirtyRect: false, useCoarsePointer: true, pointerSize: 44, locale: "EN" }, setOption: { notMerge: false, lazyUpdate: false, silent: false, replaceMerge: ["series"] }, options: { aria: { enabled: true }, title: { text: "Advanced analysis", left: "center" }, tooltip: { trigger: "axis", formatter: "{b}: {c}" }, legend: { type: "scroll", bottom: 0 }, toolbox: { show: true, feature: { dataZoom: {}, restore: {}, saveAsImage: {} } }, dataZoom: [{ type: "inside", start: 0, end: 100 }, { type: "slider", bottom: 28 }], grid: { left: 52, right: 24, top: 56, bottom: 86, containLabel: true }, xAxis: { type: "category", axisLabel: { hideOverlap: true } }, yAxis: { type: "value", splitLine: { show: true } }, visualMap: { show: false, min: 0, max: 100 }, series: [{ type: "bar", encode: { x: categoryField, y: measureField }, emphasis: { focus: "series" }, markLine: { data: [{ type: "average", name: "Average" }] } }, { type: "line", encode: { x: categoryField, y: measureField }, smooth: true, showSymbol: false }] }, ...chartInteraction }
 };
+
+// Catalog examples are standalone specifications. Keep their nested component IDs
+// unique so copying any example satisfies the same global ID contract as a dashboard.
+for (const example of Object.values(componentJsonExamples)) {
+    const used = new Map<string, number>();
+    const visit = (component: JsonObject) => {
+        if (typeof component.id === "string") {
+            const count = used.get(component.id) ?? 0;
+            used.set(component.id, count + 1);
+            if (count) component.id = `${component.id}_${count + 1}`;
+        }
+        for (const key of ["children", "footer", "avatars"]) if (Array.isArray(component[key])) (component[key] as JsonObject[]).forEach(visit);
+        if (Array.isArray(component.tabs)) (component.tabs as JsonObject[]).forEach(tab => ["children", "components", "content"].forEach(key => Array.isArray(tab[key]) && (tab[key] as JsonObject[]).forEach(visit)));
+        if (component.type === "accordion" && Array.isArray(component.items)) (component.items as JsonObject[]).forEach(item => Array.isArray(item.children) && (item.children as JsonObject[]).forEach(visit));
+        if (component.chart && typeof component.chart === "object") visit(component.chart as JsonObject);
+    };
+    visit(example);
+}
 
 export function componentJsonExample(type: string): string {
     const example = componentJsonExamples[type];

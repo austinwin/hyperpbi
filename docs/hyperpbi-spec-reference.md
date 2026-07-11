@@ -123,11 +123,13 @@ Layout types: `grid`, `flex`, `split`, `section`, `toolbar`, `leftPanel`, `right
 ## Overlays
 
 - **`modal`**: title, children, footer, size (sm/md/lg), backdropClose. Rendered by root OverlayHost.
-- **`offcanvas`**: title, children, position (left/right), width, openWhen (always/selectedRow/state). Renders through legacy Drawer adapter.
-- **`dropdown`**: trigger, items (with dividers, disabled, actions), placement. Schema defined; renderer in development.
-- **`popover`**: trigger, children, placement. Schema defined; renderer in development.
+- **`offcanvas`**: explicit id, title, children, position (left/right), width, openWhen (always/selectedRow/state), backdrop. Root-hosted with focus management.
+- **`dropdown`**: explicit id, trigger, items (with dividers, disabled, actions/interactions and one nested level), placement. Keyboard-accessible and viewport-aware.
+- **`popover`**: explicit id, trigger, children, typed placement, width and arrow controls. Use for contextual interactive content.
 
 Overlay targets must match component IDs. Opening a modal closes open dropdowns/popovers.
+
+Prefer semantic `comboChart`, `waterfallChart`, `sankeyChart`, `treemapChart`, `funnelChart`, and `radarChart` components when applicable. Use `advancedChart` only for uncommon configurations. Semantic chart `options` are presentation-only and cannot replace generated data, links, nodes, transforms, encodings, series types, or series counts.
 
 ## Forms
 

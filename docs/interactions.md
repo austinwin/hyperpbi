@@ -134,7 +134,7 @@ When both `uiAction` and `interaction` are present, the UI action executes along
 }
 ```
 
-Overlay targets must match the `id` of an existing `modal`, `dropdown`, `popover`, or `offcanvas` component. Opening a modal closes open dropdowns/popovers. Opening a dropdown closes other dropdowns.
+Overlay targets must match the explicit unique `id` of an existing `modal`, `dropdown`, `popover`, `offcanvas`, `drawer`, or `filterDrawer` component. Opening a modal closes open dropdowns/popovers. Opening a dropdown closes other dropdowns. Legacy drawer types use the offcanvas runtime.
 
 ## Compatibility
 

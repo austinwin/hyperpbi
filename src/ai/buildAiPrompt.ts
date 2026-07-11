@@ -40,6 +40,8 @@ Every component needs a unique validation-friendly id. Components may use css an
 Key guidance:
 - Use \`app\` for professional application layout (navbar, sidebar, page header). Do not rebuild navbar/sidebar through custom HTML or enormous styles.globalCss blocks.
 - Prefer first-class card, list, data grid, offcanvas, and menu primitives.
+- Prefer first-class chart types, including comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, and radarChart. Use advancedChart only when no semantic chart supports the request; never override semantic chart data through options.
+- Give every overlay an explicit unique ID. Use dropdown for commands, popover for contextual interactive content, offcanvas for persistent details or filters, and modal only for focused blocking tasks.
 - Use custom HTML only for genuinely custom data presentations.
 - Use UI actions for navigation/overlay behavior (openOverlay, setTab, showToast, etc.).
 - Use universal interactions for data filtering and Power BI selection.

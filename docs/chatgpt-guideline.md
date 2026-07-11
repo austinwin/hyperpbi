@@ -45,8 +45,11 @@ Use root `app` only when the visual is wide enough (1100+ px):
 1. Every component needs a unique `id` and `interaction` object
 2. Use normalized field keys (lowercase, table-qualified)
 3. Prefer first-class components (`card`, `listGroup`, `dataGrid`, `modal`, `offcanvas`) over custom HTML
-4. Use `uiAction` for interface behavior; `interaction` for data behavior
-5. Never use deprecated `internal`, `external`, `selectable` properties
+4. Prefer first-class semantic charts, including combo, waterfall, Sankey, treemap, funnel, and radar; use `advancedChart` only when no semantic chart fits
+5. Require explicit unique IDs for every overlay. Use dropdown for commands, popover for contextual content, offcanvas for persistent details/filters, and modal for blocking tasks
+6. Never place JavaScript in ECharts options or override semantic chart data through `options`
+7. Use `uiAction` for interface behavior; `interaction` for data behavior
+8. Never use deprecated `internal`, `external`, `selectable` properties
 
 ## UI Actions
 

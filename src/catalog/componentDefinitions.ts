@@ -152,6 +152,12 @@ export const componentDefinitions: ComponentDefinition[] = [
     def("scatterChart", "Scatter chart", "Charts", "Relationship between two measures", "standard", { fields: true, calculations: true, interactions: true, externalSelection: true }),
     def("gauge", "Gauge", "Charts", "Single target attainment", "standard", { fields: true, calculations: true }),
     def("heatmap", "Heatmap", "Charts", "Dense intensity comparison", "standard", { fields: true, calculations: true, interactions: true }),
+    def("comboChart", "Combo chart", "Charts", "Compare bar and line measures on shared categories", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("waterfallChart", "Waterfall chart", "Charts", "Explain positive and negative contributions to a total", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("sankeyChart", "Sankey chart", "Charts", "Show weighted flow between stages", "standard", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("treemapChart", "Treemap chart", "Charts", "Explore hierarchical contribution", "standard", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("funnelChart", "Funnel chart", "Charts", "Compare ordered process stages", "standard", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("radarChart", "Radar chart", "Charts", "Compare multivariate profiles", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true }),
     def("smallMultiples", "Small multiples", "Charts", "Repeat one comparison across a split field", "recommended", { fields: true, calculations: true, interactions: true, externalSelection: true }),
 
     // Tables
@@ -166,7 +172,7 @@ export const componentDefinitions: ComponentDefinition[] = [
     def("markdown", "Markdown", "Custom components", "Structured explanatory content"),
     def("html", "Sanitized HTML", "Custom components", "Branded static content", "advanced", { customHtml: true }),
     def("custom", "Custom HTML/CSS", "Custom components", "Safe app-like cards, lists, and slicers", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true, customHtml: true }),
-    def("advancedChart", "Advanced ECharts", "Advanced components", "JSON-only radar, treemap, sankey, funnel, calendar, network, combo, or waterfall visuals", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true }),
+    def("advancedChart", "Advanced ECharts", "Advanced components", "JSON-only ECharts escape hatch for uncommon configurations not represented by a first-class HyperPBI chart", "advanced", { fields: true, calculations: true, interactions: true, externalSelection: true }),
 ];
 
 // ── Derived collections ───────────────────────────────────────────────

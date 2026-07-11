@@ -10,6 +10,7 @@ export function validateReferences(schema: HyperPbiSchema, data: NormalizedData)
         powerBISelection: "Property powerBISelection is not used. Use component.interaction.externalMode instead."
     };
     const check = (field: string | undefined, owner: string) => { if (field && !data.fields[field]) errors.push(`${owner} references missing field “${field}”.`); };
+    const checkNumeric = (field: string | undefined, owner: string) => { check(field, owner); if (field && data.fields[field]) { const values=data.rows.map(row=>row[field]).filter(value=>value!==null&&value!==undefined);if(values.length&&!values.some(value=>typeof value==="number"&&Number.isFinite(value)))errors.push(`${owner} requires numeric field “${field}”.`); } };
     const checkExpression = (value: unknown, owner: string): void => {
         if (!value || typeof value !== "object") return; const node=value as Record<string,unknown>;
         if(typeof node.field==="string")check(node.field,owner);if(typeof node.valueFromRow==="string")check(node.valueFromRow,owner);
@@ -19,7 +20,15 @@ export function validateReferences(schema: HyperPbiSchema, data: NormalizedData)
         const owner = component.id ?? component.title ?? component.type;
         check(component.interaction?.field,owner);
         if ("field" in component) check(component.field, owner);
-        if ("category" in component) { check(component.category, owner); check(component.measure, owner); check(component.x, owner); check(component.y, owner); }
+        if ("category" in component) check(component.category, owner);
+        if ("measure" in component) checkNumeric(component.measure, owner);
+        if ("x" in component) checkNumeric(component.x, owner);
+        if ("y" in component) checkNumeric(component.y, owner);
+        if (component.type === "scatterChart") { const chart=component as import("./hyperpbiSchema").ScatterChartComponent;checkNumeric(chart.pointSize, owner); }
+        if (component.type === "comboChart") { const chart=component as import("./hyperpbiSchema").ComboChartComponent;chart.series.forEach(series=>checkNumeric(series.field,owner)); }
+        if (component.type === "sankeyChart") { const chart=component as import("./hyperpbiSchema").SankeyChartComponent;check(chart.sourceField,owner);check(chart.targetField,owner);checkNumeric(chart.valueField,owner); }
+        if (component.type === "treemapChart") { const chart=component as import("./hyperpbiSchema").TreemapChartComponent;chart.pathFields.forEach(field=>check(field,owner));checkNumeric(chart.valueField,owner);check(chart.labelField,owner); }
+        if (component.type === "radarChart") { const chart=component as import("./hyperpbiSchema").RadarChartComponent;check(chart.groupField,owner);chart.indicators.forEach(indicator=>checkNumeric(indicator.field,owner)); }
         if(component.type==="timeline"){const timeline=component as import("./hyperpbiSchema").TimelineComponent;check(timeline.dateField,owner);check(timeline.titleField,owner);check(timeline.categoryField,owner);check(timeline.statusField,owner);check(timeline.descriptionField,owner);}
         if(component.type==="smallMultiples"){const small=component as import("./hyperpbiSchema").SmallMultiplesComponent;check(small.splitField,owner);visit(small.chart);}
         if(component.type==="matrix"){const matrix=component as import("./hyperpbiSchema").MatrixComponent;matrix.rows.forEach(field=>check(field,owner));matrix.columns?.forEach(field=>check(field,owner));matrix.values.forEach(value=>check(value.field,owner));}

@@ -1,9 +1,9 @@
 import { ComponentChildren, h } from "preact";
 import type {
     ChartComponent, ContainerComponent, ContentComponent, ControlComponent,
-    DashboardComponent, DrawerComponent, MapComponent, MatrixComponent,
+    DashboardComponent, MapComponent, MatrixComponent,
     SmallMultiplesComponent, TableComponent, TabsComponent, TimelineComponent,
-    CardComponent, OffcanvasComponent, AccordionComponent,
+    CardComponent, AccordionComponent, DropdownComponent, PopoverComponent,
     ListGroupComponent, DataGridComponent, EmptyStateComponent,
     PlaceholderComponent, SpinnerComponent, CountUpComponent, TrackingComponent,
     StepsComponent, IconComponent, IconButtonComponent, AvatarComponent, AvatarGroupComponent,
@@ -20,7 +20,6 @@ import { Collapsible, Tabs } from "../components/navigation/Navigation";
 import { TableBlock } from "../components/tables/TableBlock";
 import { EmptyState } from "../components/system/EmptyState";
 import { CustomComponent } from "../components/custom/CustomComponent";
-import { Drawer } from "../components/navigation/Drawer";
 import { Timeline } from "../components/dataDisplay/Timeline";
 import { MatrixBlock } from "../components/tables/MatrixBlock";
 import { SmallMultiples } from "../components/charts/SmallMultiples";
@@ -36,13 +35,14 @@ import { Tracking } from "../components/display/Tracking";
 import { Icon } from "../components/icons/Icon";
 import { IconButton } from "../components/display/IconButton";
 import { Avatar, AvatarGroup } from "../components/display/Avatar";
+import { OverlayTrigger } from "../components/overlays/OverlayTrigger";
 
 type RenderChildren = (children: DashboardComponent[]) => ComponentChildren;
 type ComponentRenderer = (component: DashboardComponent, renderChildren: RenderChildren) => ComponentChildren;
 
 const controlTypes = new Set(["searchBox", "textInput", "numberInput", "slider", "select", "multiSelect", "segmentedControl", "toggle", "button", "buttonGroup", "filterChips", "dateRange", "textarea", "checkbox", "checkboxGroup", "radioGroup", "inputGroup"]);
 const dataTypes = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel"]);
-const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "advancedChart"]);
+const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "advancedChart"]);
 
 const componentRenderers: Record<string, ComponentRenderer> = {
     table: c => h(TableBlock, { component: c as TableComponent }),
@@ -78,14 +78,13 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     avatarGroup: c => h(AvatarGroup, { component: c as AvatarGroupComponent }),
     // overlays - triggers render inline, body rendered by OverlayHost
     modal: () => null, // rendered by OverlayHost
-    dropdown: () => null, // TODO: implement dropdown renderer
+    dropdown: c => h(OverlayTrigger, { component: c as DropdownComponent }),
     offcanvas: () => null, // TODO: implement offcanvas renderer
-    popover: () => null, // TODO: implement popover renderer
+    popover: c => h(OverlayTrigger, { component: c as PopoverComponent }),
     // stepper normalized to steps via migration
     stepper: (c, rc) => h(Collapsible, { component: c, renderChildren: rc }),
-    // drawer and filterDrawer use the existing Drawer (will be normalized to offcanvas in migration)
-    drawer: (c, rc) => h(Drawer, { component: c as DrawerComponent, renderChildren: rc }),
-    filterDrawer: (c, rc) => h(Drawer, { component: c as DrawerComponent, renderChildren: rc }),
+    drawer: () => null,
+    filterDrawer: () => null,
     // navigation
     collapsible: (c, rc) => h(Collapsible, { component: c, renderChildren: rc }),
 };
@@ -111,6 +110,7 @@ for (const type of ["section", "leftPanel", "rightPanel", "split"]) {
 export function ComponentRegistry({ component, renderChildren }: { component: DashboardComponent; renderChildren: RenderChildren }) {
     const renderer = componentRenderers[component.type];
     if (renderer) {
+        if (["modal", "offcanvas", "drawer", "filterDrawer"].includes(component.type)) return renderer(component, renderChildren);
         return h("div", {}, renderer(component, renderChildren));
     }
     // Unsupported component fallback

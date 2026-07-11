@@ -3,6 +3,8 @@ import { DashboardState, DashboardAction } from "../../render/stateStore";
 import type { AppNavbarConfig, AppBrandConfig } from "../../schema/uiSchema";
 import { Icon } from "../icons/Icon";
 import { useRenderContext } from "../../render/RenderContext";
+import type { DropdownComponent } from "../../schema/hyperpbiSchema";
+import { OverlayTrigger } from "../overlays/OverlayTrigger";
 
 export function AppNavbar({
     config,
@@ -64,68 +66,28 @@ export function AppNavbar({
             )}
 
             <div class="hp-navbar-end">
-                {config.actions?.map(action => (
-                    <button
-                        key={action.id}
-                        type="button"
-                        class={`hp-navbar-action hp-btn-icon ${action.variant ? `hp-variant-${action.variant}` : ""}`}
-                        aria-label={action.ariaLabel ?? action.label ?? action.id}
-                        title={action.ariaLabel ?? action.label}
-                        onClick={() => {
-                            if (action.action) {
-                                context.executeUiAction(action.action);
-                            }
-                        }}
-                    >
-                        {action.icon && <Icon name={action.icon} size="sm" decorative />}
-                        {action.label && <span class="hp-navbar-action-label">{action.label}</span>}
-                        {action.badge !== undefined && <span class="badge hp-badge">{action.badge}</span>}
-                    </button>
-                ))}
+                {config.actions?.map((action, actionIndex) => {
+                    const content = <>{action.icon && <Icon name={action.icon} size="sm" decorative />}{action.label && <span class="hp-navbar-action-label">{action.label}</span>}{action.badge !== undefined && <span class="badge hp-badge">{action.badge}</span>}</>;
+                    if (action.menu?.length) {
+                        const dropdown: DropdownComponent = { type: "dropdown", id: `hp-navbar-action-${action.id.replace(/[^A-Za-z0-9_-]/g, "-")}-${actionIndex}`, items: action.menu, placement: "bottom-end", trigger: { ariaLabel: action.ariaLabel ?? action.label ?? action.id, variant: action.variant } };
+                        return <OverlayTrigger key={action.id} component={dropdown} className={`hp-navbar-action hp-btn-icon ${action.variant ? `hp-variant-${action.variant}` : ""}`}>{content}</OverlayTrigger>;
+                    }
+                    return <button key={action.id} type="button" class={`hp-navbar-action hp-btn-icon ${action.variant ? `hp-variant-${action.variant}` : ""}`} aria-label={action.ariaLabel ?? action.label ?? action.id} title={action.ariaLabel ?? action.label} onClick={event => action.action && context.executeUiAction(action.action, event)}>{content}</button>;
+                })}
 
-                {config.notifications && (
-                    <button
-                        type="button"
-                        class="hp-navbar-action hp-btn-icon"
-                        aria-label={`Notifications${config.notifications.count ? ` (${config.notifications.count})` : ""}`}
-                    >
-                        <Icon name="bell" size="sm" decorative />
-                        {config.notifications.count ? <span class="badge bg-red hp-notification-badge">{config.notifications.count}</span> : null}
-                    </button>
-                )}
+                {config.notifications && (() => {
+                    const dropdown: DropdownComponent = { type: "dropdown", id: "hp-navbar-notifications", placement: "bottom-end", trigger: { ariaLabel: `Notifications${config.notifications?.count ? ` (${config.notifications.count})` : ""}` }, items: (config.notifications.items ?? []).map(item => ({ id: item.id, label: [item.title, item.message, item.time].filter(Boolean).join(" — "), badge: item.read === false ? "New" : undefined, action: item.action })) };
+                    return dropdown.items.length ? <OverlayTrigger component={dropdown} className="hp-navbar-action hp-btn-icon"><Icon name="bell" size="sm" decorative />{config.notifications.count ? <span class="badge bg-red hp-notification-badge">{config.notifications.count}</span> : null}</OverlayTrigger> : <button type="button" class="hp-navbar-action hp-btn-icon" aria-label={dropdown.trigger?.ariaLabel} disabled><Icon name="bell" size="sm" decorative /></button>;
+                })()}
 
                 {config.user && (
                     <div class="hp-navbar-user">
-                        <button
-                            type="button"
-                            class="hp-navbar-user-btn"
-                            aria-label={`${config.user.name} menu`}
-                        >
+                        {config.user.menu?.length ? <OverlayTrigger component={{ type: "dropdown", id: "hp-navbar-user", items: config.user.menu, placement: "bottom-end", trigger: { ariaLabel: `${config.user.name} menu` } }} className="hp-navbar-user-btn">
                             <span class="hp-avatar hp-avatar-sm hp-avatar-circle">
                                 {config.user.initials ?? config.user.name.charAt(0)}
                             </span>
                             <span class="hp-navbar-user-name">{config.user.name}</span>
-                        </button>
-                        {config.user.menu && config.user.menu.length > 0 && (
-                            <div class="hp-navbar-user-menu">
-                                {config.user.menu.map(item => (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        class="hp-menu-item"
-                                        disabled={item.disabled}
-                                        onClick={() => {
-                                            if (item.action) {
-                                                context.executeUiAction(item.action);
-                                            }
-                                        }}
-                                    >
-                                        {item.icon && <Icon name={item.icon} size="xs" decorative />}
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        </OverlayTrigger> : <div class="hp-navbar-user-btn"><span class="hp-avatar hp-avatar-sm hp-avatar-circle">{config.user.initials ?? config.user.name.charAt(0)}</span><span class="hp-navbar-user-name">{config.user.name}</span></div>}
                     </div>
                 )}
             </div>

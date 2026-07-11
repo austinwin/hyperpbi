@@ -16,7 +16,8 @@ export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSe
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
 export type FilterOperator = "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
-export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap" | "advancedChart";
+export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap" | "comboChart" | "waterfallChart" | "sankeyChart" | "treemapChart" | "funnelChart" | "radarChart" | "advancedChart";
+export type OverlayPlacement = "top-start" | "top" | "top-end" | "right-start" | "right" | "right-end" | "bottom-start" | "bottom" | "bottom-end" | "left-start" | "left" | "left-end";
 
 // Re-export UI types for convenience
 export type { AppShellConfig, UiVariant, UiSize, IconName, UiAction, UiIntent, TooltipDefinition,
@@ -154,21 +155,115 @@ export interface DataDisplayComponent extends ComponentBase {
     emptyText?: string;
 }
 
-export interface ChartComponent extends ComponentBase {
-    type: ChartType;
-    category?: string;
-    measure?: string;
-    aggregation?: MetricDefinition["aggregation"];
-    x?: string;
-    y?: string;
-    /** Scatter chart point size field name */
-    pointSize?: string;
+export interface BaseChartComponent extends ComponentBase {
     height?: number;
     maxDataRows?: number;
     initOptions?: EChartsInitOpts;
     setOption?: SetOptionOpts;
     options?: Record<string, unknown>;
 }
+
+export interface CategoryChartComponent extends BaseChartComponent {
+    type: "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "heatmap";
+    category?: string;
+    measure?: string;
+    aggregation?: MetricDefinition["aggregation"];
+}
+
+export interface ScatterChartComponent extends BaseChartComponent {
+    type: "scatterChart";
+    x?: string;
+    y?: string;
+    pointSize?: string;
+}
+
+export interface GaugeChartComponent extends BaseChartComponent {
+    type: "gauge";
+    measure?: string;
+    aggregation?: MetricDefinition["aggregation"];
+}
+
+export interface AdvancedChartComponent extends BaseChartComponent {
+    type: "advancedChart";
+    category?: string;
+    measure?: string;
+    aggregation?: MetricDefinition["aggregation"];
+    x?: string;
+    y?: string;
+    pointSize?: string;
+}
+
+export interface ComboChartSeries {
+    field: string;
+    label?: string;
+    chartType: "bar" | "line";
+    aggregation?: MetricDefinition["aggregation"];
+    axis?: "left" | "right";
+    format?: string;
+}
+
+export interface ComboChartComponent extends BaseChartComponent {
+    type: "comboChart";
+    category: string;
+    series: ComboChartSeries[];
+}
+
+export interface WaterfallChartComponent extends BaseChartComponent {
+    type: "waterfallChart";
+    category: string;
+    measure: string;
+    aggregation?: MetricDefinition["aggregation"];
+    showStart?: boolean;
+    showEnd?: boolean;
+    positiveIntent?: UiIntent;
+    negativeIntent?: UiIntent;
+    totalIntent?: UiIntent;
+}
+
+export interface SankeyChartComponent extends BaseChartComponent {
+    type: "sankeyChart";
+    sourceField: string;
+    targetField: string;
+    valueField?: string;
+    aggregation?: MetricDefinition["aggregation"];
+    orientation?: "horizontal" | "vertical";
+    nodeAlign?: "left" | "right" | "justify";
+    selectionTarget?: "node" | "edge" | "both";
+}
+
+export interface TreemapChartComponent extends BaseChartComponent {
+    type: "treemapChart";
+    pathFields: string[];
+    valueField: string;
+    aggregation?: MetricDefinition["aggregation"];
+    labelField?: string;
+    maxDepth?: number;
+}
+
+export interface FunnelChartComponent extends BaseChartComponent {
+    type: "funnelChart";
+    category: string;
+    measure: string;
+    aggregation?: MetricDefinition["aggregation"];
+    sort?: "ascending" | "descending" | "none";
+    gap?: number;
+}
+
+export interface RadarIndicatorDefinition {
+    field: string;
+    label?: string;
+    min?: number;
+    max: number;
+    aggregation?: MetricDefinition["aggregation"];
+}
+
+export interface RadarChartComponent extends BaseChartComponent {
+    type: "radarChart";
+    groupField?: string;
+    indicators: RadarIndicatorDefinition[];
+}
+
+export type ChartComponent = CategoryChartComponent | ScatterChartComponent | GaugeChartComponent | ComboChartComponent | WaterfallChartComponent | SankeyChartComponent | TreemapChartComponent | FunnelChartComponent | RadarChartComponent | AdvancedChartComponent;
 
 export interface SmallMultiplesComponent extends ComponentBase {
     type: "smallMultiples";
@@ -309,6 +404,7 @@ export interface TabsComponent extends ComponentBase {
 
 export interface DrawerComponent extends ComponentBase {
     type: "drawer" | "filterDrawer";
+    id: string;
     children?: DashboardComponent[];
     position?: "left" | "right";
     width?: number;
@@ -345,7 +441,8 @@ export interface CardComponent extends ComponentBase {
 
 export interface DropdownComponent extends ComponentBase {
     type: "dropdown";
-    trigger?: { label?: string; icon?: IconName; variant?: UiVariant; };
+    id: string;
+    trigger?: { label?: string; icon?: IconName; ariaLabel?: string; variant?: UiVariant; };
     items: MenuItem[];
     placement?: "bottom-start" | "bottom-end" | "top-start" | "top-end";
     closeOnSelect?: boolean;
@@ -353,6 +450,7 @@ export interface DropdownComponent extends ComponentBase {
 
 export interface ModalComponent extends ComponentBase {
     type: "modal";
+    id: string;
     children?: DashboardComponent[];
     size?: "sm" | "md" | "lg";
     backdropClose?: boolean;
@@ -361,19 +459,27 @@ export interface ModalComponent extends ComponentBase {
 
 export interface OffcanvasComponent extends ComponentBase {
     type: "offcanvas";
+    id: string;
     children?: DashboardComponent[];
     position?: "left" | "right";
     width?: number;
     openWhen?: "always" | "selectedRow" | "state";
     stateKey?: string;
     defaultOpen?: boolean;
+    backdrop?: boolean;
+    backdropClose?: boolean;
 }
 
 export interface PopoverComponent extends ComponentBase {
     type: "popover";
-    children?: DashboardComponent[];
-    trigger?: { label?: string; icon?: IconName; };
-    placement?: string;
+    id: string;
+    children: DashboardComponent[];
+    trigger: { label?: string; icon?: IconName; ariaLabel?: string; variant?: UiVariant; };
+    placement?: OverlayPlacement;
+    width?: number;
+    closeOnOutsideClick?: boolean;
+    closeOnEscape?: boolean;
+    showArrow?: boolean;
 }
 
 export interface ListGroupComponent extends ComponentBase {

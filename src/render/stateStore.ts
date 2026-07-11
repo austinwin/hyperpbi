@@ -14,6 +14,7 @@ export interface OverlayAnchor {
     left: number;
     width: number;
     height: number;
+    triggerId?: string;
 }
 
 export type MapToolbarPopover = "layers" | "legend" | "search" | null;
@@ -242,7 +243,11 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         return { ...state, openOverlays: [...state.openOverlays.filter(id => id !== action.id), action.id], overlayAnchors };
     }
     if (action.type === "closeAllOverlays") return { ...state, openOverlays: [], overlayAnchors: {} };
-    if (action.type === "setOpenOverlays") return { ...state, openOverlays: action.ids };
+    if (action.type === "setOpenOverlays") {
+        const ids = Array.from(new Set(action.ids));
+        const overlayAnchors = Object.fromEntries(Object.entries(state.overlayAnchors).filter(([id]) => ids.includes(id)));
+        return { ...state, openOverlays: ids, overlayAnchors };
+    }
 
     // ── Accordion & steps ─────────────────────────────────────────
     if (action.type === "accordion") return { ...state, accordionOpenItems: { ...state.accordionOpenItems, [action.id]: action.items } };

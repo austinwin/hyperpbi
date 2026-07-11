@@ -110,7 +110,7 @@ function generateMarkdownCatalog(types, categories) {
     lines.push("| `setState` | target, value | Sets a named state value |");
     lines.push("| `toggleState` | target | Toggles a Boolean state |");
     lines.push("| `toggleSidebar` | — | Toggles the root sidebar collapsed state |");
-    lines.push("| `openOverlay` | target | Opens a modal, dropdown, or popover |");
+    lines.push("| `openOverlay` | target | Opens a modal, offcanvas, dropdown, popover, or legacy drawer |");
     lines.push("| `closeOverlay` | target | Closes an overlay |");
     lines.push("| `toggleOverlay` | target | Toggles an overlay |");
     lines.push("| `setStep` | target, value | Sets the active step |");
@@ -173,7 +173,7 @@ function generateMarkdownCatalog(types, categories) {
             const primitiveTypes = ["card", "icon", "iconButton", "avatar", "avatarGroup", "listGroup", "dataGrid", "countUp", "tracking", "dropdown", "modal", "offcanvas", "popover"];
             const feedbackTypes = ["emptyState", "placeholder", "spinner"];
             const formTypes = ["textarea", "checkbox", "checkboxGroup", "radioGroup", "inputGroup"];
-            const chartTypes = ["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "smallMultiples"];
+            const chartTypes = ["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "smallMultiples"];
             const tableTypes = ["table", "matrix"];
             const mapTypes = ["map"];
             const contentTypes = ["text", "markdown", "html", "custom"];
@@ -289,7 +289,7 @@ body{margin:0;padding:0}
 
 ${categories.map(cat => {
     const catTypes = types.filter(t => {
-        const map = {"Layout":["grid","flex","split","section","toolbar","leftPanel","rightPanel","spacer","divider"],"Controls":["searchBox","textInput","numberInput","slider","select","multiSelect","segmentedControl","toggle","button","buttonGroup","filterChips","dateRange"],"Navigation":["tabs","collapsible","accordion","drawer","filterDrawer","steps","stepper"],"Display":["kpi","metricGrid","infoCard","statusBadge","progressBar","alert","statList","detailPanel","timeline"],"Primitives":["card","icon","iconButton","avatar","avatarGroup","listGroup","dataGrid","countUp","tracking","dropdown","modal","offcanvas","popover"],"Feedback":["emptyState","placeholder","spinner"],"Forms":["textarea","checkbox","checkboxGroup","radioGroup","inputGroup"],"Charts":["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","smallMultiples"],"Tables":["table","matrix"],"Maps":["map"],"Custom components":["text","markdown","html","custom"],"Advanced components":["advancedChart"]};
+        const map = {"Layout":["grid","flex","split","section","toolbar","leftPanel","rightPanel","spacer","divider"],"Controls":["searchBox","textInput","numberInput","slider","select","multiSelect","segmentedControl","toggle","button","buttonGroup","filterChips","dateRange"],"Navigation":["tabs","collapsible","accordion","drawer","filterDrawer","steps","stepper"],"Display":["kpi","metricGrid","infoCard","statusBadge","progressBar","alert","statList","detailPanel","timeline"],"Primitives":["card","icon","iconButton","avatar","avatarGroup","listGroup","dataGrid","countUp","tracking","dropdown","modal","offcanvas","popover"],"Feedback":["emptyState","placeholder","spinner"],"Forms":["textarea","checkbox","checkboxGroup","radioGroup","inputGroup"],"Charts":["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","smallMultiples"],"Tables":["table","matrix"],"Maps":["map"],"Custom components":["text","markdown","html","custom"],"Advanced components":["advancedChart"]};
         return (map[cat]||[]).includes(t);
     });
     if(catTypes.length===0)return"";

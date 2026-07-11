@@ -1,6 +1,8 @@
 import type { DashboardAction } from "../render/stateStore";
 import type { RenderContextValue } from "../render/RenderContext";
 import type { UiAction, UiActionResult } from "./uiActionTypes";
+import { collectOverlayComponents, getOverlayAnchor, overlayKind } from "../components/overlays/overlayTypes";
+import { overlayRuntime } from "../components/overlays/overlayRuntime";
 
 // ── Safe UI Action Executor ───────────────────────────────────────────
 // Never executes strings as code. Never uses eval or new Function.
@@ -68,28 +70,26 @@ export function executeUiAction(
             }
             // Close dropdowns/popovers when opening a modal
             const overlayType = getOverlayType(action.target, context);
+            const anchor = getOverlayAnchor(event);
+            const eventElement = typeof HTMLElement !== "undefined" && event?.currentTarget instanceof HTMLElement ? event.currentTarget : undefined;
+            if (eventElement) {
+                const containingOverlay = Array.from(overlayRuntime.panels.entries()).find(([, panel]) => panel.contains(eventElement));
+                overlayRuntime.triggers.set(action.target, containingOverlay ? overlayRuntime.triggers.get(containingOverlay[0]) ?? eventElement : eventElement);
+            }
             if (overlayType === "modal") {
-                // Close all dropdowns and popovers
-                const openOverlays = state.openOverlays.filter(id => {
+                state.openOverlays.filter(id => {
                     const t = getOverlayType(id, context);
-                    return t !== "dropdown" && t !== "popover";
-                });
-                dispatch({
-                    type: "setOpenOverlays",
-                    ids: [...openOverlays, action.target]
-                } as DashboardAction);
+                    return t === "dropdown" || t === "popover";
+                }).forEach(id => dispatch({ type: "closeOverlay", id } as DashboardAction));
+                dispatch({ type: "openOverlay", id: action.target, anchor } as DashboardAction);
             } else if (overlayType === "dropdown") {
-                // Close other dropdowns
-                const openOverlays = state.openOverlays.filter(id => {
+                state.openOverlays.filter(id => {
                     const t = getOverlayType(id, context);
-                    return t !== "dropdown";
-                });
-                dispatch({
-                    type: "setOpenOverlays",
-                    ids: [...openOverlays, action.target]
-                } as DashboardAction);
+                    return t === "dropdown" && id !== action.target;
+                }).forEach(id => dispatch({ type: "closeOverlay", id } as DashboardAction));
+                dispatch({ type: "openOverlay", id: action.target, anchor } as DashboardAction);
             } else {
-                dispatch({ type: "openOverlay", id: action.target } as DashboardAction);
+                dispatch({ type: "openOverlay", id: action.target, anchor } as DashboardAction);
             }
             if (event) event.stopPropagation();
             return { success: true };
@@ -207,42 +207,6 @@ function getOverlayType(
     id: string,
     context: RenderContextValue
 ): "modal" | "dropdown" | "popover" | "offcanvas" | "unknown" {
-    // Search schema for component with this ID
-    const findIn = (components: any[]): string | undefined => {
-        for (const c of components) {
-            if (c.id === id) return c.type;
-            if (c.children) {
-                const found = findIn(c.children);
-                if (found) return found;
-            }
-            if (c.tabs) {
-                for (const tab of c.tabs) {
-                    if (tab.children) {
-                        const found = findIn(tab.children);
-                        if (found) return found;
-                    }
-                }
-            }
-            if (c.chart) {
-                if (c.chart.id === id) return c.chart.type;
-            }
-        }
-        return undefined;
-    };
-
-    const type = findIn(context.schema.components) ??
-        findIn(context.schema.toolbar ?? []) ??
-        findIn(context.schema.leftPanel ?? []) ??
-        findIn(context.schema.rightPanel ?? []);
-
-    switch (type) {
-        case "modal": return "modal";
-        case "dropdown": return "dropdown";
-        case "popover": return "popover";
-        case "offcanvas":
-        case "drawer":
-        case "filterDrawer":
-            return "offcanvas";
-        default: return "unknown";
-    }
+    const component = collectOverlayComponents(context.schema).get(id) ?? overlayRuntime.definitions.get(id);
+    return overlayKind(component);
 }

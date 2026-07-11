@@ -1,0 +1,5 @@
+import type { FunnelChartComponent } from "../../../schema/hyperpbiSchema";
+import type { ChartAdapter } from "./types";
+import { baseOption, groupRows, semanticResult, sourceIndices } from "./shared";
+
+export const funnelAdapter: ChartAdapter<FunnelChartComponent>={type:"funnelChart",fields:component=>[component.category,component.measure],build(component,rows,context){const groups=groupRows(rows,component.category,component.measure,component.aggregation??"sum");if(component.sort!=="none")groups.sort((a,b)=>(component.sort??"descending")==="ascending"?a.value-b.value:b.value-a.value);const total=groups.reduce((sum,item)=>sum+item.value,0);return semanticResult({...baseOption(context),tooltip:{trigger:"item",confine:true},series:[{type:"funnel",sort:component.sort??"descending",gap:component.gap??2,selectedMode:"multiple",data:groups.map(item=>({name:item.key,value:item.value,label:{formatter:`${item.key}: ${item.value}${total?` (${Math.round(item.value/total*100)}%)`:""}`}}))}]},component,groups.map((group,dataIndex)=>({seriesIndex:0,dataIndex,sourceRowIndices:sourceIndices(group.rows,context),field:component.category,value:group.rawKey})));}};

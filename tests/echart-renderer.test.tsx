@@ -136,4 +136,14 @@ describe("EChartRenderer lifecycle", () => {
         expect(runtime.charts[0].setOption).toHaveBeenCalledWith({}, expect.objectContaining({ notMerge: false, lazyUpdate: false }));
         expect(runtime.charts[0].dispatchAction).not.toHaveBeenCalled();
     });
+
+    it("emits full ECharts data context and highlights exact series/data types", () => {
+        const host = document.createElement("div"); const onDataPoint = vi.fn();
+        act(() => render(h(EChartRenderer, { option: {}, selectedDataPoints: [{ seriesIndex: 2, dataIndex: 4, dataType: "edge" }], onDataPoint }), host));
+        expect(runtime.charts[0].dispatchAction).toHaveBeenCalledWith({ type: "highlight", seriesIndex: 2, dataIndex: 4, dataType: "edge" });
+        runtime.charts[0].handlers.click({ seriesIndex: 2, dataIndex: 4, seriesType: "sankey", seriesName: "Flow", dataType: "edge", name: "A", value: 12, event: { event: { metaKey: true } } });
+        expect(onDataPoint).toHaveBeenCalledWith(expect.objectContaining({ seriesIndex: 2, dataIndex: 4, seriesType: "sankey", dataType: "edge", multiSelect: true }));
+        act(() => render(h(EChartRenderer, { option: {}, selectedDataPoints: [], onDataPoint }), host));
+        expect(runtime.charts[0].dispatchAction).toHaveBeenCalledWith({ type: "downplay", seriesIndex: 2, dataIndex: 4, dataType: "edge" });
+    });
 });

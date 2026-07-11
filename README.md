@@ -16,7 +16,7 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 | Components | ~60 first-class component types across 11 categories |
 | Actions | Safe UI actions and Power BI data interactions (independent) |
 | Data | Power BI Values field, calculations, identity selection |
-| Charts | Simple and advanced ECharts (10 chart types + JSON-only advanced) |
+| Charts | Adapter-based semantic ECharts (16 chart types + JSON-only advanced escape hatch) |
 | Tables | Native paginated, sortable, resizable, frozen columns |
 | Maps | Power BI spatial maps plus practical public ArcGIS feature, join, tile, and dynamic layers |
 | Security | No user JavaScript, sanitized HTML, scoped CSS |
@@ -90,7 +90,7 @@ The catalog includes approximately 60 first-class component types across 11 cate
 | Primitives | card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover |
 | Feedback | emptyState, placeholder, spinner |
 | Forms | textarea, checkbox, checkboxGroup, radioGroup, inputGroup |
-| Charts | barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, smallMultiples |
+| Charts | barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, radarChart, smallMultiples |
 | Tables | table, matrix |
 | Maps | map |
 | Content/Advanced | text, markdown, html, custom, advancedChart |
@@ -134,10 +134,10 @@ Professional dashboards can be built with first-class components instead of cust
 - **`avatar`** / **`avatarGroup`** — Identity indicators with initials, status, overflow
 - **`countUp`** — Animated number with prefix/suffix (respects reduced motion)
 - **`tracking`** — Compact stage progress (horizontal/vertical)
-- **`dropdown`** — Action menu (schema defined; renderer in development)
-- **`modal`** — Focused overlay with backdrop/Escape close (focus trap in development)
-- **`offcanvas`** — Slide-over panel (renders through legacy Drawer adapter)
-- **`popover`** — Rich tooltip (schema defined; renderer in development)
+- **`dropdown`** — Keyboard-accessible, viewport-aware command menu
+- **`modal`** — Focused blocking dialog with focus trap and restoration
+- **`offcanvas`** — Responsive root-hosted details or filter panel
+- **`popover`** — Contextual interactive content with nested components
 - **`emptyState`** / **`placeholder`** / **`spinner`** — Empty, loading, skeleton states
 - **`accordion`** — Real accordion with keyboard navigation, multiple/exclusive mode
 - **`steps`** — Sequential workflow with configurable orientation
@@ -225,4 +225,4 @@ Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-m
 - Nominatim unsuitable for bulk production geocoding
 - Maps package requires organizational WebAccess approval
 - ArcGIS support is limited to public HTTPS services and output SR 4326; secured services, editing, 3D, relationships, tracing, density grids, and advanced label collision are unsupported
-- Dropdown, popover, and dedicated offcanvas renderers are in development
+- Overlay components require explicit unique IDs. Legacy drawer and filterDrawer specifications are normalized through offcanvas.

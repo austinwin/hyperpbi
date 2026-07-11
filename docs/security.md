@@ -46,10 +46,10 @@ UI actions are declarative and safe:
 ## Overlay Safety
 
 - All overlays render within `.hyperpbi-root` — no portal to `document.body`
-- Modal uses `position: absolute` within the visual root
-- Backdrop and Escape close work for modals
-- Dropdown and popover render near their triggers
-- No `position: fixed` used in overlay positioning
+- The root overlay host uses viewport-relative fixed positioning inside the custom visual document; no portal escapes to `document.body`
+- Modal and offcanvas use focus containment, document-level Escape handling, and trigger focus restoration
+- Dropdown and popover store only serializable trigger geometry in reducer state; DOM references remain in an internal runtime registry
+- Anchored panels flip and shift within the Power BI visual viewport and recalculate on scroll/resize
 
 ## Icon Safety
 
@@ -136,7 +136,7 @@ For controlled internal dashboards:
 
 ## Known Limitations
 
-- Focus trapping not yet implemented for modals
+- Popovers intentionally do not trap focus; modal and blocking offcanvas overlays do
 - No Content Security Policy header control (Power BI host responsibility)
 - No request signing or HMAC for ArcGIS queries
 - No encrypted storage for cached metadata

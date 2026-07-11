@@ -60,6 +60,11 @@ function formatError(error: ErrorObject): string {
 
 function componentContractErrors(value: unknown): string[] {
     const errors:string[]=[];
+    const ids = new Map<string, string>();
+    const nonblank = (input: unknown): input is string => typeof input === "string" && input.trim().length > 0;
+    const placements = new Set(["top-start","top","top-end","right-start","right","right-end","bottom-start","bottom","bottom-end","left-start","left","left-end"]);
+    const aggregations = new Set(["sum","avg","min","max","count","distinctCount","countWhere","first"]);
+    const requireField = (component: Record<string, unknown>, name: string, path: string) => { if (!nonblank(component[name])) errors.push(`${path}/${name} must be a nonblank string`); };
     const validateMapTooltip=(tooltip:unknown,path:string)=>{
         if(!tooltip||typeof tooltip!=="object"||Array.isArray(tooltip)){errors.push(`${path} must be an object`);return;}
         const definition=tooltip as Record<string,unknown>;
@@ -78,7 +83,75 @@ function componentContractErrors(value: unknown): string[] {
     };
     const visit=(component:Record<string,unknown>,path:string)=>{
         const type=component.type;
+        if (nonblank(component.id)) {
+            const previous = ids.get(component.id);
+            if (previous) errors.push(`${path}/id duplicates component ID “${component.id}” first declared at ${previous}/id`);
+            else ids.set(component.id, path);
+        }
+        if (["modal","offcanvas","dropdown","popover","drawer","filterDrawer"].includes(String(type)) && !nonblank(component.id)) errors.push(`${path}/id is required and must be nonblank for ${type}`);
+        if (type === "dropdown") {
+            if (!Array.isArray(component.items) || component.items.length === 0) errors.push(`${path}/items must contain at least one menu item`);
+            if (component.placement !== undefined && !["bottom-start","bottom-end","top-start","top-end"].includes(String(component.placement))) errors.push(`${path}/placement must be bottom-start, bottom-end, top-start, or top-end`);
+        }
+        if (type === "popover") {
+            if (!Array.isArray(component.children) || component.children.length === 0) errors.push(`${path}/children must contain at least one component`);
+            if (!component.trigger || typeof component.trigger !== "object" || Array.isArray(component.trigger)) errors.push(`${path}/trigger must be an object`);
+            if (component.placement !== undefined && !placements.has(String(component.placement))) errors.push(`${path}/placement is invalid`);
+            if (component.width !== undefined && (typeof component.width !== "number" || component.width < 160 || component.width > 800)) errors.push(`${path}/width must be between 160 and 800`);
+        }
+        if (["offcanvas","drawer","filterDrawer"].includes(String(type))) {
+            if (component.position !== undefined && !["left","right"].includes(String(component.position))) errors.push(`${path}/position must be left or right`);
+            if (component.width !== undefined && (typeof component.width !== "number" || component.width < 240 || component.width > 1600)) errors.push(`${path}/width must be between 240 and 1600`);
+            if (component.openWhen === "state" && !nonblank(component.stateKey)) errors.push(`${path}/stateKey is required when openWhen is state`);
+        }
+        if (type === "modal" && !nonblank(component.title) && !nonblank(component.ariaLabel)) errors.push(`${path} modal requires title or ariaLabel`);
         if(type==="advancedChart"&&(!component.options||typeof component.options!=="object"||Array.isArray(component.options)))errors.push(`${path}/options must be a JSON object for advancedChart`);
+        if (type === "comboChart") {
+            requireField(component, "category", path);
+            if (!Array.isArray(component.series) || component.series.length < 2) errors.push(`${path}/series must contain at least two entries`);
+            else component.series.forEach((entry, index) => {
+                const seriesPath = `${path}/series/${index}`; const item = entry as Record<string, unknown>;
+                requireField(item, "field", seriesPath);
+                if (!["bar","line"].includes(String(item.chartType))) errors.push(`${seriesPath}/chartType must be bar or line`);
+                if (item.axis !== undefined && !["left","right"].includes(String(item.axis))) errors.push(`${seriesPath}/axis must be left or right`);
+                if (item.aggregation !== undefined && !aggregations.has(String(item.aggregation))) errors.push(`${seriesPath}/aggregation is invalid`);
+            });
+        }
+        if (type === "waterfallChart") { requireField(component, "category", path); requireField(component, "measure", path);if(component.aggregation!==undefined&&!aggregations.has(String(component.aggregation)))errors.push(`${path}/aggregation is invalid`); }
+        if (type === "sankeyChart") {
+            requireField(component, "sourceField", path); requireField(component, "targetField", path);
+            if (component.selectionTarget !== undefined && !["node","edge","both"].includes(String(component.selectionTarget))) errors.push(`${path}/selectionTarget must be node, edge, or both`);
+            if (component.orientation !== undefined && !["horizontal","vertical"].includes(String(component.orientation))) errors.push(`${path}/orientation must be horizontal or vertical`);
+            if (component.nodeAlign !== undefined && !["left","right","justify"].includes(String(component.nodeAlign))) errors.push(`${path}/nodeAlign must be left, right, or justify`);
+            if(component.aggregation!==undefined&&!aggregations.has(String(component.aggregation)))errors.push(`${path}/aggregation is invalid`);
+        }
+        if (type === "treemapChart") {
+            if (!Array.isArray(component.pathFields) || component.pathFields.length === 0 || component.pathFields.some(field => !nonblank(field))) errors.push(`${path}/pathFields must contain at least one nonblank field`);
+            else if (new Set(component.pathFields).size !== component.pathFields.length) errors.push(`${path}/pathFields must not contain duplicates`);
+            requireField(component, "valueField", path);
+            if(component.aggregation!==undefined&&!aggregations.has(String(component.aggregation)))errors.push(`${path}/aggregation is invalid`);
+            if(component.maxDepth!==undefined&&(!Number.isInteger(component.maxDepth)||Number(component.maxDepth)<1))errors.push(`${path}/maxDepth must be a positive integer`);
+            if (typeof component.maxDepth === "number" && Array.isArray(component.pathFields) && component.maxDepth > component.pathFields.length) errors.push(`${path}/maxDepth cannot exceed pathFields length`);
+        }
+        if (type === "funnelChart") {
+            requireField(component, "category", path); requireField(component, "measure", path);
+            if (component.sort !== undefined && !["ascending","descending","none"].includes(String(component.sort))) errors.push(`${path}/sort must be ascending, descending, or none`);
+            if(component.aggregation!==undefined&&!aggregations.has(String(component.aggregation)))errors.push(`${path}/aggregation is invalid`);
+        }
+        if (type === "radarChart") {
+            if (!Array.isArray(component.indicators) || component.indicators.length < 3) errors.push(`${path}/indicators must contain at least three entries`);
+            else {
+                const fields = new Set<string>();
+                component.indicators.forEach((entry, index) => {
+                    const indicatorPath = `${path}/indicators/${index}`; const item = entry as Record<string, unknown>;
+                    requireField(item, "field", indicatorPath);
+                    if (nonblank(item.field)) { if (fields.has(item.field)) errors.push(`${indicatorPath}/field duplicates another indicator field`); fields.add(item.field); }
+                    const min = typeof item.min === "number" ? item.min : 0;
+                    if (typeof item.max !== "number" || !Number.isFinite(item.max) || item.max <= min) errors.push(`${indicatorPath}/max must be greater than min`);
+                    if(item.aggregation!==undefined&&!aggregations.has(String(item.aggregation)))errors.push(`${indicatorPath}/aggregation is invalid`);
+                });
+            }
+        }
         if(type==="timeline"&&(typeof component.dateField!=="string"||typeof component.titleField!=="string"))errors.push(`${path} timeline requires dateField and titleField`);
         if(type==="matrix"&&(!Array.isArray(component.rows)||!component.rows.length||!Array.isArray(component.values)||!component.values.length))errors.push(`${path} matrix requires non-empty rows and values arrays`);
         if(type==="smallMultiples"&&(typeof component.splitField!=="string"||!component.chart||typeof component.chart!=="object"))errors.push(`${path} smallMultiples requires splitField and chart`);
@@ -89,7 +162,10 @@ function componentContractErrors(value: unknown): string[] {
             if(tooltip!==undefined)validateMapTooltip(tooltip,`${path}/layers/${index}/tooltip`);
         });
         if(Array.isArray(component.children))component.children.forEach((child,index)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/children/${index}`);});
-        if(Array.isArray(component.tabs))component.tabs.forEach((tab,index)=>{if(!tab||typeof tab!=="object")return;const children=(tab as Record<string,unknown>).children;if(Array.isArray(children))children.forEach((child,childIndex)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/tabs/${index}/children/${childIndex}`);});});
+        if(Array.isArray(component.footer))component.footer.forEach((child,index)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/footer/${index}`);});
+        if(Array.isArray(component.tabs))component.tabs.forEach((tab,index)=>{if(!tab||typeof tab!=="object")return;const record=tab as Record<string,unknown>;for(const key of ["children","components","content"]){const children=record[key];if(Array.isArray(children))children.forEach((child,childIndex)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/tabs/${index}/${key}/${childIndex}`);});}});
+        if(type==="accordion"&&Array.isArray(component.items))component.items.forEach((item,index)=>{if(!item||typeof item!=="object")return;const children=(item as Record<string,unknown>).children;if(Array.isArray(children))children.forEach((child,childIndex)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/items/${index}/children/${childIndex}`);});});
+        if(type==="avatarGroup"&&Array.isArray(component.avatars))component.avatars.forEach((child,index)=>{if(child&&typeof child==="object")visit(child as Record<string,unknown>,`${path}/avatars/${index}`);});
         if(component.chart&&typeof component.chart==="object")visit(component.chart as Record<string,unknown>,`${path}/chart`);
     };
     if(value&&typeof value==="object"){const root=value as Record<string,unknown>;for(const key of ["leftPanel","rightPanel","toolbar","components"]){const components=root[key];if(Array.isArray(components))components.forEach((component,index)=>{if(component&&typeof component==="object")visit(component as Record<string,unknown>,`/${key}/${index}`);});}}

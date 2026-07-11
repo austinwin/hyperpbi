@@ -39,6 +39,10 @@ Prefer first-class components over custom HTML:
 | Loading | `placeholder` or `spinner` |
 | Input | First-class form component |
 
+Prefer semantic `comboChart`, `waterfallChart`, `sankeyChart`, `treemapChart`, `funnelChart`, and `radarChart` components when they match the request. Use `advancedChart` only for uncommon ECharts configurations, and never override generated semantic data through `options`.
+
+Every overlay needs an explicit unique ID. Use dropdown for commands, popover for contextual interactive content, offcanvas for persistent details or filters, and modal only for focused blocking tasks.
+
 ## Action Selection
 
 - Need to open a modal? → `uiAction: { type: "openOverlay" }`

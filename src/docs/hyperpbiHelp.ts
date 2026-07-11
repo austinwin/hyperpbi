@@ -57,7 +57,7 @@ Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, d
 Primitives: card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover.
 Feedback: emptyState, placeholder, spinner.
 Forms: textarea, checkbox, checkboxGroup, radioGroup, inputGroup.
-Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, smallMultiples, advancedChart.
+Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, radarChart, smallMultiples, advancedChart. Prefer a first-class chart; use advancedChart only when no semantic chart fits. Semantic chart options cannot replace generated data.
 Tables: table, matrix.
 Maps: map.
 Content: text, markdown, html, custom.
@@ -78,7 +78,7 @@ For interface behavior: clearFilters, setTab, setState, toggleState, toggleSideb
 
 ## Overlay rules
 
-Modal rendered at root level. Opening modal closes dropdowns/popovers. Targets must match overlay component IDs. Never invent overlay targets.
+All overlays require explicit unique IDs and render through the root host. Use dropdown for commands, popover for contextual interactive content, offcanvas for persistent details or filters, and modal only for focused blocking tasks. Targets must match overlay component IDs. Never invent overlay targets.
 
 ## First-class component preference
 
