@@ -1,2 +1,4 @@
 import { NormalizedData } from "../data/normalizeData";
-export function fieldDictionaryForPrompt(data: NormalizedData, selected: string[] = [], typesOnly = false): unknown[] { const include = selected.length ? new Set(selected) : null; return Object.values(data.fields).filter(field => !include || include.has(field.key)).map(field => ({ key: field.key, displayName: typesOnly ? undefined : field.displayName, queryName: typesOnly ? undefined : field.queryName, sourceTable: typesOnly ? undefined : field.sourceTable, sourceColumn: typesOnly ? undefined : field.sourceColumn, qualifiedName: typesOnly ? undefined : field.qualifiedName, type: field.type, format: typesOnly ? undefined : field.format ?? null, roles: field.roles })); }
+import { fieldManifestForPrompt } from "./fieldManifestForPrompt";
+/** @deprecated Use fieldManifestForPrompt. Retained for extensions importing the v1 helper. */
+export function fieldDictionaryForPrompt(data: NormalizedData, selected: string[] = [], typesOnly = false): unknown[] { return fieldManifestForPrompt(data,selected,typesOnly?"types":"fields"); }

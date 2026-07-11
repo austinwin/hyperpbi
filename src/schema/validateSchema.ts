@@ -1,6 +1,8 @@
 import Ajv, { ErrorObject } from "ajv";
 import { HyperPbiSchema } from "./hyperpbiSchema";
 import { componentTypeNames } from "../catalog/componentCatalog";
+import { Diagnostic, diagnosticsToStrings } from "./diagnostics";
+import { validateV2Schema, v2CommonComponentProperties, v2ComponentPropertiesByType } from "./validateV2Schema";
 
 const componentTypes = componentTypeNames;
 
@@ -52,7 +54,11 @@ export interface SchemaValidationResult {
     valid: boolean;
     schema?: HyperPbiSchema;
     errors: string[];
+    diagnostics?: Diagnostic[];
+    warnings?: string[];
 }
+
+function legacyUnknownPropertyDiagnostics(value:unknown):Diagnostic[]{const diagnostics:Diagnostic[]=[];if(!value||typeof value!=="object"||Array.isArray(value))return diagnostics;const root=value as Record<string,unknown>;const allowedRoot=new Set(["version","title","theme","layout","state","app","leftPanel","rightPanel","toolbar","components","css","styles","calculations"]);for(const key of Object.keys(root))if(!allowedRoot.has(key))diagnostics.push({code:"UNKNOWN_PROPERTY",severity:"warning",path:`/${key}`,message:`Version 1.0 ignores or leniently accepts unknown root property “${key}”.`,received:key});const visit=(node:unknown,path:string)=>{if(Array.isArray(node)){node.forEach((item,index)=>visit(item,`${path}/${index}`));return;}if(!node||typeof node!=="object")return;const component=node as Record<string,unknown>;const type=String(component.type??"");const allowed=new Set([...v2CommonComponentProperties,...(v2ComponentPropertiesByType[type]??[]),"internal","external","selectable","selectionMode"]);for(const key of Object.keys(component))if(!allowed.has(key))diagnostics.push({code:"UNKNOWN_PROPERTY",severity:"warning",path:`${path}/${key}`,componentId:typeof component.id==="string"?component.id:undefined,message:`Version 1.0 leniently accepts unknown property “${key}” on ${type}.`,received:key});for(const key of ["children","footer","chart"])if(component[key]!==undefined)visit(component[key],`${path}/${key}`);if(Array.isArray(component.tabs))component.tabs.forEach((tab,index)=>{if(tab&&typeof tab==="object")visit((tab as Record<string,unknown>).children,`${path}/tabs/${index}/children`);});};for(const key of ["components","toolbar","leftPanel","rightPanel"])if(Array.isArray(root[key]))visit(root[key],`/${key}`);return diagnostics;}
 
 function formatError(error: ErrorObject): string {
     return `${error.instancePath || "/"} ${error.message ?? "is invalid"}`;
@@ -173,6 +179,10 @@ function componentContractErrors(value: unknown): string[] {
 }
 
 export function validateSchema(value: unknown): SchemaValidationResult {
-    if (validate(value)) { const errors=componentContractErrors(value); return errors.length?{valid:false,errors}:{ valid: true, schema: value as HyperPbiSchema, errors: [] }; }
+    if (value && typeof value === "object" && (value as {version?:unknown}).version === "2.0") {
+        const result=validateV2Schema(value);
+        return { valid:result.valid, schema:result.schema, diagnostics:result.diagnostics, errors:diagnosticsToStrings(result.diagnostics.filter(item=>item.severity==="error")), warnings:diagnosticsToStrings(result.diagnostics.filter(item=>item.severity==="warning")) };
+    }
+    if (validate(value)) { const errors=componentContractErrors(value);if(errors.length)return{valid:false,errors};const diagnostics=legacyUnknownPropertyDiagnostics(value);return{ valid: true, schema: value as HyperPbiSchema, errors: [],diagnostics,warnings:diagnosticsToStrings(diagnostics) }; }
     return { valid: false, errors: (validate.errors ?? []).map(formatError) };
 }

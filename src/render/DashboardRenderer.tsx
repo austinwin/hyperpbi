@@ -3,16 +3,21 @@ import { ComponentRegistry } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
 import { sanitizeStyleObject } from "../security/sanitizeCss";
-import { useRenderContext } from "./RenderContext";
+import { RenderContext, useRenderContext } from "./RenderContext";
 import { executeComponentInteraction } from "../interactions/componentInteraction";
 import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
+import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
+import { rowsForComponent } from "../interactions/componentInteraction";
 
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
     const context=useRenderContext();const { schema, config } = context;
     const renderChildren = (children: DashboardComponent[]) => <DashboardRenderer components={children} />;
     return <>{components.filter(component => !component.hidden).map((component, index) => {
         const componentId = component.id ?? `${component.type}-${index}`;
+        const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
+        const sourceIndices=(indices:number[])=>Array.from(new Set(indices.flatMap(index=>datasetResult?.lineage[index]??[]))).sort((a,b)=>a-b);
+        const componentContext=datasetResult?{...context,data:datasetResult.data,rows:datasetResult.data.rows,sourceRows:datasetResult.data.rows,sourceRowKeys:datasetResult.data.rowKeys,datasetLineage:datasetResult.lineage,getRowsForComponent:(id:string)=>rowsForComponent(datasetResult.data.rows,datasetResult.data.rowKeys,datasetResult.data.rows,id,{state:context.state}),selectExternal:(indices:number[],multiSelect?:boolean,details?:Parameters<typeof context.selectExternal>[2])=>context.selectExternal(sourceIndices(indices),multiSelect,{...details,matchedRowCount:sourceIndices(indices).length}),reportInteraction:(details:Parameters<typeof context.reportInteraction>[0],reason?:Parameters<typeof context.reportInteraction>[1],indices:number[]=[])=>context.reportInteraction({...details,matchedRowCount:sourceIndices(indices).length},reason,sourceIndices(indices))}:context;
         const rules = schema.styles?.components ?? {};
         const globalRule = rules["*"] ?? {};
         const typeRule = rules[component.type] ?? {};
@@ -40,7 +45,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const wrapperAdapter = !isOverlayOnly && (kind==="layout"||kind==="content") && policy.enabled;
         const run=(event:Event)=>{
             if(kind==="layout"&&event.target!==event.currentTarget)return;
-            executeComponentInteraction(policy,deriveBoundPayload(component,context.data,context.sourceRows,context.sourceRowKeys),context,{trigger:"click",event});
+            executeComponentInteraction(policy,deriveBoundPayload(component,componentContext.data,componentContext.sourceRows,componentContext.sourceRowKeys),componentContext,{trigger:"click",event});
             // Also execute UI action after data interaction
             if (hasUiAction) handleUiAction(event);
         };
@@ -86,11 +91,13 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
             style={{ "--hp-span": Math.max(1, Math.min(12, component.span ?? 12)), ...safeStyle }}
         >
             <style>{scoped.css}</style>
-            <SlotRenderer component={component} name="header" />
-            <SlotRenderer component={component} name="subheader" />
-            <SlotRenderer component={component} name="actions" />
-            <ComponentRegistry component={component} renderChildren={renderChildren} />
-            <SlotRenderer component={component} name="footer" />
+            <RenderContext.Provider value={componentContext}>
+                <SlotRenderer component={component} name="header" />
+                <SlotRenderer component={component} name="subheader" />
+                <SlotRenderer component={component} name="actions" />
+                <ComponentErrorBoundary id={componentId} type={component.type} dataset={component.dataset} developer={context.settings.debug.showSchemaErrors}><ComponentRegistry component={component} renderChildren={renderChildren} /></ComponentErrorBoundary>
+                <SlotRenderer component={component} name="footer" />
+            </RenderContext.Provider>
         </div>;
     })}</>;
 }

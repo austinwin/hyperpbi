@@ -1,12 +1,16 @@
 # HyperPBI Specification Reference
 
-Complete JSON schema reference for HyperPBI 1.0 dashboard specifications.
+Reference for strict HyperPBI 2.0 authoring and compatible HyperPBI 1.0 dashboard specifications.
+
+Version 2.0 rejects unknown properties and requires stable component IDs. Version 1.0 remains lenient and supports normalized/legacy field keys. Both use the same renderer; patterns and definitions are compiled before rendering.
 
 ## Root Document
 
 | Key | Required | Type | Description |
 |-----|----------|------|-------------|
-| `version` | Yes | `"1.0"` | Schema version |
+| `version` | Yes | `"2.0"` or compatible `"1.0"` | Schema version |
+| `data.datasets` | No | object | Named logical datasets derived from the Power BI data view |
+| `definitions` | No | object | Reusable component defaults |
 | `title` | No | string | Dashboard title (max 200 chars) |
 | `theme` | No | object | Theme configuration |
 | `layout` | No | object | Legacy layout configuration |
@@ -53,6 +57,7 @@ All components support:
 |----------|------|-------------|
 | `type` | string | Component type (required) |
 | `id` | string | Unique stable ID |
+| `dataset` | string | Named logical dataset; omitted uses Power BI data view |
 | `title` | string | Display title |
 | `subtitle` | string | Secondary text |
 | `span` | 1-12 | Grid column span |

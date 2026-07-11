@@ -9,6 +9,7 @@ import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDet
 import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
+import type { DatasetResult } from "../data/datasets";
 
 export interface RenderContextValue {
     data: NormalizedData;
@@ -32,6 +33,8 @@ export interface RenderContextValue {
     // ── UI Actions ──
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;
+    datasets?: Map<string,DatasetResult>;
+    datasetLineage?: number[][];
 }
 
 export const RenderContext = createContext<RenderContextValue | undefined>(undefined);

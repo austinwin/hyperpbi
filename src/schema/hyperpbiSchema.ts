@@ -44,6 +44,8 @@ export interface HyperPbiTheme {
 
 export interface ComponentBase {
     type: string;
+    /** Logical dataset. Omitted components use the base Power BI data view. */
+    dataset?: string;
     id?: string;
     title?: string;
     subtitle?: string;
@@ -643,7 +645,7 @@ export type DashboardComponent =
     | AvatarGroupComponent;
 
 export interface HyperPbiSchema {
-    version: "1.0";
+    version: "1.0" | "2.0";
     title?: string;
     theme?: HyperPbiTheme;
     layout?: {
@@ -663,4 +665,7 @@ export interface HyperPbiSchema {
     css?: string;
     styles?: HyperPbiStyleSystem;
     calculations?: CalculationSpecification;
+    /** Version 2 authoring structures are retained for round-tripping and compiled before rendering. */
+    data?: { datasets?: Record<string, import("../data/datasets").DatasetDefinition> };
+    definitions?: Record<string, Record<string, unknown>>;
 }

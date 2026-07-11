@@ -4,6 +4,8 @@ import { validateSchema } from "../src/schema/validateSchema";
 import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { migrateSchema } from "../src/schema/schemaMigrations";
+import { expandDefinitions } from "../src/schema/definitionExpansion";
+import { expandPatterns } from "../src/schema/patternRegistry";
 
 describe("schema validation", () => {
     it("accepts the bundled default", () => expect(validateSchema(defaultSchema).valid).toBe(true));
@@ -38,6 +40,7 @@ describe("schema validation", () => {
         }
     });
     it("keeps the guided operations specification valid",()=>{const result=validateSchema(JSON.parse(readFileSync(resolve(process.cwd(),"examples/specs/guided-operations-dashboard.json"),"utf8")));expect(result.errors).toEqual([]);});
+    it("keeps version 2 example specifications structurally valid after compilation",()=>{const directory=resolve(process.cwd(),"examples/specs");for(const file of readdirSync(directory).filter(name=>name.startsWith("v2-")&&name.endsWith(".json"))){const input=JSON.parse(readFileSync(resolve(directory,file),"utf8"));const expanded=expandPatterns(expandDefinitions(input).value);expect(expanded.diagnostics,file).toEqual([]);expect(validateSchema(expanded.value).errors,file).toEqual([]);}});
     it("keeps practical ArcGIS examples internally consistent", () => {
         for (const file of ["arcgis-wastewater-live-map.json", "arcgis-wastewater-join-map.json"]) {
             const example = JSON.parse(readFileSync(resolve(process.cwd(), "examples/specs", file), "utf8"));

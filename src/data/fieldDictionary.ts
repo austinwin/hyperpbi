@@ -84,6 +84,7 @@ export function buildFieldDictionary(columns: powerbi.DataViewMetadataColumn[]):
         counts.set(base, occurrence);
         const key = occurrence === 1 ? base : `${base}_${occurrence}`;
         keys.push(key);
+        const normalizedType=fieldType(source);
         fields[key] = {
             key,
             displayName: source.displayName || key,
@@ -91,9 +92,11 @@ export function buildFieldDictionary(columns: powerbi.DataViewMetadataColumn[]):
             sourceTable: parsed.sourceTable,
             sourceColumn: parsed.sourceColumn,
             qualifiedName: parsed.qualifiedName,
-            type: fieldType(source),
+            type: normalizedType,
             format: source.format,
-            roles: Object.keys(source.roles ?? {}).filter(role => source.roles?.[role])
+            roles: Object.keys(source.roles ?? {}).filter(role => source.roles?.[role]),
+            kind: source.isMeasure || normalizedType === "measure" ? "measure" : normalizedType === "schema" ? "unknown" : "column",
+            dataType: source.type?.dateTime ? "datetime" : source.type?.numeric ? "number" : source.type?.bool ? "boolean" : source.type?.text ? "text" : "unknown"
         };
     }
     return { fields, keys };

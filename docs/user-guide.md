@@ -1,5 +1,7 @@
 # HyperPBI User Guide
 
+> New dashboards use strict schema 2.0 with field aliases, application patterns, logical data views, reusable styles, structured repair diagnostics, and a post-import visual inspector. Existing 1.0 dashboards continue to work.
+
 ## 1. What HyperPBI Does
 
 HyperPBI turns declarative JSON specifications into professional Power BI dashboards. It renders application shells, responsive layouts, KPI cards, charts, tables, maps, forms, overlays, and custom components — without executing JavaScript.
@@ -9,7 +11,9 @@ HyperPBI turns declarative JSON specifications into professional Power BI dashbo
 1. Import the `.pbiviz` file into Power BI Desktop
 2. Add HyperPBI to your report canvas
 3. Drag columns and measures into the **Values** field well
-4. HyperPBI normalizes field keys (lowercase, table-qualified)
+4. HyperPBI creates deterministic AI-friendly field aliases and retains normalized keys for compatibility
+
+The Field Manifest shows each alias, display name, source, type, column/measure classification, semantic role, format, and selection/filter support. Copy this manifest for external AI authoring. Alias overrides are optional, validated, and stored once in Runtime Config. Types-only and restricted privacy choices do not expose raw values.
 
 ## 3. Open Edit Mode
 
@@ -17,11 +21,12 @@ Select the visual, open the **…** menu (top-right), and choose **Edit**. Hyper
 
 ## 4. Guided Builder Workflow
 
-1. **Customize Dashboard Setup** (optional): goal, audience, layout pattern, components, style preset, privacy mode
+1. **Customize Dashboard Setup** (optional): prompt job, goal, audience, decisions, application pattern, sections, fields, device priority, style, and privacy mode
 2. **Copy AI Prompt**: copies the complete prompt to clipboard
-3. **Paste AI response**: paste the JSON from ChatGPT/DeepSeek/Copilot
-4. **Validate & Preview**: checks JSON structure and renders a preview
-5. **Save & return**: saves to Power BI and exits
+3. **Paste AI response**: paste JSON from any approved external model
+4. **Validate & Preview**: extracts one object, shows safe repairs and structured diagnostics, compiles the canonical JSON, and renders a preview
+5. **Visual inspector** (optional): edit common properties, fields, order, visibility, responsive width, and interactions with undo/redo
+6. **Save & return**: saves only the successfully previewed specification to Power BI
 
 ## 5. Dashboard Setup Options
 
@@ -87,8 +92,8 @@ npm run package:verify
 
 | Issue | Solution |
 |-------|----------|
-| JSON won't validate | Check for trailing commas, missing quotes, invalid field keys |
-| Preview is empty | Verify field bindings match normalized keys |
+| JSON won't validate | Use Copy repair prompt; comments, smart quotes, trailing commas, and competing objects are diagnosed rather than silently rewritten |
+| Preview is empty | Verify field aliases and logical data-view bindings in the Field Manifest |
 | Map shows grid | Install Maps package or set basemap |
 | No external tiles | Maps package + WebAccess required |
 | Component not visible | Check `hidden`, `span`, parent container |

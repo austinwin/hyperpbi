@@ -1,0 +1,52 @@
+import { componentCatalog } from "../catalog/componentCatalog";
+import { NormalizedData } from "../data/normalizeData";
+import { designPresetPrompt } from "../design/stylePresets";
+import { createFieldAliasRegistry } from "../fields/fieldAliasRegistry";
+import { fieldManifestForPrompt } from "./fieldManifestForPrompt";
+import { AiPromptSettings } from "./aiPromptSettings";
+import { patternRegistry } from "../schema/patternRegistry";
+import { v2CommonComponentProperties, v2ComponentPropertiesByType, v2RequiredPropertiesByType } from "../schema/validateV2Schema";
+
+export interface PromptCompositionContext { width?:number;height?:number;currentSpecification?:string;diagnostics?:unknown[];selectedComponentId?:string;budget?:number; }
+export interface ComposedPrompt { prompt:string;includedModules:string[];excludedModules:string[];approximateTokens:number;warnings:string[];fieldAliases:string[]; }
+type Module={id:string;include:boolean;content:string};
+const contract=`Use HyperPBI schema version 2.0. Return one complete JSON object with this root shape: {"version":"2.0","app":{"designSystem":"enterprise-light"},"data":{"datasets":{}},"definitions":{},"components":[]}.
+Every component has a unique stable id. Components may reference one logical dataset with dataset. Components without dataset use the base Power BI data view.`;
+const datasetLanguage=`Logical datasets are declared at data.datasets. Allowed operations, in deterministic order, are source, select, rename, filter, derive, groupBy, metrics, distinct, sort, and limit. source is "powerbi" or another listed dataset. Metric ops: sum, avg, min, max, count, distinctCount, first. Derive expressions use the safe calculation DSL only. No SQL, joins, functions, or network sources.`;
+const security=`Security: no JavaScript, functions, eval, event-handler attributes, script tags, credentials, dynamic imports, unsafe iframe/object, or network datasets. HTML is sanitized, CSS is scoped/allowlisted, URLs and ArcGIS hosts remain subject to HyperPBI policy.`;
+const output=`OUTPUT CONTRACT:
+- Return one JSON object only.
+- No Markdown fences, comments, explanations, or alternate versions.
+- Use only listed field aliases, datasets, patterns, component types, properties, actions, and design tokens.
+- Do not invent fields or business logic.
+- Preserve stable IDs when a component remains.
+- Any component type, property, action, dataset operation, pattern, field alias, or design token not listed in this prompt is invalid.`;
+
+function relevantTypes(settings:AiPromptSettings):string[]{const types=new Set(["grid","section","card","kpi","metricGrid","text","emptyState"]);if(settings.tableRequired){types.add("table");types.add("detailPanel");}if(settings.chartsRequired)["lineChart","barChart","horizontalBarChart","areaChart","comboChart"].forEach(type=>types.add(type));if(settings.controlsRequired)["searchBox","select","multiSelect","dateRange","button"].forEach(type=>types.add(type));if(settings.mapRequired)types.add("map");if(settings.detailPanelRequired){types.add("offcanvas");types.add("detailPanel");}if(settings.complexity==="advanced")types.add("advancedChart");return Array.from(types);}
+function componentModule(types:string[]):string{return types.map(type=>{const item=componentCatalog.find(component=>component.type===type);const properties=Array.from(new Set([...v2CommonComponentProperties,...(v2ComponentPropertiesByType[type]??[])])).sort();const required=["type","id",...(v2RequiredPropertiesByType[type]??[])];return item?`${item.type}: ${item.useWhen}. Required: ${required.join(", ")}. Allowed properties: ${properties.join(", ")}.`:type;}).join("\n");}
+function recommendedPatterns(data:NormalizedData):string[]{const registry=createFieldAliasRegistry(data);const roles=new Set(registry.entries.map(entry=>entry.semanticRole));const result:string[]=[];if(registry.entries.filter(entry=>["measure","currency","percentage"].includes(entry.semanticRole)).length>1)result.push("kpi-row");if((roles.has("date")||roles.has("datetime"))&&[...roles].some(role=>["measure","currency","percentage"].includes(role)))result.push("trend-and-breakdown");if(roles.has("identifier"))result.push("record-explorer");if(roles.has("geometry")||(roles.has("latitude")&&roles.has("longitude")))result.push("map-and-details");return result;}
+
+export function composeAiPrompt(data:NormalizedData,settings:AiPromptSettings,context:PromptCompositionContext={}):ComposedPrompt{
+    const fields=fieldManifestForPrompt(data,settings.selectedFields,settings.privacyMode,settings.aliasOverrides) as Array<{alias:string;semanticRole:string}>;const types=relevantTypes(settings);const patterns=recommendedPatterns(data);const improvement=settings.job==="improve";const repair=settings.job==="repair";const map=settings.mapRequired;const advanced=settings.complexity==="advanced";const modules:Module[]=[
+        {id:"root-contract",include:true,content:contract},
+        {id:"field-manifest",include:true,content:`AVAILABLE FIELD ALIASES:\n${JSON.stringify(fields,null,2)}`},
+        {id:"datasets",include:settings.calculationsRequired||/group|aggregate|dataset|derive/i.test(settings.goal+settings.requiredSections),content:datasetLanguage},
+        {id:"patterns",include:true,content:`APPLICATION PATTERNS AVAILABLE:\n${patterns.map(id=>`${id}: required ${patternRegistry[id].required.join(", ")}; optional ${patternRegistry[id].optional.join(", ")}; example ${JSON.stringify(patternRegistry[id].example)}`).join("\n")||"No pattern is automatically recommended; first-class components remain available."}`},
+        {id:"components",include:true,content:`COMPONENTS AVAILABLE:\n${componentModule(types)}`},
+        {id:"design-system",include:true,content:`DESIGN SYSTEM:\n${designPresetPrompt(settings.stylePreset||settings.designStyle)}\nUse semantic variant, intent, density, and emphasis values before custom CSS.`},
+        {id:"interactions",include:true,content:`INTERACTIONS: ${settings.interactionExpectations}. internalMode is none, highlight, or filter. externalMode is none, auto, selection, or filter. External filters require a supplied model-column alias.`},
+        {id:"maps",include:map,content:"MAP RULES: use the map component and existing bound latitude/longitude/geometry aliases. Respect feature limits and public-service host policy. Do not add secured services or credentials."},
+        {id:"tables",include:settings.tableRequired,content:"TABLE RULES: use the native table with an ordered columns array, compact density, explicit pagination/pageSize for large data, and selection interaction when requested."},
+        {id:"charts",include:settings.chartsRequired,content:"CHART RULES: category and measure references must be supplied aliases or fields produced by the selected dataset. Prefer semantic charts; keep labels and marks compact."},
+        {id:"advanced-chart",include:advanced,content:"ADVANCED CHART: JSON-only safe ECharts presentation overrides are allowed; they may not replace semantic data bindings, functions, formatters, events, or unsafe options."},
+        {id:"security",include:true,content:security},
+        {id:"current-specification",include:improvement,content:`CURRENT DASHBOARD (return the complete updated specification; preserve unrelated functionality and IDs):\n${context.currentSpecification||"{}"}`},
+        {id:"repair-diagnostics",include:repair,content:`STRUCTURED DIAGNOSTICS:\n${JSON.stringify(context.diagnostics??[],null,2)}`},
+        {id:"selected-section",include:settings.job==="redesign-section",content:`REDESIGN ONLY THE SECTION WITH STABLE ID ${context.selectedComponentId??"(not supplied)"}; return a replacement using the same ID.`},
+        {id:"output-contract",include:true,content:output}
+    ];
+    const jobInstruction=improvement?"Improve the current dashboard and return the complete updated specification. Preserve unrelated working sections and schema version.":repair?"Repair the invalid JSON using only the supplied diagnostics and preserve valid unrelated content.":settings.job==="add-section"?"Return one validated section package with an explicit insertion target.":settings.job==="redesign-section"?"Return one replacement component or section.":"Create one complete dashboard specification.";
+    const header=`You are authoring an AI-first declarative HyperPBI dashboard. ${jobInstruction}\n\nUSER INTENT:\nGoal: ${settings.goal}\nAudience: ${settings.audience}\nDecisions supported: ${settings.decisions||"Not specified"}\nPrimary entity: ${settings.primaryEntity||"Infer only from supplied fields"}\nApplication type: ${settings.applicationType}\nLayout: ${settings.layoutPattern}\nImportant KPIs: ${settings.importantKpis||"Infer conservatively"}\nRequired sections: ${settings.requiredSections||settings.components.join(", ")}\nRequired filters: ${settings.requiredFilters||"None specified"}\nDevice priority: ${settings.devicePriority}\nViewport: ${context.width??"unknown"} × ${context.height??"unknown"}`;
+    let prompt=[header,...modules.filter(module=>module.include).map(module=>`\n## ${module.id}\n${module.content}`)].join("\n");const warnings:string[]=[];const budget=context.budget??14000;const approximateTokens=Math.ceil(prompt.length/4);if(approximateTokens>budget)warnings.push(`Prompt is approximately ${approximateTokens} tokens, above the ${budget}-token budget.`);
+    return{prompt,includedModules:modules.filter(item=>item.include).map(item=>item.id),excludedModules:modules.filter(item=>!item.include).map(item=>item.id),approximateTokens,warnings,fieldAliases:fields.map(field=>field.alias)};
+}

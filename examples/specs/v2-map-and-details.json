@@ -1,0 +1,1 @@
+{"version":"2.0","components":[{"type":"pattern","pattern":"map-and-details","id":"asset-map","title":"Assets","height":440,"details":{"fields":["assetId","status","address"]}}]}

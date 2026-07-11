@@ -25,6 +25,7 @@ import { buildRowSelectionData, persistVisualState, readVisualState } from "./po
 import { applyCalculations } from "./calculations/calculationEngine";
 import { defaultStudioLayout } from "./editor/studioLayout";
 import { migrateFieldReferences } from "./schema/migrateFieldReferences";
+import { prepareSpecification } from "./schema/prepareSpecification";
 import { createInteractionDiagnostics, ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails, InteractionDiagnostics } from "./powerbi/interactionDiagnostics";
 import { applyExternalFilter as applyPowerBiFilter, clearExternalFilter as clearPowerBiFilter, ExternalFilterResult } from "./powerbi/externalFilters";
 import { FilterOperator } from "./schema/hyperpbiSchema";
@@ -143,7 +144,7 @@ export class Visual implements IVisual {
 
     private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[] } {
         const parsed = parseJson(text); if (parsed.error) return { errors: [`Specification JSON: ${parsed.error}`] };
-        const validation = validateSchema(migrateFieldReferences(migrateSchema(parsed.value), this.data.fields)); return validation.valid && validation.schema ? { schema: validation.schema, errors: [] } : { errors: validation.errors };
+        const aliases=parseConfig(this.configuration).config?.fields?.aliases;const prepared=prepareSpecification(parsed.value,this.data,{repair:false,aliasOverrides:aliases});return prepared.schema?{schema:prepared.schema,errors:[]}:{errors:prepared.errors};
     }
 
     private saveAndCloseStudio = (specification: string, configuration: string): void => {

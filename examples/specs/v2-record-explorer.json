@@ -1,0 +1,1 @@
+{"version":"2.0","components":[{"type":"pattern","pattern":"record-explorer","id":"work-order-explorer","title":"Work orders","columns":["workOrderNumber","status","assignedTeam","completionDate"],"details":{"titleField":"workOrderNumber","fields":["status","assignedTeam","completionDate"]}}]}

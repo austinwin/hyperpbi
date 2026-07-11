@@ -11,6 +11,10 @@ export interface NormalizedField {
     type: "measure" | "date" | "latitude" | "longitude" | "geometry" | "schema" | "dimension";
     format?: string;
     roles: string[];
+    /** Power BI metadata classification. Kept optional for persisted/test data compatibility. */
+    kind?: "column" | "measure" | "unknown";
+    /** Primitive metadata type used by the AI-facing semantic manifest. */
+    dataType?: "text" | "number" | "boolean" | "date" | "datetime" | "unknown";
 }
 
 export type MapLocationMode = "geometry" | "latLon" | "xy" | "address" | "none";

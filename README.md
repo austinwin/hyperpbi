@@ -2,6 +2,8 @@
 
 HyperPBI is a schema-driven Power BI custom visual that compiles declarative JSON into professional enterprise dashboards and application-style interfaces. It renders application shells, responsive layouts, controls, metrics, tables, ECharts charts, Leaflet maps, custom components, sanitized HTML/CSS, safe calculations, and Power BI selections — without executing user JavaScript.
 
+HyperPBI 2.0 adds one AI-friendly authoring language on top of the same renderer: stable field aliases, strict diagnostics, safe AI-response extraction, logical named datasets with source-row lineage, reusable definitions, four application patterns, relevance-aware prompts, and a canonical-JSON visual inspector. Existing 1.0 specifications and normalized field keys remain supported.
+
 The repository includes a responsive, dependency-free [product landing page](index.html) ready for GitHub Pages, and a standalone [component catalog](hyperpbi-component-catalog-reference.html).
 
 ## Capability Summary
@@ -11,11 +13,11 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 
 | Area | Capability |
 |------|-----------|
-| Authoring | Guided Builder, AI prompt, validation, preview, repair |
+| Authoring | Guided Builder, modular AI prompts, structured diagnostics, preview, repair, inspector |
 | Application layout | Navbar, sidebar, page header, footer, responsive shell |
 | Components | ~60 first-class component types across 11 categories |
 | Actions | Safe UI actions and Power BI data interactions (independent) |
-| Data | Power BI Values field, calculations, identity selection |
+| Data | Power BI data view, semantic field aliases, named logical datasets, calculations, lineage-preserving identity selection |
 | Charts | Adapter-based semantic ECharts (16 chart types + JSON-only advanced escape hatch) |
 | Tables | Native paginated, sortable, resizable, frozen columns |
 | Maps | Power BI spatial maps plus practical public ArcGIS feature, join, tile, and dynamic layers |
@@ -50,10 +52,22 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 
 1. Add HyperPBI to a Power BI report and drag columns/measures into the **Values** field well.
 2. Select the visual, open the **…** menu, and choose **Edit**. HyperPBI opens in focus mode.
-3. In **Guided Builder**, describe the dashboard goal, audience, layout, and components.
+3. In **Guided Builder**, describe the goal, audience, decisions, application pattern, fields, and required sections.
 4. **Copy AI Prompt** and paste it into ChatGPT, DeepSeek, or Copilot.
-5. Paste the AI response and select **Validate & Preview**.
-6. Inspect the preview, then **Save & return**.
+5. Paste the AI response. HyperPBI extracts one JSON object, performs only reviewable safe repairs, resolves aliases, compiles patterns/datasets, and reports structured diagnostics.
+6. Select **Validate & Preview**, make common edits in the visual inspector, then **Save & return**.
+
+## AI-first schema 2.0
+
+- Field aliases are deterministic, semantic, privacy-aware, and resolved to existing canonical keys at runtime.
+- Version 2.0 rejects unknown properties; version 1.0 remains lenient for compatibility.
+- `data.datasets` derives named views using a bounded operation set and retains original Power BI row lineage.
+- `definitions` provides deterministic reusable component defaults.
+- `pattern` components support `kpi-row`, `trend-and-breakdown`, `record-explorer`, and `map-and-details`.
+- Create, improve, redesign, and repair prompts include only relevant engine modules. Improve jobs return a complete specification, not JSON Patch.
+- There is no model API, network AI request, API key, arbitrary SQL, or user JavaScript.
+
+See [AI authoring](docs/ai-authoring.md), [data model](docs/data-model.md), [repair workflow](docs/repair-workflow.md), and [migration guide](docs/migration-versioning.md).
 
 The specification and runtime config are saved with Power BI persistent visual properties.
 
@@ -217,6 +231,9 @@ Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-m
 | [Custom components](docs/custom-components.md) | Sanitized HTML, repeats |
 | [Map services](docs/map-services.md) | Maps, ArcGIS REST, hosts |
 | [Calculation DSL](docs/calculations-dsl.md) | Derived fields, metrics |
+| [Logical data model](docs/data-model.md) | Named datasets, caching, source-row lineage |
+| [Repair workflow](docs/repair-workflow.md) | Safe extraction, diagnostics, reviewable repairs |
+| [Migration/versioning](docs/migration-versioning.md) | Version 1.0 compatibility and 2.0 adoption |
 | [Security](docs/security.md) | Security model |
 | [Examples](examples/specs/) | Professional specs |
 

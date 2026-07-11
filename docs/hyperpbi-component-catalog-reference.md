@@ -1,5 +1,14 @@
 # HyperPBI component catalog reference
 
+## Application patterns (schema 2.0)
+
+Patterns are AI-friendly authoring constructs compiled into the existing component runtime. Generated child IDs are derived from the pattern ID.
+
+- `kpi-row`
+- `trend-and-breakdown`
+- `record-explorer`
+- `map-and-details`
+
 > Generated from canonical component definitions. Do not edit manually.
 > Component count: 82
 
@@ -59,6 +68,7 @@ All components share these base properties:
 |----------|------|-------------|
 | `type` | string | Component type identifier (required) |
 | `id` | string | Unique stable identifier |
+| `dataset` | string | Logical dataset name; omitted uses the Power BI data view |
 | `title` | string | Display title |
 | `subtitle` | string | Secondary display text |
 | `span` | 1–12 | 12-column grid span |

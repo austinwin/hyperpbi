@@ -2,18 +2,35 @@
 
 ## Prompt Composition
 
-Generated prompts contain:
-- Field dictionary (normalized keys, types, display names)
+Generated prompts contain only relevant modules:
+- Semantic field manifest (stable aliases, types, roles, formats, source capabilities, privacy-aware profiles)
 - Privacy-selected sample rows
 - Visual dimensions
-- Current component catalog
+- Relevant components and application patterns
 - Application-shell contract
 - UI-action contract
 - Overlay contract
 - Table contract
 - Map contract
 - Security contract
-- Dashboard recipes
+- Exact version 2.0 output contract
+
+Prompt jobs are **Create dashboard**, **Improve current dashboard**, **Add section**, **Redesign selected section**, and **Repair invalid JSON**. Improve jobs include the complete current specification and require one complete updated specification with unrelated behavior and stable IDs preserved. Generic JSON Patch is not the default workflow.
+
+The prompt always states: “Any component type, property, action, dataset operation, pattern, field alias, or design token not listed in this prompt is invalid.” Map and advanced-chart rules are omitted unless requested.
+
+## Field aliases
+
+Use the supplied `alias` in version 2.0 JSON. Aliases are generated from source metadata, remain stable when field order changes, qualify collisions with the source table, and use a stable hash only for remaining collisions. Existing normalized keys still resolve for version 1.0 compatibility. Types-only and restricted privacy modes never expose raw examples.
+
+## Application patterns
+
+- `kpi-row` — a responsive row of KPI components
+- `trend-and-breakdown` — coordinated trend and category charts
+- `record-explorer` — searchable table and selected-record detail panel
+- `map-and-details` — map and selected-location details
+
+Patterns compile to existing first-class components. They do not add a second runtime or bypass validation.
 
 ## Choosing an Application Shell
 
@@ -77,7 +94,7 @@ All components share: `type`, `id`, `title`, `subtitle`, `span`, `className`, `h
 
 ## Common Mistakes
 
-- Inventing field keys instead of using normalized ones
+- Inventing fields instead of using supplied aliases
 - Using display names as field references
 - Omitting component `id`
 - Putting comments in JSON

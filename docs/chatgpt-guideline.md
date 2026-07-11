@@ -1,5 +1,9 @@
 # ChatGPT Authoring Guideline
 
+Use the self-contained prompt copied from the Guided Builder. Return exactly one complete JSON object using the requested schema version—normally `2.0`. Use only the field aliases, logical dataset operations, application patterns, components, properties, actions, and design tokens listed in that prompt. Do not return Markdown fences, explanation, JSON Patch, JavaScript, functions, credentials, or invented fields.
+
+For improvements, preserve stable IDs and unrelated working behavior and return the complete updated specification. For repairs, address the structured diagnostics without changing field choice, aggregation meaning, interactions, filters, or business logic unless the requested change explicitly requires it.
+
 Use this as a concise reference when generating HyperPBI dashboard JSON with ChatGPT or similar AI tools.
 
 ## Output Format

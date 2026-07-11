@@ -23,6 +23,7 @@ import { resolveAppShell } from "../components/app/appShellResolver";
 import { AppShell } from "../components/app/AppShell";
 import { OverlayHost } from "../components/overlays/OverlayHost";
 import { ToastHost } from "../components/overlays/ToastHost";
+import { evaluateDatasets } from "../data/datasets";
 
 const notSent = (): ExternalSelectionResult => ({ sent: false, reason: "component did not call selectExternal" });
 const filterNotSent = (): ExternalFilterResult => ({ sent:false, reason:"component did not call selectExternal" });
@@ -54,6 +55,7 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
             .filter((key): key is string => Boolean(key));
     }, [data.rows, data.rowKeys, rows]);
     const filteredData = useMemo<NormalizedData>(() => ({ ...data, rows, rowKeys: filteredRowKeys, aggregates: calculateAggregates(rows), calculatedMetrics: calculateDerivedMetrics(rows, schema.calculations?.metrics), map: normalizeMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries, filteredRowKeys) }), [data, rows, filteredRowKeys, schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
+    const datasetEvaluation=useMemo(()=>{const sourceIndexByKey=new Map(data.rowKeys.map((key,index)=>[key,index] as const));return evaluateDatasets(filteredData,schema.data?.datasets??{},new Map(),{sourceIndices:filteredRowKeys.map(key=>sourceIndexByKey.get(key)??-1),sourceRowKeys:data.rowKeys});},[filteredData,schema.data?.datasets,filteredRowKeys,data.rowKeys]);
     const scope = `#${instanceId}`; const cssMode = config.security?.cssMode ?? "scoped"; const sanitizedCss = useMemo(() => sanitizeCss(`${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}\n${settings.customCss}`, scope, { mode: cssMode }), [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode]);
     const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }), [data.rows, data.rowKeys, rows, state]);
     const componentRows = useCallback((componentId:string) => selectedComponentRows(componentId, { state }), [state]);
@@ -66,7 +68,7 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
             getRowsForComponent, componentRows, schema, settings, state, dispatch,
             warnings: sanitizedCss.warnings,
             selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
-            config, webAccessAvailable,
+            config, webAccessAvailable, datasets:datasetEvaluation.datasets,
             executeUiAction: (null as any), isOverlayOpen: (null as any),
         };
         return executeUiActions(action, ctx, event);
@@ -77,10 +79,10 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
         getRowsForComponent, componentRows, schema, settings, state, dispatch,
         warnings: sanitizedCss.warnings,
         selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
-        config, webAccessAvailable,
+        config, webAccessAvailable, datasets:datasetEvaluation.datasets,
         executeUiAction: execUiAction,
         isOverlayOpen,
-    }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen]);
+    }), [filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
     const resolvedApp = useMemo(() => resolveAppShell(schema, settings, state), [schema, settings, state]);
@@ -112,7 +114,7 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
             {settings.debug.showSchemaErrors && referenceWarnings.length > 0 && <details class="hp-reference-warning"><summary>{referenceWarnings.length} schema field warning(s)</summary><ul>{referenceWarnings.map(warning => <li>{warning}</li>)}</ul><div>Valid field keys: {Object.keys(data.fields).join(", ") || "No fields are bound."}</div></details>}
             {settings.debug.showFieldDictionary && <FieldDictionaryPanel data={filteredData} />}
             {settings.debug.showDataSample && <details class="hp-debug"><summary>Normalized data sample</summary><pre>{JSON.stringify(filteredData.rows.slice(0, 10), null, 2)}</pre></details>}
-            {settings.debug.showPerformance && <div class="hp-performance">Render preparation: {renderMs.toFixed(1)} ms · Loaded {data.rows.length.toLocaleString()} rows{data.loadStatus?.moreRowsAvailable ? " · more available" : ""}</div>}
+            {settings.debug.showPerformance && <div class="hp-performance">Render preparation: {renderMs.toFixed(1)} ms · Loaded {data.rows.length.toLocaleString()} rows{data.loadStatus?.moreRowsAvailable ? " · more available" : ""}{datasetEvaluation.diagnostics.map(item=>` · ${item.name}: ${item.outputRowCount} rows/${item.evaluationMs.toFixed(1)}ms/${item.cacheStatus}`)}</div>}
             {config.security?.showSanitizerWarnings === true && settings.showWarnings && sanitizedCss.warnings.length > 0 && <details class="hp-debug"><summary>CSS sanitizer warnings ({sanitizedCss.warnings.length})</summary><ul>{sanitizedCss.warnings.map(warning => <li>{warning}</li>)}</ul></details>}
         </RenderContext.Provider>
     </div>;

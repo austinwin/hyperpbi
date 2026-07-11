@@ -23,14 +23,16 @@ async function main() {
     const examplesContent = await readFile(join(root, "src/catalog/componentJsonExamples.ts"), "utf8");
     const defsContent = await readFile(join(root, "src/catalog/componentDefinitions.ts"), "utf8");
     const docsContent = await readFile(join(root, "src/catalog/componentDocumentation.ts"), "utf8");
+    const patternsContent = await readFile(join(root, "src/schema/patternRegistry.ts"), "utf8");
 
     // Extract component types from definitions
     const types = extractComponentTypes(defsContent);
     const categories = extractCategories(defsContent);
+    const patterns = [...patternsContent.matchAll(/^\s*"([a-z][a-z-]+)":\{/gm)].map(match => match[1]);
 
     // Build the catalog
-    const mdCatalog = generateMarkdownCatalog(types, categories);
-    const htmlCatalog = generateHtmlCatalog(types, categories);
+    const mdCatalog = generateMarkdownCatalog(types, categories, patterns);
+    const htmlCatalog = generateHtmlCatalog(types, categories, patterns);
 
     // Write outputs
     const mdPath = join(root, "docs/hyperpbi-component-catalog-reference.md");
@@ -69,9 +71,16 @@ function extractCategories(defsContent) {
     return knownCategories.filter(c => catMatches.some(m => m === c));
 }
 
-function generateMarkdownCatalog(types, categories) {
+function generateMarkdownCatalog(types, categories, patterns) {
     const lines = [];
     lines.push("# HyperPBI component catalog reference");
+    lines.push("");
+
+    lines.push("## Application patterns (schema 2.0)");
+    lines.push("");
+    lines.push("Patterns are AI-friendly authoring constructs compiled into the existing component runtime. Generated child IDs are derived from the pattern ID.");
+    lines.push("");
+    for (const pattern of patterns) lines.push(`- \`${pattern}\``);
     lines.push("");
     lines.push("> Generated from canonical component definitions. Do not edit manually.");
     lines.push(`> Component count: ${types.length}`);
@@ -136,6 +145,7 @@ function generateMarkdownCatalog(types, categories) {
     lines.push("|----------|------|-------------|");
     lines.push("| `type` | string | Component type identifier (required) |");
     lines.push("| `id` | string | Unique stable identifier |");
+    lines.push("| `dataset` | string | Logical dataset name; omitted uses the Power BI data view |");
     lines.push("| `title` | string | Display title |");
     lines.push("| `subtitle` | string | Secondary display text |");
     lines.push("| `span` | 1–12 | 12-column grid span |");
@@ -216,7 +226,7 @@ function generateMarkdownCatalog(types, categories) {
     return lines.join("\n");
 }
 
-function generateHtmlCatalog(types, categories) {
+function generateHtmlCatalog(types, categories, patterns) {
     // Generate a standalone HTML catalog page
     return `<!DOCTYPE html>
 <html lang="en">

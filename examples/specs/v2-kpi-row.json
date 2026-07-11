@@ -1,0 +1,1 @@
+{"version":"2.0","components":[{"type":"pattern","pattern":"kpi-row","id":"operations-summary","title":"Operations summary","fields":["completedCount","openCount","overdueCount","completionRate"]}]}

@@ -1,0 +1,1 @@
+{"version":"2.0","components":[{"type":"pattern","pattern":"trend-and-breakdown","id":"completion-analysis","title":"Completion analysis","date":"completionMonth","measure":"completedCount","breakdown":"status","aggregation":"sum"}]}

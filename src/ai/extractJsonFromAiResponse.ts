@@ -1,47 +1,22 @@
-export interface ExtractedAiJson { value?: unknown; json?: string; config?: unknown; configJson?: string; repaired?: boolean; error?: string; }
+import { Diagnostic, diagnosticsToStrings } from "../schema/diagnostics";
 
-function syntaxRepair(input: string): string {
-    return input.replace(/[\u201c\u201d]/g, '"').replace(/[\u2018\u2019]/g, "'").replace(/\u00a0/g, " ").replace(/,\s*([}\]])/g, "$1");
+export interface ExtractedAiJson { value?: unknown; json?: string; config?: unknown; configJson?: string; repaired?: boolean; repairs?:string[]; diagnostics?:Diagnostic[]; error?: string; }
+interface CandidateScan { candidates:string[];unbalanced:boolean; }
+
+function scanObjects(input:string):CandidateScan{const candidates:string[]=[];let start=-1,depth=0;let quote=false,escaped=false;for(let index=0;index<input.length;index+=1){const char=input[index];if(quote){if(escaped)escaped=false;else if(char==="\\")escaped=true;else if(char==='"')quote=false;continue;}if(char==='"'){quote=true;continue;}if(char==="{"){if(depth===0)start=index;depth+=1;}else if(char==="}"&&depth>0){depth-=1;if(depth===0&&start>=0){candidates.push(input.slice(start,index+1));start=-1;}}}return{candidates,unbalanced:depth>0||quote};}
+function packaged(value:unknown):{specification:unknown;config?:unknown}|undefined{if(!value||typeof value!=="object"||Array.isArray(value)||!("specification" in value))return{specification:value};const result=value as {specification?:unknown;config?:unknown};let specification=result.specification,config=result.config;try{if(typeof specification==="string")specification=JSON.parse(specification);if(typeof config==="string")config=JSON.parse(config);}catch{return undefined;}return specification===undefined?undefined:{specification,config};}
+function invalidDiagnostic(candidate:string,error:unknown):Diagnostic{const message=error instanceof Error?error.message:"JSON parsing failed.";if(/[\u2018\u2019\u201c\u201d]/.test(candidate))return{code:"INVALID_JSON",severity:"error",path:"/",message:"Smart quotes are not valid JSON. Replace them explicitly and review the change.",autoFixAvailable:false};if(/\/\*|(^|\s)\/\//m.test(candidate))return{code:"INVALID_JSON",severity:"error",path:"/",message:"JSON comments are not supported.",autoFixAvailable:false};if(/Unexpected end|unterminated/i.test(message))return{code:"TRUNCATED_JSON",severity:"error",path:"/",message:"The JSON object appears to be truncated or has unbalanced quoting.",autoFixAvailable:false};return{code:"INVALID_JSON",severity:"error",path:"/",message:`The extracted object is not valid JSON: ${message}`,autoFixAvailable:false};}
+
+export function extractJsonWithDiagnostics(input:string):ExtractedAiJson{
+    const normalized=input.replace(/^\uFEFF/,"").trim();if(!normalized){const diagnostics:Diagnostic[]=[{code:"INVALID_JSON",severity:"error",path:"/",message:"The AI response is empty."}];return{diagnostics,error:diagnosticsToStrings(diagnostics)[0]};}
+    const fences=Array.from(normalized.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)).map(match=>match[1].trim());let source=normalized;
+    if(fences.length===1)source=fences[0];else if(fences.length>1){const parseable=fences.filter(candidate=>{try{const value=JSON.parse(candidate);return Boolean(value&&typeof value==="object"&&!Array.isArray(value));}catch{return false;}});if(parseable.length!==1){const diagnostics:Diagnostic[]=[{code:"MULTIPLE_JSON_OBJECTS",severity:"error",path:"/",message:"More than one code block could contain a dashboard specification."}];return{diagnostics,error:diagnosticsToStrings(diagnostics)[0]};}source=parseable[0];}
+    const direct=source.trim();let candidates:string[]=[];try{const value=JSON.parse(direct);if(value&&typeof value==="object"&&!Array.isArray(value))candidates=[direct];else{const diagnostics:Diagnostic[]=[{code:"INVALID_JSON",severity:"error",path:"/",message:"The AI response must contain one JSON object, not an array or primitive."}];return{diagnostics,error:diagnosticsToStrings(diagnostics)[0]};}}catch{const scan=scanObjects(source);candidates=scan.candidates;if(!candidates.length){const diagnostic=scan.unbalanced?{code:"TRUNCATED_JSON" as const,severity:"error" as const,path:"/",message:"The JSON object is truncated or has unbalanced braces/quotes."}:invalidDiagnostic(source,new Error("No complete JSON object was found."));return{diagnostics:[diagnostic],error:diagnosticsToStrings([diagnostic])[0]};}}
+    const parsed=candidates.map(candidate=>{try{return{candidate,value:JSON.parse(candidate) as unknown};}catch(error){return{candidate,error};}}).filter(item=>item.value&&typeof item.value==="object"&&!Array.isArray(item.value));
+    if(parsed.length>1){const diagnostics:Diagnostic[]=[{code:"MULTIPLE_JSON_OBJECTS",severity:"error",path:"/",message:"The response contains multiple JSON objects. Paste one complete specification only."}];return{diagnostics,error:diagnosticsToStrings(diagnostics)[0]};}
+    if(parsed.length!==1){const diagnostic=invalidDiagnostic(candidates[0]??source,(parsed[0] as {error?:unknown}|undefined)?.error);return{diagnostics:[diagnostic],error:diagnosticsToStrings([diagnostic])[0]};}
+    const result=packaged(parsed[0].value);if(!result){const diagnostics:Diagnostic[]=[{code:"INVALID_JSON",severity:"error",path:"/specification",message:"The packaged specification could not be parsed."}];return{diagnostics,error:diagnosticsToStrings(diagnostics)[0]};}
+    return{value:result.specification,json:JSON.stringify(result.specification,null,2),config:result.config,configJson:result.config===undefined?undefined:JSON.stringify(result.config,null,2),repaired:false,repairs:[],diagnostics:[]};
 }
 
-function parseCandidate(candidate: string): { value: unknown; repaired: boolean } | undefined {
-    try { return { value: JSON.parse(candidate) as unknown, repaired: false }; }
-    catch {
-        const repaired = syntaxRepair(candidate);
-        try { return { value: JSON.parse(repaired) as unknown, repaired: repaired !== candidate }; } catch { return undefined; }
-    }
-}
-
-function extractCandidates(input: string): string[] {
-    const normalized = input.replace(/[\u201c\u201d]/g, '"');
-    const candidates: string[] = []; let start = -1; let depth = 0; let quote = false; let escaped = false;
-    for (let index = 0; index < normalized.length; index++) {
-        const char = normalized[index];
-        if (quote) { if (escaped) escaped = false; else if (char === "\\") escaped = true; else if (char === '"') quote = false; continue; }
-        if (char === '"') { quote = true; continue; }
-        if (char === "{") { if (depth === 0) start = index; depth++; }
-        else if (char === "}" && depth > 0) { depth--; if (depth === 0 && start >= 0) candidates.push(normalized.slice(start, index + 1)); }
-    }
-    return candidates.sort((left, right) => right.length - left.length);
-}
-
-function parsePackagedValue(value: unknown): { specification: unknown; config?: unknown } | undefined {
-    if (!value || typeof value !== "object" || Array.isArray(value) || !("specification" in value)) return { specification: value };
-    const packageValue = value as { specification?: unknown; config?: unknown };
-    let specification = packageValue.specification;
-    if (typeof specification === "string") specification = parseCandidate(specification)?.value;
-    if (specification === undefined) return undefined;
-    let config = packageValue.config;
-    if (typeof config === "string") config = parseCandidate(config)?.value;
-    return { specification, config };
-}
-
-export function extractJsonFromAiResponse(input: string): ExtractedAiJson {
-    if (!input.trim()) return { error: "The AI response is empty." };
-    for (const candidate of extractCandidates(input)) {
-        const parsed = parseCandidate(candidate); if (!parsed) continue;
-        const packaged = parsePackagedValue(parsed.value); if (!packaged) continue;
-        return { value: packaged.specification, json: JSON.stringify(packaged.specification, null, 2), config: packaged.config, configJson: packaged.config === undefined ? undefined : JSON.stringify(packaged.config, null, 2), repaired: parsed.repaired };
-    }
-    return { error: "A JSON-like object was detected, but it could not be parsed after safe quote and trailing-comma repair." };
-}
+export const extractJsonFromAiResponse=extractJsonWithDiagnostics;

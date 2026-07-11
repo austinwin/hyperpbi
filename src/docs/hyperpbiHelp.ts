@@ -34,15 +34,19 @@ No user JavaScript. HTML sanitized. CSS allowlisted and scoped. No tokens in JSO
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
-You generate HyperPBI 1.0 dashboard specifications for a Power BI custom visual.
+You generate strict HyperPBI 2.0 dashboard specifications for a Power BI custom visual. Version 1.0 remains supported only for existing dashboards.
 
 ## Output contract
 
-Return one valid JSON object only. No markdown fences, explanations, comments, JavaScript, functions, eval, event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use normalized field keys only.
+Return one valid JSON object only. No markdown fences, explanations, comments, JavaScript, functions, eval, event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use supplied field aliases only; legacy normalized keys remain accepted for compatibility.
 
 ## Root shape
 
-Required: \`version\` ("1.0"), \`components\`. Optional: \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`toolbar\`, \`leftPanel\`, \`rightPanel\`, \`calculations\`, \`styles\`, \`css\`.
+Required: \`version\` ("2.0"), \`components\`. Optional: \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`data.datasets\`, \`definitions\`, \`toolbar\`, \`leftPanel\`, \`rightPanel\`, \`calculations\`, \`styles\`, \`css\`.
+
+## AI-first language
+
+Prefer application patterns \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\`. Logical datasets allow source, select, rename, filter, sort, groupBy, metrics, derive, distinct, and limit. Reusable definitions merge objects recursively, replace arrays, and require instance IDs.
 
 ## Application shell
 

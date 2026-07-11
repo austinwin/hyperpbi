@@ -28,6 +28,7 @@ function BuilderAccordionStep({number,title,description,summary,open,onToggle,ch
 export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPromptSettings; fields: string[]; onChange: (value: AiPromptSettings) => void }) {
     const [customizeOpen, setCustomizeOpen] = useState(false);
     const [openStep, setOpenStep] = useState<number | null>(null);
+    const [aliasText,setAliasText]=useState(()=>JSON.stringify(value.aliasOverrides,null,2));
     const update = <K extends keyof AiPromptSettings>(key: K, next: AiPromptSettings[K]) => onChange({ ...value, [key]: next });
     const toggleStep=(step:number)=>setOpenStep(openStep===step?null:step);
     const toggleCustomization = () => {
@@ -51,6 +52,7 @@ export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPr
 
         {customizeOpen && (
             <div id="hp-builder-customization" class="hp-builder-customization">
+                <label class="hp-builder-custom"><span>Prompt job</span><select value={value.job} onChange={event=>update("job",event.currentTarget.value as AiPromptSettings["job"])}><option value="create">Create dashboard</option><option value="improve">Improve current dashboard</option><option value="add-section">Add section</option><option value="redesign-section">Redesign selected section</option><option value="repair">Repair invalid JSON</option></select></label>
                 <BuilderAccordionStep number={1} title="Dashboard goal" description="Choose the closest outcome." summary={value.goal} open={openStep===1} onToggle={()=>toggleStep(1)}>
                     <ChoiceGrid items={dashboardGoals} value={value.goal} onChoose={item=>update("goal",item)}/>
                     <label class="hp-builder-custom"><span>Or describe it</span><input value={value.goal} onInput={event=>update("goal",event.currentTarget.value)}/></label>
@@ -79,6 +81,9 @@ export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPr
                         <label><span>Sample rows</span><input type="number" min="1" max="50" value={value.sampleRows} onInput={event=>update("sampleRows",Math.min(50,Math.max(1,Number(event.currentTarget.value))))}/></label>
                     </div>
                     <label><span>Fields (empty means all)</span><select multiple onChange={event=>update("selectedFields",Array.from(event.currentTarget.selectedOptions).map(option=>option.value))}>{fields.map(field=><option value={field} selected={value.selectedFields.includes(field)}>{field}</option>)}</select></label>
+                    <div class="hp-form-grid"><label><span>Decisions supported</span><input value={value.decisions} onInput={event=>update("decisions",event.currentTarget.value)}/></label><label><span>Primary entity</span><input value={value.primaryEntity} onInput={event=>update("primaryEntity",event.currentTarget.value)}/></label><label><span>Important KPIs</span><input value={value.importantKpis} onInput={event=>update("importantKpis",event.currentTarget.value)}/></label><label><span>Required filters</span><input value={value.requiredFilters} onInput={event=>update("requiredFilters",event.currentTarget.value)}/></label><label><span>Required sections</span><input value={value.requiredSections} onInput={event=>update("requiredSections",event.currentTarget.value)}/></label><label><span>Device priority</span><select value={value.devicePriority} onChange={event=>update("devicePriority",event.currentTarget.value as AiPromptSettings["devicePriority"])}><option value="balanced">Desktop and mobile</option><option value="desktop">Desktop first</option><option value="mobile">Mobile first</option></select></label></div>
+                    <label><input type="checkbox" checked={value.detailPanelRequired} onChange={event=>update("detailPanelRequired",event.currentTarget.checked)}/> Detail panel required</label>
+                    <label><span>Alias overrides (canonical key to alias JSON)</span><textarea value={aliasText} onInput={event=>{const text=event.currentTarget.value;setAliasText(text);try{update("aliasOverrides",JSON.parse(text) as Record<string,string>);}catch{return;}}}/></label>
                 </details>
             </div>
         )}
