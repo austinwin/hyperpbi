@@ -1,0 +1,25 @@
+﻿date,initiative,region,team,prior_stage,stage,status,actual,target,variance,risk_score,latitude,longitude
+2026-01-01,Digital Service Hub,North,Platform,Intake,Discovery,On Track,83,72,11,32,41.92055,-87.7135
+2026-02-01,Cloud Foundation,South,Operations,Discovery,Planning,Watch,80,78,2,42,29.69167,-95.45612
+2026-03-01,Field Mobility,East,Customer,Planning,Delivery,Watch,82,84,-2,41,40.68582,-74.10262
+2026-04-01,Customer 360,West,Security,Delivery,Validation,At Risk,78,90,-12,79,47.6668,-122.32363
+2026-05-01,Identity Modernization,North,Platform,Validation,Launch,On Track,103,96,7,15,41.94397,-87.64701
+2026-06-01,Automation Center,South,Operations,Launch,Value Realization,At Risk,96,102,-6,77,29.69277,-95.31342
+2026-07-01,Digital Service Hub,East,Customer,Intake,Discovery,On Track,79,72,7,33,40.73731,-73.91845
+2026-08-01,Cloud Foundation,West,Security,Discovery,Planning,Watch,81,78,3,33,47.60768,-122.40161
+2026-09-01,Field Mobility,North,Platform,Planning,Delivery,At Risk,80,84,-4,81,41.98229,-87.68737
+2026-10-01,Customer 360,South,Operations,Delivery,Validation,At Risk,76,90,-14,64,29.64616,-95.37451
+2026-11-01,Identity Modernization,East,Customer,Validation,Launch,Watch,100,96,4,32,40.60535,-74.07155
+2026-12-01,Automation Center,West,Security,Launch,Value Realization,At Risk,92,102,-10,87,47.64429,-122.34695
+2026-01-01,Digital Service Hub,North,Platform,Intake,Discovery,On Track,85,76,9,33,41.77244,-87.70006
+2026-02-01,Cloud Foundation,South,Operations,Discovery,Planning,Watch,86,82,4,37,29.64902,-95.28333
+2026-03-01,Field Mobility,East,Customer,Planning,Delivery,At Risk,84,88,-4,88,40.77866,-73.95518
+2026-04-01,Customer 360,West,Security,Delivery,Validation,At Risk,81,94,-13,76,47.65735,-122.36128
+2026-05-01,Identity Modernization,North,Platform,Validation,Launch,On Track,106,100,6,17,41.9893,-87.74605
+2026-06-01,Automation Center,South,Operations,Launch,Value Realization,At Risk,99,106,-7,82,29.75537,-95.45807
+2026-07-01,Digital Service Hub,East,Customer,Intake,Discovery,On Track,83,76,7,29,40.62821,-74.07088
+2026-08-01,Cloud Foundation,West,Security,Discovery,Planning,Watch,84,82,2,34,47.65888,-122.30198
+2026-09-01,Field Mobility,North,Platform,Planning,Delivery,Watch,87,88,-1,36,41.83378,-87.71375
+2026-10-01,Customer 360,South,Operations,Delivery,Validation,At Risk,80,94,-14,68,29.85804,-95.4165
+2026-11-01,Identity Modernization,East,Customer,Validation,Launch,Watch,102,100,2,36,40.77208,-73.99268
+2026-12-01,Automation Center,West,Security,Launch,Value Realization,At Risk,101,106,-5,59,47.52074,-122.36369
