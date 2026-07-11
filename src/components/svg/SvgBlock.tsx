@@ -10,7 +10,7 @@ import { SvgElementRenderer, SvgRenderBudget } from "./SvgElementRenderer";
 
 export function SvgBlock({ component }: { component: SvgComponent }) {
     const compileStarted = globalThis.performance?.now?.() ?? Date.now();
-    const context = useRenderContext(), host = useRef<HTMLDivElement>(null), [offscreen, setOffscreen] = useState(false);
+    const context = useRenderContext(), host = useRef<HTMLDivElement>(null), [offscreen, setOffscreen] = useState(false), [inactive, setInactive] = useState(typeof document !== "undefined" && document.hidden);
     const namespace = createSvgNamespace(context.instanceId ?? "visual", component.id ?? "svg"), ids = useMemo(() => createSvgIdMap(component.elements, namespace), [component.elements, namespace]);
     const warnings: string[] = [], row = resolveSvgDataContextRow(component.dataContext, context.rows, context.sourceRowKeys, context.state.selectedRowKeys, warnings);
     const reducedMode = component.motion?.reducedMotion ?? context.config.motion?.reducedMotion ?? "respect-system"; const systemReduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true; const reduced = component.motion?.enabled === false || context.config.motion?.enabled === false || reducedMode === "always-reduce" || reducedMode === "respect-system" && systemReduced;
@@ -19,9 +19,10 @@ export function SvgBlock({ component }: { component: SvgComponent }) {
     const content = component.elements.map(element => SvgElementRenderer({ element, component, context, binding, ids, namespace, budget }));
     const ownCss = sanitizeCss(rewriteSvgCssReferences(component.css ?? "", ids), `[data-hp-svg="${namespace}"]`, { mode: context.config.security?.cssMode, keyframeNamespace: namespace, allowLocalSvgReferences: true }); warnings.push(...ownCss.warnings);
     useEffect(() => { const node = host.current; if (!node || typeof IntersectionObserver === "undefined") return; const observer = new IntersectionObserver(entries => setOffscreen(!entries[0]?.isIntersecting), { rootMargin: "50px" }); observer.observe(node); return () => observer.disconnect(); }, []);
+    useEffect(() => { if (typeof document === "undefined") return; const update = () => setInactive(document.hidden); document.addEventListener("visibilitychange", update); return () => document.removeEventListener("visibilitychange", update); }, []);
     const compileMs = (globalThis.performance?.now?.() ?? Date.now()) - compileStarted;
     const titleId = `${namespace}-title`, descId = `${namespace}-desc`, role = component.role ?? (budget.animated || component.elements.some(element => Boolean(element.interaction || element.uiAction)) ? "group" : "img");
-    return <div ref={host} class={`hp-svg-block ${offscreen ? "hp-svg-paused" : ""}`} data-hp-svg={namespace}>
+    return <div ref={host} class={`hp-svg-block ${offscreen || inactive ? "hp-svg-paused" : ""}`} data-hp-svg={namespace}>
         {component.title ? <div class="hp-svg-heading">{component.title}</div> : null}
         <style>{`${ownCss.css}\n${budget.css.join("\n")}`}</style>
         <svg viewBox={component.viewBox} width={component.width ?? "100%"} height={component.height ?? "auto"} preserveAspectRatio={component.preserveAspectRatio ?? "xMidYMid meet"} role={role} aria-label={component.ariaLabel} aria-labelledby={component.title ? titleId : undefined} aria-describedby={component.description ? descId : undefined}>
