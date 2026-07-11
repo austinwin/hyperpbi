@@ -22,6 +22,7 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 | Security | No user JavaScript, sanitized HTML, scoped CSS |
 | Packaging | Core and Maps profiles |
 <img width="1380" height="785" alt="image" src="https://github.com/user-attachments/assets/77d7f490-3b5a-46a2-be62-1420b8741e4e" />  
+<img width="1422" height="790" alt="image" src="https://github.com/user-attachments/assets/2c2a5e1b-0e81-4dff-a0f5-09f08ec25e1b" />  
 
 <img width="1406" height="644" alt="image" src="https://github.com/user-attachments/assets/c4f2cd54-c0e1-4999-9c47-adb05c743858" />  
 
