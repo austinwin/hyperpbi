@@ -27,12 +27,12 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 
 <img width="1288" height="742" alt="image" src="https://github.com/user-attachments/assets/2856696d-9c31-4a99-a30c-836a946f369c" />  
 
-<img width="1389" height="705" alt="image" src="https://github.com/user-attachments/assets/0321292d-6da9-4c77-9a6e-6c6dc31284f7" />  
 
 <img width="1383" height="729" alt="image" src="https://github.com/user-attachments/assets/056d3f2a-eb89-4d0c-8607-11cf3d444464" />  
 
+<img width="1504" height="858" alt="image" src="https://github.com/user-attachments/assets/58fd1877-1473-40b0-a4bc-853f5542c101" />
 
-<img width="1405" height="783" alt="image" src="https://github.com/user-attachments/assets/c7799f63-e0a6-4d8a-8e4a-cd8bb842e690" />  
+<img width="1412" height="773" alt="image" src="https://github.com/user-attachments/assets/e0ff4f25-b42b-4f37-b030-dbf4010ddc55" />
 
 
 <img width="1453" height="732" alt="image" src="https://github.com/user-attachments/assets/cf897e7c-fc66-4f46-9b86-3f623c0cc2d9" />  
@@ -41,9 +41,7 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 
 <img width="1185" height="811" alt="image" src="https://github.com/user-attachments/assets/336fe490-ad1a-4293-9908-001c4a3e0a44" />
 
-<img width="1504" height="858" alt="image" src="https://github.com/user-attachments/assets/58fd1877-1473-40b0-a4bc-853f5542c101" />
 
-<img width="1412" height="773" alt="image" src="https://github.com/user-attachments/assets/e0ff4f25-b42b-4f37-b030-dbf4010ddc55" />
 
 
 
