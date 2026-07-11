@@ -39,7 +39,7 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 
 <img width="1404" height="796" alt="image" src="https://github.com/user-attachments/assets/3152f582-374c-4f2d-91d8-ab4bfdaf9886" />  
 
-<img width="829" height="808" alt="image" src="https://github.com/user-attachments/assets/c0262aaf-fb2f-4e90-a8da-71bbacd3f519" />
+<img width="1185" height="811" alt="image" src="https://github.com/user-attachments/assets/336fe490-ad1a-4293-9908-001c4a3e0a44" />
 
 
 
