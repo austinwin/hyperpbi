@@ -1,113 +1,132 @@
-# HyperPBI AI Authoring
+# AI authoring in HyperPBI
 
-## Prompt Composition
+HyperPBI is a prompt builder, validator, and renderer. It does not call an AI API, store an AI key, or send data automatically. A user reviews and copies a generated prompt to an externally approved AI, then pastes one response back into Studio.
 
-Generated prompts contain only relevant modules:
+## Prompt jobs and output contracts
 
-- SVG grammar is included only for SVG, animation, illustration, diagram, pictorial, gauge, pipeline, schematic, or moving-marker intent.
-- AI guidance prefers declarative `type: "svg"`, approved presets, field aliases, bounded repeats, stable interactive IDs, and `ariaLabel`.
-- Raw `svgMarkup` is not recommended unless the request explicitly needs raw SVG; JavaScript, events, external resources, `foreignObject`, and external libraries are always forbidden.
-- Semantic field manifest (stable aliases, types, roles, formats, source capabilities, privacy-aware profiles)
-- Privacy-selected sample rows
-- Visual dimensions
-- Relevant components and application patterns
-- Application-shell contract
-- UI-action contract
-- Overlay contract
-- Table contract
-- Map contract
-- Security contract
-- Exact version 2.0 output contract
+| Job | Context included | Required AI output |
+|---|---|---|
+| Create dashboard | Goal, viewport, Field Manifest, relevant modules | One complete 2.0 specification |
+| Improve current dashboard | Current complete JSON plus intent | One complete updated specification; preserve version/IDs/unrelated behavior |
+| Add section | Intent and insertion context | One validated section package with an explicit insertion target |
+| Redesign selected section | Selected stable ID and intent | One replacement component/section using the same ID |
+| Repair invalid JSON | Invalid JSON/fragment and structured diagnostics | One complete corrected specification; no JSON Patch |
 
-Prompt jobs are **Create dashboard**, **Improve current dashboard**, **Add section**, **Redesign selected section**, and **Repair invalid JSON**. Improve jobs include the complete current specification and require one complete updated specification with unrelated behavior and stable IDs preserved. Generic JSON Patch is not the default workflow.
+Create defaults to version 2.0. Improvement preserves the current schema version, including 1.0, unless intentional migration is requested. Normal improvement and repair jobs never ask for JSON Patch.
 
-The prompt always states: “Any component type, property, action, dataset operation, pattern, field alias, or design token not listed in this prompt is invalid.” Map and advanced-chart rules are omitted unless requested.
+## Prompt composition
 
-## Field aliases
+`promptComposer.ts` builds a modular prompt instead of dumping the complete product documentation:
 
-Use the supplied `alias` in version 2.0 JSON. Aliases are generated from the underlying Power BI table and column metadata, remain stable when field order changes, qualify collisions with the source table, and use a stable hash only for remaining collisions. The manifest distinguishes true model measures from model columns summarized by the current visual query through `kind`, `queryAggregation`, and `isImplicitAggregation`. Existing normalized and unambiguous legacy wrapper keys still resolve for version 1.0 compatibility. Types-only and restricted privacy modes never expose raw examples.
+- root 2.0/output contract
+- user goal, audience, decisions, entity, application type, layout, viewport, device priority, and required sections/filters/KPIs
+- Field Manifest under the selected privacy mode
+- logical dataset language only when calculations/grouping/dataset intent makes it relevant
+- application patterns recommended from available semantic field roles
+- a relevant subset of component types with validator-derived required/allowed properties
+- design-system guidance
+- interaction/security modules
+- conditional map, table, chart, advanced-chart, and SVG modules
+- complete current specification for improvement
+- selected stable ID for section redesign
+- structured diagnostics for repair
 
-For logical datasets, generated names (`derive`, rename targets, and metric keys) remain exactly as authored. Components may reference them only when their selected dataset exposes them. Do not use derived or metric fields as direct Power BI external-filter targets; use selection/highlight or a retained group-by/model column.
+The relevant component set always includes foundational layout/display types and expands from the requested features. SVG guidance is selected from explicit SVG/animation/diagram/schematic intent; `svgMarkup` remains an explicit advanced fallback.
 
-## Application patterns
+Prompt quality checks verify that field aliases, goal, components, JSON-only output, JavaScript prohibition, version contract, needed dataset language, conditional map policy, interaction/security rules, and improvement-only current JSON are present.
 
-- `kpi-row` — a responsive row of KPI components
-- `trend-and-breakdown` — coordinated trend and category charts
-- `record-explorer` — searchable table and selected-record detail panel
-- `map-and-details` — map and selected-location details
+## Field Manifest
 
-Patterns compile to existing first-class components. They do not add a second runtime or bypass validation.
+Each manifest entry can include:
 
-## Choosing an Application Shell
+- `alias`: authoring key
+- canonical `key`
+- display/query/source table/source column/qualified names
+- dimension/measure/schema type and `kind`
+- data type, format, roles, and semantic role
+- default aggregation
+- `queryAggregation` and `isImplicitAggregation`
+- origin
+- identity-selection and external-filter capability
+- privacy-controlled data profile
 
-- Use `app` for a true full-page or large dashboard (>1100px)
-- Avoid in small embedded tiles (<600px)
-- Use compact page header without sidebar for medium views (600-800px)
-- Use offcanvas on narrow views instead of permanent sidebar
-- Never emulate the app shell using giant custom HTML/CSS
+Aliases are deterministic camel-case identifiers. Collisions are table-qualified, then stably suffixed if still ambiguous. Explicit overrides must match `^[A-Za-z][A-Za-z0-9]*$` and remain unique.
 
-## Choosing First-Class Components
+### Privacy modes
 
-Prefer first-class components over custom HTML:
+The configured modes are `samples`, `masked`, `summary`, `fields`, and `types`. The manifest builder delegates profiles to the privacy mode, while field/type metadata remains available for safe binding. Select only the fields needed for the task. Treat sample-bearing modes as a deliberate disclosure choice.
 
-| Need | Prefer |
-|------|--------|
-| Container | `card` |
-| Record list | `listGroup` |
-| Detail layout | `dataGrid` |
-| Menu | `dropdown` |
-| Dialog | `modal` |
-| Slide-over | `offcanvas` |
-| Empty data | `emptyState` |
-| Loading | `placeholder` or `spinner` |
-| Input | First-class form component |
+The prompt is local until copied. HyperPBI does not control the receiving AI service; organizational data-handling policy still applies.
 
-Prefer semantic `comboChart`, `waterfallChart`, `sankeyChart`, `treemapChart`, `funnelChart`, and `radarChart` components when they match the request. Use `advancedChart` only for uncommon ECharts configurations, and never override generated semantic data through `options`.
+## 2.0 concepts exposed to AI
 
-Every overlay needs an explicit unique ID. Use dropdown for commands, popover for contextual interactive content, offcanvas for persistent details or filters, and modal only for focused blocking tasks.
+The generated prompt describes:
 
-## Action Selection
+- strict root/component properties and stable IDs
+- aliases and field origin
+- named datasets and exact operation order
+- reusable definitions
+- the four registered application patterns
+- component-selected datasets
+- semantic charts and safe presentation options
+- native tables/matrix
+- map/provider constraints
+- governed declarative SVG
+- the three independent interaction systems
+- root `app`, overlays, and UI actions
+- security boundaries
 
-- Need to open a modal? → `uiAction: { type: "openOverlay" }`
-- Need to change a tab? → `uiAction: { type: "setTab" }`
-- Need to show a toast? → `uiAction: { type: "showToast" }`
-- Need to filter HyperPBI data? → `interaction.internalMode: "filter"`
-- Need to select Power BI identities? → `interaction.externalMode: "selection"`
-- Need to resolve a repeated custom row? → `interactions` + `interaction`
+Any type/property/action/dataset operation/pattern/alias/token not listed in the generated prompt is invalid for that job.
 
-## Map Generation Rules
+## Current-spec and selected-section behavior
 
-- Always prefer stable Power BI lat/lon/geometry maps by default
-- Only generate ArcGIS layers when the user explicitly provides a verified public HTTPS service URL, layer ID, and real fields
-- Never invent ArcGIS service URLs, layer IDs, join fields, or tokens
-- Never include credentials in any form
-- Practical ArcGIS feature/reference and Power BI join layers, viewport queries, tiles, basic dynamic images, labels, tooltips/popups, selection, layer controls, legends, Home, and Zoom to Selection are supported
-- Use `[latitude, longitude]` for map centers and output SR 4326; do not generate authentication, editing, 3D, relationship/tracing, density-grid, advanced-collision, or non-4326 configurations
+Improve prompts include the complete current specification and explicitly require a complete updated object. The AI must preserve stable IDs for unchanged components and retain unrelated content.
 
-## Sharing Component Properties
+Redesign prompts include the selected component ID and request one replacement using that ID. The importer/inspector then validates the complete specification after insertion; a fragment is never treated as a standalone saved dashboard.
 
-All components share: `type`, `id`, `title`, `subtitle`, `span`, `className`, `hidden`, `style`, `css`, `slots`, `interaction`, `interactions`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`.
+Add-section output is intentionally different from a complete-dashboard response: it must name an insertion target so Studio does not guess where the new section belongs.
 
-## Style Guidance
+## Safe response extraction
 
-- Use compact enterprise spacing
-- Restrained colors; avoid rainbow palettes
-- Strong hierarchy: header → KPI → filter → chart → detail
-- Responsive 12-column spans
-- No fixed widths that overflow
-- Use theme tokens rather than hardcoded colors
-- Prefer `styles.globalCss` for visual-wide design
+The importer:
 
-## Common Mistakes
+1. removes a UTF-8 BOM and surrounding whitespace
+2. accepts one direct JSON object
+3. accepts one fenced JSON block
+4. when prose surrounds the response, scans balanced quoted/braced objects
+5. accepts exactly one parseable object
+6. unwraps an optional `{specification, config}` export package, parsing string values when necessary
+7. returns canonical pretty JSON
 
-- Inventing fields instead of using supplied aliases
-- Using display names as field references
-- Omitting component `id`
-- Putting comments in JSON
-- Using spacious toy styling for enterprise dashboards
-- Generating a full app shell for a small tile
-- Using custom HTML where first-class components exist
-- Inventing ArcGIS service URLs
-- Including tokens or credentials
-- Forgetting `interaction` on interactive components
-- Using deprecated `internal`, `external`, `selectable` properties
+An array/primitive, multiple candidate objects, multiple ambiguous fences, truncation/unbalanced quotes, comments, or smart quotes produces diagnostics. The extractor does not silently rewrite those forms.
+
+## Validation and preparation
+
+The AI response passes preparation, dataset schemas, strict schema validation, calculation validation, and reference validation. Structured diagnostics retain code, severity, JSON path, optional component ID, received value, suggestions, and auto-fix availability.
+
+The last valid saved specification remains intact when import/preview fails.
+
+## Bounded automatic repairs
+
+Preparation may:
+
+- add version 2.0 when an unversioned object clearly has a components array
+- generate missing 2.0 component IDs during import
+- correct `meausre`, `catgory`, `componets`, and `aggregration`
+- convert numeric strings for bounded numeric properties
+
+It will not:
+
+- repair comments, smart quotes, truncation, or multiple objects
+- guess an alias/model field
+- change aggregation or business logic
+- invent/delete components
+- remove unknown content simply to make validation pass
+- weaken sanitizers or host policy
+- migrate 1.0 to 2.0 without intent
+
+## Repair prompt
+
+The repair prompt includes structured diagnostics, warnings, a types-only Field Manifest, relevant affected IDs, registered patterns, the invalid JSON/fragment, and a version-preservation rule. The response must be one complete corrected object and must preserve valid unrelated content.
+
+See [Repair workflow](repair-workflow.md), [ChatGPT guideline](chatgpt-guideline.md), and the generated [AI skill](hyperpbi-ai-skill.md).

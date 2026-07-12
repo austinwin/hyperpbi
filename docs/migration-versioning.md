@@ -1,7 +1,55 @@
-# Versioning and migration
+# Migration and versioning
 
-HyperPBI 1.0 remains supported with its lenient component property handling, normalized field keys, legacy tab child names, legacy drawers/steppers, table engine normalization, calculations, interactions, maps, and persisted Power BI state.
+HyperPBI supports two dashboard schema versions. Version 2.0 is the default for new authoring; version 1.0 remains a legitimate compatibility format.
 
-Use 2.0 for new AI-authored dashboards. It adds strict properties, field aliases, named datasets, reusable definitions, design-system references, and application patterns. The preparation pipeline detects the version, applies supported legacy migrations, expands definitions and patterns, evaluates datasets, validates references/security, and then renders with the existing component engine.
+## Version 2.0
 
-Migration is explicit when ambiguity exists. HyperPBI does not silently reinterpret fields or business logic. To upgrade an existing dashboard, use an **Improve current dashboard** prompt and request an intentional 2.0 migration; otherwise improvement prompts preserve the current schema version.
+Version 2.0 adds strict unknown-property handling, stable global component IDs, Field Manifest aliases, named logical datasets, reusable definitions, registered application patterns, component dataset scope, structured diagnostics, and a bounded repair workflow.
+
+New authoring starts with:
+
+```json
+{
+  "version": "2.0",
+  "components": []
+}
+```
+
+## Version 1.0 compatibility
+
+Existing 1.0 dashboards can continue using canonical normalized runtime keys and lenient component properties. Compatibility migrations include:
+
+- tabs using `components` or `content` instead of `children`
+- accordion components with children but no item array
+- drawer/filterDrawer behavior
+- stepper compatibility rendering
+- button/buttonGroup `action` and `actionValue`
+- `table.engine: "tabulator"` normalized to the supported native table
+- legacy map `settings`, `style`, and `popup`
+- deprecated component `internal`, `external`, `selectable`, and table `selectionMode`
+
+These references should be labeled compatibility/history. They are not the primary 2.0 examples.
+
+## Preparation behavior
+
+An object without a version is assigned 1.0 by the legacy migration layer, except the bounded import repair may first add 2.0 when a components-array shape is unambiguous. Existing declared versions are preserved.
+
+For 1.0, legacy field references are migrated against the current normalized data. For 2.0, aliases resolve during preparation and unknown properties/fields are errors.
+
+Definitions and patterns expand before rendering; datasets are schema-resolved; fields are validated in dataset scope; and the prepared runtime schema still uses the existing renderer.
+
+## Improvement versus migration
+
+An Improve current dashboard prompt preserves the existing version. A repair prompt also preserves a detected/declared version. This avoids silently changing field semantics, IDs, or lenient legacy properties.
+
+An intentional 1.0 → 2.0 migration should:
+
+1. capture the Field Manifest and replace legacy references with supplied aliases
+2. assign and review stable unique IDs
+3. replace deprecated interaction flags with `interaction`
+4. normalize tabs, accordion, table, drawer/stepper, and map compatibility forms where desired
+5. remove properties not allowed by the strict per-type validator
+6. introduce datasets/definitions/patterns only when they preserve behavior
+7. validate the complete migrated specification and manually compare interactions/output
+
+Never infer a field mapping or business aggregation merely to satisfy strict validation.

@@ -1,169 +1,258 @@
-# HyperPBI Specification Reference
+# HyperPBI specification reference
 
-Reference for strict HyperPBI 2.0 authoring and compatible HyperPBI 1.0 dashboard specifications.
+This reference describes the implemented HyperPBI 2.0 authoring contract and the intentionally preserved HyperPBI 1.0 compatibility path. Runtime implementation and validators are authoritative.
 
-Version 2.0 rejects unknown properties and requires stable component IDs. Version 1.0 remains lenient and supports normalized/legacy field keys. Both use the same renderer; patterns and definitions are compiled before rendering.
-
-## SVG components
-
-`svg` requires `viewBox` and `elements`; optional properties include width, height, preserveAspectRatio, role, ariaLabel, description, dataContext, motion, performance, and scoped CSS. `svgMarkup` requires raw `svg` text and uses the dedicated sanitizer. The complete element/attribute, binding, animation, repeat, security, and limit reference is in [SVG visuals](svg-visuals.md).
-
-## Root Document
-
-| Key | Required | Type | Description |
-|-----|----------|------|-------------|
-| `version` | Yes | `"2.0"` or compatible `"1.0"` | Schema version |
-| `data.datasets` | No | object | Named logical datasets derived from the Power BI data view |
-| `definitions` | No | object | Reusable component defaults |
-| `title` | No | string | Dashboard title (max 200 chars) |
-| `theme` | No | object | Theme configuration |
-| `layout` | No | object | Legacy layout configuration |
-| `state` | No | object | Initial state (search, activeTab, filters) |
-| `app` | No | object | Application shell configuration |
-| `toolbar` | No | array | Toolbar components (max 100) |
-| `leftPanel` | No | array | Left panel components (max 200) |
-| `rightPanel` | No | array | Right panel components (max 200) |
-| `components` | Yes | array | Dashboard components (max 500) |
-| `calculations` | No | object | Calculation specification |
-| `styles` | No | object | Global style system |
-| `css` | No | string | Deprecated global CSS (max 100k chars) |
-
-## Theme
-
-| Key | Type | Default |
-|-----|------|---------|
-| `mode` | `"light"` \| `"dark"` \| `"auto"` | `"light"` |
-| `density` | `"compact"` \| `"normal"` \| `"spacious"` | `"normal"` |
-| `fontFamily` | string | System font |
-| `primaryColor` | string | `#206bc4` |
-| `surfaceColor` | string | `#ffffff` |
-| `textColor` | string | `#182433` |
-| `borderColor` | string | `#dce1e7` |
-| `radius` | number | `6` |
-| `cardPadding` | number | `12` |
-| `gap` | number | `12` |
-
-## Application Shell
-
-See `src/schema/uiSchema.ts` for the complete `AppShellConfig` interface.
-
-**Brand:** `title`, `subtitle`, `icon`, `shortTitle`
-**Navbar:** `visible`, `showSidebarToggle`, `showSearch`, `actions[]`, `user`, `notifications`
-**Sidebar:** `visible`, `width`, `collapsedWidth`, `collapsible`, `defaultCollapsed`, `navigation[]`, `footer`
-**Page Header:** `visible`, `title`, `subtitle`, `breadcrumbs[]`, `meta[]`, `actions[]`
-**Footer:** `visible`, `text`, `secondaryText`
-
-## Shared Component Properties
-
-All components support:
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `type` | string | Component type (required) |
-| `id` | string | Unique stable ID |
-| `dataset` | string | Named logical dataset; omitted uses Power BI data view |
-| `title` | string | Display title |
-| `subtitle` | string | Secondary text |
-| `span` | 1-12 | Grid column span |
-| `className` | string | CSS class |
-| `hidden` | boolean | Hide component |
-| `style` | object | Inline CSS (sanitized) |
-| `css` | string | Scoped CSS |
-| `slots` | object | Named HTML slot overrides |
-| `interaction` | object | Universal data interaction |
-| `interactions` | object | Safe custom interactions |
-| `ariaLabel` | string | Accessible label |
-| `icon` | string | Icon from bundled registry |
-| `variant` | string | UI variant |
-| `size` | string | UI size (xs/sm/md/lg) |
-| `disabled` | boolean | Disabled state |
-| `tooltip` | object | Tooltip definition |
-| `uiAction` | object/array | UI action(s) |
-
-Three independent behavior systems:
-- **`interactions`** — safe custom event-to-data payloads
-- **`interaction`** — universal Power BI data policy
-- **`uiAction`** — interface/navigation/overlay behavior
-
-## UI Actions
-
-| Action | Required | Description |
-|--------|----------|-------------|
-| `clearFilters` | — | Clear all HyperPBI filters |
-| `setTab` | target, value | Set active tab |
-| `setState` | target, value | Set state value |
-| `toggleState` | target | Toggle Boolean state |
-| `toggleSidebar` | — | Toggle sidebar collapse |
-| `openOverlay` | target | Open overlay |
-| `closeOverlay` | target | Close overlay |
-| `toggleOverlay` | target | Toggle overlay |
-| `setStep` | target, value | Set active step |
-| `nextStep` | target | Advance step |
-| `previousStep` | target | Reverse step |
-| `showToast` | message, title?, intent?, durationMs? | Show toast (1-30s) |
-| `dismissToast` | target (toast ID) | Dismiss toast |
-| `scrollTo` | target (component ID) | Scroll to component |
-| `refresh` | — | Safe no-op |
-
-## Universal Data Interaction
+## Root object and version behavior
 
 ```json
 {
-  "interaction": {
-    "enabled": true,
-    "trigger": "auto",
-    "internalMode": "highlight",
-    "internalScope": "self",
-    "externalMode": "auto",
-    "field": "__field_key__",
-    "operator": "=",
-    "selectionMode": "replace",
-    "multiSelect": true,
-    "showSelector": false,
-    "clearOnSecondClick": true
-  }
+  "version": "2.0",
+  "title": "Operations",
+  "theme": { "mode": "light", "density": "compact" },
+  "app": { "enabled": true },
+  "data": { "datasets": {} },
+  "definitions": {},
+  "components": []
 }
 ```
 
-## Containers
+| Property | 2.0 type | Notes |
+|---|---|---|
+| `version` | literal `"2.0"` | Required for strict 2.0 validation |
+| `components` | component array | Required; may be empty |
+| `title` | string | Optional dashboard title |
+| `theme` | object | Theme tokens below |
+| `layout` | object | Root grid/flex/split hints |
+| `state` | object | Initial `search`, `activeTab`, and `filters` compatibility state |
+| `app` | object | Root application shell; never `schema.app` |
+| `toolbar`, `leftPanel`, `rightPanel` | component arrays | Root regions; panels are also compatibility surfaces |
+| `css` | string | Sanitized visual-wide CSS |
+| `styles` | object | Global and type/ID component styles |
+| `calculations` | object | Root calculated fields and metrics |
+| `data` | object | Only `datasets` is allowed |
+| `definitions` | named object | Reusable authoring fragments |
 
-Layout types: `grid`, `flex`, `split`, `section`, `toolbar`, `leftPanel`, `rightPanel`. All support `children`, `direction`, `gap`, `columns`.
+Version 2.0 rejects unknown root properties and unknown properties on a component. Unknown dataset-definition properties are also errors. Version 1.0 uses the legacy validator and intentionally remains more lenient; compatibility diagnostics may warn without making a previously valid dashboard unusable.
+
+The package version in `pbiviz.json` is unrelated to this schema version.
+
+## Theme and style system
+
+`theme` accepts:
+
+- `mode: light|dark|auto`
+- `density: compact|normal|spacious`
+- `fontFamily`
+- `primaryColor`, `accentColor`, `surfaceColor`, `textColor`, `borderColor`
+- `dangerColor`, `warningColor`, `successColor`
+- numeric `radius`, `cardPadding`, `gap`
+
+`styles.globalCss` is sanitized visual-wide CSS. `styles.components` is a record keyed by `*`, a component type, or `#component_id`; each entry may contain `className`, `style`, and `css`. Component-local style wins. CSS is parsed, allowlisted, and scoped; it is not an arbitrary browser stylesheet.
+
+During authoring, `app.designSystem` may reference a registered design preset. Preparation merges its theme/style defaults, lets explicit authoring values win, and removes `designSystem` before strict runtime validation. Unknown presets are errors.
+
+## Root layout, shell, and state
+
+`layout.type` is `grid|flex|split`; optional `columns` and `gap` are numeric. `layout.leftPanel` can set `width`, `collapsible`, and `defaultCollapsed`; `layout.main` can set `type: grid|flex`, `columns`, and `gap`.
+
+`app` supports:
+
+- `enabled`
+- `layout: vertical|horizontal`
+- `container: fluid|boxed`
+- `density: compact|normal`
+- `stickyHeader`
+- `contentPadding: none|compact|normal`
+- `brand`: required `title`; optional `subtitle`, `icon`, `shortTitle`
+- `navbar`: visibility, sidebar toggle, search, actions, user, notifications
+- `sidebar`: visibility, width, collapsed width, collapse settings, mobile breakpoint, navigation, footer
+- `pageHeader`: visibility, title/subtitle, breadcrumbs, actions, metadata
+- `footer`: visibility and primary/secondary text
+
+Navigation/action items use declarative `uiAction`; they never execute code or navigate arbitrary URLs. A permanent sidebar should be used only when the visual viewport can support it. Overlays/offcanvas are safer for narrow tiles.
+
+Runtime state tracks tabs, steps, sidebar state, component values, overlays/toasts, selected source rows/keys, per-component selections, highlights, and interaction filters. Stable IDs are therefore part of the behavior contract.
+
+## Field references and origin
+
+New 2.0 authoring uses Field Manifest aliases. Preparation resolves them to canonical runtime keys. Aliases match `^[A-Za-z][A-Za-z0-9]*$`, are deterministically derived from display/source metadata, qualify collisions with the source table, and use a stable suffix only for remaining collisions.
+
+Field metadata distinguishes:
+
+- `key`: canonical runtime key
+- `alias`: AI-facing key
+- `displayName`
+- `queryName`, `qualifiedName`
+- `sourceTable`, `sourceColumn`
+- `kind: column|measure|unknown`
+- `queryAggregation`
+- `isImplicitAggregation`
+- `origin: powerbi-column|powerbi-measure|dataset-group|dataset-derived|dataset-metric`
+- semantic role, data type, format, bound roles, and default aggregation
+- identity-selection and external-filter support
+
+A query wrapper such as `Sum(Sales.Amount)` has `queryAggregation: "sum"` and `isImplicitAggregation: true` when it wraps a model column. It is not a true model measure. External filters require a column plus `sourceTable` and `sourceColumn`. Identity selection instead uses Power BI selection identities/source-row lineage.
+
+## Logical datasets
+
+`data.datasets` is a named object. Every definition requires a nonblank `source` of `powerbi` or another named dataset. Allowed operations are `filter`, `derive`, `rename`, `select`, `groupBy`, `metrics`, `distinct`, `sort`, and `limit`.
+
+After resolving the source chain, runtime and static-schema order is:
+
+1. filter
+2. derive
+3. rename
+4. select
+5. groupBy and metrics
+6. distinct
+7. sort
+8. limit
+
+See [Data model](data-model.md) for exact contracts, lineage, caching, and zero-row behavior.
+
+## Definitions
+
+`definitions` maps a name to a component fragment. An instance supplies `use: "name"` and its own `id`.
+
+- Object properties merge recursively.
+- Instance values override definition values.
+- Arrays are replaced, not concatenated.
+- A definition may inherit another definition with `use`.
+- Definition IDs are removed so an instance cannot inherit an identity.
+- Unknown references and cycles are errors.
+
+Expansion occurs before strict component validation. `use` is therefore an authoring property, not a runtime component property.
+
+## Application patterns
+
+Patterns have `type: "pattern"`, a `pattern` name, a stable `id`, and pattern-specific fields. They expand before strict component validation and derive child IDs from the pattern ID.
+
+| Pattern | Required | Optional |
+|---|---|---|
+| `kpi-row` | `id`, `fields` | `title`, `dataset`, `variant`, `span` |
+| `trend-and-breakdown` | `id`, `date`, `measure`, `breakdown` | `title`, `dataset`, `aggregation` |
+| `record-explorer` | `id`, `columns`, `details` | `title`, `dataset`, `pageSize` |
+| `map-and-details` | `id` | `title`, `dataset`, `height`, `details` |
+
+Unknown patterns and missing required values produce structured diagnostics.
+
+## Calculations
+
+Root `calculations.fields` defines typed row-level outputs with `key`, optional `label`, `type: number|text|boolean|date`, and a safe expression. Root `calculations.metrics` defines dashboard aggregates using `count`, `countWhere`, `sum`, `sumWhere`, `avg`, `avgWhere`, `min`, `max`, `distinctCount`, `ratio`, or `percentOfTotal`.
+
+At runtime, root calculated fields are applied before render-time logical dataset evaluation; root metrics are recomputed over currently filtered rows. However, strict preparation builds field/dataset schemas before those calculated fields are applied. New 2.0 component/dataset bindings should therefore use dataset `derive`/`metrics`; root metrics are consumed through `metricGrid.metrics[].metric` or the `metric` template namespace. See [Calculations DSL](calculations-dsl.md).
+
+## Shared component contract
+
+Every 2.0 component requires:
+
+- `type`: a canonical type
+- `id`: globally unique; `^[A-Za-z][A-Za-z0-9_-]{0,99}$`
+
+Shared allowed properties are `type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, and `uiAction`.
+
+`span`, when supplied, is numeric from 1 through 12. `title`, `subtitle`, `dataset`, and `ariaLabel` must be strings; `hidden` must be Boolean. A component inherits its ancestor dataset unless it names another dataset. Unknown datasets and fields outside the selected dataset schema are errors.
+
+Exact per-type required/allowed properties, status, capabilities, accessibility notes, compatibility, and examples are generated in the [component catalog](hyperpbi-component-catalog-reference.md). Do not maintain a second handwritten list.
+
+## Interaction systems
+
+### UI actions
+
+`uiAction` is one action or an array. Types are:
+
+- `clearFilters`
+- `setTab` (`target`, `value`)
+- `setState` (`target`, `value`)
+- `toggleState` (`target`)
+- `toggleSidebar`
+- `openOverlay`, `closeOverlay`, `toggleOverlay` (`target`)
+- `setStep` (`target`, `value`), `nextStep`, `previousStep` (`target`)
+- `showToast` (`message`; optional `title`, `intent`, `durationMs`)
+- `dismissToast` (`target`)
+- `scrollTo` (`target`)
+- `refresh` (successful safe no-op; Power BI owns refresh)
+
+Toast duration is persistent when omitted/zero; otherwise runtime clamps it to 1,000–30,000 ms.
+
+### Universal data interaction
+
+`interaction` allows:
+
+- `enabled`
+- `trigger: auto|click|change`
+- `internalMode: none|highlight|filter`
+- `internalScope: self|others|all`
+- `externalMode: none|auto|selection|filter`
+- `field`, `value`
+- `operator: =|!=|>|>=|<|<=|contains|in|between`
+- `selectionMode: replace|toggle|add`
+- `multiSelect`, `showSelector`, `clearOnSecondClick`
+
+It is optional. `auto` trigger resolves to change for controls and click otherwise. `auto` external mode resolves to filter for controls and selection for data-point/custom components.
+
+### Safe event-specific interactions
+
+`interactions` maps a supported event such as custom-content `onClick` to an allowlisted action: `selectRow`, `selectWhere`, `clearSelection`, `setFilter`, `clearFilter`, `setState`, `toggleState`, `openTab`, `toggleCollapse`, `drillToDetail`, `highlight`, or `clearHighlight`. Conditions use safe expression objects; no handler code is accepted.
+
+See [Interactions](interactions.md) for origin/lineage restrictions.
 
 ## Overlays
 
-- **`modal`**: title, children, footer, size (sm/md/lg), backdropClose. Rendered by root OverlayHost.
-- **`offcanvas`**: explicit id, title, children, position (left/right), width, openWhen (always/selectedRow/state), backdrop. Root-hosted with focus management.
-- **`dropdown`**: explicit id, trigger, items (with dividers, disabled, actions/interactions and one nested level), placement. Keyboard-accessible and viewport-aware.
-- **`popover`**: explicit id, trigger, children, typed placement, width and arrow controls. Use for contextual interactive content.
+`dropdown`, `popover`, `modal`, `offcanvas`, and compatibility drawers render through the root overlay host. Each requires a stable ID. UI actions must target an existing overlay ID. Dropdown/popover positioning is viewport-aware; modal/offcanvas support focus and dismissal behavior. Do not simulate overlays with fixed-position custom HTML (fixed positioning is blocked by scoped CSS policy).
 
-Overlay targets must match component IDs. Opening a modal closes open dropdowns/popovers.
+## Charts
 
-Prefer semantic `comboChart`, `waterfallChart`, `sankeyChart`, `treemapChart`, `funnelChart`, and `radarChart` components when applicable. Use `advancedChart` only for uncommon configurations. Semantic chart `options` are presentation-only and cannot replace generated data, links, nodes, transforms, encodings, series types, or series counts.
+Semantic chart bindings are schema properties: category/measure, x/y, series, source/target, path fields, group/indicators, or nested chart depending on the type. Aggregation enum is `sum|avg|min|max|count|distinctCount|countWhere|first` where component metadata allows it.
 
-## Forms
+Safe ECharts `options` may adjust presentation. Functions, URL-bearing keys, executable strings, and unsupported series types are removed. On semantic charts, options cannot replace datasets/transforms, generated axis data/type, semantic series data/type/links/nodes/encode/transform/dimensions, radar indicators, or series counts. `advancedChart` permits broader sanitized JSON options but still no functions or unsafe URLs.
 
-`textarea`, `checkbox`, `checkboxGroup`, `radioGroup`, `inputGroup`. Shared properties: `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, prefix/suffix.
+## Tables and matrix
 
-## Tables
+`table` accepts native columns, pagination, page size, search, column resizing, maximum rows, sticky header, compact/normal density, stripes, hover, row count, page-size choices, row actions, and an empty state. Columns can specify field/title/width/format/alignment, conditions, sorting, resizing, visibility, wrapping, freezing, text/badge/progress cell type, and intent mapping.
 
-Native table properties: `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`. Column properties: `sortable`, `resizable`, `visible`, `wrap`, `frozen`, `cellType`, `intentMap`. Tabulator is not bundled.
+`matrix` requires nonempty `rows` and `values`; it supports optional columns, totals, heatmap, and max rows. `engine: "tabulator"` is compatibility input normalized to native because Tabulator is not bundled.
 
 ## Maps
 
-See [map services documentation](map-services.md) for complete coverage. Legacy `settings`/`style`/`popup` remain supported and normalize into the resolved `layers[]` model.
+`map` uses Leaflet and accepts view, basemap, layers, search, legend, layer panel, toolbar, and height. Layer source types are `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`. Public ArcGIS requests require HTTPS, a permitted Maps package host, and no embedded credentials.
 
-- `view.center` is `[latitude, longitude]`; practical ArcGIS query output is SR 4326.
-- `layers[].source.type` supports `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`.
-- Feature sources support reference or Power BI join mode, definition expressions, explicit output fields, opt-in service renderer/labels, viewport queries, cache/feature/batch limits, and managed refresh intervals.
-- Tooltip definitions validate `enabled`, `template`, and `fields[]` (`field`, `fieldSource`, `label`, `format`). Tooltip configuration is not inferred from popup fields.
-- Layer panels support viewer visibility, opacity, labels, order, Reset, and inline diagnostics. Toolbar controls support Home, Layers, Legend, Clear Selection, and Zoom to Selection.
-- The practical runtime excludes secured authentication, editing, 3D, relationships, tracing, density grids, advanced label collision, and non-4326 output.
+Power BI geometry/location binding, joins, feature queries, tile layers, basic dynamic images, safe renderers/labels/popups/tooltips, layer controls, legend, search, Home, Clear Selection, and Zoom to Selection are implemented within the limits in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
 
-## Compatibility
+## SVG
 
-- Legacy `internal`/`external` → use `interaction.internalMode`/`interaction.externalMode`
-- Legacy `selectable`/`selectionMode` → use `interaction.showSelector`/`interaction.internalMode`
-- `drawer`/`filterDrawer` → supported; use `offcanvas` for new specs
-- `stepper` → supported; use `steps` for new workflows
-- `engine: "tabulator"` → normalized to native with warning
-- Legacy map properties → normalized to `layers[]` internally
+`svg` requires `viewBox` and `elements`; `svgMarkup` requires `svg`. Both accept size/aspect/role/description/dataContext/motion/performance. Structured SVG elements, binding forms, animation enums, repeat behavior, sanitizer rules, and exact limits are documented in [SVG visuals](svg-visuals.md).
+
+## Security restrictions
+
+HyperPBI JSON cannot provide JavaScript, functions, eval, event handlers, script/embed/iframe content, arbitrary network datasets, SQL, credentials, or AI keys. HTML, CSS, ECharts options, SVG, URLs, map hosts, and provider access each pass dedicated allowlists/policies. See [Security](security.md).
+
+## Preparation and diagnostics
+
+Preparation returns authoring JSON, a renderable schema only when no errors remain, structured diagnostics, text error/warning summaries, applied repair records, and resolved dataset schemas.
+
+Common diagnostic families include invalid/unknown properties, unsupported version/type/enum, missing required properties, duplicate/invalid IDs, unknown/ambiguous fields, unknown dataset/source, dataset/definition cycles, invalid dataset operations/collisions, nonnumeric fields, invalid interactions/targets, reference errors, and SVG dashboard limits.
+
+Automatic repairs are intentionally narrow:
+
+- add 2.0 when `components` makes the missing version unambiguous
+- generate missing 2.0 component IDs during import
+- correct `meausre→measure`, `catgory→category`, `componets→components`, `aggregration→aggregation`
+- convert numeric strings for `span`, `height`, `width`, `limit`, `pageSize`, `maxRows`, `columns`, and `gap`
+
+Comments, smart quotes, truncation, unknown types/fields, unsafe content, and ambiguous intent are not automatically repaired.
+
+## 1.0 compatibility and migrations
+
+HyperPBI 1.0 is valid compatibility/history material. The migration layer:
+
+- supplies version 1.0 when a legacy object omits a version
+- resolves legacy field references against current normalized data
+- normalizes tab `components`/`content` to `children`
+- wraps legacy accordion children into one item
+- preserves drawer/filterDrawer and stepper compatibility rendering
+- maps legacy button `action`/`actionValue` to `uiAction` while retaining the legacy properties
+- normalizes `table.engine: "tabulator"` to native
+- recursively migrates component regions and footer children
+
+Normal improvement jobs preserve the existing schema version. Migration to 2.0 must be intentional because strict properties, aliases, datasets, definitions, patterns, and stable-ID requirements can expose ambiguities that should not be guessed.

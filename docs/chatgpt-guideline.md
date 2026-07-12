@@ -1,132 +1,121 @@
-# ChatGPT Authoring Guideline
+# ChatGPT guideline for HyperPBI
 
-Use the self-contained prompt copied from the Guided Builder. Return exactly one complete JSON object using the requested schema version—normally `2.0`. Use only the field aliases, logical dataset operations, application patterns, components, properties, actions, and design tokens listed in that prompt. Do not return Markdown fences, explanation, JSON Patch, JavaScript, functions, credentials, or invented fields.
+Use the self-contained prompt copied from HyperPBI Studio. HyperPBI does not call ChatGPT or another AI internally; a user deliberately copies the prompt to an approved service and pastes the response back.
 
-For improvements, preserve stable IDs and unrelated working behavior and return the complete updated specification. For repairs, address the structured diagnostics without changing field choice, aggregation meaning, interactions, filters, or business logic unless the requested change explicitly requires it.
+## Output-only rules
 
-For custom SVG illustrations, prefer declarative `type: "svg"` and the allowlisted element, binding, repeat, interaction, and animation contracts in the generated prompt. Use ECharts components for standard analytical charts. Never emit JavaScript, event attributes, external URLs/libraries, `foreignObject`, external images, `use`, or unbounded repetition. Include an accessible label and a reduced-motion-safe final state.
+Return exactly the artifact requested by the prompt:
 
-Use this as a concise reference when generating HyperPBI dashboard JSON with ChatGPT or similar AI tools.
+- Create dashboard, Improve current dashboard, and Repair invalid JSON: one complete specification object
+- Add section: one section package with the requested insertion target
+- Redesign selected section: one replacement component/section using the selected stable ID
 
-## Output Format
+Return valid JSON only: no Markdown fence, explanation, comments, trailing commas, alternate versions, or JSON Patch for normal improvement/repair jobs. Never emit JavaScript, functions, callbacks, inline handlers, scripts, iframes, credentials, SQL, network datasets, or invented fields.
 
-Return exactly one valid JSON object. No markdown fences, no explanations, no comments.
-
-## Required Structure
+Use version 2.0 for new specifications:
 
 ```json
 {
-  "version": "1.0",
-  "title": "Dashboard Title",
+  "version": "2.0",
   "components": []
 }
 ```
 
-## Professional Application Shell (Optional)
+Version 2.0 rejects unknown root/component properties. Every component requires a globally unique stable ID. Preserve IDs and valid unrelated behavior when improving or repairing a dashboard.
 
-Use root `app` only when the visual is wide enough (1100+ px):
-```json
-{
-  "app": {
-    "enabled": true,
-    "layout": "vertical",
-    "container": "fluid",
-    "brand": { "title": "App Name" },
-    "navbar": { "visible": true },
-    "sidebar": {
-      "visible": true,
-      "collapsible": true,
-      "navigation": [
-        { "id": "overview", "label": "Overview", "icon": "dashboard",
-          "action": { "type": "setTab", "target": "main_tabs", "value": "overview" } }
-      ]
-    },
-    "pageHeader": { "visible": true, "title": "Page Title" }
-  }
-}
-```
+## Fields
 
-## Component Rules
+Use only aliases listed in `AVAILABLE FIELD ALIASES`. An alias is the AI-facing authoring key; it resolves to a canonical runtime key. Do not substitute a display name, guess a normalized key, or call `Sum(Table.Column)` a model measure. The Field Manifest states whether a field is a true model measure, an implicitly aggregated model column, or another origin.
 
-1. Every component needs a unique `id` and `interaction` object
-2. Use normalized field keys (lowercase, table-qualified)
-3. Prefer first-class components (`card`, `listGroup`, `dataGrid`, `modal`, `offcanvas`) over custom HTML
-4. Prefer first-class semantic charts, including combo, waterfall, Sankey, treemap, funnel, and radar; use `advancedChart` only when no semantic chart fits
-5. Require explicit unique IDs for every overlay. Use dropdown for commands, popover for contextual content, offcanvas for persistent details/filters, and modal for blocking tasks
-6. Never place JavaScript in ECharts options or override semantic chart data through `options`
-7. Use `uiAction` for interface behavior; `interaction` for data behavior
-8. Never use deprecated `internal`, `external`, `selectable` properties
+External Power BI filters require an alias for a real model column with source table/column metadata. Dataset-derived fields and dataset metrics cannot directly filter the semantic model. Identity selection can still work through source-row lineage.
 
-## UI Actions
+## Representative 2.0 response
 
-For interface behavior: `openOverlay`, `closeOverlay`, `setTab`, `showToast`, `setState`, `toggleSidebar`, `scrollTo`, `setStep`. `refresh` is a safe no-op.
-
-## Data Interactions
+This example assumes the prompt supplied aliases `status` and `amount`.
 
 ```json
 {
-  "interaction": {
-    "enabled": true,
-    "trigger": "auto",
-    "internalMode": "highlight",
-    "internalScope": "self",
-    "externalMode": "auto",
-    "selectionMode": "replace",
-    "multiSelect": true,
-    "showSelector": false,
-    "clearOnSecondClick": true
-  }
-}
-```
-
-## Maps
-
-- Use stable Power BI spatial maps by default (lat/lon, geometry)
-- Never invent ArcGIS service URLs, layer IDs, or tokens
-- Practical public ArcGIS feature/join, viewport, tile, basic dynamic, label, tooltip/popup, selection, layer-control, legend, Home, and Zoom-to-Selection behavior is supported; use only verified HTTPS resources and output SR 4326
-
-## Tables
-
-- Tabulator is not bundled; native table is the engine
-- Enhanced properties: `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`
-
-## Security
-
-- No JavaScript, functions, eval, event handlers, scripts, iframes
-- No credentials or tokens anywhere in JSON
-- HTML is sanitized; CSS is allowlisted and scoped
-- Only HTTPS for external services (Maps build only)
-
-## Responsive Sizing
-
-- 12-column grid system via component `span`
-- Below 700px: avoid permanent sidebar; use offcanvas
-- Small tiles: compact cards, one primary analysis path
-- No fixed pixel widths that overflow
-
-## Minimal Example
-
-```json
-{
-  "version": "1.0",
-  "title": "Summary Dashboard",
-  "theme": { "mode": "light", "density": "compact" },
+  "version": "2.0",
+  "title": "Operations by status",
+  "data": {
+    "datasets": {
+      "statusSummary": {
+        "source": "powerbi",
+        "groupBy": ["status"],
+        "metrics": {
+          "totalAmount": {
+            "op": "sum",
+            "field": "amount"
+          }
+        },
+        "sort": [
+          {
+            "field": "totalAmount",
+            "direction": "descending"
+          }
+        ]
+      }
+    }
+  },
   "components": [
     {
-      "type": "metricGrid", "id": "metrics", "span": 12,
-      "metrics": [
-        { "title": "Records", "aggregation": "count", "format": "integer", "intent": "primary" }
-      ],
-      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
-    },
-    {
-      "type": "barChart", "id": "chart", "span": 7, "category": "__category_field_key__", "measure": "__measure_field_key__", "aggregation": "sum", "height": 300,
-      "interaction": { "enabled": true, "trigger": "auto", "internalMode": "highlight", "internalScope": "self", "externalMode": "auto", "selectionMode": "replace", "multiSelect": true, "showSelector": false, "clearOnSecondClick": true }
-    },
-    {
-      "type": "table", "id": "details", "span": 5, "columns": ["__field_key__"], "pagination": true, "pageSize": 25,
-      "interaction": { "enabled": true, "trigger": "auto", "internalMode": "highlight", "internalScope": "self", "externalMode": "auto", "selectionMode": "replace", "multiSelect": true, "showSelector": true, "clearOnSecondClick": true }
+      "type": "barChart",
+      "id": "amount_by_status",
+      "title": "Amount by status",
+      "dataset": "statusSummary",
+      "category": "status",
+      "measure": "totalAmount",
+      "aggregation": "sum",
+      "span": 12,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "self",
+        "externalMode": "selection",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "clearOnSecondClick": true
+      }
     }
   ]
 }
 ```
+
+The chart is semantic: HyperPBI generates its chart data from `category` and `measure`. The named dataset groups rows and preserves contributing source-row lineage for external selection. `totalAmount` is not used for external filter mode because it is a dataset metric.
+
+## Logical datasets
+
+Each named dataset requires `source`. After resolving that source, operations run as:
+
+`filter → derive → rename → select → groupBy/metrics → distinct → sort → limit`
+
+Only use operations and fields listed in the prompt. No SQL, joins, network sources, or functions.
+
+## Definitions and patterns
+
+Definitions are reusable component fragments. A `use` instance supplies its own stable ID; objects merge recursively and arrays replace. Available application patterns are `kpi-row`, `trend-and-breakdown`, `record-explorer`, and `map-and-details`; use only the exact required/optional properties supplied by the prompt.
+
+## Components and interactions
+
+Use only component types and properties in the prompt's relevant-component module. Prefer first-class semantic charts, native tables, cards, detail panels, and overlays over custom markup. Use `advancedChart` only when no semantic chart fits, `svg` for governed diagrams/schematics, and `svgMarkup` only as a strictly sanitized fallback.
+
+Do not add an interaction object merely to satisfy a blanket rule. The three optional systems are distinct:
+
+- `uiAction`: safe interface behavior
+- `interaction`: universal internal/Power BI data behavior
+- `interactions`: allowlisted event-specific custom behavior
+
+Targets must name real stable component/overlay IDs.
+
+## Improve and repair
+
+For improvement, return the complete updated specification. Preserve the current version, stable IDs, datasets, interactions, app shell, styling, and unrelated sections unless the request requires a change.
+
+For repair, follow structured diagnostics. Correct syntax/schema/reference issues without guessing business meaning. Do not delete a component merely because a field is ambiguous. Do not convert 1.0 to 2.0 unless migration is explicitly requested.
+
+## Version 1.0 compatibility
+
+An existing `{"version":"1.0", ...}` dashboard remains valid compatibility material. It may use normalized runtime keys, lenient properties, legacy accordion children, drawers/filter drawers, steppers, button `action`/`actionValue`, Tabulator engine input, legacy map settings, or deprecated interaction flags.
+
+When asked to improve an existing 1.0 specification, preserve version 1.0 and its working normalized keys unless the user explicitly requests a 2.0 migration. Never use 1.0 as the default for a new dashboard.

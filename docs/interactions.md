@@ -1,60 +1,29 @@
-# UI Actions and Data Interactions
+# Interactions
 
-HyperPBI has three independent behavior systems on every component:
+HyperPBI has three independent declarative systems. A component may use none, one, or more of them; an interaction object is not required on every component.
 
-| System | Property | Purpose |
-|--------|----------|---------|
-| UI Actions | `uiAction` | Interface behavior: navigation, overlays, toasts, sidebar, steps |
-| Data Interaction | `interaction` | Universal data policy: internal highlight/filter, Power BI selection/filter |
-| Custom Interactions | `interactions` | Safe event-to-data payload resolution (custom repeat rows) |
+## 1. UI actions
 
-They are independent and may coexist on one component. A list item can both filter data (`interaction`) and open a detail modal (`uiAction`).
+`uiAction` changes interface state and never directly sends a Power BI selection/filter:
 
-## UI Actions
+| Type | Required/important values |
+|---|---|
+| `clearFilters` | none |
+| `setTab` | `target`, `value` |
+| `setState` | `target`, `value` |
+| `toggleState` | `target` |
+| `toggleSidebar` | none |
+| `openOverlay`, `closeOverlay`, `toggleOverlay` | existing overlay `target` |
+| `setStep` | `target`, `value` |
+| `nextStep`, `previousStep` | `target` |
+| `showToast` | `message`; optional title/intent/duration |
+| `dismissToast` | toast `target` |
+| `scrollTo` | component `target` |
+| `refresh` | safe successful no-op; Power BI owns refresh |
 
-UI actions control interface behavior. They never execute strings, navigate the browser, open arbitrary URLs, or trigger Power BI filtering.
+Toast duration is persistent when omitted/zero, otherwise clamped to 1–30 seconds. UI actions are executed as data, never code. Overlay targets must exist.
 
-| Action | Required Fields | Description |
-|--------|----------------|-------------|
-| `clearFilters` | — | Clears all HyperPBI internal filters |
-| `setTab` | target, value | Sets active tab in a tab container |
-| `setState` | target, value | Sets a named state value |
-| `toggleState` | target | Toggles a Boolean state value |
-| `toggleSidebar` | — | Toggles root sidebar collapsed state |
-| `openOverlay` | target | Opens a modal, dropdown, or popover |
-| `closeOverlay` | target | Closes an overlay |
-| `toggleOverlay` | target | Toggles an overlay |
-| `setStep` | target, value | Sets the active step in a steps component |
-| `nextStep` | target | Advances to the next step |
-| `previousStep` | target | Goes to the previous step |
-| `showToast` | message, title?, intent?, durationMs? | Shows a toast notification (1-30s duration) |
-| `dismissToast` | target (toast ID) | Dismisses a specific toast |
-| `scrollTo` | target (component ID) | Scrolls to a component by ID |
-| `refresh` | — | Safe no-op (Power BI owns data refresh) |
-
-### UI-Only Example
-
-```json
-{
-  "type": "iconButton",
-  "id": "open_filters",
-  "icon": "filter",
-  "ariaLabel": "Open filters",
-  "uiAction": {
-    "type": "openOverlay",
-    "target": "filters_panel"
-  },
-  "interaction": {
-    "enabled": false,
-    "internalMode": "none",
-    "externalMode": "none"
-  }
-}
-```
-
-## Universal Data Interaction
-
-Every component supports the universal `interaction` object for Power BI data behavior:
+## 2. Universal interaction
 
 ```json
 {
@@ -64,9 +33,8 @@ Every component supports the universal `interaction` object for Power BI data be
     "internalMode": "highlight",
     "internalScope": "self",
     "externalMode": "auto",
-    "field": "__field_key__",
+    "field": "status",
     "operator": "=",
-    "value": "__value__",
     "selectionMode": "replace",
     "multiSelect": true,
     "showSelector": false,
@@ -75,70 +43,63 @@ Every component supports the universal `interaction` object for Power BI data be
 }
 ```
 
-### Internal Behavior
-- `none` — No internal filtering/highlighting
-- `highlight` — Highlight matching items; keep all visible
-- `filter` — Filter to matching items only
-- `self` / `others` / `all` — Scope of internal effect
+Exact enums:
 
-### External Behavior
-- `none` — No Power BI interaction
-- `auto` — Controls filter Power BI; data points select identities
-- `selection` — Select Power BI identities
-- `filter` — Filter Power BI by field value (requires explicit field)
+- `trigger`: `auto|click|change`
+- `internalMode`: `none|highlight|filter`
+- `internalScope`: `self|others|all`
+- `externalMode`: `none|auto|selection|filter`
+- `operator`: `=|!=|>|>=|<|<=|contains|in|between`
+- `selectionMode`: `replace|toggle|add`
 
-Runtime Config is only a global gate/fallback. Component interaction policy wins.
+`auto` trigger resolves to change for controls and click otherwise. `auto` external mode resolves to filter for controls and selection for data-point/custom components.
 
-## Safe Custom Interactions
+### Internal modes
 
-The `interactions` property resolves custom click/change events to data payloads for the universal engine. Used with custom repeat-row components:
+- `none`: no HyperPBI highlight/filter
+- `highlight`: records selected source rows/keys; scope decides whether self, others, or all components consume the highlight
+- `filter`: adds a scoped internal field/value filter, or a source-row-key filter when no field payload exists
 
-```json
-{
-  "interactions": {
-    "onClick": {
-      "action": "selectWhere",
-      "where": {
-        "op": "=",
-        "left": { "field": "category" },
-        "right": { "valueFromRow": "category" }
-      }
-    }
-  }
-}
-```
+`selectionMode` replaces, toggles, or adds matching row keys. With replace mode, a modifier gesture can toggle. `clearOnSecondClick` compares a stable signature of component, field, operator, value, and sorted row keys.
 
-Supported actions: `selectRow`, `selectWhere`, `setFilter`, `clearFilter`, `clearSelection`, `setState`, `toggleState`, `openTab`, `toggleCollapse`, `openOverlay`, `closeOverlay`, `toggleOverlay`, `showToast`, `setStep`, `nextStep`, `previousStep`.
+`showSelector` only controls table selector UI; row clicks still work whenever interaction is enabled.
 
-## Combined Behavior
+### External selection
 
-When both `uiAction` and `interaction` are present, the UI action executes alongside the data interaction. Both fire on the same trigger event.
+Selection uses exact Power BI identities for source row indices. For a logical dataset, each output row carries source lineage; selecting a grouped/distinct row can select every contributing base identity. Selection is unavailable when the host/data view supplied no identities.
 
-## Overlay Examples
+### External filtering
 
-### Open a Modal
-```json
-{
-  "type": "button",
-  "id": "open_settings",
-  "label": "Settings",
-  "uiAction": { "type": "openOverlay", "target": "settings_modal" },
-  "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
-}
-```
+Filtering constructs a Power BI basic or advanced JSON filter:
 
-### Toggle an Offcanvas
-```json
-{
-  "uiAction": { "type": "toggleOverlay", "target": "filter_panel" }
-}
-```
+- `=`, `in`, `!=` use `In`/`NotIn`
+- `contains`, comparisons, and `between` use advanced conditions
+- an empty value clears the filter
 
-Overlay targets must match the explicit unique `id` of an existing `modal`, `dropdown`, `popover`, `offcanvas`, `drawer`, or `filterDrawer` component. Opening a modal closes open dropdowns/popovers. Opening a dropdown closes other dropdowns. Legacy drawer types use the offcanvas runtime.
+The field must resolve to a model column with `sourceTable` and `sourceColumn`. A true model measure has no basic filter target. A query wrapper such as `Sum(Sales.Amount)` may still target `Sales.Amount` because it is an implicitly aggregated column.
+
+Dataset-derived fields and dataset metrics cannot directly filter Power BI. Renamed direct columns and dataset group fields can retain their original target metadata. Use identity selection for grouped metrics rather than pretending a metric is a model column.
+
+Runtime Config `crossFilter: false` is a global gate; it does not redefine component semantics.
+
+## 3. Safe event-specific interactions
+
+`interactions` is primarily used by custom content to map a supported event to an allowlisted payload:
+
+- `selectRow`, `selectWhere`, `clearSelection`
+- `setFilter`, `clearFilter`
+- `setState`, `toggleState`
+- `openTab`, `toggleCollapse`
+- `drillToDetail`, `highlight`, `clearHighlight`
+
+`selectWhere` uses safe expression objects and may read a known clicked-row field via `valueFromRow`. The resolver converts supported data actions into the universal engine, so internal/external policies and diagnostics remain consistent.
+
+No JavaScript callback, handler string, arbitrary dispatch name, URL navigation, or DOM script is accepted.
+
+## Dataset scope
+
+Components validate fields against their selected logical dataset. Internal row behavior maps through source keys/lineage. An interaction field is not automatically remapped to a Power BI filter target: the selected field's retained origin metadata decides eligibility.
 
 ## Compatibility
 
-Legacy properties normalized internally:
-- `button.action: "clearFilters"` → `uiAction: { type: "clearFilters" }`
-- `button.action: "setTab"` + `actionValue` → `uiAction: { type: "setTab", target: "mainTabs", value: "..." }`
-- Deprecated `internal`, `external`, `selectable`, `selectionMode` remain accepted
+Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `crossFilter`, or `powerBISelection` in dashboard JSON.

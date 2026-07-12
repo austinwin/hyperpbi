@@ -1,145 +1,85 @@
-# HyperPBI Security
+# Security model
 
-## JSON is Data, Not Code
+HyperPBI treats dashboard JSON and pasted AI output as untrusted data. It validates declarative structures and never provides a user-code sandbox.
 
-HyperPBI specifications are static JSON objects. HyperPBI never executes user-supplied code:
+## No executable dashboard code
 
-SVG follows the same rule. Declarative SVG renders only allowlisted native nodes. Raw `svgMarkup` is parsed by a dedicated sanitizer, blocks script/event attributes, `foreignObject`, embedded HTML/media, image/use, style elements, and every external/data/blob/JavaScript URL, then isolates local IDs and applies final sanitization. Legacy HTML/custom components do not gain inline SVG permission.
+Dashboard JSON cannot supply JavaScript, `eval`, `new Function`, callbacks, formatter functions, inline event handlers, dynamic imports, scripts, iframes, arbitrary DOM code, SQL, or network dataset loaders.
 
-- No `eval`, `new Function`, or `Function` constructor
-- No inline event handlers (`onclick`, `onerror`, etc.)
-- No `<script>`, `<iframe>`, `<object>`, or `<embed>` tags
-- No JavaScript URLs (`javascript:`)
-- No dynamic module imports
-- No browser navigation from user data
-- No arbitrary URL opening
+UI/data interactions are enums and structured payloads. Calculation/condition logic is a finite JSON operator DSL.
 
-## HTML Sanitization
+## AI and prompt privacy
 
-All user-supplied HTML is sanitized with DOMPurify before rendering:
-- Scripts, iframes, event handlers, and unsafe elements are removed
-- Popup templates are sanitized before DOM insertion
-- Slot content is sanitized per slot
-- Trusted-author mode (`htmlMode: "trusted"`) relaxes sanitization for controlled environments but still blocks scripts and event handlers
+HyperPBI does not call an AI API, contain an AI key, or send a prompt automatically. The user chooses Field Manifest privacy mode, reviews the prompt, copies it to an externally approved AI, and pastes the result back.
 
-## CSS Sanitization
+Privacy modes are `samples`, `masked`, `summary`, `fields`, and `types`. Use the least revealing mode that supports the task. Never place credentials, access tokens, private keys, secrets, or sensitive service URLs in dashboard JSON or prompts.
 
-All user-supplied CSS is parsed with css-tree, validated against an allowlist, and scoped:
-- Only approved CSS properties are permitted
-- `position: fixed` is blocked (would escape the visual)
-- `z-index` values above 100 are blocked
-- CSS `url()`, `expression()`, `behavior:`, and `javascript:` are blocked
-- `@import`, `@font-face`, `@namespace` rules are blocked
-- CSS is scoped to the visual root or component element
-- Internal runtime CSS (overlays, toasts) uses higher controlled z-index values from trusted source code
+## Response extraction
 
-## UI Action Safety
+The importer accepts exactly one JSON object. Multiple objects, arrays/primitives, comments, smart quotes, truncation, and ambiguous fences are diagnostics—not silently interpreted. Packaged `specification`/`config` strings are parsed as JSON rather than executed.
 
-UI actions are declarative and safe:
-- Never execute strings as code
-- Never navigate the browser
-- Never open arbitrary URLs
-- Never import modules
-- Only dispatch known engine actions
-- Validate required targets before execution
-- Clamp toast duration to 1-30 seconds
-- Cap toast queue to 5 messages
+## HTML sanitizer
 
-## Overlay Safety
+Normal HTML is DOMPurify-sanitized. It forbids script, iframe, object/embed, link/meta/base, form controls, and style elements; raw style/srcset/form-action/xlink attributes are blocked. Data attributes are disabled and ARIA attributes are allowed.
 
-- All overlays render within `.hyperpbi-root` — no portal to `document.body`
-- The root overlay host uses viewport-relative fixed positioning inside the custom visual document; no portal escapes to `document.body`
-- Modal and offcanvas use focus containment, document-level Escape handling, and trigger focus restoration
-- Dropdown and popover store only serializable trigger geometry in reducer state; DOM references remain in an internal runtime registry
-- Anchored panels flip and shift within the Power BI visual viewport and recalculate on scroll/resize
+Normal URL policy permits fragment/root/relative and mailto forms; external images are not enabled by default. Trusted/internal modes are implementation-controlled, not a dashboard option for bypassing security.
 
-## Icon Safety
+## CSS parser, allowlist, and scope
 
-- Icons come from a curated, bundled registry of ~40 SVG icons
-- No arbitrary SVG strings accepted from JSON
-- Icons use `currentColor` and safe SVG attributes
-- Decorative icons hidden from assistive technology
+CSS is parsed with `css-tree`; parse failure returns empty CSS with a warning. It removes `@import`, `@font-face`, namespace, document, and page rules. Only an explicit property set (or safe custom properties in trusted mode) survives.
 
-## Chart Option Sanitization
+The sanitizer blocks:
 
-- ECharts options are recursively sanitized
-- JavaScript function callbacks are blocked
-- Event handler keys are removed
-- External URLs and executable markup are blocked
-- Safe string formatter templates are allowed
+- external/malformed `url()` values (only explicitly allowed local SVG fragments can pass)
+- `expression()`/`behavior`/JavaScript forms
+- `position: fixed`
+- absolute z-index over 100
+- unsafe/unbounded animation duration, delay, iteration, or easing
+- infinite shorthand animations in ordinary scoped CSS
 
-## External Provider Builds
+Selectors are scoped beneath the visual/component selector. Keyframes are namespaced and references rewritten. Style objects pass the same declaration checks.
 
-### Core Package
-- No WebAccess privileges
-- External request call sites removed by SDK certification-fix
-- No external tiles, geocoding, or ArcGIS requests possible
+## Safe ECharts options
 
-### Maps Packages
-- Broad Maps uses `https://*` WebAccess while the runtime still requires HTTPS and rejects credentials
-- Restricted Maps uses built-in provider hosts plus exact/subdomain-wildcard hosts specified through `HYPERPBI_MAP_HOSTS`
-- User-entered URLs cannot bypass package privileges
-- ArcGIS Online wildcards included by default
-- HTTP, credential-bearing, path, query, hash, and malformed host patterns fail the package build
-- `npm run package:verify` opens each PBIVIZ ZIP and verifies the packaged capabilities payload
+ECharts option objects are recursively copied. Functions disappear. Prototype/constructor keys, `renderItem`, event keys, URL/source/background-image keys, and keys beginning with event-handler patterns are blocked. Executable markup and external/protocol-relative URL strings are removed. Strings and arrays are bounded.
 
-## ArcGIS REST Security
+Only an allowlisted series-type set passes. Semantic chart options cannot replace generated dataset/transform, axis data/type, series type/data/links/nodes/edges/source/encode/transform/dimensions, radar indicators, or series count. `advancedChart` remains JSON-only and subject to the same recursive sanitizer.
 
-- HTTPS required for all service URLs
-- Host allowlist enforced at build time
-- Recognized ArcGIS REST path patterns only
-- No credentials embedded in URLs (rejected by parser)
-- No tokens in JSON specification
-- No persisted tokens
-- No OAuth or portal authentication
+## SVG sanitizer and limits
 
-### Query Safety
-- WHERE clauses built from validated field metadata only
-- String values safely quoted with apostrophe escaping
-- No SQL comments, semicolons, or injection vectors
-- Query size limited per batch
-- Feature count limited per layer
-- No `outFields=*` by default — minimal field list computed from configuration
+Declarative `svg` passes a strict element/property/binding/animation schema. Raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
 
-### Public Services Only
-- Secured services (ArcGIS error 498/499, HTTP 401/403) are detected
-- Clear "requires authentication — public layers only" message displayed
-- No token field exposed to users
-- No authentication flow implemented
+Scripts, handlers, style, foreignObject, link/image/use, audio/video/canvas, external resources, animation elements, unsafe transforms, unknown references, and field-injected path data are blocked. Exact limits are in [SVG visuals](svg-visuals.md).
 
-## Join Privacy
+## URL restrictions
 
-When a geometry join is configured:
-- Only the explicit join-key field values are transmitted to the service host
-- No other Power BI fields are sent
-- Values are normalized and deduplicated before transmission
-- The report author must acknowledge this before saving (when Map Builder is implemented)
+`safeUrl` rejects JavaScript, VBScript, file URLs, and all data URLs except explicitly enabled base64 PNG/GIF/JPEG/WebP images. HTTP(S) requires an explicit allow-external option. Fragment/root/relative URLs are the safe default.
 
-## Request Limits and Cancellation
+HTML, ECharts, SVG, map services, and providers apply stricter context-specific policies on top of this helper.
 
-- Requests are aborted when components unmount
-- Timeout enforced on all external requests (default 30s)
-- Maximum 2 retries for transient errors (429, 5xx)
-- No retry for authentication or validation failures
-- Concurrent request limiting (default 4)
-- Response size bounded
-- Feature count bounded (default 20,000 per layer, 30,000 join keys)
+## ArcGIS/provider policy
 
-## Server Errors
+ArcGIS URLs must be HTTPS, contain no embedded username/password, and match the package's host patterns. Broad Maps mode may grant `https://*`, but runtime still enforces HTTPS/no credentials. Restricted patterns can be exact hosts or one leading subdomain wildcard and may not contain a path/query/hash.
 
-Service errors do not expose internal implementation details. Standardized messages map common ArcGIS error codes to user-friendly explanations.
+Core has no WebAccess. Maps packages add optional WebAccess for broad or restricted hosts. Power BI host denial still disables external providers.
 
-## Trusted-Author Mode
+Geocoding is user-triggered, has no autocomplete, requires privacy acknowledgment, and is rate-limited/cached according to provider configuration. Dashboard JSON must not contain service credentials.
 
-For controlled internal dashboards:
-- `cssMode: "trusted"` — broader CSS property set, still blocks `position: fixed` and `url()`
-- `htmlMode: "trusted"` — relaxed sanitization, still blocks scripts and event handlers
-- Never fully disables security — no code execution regardless of mode
+## Data boundaries
 
-## Known Limitations
+Logical datasets are deterministic in-memory transformations of the current Power BI data view. They cannot execute SQL, join network data, read files, fetch URLs, or mutate the semantic model.
 
-- Popovers intentionally do not trap focus; modal and blocking offcanvas overlays do
-- No Content Security Policy header control (Power BI host responsibility)
-- No request signing or HMAC for ArcGIS queries
-- No encrypted storage for cached metadata
-- ArcGIS runtime scope is public read-only feature/tile/basic-dynamic services; secured authentication, editing, 3D, relationships, tracing, and non-4326 output are intentionally unsupported
+External filters require a true model-column target. Dataset-derived fields/metrics and model measures cannot be smuggled into Power BI filter schemas. External identity selection uses host-provided identities/source lineage only.
+
+## Core versus Maps
+
+| Boundary | Core | Maps |
+|---|---|---|
+| Bound Power BI geometry | Yes | Yes |
+| WebAccess privilege | None | Broad or restricted HTTPS hosts |
+| External tiles/services | No | Subject to host/runtime policy |
+| Geocoder | No | User-triggered and policy-gated |
+| Dashboard JavaScript | No | No |
+| Credentials in JSON | No | No |
+
+These profiles affect network privilege only; neither relaxes JSON, HTML, CSS, chart, SVG, interaction, or dataset safety.

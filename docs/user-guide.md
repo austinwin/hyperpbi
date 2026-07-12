@@ -1,106 +1,107 @@
-# HyperPBI User Guide
+# HyperPBI user guide
 
-> New dashboards use strict schema 2.0 with field aliases, application patterns, logical data views, reusable styles, structured repair diagnostics, and a post-import visual inspector. Existing 1.0 dashboards continue to work.
+## Install and bind data
 
-## SVG visuals
+1. Choose a Core or Maps `.pbiviz` package.
+2. In Power BI Desktop, use **Visualizations → … → Import a visual from a file**.
+3. Add HyperPBI to the report canvas.
+4. Bind every field the dashboard needs to **Values**, including explicit map roles when applicable.
+5. Resize the visual for the intended report layout.
+6. Open the visual's **Edit** command to enter HyperPBI Studio.
 
-Use first-class `svg` components for custom gauges, animated progress cards, process flows, pictorial marks, and schematics. Attributes bind through normal field aliases and logical datasets; repeated marks preserve source-row selection lineage. `svgMarkup` is an advanced, strictly sanitized fallback. See [SVG visuals](svg-visuals.md).
+Core has no external provider access. Use a Maps package only when the report needs approved tiles, geocoding, or public ArcGIS services.
 
-## 1. What HyperPBI Does
+## Studio workflow
 
-HyperPBI turns declarative JSON specifications into professional Power BI dashboards. It renders application shells, responsive layouts, KPI cards, charts, tables, maps, forms, overlays, and custom components — without executing JavaScript.
+The normal path is:
 
-## 2. Add the Visual and Bind Values
+**Dashboard setup → Copy AI Prompt → external approved AI → Paste AI response → Validate & Preview → Save & return**
 
-1. Import the `.pbiviz` file into Power BI Desktop
-2. Add HyperPBI to your report canvas
-3. Drag columns and measures into the **Values** field well
-4. HyperPBI creates deterministic AI-friendly field aliases and retains normalized keys for compatibility
+HyperPBI never sends the prompt itself. Review selected fields and privacy mode before copying.
 
-The Field Manifest shows each alias, display name, underlying source, type, column/measure classification, query aggregation, semantic role, format, and selection/filter support. `Sum(Table.Column)` is shown as a summarized model column, not a true model measure. Copy this manifest for external AI authoring. Alias overrides are optional, validated, and stored once in Runtime Config. Types-only and restricted privacy choices do not expose raw values.
+### Dashboard setup
 
-Logical dataset fields are validated in their dataset scope. Fields created by `derive`, `rename`, or `metrics` remain available even when no rows are returned, but only components selecting that dataset can use them. Derived and metric fields cannot directly filter the Power BI model; group-by and renamed direct model columns can.
+Describe the goal, audience, supported decisions, primary entity, application type, layout, important KPIs, sections/filters, device priority, interaction expectations, and complexity. Choose whether maps, tables, charts, controls, calculations, or detail panels are required.
 
-## 3. Open Edit Mode
+Studio uses this setup to choose relevant prompt modules; it does not add unimplemented features.
 
-Select the visual, open the **…** menu (top-right), and choose **Edit**. HyperPBI opens in focus mode.
+### Field Manifest
 
-## 4. Guided Builder Workflow
+Use the shown aliases in new 2.0 authoring. The manifest also explains canonical key, display/source names, data type, semantic role, true measure versus summarized model column, default aggregation, and external selection/filter eligibility.
 
-1. **Customize Dashboard Setup** (optional): prompt job, goal, audience, decisions, application pattern, sections, fields, device priority, style, and privacy mode
-2. **Copy AI Prompt**: copies the complete prompt to clipboard
-3. **Paste AI response**: paste JSON from any approved external model
-4. **Validate & Preview**: extracts one object, shows safe repairs and structured diagnostics, compiles the canonical JSON, and renders a preview
-5. **Visual inspector** (optional): edit common properties, fields, order, visibility, responsive width, and interactions with undo/redo
-6. **Save & return**: saves only the successfully previewed specification to Power BI
+If a latitude/longitude field is summarized in the Power BI query, change it to **Don't summarize**.
 
-## 5. Dashboard Setup Options
+### Prompt jobs
 
-| Setting | Purpose |
-|---------|---------|
-| Goal | What the dashboard should show |
-| Audience | Executive, Manager, Analyst, Field operations, Public viewer |
-| Layout | KPI row, left filter drawer, map+details, full table, app shell, etc. |
-| Components | KPI cards, charts, table, map, filters, app shell, detail panel, timeline, offcanvas |
-| Style | Enterprise Light, Bright Modern, Dark Ops Center, Dense Compact, Map Command Center |
-| Privacy | Field-only, sample, masked sample, summary, type-only |
+- **Create dashboard:** complete new 2.0 object
+- **Improve current dashboard:** complete updated object; preserve version, stable IDs, and unrelated behavior
+- **Add section:** section package with insertion target
+- **Redesign selected section:** replacement using the selected stable ID
+- **Repair invalid JSON:** complete corrected object based on diagnostics
 
-## 6. Professional Application Layouts
+Do not accept JSON Patch for normal improve/repair responses.
 
-Use an app shell (`schema.app`) only when the visual size can support it:
-- **Wide (1100+ px):** Full navbar, sidebar, page header
-- **Standard (800-1100 px):** Navbar, collapsible sidebar or offcanvas
-- **Compact (600-800 px):** Navbar only, offcanvas for secondary content
-- **Mobile tile (<600 px):** No permanent sidebar, offcanvas panels, stacked cards
+## Validate and preview
 
-Prefer offcanvas panels instead of permanent sidebars on narrow visuals.
+The importer extracts one JSON object, prepares aliases/definitions/patterns/datasets, and reports structured diagnostics. Version 2.0 is strict: unknown properties, invalid IDs, wrong enums, missing required properties, bad dataset stages, unknown fields/targets, and SVG limits are errors.
 
-## 7. Choosing Components
+Use the JSON path and component ID in each diagnostic. Applied automatic repairs are listed separately. HyperPBI will not overwrite the last valid saved dashboard when validation fails.
 
-Prefer first-class components over custom HTML:
-- Container → `card`
-- Record list → `listGroup`
-- Detail layout → `dataGrid`
-- Menu → `dropdown`
-- Dialog → `modal`
-- Slide-over → `offcanvas`
-- Empty data → `emptyState`
-- Loading → `placeholder` or `spinner`
+## Visual Inspector
 
-## 8. UI Actions vs Data Interactions
+Select a rendered component to locate it by stable ID. The inspector edits canonical JSON for that component in the context of the whole specification. Validate the complete dashboard after every edit; preserve the ID when the component's role remains.
 
-- Use `uiAction` for: opening modals, changing tabs, showing toasts, toggling sidebar, navigating steps
-- Use `interaction` for: filtering data, highlighting rows, selecting Power BI identities
-- Both can coexist on one component
+## Application shell
 
-## 9. Advanced Mode
+Configure the shell at root `app`, not `schema.app`. It can provide brand, navbar, sidebar, page header, footer, navigation, and actions. Use it for a sufficiently large app-style visual. Prefer offcanvas/modal/dropdown/popover components for narrow layouts.
 
-Toggle **Advanced** to access: JSON editor, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, Interactions, Documentation, and full diagnostics panels.
+## Components and catalogs
 
-## 10. Maps
+Use the generated [component catalog](hyperpbi-component-catalog-reference.md) for canonical types and properties. Prefer semantic charts, native table/matrix, first-class cards/lists/detail/overlays, `map`, and declarative `svg` before advanced/custom fallbacks.
 
-Power BI spatial maps and practical public ArcGIS feature/reference layers, Power BI geometry joins, viewport queries, tile overlays, and basic dynamic images render end to end. Labels, tooltip/popup content, selection, layer visibility/opacity/order, inline diagnostics, legends, Home, Zoom to Selection, and Clear Selection are available. Explicit map bindings and Power BI roles take priority; otherwise numeric source fields named latitude/lat and longitude/lon/lng are recognized conservatively. Map centers use `[latitude, longitude]`. Set coordinate columns to **Don't summarize** for row-level mapping; HyperPBI warns when Power BI sends summarized coordinates. See [map services](map-services.md) for the exact supported scope and limitations.
+## Interactions
 
-Use a Maps build profile for external tiles, geocoding, and ArcGIS requests:
-```bash
+Keep interface and data behavior separate:
+
+- `uiAction` changes tabs, steps, shell/overlay/toast/scroll state
+- `interaction` controls internal highlight/filter and external Power BI selection/filter
+- `interactions` handles safe event-specific custom-content behavior
+
+Power BI external filter mode requires a model-column target. Dataset metrics, derived fields, and true measures cannot directly filter the semantic model. Identity selection may work through source lineage.
+
+## Maps
+
+Bind Geometry or Latitude+Longitude (preferred), X+Y, or Address. Location precedence is Geometry → Lat/Lon → X/Y → Address. Address search is user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment.
+
+Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| Unknown field | Use the current Field Manifest alias; check the component's dataset |
+| Non-numeric measure | Bind/select a numeric field at that dataset stage |
+| Unknown property | Use only the generated catalog's properties for that type |
+| Duplicate/invalid ID | Start with a letter; use letters/digits/`_`/`-`; keep IDs global and unique |
+| External filter unavailable | Field must be a model column with source table/column |
+| External selection unavailable | Power BI identities/lineage may be absent |
+| Component sees no field | Its named dataset may have renamed/selected/grouped the field away |
+| Map has no locations | Bind geometry or a complete valid coordinate/address pair |
+| Coordinates collapse | Set latitude/longitude to Don't summarize |
+| External map/provider disabled | Use Maps package; verify WebAccess, HTTPS host, runtime config |
+| Raw SVG disappears | Review sanitizer warnings, exact limits, forbidden resource/element use |
+| AI response rejected | Return one complete JSON object; remove comments/fences/prose/multiple objects |
+
+## Package commands for maintainers
+
+```powershell
+npm run package:core
 npm run package:maps
 npm run package:verify
 ```
 
-## 11. Security and Privacy
+Maps defaults to broad HTTPS. Set `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false` and `HYPERPBI_MAP_HOSTS` for restricted packaging. See [Map services](map-services.md) and [Security](security.md).
 
-- No user JavaScript executes
-- HTML is sanitized; CSS is allowlisted and scoped
-- AI prompts may contain field names and sample data — review before sending
-- External services only available in Maps build profile
+## Version 1.0 dashboards
 
-## 12. Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| JSON won't validate | Use Copy repair prompt; comments, smart quotes, trailing commas, and competing objects are diagnosed rather than silently rewritten |
-| Preview is empty | Verify field aliases and logical data-view bindings in the Field Manifest |
-| Map shows grid | Install Maps package or set basemap |
-| No external tiles | Maps package + WebAccess required |
-| Component not visible | Check `hidden`, `span`, parent container |
-| Interaction not working | Verify `interaction.enabled: true` |
+Existing 1.0 dashboards remain supported. Improve/repair them without changing version unless an explicit migration is requested. Legacy normalized keys, accordion/drawer/stepper forms, Tabulator input, map settings, and deprecated interaction flags are compatibility behavior—not recommended new-authoring examples.

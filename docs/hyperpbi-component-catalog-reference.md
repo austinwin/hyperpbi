@@ -1,20 +1,109 @@
+<!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->
 # HyperPBI component catalog reference
 
-## Application patterns (schema 2.0)
+HyperPBI currently defines **84 component types across 12 categories**. This file is generated from `componentDefinitions.ts`, `componentDocumentation.ts`, `componentJsonExamples.ts`, `patternRegistry.ts`, and the strict 2.0 validator metadata.
 
-Patterns are AI-friendly authoring constructs compiled into the existing component runtime. Generated child IDs are derived from the pattern ID.
+For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
 
-- `kpi-row`
-- `trend-and-breakdown`
-- `record-explorer`
-- `map-and-details`
+## HyperPBI 2.0 shared contract
 
-> Generated from canonical component definitions. Do not edit manually.
-> Component count: 84
+Every 2.0 component requires `type` and a globally unique stable `id` matching `^[A-Za-z][A-Za-z0-9_-]{0,99}$`. `dataset` selects a named logical dataset; omission selects `powerbi`. Field references use Field Manifest aliases during authoring and are resolved to canonical runtime keys during preparation.
 
-## Universal interaction
+Allowed shared properties:
 
-Every component supports the universal interaction object:
+`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+
+The three behavior systems are independent: `uiAction` changes interface state; `interaction` controls universal internal/Power BI data behavior; `interactions` maps safe component-specific events to allowlisted payloads. None is mandatory on every component.
+
+External filtering requires a field whose metadata identifies a real model column (`sourceTable` and `sourceColumn`). True measures, dataset-derived fields, and dataset metrics cannot directly filter the Power BI model. Exact identity selection can still use source-row lineage when available.
+
+## Application patterns
+
+Patterns are 2.0 authoring constructs expanded before strict component validation. Generated child IDs are deterministic derivatives of the pattern ID.
+
+### kpi-row
+
+Required: `id`, `fields`
+
+Optional: `title`, `dataset`, `variant`, `span`
+
+Field properties: `fields`
+
+```json
+{
+  "type": "pattern",
+  "pattern": "kpi-row",
+  "id": "summary",
+  "fields": [
+    "revenue",
+    "orders"
+  ]
+}
+```
+
+### trend-and-breakdown
+
+Required: `id`, `date`, `measure`, `breakdown`
+
+Optional: `title`, `dataset`, `aggregation`
+
+Field properties: `date`, `measure`, `breakdown`
+
+```json
+{
+  "type": "pattern",
+  "pattern": "trend-and-breakdown",
+  "id": "performance",
+  "date": "month",
+  "measure": "completed",
+  "breakdown": "status"
+}
+```
+
+### record-explorer
+
+Required: `id`, `columns`, `details`
+
+Optional: `title`, `dataset`, `pageSize`
+
+Field properties: `columns`
+
+```json
+{
+  "type": "pattern",
+  "pattern": "record-explorer",
+  "id": "records",
+  "columns": [
+    "recordId",
+    "status"
+  ],
+  "details": {
+    "titleField": "recordId",
+    "fields": [
+      "status"
+    ]
+  }
+}
+```
+
+### map-and-details
+
+Required: `id`
+
+Optional: `title`, `dataset`, `height`, `details`
+
+Field properties: —
+
+```json
+{
+  "type": "pattern",
+  "pattern": "map-and-details",
+  "id": "locations",
+  "title": "Locations"
+}
+```
+
+## Universal interaction reference
 
 ```json
 {
@@ -33,410 +122,5913 @@ Every component supports the universal interaction object:
 }
 ```
 
-## UI action reference
+`externalMode: "auto"` resolves to `filter` for controls and `selection` for data-point/custom components. See [interactions](interactions.md) for lineage and field-origin restrictions.
 
-UI actions control interface behavior (navigation, overlays, toasts). They are separate from data interactions.
+## UI actions
 
-| Action | Required Fields | Description |
-|--------|----------------|-------------|
-| `clearFilters` | — | Clears all HyperPBI filters |
-| `setTab` | target, value | Sets the active tab in a tab container |
-| `setState` | target, value | Sets a named state value |
-| `toggleState` | target | Toggles a Boolean state |
-| `toggleSidebar` | — | Toggles the root sidebar collapsed state |
-| `openOverlay` | target | Opens a modal, offcanvas, dropdown, popover, or legacy drawer |
-| `closeOverlay` | target | Closes an overlay |
-| `toggleOverlay` | target | Toggles an overlay |
-| `setStep` | target, value | Sets the active step |
-| `nextStep` | target | Advances to the next step |
-| `previousStep` | target | Goes to the previous step |
-| `showToast` | message, title?, intent?, durationMs? | Shows a toast notification |
-| `dismissToast` | target | Dismisses a specific toast |
-| `scrollTo` | target | Scrolls to a component by ID |
-| `refresh` | — | Safe no-op (Power BI owns data refresh) |
-
-## Application shell
-
-The application shell is configured at the root level through `schema.app`, not as a component.
-See the [specification reference](hyperpbi-spec-reference.md) for complete property documentation.
-
-## Shared component properties
-
-All components share these base properties:
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `type` | string | Component type identifier (required) |
-| `id` | string | Unique stable identifier |
-| `dataset` | string | Logical dataset name; omitted uses the Power BI data view |
-| `title` | string | Display title |
-| `subtitle` | string | Secondary display text |
-| `span` | 1–12 | 12-column grid span |
-| `className` | string | Additional CSS class |
-| `hidden` | boolean | Hide the component |
-| `style` | object | Inline CSS properties (sanitized) |
-| `css` | string | Scoped CSS (allowlisted, scoped) |
-| `slots` | object | Named HTML slot overrides |
-| `interaction` | object | Universal data interaction policy |
-| `interactions` | object | Safe custom event-to-data payloads |
-| `ariaLabel` | string | Accessible label |
-| `icon` | string | Icon name from bundled registry |
-| `variant` | string | UI variant (primary, secondary, success, warning, danger, ghost, outline) |
-| `size` | string | UI size (xs, sm, md, lg) |
-| `disabled` | boolean | Disabled state |
-| `tooltip` | object | Tooltip definition (content, placement, delayMs) |
-| `uiAction` | object/array | Declarative UI action(s) |
-
-Three independent behavior systems:
-
-- **`interactions`** — Safe custom event-to-data payload resolver
-- **`interaction`** — Universal local/Power BI data policy
-- **`uiAction`** — Interface/navigation/overlay/state behavior
-
-## Data scopes and Power BI field origin
-
-Components validate against their selected logical dataset; omitted `dataset` uses the base Power BI data view. Dataset schemas are propagated statically, so derived and metric fields remain available with zero rows.
-
-Power BI query aggregation is separate from model origin. For example, `Sum(Sales.Amount)` remains a filterable model column targeting `Sales.Amount`, while a true model measure is not a basic model-column filter target. Derived fields and dataset metrics are also not direct external-filter targets; renamed and group-by model columns retain their source target.
+`clearFilters`, `setTab`, `setState`, `toggleState`, `toggleSidebar`, `openOverlay`, `closeOverlay`, `toggleOverlay`, `setStep`, `nextStep`, `previousStep`, `showToast`, `dismissToast`, `scrollTo`, and `refresh` (a safe no-op because Power BI owns refresh).
 
 ## Layout
 
-### grid
+_9 components_
 
-<!-- component:grid -->
+### `grid` — Grid
 
-### flex
+**Status:** stable
 
-<!-- component:flex -->
+**Level:** recommended
 
-### split
+**Recommended use:** Responsive 12-column dashboard sections
 
-<!-- component:split -->
+**Required properties:** `type`, `id`
 
-### section
+**Key properties:** `columns`, `gap`, `children`
 
-<!-- component:section -->
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
-### toolbar
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-<!-- component:toolbar -->
+**Data interaction:** No. **UI action:** No.
 
-### leftPanel
+**Related:** `flex`, `section`
 
-<!-- component:leftPanel -->
+```json
+{
+  "type": "grid",
+  "id": "grid",
+  "title": "Responsive grid",
+  "span": 12,
+  "className": "hp-example-grid",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-grid { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 12,
+  "children": [
+    {
+      "type": "kpi",
+      "id": "kpi",
+      "title": "Total records",
+      "span": 4,
+      "className": "hp-example-kpi",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-kpi { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "field": "__field_key__",
+      "aggregation": "count",
+      "format": "integer",
+      "intent": "primary"
+    },
+    {
+      "type": "text",
+      "id": "supporting_text",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ]
+}
+```
 
-### rightPanel
+### `flex` — Flex row/column
 
-<!-- component:rightPanel -->
+**Status:** stable
 
-### spacer
+**Level:** standard
 
-<!-- component:spacer -->
+**Recommended use:** Compact toolbars and flowing groups
 
-### divider
+**Required properties:** `type`, `id`
 
-<!-- component:divider -->
+**Key properties:** `direction`, `gap`, `children`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `grid`, `toolbar`
+
+```json
+{
+  "type": "flex",
+  "id": "flex",
+  "title": "Flexible content row",
+  "span": 12,
+  "className": "hp-example-flex",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-flex { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "row",
+  "columns": 12,
+  "gap": 10,
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Status",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Status",
+      "placeholder": "Choose status",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    },
+    {
+      "type": "searchBox",
+      "id": "searchBox",
+      "title": "Search",
+      "span": 4,
+      "className": "hp-example-searchBox",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-searchBox { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "contains",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Search",
+      "placeholder": "Choose search",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    }
+  ]
+}
+```
+
+### `split` — Split layout
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Two coordinated content regions
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `direction`, `gap`, `children`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `leftPanel`, `rightPanel`
+
+```json
+{
+  "type": "split",
+  "id": "split",
+  "title": "Split workspace",
+  "span": 12,
+  "className": "hp-example-split",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-split { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "row",
+  "columns": 12,
+  "gap": 12,
+  "children": [
+    {
+      "type": "section",
+      "id": "section",
+      "title": "Summary",
+      "span": 5,
+      "className": "hp-example-section",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-section { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "direction": "column",
+      "columns": 12,
+      "gap": 8,
+      "children": [
+        {
+          "type": "text",
+          "id": "supporting_text",
+          "span": 12,
+          "text": "Supporting content",
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "section_2",
+      "title": "Details",
+      "span": 7,
+      "className": "hp-example-section",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-section { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "direction": "column",
+      "columns": 12,
+      "gap": 8,
+      "children": [
+        {
+          "type": "text",
+          "id": "supporting_text_2",
+          "span": 12,
+          "text": "Supporting content",
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### `section` — Section
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Named content grouping
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `title`, `children`, `collapsible`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `card`, `collapsible`
+
+```json
+{
+  "type": "section",
+  "id": "section",
+  "title": "Operations section",
+  "span": 12,
+  "className": "hp-example-section",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-section { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "text",
+      "id": "section_content",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ],
+  "collapsible": true,
+  "defaultCollapsed": false
+}
+```
+
+### `toolbar` — Toolbar
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact controls above content
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `direction`, `gap`, `children`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `flex`
+
+```json
+{
+  "type": "toolbar",
+  "id": "toolbar",
+  "title": "Dashboard toolbar",
+  "span": 12,
+  "className": "hp-example-toolbar",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-toolbar { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "row",
+  "columns": 12,
+  "gap": 6,
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Status",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Status",
+      "placeholder": "Choose status",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    },
+    {
+      "type": "button",
+      "id": "button",
+      "title": "Reset",
+      "span": 2,
+      "className": "hp-example-button",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-button { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "label": "Reset filters",
+      "action": "clearFilters"
+    }
+  ]
+}
+```
+
+### `leftPanel` — Left panel
+
+**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas or the root app sidebar for new layouts.
+
+**Level:** standard
+
+**Recommended use:** Persistent filter rail
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `width`, `collapsible`, `children`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Compatibility:** Legacy left-panel rail. Use app.sidebar or an offcanvas component for new dashboards.
+
+**Related:** `rightPanel`, `offcanvas`
+
+```json
+{
+  "type": "leftPanel",
+  "id": "leftPanel",
+  "title": "Filter panel",
+  "span": 12,
+  "className": "hp-example-leftPanel",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-leftPanel { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Category",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Category",
+      "placeholder": "Choose category",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    },
+    {
+      "type": "dateRange",
+      "id": "dateRange",
+      "title": "Date range",
+      "span": 4,
+      "className": "hp-example-dateRange",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-dateRange { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "between",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Date range",
+      "placeholder": "Choose date range",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    }
+  ],
+  "width": 280,
+  "collapsible": true,
+  "defaultCollapsed": false
+}
+```
+
+### `rightPanel` — Right panel
+
+**Status:** compatibility — Supported for legacy dashboards.
+
+**Level:** standard
+
+**Recommended use:** Persistent details rail
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `width`, `collapsible`, `children`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Compatibility:** Legacy right-panel rail.
+
+**Related:** `leftPanel`, `offcanvas`
+
+```json
+{
+  "type": "rightPanel",
+  "id": "rightPanel",
+  "title": "Detail panel",
+  "span": 12,
+  "className": "hp-example-rightPanel",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-rightPanel { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "detailPanel",
+      "id": "detailPanel",
+      "title": "Selected record",
+      "span": 12,
+      "className": "hp-example-detailPanel",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-detailPanel { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "selectedRow": true,
+      "emptyText": "Select a record",
+      "groups": [
+        {
+          "title": "Details",
+          "fields": [
+            "__field_key__"
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 340,
+  "collapsible": true,
+  "defaultCollapsed": false
+}
+```
+
+### `spacer` — Spacer
+
+**Status:** stable
+
+**Level:** advanced
+
+**Recommended use:** Small intentional separation
+
+**Required properties:** `type`, `id`
+
+**Key properties:** —
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** When a gap property on a parent container is sufficient.
+
+```json
+{
+  "type": "spacer",
+  "id": "spacer",
+  "title": "Vertical spacing",
+  "span": 12,
+  "className": "hp-example-spacer",
+  "hidden": false,
+  "style": {
+    "height": 24,
+    "minHeight": 24
+  },
+  "css": ".hp-example-spacer { display: block; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  }
+}
+```
+
+### `divider` — Divider
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Subtle visual separation
+
+**Required properties:** `type`, `id`
+
+**Key properties:** —
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "divider",
+  "id": "divider",
+  "title": "Section divider",
+  "span": 12,
+  "className": "hp-example-divider",
+  "hidden": false,
+  "style": {
+    "marginTop": 8,
+    "marginBottom": 8
+  },
+  "css": ".hp-example-divider { border-color: #d8dee8; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  }
+}
+```
 
 ## Controls
 
-### searchBox
+_12 components_
 
-<!-- component:searchBox -->
+### `searchBox` — Search box
 
-### textInput
+**Status:** stable
 
-<!-- component:textInput -->
+**Level:** recommended
 
-### numberInput
+**Recommended use:** Search all visible row values
 
-<!-- component:numberInput -->
+**Required properties:** `type`, `id`
 
-### slider
+**Key properties:** `field`, `placeholder`, `filter`
 
-<!-- component:slider -->
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
-### select
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-<!-- component:select -->
+**Data interaction:** Yes. **UI action:** No.
 
-### multiSelect
+```json
+{
+  "type": "searchBox",
+  "id": "searchBox",
+  "title": "Search records",
+  "span": 4,
+  "className": "hp-example-searchBox",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-searchBox { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "contains",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Search records",
+  "placeholder": "Search all records…",
+  "defaultValue": "",
+  "targets": [
+    "detail_table"
+  ],
+  "filter": {
+    "operator": "contains",
+    "value": ""
+  }
+}
+```
 
-<!-- component:multiSelect -->
+### `textInput` — Text input
 
-### segmentedControl
+**Status:** stable
 
-<!-- component:segmentedControl -->
+**Level:** standard
 
-### toggle
+**Recommended use:** Text field filtering
 
-<!-- component:toggle -->
+**Required properties:** `type`, `id`
 
-### button
+**Key properties:** `field`, `placeholder`, `filter`
 
-<!-- component:button -->
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
-### buttonGroup
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-<!-- component:buttonGroup -->
+**Data interaction:** Yes. **UI action:** No.
 
-### filterChips
+```json
+{
+  "type": "textInput",
+  "id": "textInput",
+  "title": "Contains text",
+  "span": 4,
+  "className": "hp-example-textInput",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-textInput { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "contains",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Contains text",
+  "placeholder": "Enter text…",
+  "defaultValue": "",
+  "targets": [
+    "detail_table"
+  ],
+  "filter": {
+    "operator": "contains",
+    "value": ""
+  }
+}
+```
 
-<!-- component:filterChips -->
+### `numberInput` — Number input
 
-### dateRange
+**Status:** stable
 
-<!-- component:dateRange -->
+**Level:** standard
+
+**Recommended use:** Numeric thresholds
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `min`, `max`, `step`, `filter`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "numberInput",
+  "id": "numberInput",
+  "title": "Minimum amount",
+  "span": 4,
+  "className": "hp-example-numberInput",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-numberInput { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Minimum amount",
+  "placeholder": "Choose minimum amount",
+  "defaultValue": 0,
+  "targets": [
+    "detail_table"
+  ],
+  "min": 0,
+  "max": 1000000,
+  "step": 100,
+  "filter": {
+    "operator": ">=",
+    "value": 0
+  }
+}
+```
+
+### `slider` — Slider
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Bounded numeric filtering
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `min`, `max`, `step`, `filter`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "slider",
+  "id": "slider",
+  "title": "Minimum score",
+  "span": 4,
+  "className": "hp-example-slider",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-slider { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Minimum score",
+  "placeholder": "Choose minimum score",
+  "defaultValue": 50,
+  "targets": [
+    "detail_table"
+  ],
+  "min": 0,
+  "max": 100,
+  "step": 5,
+  "filter": {
+    "operator": ">=",
+    "value": 50
+  }
+}
+```
+
+### `select` — Select
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Compact categorical filtering
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `options`, `filter`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Uses native <select> element.
+
+```json
+{
+  "type": "select",
+  "id": "select",
+  "title": "Status",
+  "span": 4,
+  "className": "hp-example-select",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-select { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Status",
+  "placeholder": "Choose status",
+  "defaultValue": "",
+  "targets": [
+    "detail_table"
+  ],
+  "options": [
+    {
+      "label": "Open",
+      "value": "Open"
+    },
+    {
+      "label": "Closed",
+      "value": "Closed"
+    }
+  ],
+  "filter": {
+    "operator": "=",
+    "value": ""
+  }
+}
+```
+
+### `multiSelect` — Multi-select
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Filtering by several categories
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `options`, `multiple`, `filter`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "multiSelect",
+  "id": "multiSelect",
+  "title": "Statuses",
+  "span": 4,
+  "className": "hp-example-multiSelect",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-multiSelect { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "in",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Statuses",
+  "placeholder": "Choose statuses",
+  "defaultValue": [],
+  "targets": [
+    "detail_table"
+  ],
+  "multiple": true,
+  "options": [
+    {
+      "label": "Open",
+      "value": "Open"
+    },
+    {
+      "label": "Closed",
+      "value": "Closed"
+    }
+  ],
+  "filter": {
+    "operator": "in",
+    "value": []
+  }
+}
+```
+
+### `segmentedControl` — Segmented control
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Two to seven high-frequency choices
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `options`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Related:** `buttonGroup`
+
+```json
+{
+  "type": "segmentedControl",
+  "id": "segmentedControl",
+  "title": "Priority",
+  "span": 4,
+  "className": "hp-example-segmentedControl",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-segmentedControl { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Priority",
+  "placeholder": "Choose priority",
+  "defaultValue": "",
+  "targets": [
+    "detail_table"
+  ],
+  "options": [
+    {
+      "label": "High",
+      "value": "High"
+    },
+    {
+      "label": "Medium",
+      "value": "Medium"
+    },
+    {
+      "label": "Low",
+      "value": "Low"
+    }
+  ],
+  "filter": {
+    "operator": "=",
+    "value": ""
+  }
+}
+```
+
+### `toggle` — Toggle
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Boolean state or view switch
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `defaultValue`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "toggle",
+  "id": "toggle",
+  "title": "Active records only",
+  "span": 4,
+  "className": "hp-example-toggle",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-toggle { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Active records only",
+  "placeholder": "Choose active records only",
+  "defaultValue": false,
+  "targets": [
+    "detail_table"
+  ],
+  "filter": {
+    "operator": "=",
+    "value": true
+  }
+}
+```
+
+### `button` — Button
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Clear filters or open a view
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `label`, `action`, `actionValue`, `uiAction`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Compatibility:** Legacy action/actionValue normalized to uiAction internally. Prefer uiAction for new specs.
+
+```json
+{
+  "type": "button",
+  "id": "button",
+  "title": "Reset filters",
+  "span": 2,
+  "className": "hp-example-button",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-button { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "change",
+    "internalMode": "none",
+    "internalScope": "all",
+    "externalMode": "none",
+    "selectionMode": "replace",
+    "multiSelect": false,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "label": "Reset filters",
+  "action": "clearFilters",
+  "actionValue": ""
+}
+```
+
+### `buttonGroup` — Button group
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Small action groups
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `buttons`, `defaultValue`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+```json
+{
+  "type": "buttonGroup",
+  "id": "buttonGroup",
+  "title": "View options",
+  "span": 4,
+  "className": "hp-example-buttonGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-buttonGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "change",
+    "internalMode": "none",
+    "internalScope": "self",
+    "externalMode": "none",
+    "selectionMode": "replace",
+    "multiSelect": false,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "label": "View",
+  "defaultValue": "summary",
+  "buttons": [
+    {
+      "id": "summary",
+      "label": "Summary",
+      "value": "summary",
+      "action": "setTab"
+    },
+    {
+      "id": "details",
+      "label": "Details",
+      "value": "details",
+      "action": "setTab"
+    }
+  ]
+}
+```
+
+### `filterChips` — Filter chips
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Visible applied-filter summary
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `targets`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "filterChips",
+  "id": "filterChips",
+  "title": "Applied filters",
+  "span": 12,
+  "className": "hp-example-filterChips",
+  "hidden": false,
+  "style": {
+    "display": "flex",
+    "gap": 6,
+    "minWidth": 0
+  },
+  "css": ".hp-example-filterChips { flex-wrap: wrap; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "change",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "targets": [
+    "detail_table"
+  ]
+}
+```
+
+### `dateRange` — Date range
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Start/end date filtering
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `defaultValue`, `filter`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "dateRange",
+  "id": "dateRange",
+  "title": "Reporting period",
+  "span": 4,
+  "className": "hp-example-dateRange",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-dateRange { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "between",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Reporting period",
+  "placeholder": "Choose reporting period",
+  "defaultValue": [
+    "2026-01-01",
+    "2026-12-31"
+  ],
+  "targets": [
+    "detail_table"
+  ],
+  "filter": {
+    "operator": "between",
+    "value": [
+      "2026-01-01",
+      "2026-12-31"
+    ]
+  }
+}
+```
 
 ## Navigation
 
-### tabs
+_7 components_
 
-<!-- component:tabs -->
+### `tabs` — Tabs
 
-### collapsible
+**Status:** stable
 
-<!-- component:collapsible -->
+**Level:** recommended
 
-### accordion
+**Recommended use:** Separate overview, map, and details
 
-<!-- component:accordion -->
+**Required properties:** `type`, `id`, `tabs`
 
-### drawer
+**Key properties:** `tabs[].id`, `tabs[].title`, `tabs[].children`
 
-<!-- component:drawer -->
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `tabs`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
-### filterDrawer
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-<!-- component:filterDrawer -->
+**Data interaction:** Yes. **UI action:** Yes.
 
-### steps
+```json
+{
+  "type": "tabs",
+  "id": "tabs",
+  "title": "Dashboard views",
+  "span": 12,
+  "className": "hp-example-tabs",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-tabs { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "none",
+    "internalScope": "self",
+    "externalMode": "none",
+    "selectionMode": "replace",
+    "multiSelect": false,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "tabs": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "children": [
+        {
+          "type": "text",
+          "id": "overview_content",
+          "span": 12,
+          "text": "Supporting content",
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "details",
+      "title": "Details",
+      "children": [
+        {
+          "type": "table",
+          "id": "table",
+          "title": "Records",
+          "span": 12,
+          "className": "hp-example-table",
+          "hidden": false,
+          "style": {
+            "minWidth": 0
+          },
+          "css": ".hp-example-table { min-width: 0; }",
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          },
+          "columns": [
+            "__field_key__"
+          ],
+          "pagination": true,
+          "pageSize": 25
+        }
+      ]
+    }
+  ]
+}
+```
 
-<!-- component:steps -->
+### `collapsible` — Collapsible section
 
-### stepper
+**Status:** stable
 
-<!-- component:stepper -->
+**Level:** standard
+
+**Recommended use:** Hide secondary content
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `children`, `defaultOpen`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `accordion`
+
+```json
+{
+  "type": "collapsible",
+  "id": "collapsible",
+  "title": "Optional details",
+  "span": 12,
+  "className": "hp-example-collapsible",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-collapsible { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "text",
+      "id": "collapsible_content",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ],
+  "collapsible": true,
+  "defaultOpen": true
+}
+```
+
+### `accordion` — Accordion
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact grouped filters
+
+**Required properties:** `type`, `id`, `items`
+
+**Key properties:** `items[].id`, `items[].title`, `items[].children`, `multiple`, `defaultOpenItems`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `defaultOpenItems`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `multiple`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Accessibility:** Supports arrow-key navigation between headers. Enter/Space toggles. Proper aria-expanded.
+
+**Compatibility:** Legacy accordion with only children wraps into one item automatically.
+
+**Related:** `collapsible`
+
+```json
+{
+  "type": "accordion",
+  "id": "accordion",
+  "title": "Filter group",
+  "span": 12,
+  "className": "hp-example-accordion",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-accordion { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Category",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Category",
+      "placeholder": "Choose category",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    },
+    {
+      "type": "slider",
+      "id": "slider",
+      "title": "Score",
+      "span": 4,
+      "className": "hp-example-slider",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-slider { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Score",
+      "placeholder": "Choose score",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    }
+  ],
+  "collapsible": true,
+  "defaultOpen": false
+}
+```
+
+### `drawer` — Drawer / slide-over
+
+**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas for new components.
+
+**Level:** recommended
+
+**Recommended use:** Selected-record details without leaving context
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `children`, `position`, `width`, `openWhen`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Compatibility:** Legacy drawer. Normalized to offcanvas internally. Use offcanvas for new specs.
+
+**Related:** `offcanvas`, `filterDrawer`
+
+```json
+{
+  "type": "drawer",
+  "id": "drawer",
+  "title": "Selected record",
+  "span": 12,
+  "className": "hp-example-drawer",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-drawer { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "position": "right",
+  "width": 360,
+  "openWhen": "selectedRow",
+  "stateKey": "detail_drawer_open",
+  "defaultOpen": true,
+  "collapsible": true,
+  "children": [
+    {
+      "type": "detailPanel",
+      "id": "detailPanel",
+      "title": "Record details",
+      "span": 12,
+      "className": "hp-example-detailPanel",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-detailPanel { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "selectedRow": true,
+      "emptyText": "Select a row",
+      "groups": [
+        {
+          "title": "Overview",
+          "fields": [
+            {
+              "field": "__field_key__",
+              "label": "Record",
+              "badge": true,
+              "copyable": true,
+              "format": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### `filterDrawer` — Filter drawer
+
+**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas for new components.
+
+**Level:** recommended
+
+**Recommended use:** On-demand compact filter controls
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `children`, `position`, `width`, `openWhen`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Compatibility:** Legacy filter drawer. Use offcanvas for new specs.
+
+**Related:** `drawer`, `offcanvas`
+
+```json
+{
+  "type": "filterDrawer",
+  "id": "filterDrawer",
+  "title": "Filters",
+  "span": 12,
+  "className": "hp-example-filterDrawer",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-filterDrawer { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "position": "left",
+  "width": 300,
+  "openWhen": "always",
+  "stateKey": "filter_drawer_open",
+  "defaultOpen": false,
+  "collapsible": true,
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Category",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Category",
+      "placeholder": "Choose category",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    },
+    {
+      "type": "dateRange",
+      "id": "dateRange",
+      "title": "Date range",
+      "span": 4,
+      "className": "hp-example-dateRange",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-dateRange { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "between",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Date range",
+      "placeholder": "Choose date range",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    }
+  ]
+}
+```
+
+### `steps` — Steps
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Sequential workflow progression
+
+**Required properties:** `type`, `id`, `items`
+
+**Key properties:** `items[].id`, `items[].label`, `orientation`, `activeStep`, `stateKey`, `clickable`
+
+**All allowed properties:** `activeStep`, `ariaLabel`, `className`, `clickable`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `orientation`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** Yes.
+
+**Related:** `tracking`
+
+```json
+{
+  "type": "steps",
+  "id": "steps",
+  "title": "Workflow progress",
+  "span": 12,
+  "className": "hp-example-steps",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-steps { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "orientation": "horizontal",
+  "activeStep": "review",
+  "stateKey": "workflow_steps",
+  "clickable": true,
+  "items": [
+    {
+      "id": "draft",
+      "label": "Draft",
+      "description": "Initial preparation"
+    },
+    {
+      "id": "review",
+      "label": "Review",
+      "description": "Quality check"
+    },
+    {
+      "id": "complete",
+      "label": "Complete",
+      "description": "Finalized"
+    }
+  ]
+}
+```
+
+### `stepper` — Stepper
+
+**Status:** compatibility — Legacy stepper. Prefer steps for new workflows.
+
+**Level:** advanced
+
+**Recommended use:** Sequential app-style flows (legacy)
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `children`, `defaultOpen`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Compatibility:** Legacy stepper rendered as collapsible section. Use steps for real workflow progression.
+
+**Related:** `steps`
+
+```json
+{
+  "type": "stepper",
+  "id": "stepper",
+  "title": "Workflow step",
+  "span": 12,
+  "className": "hp-example-stepper",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-stepper { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "direction": "column",
+  "columns": 12,
+  "gap": 8,
+  "children": [
+    {
+      "type": "infoCard",
+      "id": "infoCard",
+      "title": "Step instructions",
+      "span": 12,
+      "className": "hp-example-infoCard",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-infoCard { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "text": "Complete this step before continuing.",
+      "intent": "primary"
+    },
+    {
+      "type": "text",
+      "id": "step_content",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ],
+  "defaultOpen": true
+}
+```
 
 ## Display
 
-### kpi
+_9 components_
 
-<!-- component:kpi -->
+### `kpi` — KPI card
 
-### metricGrid
+**Status:** stable
 
-<!-- component:metricGrid -->
+**Level:** recommended
 
-### infoCard
+**Recommended use:** One decision-critical number
 
-<!-- component:infoCard -->
+**Required properties:** `type`, `id`
 
-### statusBadge
+**Key properties:** `field`, `aggregation`, `format`, `intent`, `prefix`, `suffix`
 
-<!-- component:statusBadge -->
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
-### progressBar
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-<!-- component:progressBar -->
+**Data interaction:** No. **UI action:** No.
 
-### alert
+```json
+{
+  "type": "kpi",
+  "id": "kpi",
+  "title": "Total value",
+  "span": 3,
+  "className": "hp-example-kpi",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-kpi { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__field_key__",
+  "aggregation": "sum",
+  "format": "currency",
+  "intent": "primary"
+}
+```
 
-<!-- component:alert -->
+### `metricGrid` — Metric grid
 
-### statList
+**Status:** stable
 
-<!-- component:statList -->
+**Level:** recommended
 
-### detailPanel
+**Recommended use:** Three to six summary metrics
 
-<!-- component:detailPanel -->
+**Required properties:** `type`, `id`
 
-### timeline
+**Key properties:** `metrics[].title`, `metrics[].field`, `metrics[].aggregation`, `metrics[].format`, `metrics[].intent`
 
-<!-- component:timeline -->
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "metricGrid",
+  "id": "metricGrid",
+  "title": "Executive metrics",
+  "span": 12,
+  "className": "hp-example-metricGrid",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-metricGrid { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "metrics": [
+    {
+      "title": "Records",
+      "aggregation": "count",
+      "format": "integer",
+      "intent": "primary",
+      "prefix": "",
+      "suffix": ""
+    },
+    {
+      "title": "Total value",
+      "field": "__measure_field_key__",
+      "aggregation": "sum",
+      "format": "currency",
+      "intent": "success",
+      "prefix": "$",
+      "suffix": ""
+    },
+    {
+      "title": "Open records",
+      "field": "__field_key__",
+      "aggregation": "countWhere",
+      "where": {
+        "field": "__category_field_key__",
+        "equals": "Open"
+      },
+      "format": "integer",
+      "intent": "warning",
+      "metric": "open_records"
+    }
+  ]
+}
+```
+
+### `infoCard` — Info card
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Short explanatory or record content
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `text`, `intent`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "infoCard",
+  "id": "infoCard",
+  "title": "Record summary",
+  "span": 4,
+  "className": "hp-example-infoCard",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-infoCard { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__field_key__",
+  "aggregation": "first",
+  "format": "",
+  "intent": "neutral",
+  "text": "Context and guidance for this dashboard.",
+  "value": "Optional static fallback"
+}
+```
+
+### `statusBadge` — Status badge
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact status labeling
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `intent`, `value`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "statusBadge",
+  "id": "statusBadge",
+  "title": "Current status",
+  "span": 3,
+  "className": "hp-example-statusBadge",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-statusBadge { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__field_key__",
+  "aggregation": "first",
+  "format": "",
+  "intent": "success",
+  "value": "Active"
+}
+```
+
+### `progressBar` — Progress bar
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Progress toward a target
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `max`, `intent`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "progressBar",
+  "id": "progressBar",
+  "title": "Completion",
+  "span": 4,
+  "className": "hp-example-progressBar",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-progressBar { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__measure_field_key__",
+  "aggregation": "first",
+  "format": "percent",
+  "intent": "primary",
+  "value": 72,
+  "max": 100
+}
+```
+
+### `alert` — Alert
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Actionable exception banner
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `text`, `intent`, `field`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "alert",
+  "id": "alert",
+  "title": "Attention required",
+  "span": 12,
+  "className": "hp-example-alert",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-alert { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__field_key__",
+  "aggregation": "count",
+  "format": "integer",
+  "intent": "warning",
+  "text": "Some records require review.",
+  "value": "Review"
+}
+```
+
+### `statList` — Stat list
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact label/value summary
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `items[].label`, `items[].field`, `items[].format`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "statList",
+  "id": "statList",
+  "title": "Record statistics",
+  "span": 4,
+  "className": "hp-example-statList",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-statList { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "items": [
+    {
+      "label": "Owner",
+      "field": "__field_key__",
+      "format": ""
+    },
+    {
+      "label": "Amount",
+      "field": "__measure_field_key__",
+      "format": "currency"
+    },
+    {
+      "label": "Target",
+      "value": 100,
+      "format": "integer"
+    }
+  ]
+}
+```
+
+### `detailPanel` — Detail panel
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Selected-row fields, groups, badges, and copyable values
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `selectedRow`, `groups`, `items`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "detailPanel",
+  "id": "detailPanel",
+  "title": "Selected record",
+  "span": 5,
+  "className": "hp-example-detailPanel",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-detailPanel { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "selectedRow": true,
+  "emptyText": "Select a table row, chart point, map feature, or timeline event.",
+  "groups": [
+    {
+      "title": "Overview",
+      "fields": [
+        {
+          "field": "__field_key__",
+          "label": "Record",
+          "badge": true,
+          "copyable": true,
+          "format": ""
+        },
+        {
+          "field": "__category_field_key__",
+          "label": "Category"
+        }
+      ]
+    },
+    {
+      "title": "Measures",
+      "fields": [
+        {
+          "field": "__measure_field_key__",
+          "label": "Amount",
+          "format": "currency",
+          "copyable": true
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "label": "Record",
+      "field": "__field_key__"
+    },
+    {
+      "label": "Amount",
+      "field": "__measure_field_key__",
+      "format": "currency"
+    }
+  ]
+}
+```
+
+### `timeline` — Timeline / activity feed
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Operational history and status events
+
+**Required properties:** `type`, `id`, `dateField`, `titleField`
+
+**Key properties:** `dateField`, `titleField`, `categoryField`, `limit`
+
+**All allowed properties:** `ariaLabel`, `categoryField`, `className`, `css`, `data`, `dataset`, `dateField`, `descriptionField`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `limit`, `props`, `size`, `slots`, `sortDirection`, `span`, `statusField`, `style`, `subtitle`, `title`, `titleField`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "timeline",
+  "id": "timeline",
+  "title": "Activity timeline",
+  "span": 6,
+  "className": "hp-example-timeline",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-timeline { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "dateField": "__date_field_key__",
+  "titleField": "__field_key__",
+  "categoryField": "__category_field_key__",
+  "statusField": "__status_field_key__",
+  "descriptionField": "__description_field_key__",
+  "sortDirection": "desc",
+  "limit": 50
+}
+```
 
 ## Primitives
 
-### card
+_13 components_
 
-<!-- component:card -->
+### `card` — Card
 
-### icon
+**Status:** stable
 
-<!-- component:icon -->
+**Level:** recommended
 
-### iconButton
+**Recommended use:** Professional content container with header
 
-<!-- component:iconButton -->
+**Required properties:** `type`, `id`
 
-### avatar
+**Key properties:** `header`, `children`, `footer`, `padding`, `status`, `collapsible`, `actions`
 
-<!-- component:avatar -->
+**All allowed properties:** `actions`, `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `header`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `padding`, `props`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
-### avatarGroup
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-<!-- component:avatarGroup -->
+**Data interaction:** No. **UI action:** No.
 
-### listGroup
+**Do not use when:** When a simple section is sufficient.
 
-<!-- component:listGroup -->
+**Related:** `section`, `collapsible`
 
-### dataGrid
+```json
+{
+  "type": "card",
+  "id": "card",
+  "title": "Analysis card",
+  "span": 6,
+  "className": "hp-example-card",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-card { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "header": {
+    "title": "Performance",
+    "subtitle": "Current period",
+    "icon": "chart"
+  },
+  "padding": "compact",
+  "status": {
+    "intent": "primary",
+    "position": "top"
+  },
+  "children": [
+    {
+      "type": "text",
+      "id": "card_content",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ],
+  "footer": [
+    {
+      "type": "text",
+      "id": "text",
+      "title": "Footer note",
+      "span": 12,
+      "className": "hp-example-text",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-text { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "text": "Updated from Power BI"
+    }
+  ]
+}
+```
 
-<!-- component:dataGrid -->
+### `icon` — Icon
 
-### countUp
+**Status:** stable
 
-<!-- component:countUp -->
+**Level:** standard
 
-### tracking
+**Recommended use:** Safe SVG icon from bundled registry
 
-<!-- component:tracking -->
+**Required properties:** `type`, `id`, `icon`
 
-### dropdown
+**Key properties:** `icon`, `size`, `ariaLabel`
 
-<!-- component:dropdown -->
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
-### modal
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-<!-- component:modal -->
+**Data interaction:** No. **UI action:** No.
 
-### offcanvas
+**Do not use when:** When you need a clickable action — use iconButton instead.
 
-<!-- component:offcanvas -->
+**Accessibility:** Use ariaLabel when the icon is the only visible content.
 
-### popover
+```json
+{
+  "type": "icon",
+  "id": "icon",
+  "title": "Information icon",
+  "span": 1,
+  "className": "hp-example-icon",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-icon { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "icon": "info",
+  "size": "md",
+  "ariaLabel": "Information"
+}
+```
 
-<!-- component:popover -->
+### `iconButton` — Icon button
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact accessible icon action
+
+**Required properties:** `type`, `id`, `icon`, `ariaLabel`
+
+**Key properties:** `icon`, `ariaLabel`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** Yes.
+
+**Accessibility:** ariaLabel is required. Tooltips provide additional context.
+
+```json
+{
+  "type": "iconButton",
+  "id": "iconButton",
+  "title": "Refresh dashboard",
+  "span": 1,
+  "className": "hp-example-iconButton",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-iconButton { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "icon": "refresh",
+  "ariaLabel": "Refresh data",
+  "variant": "ghost",
+  "size": "sm",
+  "uiAction": {
+    "type": "showToast",
+    "message": "Dashboard refreshed",
+    "intent": "primary",
+    "durationMs": 3000
+  }
+}
+```
+
+### `avatar` — Avatar
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Identity indicator with initials
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `initials`, `label`, `size`, `shape`, `status`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `initials`, `interaction`, `interactions`, `label`, `props`, `shape`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** Remote avatar URLs are not supported. Use initials only.
+
+```json
+{
+  "type": "avatar",
+  "id": "avatar",
+  "title": "User avatar",
+  "span": 1,
+  "className": "hp-example-avatar",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-avatar { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "initials": "JD",
+  "label": "Jane Doe",
+  "size": "md",
+  "shape": "circle",
+  "status": "online"
+}
+```
+
+### `avatarGroup` — Avatar group
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Stacked identity indicators
+
+**Required properties:** `type`, `id`, `avatars`
+
+**Key properties:** `avatars`, `max`
+
+**All allowed properties:** `ariaLabel`, `avatars`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `max`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "avatarGroup",
+  "id": "avatarGroup",
+  "title": "Team members",
+  "span": 3,
+  "className": "hp-example-avatarGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-avatarGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "avatars": [
+    {
+      "type": "avatar",
+      "id": "avatar",
+      "title": "Member 1",
+      "span": 12,
+      "className": "hp-example-avatar",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-avatar { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "initials": "JD",
+      "size": "sm",
+      "shape": "circle"
+    },
+    {
+      "type": "avatar",
+      "id": "avatar_2",
+      "title": "Member 2",
+      "span": 12,
+      "className": "hp-example-avatar",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-avatar { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "initials": "AK",
+      "size": "sm",
+      "shape": "circle"
+    }
+  ],
+  "max": 5
+}
+```
+
+### `listGroup` — List group
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Compact row list with badges and actions
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `source`, `primaryField`, `secondaryField`, `badgeField`, `items`, `maxItems`, `compact`
+
+**All allowed properties:** `ariaLabel`, `badgeField`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `maxItems`, `primaryField`, `props`, `secondaryField`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** For a simple plain list without data binding.
+
+**Related:** `dataGrid`
+
+```json
+{
+  "type": "listGroup",
+  "id": "listGroup",
+  "title": "Recent items",
+  "span": 12,
+  "className": "hp-example-listGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-listGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "source": "rows",
+  "primaryField": "__field_key__",
+  "secondaryField": "__category_field_key__",
+  "badgeField": "__status_field_key__",
+  "maxItems": 10,
+  "compact": false
+}
+```
+
+### `dataGrid` — Data grid
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Record detail label/value layout
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `items`, `selectedRow`, `columns`, `source`
+
+**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `props`, `selectedRow`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** For analytical pivot-style comparison — use matrix instead.
+
+**Related:** `listGroup`, `detailPanel`
+
+```json
+{
+  "type": "dataGrid",
+  "id": "dataGrid",
+  "title": "Record details",
+  "span": 12,
+  "className": "hp-example-dataGrid",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-dataGrid { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "selectedRow": true,
+  "columns": 2,
+  "items": [
+    {
+      "label": "Record",
+      "field": "__field_key__",
+      "copyable": true
+    },
+    {
+      "label": "Status",
+      "field": "__category_field_key__",
+      "badge": true
+    },
+    {
+      "label": "Value",
+      "field": "__measure_field_key__",
+      "format": "currency"
+    }
+  ]
+}
+```
+
+### `countUp` — Count-up
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Animated number with prefix/suffix
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `aggregation`, `value`, `prefix`, `suffix`, `duration`, `format`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `duration`, `field`, `format`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `prefix`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `suffix`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** For static display without animation — use kpi instead.
+
+**Accessibility:** Respects prefers-reduced-motion. Animation disabled under reduced motion.
+
+```json
+{
+  "type": "countUp",
+  "id": "countUp",
+  "title": "Total value",
+  "span": 3,
+  "className": "hp-example-countUp",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-countUp { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "field": "__measure_field_key__",
+  "aggregation": "sum",
+  "prefix": "$",
+  "suffix": "",
+  "duration": 2000,
+  "format": "currency"
+}
+```
+
+### `tracking` — Tracking
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compact stage progress display
+
+**Required properties:** `type`, `id`, `stages`
+
+**Key properties:** `stages`, `activeStage`, `stageField`, `orientation`, `compact`
+
+**All allowed properties:** `activeStage`, `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `orientation`, `props`, `size`, `slots`, `span`, `stageField`, `stages`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Related:** `steps`
+
+```json
+{
+  "type": "tracking",
+  "id": "tracking",
+  "title": "Approval progress",
+  "span": 12,
+  "className": "hp-example-tracking",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-tracking { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "stages": [
+    {
+      "id": "submitted",
+      "label": "Submitted",
+      "state": "complete"
+    },
+    {
+      "id": "review",
+      "label": "In Review",
+      "state": "current"
+    },
+    {
+      "id": "approved",
+      "label": "Approved",
+      "state": "upcoming"
+    }
+  ],
+  "activeStage": "review",
+  "orientation": "horizontal",
+  "compact": false
+}
+```
+
+### `dropdown` — Dropdown
+
+**Status:** stable — Root-hosted menu with collision-aware positioning and shared navbar integration.
+
+**Level:** recommended
+
+**Recommended use:** Compact action menu
+
+**Required properties:** `type`, `id`, `items`
+
+**Key properties:** `id`, `trigger`, `items`, `placement`, `closeOnSelect`
+
+**All allowed properties:** `ariaLabel`, `className`, `closeOnSelect`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `placement`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Do not use when:** The content is informational or contains form controls; use popover instead.
+
+**Accessibility:** Menu roles, roving arrow-key focus, Home/End, nested-menu keys, Escape/Tab dismissal, and trigger focus restoration are supported.
+
+```json
+{
+  "type": "dropdown",
+  "id": "dropdown",
+  "title": "Row actions",
+  "span": 12,
+  "className": "hp-example-dropdown",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-dropdown { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "trigger": {
+    "label": "Actions",
+    "icon": "dots",
+    "variant": "ghost"
+  },
+  "items": [
+    {
+      "id": "view",
+      "label": "View details",
+      "icon": "eye",
+      "action": {
+        "type": "openOverlay",
+        "target": "detail_modal"
+      }
+    },
+    {
+      "id": "divider",
+      "divider": true
+    },
+    {
+      "id": "delete",
+      "label": "Remove",
+      "icon": "trash",
+      "disabled": true
+    }
+  ],
+  "placement": "bottom-end",
+  "closeOnSelect": true
+}
+```
+
+### `modal` — Modal
+
+**Status:** stable — Root-hosted blocking dialog with stacking, document-level dismissal, and focus containment.
+
+**Level:** recommended
+
+**Recommended use:** Focused overlay with children
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `id`, `title`, `children`, `footer`, `size`, `backdropClose`, `ariaLabel`
+
+**All allowed properties:** `ariaLabel`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** Yes.
+
+**Do not use when:** The task does not need to block the dashboard; prefer popover or offcanvas.
+
+**Accessibility:** Initial focus, focus trap, Escape close, labelled dialog semantics, and trigger focus restoration are supported.
+
+```json
+{
+  "type": "modal",
+  "id": "modal",
+  "title": "Record Details",
+  "span": 12,
+  "className": "hp-example-modal",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-modal { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "size": "md",
+  "backdropClose": true,
+  "children": [
+    {
+      "type": "dataGrid",
+      "id": "dataGrid",
+      "title": "Details",
+      "span": 12,
+      "className": "hp-example-dataGrid",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-dataGrid { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "items": [
+        {
+          "label": "Record",
+          "field": "__field_key__"
+        },
+        {
+          "label": "Value",
+          "field": "__measure_field_key__",
+          "format": "currency"
+        }
+      ]
+    }
+  ],
+  "footer": [
+    {
+      "type": "button",
+      "id": "button",
+      "title": "Close",
+      "span": 12,
+      "className": "hp-example-button",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-button { min-width: 0; }",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      },
+      "label": "Close",
+      "uiAction": {
+        "type": "closeOverlay",
+        "target": "detail_modal"
+      }
+    }
+  ]
+}
+```
+
+### `offcanvas` — Offcanvas
+
+**Status:** stable — Root-hosted responsive side panel shared by legacy drawer components.
+
+**Level:** recommended
+
+**Recommended use:** Slide-over panel for details/filters
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `id`, `title`, `children`, `position`, `width`, `openWhen`, `stateKey`, `backdrop`
+
+**All allowed properties:** `ariaLabel`, `backdrop`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Accessibility:** Uses dialog semantics, managed focus, Escape/backdrop close, an accessible close button, and internal scrolling.
+
+**Related:** `drawer`, `filterDrawer`, `modal`
+
+```json
+{
+  "type": "offcanvas",
+  "id": "offcanvas",
+  "title": "Filters",
+  "span": 12,
+  "className": "hp-example-offcanvas",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-offcanvas { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "position": "left",
+  "width": 320,
+  "openWhen": "state",
+  "stateKey": "filter_offcanvas",
+  "children": [
+    {
+      "type": "select",
+      "id": "select",
+      "title": "Category",
+      "span": 4,
+      "className": "hp-example-select",
+      "hidden": false,
+      "style": {
+        "minWidth": 0
+      },
+      "css": ".hp-example-select { min-width: 0; }",
+      "interaction": {
+        "enabled": true,
+        "trigger": "auto",
+        "internalMode": "filter",
+        "internalScope": "all",
+        "externalMode": "auto",
+        "field": "__field_key__",
+        "operator": "=",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": false
+      },
+      "field": "__field_key__",
+      "label": "Category",
+      "placeholder": "Choose category",
+      "defaultValue": "",
+      "targets": [
+        "detail_table"
+      ]
+    }
+  ]
+}
+```
+
+### `popover` — Popover
+
+**Status:** stable — Root-hosted rich contextual dialog with nested HyperPBI components.
+
+**Level:** standard
+
+**Recommended use:** Rich tooltip with actions
+
+**Required properties:** `type`, `id`, `trigger`, `children`
+
+**Key properties:** `id`, `trigger`, `children`, `placement`, `width`, `showArrow`
+
+**All allowed properties:** `ariaLabel`, `children`, `className`, `closeOnEscape`, `closeOnOutsideClick`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `placement`, `props`, `showArrow`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`, `width`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Do not use when:** A simple command list is sufficient; use dropdown instead.
+
+**Accessibility:** Uses role=dialog, managed focus, Escape/outside dismissal, ARIA trigger relationships, and focus restoration.
+
+```json
+{
+  "type": "popover",
+  "id": "popover",
+  "title": "Help popover",
+  "span": 1,
+  "className": "hp-example-popover",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-popover { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "trigger": {
+    "label": "?",
+    "icon": "info"
+  },
+  "children": [
+    {
+      "type": "text",
+      "id": "popover_content",
+      "span": 12,
+      "text": "Supporting content",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    }
+  ]
+}
+```
 
 ## Feedback
 
-### emptyState
+_3 components_
 
-<!-- component:emptyState -->
+### `emptyState` — Empty state
 
-### placeholder
+**Status:** stable
 
-<!-- component:placeholder -->
+**Level:** recommended
 
-### spinner
+**Recommended use:** Placeholder when no data is available
 
-<!-- component:spinner -->
+**Required properties:** `type`, `id`
+
+**Key properties:** `icon`, `title`, `description`, `primaryAction`, `secondaryAction`, `compact`
+
+**All allowed properties:** `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `description`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `primaryAction`, `props`, `secondaryAction`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** Yes.
+
+```json
+{
+  "type": "emptyState",
+  "id": "emptyState",
+  "title": "No data available",
+  "span": 12,
+  "className": "hp-example-emptyState",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-emptyState { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "icon": "info",
+  "description": "No records match the current filters.",
+  "primaryAction": {
+    "type": "clearFilters"
+  },
+  "compact": false
+}
+```
+
+### `placeholder` — Placeholder
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Skeleton loading indicator
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `lines`, `placeholderVariant`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `lines`, `placeholderVariant`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Accessibility:** Uses aria-hidden. Respects prefers-reduced-motion.
+
+```json
+{
+  "type": "placeholder",
+  "id": "placeholder",
+  "title": "Loading content",
+  "span": 12,
+  "className": "hp-example-placeholder",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-placeholder { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "lines": 4,
+  "placeholderVariant": "text"
+}
+```
+
+### `spinner` — Spinner
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Inline or centered loading indicator
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `label`, `inline`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `inline`, `interaction`, `interactions`, `label`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** When you need a skeleton layout — use placeholder instead.
+
+**Accessibility:** Uses role=status with accessible label.
+
+```json
+{
+  "type": "spinner",
+  "id": "spinner",
+  "title": "Loading data",
+  "span": 12,
+  "className": "hp-example-spinner",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-spinner { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "label": "Loading records...",
+  "inline": false
+}
+```
 
 ## Forms
 
-### textarea
+_5 components_
 
-<!-- component:textarea -->
+### `textarea` — Text area
 
-### checkbox
+**Status:** stable
 
-<!-- component:checkbox -->
+**Level:** standard
 
-### checkboxGroup
+**Recommended use:** Multi-line text input
 
-<!-- component:checkboxGroup -->
+**Required properties:** `type`, `id`
 
-### radioGroup
+**Key properties:** `field`, `rows`, `maxLength`, `placeholder`, `label`
 
-<!-- component:radioGroup -->
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
-### inputGroup
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-<!-- component:inputGroup -->
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Associated label via generated ID.
+
+```json
+{
+  "type": "textarea",
+  "id": "textarea",
+  "title": "Notes",
+  "span": 4,
+  "className": "hp-example-textarea",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-textarea { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Notes",
+  "placeholder": "Enter notes...",
+  "defaultValue": "",
+  "targets": [
+    "detail_table"
+  ],
+  "rows": 4,
+  "maxLength": 500
+}
+```
+
+### `checkbox` — Checkbox
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Single boolean toggle
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `label`, `defaultValue`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "checkbox",
+  "id": "checkbox",
+  "title": "Include inactive",
+  "span": 12,
+  "className": "hp-example-checkbox",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-checkbox { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Include inactive records",
+  "defaultValue": false
+}
+```
+
+### `checkboxGroup` — Checkbox group
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Multiple choice selection
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `label`, `options`, `multiple`, `defaultValue`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "checkboxGroup",
+  "id": "checkboxGroup",
+  "title": "Categories",
+  "span": 12,
+  "className": "hp-example-checkboxGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-checkboxGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "in",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__category_field_key__",
+  "label": "Select categories",
+  "options": [
+    {
+      "label": "Category A",
+      "value": "A"
+    },
+    {
+      "label": "Category B",
+      "value": "B"
+    }
+  ],
+  "multiple": true,
+  "defaultValue": []
+}
+```
+
+### `radioGroup` — Radio group
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Single choice from options
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `label`, `options`, `defaultValue`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "radioGroup",
+  "id": "radioGroup",
+  "title": "Priority",
+  "span": 12,
+  "className": "hp-example-radioGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-radioGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "label": "Priority level",
+  "options": [
+    {
+      "label": "High",
+      "value": "High"
+    },
+    {
+      "label": "Medium",
+      "value": "Medium"
+    },
+    {
+      "label": "Low",
+      "value": "Low"
+    }
+  ],
+  "defaultValue": "Medium"
+}
+```
+
+### `inputGroup` — Input group
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Input with safe prefix/suffix
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `field`, `prefixIcon`, `prefixText`, `suffixIcon`, `suffixText`
+
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** Arbitrary HTML prefix/suffix content — only icon and safe text are supported.
+
+```json
+{
+  "type": "inputGroup",
+  "id": "inputGroup",
+  "title": "Search with icon",
+  "span": 12,
+  "className": "hp-example-inputGroup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-inputGroup { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "filter",
+    "internalScope": "all",
+    "externalMode": "auto",
+    "field": "__field_key__",
+    "operator": "contains",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": false
+  },
+  "field": "__field_key__",
+  "placeholder": "Search...",
+  "prefixIcon": "search",
+  "suffixText": "items"
+}
+```
 
 ## Charts
 
-### barChart
+_16 components_
 
-<!-- component:barChart -->
+### `barChart` — Bar chart
 
-### horizontalBarChart
+**Status:** stable
 
-<!-- component:horizontalBarChart -->
+**Level:** recommended
 
-### lineChart
+**Recommended use:** Ranked category comparison
 
-<!-- component:lineChart -->
+**Required properties:** `type`, `id`, `category`, `measure`
 
-### areaChart
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
 
-<!-- component:areaChart -->
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
-### pieChart
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-<!-- component:pieChart -->
+**Data interaction:** Yes. **UI action:** No.
 
-### donutChart
+```json
+{
+  "type": "barChart",
+  "id": "barChart",
+  "title": "Value by category",
+  "span": 6,
+  "className": "hp-example-barChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-barChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "axis",
+      "formatter": "{b}: {c}"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "xAxis": {
+      "axisLabel": {
+        "rotate": 0,
+        "hideOverlap": true
+      }
+    },
+    "series": [
+      {
+        "type": "bar",
+        "barMaxWidth": 42,
+        "label": {
+          "show": false
+        }
+      }
+    ]
+  }
+}
+```
 
-<!-- component:donutChart -->
+### `horizontalBarChart` — Horizontal bar
 
-### scatterChart
+**Status:** stable
 
-<!-- component:scatterChart -->
+**Level:** recommended
 
-### gauge
+**Recommended use:** Long category labels
 
-<!-- component:gauge -->
+**Required properties:** `type`, `id`, `category`, `measure`
 
-### heatmap
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
 
-<!-- component:heatmap -->
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
-### comboChart
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-<!-- component:comboChart -->
+**Data interaction:** Yes. **UI action:** No.
 
-### waterfallChart
+```json
+{
+  "type": "horizontalBarChart",
+  "id": "horizontalBarChart",
+  "title": "Ranked categories",
+  "span": 6,
+  "className": "hp-example-horizontalBarChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-horizontalBarChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "axis",
+      "formatter": "{b}: {c}"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "yAxis": {
+      "axisLabel": {
+        "width": 120,
+        "overflow": "truncate"
+      }
+    },
+    "series": [
+      {
+        "type": "bar",
+        "barMaxWidth": 32,
+        "label": {
+          "show": true,
+          "position": "right"
+        }
+      }
+    ]
+  }
+}
+```
 
-<!-- component:waterfallChart -->
+### `lineChart` — Line chart
 
-### sankeyChart
+**Status:** stable
 
-<!-- component:sankeyChart -->
+**Level:** recommended
 
-### treemapChart
+**Recommended use:** Time or ordered trends
 
-<!-- component:treemapChart -->
+**Required properties:** `type`, `id`, `category`, `measure`
 
-### funnelChart
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
 
-<!-- component:funnelChart -->
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
-### radarChart
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-<!-- component:radarChart -->
+**Data interaction:** Yes. **UI action:** No.
 
-### smallMultiples
+```json
+{
+  "type": "lineChart",
+  "id": "lineChart",
+  "title": "Trend over time",
+  "span": 6,
+  "className": "hp-example-lineChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-lineChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "axis"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "series": [
+      {
+        "type": "line",
+        "smooth": true,
+        "showSymbol": false,
+        "connectNulls": true
+      }
+    ]
+  }
+}
+```
 
-<!-- component:smallMultiples -->
+### `areaChart` — Area chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Trend plus magnitude
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "areaChart",
+  "id": "areaChart",
+  "title": "Volume trend",
+  "span": 6,
+  "className": "hp-example-areaChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-areaChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "axis",
+      "formatter": "{b}: {c}"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "series": [
+      {
+        "type": "line",
+        "smooth": true,
+        "areaStyle": {
+          "opacity": 0.24
+        },
+        "showSymbol": false
+      }
+    ]
+  }
+}
+```
+
+### `pieChart` — Pie chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Few-part composition only
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** With more than 8-10 categories.
+
+```json
+{
+  "type": "pieChart",
+  "id": "pieChart",
+  "title": "Category share",
+  "span": 6,
+  "className": "hp-example-pieChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-pieChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "item",
+      "formatter": "{b}: {c} ({d}%)"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "series": [
+      {
+        "type": "pie",
+        "radius": "72%",
+        "label": {
+          "show": true,
+          "formatter": "{b}: {d}%"
+        }
+      }
+    ]
+  }
+}
+```
+
+### `donutChart` — Donut chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Few-part composition with central space
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "donutChart",
+  "id": "donutChart",
+  "title": "Category distribution",
+  "span": 6,
+  "className": "hp-example-donutChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-donutChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "item",
+      "formatter": "{b}: {c} ({d}%)"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "series": [
+      {
+        "type": "pie",
+        "radius": [
+          "46%",
+          "72%"
+        ],
+        "avoidLabelOverlap": true
+      }
+    ]
+  }
+}
+```
+
+### `scatterChart` — Scatter chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Relationship between two measures
+
+**Required properties:** `type`, `id`, `x`, `y`
+
+**Key properties:** `x`, `y`, `pointSize`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "scatterChart",
+  "id": "scatterChart",
+  "title": "Measure relationship",
+  "span": 6,
+  "className": "hp-example-scatterChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-scatterChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "x": "__x_measure_field_key__",
+  "y": "__y_measure_field_key__",
+  "pointSize": "__size_measure_field_key__",
+  "height": 340,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false
+  },
+  "options": {
+    "tooltip": {
+      "trigger": "item"
+    },
+    "xAxis": {
+      "name": "X measure",
+      "scale": true
+    },
+    "yAxis": {
+      "name": "Y measure",
+      "scale": true
+    },
+    "series": [
+      {
+        "type": "scatter",
+        "emphasis": {
+          "focus": "series"
+        }
+      }
+    ]
+  }
+}
+```
+
+### `gauge` — Gauge
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Single target attainment
+
+**Required properties:** `type`, `id`, `measure`
+
+**Key properties:** `measure`, `aggregation`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "gauge",
+  "id": "gauge",
+  "title": "Target attainment",
+  "span": 4,
+  "className": "hp-example-gauge",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-gauge { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "measure": "__measure_field_key__",
+  "aggregation": "avg",
+  "height": 300,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false
+  },
+  "options": {
+    "series": [
+      {
+        "type": "gauge",
+        "min": 0,
+        "max": 100,
+        "progress": {
+          "show": true,
+          "width": 14
+        },
+        "axisLine": {
+          "lineStyle": {
+            "width": 14
+          }
+        },
+        "detail": {
+          "formatter": "{value}%"
+        }
+      }
+    ]
+  }
+}
+```
+
+### `heatmap` — Heatmap
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Dense intensity comparison
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "heatmap",
+  "id": "heatmap",
+  "title": "Category intensity",
+  "span": 6,
+  "className": "hp-example-heatmap",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-heatmap { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "height": 320,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "useDirtyRect": false
+  },
+  "setOption": {
+    "notMerge": true,
+    "lazyUpdate": false,
+    "silent": false
+  },
+  "options": {
+    "animation": true,
+    "tooltip": {
+      "trigger": "axis",
+      "formatter": "{b}: {c}"
+    },
+    "legend": {
+      "show": true,
+      "bottom": 0
+    },
+    "grid": {
+      "left": 48,
+      "right": 20,
+      "top": 32,
+      "bottom": 52,
+      "containLabel": true
+    },
+    "visualMap": {
+      "min": 0,
+      "max": 100,
+      "calculable": true,
+      "orient": "horizontal",
+      "bottom": 0
+    },
+    "series": [
+      {
+        "type": "heatmap",
+        "label": {
+          "show": true
+        },
+        "emphasis": {
+          "itemStyle": {
+            "shadowBlur": 8
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### `comboChart` — Combo chart
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Compare bar and line measures on shared categories
+
+**Required properties:** `type`, `id`, `category`, `series`
+
+**Key properties:** `category`, `series`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `series`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Each series/category point maps back to its source rows.
+
+**Related:** `barChart`, `lineChart`
+
+```json
+{
+  "type": "comboChart",
+  "id": "comboChart",
+  "title": "Actual vs. target",
+  "span": 8,
+  "className": "hp-example-comboChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-comboChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "series": [
+    {
+      "field": "__measure_field_key__",
+      "label": "Actual",
+      "chartType": "bar",
+      "aggregation": "sum",
+      "axis": "left"
+    },
+    {
+      "field": "__target_measure_field_key__",
+      "label": "Target",
+      "chartType": "line",
+      "aggregation": "sum",
+      "axis": "left"
+    },
+    {
+      "field": "__rate_measure_field_key__",
+      "label": "Completion",
+      "chartType": "line",
+      "aggregation": "avg",
+      "axis": "right",
+      "format": "percent"
+    }
+  ],
+  "height": 340,
+  "options": {
+    "legend": {
+      "top": 0
+    },
+    "animation": true
+  }
+}
+```
+
+### `waterfallChart` — Waterfall chart
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Explain positive and negative contributions to a total
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `aggregation`, `showStart`, `showEnd`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `negativeIntent`, `options`, `pointSize`, `positiveIntent`, `props`, `setOption`, `showEnd`, `showStart`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `totalIntent`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** A simple category comparison is sufficient; use barChart.
+
+```json
+{
+  "type": "waterfallChart",
+  "id": "waterfallChart",
+  "title": "Budget variance",
+  "span": 6,
+  "className": "hp-example-waterfallChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-waterfallChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "showStart": true,
+  "showEnd": true,
+  "positiveIntent": "success",
+  "negativeIntent": "danger",
+  "totalIntent": "primary",
+  "height": 320
+}
+```
+
+### `sankeyChart` — Sankey chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Show weighted flow between stages
+
+**Required properties:** `type`, `id`, `sourceField`, `targetField`
+
+**Key properties:** `sourceField`, `targetField`, `valueField`, `aggregation`, `orientation`, `selectionTarget`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `nodeAlign`, `options`, `orientation`, `pointSize`, `props`, `selectionTarget`, `setOption`, `size`, `slots`, `sourceField`, `span`, `style`, `subtitle`, `targetField`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Node and edge clicks retain distinct row bindings; accompany dense flows with a table when exact values matter.
+
+```json
+{
+  "type": "sankeyChart",
+  "id": "sankeyChart",
+  "title": "Work order flow",
+  "span": 8,
+  "className": "hp-example-sankeyChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-sankeyChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "sourceField": "__source_field_key__",
+  "targetField": "__target_field_key__",
+  "valueField": "__measure_field_key__",
+  "aggregation": "sum",
+  "orientation": "horizontal",
+  "nodeAlign": "justify",
+  "selectionTarget": "both",
+  "height": 380
+}
+```
+
+### `treemapChart` — Treemap chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Explore hierarchical contribution
+
+**Required properties:** `type`, `id`, `pathFields`, `valueField`
+
+**Key properties:** `pathFields`, `valueField`, `aggregation`, `maxDepth`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `labelField`, `maxDataRows`, `maxDepth`, `measure`, `options`, `pathFields`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Every hierarchy node maps to the contributing source rows.
+
+```json
+{
+  "type": "treemapChart",
+  "id": "treemapChart",
+  "title": "Cost hierarchy",
+  "span": 8,
+  "className": "hp-example-treemapChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-treemapChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "pathFields": [
+    "__department_field_key__",
+    "__program_field_key__",
+    "__project_field_key__"
+  ],
+  "valueField": "__measure_field_key__",
+  "aggregation": "sum",
+  "labelField": "__project_field_key__",
+  "maxDepth": 3,
+  "height": 380
+}
+```
+
+### `funnelChart` — Funnel chart
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Compare ordered process stages
+
+**Required properties:** `type`, `id`, `category`, `measure`
+
+**Key properties:** `category`, `measure`, `aggregation`, `sort`, `gap`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `gap`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `sort`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Labels include stage values and percentages.
+
+```json
+{
+  "type": "funnelChart",
+  "id": "funnelChart",
+  "title": "Project pipeline",
+  "span": 6,
+  "className": "hp-example-funnelChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-funnelChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "aggregation": "sum",
+  "sort": "descending",
+  "gap": 3,
+  "height": 340
+}
+```
+
+### `radarChart` — Radar chart
+
+**Status:** stable
+
+**Level:** advanced
+
+**Recommended use:** Compare multivariate profiles
+
+**Required properties:** `type`, `id`, `indicators`
+
+**Key properties:** `groupField`, `indicators`, `height`, `options`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `groupField`, `height`, `hidden`, `icon`, `id`, `indicators`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** Exact cross-group comparisons are more important than profile shape; use comboChart or a table.
+
+```json
+{
+  "type": "radarChart",
+  "id": "radarChart",
+  "title": "Team performance",
+  "span": 6,
+  "className": "hp-example-radarChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-radarChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "groupField": "__category_field_key__",
+  "indicators": [
+    {
+      "field": "__safety_measure_field_key__",
+      "label": "Safety",
+      "max": 100
+    },
+    {
+      "field": "__quality_measure_field_key__",
+      "label": "Quality",
+      "max": 100
+    },
+    {
+      "field": "__schedule_measure_field_key__",
+      "label": "Schedule",
+      "max": 100
+    }
+  ],
+  "height": 360
+}
+```
+
+### `smallMultiples` — Small multiples
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Repeat one comparison across a split field
+
+**Required properties:** `type`, `id`, `splitField`, `chart`
+
+**Key properties:** `splitField`, `chart`, `maxPanels`, `sharedScale`
+
+**All allowed properties:** `ariaLabel`, `chart`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxPanels`, `props`, `sharedScale`, `size`, `slots`, `span`, `splitField`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+```json
+{
+  "type": "smallMultiples",
+  "id": "smallMultiples",
+  "title": "Regional comparisons",
+  "span": 12,
+  "className": "hp-example-smallMultiples",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-smallMultiples { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "splitField": "__split_field_key__",
+  "maxPanels": 6,
+  "sharedScale": true,
+  "height": 200,
+  "chart": {
+    "type": "barChart",
+    "id": "small_multiple_chart",
+    "title": "Value by category",
+    "span": 12,
+    "className": "hp-example-barChart",
+    "hidden": false,
+    "style": {
+      "minWidth": 0
+    },
+    "css": ".hp-example-barChart { min-width: 0; }",
+    "interaction": {
+      "enabled": true,
+      "trigger": "auto",
+      "internalMode": "highlight",
+      "internalScope": "self",
+      "externalMode": "auto",
+      "selectionMode": "replace",
+      "multiSelect": true,
+      "showSelector": false,
+      "clearOnSecondClick": true
+    },
+    "category": "__category_field_key__",
+    "measure": "__measure_field_key__",
+    "aggregation": "sum",
+    "height": 200,
+    "maxDataRows": 30000,
+    "initOptions": {
+      "renderer": "canvas",
+      "useDirtyRect": false
+    },
+    "setOption": {
+      "notMerge": true,
+      "lazyUpdate": false,
+      "silent": false
+    },
+    "options": {
+      "animation": true,
+      "tooltip": {
+        "trigger": "axis",
+        "formatter": "{b}: {c}"
+      },
+      "legend": {
+        "show": true,
+        "bottom": 0
+      },
+      "grid": {
+        "left": 48,
+        "right": 20,
+        "top": 32,
+        "bottom": 52,
+        "containLabel": true
+      }
+    }
+  }
+}
+```
 
 ## Tables
 
-### table
+_2 components_
 
-<!-- component:table -->
+### `table` — Detail table
 
-### matrix
+**Status:** stable
 
-<!-- component:matrix -->
+**Level:** recommended
+
+**Recommended use:** Row-level investigation and export-ready detail
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `columns`, `pagination`, `pageSize`, `search`, `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`, `stickyHeader`
+
+**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `density`, `disabled`, `emptyState`, `engine`, `hidden`, `hover`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `pageSize`, `pageSizeOptions`, `pagination`, `props`, `resizableColumns`, `rowActions`, `search`, `showRowCount`, `size`, `slots`, `span`, `stickyHeader`, `striped`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Row actions use safe UiAction. Column resizing prevents row selection while active.
+
+**Compatibility:** Tabulator engine is not bundled. engine:'tabulator' is normalized to native.
+
+**Related:** `matrix`
+
+```json
+{
+  "type": "table",
+  "id": "table",
+  "title": "Record details",
+  "span": 12,
+  "className": "hp-example-table",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-table { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": true,
+    "clearOnSecondClick": true
+  },
+  "engine": "native",
+  "columns": [
+    {
+      "field": "__field_key__",
+      "title": "Record",
+      "width": 180,
+      "format": "",
+      "hozAlign": "left",
+      "conditional": [
+        {
+          "operator": "=",
+          "value": "Critical",
+          "color": "#991b1b",
+          "background": "#fee2e2"
+        }
+      ]
+    },
+    {
+      "field": "__measure_field_key__",
+      "title": "Amount",
+      "width": 120,
+      "format": "currency",
+      "hozAlign": "right",
+      "conditional": [
+        {
+          "operator": ">=",
+          "value": 1000,
+          "color": "#166534",
+          "background": "#dcfce7"
+        }
+      ]
+    }
+  ],
+  "pagination": true,
+  "pageSize": 25,
+  "search": true,
+  "resizableColumns": true,
+  "maxRows": 1000,
+  "stickyHeader": true
+}
+```
+
+### `matrix` — Matrix / pivot
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Summarized row-by-column comparison
+
+**Required properties:** `type`, `id`, `rows`, `values`
+
+**Key properties:** `rows`, `columns`, `values`, `showTotals`, `heatmap`
+
+**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `heatmap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `props`, `rows`, `showTotals`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `values`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** For row-level detail — use table instead.
+
+**Related:** `table`
+
+```json
+{
+  "type": "matrix",
+  "id": "matrix",
+  "title": "Category matrix",
+  "span": 12,
+  "className": "hp-example-matrix",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-matrix { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "rows": [
+    "__category_field_key__",
+    "__field_key__"
+  ],
+  "columns": [
+    "__column_field_key__"
+  ],
+  "values": [
+    {
+      "field": "__measure_field_key__",
+      "title": "Total amount",
+      "aggregation": "sum",
+      "format": "currency"
+    },
+    {
+      "title": "Records",
+      "aggregation": "count",
+      "format": "integer"
+    }
+  ],
+  "showTotals": true,
+  "heatmap": true,
+  "maxRows": 200
+}
+```
 
 ## Maps
 
-### map
+_1 components_
 
-<!-- component:map -->
+### `map` — Map
 
-Practical runtime support includes Power BI geometry, public ArcGIS feature layers and joins, viewport queries, tile and basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection. External ArcGIS requests require a Maps package whose WebAccess hosts match the service.
+**Status:** stable — Power BI spatial maps and the practical public ArcGIS REST runtime are connected. Supported ArcGIS sources are feature layers, tile overlays, and basic dynamic MapServer images; secured services, editing, 3D, non-4326 output, advanced label collision, and density grids are outside scope.
 
-## Compatibility
+**Level:** recommended
 
-Legacy properties and types remain supported for existing dashboards:
+**Recommended use:** Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers
 
-- `accordion` with only `children` (no `items`) — wrapped into one item automatically
-- `stepper` — rendered as a collapsible section. Use `steps` for new workflows.
-- `drawer` / `filterDrawer` — supported. Use `offcanvas` for new components.
-- `button.action` / `button.actionValue` — normalized to `uiAction` internally.
-- `table.engine: "tabulator"` — normalized to native with a nonblocking warning.
-- `map.settings` / `map.style` / `map.popup` — legacy map properties normalized to `layers[]`.
-- Deprecated properties: `internal`, `external`, `selectable`, `selectionMode`.
+**Required properties:** `type`, `id`
+
+**Key properties:** `view`, `basemap`, `layers`, `layerPanel`, `toolbar`, `settings`, `style`, `popup`, `height`
+
+**All allowed properties:** `ariaLabel`, `basemap`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerPanel`, `layers`, `legend`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** When spatial location data is not available in the semantic model.
+
+**Compatibility:** Legacy settings/style/popup fully supported. Normalized to layers[] internally.
+
+**Related:** `offcanvas`, `dataGrid`
+
+```json
+{
+  "type": "map",
+  "id": "map",
+  "title": "Locations",
+  "span": 12,
+  "className": "hp-example-map",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-map { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "height": 420,
+  "view": {
+    "center": [
+      29.75,
+      -95.35
+    ],
+    "zoom": 10,
+    "fitMode": "data"
+  },
+  "basemap": {
+    "type": "none"
+  },
+  "search": {
+    "enabled": true,
+    "placeholder": "Search for a place or address",
+    "zoom": 16,
+    "showResultMarker": true,
+    "clearMarkerOnClose": false
+  },
+  "legend": {
+    "defaultOpen": false
+  },
+  "layers": [
+    {
+      "id": "powerbi_locations",
+      "name": "Locations",
+      "source": {
+        "type": "powerbi",
+        "bindings": {
+          "latitude": "__latitude_field_key__",
+          "longitude": "__longitude_field_key__"
+        }
+      },
+      "renderer": {
+        "type": "simple",
+        "symbol": {
+          "shape": "circle",
+          "fillColor": "#2563eb",
+          "outlineColor": "#1d4ed8",
+          "size": 7
+        }
+      },
+      "popup": {
+        "enabled": true,
+        "title": "{{__field_key__}}",
+        "fields": [
+          {
+            "field": "__field_key__",
+            "fieldSource": "powerbi",
+            "label": "Location"
+          }
+        ]
+      },
+      "tooltip": {
+        "enabled": true,
+        "fields": [
+          {
+            "field": "__field_key__",
+            "fieldSource": "powerbi",
+            "label": "Location"
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "externalMode": "selection",
+        "selectionMode": "replace",
+        "multiSelect": true
+      }
+    }
+  ],
+  "layerPanel": {
+    "visible": true,
+    "defaultOpen": false,
+    "allowViewerReorder": true,
+    "allowViewerOpacity": true,
+    "allowViewerLabels": true
+  },
+  "toolbar": {
+    "visible": true,
+    "home": true,
+    "layers": true,
+    "legend": true,
+    "search": true,
+    "clearSelection": true,
+    "zoomToSelection": true
+  },
+  "settings": {
+    "showLayerControl": true,
+    "showLegend": true
+  }
+}
+```
+
+## Custom components
+
+_5 components_
+
+### `text` — Text
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Safe plain text
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `text`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** For structured content — use markdown or first-class components instead.
+
+```json
+{
+  "type": "text",
+  "id": "text",
+  "title": "Text content",
+  "span": 12,
+  "className": "hp-example-text",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-text { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "text": "Plain text content for the dashboard."
+}
+```
+
+### `markdown` — Markdown
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Structured explanatory content
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `text`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+```json
+{
+  "type": "markdown",
+  "id": "markdown",
+  "title": "Markdown content",
+  "span": 12,
+  "className": "hp-example-markdown",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-markdown { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "text": "## Dashboard notes\n\n- Current period\n- Key operational context\n\n**Field:** {{__field_key__}}"
+}
+```
+
+### `html` — Sanitized HTML
+
+**Status:** stable
+
+**Level:** advanced
+
+**Recommended use:** Branded static content
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `html`, `slots`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML Yes.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** When a first-class component (card, listGroup, dataGrid) can achieve the same result.
+
+**Accessibility:** HTML is sanitized with DOMPurify. No scripts, iframes, or event handlers allowed.
+
+```json
+{
+  "type": "html",
+  "id": "html",
+  "title": "Formatted content",
+  "span": 12,
+  "className": "hp-example-html",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-html { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "html": "<section class=\"summary\"><strong>Summary</strong><span>{{__field_key__}}</span></section>",
+  "slots": {
+    "header": "<span>Header content</span>",
+    "footer": "<small>Updated from Power BI data</small>"
+  }
+}
+```
+
+### `custom` — Custom HTML/CSS
+
+**Status:** stable
+
+**Level:** advanced
+
+**Recommended use:** Safe app-like cards, lists, and slicers
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `html`, `repeat`, `slots`, `interactions`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML Yes.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** When a first-class component can achieve the same result with less custom code.
+
+**Accessibility:** Custom HTML is sanitized. Repeat rows support keyboard interaction.
+
+**Related:** `html`, `listGroup`, `card`
+
+```json
+{
+  "type": "custom",
+  "id": "custom",
+  "title": "Interactive record list",
+  "span": 12,
+  "className": "hp-example-custom",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-custom { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "none",
+    "internalScope": "self",
+    "externalMode": "filter",
+    "field": "__field_key__",
+    "operator": "=",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "html": "<header><strong>Records</strong></header>",
+  "repeat": {
+    "source": "rows",
+    "as": "row",
+    "limit": 100,
+    "template": "<span>{{__field_key__}}</span><small>{{__category_field_key__}}</small>",
+    "distinctBy": "__field_key__",
+    "sortBy": "__field_key__",
+    "sortDirection": "asc"
+  },
+  "slots": {
+    "empty": "<p>No records available.</p>",
+    "footer": "<small>Select a record to filter the report.</small>"
+  },
+  "data": {
+    "variant": "compact-list"
+  },
+  "interactions": {
+    "onClick": {
+      "action": "selectWhere",
+      "where": {
+        "op": "=",
+        "left": {
+          "field": "__field_key__"
+        },
+        "right": {
+          "valueFromRow": "__field_key__"
+        }
+      }
+    }
+  }
+}
+```
+
+### `svg` — Declarative SVG
+
+**Status:** stable
+
+**Level:** recommended
+
+**Recommended use:** Animated KPI cards, diagrams, gauges, pictorial marks, and schematics
+
+**Required properties:** `type`, `id`, `viewBox`, `elements`
+
+**Key properties:** `viewBox`, `elements`, `dataContext`, `motion`, `performance`, `css`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Do not use when:** A standard analytical chart is available; use ECharts chart components for bars, lines, pies, scatterplots, heatmaps, Sankey, and treemaps.
+
+**Accessibility:** ariaLabel is recommended. Interactive marks are keyboard focusable and respond to Enter and Space. Motion respects the configured reduced-motion policy.
+
+**Related:** `svgMarkup`, `gauge`, `progressBar`
+
+```json
+{
+  "type": "svg",
+  "id": "svg",
+  "title": "Animated progress",
+  "span": 6,
+  "className": "hp-example-svg",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-svg { min-width: 0; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "viewBox": "0 0 800 240",
+  "height": 240,
+  "ariaLabel": "Completion progress",
+  "description": "A data-bound progress track and value label.",
+  "dataContext": {
+    "mode": "aggregate"
+  },
+  "motion": {
+    "enabled": true,
+    "reducedMotion": "respect-system",
+    "maxConcurrentAnimations": 12
+  },
+  "elements": [
+    {
+      "type": "defs",
+      "children": [
+        {
+          "type": "linearGradient",
+          "id": "progressGradient",
+          "x1": 0,
+          "y1": 0,
+          "x2": 1,
+          "y2": 0,
+          "children": [
+            {
+              "type": "stop",
+              "offset": "0%",
+              "stopColor": "var(--hp-primary)"
+            },
+            {
+              "type": "stop",
+              "offset": "100%",
+              "stopColor": "var(--hp-success)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "id": "track",
+      "x": 40,
+      "y": 120,
+      "width": 720,
+      "height": 22,
+      "rx": 11,
+      "fill": "var(--hp-muted)"
+    },
+    {
+      "type": "rect",
+      "id": "progress",
+      "x": 40,
+      "y": 120,
+      "width": {
+        "bind": "__measure_field_key__",
+        "scale": {
+          "type": "linear",
+          "domain": [
+            0,
+            100
+          ],
+          "range": [
+            0,
+            720
+          ],
+          "clamp": true
+        }
+      },
+      "height": 22,
+      "rx": 11,
+      "fill": "url(#progressGradient)",
+      "animation": {
+        "preset": "progress-fill",
+        "durationMs": 1000,
+        "easing": "ease-out"
+      }
+    },
+    {
+      "type": "text",
+      "x": 40,
+      "y": 82,
+      "text": {
+        "template": "{{__measure_field_key__}}%"
+      },
+      "fontSize": 28,
+      "fontWeight": 700
+    }
+  ]
+}
+```
+
+## Advanced components
+
+_2 components_
+
+### `svgMarkup` — Sanitized SVG markup
+
+**Status:** stable — Advanced escape hatch. Markup is parsed by the dedicated SVG sanitizer, isolated, and sanitized again before rendering.
+
+**Level:** advanced
+
+**Recommended use:** Strictly sanitized raw SVG when declarative SVG cannot express the design
+
+**Required properties:** `type`, `id`, `svg`
+
+**Key properties:** `svg`, `viewBox`, `ariaLabel`, `description`, `css`
+
+**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** No.
+
+**Do not use when:** Declarative SVG can express the visual. Raw SVG cannot use scripts, events, foreignObject, external assets, use, image, style elements, or arbitrary URLs.
+
+**Accessibility:** The component wrapper supplies accessible image semantics; include title/desc content in the SVG where useful.
+
+**Related:** `svg`
+
+```json
+{
+  "type": "svgMarkup",
+  "id": "svgMarkup",
+  "title": "Sanitized raw SVG",
+  "span": 6,
+  "className": "hp-example-svgMarkup",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-status { opacity: 1; }",
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
+  },
+  "viewBox": "0 0 400 160",
+  "height": 160,
+  "ariaLabel": "Operating status",
+  "description": "Advanced sanitized SVG markup example.",
+  "svg": "<svg viewBox=\"0 0 400 160\" role=\"img\"><defs><linearGradient id=\"statusGradient\"><stop offset=\"0%\" stop-color=\"#2563eb\"/><stop offset=\"100%\" stop-color=\"#16a34a\"/></linearGradient></defs><rect id=\"statusTrack\" x=\"20\" y=\"50\" width=\"360\" height=\"40\" rx=\"20\" fill=\"url(#statusGradient)\"/><text x=\"200\" y=\"76\" text-anchor=\"middle\" fill=\"white\">{{__field_key__}}</text></svg>"
+}
+```
+
+### `advancedChart` — Advanced ECharts
+
+**Status:** stable
+
+**Level:** advanced
+
+**Recommended use:** JSON-only ECharts escape hatch for uncommon configurations not represented by a first-class HyperPBI chart
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `options`, `category`, `measure`, `height`
+
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Do not use when:** A first-class semantic chart supports the request. Use advancedChart only for configurations the semantic schema cannot express.
+
+**Accessibility:** ECharts options are recursively sanitized. JavaScript functions, event handlers, executable markup, and external URLs are blocked.
+
+```json
+{
+  "type": "advancedChart",
+  "id": "advancedChart",
+  "title": "Advanced ECharts dashboard",
+  "span": 12,
+  "className": "hp-example-advancedChart",
+  "hidden": false,
+  "style": {
+    "minWidth": 0
+  },
+  "css": ".hp-example-advancedChart { min-width: 0; }",
+  "interaction": {
+    "enabled": true,
+    "trigger": "auto",
+    "internalMode": "highlight",
+    "internalScope": "self",
+    "externalMode": "auto",
+    "selectionMode": "replace",
+    "multiSelect": true,
+    "showSelector": false,
+    "clearOnSecondClick": true
+  },
+  "category": "__category_field_key__",
+  "measure": "__measure_field_key__",
+  "x": "__x_measure_field_key__",
+  "y": "__y_measure_field_key__",
+  "pointSize": "__size_measure_field_key__",
+  "height": 420,
+  "maxDataRows": 30000,
+  "initOptions": {
+    "renderer": "canvas",
+    "devicePixelRatio": 2,
+    "useDirtyRect": false,
+    "useCoarsePointer": true,
+    "pointerSize": 44,
+    "locale": "EN"
+  },
+  "setOption": {
+    "notMerge": false,
+    "lazyUpdate": false,
+    "silent": false,
+    "replaceMerge": [
+      "series"
+    ]
+  },
+  "options": {
+    "aria": {
+      "enabled": true
+    },
+    "title": {
+      "text": "Advanced analysis",
+      "left": "center"
+    },
+    "tooltip": {
+      "trigger": "axis",
+      "formatter": "{b}: {c}"
+    },
+    "legend": {
+      "type": "scroll",
+      "bottom": 0
+    },
+    "toolbox": {
+      "show": true,
+      "feature": {
+        "dataZoom": {},
+        "restore": {},
+        "saveAsImage": {}
+      }
+    },
+    "dataZoom": [
+      {
+        "type": "inside",
+        "start": 0,
+        "end": 100
+      },
+      {
+        "type": "slider",
+        "bottom": 28
+      }
+    ],
+    "grid": {
+      "left": 52,
+      "right": 24,
+      "top": 56,
+      "bottom": 86,
+      "containLabel": true
+    },
+    "xAxis": {
+      "type": "category",
+      "axisLabel": {
+        "hideOverlap": true
+      }
+    },
+    "yAxis": {
+      "type": "value",
+      "splitLine": {
+        "show": true
+      }
+    },
+    "visualMap": {
+      "show": false,
+      "min": 0,
+      "max": 100
+    },
+    "series": [
+      {
+        "type": "bar",
+        "encode": {
+          "x": "__category_field_key__",
+          "y": "__measure_field_key__"
+        },
+        "emphasis": {
+          "focus": "series"
+        },
+        "markLine": {
+          "data": [
+            {
+              "type": "average",
+              "name": "Average"
+            }
+          ]
+        }
+      },
+      {
+        "type": "line",
+        "encode": {
+          "x": "__category_field_key__",
+          "y": "__measure_field_key__"
+        },
+        "smooth": true,
+        "showSymbol": false
+      }
+    ]
+  }
+}
+```
+
+## Compatibility notes
+
+HyperPBI 1.0 specifications remain supported. Compatibility-only metadata above identifies types or forms retained for existing dashboards. Legacy accordion children, drawers/filter drawers, steppers, button `action`/`actionValue`, `table.engine: "tabulator"`, and legacy map settings are normalized without changing the 2.0 authoring default. Deprecated `internal`, `external`, `selectable`, and table `selectionMode` remain 1.0 compatibility inputs; new 2.0 specifications use `interaction`.

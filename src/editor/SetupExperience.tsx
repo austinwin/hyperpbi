@@ -13,7 +13,7 @@ export function SetupExperience({ data }: { data: NormalizedData }) {
                 <div><strong>Import or validate</strong><span>Paste AI JSON, import a file, repair validation issues, and inspect the live preview.</span></div>
                 <div><strong>Save to Power BI</strong><span>Save the specification and runtime configuration with persistent visual properties.</span></div>
             </div>
-            <div class="hp-field-summary"><strong>{Object.keys(data.fields).length} normalized fields</strong>{Object.values(data.fields).slice(0, 12).map(field => <span>{field.displayName}</span>)}</div>
+            <div class="hp-field-summary"><strong>{Object.keys(data.fields).length} bound fields</strong>{Object.values(data.fields).slice(0, 12).map(field => <span>{field.displayName}</span>)}</div>
         </main>
     </div>;
 }

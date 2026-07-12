@@ -77,7 +77,7 @@ export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPr
                 <details class="hp-builder-data-options">
                     <summary>Advanced data options <small>Privacy, samples, and selected fields</small></summary>
                     <div class="hp-form-grid">
-                        <label><span>Privacy</span><select value={value.privacyMode} onChange={event=>update("privacyMode",event.currentTarget.value as AiPromptSettings["privacyMode"])}><option value="fields">Field dictionary only</option><option value="samples">Sample rows</option><option value="masked">Masked samples</option><option value="summary">Summary only</option><option value="types">Types only</option></select></label>
+                        <label><span>Privacy</span><select value={value.privacyMode} onChange={event=>update("privacyMode",event.currentTarget.value as AiPromptSettings["privacyMode"])}><option value="fields">Field Manifest (no values)</option><option value="samples">Sample rows</option><option value="masked">Masked samples</option><option value="summary">Summary only</option><option value="types">Types only</option></select></label>
                         <label><span>Sample rows</span><input type="number" min="1" max="50" value={value.sampleRows} onInput={event=>update("sampleRows",Math.min(50,Math.max(1,Number(event.currentTarget.value))))}/></label>
                     </div>
                     <label><span>Fields (empty means all)</span><select multiple onChange={event=>update("selectedFields",Array.from(event.currentTarget.selectedOptions).map(option=>option.value))}>{fields.map(field=><option value={field} selected={value.selectedFields.includes(field)}>{field}</option>)}</select></label>

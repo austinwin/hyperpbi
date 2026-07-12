@@ -1,347 +1,241 @@
-// ── Documentation Generator ───────────────────────────────────────────
-// Generates Markdown and HTML component catalogs from canonical sources.
-// Run: node scripts/generate-documentation.mjs [--check]
+// ── HyperPBI documentation generator ─────────────────────────────────
+// Executes canonical TypeScript metadata without building the visual.
+// Generated files must never be edited by hand.
 
+import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, "..");
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const nodeRequire = createRequire(import.meta.url);
+const moduleCache = new Map();
 const checkMode = process.argv.includes("--check");
 
-// Read component definitions (must be a JSON-like structure we can parse)
-// Since this is TypeScript, we use a simple extraction approach
-// In practice, generate from the compiled catalog data
+function resolveTypeScriptModule(parent, request) {
+    const base = resolve(dirname(parent), request);
+    const candidates = extname(base) ? [base] : [`${base}.ts`, join(base, "index.ts")];
+    for (const candidate of candidates) {
+        try { readFileSync(candidate); return candidate; } catch { /* try next */ }
+    }
+    throw new Error(`Cannot resolve ${request} from ${parent}`);
+}
+
+function loadTypeScriptModule(file) {
+    const absolute = resolve(root, file);
+    if (moduleCache.has(absolute)) return moduleCache.get(absolute).exports;
+    const module = { exports: {} };
+    moduleCache.set(absolute, module);
+    const output = ts.transpileModule(readFileSync(absolute, "utf8"), {
+        fileName: absolute,
+        compilerOptions: {
+            target: ts.ScriptTarget.ES2022,
+            module: ts.ModuleKind.CommonJS,
+            moduleResolution: ts.ModuleResolutionKind.Node10,
+            esModuleInterop: true,
+        },
+    }).outputText;
+    const localRequire = request => request.startsWith(".")
+        ? loadTypeScriptModule(resolveTypeScriptModule(absolute, request))
+        : nodeRequire(request);
+    new Function("require", "module", "exports", "__filename", "__dirname", output)(
+        localRequire, module, module.exports, absolute, dirname(absolute),
+    );
+    return module.exports;
+}
+
+const definitionsModule = loadTypeScriptModule("src/catalog/componentDefinitions.ts");
+const docsModule = loadTypeScriptModule("src/catalog/componentDocumentation.ts");
+const examplesModule = loadTypeScriptModule("src/catalog/componentJsonExamples.ts");
+const patternsModule = loadTypeScriptModule("src/schema/patternRegistry.ts");
+const validationModule = loadTypeScriptModule("src/schema/validateV2Schema.ts");
+const helpModule = loadTypeScriptModule("src/docs/hyperpbiHelp.ts");
+
+const definitions = definitionsModule.componentDefinitions;
+const docs = docsModule.componentDocs;
+const examples = examplesModule.componentJsonExamples;
+const patterns = patternsModule.patternRegistry;
+const commonProperties = validationModule.v2CommonComponentProperties;
+const propertiesByType = validationModule.v2ComponentPropertiesByType;
+const requiredByType = validationModule.v2RequiredPropertiesByType;
+const categories = [...new Set(definitions.map(item => item.category))];
+
+function assertCanonicalCoverage() {
+    const types = new Set(definitions.map(item => item.type));
+    const duplicates = definitions.filter((item, index) => definitions.findIndex(candidate => candidate.type === item.type) !== index).map(item => item.type);
+    const missingDocs = [...types].filter(type => !docs[type]);
+    const missingExamples = [...types].filter(type => !examples[type]);
+    const unknownDocs = Object.keys(docs).filter(type => !types.has(type));
+    const unknownExamples = Object.keys(examples).filter(type => !types.has(type));
+    const unknownValidators = Object.keys(propertiesByType).filter(type => !types.has(type));
+    const missingValidators = [...types].filter(type => !Object.hasOwn(propertiesByType, type));
+    const issues = { duplicates, missingDocs, missingExamples, unknownDocs, unknownExamples, unknownValidators, missingValidators };
+    const failures = Object.entries(issues).filter(([, values]) => values.length);
+    if (failures.length) throw new Error(`Canonical documentation metadata is inconsistent:\n${failures.map(([name, values]) => `- ${name}: ${values.join(", ")}`).join("\n")}`);
+}
+
+const mdEscape = value => String(value).replace(/\|/g, "\\|").replace(/\n/g, " ");
+const codeList = values => values?.length ? values.map(value => `\`${value}\``).join(", ") : "—";
+const yesNo = value => value ? "Yes" : "No";
+const htmlEscape = value => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+const json = value => JSON.stringify(value, null, 2);
+const allowedFor = type => [...new Set([...commonProperties, ...(propertiesByType[type] ?? [])])].sort();
+const requiredFor = type => [...new Set(["type", "id", ...(requiredByType[type] ?? [])])];
+
+function markdownCatalog() {
+    const lines = [
+        "<!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->",
+        "# HyperPBI component catalog reference",
+        "",
+        `HyperPBI currently defines **${definitions.length} component types across ${categories.length} categories**. This file is generated from \`componentDefinitions.ts\`, \`componentDocumentation.ts\`, \`componentJsonExamples.ts\`, \`patternRegistry.ts\`, and the strict 2.0 validator metadata.`,
+        "",
+        "For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).",
+        "",
+        "## HyperPBI 2.0 shared contract",
+        "",
+        "Every 2.0 component requires `type` and a globally unique stable `id` matching `^[A-Za-z][A-Za-z0-9_-]{0,99}$`. `dataset` selects a named logical dataset; omission selects `powerbi`. Field references use Field Manifest aliases during authoring and are resolved to canonical runtime keys during preparation.",
+        "",
+        "Allowed shared properties:",
+        "",
+        codeList(commonProperties),
+        "",
+        "The three behavior systems are independent: `uiAction` changes interface state; `interaction` controls universal internal/Power BI data behavior; `interactions` maps safe component-specific events to allowlisted payloads. None is mandatory on every component.",
+        "",
+        "External filtering requires a field whose metadata identifies a real model column (`sourceTable` and `sourceColumn`). True measures, dataset-derived fields, and dataset metrics cannot directly filter the Power BI model. Exact identity selection can still use source-row lineage when available.",
+        "",
+        "## Application patterns",
+        "",
+        "Patterns are 2.0 authoring constructs expanded before strict component validation. Generated child IDs are deterministic derivatives of the pattern ID.",
+        "",
+    ];
+    for (const pattern of Object.values(patterns)) {
+        lines.push(`### ${pattern.id}`, "", `Required: ${codeList(pattern.required)}`, "", `Optional: ${codeList(pattern.optional)}`, "", `Field properties: ${codeList(pattern.fieldProperties)}`, "", "```json", json(pattern.example), "```", "");
+    }
+    lines.push(
+        "## Universal interaction reference", "", "```json", json(examplesModule.universalInteractionReference), "```", "",
+        "`externalMode: \"auto\"` resolves to `filter` for controls and `selection` for data-point/custom components. See [interactions](interactions.md) for lineage and field-origin restrictions.", "",
+        "## UI actions", "",
+        "`clearFilters`, `setTab`, `setState`, `toggleState`, `toggleSidebar`, `openOverlay`, `closeOverlay`, `toggleOverlay`, `setStep`, `nextStep`, `previousStep`, `showToast`, `dismissToast`, `scrollTo`, and `refresh` (a safe no-op because Power BI owns refresh).", "",
+    );
+    for (const category of categories) {
+        const items = definitions.filter(item => item.category === category);
+        lines.push(`## ${category}`, "", `_${items.length} components_`, "");
+        for (const item of items) {
+            const meta = docs[item.type];
+            lines.push(
+                `### \`${item.type}\` — ${item.label}`, "",
+                `**Status:** ${meta.status}${meta.statusNote ? ` — ${meta.statusNote}` : ""}`,
+                "",
+                `**Level:** ${item.level}`,
+                "",
+                `**Recommended use:** ${item.useWhen}`,
+                "",
+                `**Required properties:** ${codeList(requiredFor(item.type))}`,
+                "",
+                `**Key properties:** ${codeList(meta.keyProperties)}`,
+                "",
+                `**All allowed properties:** ${codeList(allowedFor(item.type))}`,
+                "",
+                `**Capabilities:** fields ${yesNo(item.capabilities.fields)}; calculations ${yesNo(item.capabilities.calculations)}; scoped CSS ${yesNo(item.capabilities.css)}; slots ${yesNo(item.capabilities.slots)}; interactions ${yesNo(item.capabilities.interactions)}; identity selection ${yesNo(item.capabilities.externalSelection)}; custom HTML ${yesNo(item.capabilities.customHtml)}.`,
+                "",
+                `**Data interaction:** ${yesNo(meta.supportsDataInteraction)}. **UI action:** ${yesNo(meta.supportsUiAction)}.`, "",
+            );
+            if (meta.doNotUseWhen) lines.push(`**Do not use when:** ${meta.doNotUseWhen}`, "");
+            if (meta.accessibility) lines.push(`**Accessibility:** ${meta.accessibility}`, "");
+            if (meta.compatibility) lines.push(`**Compatibility:** ${meta.compatibility}`, "");
+            if (meta.related?.length) lines.push(`**Related:** ${codeList(meta.related)}`, "");
+            lines.push("```json", json(examples[item.type]), "```", "");
+        }
+    }
+    lines.push(
+        "## Compatibility notes", "",
+        "HyperPBI 1.0 specifications remain supported. Compatibility-only metadata above identifies types or forms retained for existing dashboards. Legacy accordion children, drawers/filter drawers, steppers, button `action`/`actionValue`, `table.engine: \"tabulator\"`, and legacy map settings are normalized without changing the 2.0 authoring default. Deprecated `internal`, `external`, `selectable`, and table `selectionMode` remain 1.0 compatibility inputs; new 2.0 specifications use `interaction`.", "",
+    );
+    return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function componentCard(item) {
+    const meta = docs[item.type];
+    const search = [item.type, item.label, item.category, item.useWhen, meta.status, meta.statusNote, meta.doNotUseWhen, meta.compatibility, ...(meta.related ?? [])].filter(Boolean).join(" ").toLowerCase();
+    return `<article class="component-card" data-category="${htmlEscape(item.category)}" data-search="${htmlEscape(search)}">
+<details><summary><span><code>${htmlEscape(item.type)}</code> — ${htmlEscape(item.label)}</span><span class="badge badge-${htmlEscape(meta.status)}">${htmlEscape(meta.status)}</span></summary>
+<div class="card-body">
+<p>${htmlEscape(item.useWhen)}</p>
+${meta.statusNote ? `<p><strong>Status note:</strong> ${htmlEscape(meta.statusNote)}</p>` : ""}
+<dl><div><dt>Level</dt><dd>${htmlEscape(item.level)}</dd></div><div><dt>Required</dt><dd>${requiredFor(item.type).map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</dd></div><div><dt>Key properties</dt><dd>${meta.keyProperties.length ? meta.keyProperties.map(value => `<code>${htmlEscape(value)}</code>`).join(", ") : "—"}</dd></div><div><dt>Data interaction</dt><dd>${yesNo(meta.supportsDataInteraction)}</dd></div><div><dt>UI action</dt><dd>${yesNo(meta.supportsUiAction)}</dd></div></dl>
+<p><strong>Allowed:</strong> ${allowedFor(item.type).map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p>
+${meta.doNotUseWhen ? `<p><strong>Do not use when:</strong> ${htmlEscape(meta.doNotUseWhen)}</p>` : ""}
+${meta.accessibility ? `<p><strong>Accessibility:</strong> ${htmlEscape(meta.accessibility)}</p>` : ""}
+${meta.compatibility ? `<p><strong>Compatibility:</strong> ${htmlEscape(meta.compatibility)}</p>` : ""}
+${meta.related?.length ? `<p><strong>Related:</strong> ${meta.related.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p>` : ""}
+<div class="code-head"><strong>Valid 2.0 component example</strong><button type="button" class="copy">Copy</button></div><pre><code>${htmlEscape(json(examples[item.type]))}</code></pre>
+</div></details></article>`;
+}
+
+function htmlCatalog() {
+    const cards = definitions.map(componentCard).join("\n");
+    const patternCards = Object.values(patterns).map(pattern => `<article class="pattern-card"><h3>${htmlEscape(pattern.id)}</h3><p><strong>Required:</strong> ${pattern.required.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p><pre><code>${htmlEscape(json(pattern.example))}</code></pre></article>`).join("\n");
+    return `<!doctype html>
+<!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Generated HyperPBI 2.0 component catalog"><title>HyperPBI component catalog</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f7fb;--panel:#fff;--text:#182433;--muted:#5f6b7a;--line:#d8e0ea;--brand:#206bc4;--soft:#edf4fc;--radius:12px;font:15px/1.55 Inter,"Segoe UI",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}a{color:var(--brand)}header{background:#142033;color:#fff;padding:2rem max(1rem,calc((100% - 1180px)/2));}header h1{margin:0 0 .4rem;font-size:clamp(1.6rem,4vw,2.5rem)}header p{max-width:760px;margin:.35rem 0;color:#d5dfec}.toolbar{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:1fr minmax(180px,280px) auto;gap:.75rem;padding:.8rem max(1rem,calc((100% - 1180px)/2));background:color-mix(in srgb,var(--panel) 94%,transparent);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}input,select{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}.count{align-self:center;color:var(--muted);white-space:nowrap}main{max-width:1180px;margin:auto;padding:1rem}section{scroll-margin-top:5rem}h2{margin:2rem 0 .7rem}.intro,.reference,.pattern-card,.component-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}.intro,.reference{padding:1rem 1.2rem}.pattern-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}.pattern-card{padding:.9rem}.pattern-card h3{margin-top:0}.component-card{margin:.65rem 0;overflow:hidden}.component-card[hidden]{display:none}summary{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.9rem 1rem;cursor:pointer;background:var(--soft);font-weight:650}.card-body{padding:1rem}.badge{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:.18rem .5rem;border-radius:999px;background:#dfe7f0}.badge-stable{background:#dff3e8;color:#146c43}.badge-compatibility{background:#fff0cf;color:#835a00}.badge-experimental,.badge-foundation{background:#dcecff;color:#174f8a}.badge-deprecated{background:#fde1e1;color:#9d2929}dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.7rem}dl div{border-left:3px solid var(--line);padding-left:.7rem}dt{font-weight:700}dd{margin:0;color:var(--muted)}code{font-family:"Cascadia Code",Consolas,monospace;font-size:.9em}pre{max-height:28rem;overflow:auto;background:#111927;color:#e8eef7;border-radius:8px;padding:1rem}.code-head{display:flex;justify-content:space-between;align-items:center;margin-top:1rem}.copy{border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);padding:.4rem .7rem;cursor:pointer}.empty{padding:2rem;text-align:center;color:var(--muted)}footer{max-width:1180px;margin:2rem auto;padding:1rem;color:var(--muted)}@media(max-width:700px){.toolbar{grid-template-columns:1fr}.count{justify-self:start}summary{align-items:flex-start}.card-body{padding:.8rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1622;--panel:#152131;--text:#e6edf5;--muted:#aeb9c8;--line:#304156;--soft:#1b2b40;--brand:#73b7ff}.badge-stable{color:#9ae6bd}.badge-compatibility{color:#ffd77d}.badge-deprecated{color:#ffaaaa}}
+</style></head><body>
+<header><h1>HyperPBI component catalog</h1><p>${definitions.length} canonical component types across ${categories.length} categories. Generated directly from implementation metadata for the strict HyperPBI 2.0 authoring contract.</p><p><a href="index.html">Product overview</a> · <a href="docs/hyperpbi-spec-reference.md">Specification</a> · <a href="docs/data-model.md">Data model</a> · <a href="docs/svg-visuals.md">SVG</a></p></header>
+<div class="toolbar"><input id="search" type="search" placeholder="Search type, label, use, or status" aria-label="Search component catalog"><select id="category" aria-label="Filter by category"><option value="">All categories</option>${categories.map(category => `<option>${htmlEscape(category)}</option>`).join("")}</select><span class="count" id="count" aria-live="polite">${definitions.length} components</span></div>
+<main><section class="intro"><h2>HyperPBI 2.0 contract</h2><p>Every component requires a globally unique stable <code>id</code>. Field Manifest aliases are resolved during preparation. Omit <code>dataset</code> to use <code>powerbi</code>, or select a named logical dataset.</p><p><code>uiAction</code>, universal <code>interaction</code>, and safe event-specific <code>interactions</code> are separate and optional. External filters require a true model-column target; identity selection can follow source-row lineage.</p></section>
+<section><h2>Application patterns</h2><div class="pattern-grid">${patternCards}</div></section>
+<section class="reference"><h2>Shared references</h2><p><strong>Shared properties:</strong> ${commonProperties.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p><p><strong>UI actions:</strong> clearFilters, setTab, setState, toggleState, toggleSidebar, openOverlay, closeOverlay, toggleOverlay, setStep, nextStep, previousStep, showToast, dismissToast, scrollTo, refresh.</p></section>
+<section><h2>Components</h2><div id="cards">${cards}</div><p id="empty" class="empty" hidden>No components match the current filters.</p></section></main>
+<footer>Generated from canonical TypeScript metadata. Do not edit this file manually. HyperPBI 1.0 remains supported as compatibility input; 2.0 is the default for new authoring.</footer>
+<script>
+const search=document.querySelector('#search'),category=document.querySelector('#category'),cards=[...document.querySelectorAll('.component-card')],count=document.querySelector('#count'),empty=document.querySelector('#empty');function filter(){const q=search.value.trim().toLowerCase(),cat=category.value;let visible=0;for(const card of cards){const show=(!q||card.dataset.search.includes(q))&&(!cat||card.dataset.category===cat);card.hidden=!show;if(show)visible++}count.textContent=visible+' component'+(visible===1?'':'s');empty.hidden=visible!==0}search.addEventListener('input',filter);category.addEventListener('change',filter);document.addEventListener('click',event=>{const button=event.target.closest('.copy');if(!button)return;const code=button.parentElement.nextElementSibling.textContent;navigator.clipboard?.writeText(code).then(()=>{button.textContent='Copied';setTimeout(()=>button.textContent='Copy',1200)})});
+</script></body></html>\n`;
+}
+
+async function writeOrCheck(path, content) {
+    if (!checkMode) { await writeFile(path, content); console.log(`Generated: ${path}`); return true; }
+    const existing = await readFile(path, "utf8").catch(() => "");
+    if (existing === content) return true;
+    console.error(`Out of date: ${path}`);
+    return false;
+}
+
+function replaceMarker(source, marker, content) {
+    const start = `<!-- ${marker}:start -->`;
+    const end = `<!-- ${marker}:end -->`;
+    const pattern = new RegExp(`${start}[\\s\\S]*?${end}`);
+    if (!pattern.test(source)) throw new Error(`Missing generated inventory marker: ${marker}`);
+    return source.replace(pattern, `${start}${content}${end}`);
+}
+
+async function synchronizedInventoryFiles() {
+    const readmePath = join(root, "README.md");
+    const indexPath = join(root, "index.html");
+    let readme = await readFile(readmePath, "utf8");
+    let index = await readFile(indexPath, "utf8");
+    readme = replaceMarker(readme, "component-summary", `\n+- The canonical implementation defines **${definitions.length} component types in ${categories.length} categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).\n+`);
+    index = replaceMarker(index, "hero-component-count", `<a class="btn btn-secondary" href="hyperpbi-component-catalog-reference.html">Browse ${definitions.length} components</a>`);
+    index = replaceMarker(index, "inventory-stats", `<div class="stat"><b>${definitions.length}</b><span>canonical component types</span></div>\n+    <div class="stat"><b>${categories.length}</b><span>implementation categories</span></div>`);
+    index = replaceMarker(index, "catalog-heading", `<h2>${definitions.length} component types across ${categories.length} generated categories.</h2>`);
+    return [{ path: readmePath, content: readme }, { path: indexPath, content: index }];
+}
 
 async function main() {
-    // Read the component catalog and examples via dynamic import of compiled JS
-    // For now, we'll use the source of truth from componentCatalog.ts
-    // by reading the generated output
-
-    const catalogContent = await readFile(join(root, "src/catalog/componentCatalog.ts"), "utf8");
-    const examplesContent = await readFile(join(root, "src/catalog/componentJsonExamples.ts"), "utf8");
-    const defsContent = await readFile(join(root, "src/catalog/componentDefinitions.ts"), "utf8");
-    const docsContent = await readFile(join(root, "src/catalog/componentDocumentation.ts"), "utf8");
-    const patternsContent = await readFile(join(root, "src/schema/patternRegistry.ts"), "utf8");
-
-    // Extract component types from definitions
-    const types = extractComponentTypes(defsContent);
-    const categories = extractCategories(defsContent);
-    const patterns = [...patternsContent.matchAll(/^\s*"([a-z][a-z-]+)":\{/gm)].map(match => match[1]);
-
-    // Build the catalog
-    const mdCatalog = generateMarkdownCatalog(types, categories, patterns);
-    const htmlCatalog = generateHtmlCatalog(types, categories, patterns);
-
-    // Write outputs
-    const mdPath = join(root, "docs/hyperpbi-component-catalog-reference.md");
-    const htmlPath = join(root, "hyperpbi-component-catalog-reference.html");
-
-    if (checkMode) {
-        const existingMd = await readFile(mdPath, "utf8").catch(() => "");
-        const existingHtml = await readFile(htmlPath, "utf8").catch(() => "");
-
-        if (existingMd !== mdCatalog || existingHtml !== htmlCatalog) {
-            console.error("ERROR: Generated documentation differs from committed files.");
-            console.error("Run: npm run docs:generate");
-            if (existingMd !== mdCatalog) console.error(`  ${mdPath} is out of date`);
-            if (existingHtml !== htmlCatalog) console.error(`  ${htmlPath} is out of date`);
-            process.exit(1);
-        }
-        console.log("Documentation is up to date.");
-    } else {
-        await writeFile(mdPath, mdCatalog);
-        await writeFile(htmlPath, htmlCatalog);
-        console.log(`Generated: ${mdPath}`);
-        console.log(`Generated: ${htmlPath}`);
-    }
+    assertCanonicalCoverage();
+    const generatedSkill = `<!-- GENERATED FILE. Edit HYPERPBI_SKILL_MARKDOWN in src/docs/hyperpbiHelp.ts and run npm run docs:generate. -->\n${helpModule.HYPERPBI_SKILL_MARKDOWN.trim()}\n`;
+    const inventories = await synchronizedInventoryFiles();
+    const results = await Promise.all([
+        writeOrCheck(join(root, "docs/hyperpbi-component-catalog-reference.md"), markdownCatalog()),
+        writeOrCheck(join(root, "hyperpbi-component-catalog-reference.html"), htmlCatalog()),
+        writeOrCheck(join(root, "docs/hyperpbi-ai-skill.md"), generatedSkill),
+        ...inventories.map(item => writeOrCheck(item.path, item.content)),
+    ]);
+    if (checkMode && results.some(result => !result)) process.exitCode = 1;
+    else if (checkMode) console.log("Generated documentation is up to date.");
 }
 
-function extractComponentTypes(defsContent) {
-    // Extract type names from componentDefinitions array
-    const matches = [...defsContent.matchAll(/def\("(\w+)"/g)];
-    return [...new Set(matches.map(m => m[1]))];
-}
-
-function extractCategories(defsContent) {
-    // Extract categories
-    const catMatches = [...defsContent.matchAll(/"(\w+)"/g)].map(m => m[1]);
-    const knownCategories = ["Layout", "Controls", "Navigation", "Display", "Primitives", "Feedback", "Forms", "Charts", "Tables", "Maps", "Custom components", "Advanced components"];
-    return knownCategories.filter(c => catMatches.some(m => m === c));
-}
-
-function generateMarkdownCatalog(types, categories, patterns) {
-    const lines = [];
-    lines.push("# HyperPBI component catalog reference");
-    lines.push("");
-
-    lines.push("## Application patterns (schema 2.0)");
-    lines.push("");
-    lines.push("Patterns are AI-friendly authoring constructs compiled into the existing component runtime. Generated child IDs are derived from the pattern ID.");
-    lines.push("");
-    for (const pattern of patterns) lines.push(`- \`${pattern}\``);
-    lines.push("");
-    lines.push("> Generated from canonical component definitions. Do not edit manually.");
-    lines.push(`> Component count: ${types.length}`);
-    lines.push("");
-
-    lines.push("## Universal interaction");
-    lines.push("");
-    lines.push("Every component supports the universal interaction object:");
-    lines.push("");
-    lines.push("```json");
-    lines.push(JSON.stringify({
-        enabled: true,
-        trigger: "auto",
-        internalMode: "highlight",
-        internalScope: "self",
-        externalMode: "auto",
-        field: "__field_key__",
-        operator: "=",
-        value: "__value__",
-        selectionMode: "replace",
-        multiSelect: true,
-        showSelector: false,
-        clearOnSecondClick: true
-    }, null, 2));
-    lines.push("```");
-    lines.push("");
-
-    lines.push("## UI action reference");
-    lines.push("");
-    lines.push("UI actions control interface behavior (navigation, overlays, toasts). They are separate from data interactions.");
-    lines.push("");
-    lines.push("| Action | Required Fields | Description |");
-    lines.push("|--------|----------------|-------------|");
-    lines.push("| `clearFilters` | — | Clears all HyperPBI filters |");
-    lines.push("| `setTab` | target, value | Sets the active tab in a tab container |");
-    lines.push("| `setState` | target, value | Sets a named state value |");
-    lines.push("| `toggleState` | target | Toggles a Boolean state |");
-    lines.push("| `toggleSidebar` | — | Toggles the root sidebar collapsed state |");
-    lines.push("| `openOverlay` | target | Opens a modal, offcanvas, dropdown, popover, or legacy drawer |");
-    lines.push("| `closeOverlay` | target | Closes an overlay |");
-    lines.push("| `toggleOverlay` | target | Toggles an overlay |");
-    lines.push("| `setStep` | target, value | Sets the active step |");
-    lines.push("| `nextStep` | target | Advances to the next step |");
-    lines.push("| `previousStep` | target | Goes to the previous step |");
-    lines.push("| `showToast` | message, title?, intent?, durationMs? | Shows a toast notification |");
-    lines.push("| `dismissToast` | target | Dismisses a specific toast |");
-    lines.push("| `scrollTo` | target | Scrolls to a component by ID |");
-    lines.push("| `refresh` | — | Safe no-op (Power BI owns data refresh) |");
-    lines.push("");
-
-    lines.push("## Application shell");
-    lines.push("");
-    lines.push("The application shell is configured at the root level through `schema.app`, not as a component.");
-    lines.push("See the [specification reference](hyperpbi-spec-reference.md) for complete property documentation.");
-    lines.push("");
-
-    lines.push("## Shared component properties");
-    lines.push("");
-    lines.push("All components share these base properties:");
-    lines.push("");
-    lines.push("| Property | Type | Description |");
-    lines.push("|----------|------|-------------|");
-    lines.push("| `type` | string | Component type identifier (required) |");
-    lines.push("| `id` | string | Unique stable identifier |");
-    lines.push("| `dataset` | string | Logical dataset name; omitted uses the Power BI data view |");
-    lines.push("| `title` | string | Display title |");
-    lines.push("| `subtitle` | string | Secondary display text |");
-    lines.push("| `span` | 1–12 | 12-column grid span |");
-    lines.push("| `className` | string | Additional CSS class |");
-    lines.push("| `hidden` | boolean | Hide the component |");
-    lines.push("| `style` | object | Inline CSS properties (sanitized) |");
-    lines.push("| `css` | string | Scoped CSS (allowlisted, scoped) |");
-    lines.push("| `slots` | object | Named HTML slot overrides |");
-    lines.push("| `interaction` | object | Universal data interaction policy |");
-    lines.push("| `interactions` | object | Safe custom event-to-data payloads |");
-    lines.push("| `ariaLabel` | string | Accessible label |");
-    lines.push("| `icon` | string | Icon name from bundled registry |");
-    lines.push("| `variant` | string | UI variant (primary, secondary, success, warning, danger, ghost, outline) |");
-    lines.push("| `size` | string | UI size (xs, sm, md, lg) |");
-    lines.push("| `disabled` | boolean | Disabled state |");
-    lines.push("| `tooltip` | object | Tooltip definition (content, placement, delayMs) |");
-    lines.push("| `uiAction` | object/array | Declarative UI action(s) |");
-    lines.push("");
-
-    lines.push("Three independent behavior systems:");
-    lines.push("");
-    lines.push("- **`interactions`** — Safe custom event-to-data payload resolver");
-    lines.push("- **`interaction`** — Universal local/Power BI data policy");
-    lines.push("- **`uiAction`** — Interface/navigation/overlay/state behavior");
-    lines.push("");
-
-    lines.push("## Data scopes and Power BI field origin");
-    lines.push("");
-    lines.push("Components validate against their selected logical dataset; omitted `dataset` uses the base Power BI data view. Dataset schemas are propagated statically, so derived and metric fields remain available with zero rows.");
-    lines.push("");
-    lines.push("Power BI query aggregation is separate from model origin. For example, `Sum(Sales.Amount)` remains a filterable model column targeting `Sales.Amount`, while a true model measure is not a basic model-column filter target. Derived fields and dataset metrics are also not direct external-filter targets; renamed and group-by model columns retain their source target.");
-    lines.push("");
-
-    // Component categories
-    for (const category of categories) {
-        const categoryTypes = types.filter(t => {
-            // Map type to category based on the definitions
-            const layoutTypes = ["grid", "flex", "split", "section", "toolbar", "leftPanel", "rightPanel", "spacer", "divider"];
-            const controlTypes = ["searchBox", "textInput", "numberInput", "slider", "select", "multiSelect", "segmentedControl", "toggle", "button", "buttonGroup", "filterChips", "dateRange"];
-            const navTypes = ["tabs", "collapsible", "accordion", "drawer", "filterDrawer", "steps", "stepper"];
-            const displayTypes = ["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel", "timeline"];
-            const primitiveTypes = ["card", "icon", "iconButton", "avatar", "avatarGroup", "listGroup", "dataGrid", "countUp", "tracking", "dropdown", "modal", "offcanvas", "popover"];
-            const feedbackTypes = ["emptyState", "placeholder", "spinner"];
-            const formTypes = ["textarea", "checkbox", "checkboxGroup", "radioGroup", "inputGroup"];
-            const chartTypes = ["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "smallMultiples"];
-            const tableTypes = ["table", "matrix"];
-            const mapTypes = ["map"];
-            const contentTypes = ["text", "markdown", "html", "custom"];
-            const advancedTypes = ["advancedChart"];
-
-            const map = { Layout: layoutTypes, Controls: controlTypes, Navigation: navTypes, Display: displayTypes, Primitives: primitiveTypes, Feedback: feedbackTypes, Forms: formTypes, Charts: chartTypes, Tables: tableTypes, Maps: mapTypes, "Custom components": contentTypes, "Advanced components": advancedTypes };
-            return (map[category] || []).includes(t);
-        });
-
-        if (categoryTypes.length === 0) continue;
-
-        lines.push(`## ${category}`);
-        lines.push("");
-
-        for (const type of categoryTypes) {
-            lines.push(`### ${type}`);
-            lines.push("");
-            lines.push(`<!-- component:${type} -->`);
-            lines.push("");
-            if (type === "map") {
-                lines.push("Practical runtime support includes Power BI geometry, public ArcGIS feature layers and joins, viewport queries, tile and basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection. External ArcGIS requests require a Maps package whose WebAccess hosts match the service.");
-                lines.push("");
-            }
-        }
-    }
-
-    lines.push("## Compatibility");
-    lines.push("");
-    lines.push("Legacy properties and types remain supported for existing dashboards:");
-    lines.push("");
-    lines.push("- `accordion` with only `children` (no `items`) — wrapped into one item automatically");
-    lines.push("- `stepper` — rendered as a collapsible section. Use `steps` for new workflows.");
-    lines.push("- `drawer` / `filterDrawer` — supported. Use `offcanvas` for new components.");
-    lines.push("- `button.action` / `button.actionValue` — normalized to `uiAction` internally.");
-    lines.push("- `table.engine: \"tabulator\"` — normalized to native with a nonblocking warning.");
-    lines.push("- `map.settings` / `map.style` / `map.popup` — legacy map properties normalized to `layers[]`.");
-    lines.push("- Deprecated properties: `internal`, `external`, `selectable`, `selectionMode`.");
-    lines.push("");
-
-    return lines.join("\n");
-}
-
-function generateHtmlCatalog(types, categories, patterns) {
-    // Generate a standalone HTML catalog page
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HyperPBI Component Catalog Reference</title>
-<style>
-:root{--bg:#fff;--text:#182433;--border:#dce1e7;--primary:#206bc4;--surface:#f6f8fa;font-family:Inter,"Segoe UI",system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5}
-body{margin:0;padding:0}
-.catalog-header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.catalog-header h1{margin:0;font-size:18px;font-weight:700}
-.catalog-header input,.catalog-header select{padding:6px 10px;border:1px solid var(--border);border-radius:5px;font:inherit;font-size:12px}
-.catalog-count{font-size:11px;color:#667382;margin-left:auto}
-.catalog-body{padding:20px;max-width:960px;margin:0 auto}
-.catalog-body h2{font-size:16px;margin:32px 0 12px;padding-bottom:4px;border-bottom:1px solid var(--border)}
-.component-card{border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
-.component-card-header{padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer}
-.component-card-header:hover{background:#edf1f5}
-.component-card-header strong{font-size:13px}
-.component-card-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700;text-transform:uppercase}
-.badge-stable{background:#e6f7ee;color:#18794e}
-.badge-compatibility{background:#fff3db;color:#8a5a00}
-.badge-experimental{background:#e8f0fe;color:#174ea6}
-.badge-deprecated{background:#fce8e6;color:#b42318}
-.component-card-body{padding:12px 14px;display:none}
-.component-card.open .component-card-body{display:block}
-.component-card pre{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:10px;overflow:auto;font-size:11px;max-height:300px}
-.copy-btn{font-size:10px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);cursor:pointer}
-.copy-btn:hover{background:var(--surface)}
-@media(max-width:640px){.catalog-body{padding:12px}.catalog-header{flex-direction:column;align-items:stretch}}
-</style>
-</head>
-<body>
-<div class="catalog-header">
-<h1>HyperPBI Component Catalog</h1>
-<input type="search" id="search" placeholder="Search components..." aria-label="Search components">
-<select id="category-filter" aria-label="Filter by category"><option value="">All categories</option>${categories.map(c => `<option value="${c}">${c}</option>`).join("")}</select>
-<span class="catalog-count" id="component-count">${types.length} components</span>
-</div>
-<div class="catalog-body">
-<p>Generated from canonical component definitions. See the <a href="docs/hyperpbi-component-catalog-reference.md">Markdown version</a> for offline reference.</p>
-
-<h2>Universal Interaction</h2>
-<p>Every component supports the universal interaction object for Power BI data behavior.</p>
-<pre>${escapeHtml(JSON.stringify({enabled:true,trigger:"auto",internalMode:"highlight",internalScope:"self",externalMode:"auto",field:"__field_key__",operator:"=",value:"__value__",selectionMode:"replace",multiSelect:true,showSelector:false,clearOnSecondClick:true},null,2))}</pre>
-
-<h2>UI Action Reference</h2>
-<table><tr><th>Action</th><th>Required</th><th>Description</th></tr>
-<tr><td>clearFilters</td><td>—</td><td>Clears all HyperPBI filters</td></tr>
-<tr><td>setTab</td><td>target, value</td><td>Sets active tab</td></tr>
-<tr><td>setState</td><td>target, value</td><td>Sets state value</td></tr>
-<tr><td>toggleState</td><td>target</td><td>Toggles Boolean state</td></tr>
-<tr><td>toggleSidebar</td><td>—</td><td>Toggles sidebar collapse</td></tr>
-<tr><td>openOverlay</td><td>target</td><td>Opens an overlay</td></tr>
-<tr><td>closeOverlay</td><td>target</td><td>Closes an overlay</td></tr>
-<tr><td>toggleOverlay</td><td>target</td><td>Toggles an overlay</td></tr>
-<tr><td>setStep</td><td>target, value</td><td>Sets active step</td></tr>
-<tr><td>nextStep</td><td>target</td><td>Advances step</td></tr>
-<tr><td>previousStep</td><td>target</td><td>Reverses step</td></tr>
-<tr><td>showToast</td><td>message</td><td>Shows toast (1-30s duration)</td></tr>
-<tr><td>dismissToast</td><td>target</td><td>Dismisses toast</td></tr>
-<tr><td>scrollTo</td><td>target</td><td>Scrolls to component</td></tr>
-<tr><td>refresh</td><td>—</td><td>Safe no-op</td></tr>
-</table>
-
-<h2>Application Shell</h2>
-<p>Configured at root level via <code>schema.app</code>. Not a component type.</p>
-<p>Supports: brand, navbar, sidebar, pageHeader, footer, vertical/horizontal layout, fluid/boxed container, density, content padding, sticky header, collapsible sidebar with mobile offcanvas.</p>
-
-<h2>Data Scopes and Power BI Field Origin</h2>
-<p>Components validate against their selected logical dataset, whose output schema exists even when it returns zero rows. Power BI query aggregation is separate from model origin: <code>Sum(Sales.Amount)</code> remains a model column targeting <code>Sales.Amount</code>. True measures, derived fields, and dataset metrics are not direct external-filter targets; renamed and group-by model columns retain their source target.</p>
-
-${categories.map(cat => {
-    const catTypes = types.filter(t => {
-        const map = {"Layout":["grid","flex","split","section","toolbar","leftPanel","rightPanel","spacer","divider"],"Controls":["searchBox","textInput","numberInput","slider","select","multiSelect","segmentedControl","toggle","button","buttonGroup","filterChips","dateRange"],"Navigation":["tabs","collapsible","accordion","drawer","filterDrawer","steps","stepper"],"Display":["kpi","metricGrid","infoCard","statusBadge","progressBar","alert","statList","detailPanel","timeline"],"Primitives":["card","icon","iconButton","avatar","avatarGroup","listGroup","dataGrid","countUp","tracking","dropdown","modal","offcanvas","popover"],"Feedback":["emptyState","placeholder","spinner"],"Forms":["textarea","checkbox","checkboxGroup","radioGroup","inputGroup"],"Charts":["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","smallMultiples"],"Tables":["table","matrix"],"Maps":["map"],"Custom components":["text","markdown","html","custom"],"Advanced components":["advancedChart"]};
-        return (map[cat]||[]).includes(t);
-    });
-    if(catTypes.length===0)return"";
-    return `<h2>${cat}</h2>` + catTypes.map(t => {
-        const practicalMapNote = t === "map" ? "<p>Supports Power BI geometry plus public ArcGIS feature layers and joins, viewport queries, tile/basic dynamic overlays, labels, tooltips/popups, selection, layer controls, legend, Home, and Zoom to Selection.</p>" : "";
-        return `<div class="component-card" data-type="${t}" data-category="${cat}">
-<div class="component-card-header" onclick="this.parentElement.classList.toggle('open')" aria-expanded="false">
-<strong>${t}</strong>
-<span class="component-card-badge badge-stable">Stable</span>
-</div>
-<div class="component-card-body">
-<p>Component type: <code>${t}</code></p>
-${practicalMapNote}
-<button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.textContent)">Copy JSON</button>
-<pre>See componentJsonExamples for ${t}</pre>
-</div></div>`;
-    }).join("\n");
-}).join("\n")}
-
-<h2>Compatibility</h2>
-<p>Legacy properties remain supported: accordion without items, stepper, drawer/filterDrawer, button action/actionValue, table tabulator engine, map legacy settings/style/popup, deprecated internal/external/selectable/selectionMode.</p>
-</div>
-<script>
-document.getElementById("search").addEventListener("input",function(){const q=this.value.toLowerCase();document.querySelectorAll(".component-card").forEach(c=>{c.style.display=c.dataset.type.toLowerCase().includes(q)?"":"none"})});
-document.getElementById("category-filter").addEventListener("change",function(){const cat=this.value;document.querySelectorAll(".component-card").forEach(c=>{c.style.display=!cat||c.dataset.category===cat?"":"none"})});
-</script>
-</body>
-</html>`;
-}
-
-function escapeHtml(str) {
-    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch(error => { console.error(error); process.exitCode = 1; });

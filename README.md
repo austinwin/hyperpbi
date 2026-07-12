@@ -1,254 +1,203 @@
 # HyperPBI
 
-HyperPBI is a schema-driven Power BI custom visual that compiles declarative JSON into professional enterprise dashboards and application-style interfaces. It renders application shells, responsive layouts, controls, metrics, tables, ECharts charts, Leaflet maps, custom components, sanitized HTML/CSS, safe calculations, and Power BI selections — without executing user JavaScript.
+HyperPBI is a schema-driven Power BI custom visual that turns declarative JSON into interactive dashboards and application-style report experiences. It binds to the current Power BI data view, validates authoring input, prepares logical datasets and reusable structures, and renders only implemented components and safe behaviors.
 
-HyperPBI 2.0 adds one AI-friendly authoring language on top of the same renderer: stable field aliases, strict diagnostics, safe AI-response extraction, logical named datasets with source-row lineage, reusable definitions, four application patterns, relevance-aware prompts, and a canonical-JSON visual inspector. Existing 1.0 specifications and normalized field keys remain supported.
+HyperPBI does not call an AI service. Studio builds a prompt from the current Field Manifest and authoring settings; the user copies that prompt to an externally approved AI, then pastes one JSON response back into HyperPBI for extraction, validation, preview, and saving.
 
-HyperPBI  provide an AI-friendly, schema-driven syntax that compiles declarative JSON into secure, enterprise-grade layouts and rich visualizations—allowing developers and AI agents to build complex analytical applications safely inside Power BI without executing user JavaScript. HyperPBI is strong in application shells, controls, tables, multi-component layouts, maps, drawers, detail panels and AI-guided generation.  
+## Current status and schema versions
 
-The repository includes a responsive, dependency-free [product landing page](index.html) ready for GitHub Pages, and a standalone [component catalog](hyperpbi-component-catalog-reference.html).
+- HyperPBI **2.0** is the default contract for new authoring: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
+- HyperPBI **1.0** remains supported for existing dashboards. Normalized runtime keys and legacy component forms are compatibility inputs, not the recommended 2.0 authoring style.
+<!-- component-summary:start -->
++- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
++<!-- component-summary:end -->
+- Power BI visual package version `1.0.0.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
-## Capability Summary
+## Core workflow
 
-Full demo:  
-https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo.pbix  
+1. Import the appropriate PBIVIZ package and bind the required Power BI fields to **Values**.
+2. Open HyperPBI Studio and review the field list/Field Manifest.
+3. Choose a prompt job and authoring settings.
+4. Copy the generated prompt to an approved external AI.
+5. Paste one JSON response into Studio.
+6. Validate and preview. If invalid, use the structured diagnostics and repair prompt.
+7. Save and return to the report.
 
-| Area | Capability |
-|------|-----------|
-| Authoring | Guided Builder, modular AI prompts, structured diagnostics, preview, repair, inspector |
-| Application layout | Navbar, sidebar, page header, footer, responsive shell |
-| Components | ~60 first-class component types across 11 categories |
-| Actions | Safe UI actions and Power BI data interactions (independent) |
-| Data | Power BI data view, semantic field aliases, named logical datasets, calculations, lineage-preserving identity selection |
-| Charts | Adapter-based semantic ECharts (16 chart types + JSON-only advanced escape hatch) |
-| Tables | Native paginated, sortable, resizable, frozen columns |
-| Maps | Power BI spatial maps plus practical public ArcGIS feature, join, tile, and dynamic layers |
-| Security | No user JavaScript, sanitized HTML, scoped CSS |
-| Packaging | Core and Maps profiles |
-<img width="1380" height="785" alt="image" src="https://github.com/user-attachments/assets/77d7f490-3b5a-46a2-be62-1420b8741e4e" />  
-<img width="1422" height="790" alt="image" src="https://github.com/user-attachments/assets/2c2a5e1b-0e81-4dff-a0f5-09f08ec25e1b" />  
+The Visual Inspector can select a rendered component, locate its canonical JSON, edit that fragment, validate the complete specification, and preserve stable IDs. Invalid input never replaces the last valid saved dashboard.
 
-<img width="1406" height="644" alt="image" src="https://github.com/user-attachments/assets/c4f2cd54-c0e1-4999-9c47-adb05c743858" />  
+## HyperPBI 2.0 authoring model
 
-<img width="1288" height="742" alt="image" src="https://github.com/user-attachments/assets/2856696d-9c31-4a99-a30c-836a946f369c" />  
+The minimal contract is:
 
-
-<img width="1383" height="729" alt="image" src="https://github.com/user-attachments/assets/056d3f2a-eb89-4d0c-8607-11cf3d444464" />  
-
-<img width="1504" height="858" alt="image" src="https://github.com/user-attachments/assets/58fd1877-1473-40b0-a4bc-853f5542c101" />
-
-<img width="1412" height="773" alt="image" src="https://github.com/user-attachments/assets/e0ff4f25-b42b-4f37-b030-dbf4010ddc55" />
-
-
-<img width="1453" height="732" alt="image" src="https://github.com/user-attachments/assets/cf897e7c-fc66-4f46-9b86-3f623c0cc2d9" />  
-
-<img width="1404" height="796" alt="image" src="https://github.com/user-attachments/assets/3152f582-374c-4f2d-91d8-ab4bfdaf9886" />  
-
-<img width="1185" height="811" alt="image" src="https://github.com/user-attachments/assets/336fe490-ad1a-4293-9908-001c4a3e0a44" />
-
-
-
-
-
-## Workflow
-
-1. Add HyperPBI to a Power BI report and drag columns/measures into the **Values** field well.
-2. Select the visual, open the **…** menu, and choose **Edit**. HyperPBI opens in focus mode.
-3. In **Guided Builder**, describe the goal, audience, decisions, application pattern, fields, and required sections.
-4. **Copy AI Prompt** and paste it into ChatGPT, DeepSeek, or Copilot.
-5. Paste the AI response. HyperPBI extracts one JSON object, performs only reviewable safe repairs, resolves aliases, compiles patterns/datasets, and reports structured diagnostics.
-6. Select **Validate & Preview**, make common edits in the visual inspector, then **Save & return**.
-
-## AI-first schema 2.0
-
-- Field aliases are deterministic, semantic, privacy-aware, and resolved to existing canonical keys at runtime.
-- Aliases and stable keys are based on the underlying Power BI table/column. Query wrappers such as `Sum(Sales.Amount)` are exposed separately as `queryAggregation`; they do not turn the model column into a true measure.
-- Version 2.0 rejects unknown properties; version 1.0 remains lenient for compatibility.
-- `data.datasets` derives named views using a bounded operation set and retains original Power BI row lineage. A static schema resolver follows runtime order (`filter`, `derive`, `rename`, `select`, grouping/metrics, `distinct`, `sort`, `limit`), so generated fields remain available when a dataset has zero rows.
-- Each component is validated against its selected logical dataset. Derived and metric fields exist only in datasets that expose them; they support local selection/highlight through lineage but cannot be direct Power BI external-filter targets. Renamed and group-by model columns retain their model-column targets.
-- `definitions` provides deterministic reusable component defaults.
-- `pattern` components support `kpi-row`, `trend-and-breakdown`, `record-explorer`, and `map-and-details`.
-- Create, improve, redesign, and repair prompts include only relevant engine modules. Improve jobs return a complete specification, not JSON Patch.
-- There is no model API, network AI request, API key, arbitrary SQL, or user JavaScript.
-
-See [AI authoring](docs/ai-authoring.md), [data model](docs/data-model.md), [repair workflow](docs/repair-workflow.md), and [migration guide](docs/migration-versioning.md).
-
-The specification and runtime config are saved with Power BI persistent visual properties.
-
-## Studio
-
-**HyperPBI Builder** (Simple mode) guides normal Power BI users through goal, audience, layout pattern, component selection, and style preset; then provides Copy AI Prompt, a response area, Validate & Preview, repair guidance, and Save. Raw JSON is never required.
-
-**Advanced mode** exposes: JSON editor, Runtime Config, AI Skill, Calculations, Map Services, Field Mapping, Interactions, Documentation, and diagnostics. The designer/preview divider and bottom diagnostics panel are resizable.
-
-**Advanced tabs:** Guided builder / AI builder, JSON, Runtime config, AI skill, Calculations, Map services, Field mapping, Interactions, Documentation.
-
-## Professional Application Shell
-
-Configured at the root level through `schema.app`:
-
-- **Brand:** title, subtitle, icon, shortTitle
-- **Navbar:** search, actions, user menu, notifications, sidebar toggle
-- **Sidebar:** collapsible navigation groups, mobile offcanvas, footer
-- **Page header:** breadcrumbs, title, subtitle, metadata, action buttons
-- **Footer:** primary and secondary text
-- **Layout:** vertical or horizontal, fluid or boxed, density, content padding, sticky header
-
-The app shell is responsive: sidebar collapses at narrow widths or becomes an offcanvas overlay on mobile. Existing dashboards without `app` continue rendering unchanged.
-
-See the [specification reference](docs/hyperpbi-spec-reference.md) and [professional operations example](examples/specs/professional-operations-app.json).
-
-## Component Catalog
-
-The catalog includes approximately 60 first-class component types across 11 categories:
-
-| Category | Types |
-|----------|-------|
-| Layout | grid, flex, split, section, toolbar, leftPanel, rightPanel, spacer, divider |
-| Controls | searchBox, textInput, numberInput, slider, select, multiSelect, segmentedControl, toggle, button, buttonGroup, filterChips, dateRange |
-| Navigation | tabs, collapsible, accordion, drawer, filterDrawer, steps, stepper |
-| Display | kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel, timeline |
-| Primitives | card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover |
-| Feedback | emptyState, placeholder, spinner |
-| Forms | textarea, checkbox, checkboxGroup, radioGroup, inputGroup |
-| Charts | barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, radarChart, smallMultiples |
-| Tables | table, matrix |
-| Maps | map |
-| Content/Advanced | text, markdown, html, custom, advancedChart |
-
-See the [component catalog](hyperpbi-component-catalog-reference.html) for complete details.
-
-ECharts uses Canvas by default in Power BI. The runtime forces `useDirtyRect: false` and `lazyUpdate: false` to prevent host repaint corruption; authors should not add `useDirtyRect: true`. Built-in charts submit complete replacement options so removed series, labels, axes, and visual maps do not remain stale.
-
-### Shared Properties
-
-All components support: `type`, `id`, `title`, `subtitle`, `span`, `className`, `hidden`, `style`, `css`, `slots`, `data`, `visibility`, `interaction`, `interactions`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`.
-
-### UI Actions vs Data Interactions
-
-Three independent behavior systems on every component:
-
-- **`uiAction`** — Interface behavior: navigation, overlays, toasts, sidebar, steps, scrolling
-- **`interaction`** — Universal data policy: internal highlight/filter, external Power BI selection/filter
-- **`interactions`** — Safe custom event-to-data payload resolution
-
-| UI Action | Purpose |
-|-----------|---------|
-| `clearFilters` | Clears all HyperPBI filters |
-| `setTab` | Sets active tab (target, value required) |
-| `setState` / `toggleState` | Named state management |
-| `toggleSidebar` | Toggles root sidebar collapse |
-| `openOverlay` / `closeOverlay` / `toggleOverlay` | Overlay visibility |
-| `setStep` / `nextStep` / `previousStep` | Step progression |
-| `showToast` / `dismissToast` | Toast notifications (1-30s duration) |
-| `scrollTo` | Scroll to component by ID |
-| `refresh` | Safe no-op (Power BI owns data refresh) |
-
-## First-Class Components
-
-Professional dashboards can be built with first-class components instead of custom HTML:
-
-- **`card`** — Container with header, icon, subtitle, actions, footer, status, collapsible body
-- **`listGroup`** — Data-bound or static list with badges, values, selection
-- **`dataGrid`** — Label/value record detail, 1-4 columns, copyable fields
-- **`iconButton`** / **`icon`** — Safe SVG icons from bundled registry (40+ icons)
-- **`avatar`** / **`avatarGroup`** — Identity indicators with initials, status, overflow
-- **`countUp`** — Animated number with prefix/suffix (respects reduced motion)
-- **`tracking`** — Compact stage progress (horizontal/vertical)
-- **`dropdown`** — Keyboard-accessible, viewport-aware command menu
-- **`modal`** — Focused blocking dialog with focus trap and restoration
-- **`offcanvas`** — Responsive root-hosted details or filter panel
-- **`popover`** — Contextual interactive content with nested components
-- **`emptyState`** / **`placeholder`** / **`spinner`** — Empty, loading, skeleton states
-- **`accordion`** — Real accordion with keyboard navigation, multiple/exclusive mode
-- **`steps`** — Sequential workflow with configurable orientation
-
-**Forms:** `textarea`, `checkbox`, `checkboxGroup`, `radioGroup`, `inputGroup` with labels, help/error text.
-
-## Native Tables
-
-The native table engine supports: `density` (compact/normal), `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`. Columns support: `sortable`, `resizable`, `visible`, `wrap`, `frozen` (left/right), `cellType` (text/badge/progress), `intentMap`.
-
-**Tabulator is not bundled.** `engine: "tabulator"` is normalized to native with a nonblocking warning.
-
-## Maps
-
-### Stable: Power BI Spatial Maps
-Location priority: Geometry → Latitude/Longitude → X/Y → Address. Explicit roles and Runtime Config bindings take priority; otherwise numeric fields named `latitude`/`lat` and `longitude`/`lon`/`lng` are inferred conservatively from source metadata. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and compact Layers, Legend, and Location Search toolbar popovers. Latitude and longitude should normally be set to **Don't summarize** in Power BI; summarized coordinates produce a warning rather than being silently changed.
-
-### Practical ArcGIS REST runtime
-Public query-capable FeatureServer/MapServer layers render end to end through the resolved-layer architecture. The runtime supports Power BI geometry joins, viewport queries, configured or opt-in service renderers/labels, tile overlays, basic dynamic images, labels, tooltips, popups/actions, selection, diagnostics, layer controls, legends, Home, user-triggered Location Search, and Zoom to Selection. Search uses the Runtime Config geocoder (Nominatim by default in Maps), requires WebAccess and privacy acknowledgment, never runs on render or keystrokes, and is unavailable in Core. Viewer opacity is entered as 0–100 percent and stored as 0–1. It intentionally excludes secured-service authentication, editing, 3D, relationship/tracing workflows, non-4326 output, density grids, and advanced label collision.
-
-### Build Profiles
-```bash
-npm run package:core   # No WebAccess, certification posture
-HYPERPBI_ALLOW_ALL_MAP_HOSTS=true npm run package:maps
-HYPERPBI_ALLOW_ALL_MAP_HOSTS=false HYPERPBI_MAP_HOSTS="https://gis.example.org" npm run package:maps
-npm run package:verify # Inspect capabilities inside actual PBIVIZ ZIPs
+```json
+{
+  "version": "2.0",
+  "components": []
+}
 ```
-Only HTTPS; user URLs cannot bypass package privileges. No tokens in JSON. Public services only.
 
-See [map services](docs/map-services.md).
+Allowed root properties are `version`, `title`, `theme`, `layout`, `state`, `app`, `leftPanel`, `rightPanel`, `toolbar`, `components`, `css`, `styles`, `calculations`, `data`, and `definitions`. Under `data`, only `datasets` is accepted. Version 2.0 rejects unknown root and component properties.
 
-## Calculations
+Every component needs a globally unique stable `id` that starts with a letter and contains only letters, digits, `_`, or `-` (maximum 100 characters). IDs connect inspector edits, UI-action targets, overlay state, interaction state, and pattern expansion, so improvements should preserve them whenever the same component remains.
 
-Derived fields and metrics using validated JSON operators: arithmetic, comparison, boolean, text, date, null, conditional. Aggregations: count, sum, avg, min, max, distinctCount, countWhere, sumWhere, avgWhere, ratio, percentOfTotal. See [calculation DSL](docs/calculations-dsl.md).
+Preparation follows the implementation pipeline: safe unambiguous import repairs; 1.0 compatibility migrations; optional ID assignment; definition expansion; pattern expansion; design-system validation; dataset field resolution and static dataset schemas; component dataset validation; field-alias resolution; design-system expansion; strict schema validation; then calculation/reference checks before render.
+
+## Field aliases and Power BI metadata
+
+The Field Manifest separates concepts that older documentation often conflated:
+
+| Concept | Meaning |
+|---|---|
+| AI alias | Stable camel-case identifier used in new 2.0 authoring |
+| Canonical runtime key | Internal normalized key used after preparation |
+| Display name | Power BI label shown to a person; not necessarily a valid reference |
+| Source table/column | Semantic-model origin used to construct external filter targets |
+| True model measure | Power BI measure (`kind: "measure"`); not a basic column-filter target |
+| Query aggregation wrapper | Query expression such as `Sum(Sales.Amount)` around a model column |
+| Implicit aggregation | `isImplicitAggregation: true`; the underlying item is still a model column |
+| Dataset-derived field | Row expression output local to a logical dataset |
+| Dataset metric | Grouped aggregate output local to a logical dataset |
+| Dataset group field | Group-by output; retains model-column origin metadata when available |
+
+`Sum(Sales.Amount)` must not be described as a model measure merely because the visual query summarizes it. A real model column with `sourceTable` and `sourceColumn` can support external filtering. Exact identity selection is separate: it requires Power BI identities or dataset source-row lineage.
+
+Alias privacy modes range from sample-bearing profiles to masked, summary, fields-only, and types-only manifests. Do not place confidential sample values, credentials, AI keys, ArcGIS tokens, or private service URLs in prompts or dashboard JSON.
+
+## Logical datasets
+
+Named datasets live at `data.datasets`. Every definition has a `source` of `powerbi` or another named dataset. After source resolution, both runtime evaluation and static schema propagation use this order:
+
+`filter → derive → rename → select → groupBy/metrics → distinct → sort → limit`
+
+Components omit `dataset` to use the base `powerbi` data view or name one dataset to use only that output schema. Dataset chains are deterministic, cycle-checked, cached by canonical definition/input signatures, and retain source-row lineage through filtering, grouping, and deduplication. Static schemas keep generated fields available even when the runtime result has zero rows.
+
+Logical datasets do not execute SQL, join arbitrary sources, call the network, or run JavaScript. See the [data model reference](docs/data-model.md).
+
+## Components and application patterns
+
+The generated catalog derives type, label, category, status, intended use, level, capabilities, required/allowed properties, interaction/UI-action support, accessibility guidance, compatibility notes, related types, and valid examples from canonical TypeScript metadata.
+
+Categories are Layout, Controls, Navigation, Display, Primitives, Feedback, Forms, Charts, Tables, Maps, Custom components, and Advanced components. The inventory includes `svg`, `svgMarkup`, `advancedChart`, custom-content components, and compatibility-only forms.
+
+Four 2.0 application patterns compile to existing runtime components with deterministic child IDs:
+
+- `kpi-row`
+- `trend-and-breakdown`
+- `record-explorer`
+- `map-and-details`
+
+Reusable root `definitions` deep-merge objects, replace arrays, remove definition IDs, and require every `use` instance to provide its own stable ID. Patterns and definitions are authoring conveniences; they do not add renderer behavior.
+
+## Charts, tables, maps, and SVG
+
+Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, gauge, heatmap, combo, waterfall, sankey, treemap, funnel, radar, and small multiples. Their ECharts `options` can alter safe presentation but cannot replace generated datasets, axes, series types/counts, links, nodes, encodings, or transforms. `advancedChart` is the sanitized JSON-only escape hatch for implemented ECharts configurations that a semantic chart cannot express.
+
+`table` is the supported native detail table. `matrix` provides grouped row/column summaries. Tabulator is not bundled; `engine: "tabulator"` is normalized only for compatibility.
+
+`map` supports Power BI geometry/coordinate bindings and practical public ArcGIS feature, tile, and basic dynamic sources. External requests need a Maps package whose WebAccess privilege and runtime host policy allow the HTTPS host. See [map services](docs/map-services.md).
+
+`svg` is the preferred governed vector system for diagrams, schematics, pictorial marks, and custom gauges. It uses structured allowlisted elements, bindings, scales, conditions, state, bounded repeats, normal interactions, ID isolation, animation presets, and reduced-motion handling. `svgMarkup` is a strictly sanitized fallback for a single raw SVG document. See [SVG visuals](docs/svg-visuals.md).
+
+For content, distinguish `text`, `markdown`, sanitized `html`, repeated/scoped `custom`, declarative `svg`, and sanitized `svgMarkup`. Prefer a first-class component when one fits.
+
+## Interactions
+
+HyperPBI has three separate declarative systems:
+
+1. `uiAction` changes interface state: tabs, steps, sidebar, overlays, toasts, scrolling, filter clearing, and a safe refresh no-op.
+2. Universal `interaction` controls internal `none|highlight|filter` behavior and external Power BI `none|auto|selection|filter` behavior.
+3. `interactions` maps supported component events to allowlisted custom payload actions.
+
+`externalMode: "auto"` resolves to filter for controls and selection for data-point/custom components. External filter mode requires a model-column target; true measures, dataset-derived fields, and dataset metrics cannot directly filter Power BI. Dataset lineage can map a derived/grouped row back to contributing source identities for selection. See [interactions](docs/interactions.md).
+
+## Studio, prompts, and repair
+
+Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification; add-section returns a section package with an insertion target; redesign returns one replacement using the selected stable ID. Normal improvements and repairs return complete JSON, not JSON Patch.
+
+Prompt composition includes only relevant component modules, Field Manifest data under the chosen privacy mode, recommended patterns, applicable datasets/maps/tables/charts/SVG guidance, current JSON for improvement, selected ID for redesign, and structured diagnostics for repair.
+
+The importer accepts one JSON object directly or inside one Markdown fence and can extract one unambiguous object from surrounding text. Multiple candidate objects, comments, smart quotes, or truncated JSON produce diagnostics rather than speculative repair. Automatic preparation repairs only known property typos, unambiguous numeric strings, an unmistakably missing 2.0 version, and missing 2.0 import IDs. It never substitutes fields, changes aggregations, deletes components, removes interactions, or rewrites business logic.
 
 ## Security
 
-- No user JavaScript — no `eval`, `new Function`, event handlers, scripts, iframes
-- HTML sanitized with DOMPurify; CSS parsed, allowlisted, scoped
-- UI actions never execute code strings or navigate arbitrary URLs
-- ArcGIS REST: HTTPS required, host allowlist, public services only
-- Safe WHERE generation from validated field metadata
-- Icons from bundled registry only; no arbitrary SVG
+- No user JavaScript, `eval`, `new Function`, callbacks, inline handlers, scripts, iframes, arbitrary SQL, or network datasets.
+- HTML is sanitized; forms and executable/embed elements are removed in normal mode.
+- CSS is parsed, property-allowlisted, scoped, and stripped of imports, external URLs, fixed positioning, abusive z-index, and unsafe animation forms.
+- ECharts options are recursively sanitized; functions, URL-bearing keys, executable strings, and unsafe semantic data overrides are removed.
+- SVG elements/attributes/references are allowlisted, IDs are namespaced, external resources are blocked, and exact element/path/depth/repeat/animation limits are enforced.
+- ArcGIS and provider URLs require HTTPS, no embedded credentials, an allowed host, and the appropriate package privilege.
+- Prompt data stays local until the user copies it. HyperPBI has no AI API key and should never receive credentials in dashboard JSON.
 
-See [security](docs/security.md).
+See the full [security model](docs/security.md).
 
-## Development
+## Package profiles
+
+```powershell
+npm run package:core
+npm run package:maps
+```
+
+- **Core** removes WebAccess privileges. Bound Power BI geometry remains available; external tiles, ArcGIS services, and geocoders are unavailable.
+- **Maps broad** is the default Maps packaging mode and uses `https://*` WebAccess (`HYPERPBI_ALLOW_ALL_MAP_HOSTS` not set to `false`).
+- **Maps restricted** uses built-in approved hosts plus comma-separated `HYPERPBI_MAP_HOSTS` when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
+
+The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`; it also writes the compatibility alias `*-maps.pbiviz` for a Maps package. Exact base names derive from the PBIVIZ packager, so documentation should not invent a fixed artifact filename.
+
+## Development commands
 
 ```powershell
 npm install
+npm run start
 npm run typecheck
 npm test
 npm run lint
-npm start              # Power BI dev server
-npm run package:core   # Certification build
-npm run package:maps   # Map-provider build
-npm run docs:generate  # Generate catalog docs
-npm run docs:check     # Verify docs up to date
+npm run docs:generate
+npm run docs:check
+npm run package:core
+npm run package:maps
+npm run package:verify
 ```
 
-Generated files: `dist/*-core.pbiviz`, `dist/*-maps-broad.pbiviz`, and `dist/*-maps-restricted.pbiviz`.
+`npm run docs:generate` is documentation-only. It executes canonical TypeScript metadata without building the visual and regenerates:
 
-## Documentation
+- `docs/hyperpbi-component-catalog-reference.md`
+- `hyperpbi-component-catalog-reference.html`
+- `docs/hyperpbi-ai-skill.md`
 
-| Document | Content |
-|----------|---------|
-| [User guide](docs/user-guide.md) | Workflow, Builder, troubleshooting |
-| [Specification reference](docs/hyperpbi-spec-reference.md) | Complete JSON schema |
-| [Component catalog](hyperpbi-component-catalog-reference.html) | Interactive catalog |
-| [AI skill](docs/hyperpbi-ai-skill.md) | Engine contract for AI |
-| [AI authoring](docs/ai-authoring.md) | Prompt composition guidance |
-| [ChatGPT guideline](docs/chatgpt-guideline.md) | Concise authoring rules |
-| [Interactions](docs/interactions.md) | UI actions + data interactions |
-| [Custom components](docs/custom-components.md) | Sanitized HTML, repeats |
-| [SVG visuals](docs/svg-visuals.md) | Declarative data-bound SVG, animation, repetition, and sanitized raw SVG |
-| [Map services](docs/map-services.md) | Maps, ArcGIS REST, hosts |
-| [Calculation DSL](docs/calculations-dsl.md) | Derived fields, metrics |
-| [Logical data model](docs/data-model.md) | Named datasets, caching, source-row lineage |
-| [Repair workflow](docs/repair-workflow.md) | Safe extraction, diagnostics, reviewable repairs |
-| [Migration/versioning](docs/migration-versioning.md) | Version 1.0 compatibility and 2.0 adoption |
-| [Security](docs/security.md) | Security model |
-| [Examples](examples/specs/) | Professional specs |
+## Documentation index
 
-## Known Limitations
+| Document | Purpose |
+|---|---|
+| [User guide](docs/user-guide.md) | Power BI and Studio workflow |
+| [2.0 specification](docs/hyperpbi-spec-reference.md) | Root, components, app, styles, behavior, diagnostics |
+| [Generated component catalog](docs/hyperpbi-component-catalog-reference.md) | Canonical component inventory and examples |
+| [AI authoring](docs/ai-authoring.md) | Prompt jobs, modules, privacy, and output contracts |
+| [ChatGPT guideline](docs/chatgpt-guideline.md) | Concise external-AI response rules |
+| [AI skill](docs/hyperpbi-ai-skill.md) | Generated checked-in authoring skill |
+| [Data model](docs/data-model.md) | Fields, datasets, lineage, caching, zero rows |
+| [Calculations](docs/calculations-dsl.md) | Root calculations and expression DSL |
+| [Interactions](docs/interactions.md) | UI actions, universal behavior, custom events |
+| [Custom content](docs/custom-components.md) | Text, Markdown, HTML, custom, SVG variants |
+| [SVG visuals](docs/svg-visuals.md) | Structured SVG, markup fallback, limits, motion |
+| [Map services](docs/map-services.md) | Power BI geometry, ArcGIS, providers, packaging |
+| [Repair workflow](docs/repair-workflow.md) | Extraction, diagnostics, and bounded repairs |
+| [Migration/versioning](docs/migration-versioning.md) | Intentional 1.0 compatibility and migration |
+| [Security](docs/security.md) | Sanitizers, URL/provider policy, privacy boundaries |
 
-- Power BI host row and aggregation-memory limits bound total data
-- Non-EPSG:4326 X/Y needs a projection adapter
-- Tabulator is not bundled; native table is the supported engine
-- Nominatim unsuitable for bulk production geocoding
-- Maps package requires organizational WebAccess approval
-- ArcGIS support is limited to public HTTPS services and output SR 4326; secured services, editing, 3D, relationships, tracing, density grids, and advanced label collision are unsupported
-- Overlay components require explicit unique IDs. Legacy drawer and filterDrawer specifications are normalized through offcanvas.
-- SVG intentionally excludes external assets, embedded HTML, JavaScript, path morphing, nested repetition, and full drawing/path editing.
+## Documentation maintenance
+
+Canonical component inventory lives in `src/catalog/componentDefinitions.ts`; documentation metadata in `src/catalog/componentDocumentation.ts`; examples in `src/catalog/componentJsonExamples.ts`; strict required/allowed properties in `src/schema/validateV2Schema.ts`; and patterns in `src/schema/patternRegistry.ts`. When adding or changing a component, update every applicable canonical source and `src/render/ComponentRegistry.tsx`, then run `npm run docs:generate` and commit all generated outputs. Do not hand-edit the generated catalogs or checked-in AI skill.
+
+Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.ts`; SVG constants from `src/components/svg/svgTypes.ts`; AI contract composition from `src/ai/promptComposer.ts`; and the canonical embedded/check-in skill from `HYPERPBI_SKILL_MARKDOWN` in `src/docs/hyperpbiHelp.ts`.
+
+## Compatibility and known limitations
+
+- Version 1.0 remains intentionally lenient and supports legacy normalized keys and migrations documented in [migration/versioning](docs/migration-versioning.md).
+- Logical datasets are in-memory transformations of the current Power BI data view: no joins, SQL, arbitrary JavaScript, or network sources.
+- Strict preparation resolves component/dataset field scopes before root calculated fields are applied at render time; use dataset `derive`/`metrics` for new 2.0 field pipelines. Root metrics remain available through metric-grid metric references/templates.
+- External filter mode targets model columns only; model measures and dataset outputs are not direct Power BI filter targets.
+- External identity selection depends on Power BI identities and retained lineage.
+- Core has no external provider access. Maps access depends on WebAccess approval and host policy.
+- ArcGIS support is public-service, 2D, REST-oriented scope; secured services, editing, relationships, tracing, and non-4326 output are not implemented.
+- SVG is governed and bounded; it is not a browser SVG/JavaScript sandbox.
+- Example JSON files that still declare `version: "1.0"` are retained as compatibility examples unless their accompanying text explicitly promotes 2.0 authoring.

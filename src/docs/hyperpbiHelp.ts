@@ -1,119 +1,150 @@
+import { componentDefinitions } from "../catalog/componentDefinitions";
+
+const componentCount = componentDefinitions.length;
+const categoryCount = new Set(componentDefinitions.map(component => component.category)).size;
+
 export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
-HyperPBI is a Power BI custom visual that compiles safe JSON into professional dashboards and application-style interfaces. The Builder prioritizes Copy AI Prompt, Paste AI response, Validate & Preview, and Save & return.
+HyperPBI compiles declarative JSON into a Power BI dashboard. Use **version 2.0 for new authoring**. Existing version 1.0 specifications remain supported as compatibility input.
 
-## Guided Builder
+## Studio workflow
 
-Simple-mode workflow: Copy AI Prompt → Paste AI response → Validate & Preview → Save & return. Optional guided setup (goal, audience, layout, components, style, privacy) under Dashboard setup → Customize.
+1. Review the Field Manifest and dashboard setup.
+2. Copy the generated prompt to an externally approved AI. HyperPBI does not call an AI API and stores no AI key.
+3. Paste one complete JSON response into Studio.
+4. Validate and preview; use structured diagnostics or the repair prompt when necessary.
+5. Save and return to the report.
 
-## Application Shell
+## Version 2.0 contract
 
-Configure root \`app\` for professional layouts: brand, navbar, sidebar, page header, footer. Use only when visual size supports it. Prefer offcanvas for narrow views.
+The root requires \`version: "2.0"\` and \`components: []\`. Optional roots are \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`css\`, \`styles\`, \`calculations\`, \`data.datasets\`, and \`definitions\`. Unknown root and component properties are errors. Every component requires a globally unique stable ID.
 
-## Component Categories
+Use Field Manifest aliases in AI-authored JSON. Preparation resolves aliases to canonical runtime keys. A display name is not automatically an alias. A query wrapper such as \`Sum(Sales.Amount)\` is still a summarized model column, not a true model measure.
 
-Layout, Controls, Navigation, Display, Primitives (card, listGroup, dataGrid, modal, offcanvas, etc.), Feedback, Forms, Charts, Tables, Maps, Content, Advanced.
+## Logical datasets, definitions, and patterns
 
-## UI Actions vs Data Interactions
+Components without \`dataset\` use \`powerbi\`; a named dataset is local to components that select it. Dataset operations run as filter → derive → rename → select → groupBy/metrics → distinct → sort → limit after resolving \`source\`. Derived fields and metrics cannot directly filter the Power BI model; source-row lineage can preserve identity selection.
 
-- \`uiAction\`: interface behavior (open modals, change tabs, show toasts)
-- \`interaction\`: data behavior (filter, highlight, Power BI selection)
-- Both may coexist on one component
+Reusable \`definitions\` deep-merge objects, replace arrays, and require a new ID at each \`use\` site. Patterns \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\` expand to normal components with deterministic child IDs.
 
-## Maps
+## Components and behavior
 
-Power BI spatial maps and practical public ArcGIS REST feature, join, tile, and dynamic layers are connected. Home, Zoom to Selection, Layers, Legend, and Clear Selection are functional. Use the Maps package for external requests: \`npm run package:maps\`.
+The canonical catalog contains ${componentCount} types in ${categoryCount} categories: Layout, Controls, Navigation, Display, Primitives, Feedback, Forms, Charts, Tables, Maps, Custom components, and Advanced components. See the generated catalog for exact required and allowed properties.
 
-## Tables
+- \`uiAction\`: safe interface state, tabs, steps, overlays, toasts, scrolling, and filter clearing.
+- \`interaction\`: universal internal highlight/filter and external Power BI selection/filter policy.
+- \`interactions\`: allowlisted event-specific payloads for custom content.
 
-Native table with enhanced features. Tabulator is not bundled.
+These systems are independent and optional. External filtering needs a real model-column target. True measures, derived fields, and dataset metrics are not model-filter targets.
 
-## SVG visuals
+## SVG and maps
 
-Use declarative \`svg\` for animated cards, custom gauges, diagrams, pictorial marks, and schematics. It supports safe field bindings, scales, maps, conditions, state, repeats, normal HyperPBI interactions, scoped keyframe presets, reduced motion, and deterministic local-ID isolation. \`svgMarkup\` is a strictly sanitized advanced fallback. Standard analytical charts remain ECharts components.
+Prefer declarative \`svg\` for governed diagrams, pictorial marks, schematics, and custom gauges. It supports bindings, scales, conditions, state, bounded repeats, allowlisted animations, normal interactions, ID isolation, and reduced motion. Use \`svgMarkup\` only when structured SVG cannot express the design; raw markup is strictly sanitized and cannot load resources or inject path data.
 
-## Security
+Maps support Power BI geometry/coordinates plus public HTTPS ArcGIS feature, tile, and basic dynamic sources. External services, tiles, and geocoding require a Maps package and its WebAccess host policy. Never place tokens or credentials in dashboard JSON.
 
-No user JavaScript. HTML sanitized. CSS allowlisted and scoped. No tokens in JSON. See security documentation for details.`;
+## Security boundaries
+
+No user JavaScript, functions, callbacks, inline handlers, scripts, iframes, SQL, network datasets, or credentials. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
-You generate strict HyperPBI 2.0 dashboard specifications for a Power BI custom visual. Version 1.0 remains supported only for existing dashboards.
+Generate or repair declarative HyperPBI dashboard specifications for a Power BI custom visual. Version 2.0 is the default for every new specification. Preserve version 1.0 when improving an existing 1.0 dashboard unless the user explicitly requests migration.
 
 ## Output contract
 
-Return one valid JSON object only. No markdown fences, explanations, comments, JavaScript, functions, eval, event handlers, scripts, iframes, or invented fields. Every component must have a stable unique id. Use supplied field aliases only; legacy normalized keys remain accepted for compatibility.
+Return exactly the output requested by the job and nothing else. Use valid JSON with no Markdown fence, prose, comment, trailing comma, JSON Patch, JavaScript, function, callback, event-handler string, credential, or invented field.
 
-## Root shape
+- Create and improve jobs return one complete specification object.
+- Add-section jobs return the requested validated section package with its insertion target.
+- Redesign-section jobs return one replacement component/section using the selected stable ID.
+- Repair jobs return one complete corrected specification object.
 
-Required: \`version\` ("2.0"), \`components\`. Optional: \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`data.datasets\`, \`definitions\`, \`toolbar\`, \`leftPanel\`, \`rightPanel\`, \`calculations\`, \`styles\`, \`css\`.
+For normal improvement and repair jobs, never return JSON Patch. Preserve stable component IDs, schema version, valid unrelated content, interactions, datasets, definitions, app state, and styling. Change only what the request or supplied diagnostics require.
 
-## AI-first language
+## Strict 2.0 root
 
-Prefer application patterns \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\`. Logical datasets allow source, select, rename, filter, sort, groupBy, metrics, derive, distinct, and limit. Reusable definitions merge objects recursively, replace arrays, and require instance IDs.
+The minimal root is:
 
-## Application shell
+\`\`\`json
+{"version":"2.0","components":[]}
+\`\`\`
 
-Root \`app\` for professional layouts. Use only when visual size justifies it. Do not place permanent sidebar in narrow tile. Prefer offcanvas for narrow layouts.
+Allowed root properties are \`version\`, \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`components\`, \`css\`, \`styles\`, \`calculations\`, \`data\`, and \`definitions\`. Under \`data\`, only \`datasets\` is allowed. Version 2.0 rejects unknown root and component properties.
+
+Every component requires \`type\` and a globally unique stable \`id\` matching \`^[A-Za-z][A-Za-z0-9_-]{0,99}$\`. IDs are behavior contracts: preserve them when the same component remains, and target only IDs that exist.
+
+## Fields and the Field Manifest
+
+Use only aliases supplied in the current Field Manifest. An alias is an AI-facing identifier; preparation resolves it to a canonical runtime key. Display names, source table/column names, and Power BI query names are metadata, not interchangeable authoring identifiers.
+
+Respect field origin:
+
+- A true model measure has model-measure origin and cannot be a basic model-column filter target.
+- A query aggregation such as \`Sum(Sales.Amount)\` is an implicit aggregation over the model column \`Sales.Amount\`, not a model measure.
+- Model columns with source table/column metadata can support external filters.
+- Dataset-derived fields and dataset metrics are local results and cannot directly filter the semantic model.
+- Renamed model columns and group-by fields retain source metadata when available.
+- Exact external selection requires Power BI identities or source-row lineage; it is different from external filtering.
+
+Never invent an alias, normalized key, model measure, aggregation, or business rule.
+
+## Logical datasets
+
+Declare named datasets at \`data.datasets\`. Each definition requires \`source\`, which is \`powerbi\` or another named dataset. Allowed properties are \`source\`, \`filter\`, \`derive\`, \`rename\`, \`select\`, \`groupBy\`, \`metrics\`, \`distinct\`, \`sort\`, and \`limit\`.
+
+Runtime and static-schema order is: resolve source; filter; derive; rename; select; groupBy/metrics; distinct; sort; limit. Metric operations are \`sum\`, \`avg\`, \`min\`, \`max\`, \`count\`, \`distinctCount\`, and \`first\`. Derive expressions use the safe calculation DSL. No SQL, joins, arbitrary JavaScript, or network sources.
+
+A component omitting \`dataset\` uses \`powerbi\`; otherwise it sees only the selected dataset's output fields. Validate references at the stage where they are used. Source cycles, unknown sources, collisions, and missing fields are errors. Lineage combines contributing source rows through grouping/distinct and enables identity selection when possible.
+
+## Reusable definitions and application patterns
+
+Root \`definitions\` are reusable component fragments. A component instance uses \`use\`; objects merge recursively, arrays are replaced, the definition's ID is removed, and every instance supplies its own stable ID. Cycles and unknown definitions are errors.
+
+Available patterns are \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\`. A pattern is \`{"type":"pattern","pattern":"...","id":"stable-id"}\` plus the pattern's required fields. Patterns expand before validation; generated child IDs derive from the pattern ID. Use a pattern only when its structure matches the user's intent.
 
 ## Components
 
-Layout: grid, flex, split, section, toolbar, spacer, divider.
-Controls: searchBox, textInput, numberInput, slider, select, multiSelect, segmentedControl, toggle, button, buttonGroup, filterChips, dateRange.
-Navigation: tabs, collapsible, accordion, steps.
-Display: kpi, metricGrid, infoCard, statusBadge, progressBar, alert, statList, detailPanel, timeline.
-Primitives: card, icon, iconButton, avatar, avatarGroup, listGroup, dataGrid, countUp, tracking, dropdown, modal, offcanvas, popover.
-Feedback: emptyState, placeholder, spinner.
-Forms: textarea, checkbox, checkboxGroup, radioGroup, inputGroup.
-Charts: barChart, horizontalBarChart, lineChart, areaChart, pieChart, donutChart, scatterChart, gauge, heatmap, comboChart, waterfallChart, sankeyChart, treemapChart, funnelChart, radarChart, smallMultiples, advancedChart. Prefer a first-class chart; use advancedChart only when no semantic chart fits. Semantic chart options cannot replace generated data.
-Tables: table, matrix.
-Maps: map.
-Content: text, markdown, html, custom, svg. Advanced escape hatch: svgMarkup.
+Use the canonical component catalog included with the prompt. It contains ${componentCount} types in ${categoryCount} categories, including first-class semantic charts, native \`table\` and \`matrix\`, \`map\`, declarative \`svg\`, sanitized \`svgMarkup\`, and \`advancedChart\`. Use only properties listed for that type.
 
-Use declarative \`svg\` only for animated KPI cards, custom gauges, diagrams, process flows, pictorial marks, and schematics. Use ECharts for standard analytical charts. SVG uses approved elements, field aliases, bounded repeats, normal interaction policies, scoped animation presets, stable IDs, ariaLabel, and reduced-motion-safe final states. Never emit JavaScript, event attributes, foreignObject, external resources or libraries, image/use, or arbitrary URLs. Prefer \`svg\` over \`svgMarkup\`.
+Prefer first-class components over custom markup: \`card\` over a simulated card, \`listGroup\` over a hand-built list, \`dataGrid\`/\`detailPanel\` over manual detail HTML, semantic charts over \`advancedChart\`, and \`svg\` over \`svgMarkup\`.
 
-## Shared properties
+Shared 2.0 properties include \`type\`, \`id\`, \`dataset\`, \`title\`, \`subtitle\`, \`span\`, \`className\`, \`hidden\`, \`props\`, \`style\`, \`css\`, \`slots\`, \`data\`, \`visibility\`, \`interactions\`, \`interaction\`, \`ariaLabel\`, \`icon\`, \`variant\`, \`size\`, \`disabled\`, \`tooltip\`, and \`uiAction\`. An interaction object is not required on every component.
 
-All components: type, id, title, subtitle, span, className, hidden, style, css, slots, interaction, interactions, ariaLabel, icon, variant, size, disabled, tooltip, uiAction.
+## Application shell and overlays
 
-## UI actions
+Configure the application shell at root \`app\`, never \`schema.app\`. It can define brand, navbar, sidebar, page header, footer, density, container, and layout. Use a permanent shell only when the visual size supports it; prefer \`offcanvas\` for narrow layouts.
 
-For interface behavior: clearFilters, setTab, setState, toggleState, toggleSidebar, openOverlay, closeOverlay, toggleOverlay, setStep, nextStep, previousStep, showToast, dismissToast, scrollTo, refresh (safe no-op).
+Overlay components require unique IDs. Target existing IDs with \`openOverlay\`, \`closeOverlay\`, or \`toggleOverlay\`. Use dropdown for commands, popover for contextual content, offcanvas for details/filters, and modal for focused blocking work.
 
-## Universal data interaction
+## Three interaction systems
 
-\`\`\`json
-{"interaction":{"enabled":true,"trigger":"auto","internalMode":"highlight","internalScope":"self","externalMode":"auto","selectionMode":"replace","multiSelect":true,"showSelector":false,"clearOnSecondClick":true}}
-\`\`\`
+1. \`uiAction\` changes interface state. Types: \`clearFilters\`, \`setTab\`, \`setState\`, \`toggleState\`, \`toggleSidebar\`, \`openOverlay\`, \`closeOverlay\`, \`toggleOverlay\`, \`setStep\`, \`nextStep\`, \`previousStep\`, \`showToast\`, \`dismissToast\`, \`scrollTo\`, and \`refresh\` (safe no-op).
+2. Universal \`interaction\` controls data behavior: trigger \`auto|click|change\`; internal mode \`none|highlight|filter\`; scope \`self|others|all\`; external mode \`none|auto|selection|filter\`; operators \`=|!=|>|>=|<|<=|contains|in|between\`; selection mode \`replace|toggle|add\`.
+3. \`interactions\` maps safe component events to allowlisted actions such as \`selectRow\`, \`selectWhere\`, \`clearSelection\`, \`setFilter\`, \`clearFilter\`, \`setState\`, \`toggleState\`, \`openTab\`, \`toggleCollapse\`, \`drillToDetail\`, \`highlight\`, and \`clearHighlight\`.
 
-## Overlay rules
+These systems are independent and can coexist. \`externalMode: "auto"\` resolves to filter for controls and selection for data points/custom content. External filter mode requires a supplied real model-column alias. Do not claim a dataset metric or derived field can directly filter Power BI.
 
-All overlays require explicit unique IDs and render through the root host. Use dropdown for commands, popover for contextual interactive content, offcanvas for persistent details or filters, and modal only for focused blocking tasks. Targets must match overlay component IDs. Never invent overlay targets.
+## SVG and svgMarkup
 
-## First-class component preference
+Use \`svg\` for governed diagrams, gauges, pictorial marks, process flows, and schematics—not standard analytical charts. Supported structured elements are \`g\`, \`path\`, \`rect\`, \`circle\`, \`ellipse\`, \`line\`, \`polyline\`, \`polygon\`, \`text\`, \`tspan\`, \`defs\`, \`linearGradient\`, \`radialGradient\`, \`stop\`, \`clipPath\`, \`mask\`, \`marker\`, \`title\`, and \`desc\`.
 
-Prefer card over custom card HTML. Prefer listGroup over custom lists. Prefer dataGrid over manual detail HTML. Prefer modal/offcanvas over simulated drawers.
+Values can be literal, bound, templated, scaled, mapped, conditional, or state-based. Data contexts are \`aggregate\`, \`selectedRow\`, and \`first\`. Repeats are bounded and may select a dataset. Animation presets are \`fade-in\`, \`slide-in\`, \`scale-in\`, \`pulse\`, \`float\`, \`swim\`, \`rotate\`, \`draw-path\`, \`progress-fill\`, \`follow-progress\`, \`flow-dash\`, \`blink-status\`, \`bounce\`, and \`shimmer\`; triggers are \`auto\`, \`hover\`, \`focus\`, \`selected\`, \`dataChange\`, \`state\`, and \`none\`. Include an accessible label and respect reduced motion.
 
-## Map rules
+Use \`svgMarkup\` only when structured SVG is insufficient. It is a sanitized single SVG document: no script, handlers, style element/attribute, external URL, \`foreignObject\`, image, use, link, animation element, or field-injected path data.
 
-Generate Power BI spatial maps by default. Use public ArcGIS feature/tile/dynamic sources only when the user supplies a verified HTTPS URL, layer ID, and real fields. Center order is [latitude, longitude]. Never invent ArcGIS resources or credentials. Secured services, editing, 3D, relationships, tracing, non-4326 output, density grids, and advanced label collision are unsupported.
+## Maps
 
-## Table rules
+Prefer Power BI geometry, latitude/longitude, X/Y, or address bindings. Map center order is \`[latitude, longitude]\`. External sources are public HTTPS \`arcgisFeature\`, \`arcgisTile\`, or basic \`arcgisDynamic\` services subject to the installed Maps package and host allowlist. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, editing, 3D, relationships, tracing, or non-4326 output.
 
-Tabulator is not bundled. Use enhanced native table properties: density, striped, hover, showRowCount, pageSizeOptions, rowActions, emptyState.
+## Repair behavior
+
+Use supplied structured diagnostics as the authority. HyperPBI's automatic preparation repairs only unambiguous cases: add version 2.0 when the shape is unmistakable, generate missing 2.0 component IDs on import, correct the known property typos \`meausre\`, \`catgory\`, \`componets\`, and \`aggregration\`, and convert numeric strings for bounded numeric properties. It does not repair comments, smart quotes, truncated JSON, unknown business fields, ambiguous aliases, unknown component types, unsafe content, or speculative intent.
 
 ## Security
 
-No JavaScript, eval, new Function, event handlers, scripts, iframes. No tokens or credentials. No invented overlay targets. No invented ArcGIS resources.
+Never emit user JavaScript, eval, functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, joins, or network datasets. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
 
-## Design standard
+## HyperPBI 1.0 compatibility
 
-Compact enterprise spacing, restrained colors, strong hierarchy, responsive spans. Use theme tokens. Prefer styles.globalCss for visual-wide design.
-
-## Compatibility
-
-Legacy properties accepted: internal, external, selectable, selectionMode, button action/actionValue, engine:"tabulator", legacy drawer/filterDrawer, legacy stepper, legacy map settings/style/popup.
-
-## Common mistakes
-
-Inventing field keys, using display names as references, omitting ids, comments in JSON, spacious toy styling, full app shell for small tiles, custom HTML where first-class components exist, inventing ArcGIS URLs, tokens/credentials, forgetting interaction objects, deprecated properties.`;
+Existing 1.0 specifications and canonical normalized field keys remain supported. Legacy accordion children, drawer/filterDrawer, stepper, button \`action\`/\`actionValue\`, \`table.engine: "tabulator"\`, legacy map settings/style/popup, and deprecated \`internal\`, \`external\`, \`selectable\`, and table \`selectionMode\` are compatibility inputs. Do not use them as the primary 2.0 authoring contract. Do not silently migrate a 1.0 specification; preserve its version during normal improvements and migrate only on explicit request.`;

@@ -1,92 +1,36 @@
-# Custom Components
+# Content and custom components
 
-Custom components use sanitized HTML, scoped CSS, safe templates, and typed interactions. Use them only when first-class components cannot achieve the desired result.
+Choose the narrowest implemented component. Custom content is not an escape hatch for JavaScript or arbitrary websites.
 
-## Before Using Custom
+| Type | Content | Binding/repetition | Security |
+|---|---|---|---|
+| `text` | Plain text | templates/repeat where supported | rendered as text |
+| `markdown` | Structured explanatory text | templates/repeat | parsed output is sanitized |
+| `html` | Branded static HTML | templates/repeat and slots | DOMPurify-sanitized |
+| `custom` | App-like repeated cards/lists/slicers | `html`, slots, `repeat`, safe `interactions` | HTML sanitized; CSS parsed/scoped |
+| `svg` | Structured governed vector scene | typed values, dataset context, repeats, interaction/UI actions | element/property schema, ID isolation, limits |
+| `svgMarkup` | One raw SVG document | escaped text templates and SVG data context | strict SVG parser/sanitizer |
 
-| Need | Prefer First-Class |
-|------|-------------------|
-| Container | `card` |
-| Record list | `listGroup` |
-| Detail layout | `dataGrid` |
-| Menu | `dropdown` |
-| Dialog | `modal` |
-| Slide-over | `offcanvas` |
-| Empty data | `emptyState` |
-| Loading | `placeholder` or `spinner` |
-| Workflow stage | `steps` or `tracking` |
-| Input | Form component |
+## HTML, slots, and CSS
 
-## Three Behavior Systems
+Normal HTML blocks remove scripts, iframes, object/embed, links/meta, forms/inputs/buttons/selects/textareas, style/base, inline style, `srcset`, form actions, and unsafe URI forms. Data attributes are not accepted; ARIA attributes are.
 
-### `interactions` (Safe Custom Interactions)
-Resolves custom click/change events and row matches into data payloads:
-```json
-{
-  "interactions": {
-    "onClick": {
-      "action": "selectWhere",
-      "where": { "op": "=", "left": { "field": "category" }, "right": { "valueFromRow": "category" } }
-    }
-  }
-}
-```
+Component CSS is parsed with `css-tree`, allowlists properties, rejects imports/font-face/document/page/namespace, blocks unsafe URLs/expressions/fixed positioning/abusive z-index, scopes selectors under the component ID, and namespaces safe keyframes. Global CSS uses the corresponding visual scope.
 
-### `interaction` (Universal Data Policy)
-Controls internal filtering/highlighting and Power BI behavior:
-```json
-{
-  "interaction": {
-    "enabled": true,
-    "trigger": "click",
-    "internalMode": "none",
-    "internalScope": "self",
-    "externalMode": "filter",
-    "field": "category",
-    "operator": "="
-  }
-}
-```
+Slots are named HTML fragments (`header`, `subheader`, `body`, `footer`, `actions`, `empty`, `item`, `row`, `cell`, `popup`, `tooltip`, `legend`, `badge`) and pass through the same sanitization.
 
-### `uiAction` (Interface Actions)
-Controls overlays, navigation, toasts. Independent from data behavior.
+## Repetition and field binding
 
-## Template Tokens
+Content repeat uses source `rows`, an optional row alias, a bounded `limit`, a template, optional `distinctBy`, `sortBy`, and `sortDirection: asc|desc`. Templates resolve known fields; they are not expressions or HTML-code generators.
 
-Safe lookup tokens available in custom HTML templates:
-- `{{row.field_key}}` — Row value
-- `{{field_key.displayName}}` — Field display name
-- `{{count}}` — Row count
-- `{{sum.field_key}}`, `{{avg.field_key}}`, `{{min.field_key}}`, `{{max.field_key}}`
-- `{{metric.key}}` — Calculated metric
-- `{{selected.field_key}}` — Selected row value
-- `{{prop.name}}` — Component prop value
-- `{{state.name}}` — Dashboard state value
+For an interactive custom slicer/list, combine a repeat with a safe `interactions.onClick` action such as `selectWhere`, then let the universal `interaction` policy determine internal/external behavior. External filtering still requires a real model-column field.
 
-Tokens are lookups only — not executable expressions.
+## SVG distinction
 
-## Repeat Templates
+`svg` is a first-class declarative scene graph and should be preferred. It can bind individual geometry/text/paint values, use scales/conditions/state, repeat marks, run allowlisted animation presets, and attach normal interaction/UI actions to elements.
 
-Custom components can iterate over data rows:
-```json
-{
-  "type": "custom",
-  "id": "field_slicer",
-  "repeat": {
-    "source": "rows",
-    "distinctBy": "field_key",
-    "sortBy": "field_key",
-    "sortDirection": "asc",
-    "limit": 200,
-    "template": "<span>{{row.field_key}}</span>"
-  }
-}
-```
+`svgMarkup` is advanced fallback markup. Templates are XML-escaped, cannot create tag/attribute names, and cannot inject path data. External resources, handlers, styles, links, images/use, animation elements, and unknown references are removed.
 
-## Security
+## Prefer first-class components
 
-- HTML is sanitized with DOMPurify
-- CSS is parsed, allowlisted, and scoped to the component
-- No scripts, iframes, event handlers, or JavaScript URLs
-- Templates use safe token lookup — no code execution
-- Handled-event protection prevents parent/child conflicts
+Use `card`, `listGroup`, `dataGrid`, `detailPanel`, `dropdown`, `popover`, `offcanvas`, `modal`, semantic charts, `table`, `matrix`, or `map` when they fit. These components provide stronger schema validation, accessibility, interactions, and responsive behavior than simulated custom markup.

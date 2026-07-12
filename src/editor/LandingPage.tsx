@@ -1,6 +1,6 @@
 const features = [
     ["Complete dashboards", "Layouts, KPI cards, controls, tabs, charts, tables, maps, detail panels, and custom content."],
-    ["AI-first design", "A complete prompt combines your goal, HyperPBI skill, field dictionary, data summary, security rules, and visual size."],
+    ["Human-controlled AI workflow", "HyperPBI builds a reviewed prompt from your goal, Field Manifest, privacy mode, relevant contract, and visual size; you choose an approved external AI."],
     ["Power BI interactions", "Selectable tables, charts, maps, and safe actions can interact with compatible report visuals."],
     ["Safe calculations", "Derived fields and metrics use a deterministic JSON DSL instead of JavaScript."],
     ["Enterprise styling", "Theme tokens, global application CSS, reusable component defaults, scoped CSS, slots, and responsive layouts."],

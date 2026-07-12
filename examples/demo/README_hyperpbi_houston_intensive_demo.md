@@ -1,18 +1,19 @@
-[README_hyperpbi_houston_intensive_demo.md](https://github.com/user-attachments/files/29875155/README_hyperpbi_houston_intensive_demo.md)
 # HyperPBI Houston Intensive Web-App Demo
+
+> Compatibility example: the included dashboard JSON files intentionally use HyperPBI 1.0 normalized runtime keys. They demonstrate the preserved 1.0 path, not the recommended contract for new AI authoring. New dashboards should use version 2.0 and aliases from the current Field Manifest.
 
 ## Included files
 
 - `hyperpbi_houston_demo_data.csv` — 240 synthetic Houston operations records.
-- `hyperpbi_houston_intensive_dashboard_EXPECTED_KEYS.json` — ready dashboard using the normalized keys expected when the CSV table remains named `hyperpbi_houston_demo_data` and numeric values use Power BI's default Sum summarization.
-- `hyperpbi_houston_intensive_dashboard_LOGICAL.json` — field-readable source dashboard.
+- `hyperpbi_houston_intensive_dashboard_EXPECTED_KEYS.json` — 1.0 compatibility dashboard using normalized keys expected when the CSV table remains named `hyperpbi_houston_demo_data` and numeric values use Power BI's default Sum summarization.
+- `hyperpbi_houston_intensive_dashboard_LOGICAL.json` — field-readable 1.0 compatibility source dashboard.
 - `hyperpbi_houston_intensive_runtime_config.json` — Maps runtime configuration.
 - `adapt_hyperpbi_dashboard_fields.py` — adapts the logical dashboard to the exact field inventory returned by HyperPBI.
 - `hyperpbi_houston_intensive_component_coverage.json` — component and feature manifest.
 
 ## Fast setup
 
-1. Build/import the HyperPBI **maps-broad** PBIVIZ.
+1. Build/import a HyperPBI **maps-broad** PBIVIZ.
 2. Import `hyperpbi_houston_demo_data.csv` into Power BI.
 3. Keep the query/table name as `hyperpbi_houston_demo_data`.
 4. Add all CSV columns to HyperPBI's Values field well.
@@ -26,9 +27,9 @@ The map uses explicit OSM tiles:
 
 The broad Maps PBIVIZ must contain `https://*` WebAccess.
 
-## Field-key fallback
+## Compatibility field-key fallback
 
-Power BI can change field keys when the query name or summarization changes. If validation reports unavailable fields:
+This adapter exists because the demo intentionally preserves 1.0 normalized keys. Power BI can change those keys when the query name or summarization changes. If validation reports unavailable fields:
 
 1. Copy/export HyperPBI's current field inventory as JSON.
 2. Run:
@@ -103,15 +104,9 @@ python adapt_hyperpbi_dashboard_fields.py   --dashboard hyperpbi_houston_intensi
 - Icon, icon button, avatar, status badge, spinner, placeholder, empty state, alert and info card
 - Data grid and list group
 
-## Intentionally excluded
+## Scope
 
-The current registry still marks these renderers TODO, so the demo does not pretend they work:
-
-- Dropdown
-- Offcanvas
-- Popover
-
-External ArcGIS services are also not required; the map uses the generated Houston latitude/longitude fields.
+The demo does not require external ArcGIS services; the map uses generated Houston latitude/longitude fields. Dropdown, offcanvas, and popover are implemented components, but this particular compatibility bundle is not intended to cover every current component.
 
 ## Synthetic-data note
 

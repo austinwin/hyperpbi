@@ -2,9 +2,8 @@ Create a dense, professional HyperPBI operations dashboard for managers using th
 
 Layout: compact KPI row, segmented priority control, small multiples by region, activity timeline, matrix summary, highlight-mode detail table, and a selected-row detail drawer. Use responsive 12-column spans and no fixed pixel layout widths except the bounded drawer.
 
-Interactions: keep all table and slicer values visible; use internal:false and external:true where a selection should affect other Power BI visuals. Explain nothing outside the JSON.
+Interactions: keep all table and slicer values visible. Use the universal interaction object: internalMode "highlight" or "none" where rows should remain visible, and externalMode "selection" for identity-backed rows/points or "filter" only for a supplied model-column alias. Prefer offcanvas for selected-row details.
 
 Design: restrained navy/teal palette, 6–8px gaps, compact card padding, sticky readable table headers, semantic colors only for risk/status, no rainbow palette, no excessive gradients, no huge cards, and no overflow.
 
-Use only normalized keys supplied in the field dictionary. Return one valid HyperPBI 1.0 JSON object only. Do not emit JavaScript, functions, formatter callbacks, inline handlers, scripts, iframes, external URLs, or comments.
-
+Use only aliases supplied in the Field Manifest. Return one complete valid HyperPBI 2.0 JSON object with stable unique component IDs. Do not emit Markdown, comments, JSON Patch, JavaScript, functions, formatter callbacks, inline handlers, scripts, iframes, credentials, external resources, or invented fields.

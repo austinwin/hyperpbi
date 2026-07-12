@@ -1,3 +1,3 @@
-Prompt job: Repair invalid JSON
+Prompt job: Repair invalid JSON (2.0 example; preserve the detected schema version)
 
-Use the invalid specification or affected fragment, structured diagnostics, valid field aliases, and relevant schema supplied by HyperPBI. Preserve valid unrelated content. Return one complete corrected JSON object only, with no Markdown fence, comments, explanation, alternate version, invented field, or unsupported property.
+Use the invalid specification or affected fragment, structured diagnostics, valid field aliases, and relevant schema supplied by HyperPBI. Preserve the schema version, stable IDs, valid unrelated content, datasets, interactions, and styling. Return one complete corrected JSON object only—not JSON Patch—with no Markdown fence, comments, explanation, alternate version, invented field, or unsupported property.
