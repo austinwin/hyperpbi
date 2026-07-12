@@ -1,3 +1,5 @@
+import type { FieldOrigin, QueryAggregation } from "./fieldMetadata";
+
 export type Primitive = string | number | boolean | Date | null | undefined;
 export type DataRow = Record<string, Primitive>;
 
@@ -15,6 +17,12 @@ export interface NormalizedField {
     kind?: "column" | "measure" | "unknown";
     /** Primitive metadata type used by the AI-facing semantic manifest. */
     dataType?: "text" | "number" | "boolean" | "date" | "datetime" | "unknown";
+    /** Visual-query summarization applied by Power BI to an underlying model column. */
+    queryAggregation?: QueryAggregation;
+    /** True only when queryAggregation wraps a model column rather than identifying a model measure. */
+    isImplicitAggregation?: boolean;
+    /** Stable metadata provenance used by validation and external-filter diagnostics. */
+    origin?: FieldOrigin;
 }
 
 export type MapLocationMode = "geometry" | "latLon" | "xy" | "address" | "none";

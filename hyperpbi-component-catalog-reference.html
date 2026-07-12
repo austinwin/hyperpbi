@@ -80,6 +80,9 @@ body{margin:0;padding:0}
 <p>Configured at root level via <code>schema.app</code>. Not a component type.</p>
 <p>Supports: brand, navbar, sidebar, pageHeader, footer, vertical/horizontal layout, fluid/boxed container, density, content padding, sticky header, collapsible sidebar with mobile offcanvas.</p>
 
+<h2>Data Scopes and Power BI Field Origin</h2>
+<p>Components validate against their selected logical dataset, whose output schema exists even when it returns zero rows. Power BI query aggregation is separate from model origin: <code>Sum(Sales.Amount)</code> remains a model column targeting <code>Sales.Amount</code>. True measures, derived fields, and dataset metrics are not direct external-filter targets; renamed and group-by model columns retain their source target.</p>
+
 <h2>Layout</h2><div class="component-card" data-type="grid" data-category="Layout">
 <div class="component-card-header" onclick="this.parentElement.classList.toggle('open')" aria-expanded="false">
 <strong>grid</strong>

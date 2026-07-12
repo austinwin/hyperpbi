@@ -56,6 +56,7 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
     }, [data.rows, data.rowKeys, rows]);
     const filteredData = useMemo<NormalizedData>(() => ({ ...data, rows, rowKeys: filteredRowKeys, aggregates: calculateAggregates(rows), calculatedMetrics: calculateDerivedMetrics(rows, schema.calculations?.metrics), map: normalizeMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries, filteredRowKeys) }), [data, rows, filteredRowKeys, schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
     const datasetEvaluation=useMemo(()=>{const sourceIndexByKey=new Map(data.rowKeys.map((key,index)=>[key,index] as const));return evaluateDatasets(filteredData,schema.data?.datasets??{},new Map(),{sourceIndices:filteredRowKeys.map(key=>sourceIndexByKey.get(key)??-1),sourceRowKeys:data.rowKeys});},[filteredData,schema.data?.datasets,filteredRowKeys,data.rowKeys]);
+    const runtimeWarnings=useMemo(()=>Array.from(new Set([...referenceWarnings,...datasetEvaluation.errors.map(item=>item.message)])),[referenceWarnings,datasetEvaluation.errors]);
     const scope = `#${instanceId}`; const cssMode = config.security?.cssMode ?? "scoped"; const sanitizedCss = useMemo(() => sanitizeCss(`${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}\n${settings.customCss}`, scope, { mode: cssMode }), [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode]);
     const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }), [data.rows, data.rowKeys, rows, state]);
     const componentRows = useCallback((componentId:string) => selectedComponentRows(componentId, { state }), [state]);
@@ -111,7 +112,7 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
             )}
             <OverlayHost />
             <ToastHost />
-            {settings.debug.showSchemaErrors && referenceWarnings.length > 0 && <details class="hp-reference-warning"><summary>{referenceWarnings.length} schema field warning(s)</summary><ul>{referenceWarnings.map(warning => <li>{warning}</li>)}</ul><div>Valid field keys: {Object.keys(data.fields).join(", ") || "No fields are bound."}</div></details>}
+            {settings.debug.showSchemaErrors && runtimeWarnings.length > 0 && <details class="hp-reference-warning"><summary>{runtimeWarnings.length} schema field warning(s)</summary><ul>{runtimeWarnings.map(warning => <li>{warning}</li>)}</ul><div>Valid field keys: {Object.keys(data.fields).join(", ") || "No fields are bound."}</div></details>}
             {settings.debug.showFieldDictionary && <FieldDictionaryPanel data={filteredData} />}
             {settings.debug.showDataSample && <details class="hp-debug"><summary>Normalized data sample</summary><pre>{JSON.stringify(filteredData.rows.slice(0, 10), null, 2)}</pre></details>}
             {settings.debug.showPerformance && <div class="hp-performance">Render preparation: {renderMs.toFixed(1)} ms · Loaded {data.rows.length.toLocaleString()} rows{data.loadStatus?.moreRowsAvailable ? " · more available" : ""}{datasetEvaluation.diagnostics.map(item=>` · ${item.name}: ${item.outputRowCount} rows/${item.evaluationMs.toFixed(1)}ms/${item.cacheStatus}`)}</div>}

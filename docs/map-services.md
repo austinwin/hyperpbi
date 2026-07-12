@@ -22,6 +22,8 @@ HyperPBI renders Power BI spatial data and a practical subset of public ArcGIS R
 
 Map `view.center` is always `[latitude, longitude]`, matching the value passed to Leaflet. ArcGIS queries request output spatial reference 4326.
 
+Explicit Runtime Config bindings and Power BI map roles have highest priority. If neither is present, HyperPBI conservatively recognizes numeric source/display names `latitude`, `lat`, `longitude`, `lon`, and `lng`. Power BI query wrappers are unwrapped before this check, so `Sum(Demo.Latitude)` retains `Demo.Latitude` metadata. Coordinates should normally use **Don't summarize**; summarized latitude or longitude is left unchanged and produces a row-level reliability warning.
+
 ## Layer sources
 
 - `powerbi`: geometry and attributes from bound Power BI rows.

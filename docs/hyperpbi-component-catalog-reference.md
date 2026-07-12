@@ -93,6 +93,12 @@ Three independent behavior systems:
 - **`interaction`** — Universal local/Power BI data policy
 - **`uiAction`** — Interface/navigation/overlay/state behavior
 
+## Data scopes and Power BI field origin
+
+Components validate against their selected logical dataset; omitted `dataset` uses the base Power BI data view. Dataset schemas are propagated statically, so derived and metric fields remain available with zero rows.
+
+Power BI query aggregation is separate from model origin. For example, `Sum(Sales.Amount)` remains a filterable model column targeting `Sales.Amount`, while a true model measure is not a basic model-column filter target. Derived fields and dataset metrics are also not direct external-filter targets; renamed and group-by model columns retain their source target.
+
 ## Layout
 
 ### grid

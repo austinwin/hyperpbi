@@ -14,11 +14,11 @@ const FILTER_MERGE=0 as powerbi.FilterAction;const FILTER_REMOVE=1 as powerbi.Fi
 const empty=(value:unknown)=>value===""||value===null||value===undefined||Array.isArray(value)&&value.length===0;
 const primitive=(value:unknown):string|number|boolean=>value instanceof Date?value.toISOString():typeof value==="string"||typeof value==="number"||typeof value==="boolean"?value:String(value??"");
 
-function targetFor(field:NormalizedField|undefined):ExternalFilterTarget|undefined{return field&&field.type!=="measure"&&field.type!=="schema"&&field.sourceTable&&field.sourceColumn?{table:field.sourceTable,column:field.sourceColumn}:undefined;}
+export function externalFilterTargetFor(field:NormalizedField|undefined):ExternalFilterTarget|undefined{const isColumn=field?.kind==="column"||field?.kind===undefined&&field?.type!=="measure"&&field?.type!=="schema";return isColumn&&field?.sourceTable&&field.sourceColumn?{table:field.sourceTable,column:field.sourceColumn}:undefined;}
 
 export function applyExternalFilter(host:FilterHost,fields:Record<string,NormalizedField>,field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult{
     void details;if(empty(value)||operator==="between"&&(!Array.isArray(value)||value.length<2||value.some(empty)))return clearExternalFilter(host,details);
-    const target=targetFor(fields[field]);if(!target)return{sent:false,reason:"field has no Power BI filter target"};
+    const target=externalFilterTargetFor(fields[field]);if(!target)return{sent:false,reason:"field has no Power BI filter target"};
     let filter:powerbi.IFilter|undefined;
     if(operator==="="||operator==="in"||operator==="!="){
         const values=(Array.isArray(value)?value:[value]).filter(item=>!empty(item)).map(primitive);

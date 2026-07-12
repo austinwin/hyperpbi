@@ -5,12 +5,17 @@ const fieldProperties = new Set(["field", "category", "measure", "x", "y", "size
 const templateProperties = new Set(["html", "template"]);
 
 export function legacyFieldKeyMap(fields: Record<string, NormalizedField>): Map<string, string> {
-    const result = new Map<string, string>(); const counts = new Map<string, number>();
+    const result = new Map<string, string>(); const counts = new Map<string, number>(); const wrapperCandidates = new Map<string, string[]>();
     for (const field of Object.values(fields)) {
         const base = slugFieldIdentifier(field.displayName || field.queryName || "field"); const occurrence = (counts.get(base) ?? 0) + 1; counts.set(base, occurrence);
         const legacyKey = occurrence === 1 ? base : `${base}_${occurrence}`;
         if (legacyKey !== field.key) result.set(legacyKey, field.key);
+        if (field.isImplicitAggregation && field.queryName) {
+            const malformedWrapperKey = slugFieldIdentifier(field.queryName);
+            const candidates = wrapperCandidates.get(malformedWrapperKey) ?? []; candidates.push(field.key); wrapperCandidates.set(malformedWrapperKey, candidates);
+        }
     }
+    for (const [legacyKey, candidates] of wrapperCandidates) if (candidates.length === 1 && legacyKey !== candidates[0]) result.set(legacyKey, candidates[0]);
     return result;
 }
 

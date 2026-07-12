@@ -20,6 +20,28 @@ describe("Power BI map bindings", () => {
         expect(dictionary.fields.longitude.roles).toContain("mapLongitude");
     });
 
+    it("recovers and conservatively binds summarized latitude/longitude metadata", () => {
+        const columns = [
+            { displayName: "Latitude", queryName: "Sum(Demo.Latitude)", roles: { values: true }, type: { numeric: true }, isMeasure: false },
+            { displayName: "Longitude", queryName: "Sum(Demo.Longitude)", roles: { values: true }, type: { numeric: true }, isMeasure: false }
+        ] as powerbi.DataViewMetadataColumn[];
+        const dictionary = buildFieldDictionary(columns);
+        expect(dictionary.fields.demo_latitude).toMatchObject({ sourceTable: "Demo", sourceColumn: "Latitude", type: "latitude", kind: "column" });
+        expect(dictionary.fields.demo_longitude).toMatchObject({ sourceTable: "Demo", sourceColumn: "Longitude", type: "longitude", kind: "column" });
+        const map = normalizeMapBindings([{ demo_latitude: 41.88, demo_longitude: -87.63 }], dictionary.fields);
+        expect(map.bindings).toMatchObject({ latitude: "demo_latitude", longitude: "demo_longitude" });
+        expect(map.warnings.join(" ")).toContain("Latitude is summarized as Sum");
+        expect(map.warnings.join(" ")).toContain("Don't summarize");
+    });
+
+    it("keeps explicit map configuration ahead of metadata inference", () => {
+        const inferred = field("inferred", "Latitude", "values", "latitude");
+        const explicit = field("configured", "Configured Latitude", "values", "measure");
+        const longitude = field("lon", "Longitude", "values", "longitude");
+        const map = normalizeMapBindings([{ inferred: 1, configured: 41.88, lon: -87.63 }], { inferred, configured: explicit, lon: longitude }, { latitude: "configured", longitude: "lon" });
+        expect(map.bindings.latitude).toBe("configured");
+    });
+
     it("parses map field wells through the DataView pipeline", () => {
         const columns = [
             { displayName: "Asset", roles: { dataset: true }, type: { text: true } },

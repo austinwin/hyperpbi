@@ -172,6 +172,13 @@ function generateMarkdownCatalog(types, categories, patterns) {
     lines.push("- **`uiAction`** — Interface/navigation/overlay/state behavior");
     lines.push("");
 
+    lines.push("## Data scopes and Power BI field origin");
+    lines.push("");
+    lines.push("Components validate against their selected logical dataset; omitted `dataset` uses the base Power BI data view. Dataset schemas are propagated statically, so derived and metric fields remain available with zero rows.");
+    lines.push("");
+    lines.push("Power BI query aggregation is separate from model origin. For example, `Sum(Sales.Amount)` remains a filterable model column targeting `Sales.Amount`, while a true model measure is not a basic model-column filter target. Derived fields and dataset metrics are also not direct external-filter targets; renamed and group-by model columns retain their source target.");
+    lines.push("");
+
     // Component categories
     for (const category of categories) {
         const categoryTypes = types.filter(t => {
@@ -296,6 +303,9 @@ body{margin:0;padding:0}
 <h2>Application Shell</h2>
 <p>Configured at root level via <code>schema.app</code>. Not a component type.</p>
 <p>Supports: brand, navbar, sidebar, pageHeader, footer, vertical/horizontal layout, fluid/boxed container, density, content padding, sticky header, collapsible sidebar with mobile offcanvas.</p>
+
+<h2>Data Scopes and Power BI Field Origin</h2>
+<p>Components validate against their selected logical dataset, whose output schema exists even when it returns zero rows. Power BI query aggregation is separate from model origin: <code>Sum(Sales.Amount)</code> remains a model column targeting <code>Sales.Amount</code>. True measures, derived fields, and dataset metrics are not direct external-filter targets; renamed and group-by model columns retain their source target.</p>
 
 ${categories.map(cat => {
     const catTypes = types.filter(t => {

@@ -39,6 +39,11 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
     if (mode === "none") warnings.push("Bind Map Geometry, Map Latitude and Map Longitude, Map X and Map Y, or Map Address.");
     if (invalidFeatureCount > 0 && mode !== "address") warnings.push(`${invalidFeatureCount.toLocaleString()} row(s) have invalid or missing map locations.`);
     if (unsupportedTypeCount > 0) warnings.push(`${unsupportedTypeCount.toLocaleString()} row(s) declare a non-point Map Type, but coordinate pairs render as points. Bind Geometry for lines or polygons.`);
+    const aggregationLabel = (value: string): string => value === "avg" ? "Average" : value === "distinctCount" ? "DistinctCount" : value[0].toUpperCase() + value.slice(1);
+    for (const [role, key] of [["Latitude", bindings.latitude], ["Longitude", bindings.longitude]] as const) {
+        const field = key ? fields[key] : undefined;
+        if (field?.isImplicitAggregation && field.queryAggregation) warnings.push(`${role} is summarized as ${aggregationLabel(field.queryAggregation)}. Set the Power BI field to Don't summarize for reliable row-level mapping.`);
+    }
     return {
         hasGeometry: Boolean(bindings.geometry), hasLatLon: Boolean(bindings.latitude && bindings.longitude), hasXY: Boolean(bindings.x && bindings.y), hasAddress: Boolean(bindings.address),
         mode, bindings, layers: Array.from(grouped, ([name, features]) => ({ name, features })), warnings, invalidFeatureCount

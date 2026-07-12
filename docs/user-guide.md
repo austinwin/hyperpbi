@@ -17,7 +17,9 @@ HyperPBI turns declarative JSON specifications into professional Power BI dashbo
 3. Drag columns and measures into the **Values** field well
 4. HyperPBI creates deterministic AI-friendly field aliases and retains normalized keys for compatibility
 
-The Field Manifest shows each alias, display name, source, type, column/measure classification, semantic role, format, and selection/filter support. Copy this manifest for external AI authoring. Alias overrides are optional, validated, and stored once in Runtime Config. Types-only and restricted privacy choices do not expose raw values.
+The Field Manifest shows each alias, display name, underlying source, type, column/measure classification, query aggregation, semantic role, format, and selection/filter support. `Sum(Table.Column)` is shown as a summarized model column, not a true model measure. Copy this manifest for external AI authoring. Alias overrides are optional, validated, and stored once in Runtime Config. Types-only and restricted privacy choices do not expose raw values.
+
+Logical dataset fields are validated in their dataset scope. Fields created by `derive`, `rename`, or `metrics` remain available even when no rows are returned, but only components selecting that dataset can use them. Derived and metric fields cannot directly filter the Power BI model; group-by and renamed direct model columns can.
 
 ## 3. Open Edit Mode
 
@@ -77,7 +79,7 @@ Toggle **Advanced** to access: JSON editor, Runtime Config, AI Skill, Calculatio
 
 ## 10. Maps
 
-Power BI spatial maps and practical public ArcGIS feature/reference layers, Power BI geometry joins, viewport queries, tile overlays, and basic dynamic images render end to end. Labels, tooltip/popup content, selection, layer visibility/opacity/order, inline diagnostics, legends, Home, Zoom to Selection, and Clear Selection are available. Map centers use `[latitude, longitude]`. See [map services](map-services.md) for the exact supported scope and limitations.
+Power BI spatial maps and practical public ArcGIS feature/reference layers, Power BI geometry joins, viewport queries, tile overlays, and basic dynamic images render end to end. Labels, tooltip/popup content, selection, layer visibility/opacity/order, inline diagnostics, legends, Home, Zoom to Selection, and Clear Selection are available. Explicit map bindings and Power BI roles take priority; otherwise numeric source fields named latitude/lat and longitude/lon/lng are recognized conservatively. Map centers use `[latitude, longitude]`. Set coordinate columns to **Don't summarize** for row-level mapping; HyperPBI warns when Power BI sends summarized coordinates. See [map services](map-services.md) for the exact supported scope and limitations.
 
 Use a Maps build profile for external tiles, geocoding, and ArcGIS requests:
 ```bash

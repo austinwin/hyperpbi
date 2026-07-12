@@ -25,7 +25,9 @@ The prompt always states: “Any component type, property, action, dataset opera
 
 ## Field aliases
 
-Use the supplied `alias` in version 2.0 JSON. Aliases are generated from source metadata, remain stable when field order changes, qualify collisions with the source table, and use a stable hash only for remaining collisions. Existing normalized keys still resolve for version 1.0 compatibility. Types-only and restricted privacy modes never expose raw examples.
+Use the supplied `alias` in version 2.0 JSON. Aliases are generated from the underlying Power BI table and column metadata, remain stable when field order changes, qualify collisions with the source table, and use a stable hash only for remaining collisions. The manifest distinguishes true model measures from model columns summarized by the current visual query through `kind`, `queryAggregation`, and `isImplicitAggregation`. Existing normalized and unambiguous legacy wrapper keys still resolve for version 1.0 compatibility. Types-only and restricted privacy modes never expose raw examples.
+
+For logical datasets, generated names (`derive`, rename targets, and metric keys) remain exactly as authored. Components may reference them only when their selected dataset exposes them. Do not use derived or metric fields as direct Power BI external-filter targets; use selection/highlight or a retained group-by/model column.
 
 ## Application patterns
 

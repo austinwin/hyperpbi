@@ -55,9 +55,10 @@ export function buildFieldDataProfile(field: NormalizedField, rows: DataRow[], p
     return profile;
 }
 
-export function defaultAggregationFor(field: NormalizedField, semanticRole = inferSemanticRole(field)): "sum" | "avg" | "count" | "distinctCount" | "first" {
+export function defaultAggregationFor(field: NormalizedField, semanticRole = inferSemanticRole(field)): "sum" | "avg" | "min" | "max" | "count" | "distinctCount" | "first" {
+    if (field.queryAggregation) return field.queryAggregation;
     if (["measure", "currency", "duration"].includes(semanticRole)) return "sum";
     if (semanticRole === "percentage") return "avg";
     if (semanticRole === "identifier") return "distinctCount";
-    return field.kind === "measure" || field.type === "measure" ? "sum" : "first";
+    return field.kind === "measure" ? "sum" : "first";
 }

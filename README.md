@@ -62,8 +62,10 @@ https://github.com/austinwin/hyperpbi/blob/main/examples/demo/hyperpbi_full_demo
 ## AI-first schema 2.0
 
 - Field aliases are deterministic, semantic, privacy-aware, and resolved to existing canonical keys at runtime.
+- Aliases and stable keys are based on the underlying Power BI table/column. Query wrappers such as `Sum(Sales.Amount)` are exposed separately as `queryAggregation`; they do not turn the model column into a true measure.
 - Version 2.0 rejects unknown properties; version 1.0 remains lenient for compatibility.
-- `data.datasets` derives named views using a bounded operation set and retains original Power BI row lineage.
+- `data.datasets` derives named views using a bounded operation set and retains original Power BI row lineage. A static schema resolver follows runtime order (`filter`, `derive`, `rename`, `select`, grouping/metrics, `distinct`, `sort`, `limit`), so generated fields remain available when a dataset has zero rows.
+- Each component is validated against its selected logical dataset. Derived and metric fields exist only in datasets that expose them; they support local selection/highlight through lineage but cannot be direct Power BI external-filter targets. Renamed and group-by model columns retain their model-column targets.
 - `definitions` provides deterministic reusable component defaults.
 - `pattern` components support `kpi-row`, `trend-and-breakdown`, `record-explorer`, and `map-and-details`.
 - Create, improve, redesign, and repair prompts include only relevant engine modules. Improve jobs return a complete specification, not JSON Patch.
@@ -172,7 +174,7 @@ The native table engine supports: `density` (compact/normal), `striped`, `hover`
 ## Maps
 
 ### Stable: Power BI Spatial Maps
-Location priority: Geometry → Latitude/Longitude → X/Y → Address. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and compact Layers, Legend, and Location Search toolbar popovers.
+Location priority: Geometry → Latitude/Longitude → X/Y → Address. Explicit roles and Runtime Config bindings take priority; otherwise numeric fields named `latitude`/`lat` and `longitude`/`lon`/`lng` are inferred conservatively from source metadata. GeoJSON and WKT point/line/polygon supported. Leaflet renders with selection, tooltips, popups, clustering, and compact Layers, Legend, and Location Search toolbar popovers. Latitude and longitude should normally be set to **Don't summarize** in Power BI; summarized coordinates produce a warning rather than being silently changed.
 
 ### Practical ArcGIS REST runtime
 Public query-capable FeatureServer/MapServer layers render end to end through the resolved-layer architecture. The runtime supports Power BI geometry joins, viewport queries, configured or opt-in service renderers/labels, tile overlays, basic dynamic images, labels, tooltips, popups/actions, selection, diagnostics, layer controls, legends, Home, user-triggered Location Search, and Zoom to Selection. Search uses the Runtime Config geocoder (Nominatim by default in Maps), requires WebAccess and privacy acknowledgment, never runs on render or keystrokes, and is unavailable in Core. Viewer opacity is entered as 0–100 percent and stored as 0–1. It intentionally excludes secured-service authentication, editing, 3D, relationship/tracing workflows, non-4326 output, density grids, and advanced label collision.

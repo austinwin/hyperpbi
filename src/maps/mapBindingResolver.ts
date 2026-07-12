@@ -2,7 +2,11 @@ import { MapBindingKeys, MapLocationMode, NormalizedField } from "../data/normal
 import { resolveConfiguredField } from "../config/hyperpbiConfig";
 
 function firstByRole(fields: Record<string, NormalizedField>, role: string): string | undefined {
-    return Object.values(fields).find(field => field.roles.includes(role))?.key;
+    const explicit = Object.values(fields).find(field => field.roles.includes(role))?.key;
+    if (explicit) return explicit;
+    if (role === "mapLatitude") return Object.values(fields).find(field => field.type === "latitude")?.key;
+    if (role === "mapLongitude") return Object.values(fields).find(field => field.type === "longitude")?.key;
+    return undefined;
 }
 
 function allByRole(fields: Record<string, NormalizedField>, role: string): string[] {
