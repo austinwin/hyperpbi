@@ -1,6 +1,7 @@
 import { ExpressionNode } from "../calculations/calculationTypes";
 import { Diagnostic } from "../schema/diagnostics";
 import type { DatasetDefinition, DatasetMetric } from "./datasets";
+import { aggregationFieldRequirement } from "../fields/aggregationFieldPolicy";
 import { NormalizedData, NormalizedField } from "./normalizeData";
 
 export interface DatasetSchemaResult {
@@ -63,8 +64,8 @@ function validateExpressionFields(expression: ExpressionNode, fields: Record<str
 }
 
 function metricType(metric: DatasetMetric, fields: Record<string, NormalizedField>): PrimitiveType {
-    if (["sum", "avg", "count", "distinctCount"].includes(metric.op)) return "number";
-    if ((metric.op === "min" || metric.op === "max" || metric.op === "first") && metric.field) return fields[metric.field]?.dataType ?? "unknown";
+    if (["sum", "avg", "min", "max", "count", "distinctCount"].includes(metric.op)) return "number";
+    if (metric.op === "first" && metric.field) return fields[metric.field]?.dataType ?? "unknown";
     return "unknown";
 }
 
@@ -103,10 +104,10 @@ function propagateDefinition(name: string, definition: DatasetDefinition, input:
             else grouped[field] = { ...fields[field], origin: "dataset-group" };
         });
         for (const [key, metric] of Object.entries(definition.metrics ?? {})) {
-            const requiresField = metric.op !== "count";
-            if (requiresField && !metric.field) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a field for ${metric.op}.` });
+            const policy = aggregationFieldRequirement(metric.op, "first");
+            if (policy.fieldRequired && !metric.field) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a field for ${metric.op}.` });
             else if (metric.field && !fields[metric.field]) unknown(metric.field, `metrics/${key}/field`, `metric “${key}”`);
-            else if (metric.field && ["sum", "avg"].includes(metric.op) && fields[metric.field].dataType !== "number" && fields[metric.field].dataType !== "unknown") diagnostics.push({ code: "NON_NUMERIC_DATASET_FIELD", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a numeric field for ${metric.op}, but “${metric.field}” is ${fields[metric.field].dataType}.`, received: metric.field });
+            else if (metric.field && policy.requirement === "numeric" && fields[metric.field].dataType !== "number" && fields[metric.field].dataType !== "unknown") diagnostics.push({ code: "NON_NUMERIC_DATASET_FIELD", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a numeric field for ${metric.op}, but “${metric.field}” is ${fields[metric.field].dataType}.`, received: metric.field });
             if (grouped[key]) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `metrics/${key}`), message: `Dataset metric “${name}.${key}” collides with a group-by field.` });
             grouped[key] = generatedField(key, metricType(metric, fields), "dataset-metric");
         }

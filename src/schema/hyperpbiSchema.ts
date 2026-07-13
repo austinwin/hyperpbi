@@ -1,4 +1,5 @@
 import { CalculationSpecification, ExpressionNode } from "../calculations/calculationTypes";
+import type { Primitive } from "../data/normalizeData";
 import type { EChartsInitOpts, SetOptionOpts } from "echarts/core";
 import type { ComponentInteractionDefinition } from "../interactions/interactionTypes";
 import type {
@@ -325,7 +326,7 @@ export interface MatrixComponent extends ComponentBase {
     type: "matrix";
     rows: string[];
     columns?: string[];
-    values: Array<{ field?: string; title?: string; aggregation?: MetricDefinition["aggregation"]; format?: string }>;
+    values: Array<{ field?: string; title?: string; aggregation?: MetricDefinition["aggregation"]; format?: string; where?: { field: string; equals: Primitive } }>;
     showTotals?: boolean;
     heatmap?: boolean;
     maxRows?: number;
