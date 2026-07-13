@@ -1,60 +1,155 @@
+import { getComponentDescriptor } from "../catalog/componentDescriptors";
+import { visitSpecificationComponents } from "../catalog/componentTraversal";
 import type { DatasetSchemaEvaluation } from "../data/datasetSchema";
 import type { NormalizedData } from "../data/normalizeData";
 import { closestMatches, type Diagnostic } from "../schema/diagnostics";
+import { aggregationFieldPolicy, aggregationFieldRequirement } from "./aggregationFieldPolicy";
+import { dispatchComponentField } from "./componentFieldHandlers";
 import { FieldResolver } from "./fieldResolver";
-import { visitSpecificationComponents } from "../catalog/componentTraversal";
 
-type Json=Record<string,unknown>;
-export type FieldReferenceSource="powerbi"|"dataset"|"service"|"joined"|"metric"|"state"|"unknown";
-export interface FieldReferenceOccurrence { reference:string;path:string;componentId?:string;datasetName:string;requirement:"any"|"numeric";source:FieldReferenceSource;set(nextReference:string):void; }
-const object=(value:unknown):value is Json=>Boolean(value)&&typeof value==="object"&&!Array.isArray(value);
-const pointer=(value:string)=>value.replace(/~/g,"~0").replace(/\//g,"~1");
-const common=new Set(["field","bind","sortBy","keyField","category","measure","x","y","pointSize","splitField","dateField","titleField","categoryField","statusField","descriptionField","sourceField","targetField","valueField","labelField","groupField","primaryField","secondaryField","badgeField","stageField"]);
-const numeric=new Set(["measure","x","y","pointSize","valueField"]);
-const preserved=(reference:string)=>/^(metric|state|selected|config|runtime)\./.test(reference)||reference.startsWith("$");
-
-function expression(node:unknown,path:string,add:(owner:Json,key:string,path:string,requirement?:"any"|"numeric",source?:FieldReferenceSource)=>void):void{
-    if(Array.isArray(node)){node.forEach((item,index)=>expression(item,`${path}/${index}`,add));return;}if(!object(node))return;
-    for(const property of ["field","valueFromRow"]){if(typeof node[property]==="string")add(node,property,`${path}/${property}`);}
-    for(const [key,value]of Object.entries(node))if(key!=="field"&&key!=="valueFromRow"&&key!=="value")expression(value,`${path}/${pointer(key)}`,add);
+type Json = Record<string, unknown>;
+export type FieldReferenceSource = "powerbi" | "dataset" | "service" | "joined" | "metric" | "state" | "unknown";
+export interface FieldReferenceOccurrence {
+    reference: string;
+    path: string;
+    componentId?: string;
+    datasetName: string;
+    requirement: "any" | "numeric";
+    source: FieldReferenceSource;
+    set(nextReference: string): void;
 }
 
-function templates(owner:Json,key:string,path:string,emit:(reference:string,path:string,set:(next:string)=>void)=>void):void{
-    const value=owner[key];if(typeof value!=="string")return;const regex=/{{\s*(?:(row|item|datum|field|sum|avg|min|max|distinctCount|metric|state|selected|config|runtime)\.)?([A-Za-z][A-Za-z0-9_-]*)\s*}}/g;let match:RegExpExecArray|null;
-    while((match=regex.exec(value))){const whole=match[0],namespace=match[1],reference=match[2];if(["metric","state","selected","config","runtime"].includes(namespace))continue;emit(reference,`${path}#${match.index}`,next=>{owner[key]=String(owner[key]).replace(whole,`{{${namespace?`${namespace}.`:""}${next}}}`);});}
+const object = (value: unknown): value is Json => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+const pointer = (value: string) => value.replace(/~/g, "~0").replace(/\//g, "~1");
+
+function expression(node: unknown, path: string, add: (owner: Json, key: string, path: string, requirement?: "any" | "numeric") => void): void {
+    if (Array.isArray(node)) { node.forEach((item, index) => expression(item, `${path}/${index}`, add)); return; }
+    if (!object(node)) return;
+    for (const property of ["field", "valueFromRow"]) if (typeof node[property] === "string") add(node, property, `${path}/${property}`);
+    for (const [key, value] of Object.entries(node)) if (!["field", "valueFromRow", "value"].includes(key)) expression(value, `${path}/${pointer(key)}`, add);
 }
 
-export function specificationFieldReferences(specification:unknown):FieldReferenceOccurrence[]{
-    if(!object(specification))return[];const result:FieldReferenceOccurrence[]=[];
-    const component=(node:Json,path:string,inheritedDataset:string)=>{const dataset=typeof node.dataset==="string"?node.dataset:inheritedDataset;const componentId=typeof node.id==="string"?node.id:undefined;
-        const emit=(reference:string,fieldPath:string,set:(next:string)=>void,requirement:"any"|"numeric"="any",source:FieldReferenceSource=dataset==="powerbi"?"powerbi":"dataset")=>{if(!reference||preserved(reference)||source==="service"||source==="joined")return;result.push({reference,path:fieldPath,componentId,datasetName:dataset,requirement,source,set});};
-        const add=(owner:Json,key:string,fieldPath:string,requirement:"any"|"numeric"="any",source:FieldReferenceSource=dataset==="powerbi"?"powerbi":"dataset")=>{const value=owner[key];if(typeof value==="string")emit(value,fieldPath,next=>{owner[key]=next;},requirement,source);};
-        for(const key of common)add(node,key,`${path}/${key}`,numeric.has(key)?"numeric":"any");
-        const stringArrays=["pathFields","fields"];
-        for(const key of stringArrays)if(Array.isArray(node[key]))(node[key] as unknown[]).forEach((item,index)=>{if(typeof item==="string")emit(item,`${path}/${key}/${index}`,next=>{(node[key] as unknown[])[index]=next;});});
-        if(Array.isArray(node.columns))node.columns.forEach((item,index)=>{if(typeof item==="string")emit(item,`${path}/columns/${index}`,next=>{(node.columns as unknown[])[index]=next;});else if(object(item))add(item,"field",`${path}/columns/${index}/field`);});
-        if(node.type==="matrix"){for(const key of ["rows","columns"]){if(Array.isArray(node[key]))(node[key] as unknown[]).forEach((item,index)=>{if(typeof item==="string")emit(item,`${path}/${key}/${index}`,next=>{(node[key] as unknown[])[index]=next;});});}if(Array.isArray(node.values))node.values.forEach((item,index)=>{if(object(item))add(item,"field",`${path}/values/${index}/field`,"numeric");});}
-        for(const key of ["metrics","items","series","indicators"]){if(Array.isArray(node[key]))(node[key] as unknown[]).forEach((item,index)=>{if(!object(item))return;add(item,"field",`${path}/${key}/${index}/field`,key==="series"||key==="indicators"||key==="metrics"?"numeric":"any");if(item.where)expression(item.where,`${path}/${key}/${index}/where`,add);for(const binding of ["primaryField","secondaryField","badgeField","valueField","labelField"])add(item,binding,`${path}/${key}/${index}/${binding}`);});}
-        if(object(node.detailPanel)&&Array.isArray(node.detailPanel.groups))node.detailPanel.groups.forEach((group,groupIndex)=>{if(object(group)&&Array.isArray(group.fields))group.fields.forEach((item,index)=>{if(typeof item==="string")emit(item,`${path}/detailPanel/groups/${groupIndex}/fields/${index}`,next=>{(group.fields as unknown[])[index]=next;});else if(object(item))add(item,"field",`${path}/detailPanel/groups/${groupIndex}/fields/${index}/field`);});});
-        if(Array.isArray(node.groups))node.groups.forEach((group,groupIndex)=>{if(object(group)&&Array.isArray(group.fields))group.fields.forEach((item,index)=>{if(typeof item==="string")emit(item,`${path}/groups/${groupIndex}/fields/${index}`,next=>{(group.fields as unknown[])[index]=next;});else if(object(item))add(item,"field",`${path}/groups/${groupIndex}/fields/${index}/field`);});});
-        if(object(node.interaction))add(node.interaction,"field",`${path}/interaction/field`);
-        const action=(value:unknown,actionPath:string):void=>{if(Array.isArray(value)){value.forEach((item,index)=>action(item,`${actionPath}/${index}`));return;}if(!object(value))return;add(value,"field",`${actionPath}/field`);add(value,"valueFromRow",`${actionPath}/valueFromRow`);if(value.where)expression(value.where,`${actionPath}/where`,add);for(const [key,child]of Object.entries(value))if(!["field","valueFromRow","where","value"].includes(key)&&(Array.isArray(child)||object(child)))action(child,`${actionPath}/${pointer(key)}`);};if(object(node.interactions))for(const [event,value]of Object.entries(node.interactions))action(value,`${path}/interactions/${pointer(event)}`);
-        if(object(node.repeat)){add(node.repeat,"distinctBy",`${path}/repeat/distinctBy`);add(node.repeat,"sortBy",`${path}/repeat/sortBy`);add(node.repeat,"keyField",`${path}/repeat/keyField`);}
-        for(const key of ["html","text","template","markdown","badgeTemplate","rowTemplate","cellTemplate"])templates(node,key,`${path}/${key}`,(reference,tokenPath,set)=>emit(reference,tokenPath,set));if(object(node.slots))for(const key of Object.keys(node.slots))templates(node.slots,key,`${path}/slots/${pointer(key)}`,(reference,tokenPath,set)=>emit(reference,tokenPath,set));if(object(node.repeat))templates(node.repeat,"template",`${path}/repeat/template`,(reference,tokenPath,set)=>emit(reference,tokenPath,set));
-        if(node.type==="svg"||node.type==="svgMarkup"){const svgVisit=(value:unknown,svgPath:string)=>{if(Array.isArray(value)){value.forEach((item,index)=>svgVisit(item,`${svgPath}/${index}`));return;}if(!object(value))return;if(typeof value.bind==="string")add(value,"bind",`${svgPath}/bind`);else if(object(value.bind))add(value.bind,"field",`${svgPath}/bind/field`);if(object(value.when))add(value.when,"field",`${svgPath}/when/field`);if(object(value.repeat)){add(value.repeat,"field",`${svgPath}/repeat/field`);add(value.repeat,"keyField",`${svgPath}/repeat/keyField`);}for(const [key,child]of Object.entries(value)){if(["bind","when","repeat"].includes(key))continue;if(typeof child==="string")templates(value,key,`${svgPath}/${pointer(key)}`,(reference,tokenPath,set)=>emit(reference,tokenPath,set));else svgVisit(child,`${svgPath}/${pointer(key)}`);}};svgVisit(node.elements,`${path}/elements`);}
-        if(node.type==="map"&&Array.isArray(node.layers))node.layers.forEach((raw,index)=>{if(!object(raw))return;const layerPath=`${path}/layers/${index}`;const source=object(raw.source)?raw.source:{};const sourceType=String(source.type??"powerbi");const defaultSource:FieldReferenceSource=sourceType==="powerbi"?"powerbi":raw.join?"joined":"service";if(object(source.bindings))for(const key of Object.keys(source.bindings))add(source.bindings,key,`${layerPath}/source/bindings/${pointer(key)}`,["latitude","longitude","x","y","size"].includes(key)?"numeric":"any","powerbi");if(object(raw.join)){add(raw.join,"powerBiField",`${layerPath}/join/powerBiField`,"any","powerbi");}
-            if(object(raw.renderer)){const fieldSource=(raw.renderer.fieldSource??defaultSource) as FieldReferenceSource;const rendererType=String(raw.renderer.type??"");if(rendererType==="heatmap")add(raw.renderer,"weightField",`${layerPath}/renderer/weightField`,"numeric",fieldSource);else if(rendererType==="cluster")add(raw.renderer,"aggregateField",`${layerPath}/renderer/aggregateField`,raw.renderer.clusterLabel==="sum"?"numeric":"any",fieldSource);else add(raw.renderer,"field",`${layerPath}/renderer/field`,["classBreaks","continuousColor","proportionalSize"].includes(rendererType)||rendererType==="densityGrid"&&["sum","avg"].includes(String(raw.renderer.statistic))?"numeric":"any",fieldSource);}if(object(raw.labels)){const fieldSource=(raw.labels.fieldSource??defaultSource) as FieldReferenceSource;add(raw.labels,"field",`${layerPath}/labels/field`,"any",fieldSource);templates(raw.labels,"template",`${layerPath}/labels/template`,(reference,tokenPath,set)=>emit(reference,tokenPath,set,"any",fieldSource));}
-            for(const section of ["popup","tooltip"]){const value=raw[section];if(object(value)){if(Array.isArray(value.fields))value.fields.forEach((item,itemIndex)=>{if(object(item))add(item,"field",`${layerPath}/${section}/fields/${itemIndex}/field`,"any",(item.fieldSource??defaultSource) as FieldReferenceSource);});for(const key of ["html","template","title"])templates(value,key,`${layerPath}/${section}/${key}`,(reference,tokenPath,set)=>emit(reference,tokenPath,set,"any",defaultSource));}}
-            if(object(raw.visibility))add(raw.visibility,"conditionField",`${layerPath}/visibility/conditionField`,"any",defaultSource);if(object(raw.interaction))add(raw.interaction,"field",`${layerPath}/interaction/field`,"any",defaultSource);
+function datasetReferences(specification: Json, result: FieldReferenceOccurrence[]): void {
+    const datasets = object(specification.data) && object(specification.data.datasets) ? specification.data.datasets : {};
+    for (const [name, raw] of Object.entries(datasets)) {
+        if (!object(raw)) continue;
+        const base = `/data/datasets/${pointer(name)}`;
+        const sourceName = String(raw.source ?? "powerbi");
+        const add = (owner: Json, key: string, path: string, requirement: "any" | "numeric" = "any") => {
+            if (typeof owner[key] !== "string") return;
+            result.push({ reference: String(owner[key]), path, datasetName: sourceName, requirement, source: "dataset", set: next => { owner[key] = next; } });
+        };
+        if (Array.isArray(raw.select)) raw.select.forEach((item, index) => {
+            if (typeof item === "string") result.push({ reference: item, path: `${base}/select/${index}`, datasetName: sourceName, requirement: "any", source: "dataset", set: next => { (raw.select as unknown[])[index] = next; } });
         });
+        if (object(raw.rename)) for (const from of Object.keys(raw.rename)) result.push({
+            reference: from,
+            path: `${base}/rename/${pointer(from)}`,
+            datasetName: sourceName,
+            requirement: "any",
+            source: "dataset",
+            set: next => { const target = (raw.rename as Json)[from]; delete (raw.rename as Json)[from]; (raw.rename as Json)[next] = target; },
+        });
+        for (const key of ["groupBy", "distinct"]) if (Array.isArray(raw[key])) (raw[key] as unknown[]).forEach((item, index) => {
+            if (typeof item === "string") result.push({ reference: item, path: `${base}/${key}/${index}`, datasetName: sourceName, requirement: "any", source: "dataset", set: next => { (raw[key] as unknown[])[index] = next; } });
+        });
+        const filters = Array.isArray(raw.filter) ? raw.filter : [raw.filter];
+        filters.forEach((item, index) => { if (object(item)) { add(item, "field", `${base}/filter/${index}/field`); if (item.where) expression(item.where, `${base}/filter/${index}/where`, add); } });
+        if (Array.isArray(raw.sort)) raw.sort.forEach((item, index) => { if (object(item)) add(item, "field", `${base}/sort/${index}/field`); });
+        if (object(raw.metrics)) for (const [metric, item] of Object.entries(raw.metrics)) if (object(item)) {
+            const policy = aggregationFieldPolicy(item.op, "first");
+            add(item, "field", `${base}/metrics/${pointer(metric)}/field`, policy.fieldType);
+            if (item.where) expression(item.where, `${base}/metrics/${pointer(metric)}/where`, add);
+        }
+        if (object(raw.derive)) for (const [key, value] of Object.entries(raw.derive)) expression(value, `${base}/derive/${pointer(key)}`, add);
+    }
+}
+
+function calculationReferences(specification: Json, result: FieldReferenceOccurrence[]): void {
+    if (!object(specification.calculations)) return;
+    const add = (owner: Json, key: string, path: string, requirement: "any" | "numeric" = "any") => {
+        if (typeof owner[key] === "string") result.push({ reference: String(owner[key]), path, datasetName: "powerbi", requirement, source: "powerbi", set: next => { owner[key] = next; } });
     };
-    visitSpecificationComponents(specification,visit=>component(visit.component,visit.path,visit.datasetName));
-    const datasets=object(specification.data)&&object(specification.data.datasets)?specification.data.datasets:{};for(const [name,raw]of Object.entries(datasets)){if(!object(raw))continue;const base=`/data/datasets/${pointer(name)}`;const add=(owner:Json,key:string,path:string,requirement:"any"|"numeric"="any")=>{if(typeof owner[key]==="string")result.push({reference:String(owner[key]),path,componentId:undefined,datasetName:String(raw.source??"powerbi"),requirement,source:"dataset",set:next=>{owner[key]=next;}});};if(Array.isArray(raw.select))raw.select.forEach((item,index)=>{if(typeof item==="string")result.push({reference:item,path:`${base}/select/${index}`,datasetName:String(raw.source??"powerbi"),requirement:"any",source:"dataset",set:next=>{(raw.select as unknown[])[index]=next;}});});if(object(raw.rename))for(const from of Object.keys(raw.rename)){result.push({reference:from,path:`${base}/rename/${pointer(from)}`,datasetName:String(raw.source??"powerbi"),requirement:"any",source:"dataset",set:next=>{const target=(raw.rename as Json)[from];delete (raw.rename as Json)[from];(raw.rename as Json)[next]=target;}});}for(const key of ["groupBy","distinct"]){if(Array.isArray(raw[key]))(raw[key] as unknown[]).forEach((item,index)=>{if(typeof item==="string")result.push({reference:item,path:`${base}/${key}/${index}`,datasetName:String(raw.source??"powerbi"),requirement:"any",source:"dataset",set:next=>{(raw[key] as unknown[])[index]=next;}});});}const filters=Array.isArray(raw.filter)?raw.filter:[raw.filter];filters.forEach((item,index)=>{if(object(item)){add(item,"field",`${base}/filter/${index}/field`);if(item.where)expression(item.where,`${base}/filter/${index}/where`,add);}});if(Array.isArray(raw.sort))raw.sort.forEach((item,index)=>{if(object(item))add(item,"field",`${base}/sort/${index}/field`);});if(object(raw.metrics))for(const [metric,item]of Object.entries(raw.metrics)){if(object(item)){add(item,"field",`${base}/metrics/${pointer(metric)}/field`,["sum","avg"].includes(String(item.op))?"numeric":"any");if(item.where)expression(item.where,`${base}/metrics/${pointer(metric)}/where`,add);}}if(object(raw.derive))for(const [key,value]of Object.entries(raw.derive))expression(value,`${base}/derive/${pointer(key)}`,add);}
-    if(object(specification.calculations)){const add=(owner:Json,key:string,path:string)=>{if(typeof owner[key]==="string")result.push({reference:String(owner[key]),path,datasetName:"powerbi",requirement:"any",source:"powerbi",set:next=>{owner[key]=next;}});};if(Array.isArray(specification.calculations.fields))specification.calculations.fields.forEach((item,index)=>{if(object(item))expression(item.expression,`/calculations/fields/${index}/expression`,add);});if(Array.isArray(specification.calculations.metrics))specification.calculations.metrics.forEach((item,index)=>{if(object(item)){add(item,"field",`/calculations/metrics/${index}/field`);if(item.where)expression(item.where,`/calculations/metrics/${index}/where`,add);}});}
+    if (Array.isArray(specification.calculations.fields)) specification.calculations.fields.forEach((item, index) => { if (object(item)) expression(item.expression, `/calculations/fields/${index}/expression`, add); });
+    if (Array.isArray(specification.calculations.metrics)) specification.calculations.metrics.forEach((item, index) => {
+        if (!object(item)) return;
+        const policy = aggregationFieldRequirement(typeof item.aggregation === "string" ? item.aggregation : undefined, "first");
+        add(item, "field", `/calculations/metrics/${index}/field`, policy.requirement);
+        if (item.where) expression(item.where, `/calculations/metrics/${index}/where`, add);
+    });
+}
+
+export function specificationFieldReferences(specification: unknown): FieldReferenceOccurrence[] {
+    if (!object(specification)) return [];
+    const result: FieldReferenceOccurrence[] = [];
+    visitSpecificationComponents(specification, visit => {
+        const type = typeof visit.component.type === "string" ? visit.component.type : "";
+        const descriptor = getComponentDescriptor(type);
+        if (!descriptor) return;
+        const componentId = typeof visit.component.id === "string" ? visit.component.id : undefined;
+        for (const descriptorField of descriptor.fields) dispatchComponentField({
+            component: visit.component,
+            descriptorField,
+            componentPath: visit.path,
+            componentId,
+            effectiveDataset: visit.datasetName,
+            emit: occurrence => result.push(occurrence),
+        });
+    });
+    datasetReferences(specification, result);
+    calculationReferences(specification, result);
     return result;
 }
 
-export function canonicalizeSpecificationFieldReferences(specification:unknown,data:NormalizedData,datasets:DatasetSchemaEvaluation,aliasOverrides:Record<string,string>={}):Diagnostic[]{const diagnostics:Diagnostic[]=[];const resolver=new FieldResolver(data,aliasOverrides);for(const occurrence of specificationFieldReferences(specification)){if(occurrence.path.startsWith("/data/"))continue;const scope=datasets.datasets.get(occurrence.datasetName)??datasets.datasets.get("powerbi");if(!scope)continue;let key=occurrence.reference,field=scope.fields[key];if(!field){const resolved=resolver.resolve(occurrence.reference);if(resolved.status==="resolved"&&resolved.key&&scope.fields[resolved.key]){key=resolved.key;field=scope.fields[key];occurrence.set(key);}else{diagnostics.push({code:resolved.status==="ambiguous"?"AMBIGUOUS_FIELD":occurrence.datasetName==="powerbi"?"UNKNOWN_FIELD":"UNKNOWN_DATASET_FIELD",severity:"error",path:occurrence.path,componentId:occurrence.componentId,message:resolved.status==="ambiguous"?`Field “${occurrence.reference}” is ambiguous.`:`Field “${occurrence.reference}” is not available in dataset “${occurrence.datasetName}”.`,received:occurrence.reference,suggestions:resolved.candidates??closestMatches(occurrence.reference,Object.keys(scope.fields))});continue;}}if(occurrence.requirement==="numeric"&&field.dataType&&field.dataType!=="unknown"&&field.dataType!=="number")diagnostics.push({code:occurrence.datasetName==="powerbi"?"FIELD_TYPE_MISMATCH":"NON_NUMERIC_DATASET_FIELD",severity:"error",path:occurrence.path,componentId:occurrence.componentId,message:`Field “${key}” in dataset “${occurrence.datasetName}” must be numeric, but it is ${field.dataType}.`,received:key});}return diagnostics;}
+export function canonicalizeSpecificationFieldReferences(specification: unknown, data: NormalizedData, datasets: DatasetSchemaEvaluation, aliasOverrides: Record<string, string> = {}): Diagnostic[] {
+    const diagnostics: Diagnostic[] = [];
+    const resolver = new FieldResolver(data, aliasOverrides);
+    for (const occurrence of specificationFieldReferences(specification)) {
+        if (occurrence.path.startsWith("/data/")) continue;
+        const scope = datasets.datasets.get(occurrence.datasetName) ?? datasets.datasets.get("powerbi");
+        if (!scope) continue;
+        let key = occurrence.reference;
+        let field = scope.fields[key];
+        if (!field) {
+            const resolved = resolver.resolve(occurrence.reference);
+            if (resolved.status === "resolved" && resolved.key && scope.fields[resolved.key]) {
+                key = resolved.key;
+                field = scope.fields[key];
+                occurrence.set(key);
+            } else {
+                diagnostics.push({
+                    code: resolved.status === "ambiguous" ? "AMBIGUOUS_FIELD" : occurrence.datasetName === "powerbi" ? "UNKNOWN_FIELD" : "UNKNOWN_DATASET_FIELD",
+                    severity: "error",
+                    path: occurrence.path,
+                    componentId: occurrence.componentId,
+                    message: resolved.status === "ambiguous" ? `Field “${occurrence.reference}” is ambiguous.` : `Field “${occurrence.reference}” is not available in dataset “${occurrence.datasetName}”.`,
+                    received: occurrence.reference,
+                    suggestions: resolved.candidates ?? closestMatches(occurrence.reference, Object.keys(scope.fields)),
+                });
+                continue;
+            }
+        }
+        if (occurrence.requirement === "numeric" && field.dataType && field.dataType !== "unknown" && field.dataType !== "number") diagnostics.push({
+            code: occurrence.datasetName === "powerbi" ? "FIELD_TYPE_MISMATCH" : "NON_NUMERIC_DATASET_FIELD",
+            severity: "error",
+            path: occurrence.path,
+            componentId: occurrence.componentId,
+            message: `Field “${key}” in dataset “${occurrence.datasetName}” must be numeric, but it is ${field.dataType}.`,
+            received: key,
+        });
+    }
+    return diagnostics;
+}
 
 /** Canonicalizes base aliases before calculation and dataset static schemas can be built. */
-export function canonicalizePreSchemaFieldReferences(specification:unknown,data:NormalizedData,aliasOverrides:Record<string,string>={}):void{const resolver=new FieldResolver(data,aliasOverrides);const calculated=new Set<string>();if(object(specification)&&object(specification.calculations)&&Array.isArray(specification.calculations.fields))specification.calculations.fields.forEach(item=>{if(object(item)&&typeof item.key==="string")calculated.add(item.key);});for(const occurrence of specificationFieldReferences(specification)){if(!occurrence.path.startsWith("/data/")&&!occurrence.path.startsWith("/calculations/"))continue;if(calculated.has(occurrence.reference))continue;const resolved=resolver.resolve(occurrence.reference);if(resolved.status==="resolved"&&resolved.key)occurrence.set(resolved.key);}}
+export function canonicalizePreSchemaFieldReferences(specification: unknown, data: NormalizedData, aliasOverrides: Record<string, string> = {}): void {
+    const resolver = new FieldResolver(data, aliasOverrides);
+    const calculated = new Set<string>();
+    if (object(specification) && object(specification.calculations) && Array.isArray(specification.calculations.fields)) specification.calculations.fields.forEach(item => { if (object(item) && typeof item.key === "string") calculated.add(item.key); });
+    for (const occurrence of specificationFieldReferences(specification)) {
+        if (!occurrence.path.startsWith("/data/") && !occurrence.path.startsWith("/calculations/")) continue;
+        if (calculated.has(occurrence.reference)) continue;
+        const resolved = resolver.resolve(occurrence.reference);
+        if (resolved.status === "resolved" && resolved.key) occurrence.set(resolved.key);
+    }
+}

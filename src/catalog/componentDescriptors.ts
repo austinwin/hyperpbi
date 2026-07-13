@@ -1,9 +1,14 @@
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity, InspectorPropertyDescriptor } from "./componentTypes";
 
 export type ComponentRenderMode = "direct" | "overlay" | "legacy";
-export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "interaction" | "event-actions" | "map-layers" | "svg-elements";
+export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart";
 export interface FieldReferenceDescriptor { property:string; requirement:"any"|"numeric"; handler:FieldTraversalHandler; }
 export interface ComponentContainerDescriptor { property:string; kind:"array"|"tabs"|"accordion"|"single"; allowedTypes?:string[]; }
+export interface ComponentMaturityEvidence {
+    renderer:boolean;schema:boolean;fieldTraversal:boolean;canonicalExample:boolean;inspector:boolean;
+    emptyState:boolean|"not-applicable";responsive:boolean;accessibility:boolean;
+    interactions:boolean|"not-applicable";focusedTests:string[];
+}
 export interface ComponentDescriptor {
     type:string; label:string; category:ComponentCategory; maturity:ComponentMaturity; complexity:ComponentComplexity; useWhen:string;
     capabilities:ComponentCapability;
@@ -15,6 +20,7 @@ export interface ComponentDescriptor {
     example:Record<string,unknown>;
     rendering:ComponentRenderMode;
     containers:ComponentContainerDescriptor[];
+    maturityEvidence?:ComponentMaturityEvidence;
 }
 
 export const componentDescriptors:ComponentDescriptor[] = [
@@ -25399,7 +25405,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
       {
         "property": "columns",
         "requirement": "any",
-        "handler": "table-columns"
+        "handler": "field-array"
       },
       {
         "property": "values",
@@ -28085,5 +28091,58 @@ export const componentDescriptors:ComponentDescriptor[] = [
     "containers": []
   }
 ] as ComponentDescriptor[];
+
+// Field surfaces that are inherently recursive or template-based are declared
+// here explicitly so traversal, Inspector controls, and authoring prompts share
+// the same descriptor contract.
+const descriptorFieldExtensions:Record<string,FieldReferenceDescriptor[]> = {
+  text: [
+    { property: "text", requirement: "any", handler: "template" },
+    { property: "slots", requirement: "any", handler: "template" }
+  ],
+  markdown: [
+    { property: "text", requirement: "any", handler: "template" },
+    { property: "slots", requirement: "any", handler: "template" }
+  ],
+  html: [
+    { property: "html", requirement: "any", handler: "template" },
+    { property: "slots", requirement: "any", handler: "template" }
+  ],
+  custom: [
+    { property: "html", requirement: "any", handler: "template" },
+    { property: "text", requirement: "any", handler: "template" },
+    { property: "slots", requirement: "any", handler: "template" }
+  ],
+  svgMarkup: [
+    { property: "svg", requirement: "any", handler: "template" },
+    { property: "slots", requirement: "any", handler: "template" }
+  ],
+  smallMultiples: [
+    { property: "chart", requirement: "any", handler: "nested-chart" }
+  ]
+};
+const stableMaturityTests:Record<string,string[]> = {
+  grid:["tests/component-catalog.test.tsx"],flex:["tests/component-catalog.test.tsx"],section:["tests/component-catalog.test.tsx"],toolbar:["tests/component-catalog.test.tsx"],
+  searchBox:["tests/universal-interactions.test.ts"],select:["tests/universal-interactions.test.ts"],multiSelect:["tests/universal-interactions.test.ts"],button:["tests/universal-interactions.test.ts"],
+  tabs:["tests/overlays.test.ts"],collapsible:["tests/overlays.test.ts"],card:["tests/component-catalog.test.tsx"],
+  kpi:["tests/component-catalog.test.tsx"],metricGrid:["tests/component-catalog.test.tsx"],statusBadge:["tests/component-catalog.test.tsx"],progressBar:["tests/component-catalog.test.tsx"],alert:["tests/component-catalog.test.tsx"],detailPanel:["tests/component-catalog.test.tsx"],
+  icon:["tests/component-catalog.test.tsx"],iconButton:["tests/component-catalog.test.tsx"],listGroup:["tests/component-catalog.test.tsx"],dataGrid:["tests/component-catalog.test.tsx"],emptyState:["tests/component-catalog.test.tsx"],placeholder:["tests/component-catalog.test.tsx"],spinner:["tests/component-catalog.test.tsx"],
+  barChart:["tests/chart-adapters.test.ts","tests/echart-renderer.test.tsx"],horizontalBarChart:["tests/chart-adapters.test.ts","tests/echart-renderer.test.tsx"],lineChart:["tests/chart-adapters.test.ts","tests/echart-renderer.test.tsx"],areaChart:["tests/chart-adapters.test.ts","tests/echart-renderer.test.tsx"],
+  table:["tests/table-selection.test.ts"],matrix:["tests/matrix-block.test.tsx","tests/matrix-field-references.test.ts"],
+  text:["tests/custom-components.test.ts"],markdown:["tests/custom-components.test.ts"],svg:["tests/svg-components.test.ts","tests/svg-renderer.test.tsx"]
+};
+const emptyStateNotApplicable=new Set(["grid","flex","section","toolbar","searchBox","select","multiSelect","button","tabs","collapsible","card","icon","iconButton","emptyState","placeholder","spinner","text","markdown"]);
+for (const descriptor of componentDescriptors) {
+  for (const field of descriptorFieldExtensions[descriptor.type] ?? []) {
+    if (!descriptor.fields.some(existing => existing.property === field.property && existing.handler === field.handler)) descriptor.fields.push(field);
+  }
+  const focusedTests=stableMaturityTests[descriptor.type];
+  if (descriptor.maturity==="stable"&&focusedTests) descriptor.maturityEvidence={
+    renderer:true,schema:true,fieldTraversal:true,canonicalExample:true,inspector:true,
+    emptyState:emptyStateNotApplicable.has(descriptor.type)?"not-applicable":true,
+    responsive:true,accessibility:true,
+    interactions:descriptor.capabilities.interactions?true:"not-applicable",focusedTests
+  };
+}
 export const componentDescriptorsByType=new Map(componentDescriptors.map(descriptor=>[descriptor.type,descriptor] as const));
 export const getComponentDescriptor=(type:string)=>componentDescriptorsByType.get(type);
