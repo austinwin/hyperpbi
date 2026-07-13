@@ -1,6 +1,10 @@
 {
   "dataRoles": [
-    { "displayName": "Values", "name": "values", "kind": "GroupingOrMeasure" }
+    { "displayName": "Values", "name": "values", "kind": "GroupingOrMeasure" },
+    { "displayName": "Map Latitude", "name": "mapLatitude", "kind": "Grouping" },
+    { "displayName": "Map Longitude", "name": "mapLongitude", "kind": "Grouping" },
+    { "displayName": "Map Geometry", "name": "mapGeometry", "kind": "Grouping" },
+    { "displayName": "Map Address", "name": "mapAddress", "kind": "Grouping" }
   ],
   "objects": {
     "hyperpbiState": {
@@ -47,10 +51,16 @@
     }
   },
   "dataViewMappings": [{
-    "conditions": [{ "values": { "max": 50 } }],
+    "conditions": [{ "values": { "max": 50 }, "mapLatitude": { "max": 1 }, "mapLongitude": { "max": 1 }, "mapGeometry": { "max": 1 }, "mapAddress": { "max": 1 } }],
     "table": {
       "rows": {
-        "select": [{ "for": { "in": "values" } }],
+        "select": [
+          { "for": { "in": "values" } },
+          { "for": { "in": "mapLatitude" } },
+          { "for": { "in": "mapLongitude" } },
+          { "for": { "in": "mapGeometry" } },
+          { "for": { "in": "mapAddress" } }
+        ],
         "dataReductionAlgorithm": { "window": { "count": 30000 } }
       }
     }

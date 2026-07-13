@@ -11,7 +11,7 @@ export interface ResolvedMapLocation {
     address: string | null;
 }
 
-function coordinate(value: Primitive): number | null { const result = Number(value); return Number.isFinite(result) ? result : null; }
+function coordinate(value: Primitive): number | null { return typeof value === "number" && Number.isFinite(value) ? value : null; }
 function text(row: DataRow, key?: string): string { return key ? String(row[key] ?? "").trim() : ""; }
 
 export function resolveMapLocation(row: DataRow, bindings: MapBindingKeys, mode: MapLocationMode): ResolvedMapLocation | null {

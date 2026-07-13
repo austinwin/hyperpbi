@@ -4,8 +4,16 @@ import { resolveConfiguredField } from "../config/hyperpbiConfig";
 function firstByRole(fields: Record<string, NormalizedField>, role: string): string | undefined {
     const explicit = Object.values(fields).find(field => field.roles.includes(role))?.key;
     if (explicit) return explicit;
-    if (role === "mapLatitude") return Object.values(fields).find(field => field.type === "latitude")?.key;
-    if (role === "mapLongitude") return Object.values(fields).find(field => field.type === "longitude")?.key;
+    const semantic = role === "mapLatitude" ? Object.values(fields).find(field => field.type === "latitude")?.key
+        : role === "mapLongitude" ? Object.values(fields).find(field => field.type === "longitude")?.key
+        : role === "mapGeometry" ? Object.values(fields).find(field => field.type === "geometry")?.key : undefined;
+    if (semantic) return semantic;
+    const names: Record<string, string[]> = {
+        mapLatitude: ["latitude", "lat"], mapLongitude: ["longitude", "longitude", "lon", "lng"],
+        mapGeometry: ["geometry", "geojson", "wkt"], mapAddress: ["address", "street address"],
+    };
+    const candidates = names[role];
+    if (candidates) return Object.values(fields).find(field => candidates.includes((field.sourceColumn ?? field.displayName ?? field.key).trim().toLowerCase()))?.key;
     return undefined;
 }
 

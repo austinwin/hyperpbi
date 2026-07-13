@@ -625,10 +625,10 @@ export function LeafletMap({
         const fitMode = viewDef.fitMode ?? "data";
         if (fitMode !== "none" && dataBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
             runProgrammaticMove(map, programmaticMoveCountRef, () => {
-                map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), {
-                    maxZoom: viewDef.maxZoom ?? 14,
-                    animate: false,
-                });
+                const minZoom = viewDef.minZoom ?? 1;
+                const maxZoom = viewDef.maxZoom ?? 18;
+                if (dataBounds.getSouthWest().equals(dataBounds.getNorthEast())) map.setView(dataBounds.getCenter(), Math.max(minZoom, Math.min(maxZoom, 14)), { animate: false });
+                else map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), { maxZoom, animate: false });
             });
             hasFitRef.current = true;
         }

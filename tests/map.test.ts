@@ -30,8 +30,9 @@ describe("Power BI map bindings", () => {
         expect(dictionary.fields.demo_longitude).toMatchObject({ sourceTable: "Demo", sourceColumn: "Longitude", type: "longitude", kind: "column" });
         const map = normalizeMapBindings([{ demo_latitude: 41.88, demo_longitude: -87.63 }], dictionary.fields);
         expect(map.bindings).toMatchObject({ latitude: "demo_latitude", longitude: "demo_longitude" });
-        expect(map.warnings.join(" ")).toContain("Latitude is summarized as Sum");
-        expect(map.warnings.join(" ")).toContain("Don't summarize");
+        expect(map.warnings.join(" ")).toContain("current HyperPBI visual query reports Latitude as Sum(Demo.Latitude)");
+        expect(map.warnings.join(" ")).toContain("model’s default summarization");
+        expect(map.warnings.join(" ")).toContain("Don’t summarize");
     });
 
     it("keeps explicit map configuration ahead of metadata inference", () => {

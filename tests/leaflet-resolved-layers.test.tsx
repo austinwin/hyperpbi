@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => {
         isValid() { return this.points.length > 0; }
         pad() { return this; }
         getCenter() { const point = this.points[0] ?? [0, 0]; return { lat: point[0], lng: point[1] }; }
+        getSouthWest() { const point = this.points[0] ?? [0, 0]; return { lat: point[0], lng: point[1], equals: (other: { lat: number; lng: number }) => point[0] === other.lat && point[1] === other.lng }; }
+        getNorthEast() { const point = this.points.at(-1) ?? [0, 0]; return { lat: point[0], lng: point[1] }; }
         getWest() { return -96; } getSouth() { return 29; } getEast() { return -94; } getNorth() { return 31; }
     }
 
@@ -168,6 +170,20 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); document.body.replaceChildren(); });
 
 describe("LeafletMap controller and viewport", () => {
+    it("fits one data point with setView and multiple points with fitBounds", async () => {
+        const singleHost = document.createElement("div");
+        const test = testContext();
+        renderMap(singleHost, test.value, { type: "map", id: "single", basemap: { type: "none" }, view: { fitMode: "data", minZoom: 2, maxZoom: 16 } }, [layer("single", { features: [feature("one", { layerId: "single", lat: 29.76, lon: -95.37 })] })]);
+        await vi.runAllTimersAsync();
+        expect(mocks.maps[0].setViewCalls.at(-1)).toEqual({ center: expect.objectContaining({ lat: 29.76, lng: -95.37 }), zoom: 14 });
+        expect(mocks.maps[0].fitBoundsCalls).toHaveLength(0);
+
+        const multipleHost = document.createElement("div");
+        renderMap(multipleHost, test.value, { type: "map", id: "multiple", basemap: { type: "none" }, view: { fitMode: "data" } }, [layer("multiple", { features: [feature("one", { layerId: "multiple", lat: 29.76, lon: -95.37 }), feature("two", { layerId: "multiple", lat: 32.78, lon: -96.8 })] })]);
+        await vi.runAllTimersAsync();
+        expect(mocks.maps[1].fitBoundsCalls).toHaveLength(1);
+    });
+
     it("initializes the map once and the controller reads updated component view", async () => {
         const host = document.createElement("div"); const test = testContext(); let controller: LeafletMapController | undefined;
         renderMap(host, test.value, { type: "map", id: "map", view: { center: [10, 20], zoom: 5 } }, [], { onControllerReady: value => { controller = value; } });
