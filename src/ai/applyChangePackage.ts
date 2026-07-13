@@ -1,14 +1,150 @@
 import type { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { validateSchema } from "../schema/validateSchema";
-import { appendChild, componentTree, deleteComponent, insertComponent, locateComponent } from "../editor/inspector/specificationEditor";
+import {
+  appendChild,
+  componentTree,
+  deleteComponent,
+  insertComponent,
+  locateComponent,
+} from "../editor/inspector/specificationEditor";
 import type { AiChangePackage } from "./changePackage";
 
-const clone=<T>(value:T):T=>JSON.parse(JSON.stringify(value)) as T;
-const object=(value:unknown):value is Record<string,unknown>=>Boolean(value)&&typeof value==="object"&&!Array.isArray(value);
-function ids(value:unknown):string[]{return componentTree(value).map(item=>item.id);}
-export interface AppliedChangePackage{schema?:HyperPbiSchema;errors:string[];summary:string;}
-export function applyChangePackage(current:HyperPbiSchema,change:AiChangePackage):AppliedChangePackage{if(change.operation==="replaceDashboard"){const validation=validateSchema(change.specification);return validation.schema?{schema:validation.schema,errors:[],summary:"Replace the complete dashboard."}:{errors:validation.errors,summary:"No changes applied."};}
-    const target=change.targetId.startsWith("root:")?undefined:locateComponent(current,change.targetId);if(!target&&!change.targetId.startsWith("root:"))return{errors:[`Target component “${change.targetId}” does not exist.`],summary:"No changes applied."};let candidate:unknown=clone(current);
-    if(change.operation==="remove")candidate=deleteComponent(candidate,change.targetId);
-    else{const incoming=ids({components:[change.component]});const duplicates=incoming.filter((id,index)=>incoming.indexOf(id)!==index);if(duplicates.length)return{errors:[`Incoming component contains duplicate IDs: ${Array.from(new Set(duplicates)).join(", ")}.`],summary:"No changes applied."};const existing=new Set(ids(current));if(change.operation==="replace")ids({components:[target!.component]}).forEach(id=>existing.delete(id));const collisions=incoming.filter(id=>existing.has(id));if(collisions.length)return{errors:[`Incoming component IDs collide with the dashboard: ${collisions.join(", ")}.`],summary:"No changes applied."};if(change.operation==="replace"){if(change.component.id!==change.targetId)return{errors:[`Replacement ID must remain “${change.targetId}”.`],summary:"No changes applied."};const next=clone(current);const found=locateComponent(next,change.targetId)!;if(Array.isArray(found.parent))found.parent[found.index as number]=clone(change.component);else found.parent[found.index as string]=clone(change.component);candidate=next;}else if(change.operation==="insertBefore"||change.operation==="insertAfter")candidate=insertComponent(candidate,change.targetId,change.operation==="insertBefore"?"before":"after",change.component as unknown as Record<string,unknown>);else if(change.targetId.startsWith("root:")){const key=change.targetId.slice(5);const next=clone(current) as unknown as Record<string,unknown>;if(!["components","toolbar","leftPanel","rightPanel"].includes(key))return{errors:[`Root container “${key}” is not supported.`],summary:"No changes applied."};if(!Array.isArray(next[key]))next[key]=[];(next[key] as unknown[]).push(clone(change.component));candidate=next;}else{const container=change.container??"children";if(!["children","footer"].includes(container))return{errors:[`Container “${container}” is not compatible with appendChild.`],summary:"No changes applied."};candidate=appendChild(candidate,change.targetId,change.component as unknown as Record<string,unknown>,container);}}
-    if(!object(candidate))return{errors:["Change package did not produce a specification."],summary:"No changes applied."};const validation=validateSchema(candidate);if(!validation.schema)return{errors:validation.errors,summary:"No changes applied."};const labels:Record<AiChangePackage["operation"],string>={replaceDashboard:"Replace dashboard",replace:"Replace selected component",insertBefore:"Insert component before target",insertAfter:"Insert component after target",appendChild:"Append child component",remove:"Remove selected component"};return{schema:validation.schema,errors:[],summary:`${labels[change.operation]} (${change.targetId}).`};}
+const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+const object = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
+function ids(value: unknown): string[] {
+  return componentTree(value).map((item) => item.id);
+}
+export interface AppliedChangePackage {
+  schema?: HyperPbiSchema;
+  errors: string[];
+  summary: string;
+}
+export interface ChangePackageValidationContext {
+  validateResult?: (candidate: unknown) => { errors: string[]; warnings?: string[] };
+}
+
+function validateCandidate(candidate: unknown, context: ChangePackageValidationContext): AppliedChangePackage {
+  const schema = validateSchema(candidate);
+  if (!schema.schema) return { errors: schema.errors, summary: "No changes applied." };
+  const full = context.validateResult?.(candidate);
+  if (full?.errors.length) return { errors: full.errors, summary: "No changes applied." };
+  return { schema: schema.schema, errors: [], summary: "" };
+}
+
+export function applyChangePackage(
+  current: HyperPbiSchema,
+  change: AiChangePackage,
+  context: ChangePackageValidationContext = {},
+): AppliedChangePackage {
+  if (change.operation === "replaceDashboard") {
+    const result = validateCandidate(change.specification, context);
+    return result.schema ? { ...result, summary: "Replace the complete dashboard." } : result;
+  }
+  const target = change.targetId.startsWith("root:")
+    ? undefined
+    : locateComponent(current, change.targetId);
+  if (!target && !change.targetId.startsWith("root:"))
+    return {
+      errors: [`Target component “${change.targetId}” does not exist.`],
+      summary: "No changes applied.",
+    };
+  let candidate: unknown = clone(current);
+  if (change.operation === "remove")
+    candidate = deleteComponent(candidate, change.targetId);
+  else {
+    const incoming = ids({ components: [change.component] });
+    const duplicates = incoming.filter(
+      (id, index) => incoming.indexOf(id) !== index,
+    );
+    if (duplicates.length)
+      return {
+        errors: [
+          `Incoming component contains duplicate IDs: ${Array.from(new Set(duplicates)).join(", ")}.`,
+        ],
+        summary: "No changes applied.",
+      };
+    const existing = new Set(ids(current));
+    if (change.operation === "replace")
+      ids({ components: [target!.component] }).forEach((id) =>
+        existing.delete(id),
+      );
+    const collisions = incoming.filter((id) => existing.has(id));
+    if (collisions.length)
+      return {
+        errors: [
+          `Incoming component IDs collide with the dashboard: ${collisions.join(", ")}.`,
+        ],
+        summary: "No changes applied.",
+      };
+    if (change.operation === "replace") {
+      if (change.component.id !== change.targetId)
+        return {
+          errors: [`Replacement ID must remain “${change.targetId}”.`],
+          summary: "No changes applied.",
+        };
+      const next = clone(current);
+      const found = locateComponent(next, change.targetId)!;
+      if (Array.isArray(found.parent))
+        found.parent[found.index as number] = clone(change.component);
+      else found.parent[found.index as string] = clone(change.component);
+      candidate = next;
+    } else if (
+      change.operation === "insertBefore" ||
+      change.operation === "insertAfter"
+    )
+      candidate = insertComponent(
+        candidate,
+        change.targetId,
+        change.operation === "insertBefore" ? "before" : "after",
+        change.component as unknown as Record<string, unknown>,
+      );
+    else if (change.targetId.startsWith("root:")) {
+      const key = change.targetId.slice(5);
+      const next = clone(current) as unknown as Record<string, unknown>;
+      if (!["components", "toolbar", "leftPanel", "rightPanel"].includes(key))
+        return {
+          errors: [`Root container “${key}” is not supported.`],
+          summary: "No changes applied.",
+        };
+      if (!Array.isArray(next[key])) next[key] = [];
+      (next[key] as unknown[]).push(clone(change.component));
+      candidate = next;
+    } else {
+      const container = change.container ?? "children";
+      if (!["children", "footer"].includes(container))
+        return {
+          errors: [
+            `Container “${container}” is not compatible with appendChild.`,
+          ],
+          summary: "No changes applied.",
+        };
+      candidate = appendChild(
+        candidate,
+        change.targetId,
+        change.component as unknown as Record<string, unknown>,
+        container,
+      );
+    }
+  }
+  if (!object(candidate))
+    return {
+      errors: ["Change package did not produce a specification."],
+      summary: "No changes applied.",
+    };
+  const validation = validateCandidate(candidate, context);
+  if (!validation.schema) return validation;
+  const labels: Record<AiChangePackage["operation"], string> = {
+    replaceDashboard: "Replace dashboard",
+    replace: "Replace selected component",
+    insertBefore: "Insert component before target",
+    insertAfter: "Insert component after target",
+    appendChild: "Append child component",
+    remove: "Remove selected component",
+  };
+  return {
+    schema: validation.schema,
+    errors: [],
+    summary: `${labels[change.operation]} (${change.targetId}).`,
+  };
+}

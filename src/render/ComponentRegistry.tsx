@@ -111,13 +111,13 @@ for (const type of ["section", "leftPanel", "rightPanel", "split"]) {
         return h(Section, { title: comp.title }, rc(comp.children ?? []));
     };
 }
+export const renderedComponentTypes=Object.freeze(Object.keys(componentRenderers).sort());
 
-export function ComponentRegistry({ component, renderChildren }: { component: DashboardComponent; renderChildren: RenderChildren }) {
+export function ComponentRegistry({ component, renderChildren, authoringOwnerId }: { component: DashboardComponent; renderChildren: RenderChildren; authoringOwnerId?: string }) {
     const renderer = componentRenderers[component.type];
     if (renderer) {
         if (["modal", "offcanvas", "drawer", "filterDrawer"].includes(component.type)) return renderer(component, renderChildren);
-        const ownerId=component.id?.includes("--")?component.id.split("--")[0]:undefined;
-        return h("div", { "data-hp-id":component.id,"data-hp-type":component.type,"data-hp-owner-id":ownerId }, renderer(component, renderChildren));
+        return h("div", { "data-hp-id":component.id,"data-hp-type":component.type,"data-hp-owner-id":authoringOwnerId }, renderer(component, renderChildren));
     }
     // Unsupported component fallback
     return h(EmptyState, { title: `Unsupported component: ${component.type}` });

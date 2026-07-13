@@ -50,6 +50,7 @@ export function AiPromptSettingsPanel({ value, fields, onChange, selectedTarget 
             </button>
         </div>
         <div class="hp-builder-target"><strong>Selected target:</strong> {selectedTarget??"None — select a component in Inspector mode to add or redesign a section."}</div>
+        {value.job==="add-section"&&<label class="hp-builder-custom"><span>Insertion position</span><select value={value.insertionPosition} disabled={!selectedTarget} onChange={event=>update("insertionPosition",event.currentTarget.value as AiPromptSettings["insertionPosition"])}><option value="before">Before target</option><option value="after">After target</option><option value="inside">Inside target</option></select>{!selectedTarget&&<small>Select an Inspector target before adding a section.</small>}</label>}
 
         {customizeOpen && (
             <div id="hp-builder-customization" class="hp-builder-customization">

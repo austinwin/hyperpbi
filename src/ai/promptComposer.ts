@@ -15,6 +15,7 @@ Every component has a unique stable id. Components may reference one logical dat
 const datasetLanguage=`Logical datasets are declared at data.datasets. Each definition requires source, which is "powerbi" or another listed dataset. After source resolution, runtime evaluation and static schema propagation use this deterministic order: filter, derive, rename, select, groupBy/metrics, distinct, sort, limit. Metric ops: sum, avg, min, max, count, distinctCount, first. Derive expressions use the safe calculation DSL only. A component sees only its selected dataset output. Dataset-derived fields and metrics cannot directly filter the Power BI model; source-row lineage may still support identity selection. No SQL, joins, functions, or network sources.`;
 const security=`Security: no JavaScript, functions, eval, event-handler attributes, script tags, credentials, dynamic imports, unsafe iframe/object, or network datasets. HTML is sanitized, CSS is scoped/allowlisted, URLs and ArcGIS hosts remain subject to HyperPBI policy.`;
 const output=`OUTPUT CONTRACT:
+- Allowed operations are declarative dashboard creation or the explicitly requested strict change-package operation.
 - Return one JSON object only.
 - No Markdown fences, comments, explanations, or alternate versions.
 - Use only listed field aliases, datasets, patterns, component types, properties, actions, and design tokens.
