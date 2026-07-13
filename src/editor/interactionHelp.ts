@@ -6,6 +6,7 @@ const help: Record<ExternalSelectionFailureReason,{message:string;fix:string}> =
     "no selection identities": { message: "No selection identities were created. Bind real table columns/measures in Values.", fix: "Add the source columns used by the component to the HyperPBI Values field well." },
     "no matching source rows": { message: "No source rows matched the clicked value.", fix: "Verify the component uses a current Field Manifest alias and that the field exists in its selected dataset." },
     "field has no Power BI filter target": { message: "The field has no Power BI filter target.", fix: "Bind a model column with source table and column metadata; calculated and display-only fields cannot externally filter." },
+    "calculated field has no direct Power BI model filter target": { message: "A root calculated field is computed in HyperPBI and has no direct model-column target.", fix: "Use identity selection/highlight, or filter through a contributing Power BI source column." },
     "unsupported external filter operator": { message: "The filter operator is not supported for Power BI propagation.", fix: "Use =, in, contains, a numeric comparison, or between." },
     "host filter failed": { message: "Power BI rejected the external filter.", fix: "Verify the filter target, report permissions, and visual interaction settings." },
     "unsupported interaction action": { message: "This interaction action is not supported by the safe engine.", fix: "Use selectRow, selectWhere, setFilter, clearSelection, or another documented safe action." },

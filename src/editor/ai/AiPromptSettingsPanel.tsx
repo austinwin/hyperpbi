@@ -25,7 +25,7 @@ function BuilderAccordionStep({number,title,description,summary,open,onToggle,ch
     </section>;
 }
 
-export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPromptSettings; fields: string[]; onChange: (value: AiPromptSettings) => void }) {
+export function AiPromptSettingsPanel({ value, fields, onChange, selectedTarget }: { value: AiPromptSettings; fields: string[]; onChange: (value: AiPromptSettings) => void; selectedTarget?:string }) {
     const [customizeOpen, setCustomizeOpen] = useState(false);
     const [openStep, setOpenStep] = useState<number | null>(null);
     const [aliasText,setAliasText]=useState(()=>JSON.stringify(value.aliasOverrides,null,2));
@@ -49,6 +49,7 @@ export function AiPromptSettingsPanel({ value, fields, onChange }: { value: AiPr
                 <span class="hp-builder-customize-chevron" aria-hidden="true">{customizeOpen ? "▴" : "▾"}</span>
             </button>
         </div>
+        <div class="hp-builder-target"><strong>Selected target:</strong> {selectedTarget??"None — select a component in Inspector mode to add or redesign a section."}</div>
 
         {customizeOpen && (
             <div id="hp-builder-customization" class="hp-builder-customization">

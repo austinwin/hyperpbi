@@ -101,7 +101,7 @@ export function MapLayerPanel({ mapId, layers, configuration }: MapLayerPanelPro
                         const iconName = layer.sourceType === "powerbi" ? "database" : layer.sourceType === "arcgisTile" ? "grid" : layer.sourceType === "arcgisDynamic" ? "image" : "layers";
                         return (
                             <div key={layer.id} class={`hp-map-layer-row ${isVisible ? "" : "is-hidden"}`}>
-                                <div class="hp-map-layer-main">
+                                <div class="hp-map-layer-rowline">
                                     <button type="button" class="hp-map-layer-visibility" aria-label={isVisible ? `Hide ${layer.name}` : `Show ${layer.name}`} title={isVisible ? "Hide layer" : "Show layer"} onClick={() => context.dispatch({ type: "mapLayerVisibility", mapId, layerId: layer.id, visible: !isVisible })}>
                                         <Icon name={isVisible ? "eye" : "eye-off"} size="xs" decorative />
                                     </button>
@@ -121,23 +121,19 @@ export function MapLayerPanel({ mapId, layers, configuration }: MapLayerPanelPro
                                             <Icon name="alert" size="xs" decorative />
                                         </button>
                                     )}
-                                </div>
-                                {(allowOpacity || allowLabels && layer.labels || allowReorder) && (
-                                    <div class="hp-map-layer-controls">
-                                        {allowOpacity && <OpacityInput mapId={mapId} layer={layer} opacity={opacity} />}
-                                        {allowLabels && layer.labels && (
+                                    {allowOpacity && <OpacityInput mapId={mapId} layer={layer} opacity={opacity} />}
+                                    {allowLabels && layer.labels && (
                                             <button type="button" class={`hp-map-layer-label-toggle ${labelsOn ? "is-active" : ""}`} aria-label={labelsOn ? `Hide labels for ${layer.name}` : `Show labels for ${layer.name}`} title={labelsOn ? "Hide labels" : "Show labels"} onClick={() => context.dispatch({ type: "mapLayerLabels", mapId, layerId: layer.id, visible: !labelsOn })}>
                                                 <Icon name="text" size="xs" decorative />
                                             </button>
-                                        )}
-                                        {allowReorder && (
+                                    )}
+                                    {allowReorder && (
                                             <div class="hp-map-layer-reorder" aria-label={`Reorder ${layer.name}`}>
                                                 <button type="button" disabled={index === 0} aria-label={`Move ${layer.name} up`} title="Move up" onClick={() => moveLayer(layer.id, -1)}><Icon name="chevron-up" size="xs" decorative /></button>
                                                 <button type="button" disabled={index === orderedLayers.length - 1} aria-label={`Move ${layer.name} down`} title="Move down" onClick={() => moveLayer(layer.id, 1)}><Icon name="chevron-down" size="xs" decorative /></button>
                                             </div>
-                                        )}
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                                 {diagnosticsOpen && (hasError || hasWarnings) && (
                                     <div class="hp-map-layer-diagnostics" role="status">
                                         {(layer.error ?? layer.diagnostics.error) && <p><strong>Error:</strong> {layer.error ?? layer.diagnostics.error}</p>}

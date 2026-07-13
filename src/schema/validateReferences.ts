@@ -3,6 +3,7 @@ import { NormalizedData, NormalizedField } from "../data/normalizeData";
 import { externalFilterTargetFor } from "../powerbi/externalFilters";
 import { closestMatches } from "./diagnostics";
 import { DashboardComponent, HyperPbiSchema, TableComponent, TabsComponent } from "./hyperpbiSchema";
+import { specificationFieldReferences } from "../fields/specificationFieldReferences";
 
 interface FieldScope { name: string; fields: Record<string, NormalizedField>; rows: NormalizedData["rows"]; }
 
@@ -11,6 +12,7 @@ export function validateReferences(schema: HyperPbiSchema, data: NormalizedData)
     const schemas = resolveDatasetSchemas(data, schema.data?.datasets ?? {});
     errors.push(...schemas.diagnostics.map(item => item.message));
     const baseScope: FieldScope = { name: "powerbi", fields: data.fields, rows: data.rows };
+    for(const occurrence of specificationFieldReferences(schema)){const scope=schemas.datasets.get(occurrence.datasetName)??schemas.datasets.get("powerbi");const field=scope?.fields[occurrence.reference];if(!field)errors.push(`${occurrence.path} references missing field “${occurrence.reference}” in dataset “${occurrence.datasetName}”.`);else if(occurrence.requirement==="numeric"&&field.dataType&&field.dataType!=="unknown"&&field.dataType!=="number")errors.push(`${occurrence.path} requires numeric field “${occurrence.reference}” in dataset “${occurrence.datasetName}”, but it is ${field.dataType}.`);}
     const ignored: Record<string,string> = {
         externalSelection: "Property externalSelection is not used. Use component.interaction.externalMode instead.",
         selectionTarget: "Property selectionTarget is not used. Use component.interaction.field instead.",
@@ -83,7 +85,7 @@ export function validateReferences(schema: HyperPbiSchema, data: NormalizedData)
         if(interaction?.enabled&&interaction.externalMode==="filter") {
             if(["table","matrix","map","scatterChart","advancedChart"].includes(component.type)&&!interaction.field)errors.push(`${owner} uses external filter mode and requires an explicit interaction.field.`);
             if (interaction.field && scope.fields[interaction.field] && !externalFilterTargetFor(scope.fields[interaction.field])) {
-                const field = scope.fields[interaction.field]; const description = field.origin === "dataset-metric" ? "dataset metric" : field.origin === "dataset-derived" ? "derived dataset field" : field.kind === "measure" ? "Power BI measure" : "generated field";
+                const field = scope.fields[interaction.field]; const description = field.origin === "calculated-field" ? "root calculated field" : field.origin === "dataset-metric" ? "dataset metric" : field.origin === "dataset-derived" ? "derived dataset field" : field.kind === "measure" ? "Power BI measure" : "generated field";
                 errors.push(`${owner} uses external filter mode with ${description} “${interaction.field}” in dataset “${scope.name}”, which has no Power BI model-column target. Use selection/highlight or filter through a group-by source field.`);
             }
         }

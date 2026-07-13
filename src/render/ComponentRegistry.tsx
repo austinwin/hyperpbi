@@ -116,7 +116,8 @@ export function ComponentRegistry({ component, renderChildren }: { component: Da
     const renderer = componentRenderers[component.type];
     if (renderer) {
         if (["modal", "offcanvas", "drawer", "filterDrawer"].includes(component.type)) return renderer(component, renderChildren);
-        return h("div", {}, renderer(component, renderChildren));
+        const ownerId=component.id?.includes("--")?component.id.split("--")[0]:undefined;
+        return h("div", { "data-hp-id":component.id,"data-hp-type":component.type,"data-hp-owner-id":ownerId }, renderer(component, renderChildren));
     }
     // Unsupported component fallback
     return h(EmptyState, { title: `Unsupported component: ${component.type}` });

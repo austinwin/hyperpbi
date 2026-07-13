@@ -30,7 +30,7 @@ describe("semantic chart adapter registry",()=>{
         const waterfall=build({type:"waterfallChart",category:"Category",measure:"Actual",showStart:true,showEnd:true});
         expect((waterfall.option as {series:unknown[]}).series).toHaveLength(2);
         expect(waterfall.bindings.some(item=>item.seriesIndex===1&&item.sourceRowIndices.join() === "0,1")).toBe(true);
-        const sankey=build({type:"sankeyChart",sourceField:"From",targetField:"To",valueField:"Actual",selectionTarget:"both"});
+        const sankey=build({type:"sankeyChart",sourceField:"From",targetField:"To",valueField:"Actual"});
         expect(sankey.bindings.some(item=>item.dataType==="node"&&item.value==="Open"&&item.sourceRowIndices.length===3)).toBe(true);
         expect(sankey.bindings.some(item=>item.dataType==="edge"&&item.sourceRowIndices.join() === "0,1")).toBe(true);
         const treemap=build({type:"treemapChart",pathFields:["Department","Program"],valueField:"Actual",maxDepth:2});

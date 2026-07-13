@@ -231,7 +231,6 @@ export interface SankeyChartComponent extends BaseChartComponent {
     aggregation?: MetricDefinition["aggregation"];
     orientation?: "horizontal" | "vertical";
     nodeAlign?: "left" | "right" | "justify";
-    selectionTarget?: "node" | "edge" | "both";
 }
 
 export interface TreemapChartComponent extends BaseChartComponent {

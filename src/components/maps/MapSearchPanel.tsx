@@ -5,11 +5,10 @@ import type { GeocoderSearchResult } from "../../providers/providerTypes";
 import { getGeocoderProvider } from "../../providers/geocoderProviderRegistry";
 import { resolveProviderPolicy } from "../../providers/providerPolicy";
 import { useRenderContext } from "../../render/RenderContext";
+import { providerErrorMessage } from "../../providers/providerRequest";
 
 function safeSearchError(error: unknown): string {
-    const message = error instanceof Error ? error.message : String(error);
-    if (/^Geocoder HTTP \d{3}$/.test(message) || /endpoint (?:is missing|must use HTTPS)/i.test(message)) return message;
-    return "Location search failed. Check the configured provider and try again.";
+    const message=providerErrorMessage(error);return message||"Location search failed. Check the configured provider and try again.";
 }
 
 export function MapSearchPanel({
@@ -27,13 +26,15 @@ export function MapSearchPanel({
     const providers = context.config.providers;
     const geocoder = providers?.geocoder;
     const provider = getGeocoderProvider(geocoder?.provider ?? "none");
-    const policy = resolveProviderPolicy(providers, context.webAccessAvailable);
+    const policy = resolveProviderPolicy(providers, context.providerAccess??context.webAccessAvailable);
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<GeocoderSearchResult[]>([]);
     const [loading, setLoading] = useState(false);
+    const [selected,setSelected]=useState<GeocoderSearchResult>();
     const [status, setStatus] = useState<string | undefined>(policy.geocoderReason);
     const controllerRef = useRef<AbortController | null>(null);
     const activeQueryRef = useRef<string | null>(null);
+    const cacheRef=useRef(new Map<string,GeocoderSearchResult[]>());
 
     useEffect(() => () => {
         controllerRef.current?.abort();
@@ -61,12 +62,11 @@ export function MapSearchPanel({
         setStatus("Searching…");
         setResults([]);
         try {
-            const found = provider.search
+            const normalized=trimmed.toLocaleLowerCase();const cached=geocoder.cache!==false?cacheRef.current.get(normalized):undefined;const found:GeocoderSearchResult[] = cached??(provider.search
                 ? await provider.search(trimmed, geocoder, controller.signal)
-                : await provider.geocode(trimmed, geocoder, controller.signal).then(result => result ? [{ ...result, label: trimmed, provider: provider.id }] : []);
+                : await provider.geocode(trimmed, geocoder, controller.signal).then(result => result ? [{ ...result, label: trimmed, provider: provider.id }] : []))??[];if(geocoder.cache!==false&&!cached)cacheRef.current.set(normalized,found);
             if (controller.signal.aborted) return;
-            setResults(found.slice(0, 5));
-            setStatus(found.length ? `${found.length} result${found.length === 1 ? "" : "s"} found.` : "No locations matched your search.");
+            const limited=found.slice(0,5);setResults(limited);const automatic=limited.length===1||limited.length>1&&definition?.autoSelectFirst!==false;if(automatic){setSelected(limited[0]);onResult(limited[0]);setStatus(`Showing ${limited[0].label??"search result"}`);}else setStatus(limited.length?`${limited.length} results found. Choose a location.`:"No locations matched your search.");
         } catch (error) {
             if (!controller.signal.aborted) setStatus(safeSearchError(error));
         } finally {
@@ -85,6 +85,7 @@ export function MapSearchPanel({
         setLoading(false);
         setQuery("");
         setResults([]);
+        setSelected(undefined);
         setStatus(policy.geocoderReason);
         onClearResult();
     };
@@ -113,7 +114,7 @@ export function MapSearchPanel({
                 <ul class="hp-map-search-results" aria-label="Location search results">
                     {results.map((result, index) => (
                         <li key={`${result.provider}-${result.latitude}-${result.longitude}-${index}`}>
-                            <button type="button" title={result.label ?? "Search result"} onClick={() => onResult(result)}>
+                            <button type="button" title={result.label ?? "Search result"} aria-current={selected===result?"true":undefined} class={selected===result?"is-selected":""} onClick={() => {setSelected(result);onResult(result);setStatus(`Showing ${result.label??"search result"}`);}}>
                                 <strong>{result.label ?? `Result ${index + 1}`}</strong>
                                 <span>{result.latitude.toFixed(5)}, {result.longitude.toFixed(5)}</span>
                             </button>

@@ -24,10 +24,13 @@ import { AppShell } from "../components/app/AppShell";
 import { OverlayHost } from "../components/overlays/OverlayHost";
 import { ToastHost } from "../components/overlays/ToastHost";
 import { evaluateDatasets } from "../data/datasets";
+import type { ProviderAccessState } from "../providers/providerTypes";
+import { getProviderAccessState } from "../providers/providerAccessState";
 
 const notSent = (): ExternalSelectionResult => ({ sent: false, reason: "component did not call selectExternal" });
 const filterNotSent = (): ExternalFilterResult => ({ sent:false, reason:"component did not call selectExternal" });
-export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, referenceWarnings = [], config = defaultConfig, selectExternal = notSent, clearExternal = notSent, applyExternalFilter = filterNotSent, clearExternalFilter = filterNotSent, reportInteraction = () => undefined, webAccessAvailable = false }: { instanceId: string; schema: HyperPbiSchema; data: NormalizedData; settings: RuntimeSettings; renderMs: number; referenceWarnings?: string[]; config?: HyperPbiConfig; selectExternal?: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult; clearExternal?: (details?: InteractionDetails) => ExternalSelectionResult; applyExternalFilter?:(field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails)=>ExternalFilterResult;clearExternalFilter?:(details?:InteractionDetails)=>ExternalFilterResult; reportInteraction?: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void; webAccessAvailable?: boolean }) {
+export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, referenceWarnings = [], config = defaultConfig, selectExternal = notSent, clearExternal = notSent, applyExternalFilter = filterNotSent, clearExternalFilter = filterNotSent, reportInteraction = () => undefined, webAccessAvailable = false,providerAccess }: { instanceId: string; schema: HyperPbiSchema; data: NormalizedData; settings: RuntimeSettings; renderMs: number; referenceWarnings?: string[]; config?: HyperPbiConfig; selectExternal?: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult; clearExternal?: (details?: InteractionDetails) => ExternalSelectionResult; applyExternalFilter?:(field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails)=>ExternalFilterResult;clearExternalFilter?:(details?:InteractionDetails)=>ExternalFilterResult; reportInteraction?: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void; webAccessAvailable?: boolean;providerAccess?:ProviderAccessState }) {
+    providerAccess=providerAccess??getProviderAccessState();
     const [state, dispatch] = useReducer(dashboardReducer, initialDashboardState(schema.state?.search, schema.state?.activeTab));
     const rowKeySignature = useMemo(
         () => JSON.stringify(data.rowKeys),
@@ -69,21 +72,21 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
             getRowsForComponent, componentRows, schema, settings, state, dispatch,
             warnings: sanitizedCss.warnings,
             selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
-            config, webAccessAvailable, datasets:datasetEvaluation.datasets,
+            config, webAccessAvailable,providerAccess:providerAccess??{tiles:{allowed:webAccessAvailable},geocoder:{allowed:webAccessAvailable}}, datasets:datasetEvaluation.datasets,
             executeUiAction: (null as any), isOverlayOpen: (null as any),
         };
         return executeUiActions(action, ctx, event);
-    }, [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable, datasetEvaluation.datasets]);
+    }, [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable,providerAccess, datasetEvaluation.datasets]);
 
     const context = useMemo((): RenderContextValue => ({
         instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
         getRowsForComponent, componentRows, schema, settings, state, dispatch,
         warnings: sanitizedCss.warnings,
         selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
-        config, webAccessAvailable, datasets:datasetEvaluation.datasets,
+        config, webAccessAvailable,providerAccess:providerAccess??{tiles:{allowed:webAccessAvailable},geocoder:{allowed:webAccessAvailable}}, datasets:datasetEvaluation.datasets,
         executeUiAction: execUiAction,
         isOverlayOpen,
-    }), [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
+    }), [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable,providerAccess, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
     const resolvedApp = useMemo(() => resolveAppShell(schema, settings, state), [schema, settings, state]);

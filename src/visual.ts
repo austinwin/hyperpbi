@@ -29,6 +29,8 @@ import { prepareSpecification } from "./schema/prepareSpecification";
 import { createInteractionDiagnostics, ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails, InteractionDiagnostics } from "./powerbi/interactionDiagnostics";
 import { applyExternalFilter as applyPowerBiFilter, clearExternalFilter as clearPowerBiFilter, ExternalFilterResult } from "./powerbi/externalFilters";
 import { FilterOperator } from "./schema/hyperpbiSchema";
+import type { ProviderAccessState } from "./providers/providerTypes";
+import { setProviderAccessState } from "./providers/providerAccessState";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -51,6 +53,8 @@ export class Visual implements IVisual {
     private renderMs = 0;
     private studioLayout = JSON.stringify(defaultStudioLayout);
     private webAccessAvailable = false;
+    private providerAccess:ProviderAccessState={tiles:{allowed:false,reason:"Provider access has not been checked."},geocoder:{allowed:false,reason:"Provider access has not been checked."}};
+    private providerAccessSequence=0;private providerAccessSignature="";
     private interactionDiagnostics: InteractionDiagnostics = createInteractionDiagnostics(false, false, 0);
     private moreRowsAvailable = false;
     private fetchMoreDataInProgress = false;
@@ -60,7 +64,7 @@ export class Visual implements IVisual {
         if (!options) throw new Error("HyperPBI requires Power BI visual constructor options.");
         this.target = options.element; this.host = options.host; this.selectionManager = this.host.createSelectionManager();
         this.target.classList.add("hyperpbi-visual-host");
-        void Promise.all([this.host.webAccessService.webAccessStatus("https://tile.openstreetmap.org"), this.host.webAccessService.webAccessStatus("https://nominatim.openstreetmap.org")]).then(statuses => { this.webAccessAvailable = statuses.every(status => status === powerbi.PrivilegeStatus.Allowed); this.renderCurrent(); }).catch(() => { this.webAccessAvailable = false; });
+        void this.checkProviderAccess();
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -117,18 +121,19 @@ export class Visual implements IVisual {
             this.data = incomingData;
             this.selectionIds = incomingSelectionIds;
         }
-        this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: this.moreRowsAvailable, fetchInProgress: false } }; this.editMode = nextEditMode;
+        this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: this.moreRowsAvailable, fetchInProgress: false } }; this.editMode = nextEditMode;void this.checkProviderAccess();
         this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length };
         this.target.style.width = `${Math.max(0, options.viewport.width)}px`; this.target.style.height = `${Math.max(0, options.viewport.height)}px`;
         this.renderMs = performance.now() - started; this.renderCurrent(); this.host.eventService?.renderingFinished(options); this.requestMoreDataIfNeeded();
     }
 
     private renderCurrent(): void {
+        setProviderAccessState(this.providerAccess);
         const settings = toRuntimeSettings(this.formattingSettings);
         if (!Object.keys(this.data.fields).length) { render(h(LandingPage, {}), this.target); return; }
         if (this.editMode === powerbi.EditMode.Advanced) {
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable }), this.target); return;
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target); return;
         }
         if (!this.specification.trim()) { render(h(SetupExperience, { data: this.data }), this.target); return; }
         const schemaResult = this.parseSpecification(this.specification); const configResult = parseConfig(this.configuration);
@@ -139,8 +144,10 @@ export class Visual implements IVisual {
         const calculated = applyCalculations(this.data, schemaResult.schema.calculations);
         if (calculated.errors.length) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: calculated.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
         const configuredData = applyConfigToData(calculated.data, configResult.config);
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target);
     }
+
+    private async checkProviderAccess():Promise<void>{const providers=parseConfig(this.configuration||defaultConfigJson).config?.providers;const tile=providers?.basemap?.enabled?providers.basemap.tileUrl:undefined;const geocoder=providers?.geocoder?.enabled&&providers.geocoder.provider!=="none"?providers.geocoder.endpoint:undefined;const signature=JSON.stringify([tile,geocoder]);if(signature===this.providerAccessSignature)return;this.providerAccessSignature=signature;const sequence=++this.providerAccessSequence;const safe=(endpoint:string|undefined)=>{if(!endpoint)return undefined;try{const url=new URL(endpoint.replace(/\{[^}]+\}/g,"0"));url.username="";url.password="";url.search="";url.hash="";return url.toString();}catch{return undefined;}};const check=async(endpoint:string|undefined,label:string)=>{const sanitized=safe(endpoint);if(!endpoint)return{allowed:false,reason:`The ${label} provider is disabled.`};if(!sanitized)return{allowed:false,reason:`The ${label} endpoint configuration is invalid.`};try{const status=await this.host.webAccessService.webAccessStatus(endpoint.replace(/\{[^}]+\}/g,"0"));return{allowed:status===powerbi.PrivilegeStatus.Allowed,endpoint:sanitized,reason:status===powerbi.PrivilegeStatus.Allowed?undefined:`Power BI denied WebAccess to the configured ${label} endpoint.`};}catch{return{allowed:false,endpoint:sanitized,reason:`Power BI could not verify WebAccess for the configured ${label} endpoint.`};}};const [tiles,result]=await Promise.all([check(tile,"tile"),check(geocoder,"geocoder")]);if(sequence!==this.providerAccessSequence)return;this.providerAccess={tiles,geocoder:result};this.webAccessAvailable=result.allowed;this.renderCurrent();}
 
     private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[] } {
         const parsed = parseJson(text); if (parsed.error) return { errors: [`Specification JSON: ${parsed.error}`] };

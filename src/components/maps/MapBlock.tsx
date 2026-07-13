@@ -72,7 +72,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const { data, sourceRows, settings, config } = context;
     const id = component.id ?? "map";
     const rows = context.getRowsForComponent(id);
-    const webAccessAvailable = context.webAccessAvailable;
+    const webAccessAvailable = context.providerAccess?.tiles.allowed??context.webAccessAvailable;
 
     // ── Source row identity mapping ──────────────────────────────────
     const sourceIndexMap = useMemo(

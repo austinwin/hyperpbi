@@ -1,4 +1,4 @@
-import type { ComponentCapability, ComponentCategory, ComponentMetadata } from "./componentCatalog";
+import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity } from "./componentTypes";
 
 // ── Component Definition (single source of truth) ─────────────────────
 
@@ -7,7 +7,10 @@ export interface ComponentDefinition {
     label: string;
     category: ComponentCategory;
     useWhen: string;
-    level: "recommended" | "standard" | "advanced";
+    /** Authoring complexity. level remains as a compatibility alias. */
+    complexity: ComponentComplexity;
+    level: ComponentComplexity;
+    maturity: ComponentMaturity;
     capabilities: ComponentCapability;
     interaction: {
         defaultEnabled: boolean;
@@ -40,7 +43,7 @@ const def = (
     label: string,
     category: ComponentCategory,
     useWhen: string,
-    level: ComponentMetadata["level"] = "standard",
+    level: ComponentComplexity = "standard",
     override: Partial<ComponentCapability> = {},
     validate?: ComponentDefinition["validate"]
 ): ComponentDefinition => {
@@ -51,12 +54,18 @@ const def = (
         category === "Maps" ||
         type === "timeline" ||
         type === "custom";
+    const legacy = new Set(["stepper", "drawer", "filterDrawer"]);
+    const experimental = new Set(["advancedChart"]);
+    const beta = new Set(["map", "svgMarkup", "offcanvas", "dropdown", "popover", "smallMultiples"]);
+    const maturity: ComponentMaturity = legacy.has(type) ? "legacy" : experimental.has(type) ? "experimental" : beta.has(type) ? "beta" : "stable";
     return {
         type,
         label,
         category,
         useWhen,
         level,
+        complexity: level,
+        maturity,
         capabilities: cap(override),
         interaction: {
             defaultEnabled: control || dataPoint,

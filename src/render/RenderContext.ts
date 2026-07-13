@@ -10,6 +10,7 @@ import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import type { DatasetResult } from "../data/datasets";
+import type { ProviderAccessState } from "../providers/providerTypes";
 
 export interface RenderContextValue {
     instanceId?: string;
@@ -33,6 +34,7 @@ export interface RenderContextValue {
     reportInteraction: (details: InteractionDetails, reason?: ExternalSelectionFailureReason, rowIndices?: number[]) => void;
     config: HyperPbiConfig;
     webAccessAvailable: boolean;
+    providerAccess?:ProviderAccessState;
     // ── UI Actions ──
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;

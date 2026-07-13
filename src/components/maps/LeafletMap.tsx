@@ -99,7 +99,7 @@ export function LeafletMap({
         const view = component.view ?? {};
         const mapCenter: [number, number] = view.center ?? settings.map.center;
         const mapZoom = view.zoom ?? settings.map.zoom;
-        const policy = resolveProviderPolicy(runtimeConfig.providers, webAccessAvailable);
+        const policy = resolveProviderPolicy(runtimeConfig.providers, context.providerAccess??webAccessAvailable);
         const enableTiles = policy.tilesAllowed;
 
         const map = L.map(ref.current, {

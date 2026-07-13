@@ -4,6 +4,7 @@ export type ExternalSelectionFailureReason =
     | "no selection identities"
     | "no matching source rows"
     | "field has no Power BI filter target"
+    | "calculated field has no direct Power BI model filter target"
     | "unsupported external filter operator"
     | "host filter failed"
     | "unsupported interaction action"

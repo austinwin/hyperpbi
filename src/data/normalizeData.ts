@@ -23,6 +23,8 @@ export interface NormalizedField {
     isImplicitAggregation?: boolean;
     /** Stable metadata provenance used by validation and external-filter diagnostics. */
     origin?: FieldOrigin;
+    /** Direct field dependencies for safe calculated fields; never a Power BI model target. */
+    dependencies?: string[];
 }
 
 export type MapLocationMode = "geometry" | "latLon" | "xy" | "address" | "none";

@@ -1,4 +1,5 @@
 import { GeocoderConfig, GeocoderProvider, GeocoderSearchResult } from "../providerTypes";
+import { providerFetch, ProviderRequestError } from "../providerRequest";
 
 const DEFAULT_ENDPOINT = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
 
@@ -24,9 +25,8 @@ async function request(address: string, config: GeocoderConfig, signal?: AbortSi
     if (config.countryCode?.trim()) url.searchParams.set("countryCode", config.countryCode.trim());
     if (config.category?.trim()) url.searchParams.set("category", config.category.trim());
     if (config.token?.trim()) url.searchParams.set("token", config.token.trim());
-    const response = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error(`Geocoder HTTP ${response.status}`);
-    const body = await response.json() as { candidates?: Array<{ address?: string; score?: number; location?: { x?: number; y?: number }; extent?: { xmin?: number; ymin?: number; xmax?: number; ymax?: number } }> };
+    const response = await providerFetch(url.toString(), { signal, headers: { Accept: "application/json" } });
+    let body: { candidates?: Array<{ address?: string; score?: number; location?: { x?: number; y?: number }; extent?: { xmin?: number; ymin?: number; xmax?: number; ymax?: number } }>;error?:{code?:number} };try{body=await response.json() as typeof body;}catch{throw new ProviderRequestError("INVALID_RESPONSE","The ArcGIS geocoder returned invalid JSON.");}if(body.error?.code===498||body.error?.code===499)throw new ProviderRequestError("AUTHENTICATION_FAILED","The ArcGIS geocoder rejected authentication.");if(!Array.isArray(body.candidates))throw new ProviderRequestError("INVALID_RESPONSE","The ArcGIS geocoder returned an unexpected response.");
     return [...(body.candidates ?? [])]
         .sort((left, right) => Number(right.score ?? 0) - Number(left.score ?? 0))
         .filter(candidate => Number(candidate.score ?? 0) >= (config.minScore ?? 80))

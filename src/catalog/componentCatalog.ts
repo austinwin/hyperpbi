@@ -1,34 +1,28 @@
-import { componentDefinitions, getComponentDefinition } from "./componentDefinitions";
-
-export type ComponentCategory = "Layout" | "Controls" | "Navigation" | "Display" | "Charts" | "Tables" | "Maps" | "Custom components" | "Advanced components" | "Primitives" | "Forms" | "Feedback";
-
-export interface ComponentCapability {
-    fields: boolean;
-    calculations: boolean;
-    css: boolean;
-    slots: boolean;
-    interactions: boolean;
-    externalSelection: boolean;
-    customHtml: boolean;
-}
+import { componentDescriptors } from "./componentDescriptors";
+import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity } from "./componentTypes";
+export type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity } from "./componentTypes";
 
 export interface ComponentMetadata {
     type: string;
     label: string;
     category: ComponentCategory;
     useWhen: string;
-    level: "recommended" | "standard" | "advanced";
+    level: ComponentComplexity;
+    complexity: ComponentComplexity;
+    maturity: ComponentMaturity;
     capability: ComponentCapability;
     interaction: { defaultEnabled: boolean; naturalTrigger: "click" | "change"; autoExternalMode: "filter" | "selection" };
 }
 
 // Derive component metadata from the centralized definitions catalog
-export const componentCatalog: ComponentMetadata[] = componentDefinitions.map(d => ({
+export const componentCatalog: ComponentMetadata[] = componentDescriptors.map(d => ({
     type: d.type,
     label: d.label,
     category: d.category as ComponentCategory,
     useWhen: d.useWhen,
-    level: d.level,
+    level: d.complexity,
+    complexity: d.complexity,
+    maturity: d.maturity,
     capability: d.capabilities,
     interaction: d.interaction,
 }));

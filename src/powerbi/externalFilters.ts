@@ -18,7 +18,7 @@ export function externalFilterTargetFor(field:NormalizedField|undefined):Externa
 
 export function applyExternalFilter(host:FilterHost,fields:Record<string,NormalizedField>,field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult{
     void details;if(empty(value)||operator==="between"&&(!Array.isArray(value)||value.length<2||value.some(empty)))return clearExternalFilter(host,details);
-    const target=externalFilterTargetFor(fields[field]);if(!target)return{sent:false,reason:"field has no Power BI filter target"};
+    const metadata=fields[field];const target=externalFilterTargetFor(metadata);if(!target)return{sent:false,reason:metadata?.origin==="calculated-field"?"calculated field has no direct Power BI model filter target":"field has no Power BI filter target"};
     let filter:powerbi.IFilter|undefined;
     if(operator==="="||operator==="in"||operator==="!="){
         const values=(Array.isArray(value)?value:[value]).filter(item=>!empty(item)).map(primitive);

@@ -1,4 +1,5 @@
 import { GeocoderConfig, GeocoderProvider, GeocoderSearchResult } from "../providerTypes";
+import { providerFetch, ProviderRequestError } from "../providerRequest";
 
 const DEFAULT_ENDPOINT = "https://nominatim.openstreetmap.org/search";
 let lastInteractiveRequestAt = 0;
@@ -18,7 +19,7 @@ async function waitForInteractiveSlot(signal?: AbortSignal): Promise<void> {
     const remaining = Math.max(0, 1000 - (Date.now() - lastInteractiveRequestAt));
     if (remaining > 0) {
         await new Promise<void>((resolve, reject) => {
-            const timer = setTimeout(resolve, remaining);
+            const done=()=>{signal?.removeEventListener("abort",abort);resolve();};const timer = setTimeout(done, remaining);
             const abort = () => { clearTimeout(timer); reject(new DOMException("The operation was aborted.", "AbortError")); };
             if (signal?.aborted) abort();
             else signal?.addEventListener("abort", abort, { once: true });
@@ -35,10 +36,9 @@ async function request(query: string, config: GeocoderConfig, signal?: AbortSign
     url.searchParams.set("q", query);
     url.searchParams.set("format", "jsonv2");
     url.searchParams.set("limit", String(resultLimit(config)));
-    const response = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error(`Geocoder HTTP ${response.status}`);
-    const body = await response.json() as Array<{ lat?: string; lon?: string; display_name?: string; boundingbox?: unknown }>;
-    return body.slice(0, resultLimit(config)).flatMap(item => {
+    if(config.countryCode?.trim())url.searchParams.set("countrycodes",config.countryCode.trim().toLowerCase());const locale=globalThis.navigator?.language;if(locale)url.searchParams.set("accept-language",locale);const response = await providerFetch(url.toString(), { signal, headers: { Accept: "application/json",...(locale?{"Accept-Language":locale}:{}) } });
+    let body:unknown;try{body=await response.json();}catch{throw new ProviderRequestError("INVALID_RESPONSE","The geocoder returned invalid JSON.");}if(!Array.isArray(body))throw new ProviderRequestError("INVALID_RESPONSE","The geocoder returned an unexpected response.");
+    return (body as Array<{ lat?: string; lon?: string; display_name?: string; boundingbox?: unknown }>).slice(0, resultLimit(config)).flatMap(item => {
         const latitude = Number(item.lat);
         const longitude = Number(item.lon);
         if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return [];

@@ -48,6 +48,8 @@ export interface MapSearchDefinition {
     zoom?: number;
     showResultMarker?: boolean;
     clearMarkerOnClose?: boolean;
+    /** Apply the first result automatically; defaults to true. */
+    autoSelectFirst?: boolean;
 }
 
 export interface MapLegendDefinition {
