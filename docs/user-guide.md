@@ -23,7 +23,7 @@ HyperPBI never sends the prompt itself. Review selected fields and privacy mode 
 
 Describe the goal, audience, supported decisions, primary entity, application type, layout, important KPIs, sections/filters, device priority, interaction expectations, and complexity. Choose whether maps, tables, charts, controls, calculations, or detail panels are required.
 
-The permanent **Inspector** tab works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested components without firing runtime interactions; Escape exits inspection. Inspector edits are validated before commit, use bounded undo/redo transactions, and support add, sibling insertion, move, duplicate, and reference-aware deletion.
+The permanent **Inspector** tab works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested or generated runtime components without firing runtime interactions; Escape exits inspection. The searchable hierarchy supports keyboard navigation. Wide layouts show resizable Tree and Properties panes; narrow layouts expose accessible Tree/Properties pane tabs while retaining selection. Inspector edits are complete-dashboard validated transactions with bounded undo/redo and support add child, insert before/after, move up/down/to another compatible container, recursive duplicate, and reference-aware deletion.
 
 Selected-section redesign and add-section jobs return a discriminated `hyperpbi-change` package. Studio validates and previews the entire resulting dashboard first, shows a mutation summary, and requires an explicit **Apply change** action.
 
@@ -33,7 +33,7 @@ Studio uses this setup to choose relevant prompt modules; it does not add unimpl
 
 Use the shown aliases in new 2.0 authoring. The manifest also explains canonical key, display/source names, data type, semantic role, true measure versus summarized model column, default aggregation, and external selection/filter eligibility.
 
-If a latitude/longitude field is summarized in the Power BI query, change it to **Don't summarize**.
+Prefer the dedicated **Map Latitude**, **Map Longitude**, **Map Geometry**, and **Map Address** roles. A coordinate's current visual-query aggregation is reported separately from its semantic-model default; change the visual query to **Don't summarize** when row-level coordinates were summarized.
 
 ### Prompt jobs
 
@@ -53,7 +53,7 @@ Use the JSON path and component ID in each diagnostic. Applied automatic repairs
 
 ## Visual Inspector
 
-Select a rendered component to locate it by stable ID. The inspector edits canonical JSON for that component in the context of the whole specification. Validate the complete dashboard after every edit; preserve the ID when the component's role remains.
+Select a rendered component to locate its stable authoring owner and exact JSON path. Field controls use the component's effective logical-dataset schema, dataset controls list valid datasets, component controls list compatible IDs, and structured fragments retain parse/validation errors inline. Preserve the ID when the component's role remains. A failed candidate keeps the current valid dashboard and the uncommitted local draft.
 
 ## Application shell
 
@@ -79,7 +79,7 @@ Power BI external filter mode requires a model-column target. Dataset metrics, d
 
 ## Maps
 
-Bind Geometry or Latitude+Longitude (preferred), X+Y, or Address. Location precedence is Geometry → Lat/Lon → X/Y → Address. Address search is user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment.
+Bind Geometry or Latitude+Longitude (preferred), X+Y, or Address. Location precedence is Geometry → Lat/Lon → X/Y → Address, with valid explicit layer overrides ahead of roles and conservative fallback. Diagnostics report incomplete pairs, nonnumeric values, out-of-range values, valid locations, and query aggregation. One valid point centers at a bounded detail zoom; multiple points fit their bounds. Address search is user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment.
 
 Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
 

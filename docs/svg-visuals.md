@@ -30,7 +30,7 @@ Unknown element types or properties are errors.
 A value is a literal string/number/Boolean/null or an object using:
 
 - `bind`: current-row field, `$index`, or `$count`
-- `template`: `{{field}}`, `{{row.field}}`, or `{{state.key}}`
+- `template`: direct `{{fieldAlias}}` and row namespaces `{{row.fieldAlias}}`, `{{item.fieldAlias}}`, or `{{datum.fieldAlias}}`; supported aggregation namespaces such as `{{sum.fieldAlias}}` are field-bearing, while `metric`, `state`, `selected`, configuration, and runtime namespaces are preserved rather than rewritten
 - `scale`: `linear|threshold|ordinal`, domain array or `auto`, range, optional clamp
 - `map`: string-keyed value map with fallback
 - `when`/`then`/`else`: field condition using the standard filter operators

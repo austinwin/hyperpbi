@@ -1,6 +1,6 @@
 # HyperPBI data model
 
-HyperPBI receives one normalized Power BI data view, optionally applies root calculations at render time, and evaluates named in-memory logical datasets. Preparation-time dataset schemas are resolved from bound/static fields before root calculated fields are applied, so new 2.0 dataset pipelines should create fields with dataset `derive`. HyperPBI never queries SQL, joins arbitrary sources, downloads a dataset, or executes user code.
+HyperPBI receives one normalized Power BI data view, augments its static schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current data view has zero rows. Root scalar metrics remain separate from row fields. HyperPBI never queries SQL, joins arbitrary sources, downloads a dataset, or executes user code.
 
 ## Base `powerbi` dataset
 

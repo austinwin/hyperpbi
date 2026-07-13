@@ -9,8 +9,8 @@ HyperPBI does not call an AI service. Studio builds a prompt from the current Fi
 - HyperPBI **2.0** is the default contract for new authoring: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
 - HyperPBI **1.0** remains supported for existing dashboards. Normalized runtime keys and legacy component forms are compatibility inputs, not the recommended 2.0 authoring style.
 <!-- component-summary:start -->
-+- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
-+<!-- component-summary:end -->
+- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+<!-- component-summary:end -->
 - Power BI visual package version `1.0.0.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
 ## Core workflow
@@ -23,7 +23,7 @@ HyperPBI does not call an AI service. Studio builds a prompt from the current Fi
 6. Validate and preview. If invalid, use the structured diagnostics and repair prompt.
 7. Save and return to the report.
 
-The Visual Inspector can select a rendered component, locate its canonical JSON, edit that fragment, validate the complete specification, and preserve stable IDs. Invalid input never replaces the last valid saved dashboard.
+The permanent Visual Inspector can select a rendered component, locate its canonical authoring JSON (including generated runtime ownership), edit that fragment, and preserve stable IDs. It provides searchable keyboard navigation, dataset-aware controls, descriptor-validated add/insert/move/duplicate/delete operations, responsive Tree/Properties panes, and bounded transaction undo/redo. Every candidate is prepared and validated as a complete dashboard; invalid input remains a local draft and never replaces the last valid specification.
 
 ## HyperPBI 2.0 authoring model
 
@@ -92,9 +92,9 @@ Reusable root `definitions` deep-merge objects, replace arrays, remove definitio
 
 Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, gauge, heatmap, combo, waterfall, sankey, treemap, funnel, radar, and small multiples. Their ECharts `options` can alter safe presentation but cannot replace generated datasets, axes, series types/counts, links, nodes, encodings, or transforms. `advancedChart` is the sanitized JSON-only escape hatch for implemented ECharts configurations that a semantic chart cannot express.
 
-`table` is the supported native detail table. `matrix` provides grouped row/column summaries. Tabulator is not bundled; `engine: "tabulator"` is normalized only for compatibility.
+`table` is the supported native detail table. `matrix` renders every declared value metric across optional column groups, with per-metric formatting, totals, heatmaps, accessible headers, source-row interactions, deterministic row limits, and a visible cell-budget warning. Its shared aggregation policy requires numeric fields for numeric operations while `count` may omit a field. Tabulator is not bundled; `engine: "tabulator"` is normalized only for compatibility.
 
-`map` supports Power BI geometry/coordinate bindings and practical public ArcGIS feature, tile, and basic dynamic sources. External requests need a Maps package whose WebAccess privilege and runtime host policy allow the HTTPS host. See [map services](docs/map-services.md).
+`map` supports dedicated Map Latitude, Map Longitude, Map Geometry, and Map Address roles (while retaining Values for general fields), explicit layer overrides, conservative semantic/name fallback, and practical public ArcGIS feature, tile, and basic dynamic sources. Invalid coordinate counts and current visual-query aggregation are diagnosed separately from semantic-model defaults. One valid point uses a bounded point zoom; multiple points use bounds. External requests need a Maps package whose WebAccess privilege and runtime host policy allow the HTTPS host. See [map services](docs/map-services.md).
 
 `svg` is the preferred governed vector system for diagrams, schematics, pictorial marks, and custom gauges. It uses structured allowlisted elements, bindings, scales, conditions, state, bounded repeats, normal interactions, ID isolation, animation presets, and reduced-motion handling. `svgMarkup` is a strictly sanitized fallback for a single raw SVG document. See [SVG visuals](docs/svg-visuals.md).
 
@@ -112,7 +112,7 @@ HyperPBI has three separate declarative systems:
 
 ## Studio, prompts, and repair
 
-Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification; add-section returns a section package with an insertion target; redesign returns one replacement using the selected stable ID. Normal improvements and repairs return complete JSON, not JSON Patch.
+Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification. Add-section returns a strict change package for before, after, a descriptor-compatible nested `containerPath`, or a root `components|toolbar|leftPanel|rightPanel` destination; redesign returns one replacement using the selected stable ID. Studio validates and previews the complete resulting dashboard, shows the mutation summary and warnings, and waits for explicit Apply. Normal improvements and repairs return complete JSON, not JSON Patch.
 
 Prompt composition includes only relevant component modules, Field Manifest data under the chosen privacy mode, recommended patterns, applicable datasets/maps/tables/charts/SVG guidance, current JSON for improvement, selected ID for redesign, and structured diagnostics for repair.
 
@@ -196,7 +196,7 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 
 - Version 1.0 remains intentionally lenient and supports legacy normalized keys and migrations documented in [migration/versioning](docs/migration-versioning.md).
 - Logical datasets are in-memory transformations of the current Power BI data view: no joins, SQL, arbitrary JavaScript, or network sources.
-- Strict preparation resolves component/dataset field scopes before root calculated fields are applied at render time; use dataset `derive`/`metrics` for new 2.0 field pipelines. Root metrics remain available through metric-grid metric references/templates.
+- Root calculated-field metadata is added before logical-dataset schema propagation, so calculated fields can drive components and dataset stages even with zero rows. Root scalar metrics remain a separate namespace consumed through metric-grid metric references/templates.
 - External filter mode targets model columns only; model measures and dataset outputs are not direct Power BI filter targets.
 - External identity selection depends on Power BI identities and retained lineage.
 - Core has no external provider access. Maps access depends on WebAccess approval and host policy.

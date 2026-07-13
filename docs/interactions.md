@@ -86,7 +86,7 @@ Runtime Config `crossFilter: false` is a global gate; it does not redefine compo
 
 ## 3. Safe event-specific interactions
 
-`interactions` is primarily used by custom content to map a supported event to an allowlisted payload:
+`interactions` is primarily used by custom content to map a supported event to one allowlisted payload or an allowed action array:
 
 - `selectRow`, `selectWhere`, `clearSelection`
 - `setFilter`, `clearFilter`
@@ -94,7 +94,7 @@ Runtime Config `crossFilter: false` is a global gate; it does not redefine compo
 - `openTab`, `toggleCollapse`
 - `drillToDetail`, `highlight`, `clearHighlight`
 
-`selectWhere` uses safe expression objects and may read a known clicked-row field via `valueFromRow`. The resolver converts supported data actions into the universal engine, so internal/external policies and diagnostics remain consistent.
+Nested declarative action payloads, `where` expressions, and `valueFromRow` occurrences use the same canonical field traversal as preparation, validation, Inspector controls, repair diagnostics, and dependency reporting. `selectWhere` uses safe expression objects and may read a known clicked-row field via `valueFromRow`. The resolver converts supported data actions into the universal engine, so internal/external policies and diagnostics remain consistent.
 
 No JavaScript callback, handler string, arbitrary dispatch name, URL navigation, or DOM script is accepted.
 
@@ -104,4 +104,4 @@ Components validate fields against their selected logical dataset. Internal row 
 
 ## Compatibility
 
-Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `crossFilter`, or `powerBISelection` in dashboard JSON.
+Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. Obsolete `selectionTarget` is ignored with one documented migration warning; it does not select nodes or edges. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.

@@ -17,6 +17,10 @@ The three behavior systems are independent: `uiAction` changes interface state; 
 
 External filtering requires a field whose metadata identifies a real model column (`sourceTable` and `sourceColumn`). True measures, dataset-derived fields, and dataset metrics cannot directly filter the Power BI model. Exact identity selection can still use source-row lineage when available.
 
+## Maturity governance
+
+Maturity is explicit per canonical descriptor and independent of authoring complexity. Stable means the descriptor records renderer, strict schema, applicable field traversal, Inspector controls, valid example, responsive and empty-state behavior, accessibility guidance, focused tests, and documentation evidence. Beta is implemented but misses one or more stable requirements. Experimental is intentionally unstable and advanced. Legacy remains loadable for compatibility but is excluded from new authoring. Deprecated is accepted only through documented migration or warning. AI includes beta only for explicit/advanced authoring and experimental only when explicitly requested.
+
 ## Application patterns
 
 Patterns are 2.0 authoring constructs expanded before strict component validation. Generated child IDs are deterministic derivatives of the pattern ID.

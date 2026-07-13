@@ -4,7 +4,7 @@ HyperPBI's `map` component combines bound Power BI locations with optional publi
 
 ## Power BI binding and precedence
 
-Bindings can be supplied per Power BI role or overridden in a layer's `source.bindings`. A valid override wins; otherwise the first field bound to the corresponding role is used. Latitude/longitude also fall back to fields normalized as latitude/longitude types.
+Bindings can be supplied by the dedicated Power BI roles **Map Latitude**, **Map Longitude**, **Map Geometry**, and **Map Address**, while **Values** remains available for general fields. A valid layer `source.bindings` override wins; otherwise the dedicated role wins, followed by a normalized semantic type and a conservative exact-name fallback.
 
 Location mode precedence is exact:
 
@@ -14,7 +14,7 @@ Location mode precedence is exact:
 4. Address
 5. None
 
-Geometry is parsed from supported GeoJSON/WKT-like input by the geometry parser. Latitude/longitude and X/Y must be finite and within ±90/±180; coordinate pairs render points. A non-point Map Type on coordinate pairs warns and still renders a point—bind Geometry for lines/polygons.
+Geometry is parsed from supported GeoJSON/WKT-like input by the geometry parser. Latitude/longitude and X/Y must be actual finite numbers (numeric strings are invalid) and within ±90/±180; coordinate pairs render points. Diagnostics separately count valid locations, incomplete pairs, nonnumeric values, and out-of-range values, and include layer/field/query metadata. A non-point Map Type on coordinate pairs warns and still renders a point—bind Geometry for lines/polygons.
 
 Address combines address, city, state, and ZIP. Normalization never sends address data automatically. It uses a cached geocode if one exists; otherwise the row remains unresolved until a user-triggered geocoder action.
 
@@ -24,7 +24,7 @@ Power BI roles also supply layer, type, color, size, tooltip, and detail fields.
 
 HyperPBI does not guess latitude/longitude from arbitrary numeric fields. Use explicit Map Latitude/Longitude roles or verified overrides. Center order is `[latitude, longitude]`.
 
-The Field Manifest distinguishes a summarized query wrapper from a true model measure. If latitude/longitude has `isImplicitAggregation` and a query aggregation, the map warns to set the Power BI field to **Don't summarize**. Average/sum coordinates collapse rows and can create incorrect locations even though the underlying origin is a model column.
+The Field Manifest distinguishes a summarized visual-query wrapper from a true model measure and records the model default separately. A coordinate bound through a dedicated map role is not warned merely because the model default aggregation exists. When the current HyperPBI visual query actually summarizes a coordinate, the diagnostic names that current aggregation and advises changing this visual's query to **Don't summarize**; it does not claim the semantic model must be changed. Coordinates supplied only through **Values** receive a role-specific authoring warning. Average/sum coordinates can collapse rows and create incorrect locations even when the origin is a model column.
 
 ## Declarative map model
 
@@ -38,7 +38,7 @@ The Field Manifest distinguishes a summarized query wrapper from a true model me
 - toolbar
 - height and normal interaction
 
-Fit modes are `data`, `allVisibleLayers`, `firstLayer`, and `none`.
+Fit modes are `data`, `allVisibleLayers`, `firstLayer`, and `none`. A single valid point uses `setView` at a detail zoom bounded by `minZoom`/`maxZoom`; multiple points use padded `fitBounds`.
 
 Basemap types are `none`, `osm`, `customTile`, and `arcgisTile`. OSM/custom/ArcGIS tiles require Maps WebAccess and runtime provider/host policy; Core uses no external tiles.
 

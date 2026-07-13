@@ -142,7 +142,7 @@ Unknown patterns and missing required values produce structured diagnostics.
 
 Root `calculations.fields` defines typed row-level outputs with `key`, optional `label`, `type: number|text|boolean|date`, and a safe expression. Root `calculations.metrics` defines dashboard aggregates using `count`, `countWhere`, `sum`, `sumWhere`, `avg`, `avgWhere`, `min`, `max`, `distinctCount`, `ratio`, or `percentOfTotal`.
 
-At runtime, root calculated fields are applied before render-time logical dataset evaluation; root metrics are recomputed over currently filtered rows. However, strict preparation builds field/dataset schemas before those calculated fields are applied. New 2.0 component/dataset bindings should therefore use dataset `derive`/`metrics`; root metrics are consumed through `metricGrid.metrics[].metric` or the `metric` template namespace. See [Calculations DSL](calculations-dsl.md).
+Preparation validates root calculated fields and augments the static `powerbi` schema before logical-dataset propagation and component binding validation. At runtime those fields are evaluated before logical datasets, so they can drive dataset select/derive/group/metrics and components even when the current data view has zero rows. Root scalar metrics are recomputed over currently filtered rows and remain a separate namespace consumed through `metricGrid.metrics[].metric` or the `metric` template namespace. See [Calculations DSL](calculations-dsl.md).
 
 ## Shared component contract
 
@@ -213,13 +213,13 @@ Safe ECharts `options` may adjust presentation. Functions, URL-bearing keys, exe
 
 `table` accepts native columns, pagination, page size, search, column resizing, maximum rows, sticky header, compact/normal density, stripes, hover, row count, page-size choices, row actions, and an empty state. Columns can specify field/title/width/format/alignment, conditions, sorting, resizing, visibility, wrapping, freezing, text/badge/progress cell type, and intent mapping.
 
-`matrix` requires nonempty `rows` and `values`; it supports optional columns, totals, heatmap, and max rows. `engine: "tabulator"` is compatibility input normalized to native because Tabulator is not bundled.
+`matrix` requires nonempty `rows` and `values` and renders every value descriptor. Each value may define `field`, `aggregation`, `where`, `title`, and `format`; metric titles fall back deterministically when omitted. `count`/`countWhere` can omit a field, while numeric aggregations require a numeric field and `countWhere`/`sumWhere`/`avgWhere` require `where`. With `columns`, output headers are column group × metric. Totals and heatmap normalization are per metric. `maxRows` is deterministic, and the runtime enforces a 5,000-cell budget with a visible truncation warning. Row/column headers use table scopes and data-cell labels include their row, column, and metric context. `engine: "tabulator"` is compatibility input normalized to native because Tabulator is not bundled.
 
 ## Maps
 
 `map` uses Leaflet and accepts view, basemap, layers, search, legend, layer panel, toolbar, and height. Layer source types are `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`. Public ArcGIS requests require HTTPS, a permitted Maps package host, and no embedded credentials.
 
-Power BI geometry/location binding, joins, feature queries, tile layers, basic dynamic images, safe renderers/labels/popups/tooltips, layer controls, legend, search, Home, Clear Selection, and Zoom to Selection are implemented within the limits in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
+Power BI geometry/location binding uses explicit layer overrides, dedicated Map roles, semantic types, then conservative exact names. Geometry overrides coordinates; latitude/longitude are strict finite numbers in range. Joins, feature queries, tile layers, basic dynamic images, safe renderers/labels/popups/tooltips, layer controls, legend, search, Home, Clear Selection, and Zoom to Selection are implemented within the limits in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
 
 ## SVG
 

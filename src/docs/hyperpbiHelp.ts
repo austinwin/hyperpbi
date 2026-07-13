@@ -7,7 +7,7 @@ export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
 HyperPBI compiles declarative JSON into a Power BI dashboard. Use **version 2.0 for new authoring**. Existing version 1.0 specifications remain supported as compatibility input.
 
-Canonical component descriptors own schema, field, Inspector, maturity, documentation, and example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; service and joined map fields remain separate. The permanent Inspector validates transactional edits and supports preview selection. AI section jobs use strict change packages with preview-before-apply. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile and geocoder access are independent, and the geocoder defaults to none.
+Canonical component descriptors own schema, field traversal, Inspector controls/containers, maturity, documentation, and valid example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; direct/row/item/datum templates resolve through the shared field engine while metric, state, selected, runtime, ArcGIS service, and joined namespaces remain separate. The permanent responsive Inspector validates transactions, supports preview selection and generated-owner mapping, and retains invalid complex drafts without replacing the last valid dashboard. AI section jobs use strict descriptor-compatible change packages with full-result preview-before-apply. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile, geocoder, and sanitized-origin ArcGIS service access are independent, and the geocoder defaults to none.
 
 ## Studio workflow
 
@@ -44,6 +44,10 @@ These systems are independent and optional. External filtering needs a real mode
 Prefer declarative \`svg\` for governed diagrams, pictorial marks, schematics, and custom gauges. It supports bindings, scales, conditions, state, bounded repeats, allowlisted animations, normal interactions, ID isolation, and reduced motion. Use \`svgMarkup\` only when structured SVG cannot express the design; raw markup is strictly sanitized and cannot load resources or inject path data.
 
 Maps support Power BI geometry/coordinates plus public HTTPS ArcGIS feature, tile, and basic dynamic sources. External services, tiles, and geocoding require a Maps package and its WebAccess host policy. Never place tokens or credentials in dashboard JSON.
+
+Prefer dedicated Map Latitude, Map Longitude, Map Geometry, and Map Address roles; Values remains available for other fields. Explicit layer bindings win, then dedicated roles, semantic types, and conservative exact names. Coordinate diagnostics distinguish incomplete pairs, nonnumeric/out-of-range values, and current visual-query aggregation from the model default. One point uses a bounded detail zoom and multiple points fit bounds. Search is user-triggered; one result is applied automatically. Public Nominatim requires deliberate expert configuration and is not a production-reliability guarantee.
+
+The native matrix renders every declared value metric, including column-group × metric headers, per-metric formatting/totals/heatmaps, accessible labels, source-row interactions, deterministic row limits, and a visible 5,000-cell budget. Numeric aggregation requirements come from the same operation policy used by calculation, dataset, schema, Inspector, and field-reference validation.
 
 ## Security boundaries
 
@@ -111,6 +115,8 @@ Use the canonical component catalog included with the prompt. It contains ${comp
 
 Prefer first-class components over custom markup: \`card\` over a simulated card, \`listGroup\` over a hand-built list, \`dataGrid\`/\`detailPanel\` over manual detail HTML, semantic charts over \`advancedChart\`, and \`svg\` over \`svgMarkup\`.
 
+For new authoring, exclude legacy and deprecated types. Include experimental types only when explicitly requested and beta types only when explicitly requested or advanced authoring is selected. Existing dashboards may continue loading non-stable types. Stable requires renderer, strict schema, applicable field metadata, Inspector metadata, valid example, responsive/empty-state behavior, accessibility guidance, focused tests, and documentation evidence.
+
 Shared 2.0 properties include \`type\`, \`id\`, \`dataset\`, \`title\`, \`subtitle\`, \`span\`, \`className\`, \`hidden\`, \`props\`, \`style\`, \`css\`, \`slots\`, \`data\`, \`visibility\`, \`interactions\`, \`interaction\`, \`ariaLabel\`, \`icon\`, \`variant\`, \`size\`, \`disabled\`, \`tooltip\`, and \`uiAction\`. An interaction object is not required on every component.
 
 ## Application shell and overlays
@@ -118,6 +124,10 @@ Shared 2.0 properties include \`type\`, \`id\`, \`dataset\`, \`title\`, \`subtit
 Configure the application shell at root \`app\`, never \`schema.app\`. It can define brand, navbar, sidebar, page header, footer, density, container, and layout. Use a permanent shell only when the visual size supports it; prefer \`offcanvas\` for narrow layouts.
 
 Overlay components require unique IDs. Target existing IDs with \`openOverlay\`, \`closeOverlay\`, or \`toggleOverlay\`. Use dropdown for commands, popover for contextual content, offcanvas for details/filters, and modal for focused blocking work.
+
+## Targeted change packages
+
+Use \`kind: "hyperpbi-change"\` and only the properties permitted by the operation. \`replace\` requires a matching \`targetId\` and \`component.id\`; \`insertBefore\` and \`insertAfter\` target a component in an ordered array; \`appendChild\` requires a descriptor-compatible relative \`containerPath\` such as \`children\`, \`footer\`, \`tabs/1/content\`, or \`items/0/children\`; \`appendRoot\` uses exactly \`components\`, \`toolbar\`, \`leftPanel\`, or \`rightPanel\`; \`remove\` carries only \`targetId\`. Never use absolute or parent paths. Preview and validate the complete resulting dashboard first, then wait for explicit Apply change.
 
 ## Three interaction systems
 
@@ -137,7 +147,7 @@ Use \`svgMarkup\` only when structured SVG is insufficient. It is a sanitized si
 
 ## Maps
 
-Prefer Power BI geometry, latitude/longitude, X/Y, or address bindings. Map center order is \`[latitude, longitude]\`. External sources are public HTTPS \`arcgisFeature\`, \`arcgisTile\`, or basic \`arcgisDynamic\` services subject to the installed Maps package and host allowlist. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, editing, 3D, relationships, tracing, or non-4326 output.
+Prefer dedicated Power BI Map Geometry, Map Latitude/Longitude, or Map Address roles, then X/Y or explicit bindings. Map center order is \`[latitude, longitude]\`. Values remains available for other map attributes but should not be the primary coordinate role. External sources are public HTTPS \`arcgisFeature\`, \`arcgisTile\`, or basic \`arcgisDynamic\` services subject to the installed Maps package and host allowlist. Geocoding defaults to none, is user-triggered, and public Nominatim is limited. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, editing, 3D, relationships, tracing, or non-4326 output.
 
 ## Repair behavior
 

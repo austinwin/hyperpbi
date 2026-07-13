@@ -28,6 +28,8 @@ Existing 1.0 dashboards can continue using canonical normalized runtime keys and
 - legacy map `settings`, `style`, and `popup`
 - deprecated component `internal`, `external`, `selectable`, and table `selectionMode`
 
+Legacy `selectionTarget` is not a 2.0 contract property and does not control runtime selection. A 1.0 dashboard containing it receives exactly: `Property selectionTarget is obsolete and ignored only for HyperPBI 1.0 compatibility.` Migrate the behavior to universal `interaction` and then remove the property.
+
 These references should be labeled compatibility/history. They are not the primary 2.0 examples.
 
 ## Preparation behavior

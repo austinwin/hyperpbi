@@ -13,9 +13,7 @@
       "https://nominatim.openstreetmap.org",
       "https://geocode-api.arcgis.com",
       "https://*.arcgis.com",
-      "https://*.arcgisonline.com",
-      "https://*.houstontx.gov",
-      "https://example.com"
+      "https://*.arcgisonline.com"
     ]
   }
 }

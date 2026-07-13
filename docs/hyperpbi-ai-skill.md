@@ -61,6 +61,8 @@ Use the canonical component catalog included with the prompt. It contains 84 typ
 
 Prefer first-class components over custom markup: `card` over a simulated card, `listGroup` over a hand-built list, `dataGrid`/`detailPanel` over manual detail HTML, semantic charts over `advancedChart`, and `svg` over `svgMarkup`.
 
+For new authoring, exclude legacy and deprecated types. Include experimental types only when explicitly requested and beta types only when explicitly requested or advanced authoring is selected. Existing dashboards may continue loading non-stable types. Stable requires renderer, strict schema, applicable field metadata, Inspector metadata, valid example, responsive/empty-state behavior, accessibility guidance, focused tests, and documentation evidence.
+
 Shared 2.0 properties include `type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, and `uiAction`. An interaction object is not required on every component.
 
 ## Application shell and overlays
@@ -68,6 +70,10 @@ Shared 2.0 properties include `type`, `id`, `dataset`, `title`, `subtitle`, `spa
 Configure the application shell at root `app`, never `schema.app`. It can define brand, navbar, sidebar, page header, footer, density, container, and layout. Use a permanent shell only when the visual size supports it; prefer `offcanvas` for narrow layouts.
 
 Overlay components require unique IDs. Target existing IDs with `openOverlay`, `closeOverlay`, or `toggleOverlay`. Use dropdown for commands, popover for contextual content, offcanvas for details/filters, and modal for focused blocking work.
+
+## Targeted change packages
+
+Use `kind: "hyperpbi-change"` and only the properties permitted by the operation. `replace` requires a matching `targetId` and `component.id`; `insertBefore` and `insertAfter` target a component in an ordered array; `appendChild` requires a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/content`, or `items/0/children`; `appendRoot` uses exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`; `remove` carries only `targetId`. Never use absolute or parent paths. Preview and validate the complete resulting dashboard first, then wait for explicit Apply change.
 
 ## Three interaction systems
 
@@ -87,7 +93,7 @@ Use `svgMarkup` only when structured SVG is insufficient. It is a sanitized sing
 
 ## Maps
 
-Prefer Power BI geometry, latitude/longitude, X/Y, or address bindings. Map center order is `[latitude, longitude]`. External sources are public HTTPS `arcgisFeature`, `arcgisTile`, or basic `arcgisDynamic` services subject to the installed Maps package and host allowlist. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, editing, 3D, relationships, tracing, or non-4326 output.
+Prefer dedicated Power BI Map Geometry, Map Latitude/Longitude, or Map Address roles, then X/Y or explicit bindings. Map center order is `[latitude, longitude]`. Values remains available for other map attributes but should not be the primary coordinate role. External sources are public HTTPS `arcgisFeature`, `arcgisTile`, or basic `arcgisDynamic` services subject to the installed Maps package and host allowlist. Geocoding defaults to none, is user-triggered, and public Nominatim is limited. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, editing, 3D, relationships, tracing, or non-4326 output.
 
 ## Repair behavior
 
