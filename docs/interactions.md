@@ -1,5 +1,7 @@
 # Interactions
 
+Root calculated fields can participate in internal filtering/highlighting and retain contributing source-row lineage for identity selection. They cannot directly become Power BI model filters; the exact runtime reason is `calculated field has no direct Power BI model filter target`.
+
 HyperPBI has three independent declarative systems. A component may use none, one, or more of them; an interaction object is not required on every component.
 
 ## 1. UI actions

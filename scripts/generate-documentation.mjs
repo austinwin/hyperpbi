@@ -46,16 +46,16 @@ function loadTypeScriptModule(file) {
     return module.exports;
 }
 
-const definitionsModule = loadTypeScriptModule("src/catalog/componentDefinitions.ts");
-const docsModule = loadTypeScriptModule("src/catalog/componentDocumentation.ts");
+const descriptorsModule = loadTypeScriptModule("src/catalog/componentDescriptors.ts");
 const examplesModule = loadTypeScriptModule("src/catalog/componentJsonExamples.ts");
 const patternsModule = loadTypeScriptModule("src/schema/patternRegistry.ts");
 const validationModule = loadTypeScriptModule("src/schema/validateV2Schema.ts");
 const helpModule = loadTypeScriptModule("src/docs/hyperpbiHelp.ts");
 
-const definitions = definitionsModule.componentDefinitions;
-const docs = docsModule.componentDocs;
-const examples = examplesModule.componentJsonExamples;
+const descriptors = descriptorsModule.componentDescriptors;
+const definitions = descriptors.map(item => ({...item,level:item.complexity}));
+const docs = Object.fromEntries(descriptors.map(item => [item.type,{status:item.maturity,keyProperties:item.schema.allowed.filter(property=>!["type","id"].includes(property)),accessibility:item.documentation.accessibility?.join(" "),compatibility:item.documentation.compatibility?.join(" "),related:item.documentation.relatedTypes,supportsUiAction:item.schema.allowed.includes("uiAction"),supportsDataInteraction:item.capabilities.interactions}]));
+const examples = Object.fromEntries(descriptors.map(item => [item.type,item.example]));
 const patterns = patternsModule.patternRegistry;
 const commonProperties = validationModule.v2CommonComponentProperties;
 const propertiesByType = validationModule.v2ComponentPropertiesByType;
@@ -89,7 +89,7 @@ function markdownCatalog() {
         "<!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->",
         "# HyperPBI component catalog reference",
         "",
-        `HyperPBI currently defines **${definitions.length} component types across ${categories.length} categories**. This file is generated from \`componentDefinitions.ts\`, \`componentDocumentation.ts\`, \`componentJsonExamples.ts\`, \`patternRegistry.ts\`, and the strict 2.0 validator metadata.`,
+        `HyperPBI currently defines **${definitions.length} component types across ${categories.length} categories**. This file is generated from the canonical explicit \`componentDescriptors.ts\` registry and \`patternRegistry.ts\`; compatibility catalogs and strict 2.0 validator maps are derived from those descriptors.`,
         "",
         "For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).",
         "",

@@ -7,6 +7,8 @@ export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
 HyperPBI compiles declarative JSON into a Power BI dashboard. Use **version 2.0 for new authoring**. Existing version 1.0 specifications remain supported as compatibility input.
 
+Canonical component descriptors own schema, field, Inspector, maturity, documentation, and example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; service and joined map fields remain separate. The permanent Inspector validates transactional edits and supports preview selection. AI section jobs use strict change packages with preview-before-apply. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile and geocoder access are independent, and the geocoder defaults to none.
+
 ## Studio workflow
 
 1. Review the Field Manifest and dashboard setup.

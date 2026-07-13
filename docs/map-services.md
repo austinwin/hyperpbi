@@ -92,6 +92,8 @@ Implemented controls include layer visibility/order/opacity/labels, legend, sear
 
 ## Search and geocoder policy
 
+The default geocoder is `none` and disabled. Tile and geocoder WebAccess decisions are independent, so denial or disablement of one does not disable the other. Public OSMF Nominatim requires deliberate expert configuration, keeps autocomplete disabled, and is not a production-reliability guarantee. A single search result is applied automatically; multiple results apply the first unless `autoSelectFirst` is false. Clear resets the query, results, status, selection, and marker.
+
 Providers are Runtime Config, not dashboard credentials. Geocoding requires:
 
 - a Maps build

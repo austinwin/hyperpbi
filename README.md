@@ -186,7 +186,9 @@ npm run package:verify
 
 ## Documentation maintenance
 
-Canonical component inventory lives in `src/catalog/componentDefinitions.ts`; documentation metadata in `src/catalog/componentDocumentation.ts`; examples in `src/catalog/componentJsonExamples.ts`; strict required/allowed properties in `src/schema/validateV2Schema.ts`; and patterns in `src/schema/patternRegistry.ts`. When adding or changing a component, update every applicable canonical source and `src/render/ComponentRegistry.tsx`, then run `npm run docs:generate` and commit all generated outputs. Do not hand-edit the generated catalogs or checked-in AI skill.
+Canonical component inventory lives in `src/catalog/componentDescriptors.ts`. Each explicit descriptor owns maturity, authoring complexity, schema properties, field traversal handlers, Inspector controls, documentation, renderer mode, child containers, and a valid example. Compatibility catalogs, strict validator maps, prompts, and generated documentation derive from that registry. Update the descriptor and renderer together, then run `npm run docs:generate`; do not hand-edit generated catalogs.
+
+HyperPBI 2.0 authoring should use Field Manifest aliases, including documented nested table, detail, template, SVG, interaction, dataset, and Power BI-backed map positions. Runtime keys remain compatibility inputs. ArcGIS service fields and joined aliases are separate namespaces and are never treated as Power BI aliases.
 
 Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.ts`; SVG constants from `src/components/svg/svgTypes.ts`; AI contract composition from `src/ai/promptComposer.ts`; and the canonical embedded/check-in skill from `HYPERPBI_SKILL_MARKDOWN` in `src/docs/hyperpbiHelp.ts`.
 

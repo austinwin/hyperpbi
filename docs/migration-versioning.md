@@ -53,3 +53,6 @@ An intentional 1.0 → 2.0 migration should:
 7. validate the complete migrated specification and manually compare interactions/output
 
 Never infer a field mapping or business aggregation merely to satisfy strict validation.
+# Version and maturity distinctions
+
+Dashboard schema version (`1.0` or `2.0`), PBIVIZ package version, and product naming are separate. Studio reports the authored schema and preview/save state independently. Component maturity is also separate from authoring complexity: stable meets the complete renderer/schema/fields/Inspector/example/responsive/empty/accessibility/test/documentation bar; beta is implemented but misses part of that bar; experimental is intentionally unstable; legacy is compatibility-only; deprecated is migration/warning-only.

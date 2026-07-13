@@ -23,6 +23,10 @@ HyperPBI never sends the prompt itself. Review selected fields and privacy mode 
 
 Describe the goal, audience, supported decisions, primary entity, application type, layout, important KPIs, sections/filters, device priority, interaction expectations, and complexity. Choose whether maps, tables, charts, controls, calculations, or detail panels are required.
 
+The permanent **Inspector** tab works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested components without firing runtime interactions; Escape exits inspection. Inspector edits are validated before commit, use bounded undo/redo transactions, and support add, sibling insertion, move, duplicate, and reference-aware deletion.
+
+Selected-section redesign and add-section jobs return a discriminated `hyperpbi-change` package. Studio validates and previews the entire resulting dashboard first, shows a mutation summary, and requires an explicit **Apply change** action.
+
 Studio uses this setup to choose relevant prompt modules; it does not add unimplemented features.
 
 ### Field Manifest
@@ -58,6 +62,10 @@ Configure the shell at root `app`, not `schema.app`. It can provide brand, navba
 ## Components and catalogs
 
 Use the generated [component catalog](hyperpbi-component-catalog-reference.md) for canonical types and properties. Prefer semantic charts, native table/matrix, first-class cards/lists/detail/overlays, `map`, and declarative `svg` before advanced/custom fallbacks.
+
+Maturity is assigned explicitly in each canonical descriptor. **Stable** requires a renderer, strict schema, applicable field metadata, Inspector metadata, a valid example, responsive and empty-state behavior, accessibility guidance, and focused tests. **Beta** is implemented but is missing at least one stable requirement. **Experimental** is intentionally unstable and advanced. **Legacy** remains loadable for compatibility but is not recommended for new authoring. **Deprecated** is accepted only through documented migration or warning.
+
+AI prompts exclude legacy and deprecated components. They include experimental components only when explicitly requested, and beta components only for explicit or advanced authoring. Existing dashboards may continue loading non-stable components.
 
 ## Interactions
 

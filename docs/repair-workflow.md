@@ -1,5 +1,7 @@
 # Repair workflow
 
+Failed targeted AI mutations preserve the prior dashboard. Repair material includes the discriminated change package, operation, target, and full resulting-dashboard diagnostics. A package is previewed only after strict operation validation and is applied only through the explicit Apply change action.
+
 Repair is diagnostic-driven and conservative. HyperPBI never replaces the last valid saved dashboard with invalid input.
 
 ## Workflow

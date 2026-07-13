@@ -130,3 +130,6 @@ It will not:
 The repair prompt includes structured diagnostics, warnings, a types-only Field Manifest, relevant affected IDs, registered patterns, the invalid JSON/fragment, and a version-preservation rule. The response must be one complete corrected object and must preserve valid unrelated content.
 
 See [Repair workflow](repair-workflow.md), [ChatGPT guideline](chatgpt-guideline.md), and the generated [AI skill](hyperpbi-ai-skill.md).
+# Targeted change packages
+
+`redesign-section` requires a selected stable component ID and returns `operation: "replace"`. `add-section` requires an insertion target and uses `insertBefore`, `insertAfter`, or `appendChild`. Packages use `kind: "hyperpbi-change"` and are never merged by concatenating root arrays. Studio previews and validates the full candidate before the author explicitly applies it.

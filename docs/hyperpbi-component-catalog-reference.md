@@ -1,7 +1,7 @@
 <!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->
 # HyperPBI component catalog reference
 
-HyperPBI currently defines **84 component types across 12 categories**. This file is generated from `componentDefinitions.ts`, `componentDocumentation.ts`, `componentJsonExamples.ts`, `patternRegistry.ts`, and the strict 2.0 validator metadata.
+HyperPBI currently defines **84 component types across 12 categories**. This file is generated from the canonical explicit `componentDescriptors.ts` registry and `patternRegistry.ts`; compatibility catalogs and strict 2.0 validator maps are derived from those descriptors.
 
 For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
 
@@ -142,13 +142,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `columns`, `gap`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `flex`, `section`
 
@@ -219,13 +219,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `direction`, `gap`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `grid`, `toolbar`
 
@@ -277,10 +277,7 @@ _9 components_
       "field": "__field_key__",
       "label": "Status",
       "placeholder": "Choose status",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     },
     {
       "type": "searchBox",
@@ -309,10 +306,7 @@ _9 components_
       "field": "__field_key__",
       "label": "Search",
       "placeholder": "Choose search",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     }
   ]
 }
@@ -320,7 +314,7 @@ _9 components_
 
 ### `split` — Split layout
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -328,13 +322,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `direction`, `gap`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `leftPanel`, `rightPanel`
 
@@ -439,13 +433,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `title`, `children`, `collapsible`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `card`, `collapsible`
 
@@ -497,13 +491,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `direction`, `gap`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `flex`
 
@@ -555,10 +549,7 @@ _9 components_
       "field": "__field_key__",
       "label": "Status",
       "placeholder": "Choose status",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     },
     {
       "type": "button",
@@ -585,7 +576,7 @@ _9 components_
 
 ### `leftPanel` — Left panel
 
-**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas or the root app sidebar for new layouts.
+**Status:** beta
 
 **Level:** standard
 
@@ -593,13 +584,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `width`, `collapsible`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Compatibility:** Legacy left-panel rail. Use app.sidebar or an offcanvas component for new dashboards.
 
@@ -653,10 +644,7 @@ _9 components_
       "field": "__field_key__",
       "label": "Category",
       "placeholder": "Choose category",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     },
     {
       "type": "dateRange",
@@ -685,10 +673,7 @@ _9 components_
       "field": "__field_key__",
       "label": "Date range",
       "placeholder": "Choose date range",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     }
   ],
   "width": 280,
@@ -699,7 +684,7 @@ _9 components_
 
 ### `rightPanel` — Right panel
 
-**Status:** compatibility — Supported for legacy dashboards.
+**Status:** beta
 
 **Level:** standard
 
@@ -707,13 +692,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `width`, `collapsible`, `children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Compatibility:** Legacy right-panel rail.
 
@@ -776,7 +761,7 @@ _9 components_
 
 ### `spacer` — Spacer
 
-**Status:** stable
+**Status:** beta
 
 **Level:** advanced
 
@@ -784,15 +769,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** —
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** When a gap property on a parent container is sufficient.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -817,7 +800,7 @@ _9 components_
 
 ### `divider` — Divider
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -825,13 +808,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** —
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -868,13 +851,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `placeholder`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -905,9 +888,6 @@ _12 components_
   "label": "Search records",
   "placeholder": "Search all records…",
   "defaultValue": "",
-  "targets": [
-    "detail_table"
-  ],
   "filter": {
     "operator": "contains",
     "value": ""
@@ -917,7 +897,7 @@ _12 components_
 
 ### `textInput` — Text input
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -925,13 +905,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `placeholder`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -962,9 +942,6 @@ _12 components_
   "label": "Contains text",
   "placeholder": "Enter text…",
   "defaultValue": "",
-  "targets": [
-    "detail_table"
-  ],
   "filter": {
     "operator": "contains",
     "value": ""
@@ -974,7 +951,7 @@ _12 components_
 
 ### `numberInput` — Number input
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -982,13 +959,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `min`, `max`, `step`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1019,9 +996,6 @@ _12 components_
   "label": "Minimum amount",
   "placeholder": "Choose minimum amount",
   "defaultValue": 0,
-  "targets": [
-    "detail_table"
-  ],
   "min": 0,
   "max": 1000000,
   "step": 100,
@@ -1034,7 +1008,7 @@ _12 components_
 
 ### `slider` — Slider
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -1042,13 +1016,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `min`, `max`, `step`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1079,9 +1053,6 @@ _12 components_
   "label": "Minimum score",
   "placeholder": "Choose minimum score",
   "defaultValue": 50,
-  "targets": [
-    "detail_table"
-  ],
   "min": 0,
   "max": 100,
   "step": 5,
@@ -1102,13 +1073,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `options`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Uses native <select> element.
 
@@ -1141,9 +1112,6 @@ _12 components_
   "label": "Status",
   "placeholder": "Choose status",
   "defaultValue": "",
-  "targets": [
-    "detail_table"
-  ],
   "options": [
     {
       "label": "Open",
@@ -1171,13 +1139,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `options`, `multiple`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1208,9 +1176,6 @@ _12 components_
   "label": "Statuses",
   "placeholder": "Choose statuses",
   "defaultValue": [],
-  "targets": [
-    "detail_table"
-  ],
   "multiple": true,
   "options": [
     {
@@ -1231,7 +1196,7 @@ _12 components_
 
 ### `segmentedControl` — Segmented control
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -1239,13 +1204,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `buttonGroup`
 
@@ -1278,9 +1243,6 @@ _12 components_
   "label": "Priority",
   "placeholder": "Choose priority",
   "defaultValue": "",
-  "targets": [
-    "detail_table"
-  ],
   "options": [
     {
       "label": "High",
@@ -1304,7 +1266,7 @@ _12 components_
 
 ### `toggle` — Toggle
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -1312,13 +1274,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `defaultValue`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1349,9 +1311,6 @@ _12 components_
   "label": "Active records only",
   "placeholder": "Choose active records only",
   "defaultValue": false,
-  "targets": [
-    "detail_table"
-  ],
   "filter": {
     "operator": "=",
     "value": true
@@ -1369,7 +1328,7 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `label`, `action`, `actionValue`, `uiAction`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
@@ -1410,7 +1369,7 @@ _12 components_
 
 ### `buttonGroup` — Button group
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -1418,7 +1377,7 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `buttons`, `defaultValue`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
@@ -1470,7 +1429,7 @@ _12 components_
 
 ### `filterChips` — Filter chips
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -1478,13 +1437,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `targets`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1510,16 +1469,13 @@ _12 components_
     "multiSelect": true,
     "showSelector": false,
     "clearOnSecondClick": false
-  },
-  "targets": [
-    "detail_table"
-  ]
+  }
 }
 ```
 
 ### `dateRange` — Date range
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -1527,13 +1483,13 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `defaultValue`, `filter`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -1567,9 +1523,6 @@ _12 components_
     "2026-01-01",
     "2026-12-31"
   ],
-  "targets": [
-    "detail_table"
-  ],
   "filter": {
     "operator": "between",
     "value": [
@@ -1594,7 +1547,7 @@ _7 components_
 
 **Required properties:** `type`, `id`, `tabs`
 
-**Key properties:** `tabs[].id`, `tabs[].title`, `tabs[].children`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `tabs`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `tabs`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
@@ -1685,13 +1638,13 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `children`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `accordion`
 
@@ -1735,7 +1688,7 @@ _7 components_
 
 ### `accordion` — Accordion
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -1743,13 +1696,13 @@ _7 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `items[].id`, `items[].title`, `items[].children`, `multiple`, `defaultOpenItems`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `multiple`, `defaultOpenItems`, `items`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `defaultOpenItems`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `multiple`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Supports arrow-key navigation between headers. Enter/Space toggles. Proper aria-expanded.
 
@@ -1761,96 +1714,42 @@ _7 components_
 {
   "type": "accordion",
   "id": "accordion",
-  "title": "Filter group",
-  "span": 12,
-  "className": "hp-example-accordion",
-  "hidden": false,
-  "style": {
-    "minWidth": 0
-  },
-  "css": ".hp-example-accordion { min-width: 0; }",
+  "title": "Filter groups",
+  "multiple": true,
+  "defaultOpenItems": [
+    "filters"
+  ],
+  "items": [
+    {
+      "id": "filters",
+      "title": "Filters",
+      "children": [
+        {
+          "type": "select",
+          "id": "accordion_status",
+          "title": "Status",
+          "field": "__field_key__",
+          "interaction": {
+            "enabled": true,
+            "trigger": "change",
+            "internalMode": "filter",
+            "externalMode": "auto"
+          }
+        }
+      ]
+    }
+  ],
   "interaction": {
     "enabled": false,
     "internalMode": "none",
     "externalMode": "none"
-  },
-  "direction": "column",
-  "columns": 12,
-  "gap": 8,
-  "children": [
-    {
-      "type": "select",
-      "id": "select",
-      "title": "Category",
-      "span": 4,
-      "className": "hp-example-select",
-      "hidden": false,
-      "style": {
-        "minWidth": 0
-      },
-      "css": ".hp-example-select { min-width: 0; }",
-      "interaction": {
-        "enabled": true,
-        "trigger": "auto",
-        "internalMode": "filter",
-        "internalScope": "all",
-        "externalMode": "auto",
-        "field": "__field_key__",
-        "operator": "=",
-        "selectionMode": "replace",
-        "multiSelect": true,
-        "showSelector": false,
-        "clearOnSecondClick": false
-      },
-      "field": "__field_key__",
-      "label": "Category",
-      "placeholder": "Choose category",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
-    },
-    {
-      "type": "slider",
-      "id": "slider",
-      "title": "Score",
-      "span": 4,
-      "className": "hp-example-slider",
-      "hidden": false,
-      "style": {
-        "minWidth": 0
-      },
-      "css": ".hp-example-slider { min-width: 0; }",
-      "interaction": {
-        "enabled": true,
-        "trigger": "auto",
-        "internalMode": "filter",
-        "internalScope": "all",
-        "externalMode": "auto",
-        "field": "__field_key__",
-        "operator": "=",
-        "selectionMode": "replace",
-        "multiSelect": true,
-        "showSelector": false,
-        "clearOnSecondClick": false
-      },
-      "field": "__field_key__",
-      "label": "Score",
-      "placeholder": "Choose score",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
-    }
-  ],
-  "collapsible": true,
-  "defaultOpen": false
+  }
 }
 ```
 
 ### `drawer` — Drawer / slide-over
 
-**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas for new components.
+**Status:** legacy
 
 **Level:** recommended
 
@@ -1858,13 +1757,13 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `children`, `position`, `width`, `openWhen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Compatibility:** Legacy drawer. Normalized to offcanvas internally. Use offcanvas for new specs.
 
@@ -1933,7 +1832,7 @@ _7 components_
 
 ### `filterDrawer` — Filter drawer
 
-**Status:** compatibility — Supported for legacy dashboards. Prefer offcanvas for new components.
+**Status:** legacy
 
 **Level:** recommended
 
@@ -1941,13 +1840,13 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `children`, `position`, `width`, `openWhen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Compatibility:** Legacy filter drawer. Use offcanvas for new specs.
 
@@ -2004,10 +1903,7 @@ _7 components_
       "field": "__field_key__",
       "label": "Category",
       "placeholder": "Choose category",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     },
     {
       "type": "dateRange",
@@ -2036,10 +1932,7 @@ _7 components_
       "field": "__field_key__",
       "label": "Date range",
       "placeholder": "Choose date range",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     }
   ]
 }
@@ -2047,7 +1940,7 @@ _7 components_
 
 ### `steps` — Steps
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -2055,13 +1948,13 @@ _7 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `items[].id`, `items[].label`, `orientation`, `activeStep`, `stateKey`, `clickable`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `orientation`, `activeStep`, `stateKey`, `clickable`, `items`
 
 **All allowed properties:** `activeStep`, `ariaLabel`, `className`, `clickable`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `orientation`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** Yes.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `tracking`
 
@@ -2108,7 +2001,7 @@ _7 components_
 
 ### `stepper` — Stepper
 
-**Status:** compatibility — Legacy stepper. Prefer steps for new workflows.
+**Status:** legacy
 
 **Level:** advanced
 
@@ -2116,13 +2009,13 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `children`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Compatibility:** Legacy stepper rendered as collapsible section. Use steps for real workflow progression.
 
@@ -2198,13 +2091,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `aggregation`, `format`, `intent`, `prefix`, `suffix`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2240,13 +2133,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `metrics[].title`, `metrics[].field`, `metrics[].aggregation`, `metrics[].format`, `metrics[].intent`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2301,7 +2194,7 @@ _9 components_
 
 ### `infoCard` — Info card
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -2309,13 +2202,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `text`, `intent`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2353,13 +2246,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `intent`, `value`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2396,13 +2289,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `max`, `intent`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2440,13 +2333,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `text`, `intent`, `field`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2476,7 +2369,7 @@ _9 components_
 
 ### `statList` — Stat list
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -2484,13 +2377,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `items[].label`, `items[].field`, `items[].format`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2539,13 +2432,13 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `selectedRow`, `groups`, `items`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -2611,7 +2504,7 @@ _9 components_
 
 ### `timeline` — Timeline / activity feed
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -2619,13 +2512,13 @@ _9 components_
 
 **Required properties:** `type`, `id`, `dateField`, `titleField`
 
-**Key properties:** `dateField`, `titleField`, `categoryField`, `limit`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `dateField`, `titleField`, `categoryField`, `statusField`, `descriptionField`, `sortDirection`, `limit`
 
 **All allowed properties:** `ariaLabel`, `categoryField`, `className`, `css`, `data`, `dataset`, `dateField`, `descriptionField`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `limit`, `props`, `size`, `slots`, `sortDirection`, `span`, `statusField`, `style`, `subtitle`, `title`, `titleField`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -2674,15 +2567,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `header`, `children`, `footer`, `padding`, `status`, `collapsible`, `actions`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `padding`, `header`, `actions`, `footer`, `status`
 
 **All allowed properties:** `actions`, `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `header`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `padding`, `props`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** When a simple section is sufficient.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `section`, `collapsible`
 
@@ -2759,15 +2650,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `icon`
 
-**Key properties:** `icon`, `size`, `ariaLabel`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** When you need a clickable action — use iconButton instead.
+**Data interaction:** No. **UI action:** Yes.
 
 **Accessibility:** Use ariaLabel when the icon is the only visible content.
 
@@ -2804,13 +2693,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `icon`, `ariaLabel`
 
-**Key properties:** `icon`, `ariaLabel`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** Yes.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** ariaLabel is required. Tooltips provide additional context.
 
@@ -2846,7 +2735,7 @@ _13 components_
 
 ### `avatar` — Avatar
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -2854,15 +2743,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `initials`, `label`, `size`, `shape`, `status`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `initials`, `label`, `shape`, `status`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `initials`, `interaction`, `interactions`, `label`, `props`, `shape`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** Remote avatar URLs are not supported. Use initials only.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2891,7 +2778,7 @@ _13 components_
 
 ### `avatarGroup` — Avatar group
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -2899,13 +2786,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `avatars`
 
-**Key properties:** `avatars`, `max`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `avatars`, `max`
 
 **All allowed properties:** `ariaLabel`, `avatars`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `max`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -2980,15 +2867,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `source`, `primaryField`, `secondaryField`, `badgeField`, `items`, `maxItems`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `primaryField`, `secondaryField`, `badgeField`, `valueField`, `maxItems`, `compact`
 
 **All allowed properties:** `ariaLabel`, `badgeField`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `maxItems`, `primaryField`, `props`, `secondaryField`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** For a simple plain list without data binding.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `dataGrid`
 
@@ -3034,15 +2919,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `items`, `selectedRow`, `columns`, `source`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `columns`, `selectedRow`
 
 **All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `props`, `selectedRow`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** For analytical pivot-style comparison — use matrix instead.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `listGroup`, `detailPanel`
 
@@ -3087,7 +2970,7 @@ _13 components_
 
 ### `countUp` — Count-up
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3095,15 +2978,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `aggregation`, `value`, `prefix`, `suffix`, `duration`, `format`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `value`, `prefix`, `suffix`, `duration`, `format`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `duration`, `field`, `format`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `prefix`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `suffix`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** For static display without animation — use kpi instead.
+**Data interaction:** No. **UI action:** Yes.
 
 **Accessibility:** Respects prefers-reduced-motion. Animation disabled under reduced motion.
 
@@ -3135,7 +3016,7 @@ _13 components_
 
 ### `tracking` — Tracking
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3143,13 +3024,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `stages`
 
-**Key properties:** `stages`, `activeStage`, `stageField`, `orientation`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `stages`, `activeStage`, `stageField`, `orientation`, `compact`
 
 **All allowed properties:** `activeStage`, `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `orientation`, `props`, `size`, `slots`, `span`, `stageField`, `stages`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Related:** `steps`
 
@@ -3195,7 +3076,7 @@ _13 components_
 
 ### `dropdown` — Dropdown
 
-**Status:** stable — Root-hosted menu with collision-aware positioning and shared navbar integration.
+**Status:** beta
 
 **Level:** recommended
 
@@ -3203,15 +3084,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `id`, `trigger`, `items`, `placement`, `closeOnSelect`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `trigger`, `items`, `placement`, `closeOnSelect`
 
 **All allowed properties:** `ariaLabel`, `className`, `closeOnSelect`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `placement`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
 **Data interaction:** Yes. **UI action:** Yes.
-
-**Do not use when:** The content is informational or contains form controls; use popover instead.
 
 **Accessibility:** Menu roles, roving arrow-key focus, Home/End, nested-menu keys, Escape/Tab dismissal, and trigger focus restoration are supported.
 
@@ -3265,7 +3144,7 @@ _13 components_
 
 ### `modal` — Modal
 
-**Status:** stable — Root-hosted blocking dialog with stacking, document-level dismissal, and focus containment.
+**Status:** beta
 
 **Level:** recommended
 
@@ -3273,15 +3152,13 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `id`, `title`, `children`, `footer`, `size`, `backdropClose`, `ariaLabel`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `backdropClose`, `footer`
 
 **All allowed properties:** `ariaLabel`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** Yes.
-
-**Do not use when:** The task does not need to block the dashboard; prefer popover or offcanvas.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Initial focus, focus trap, Escape close, labelled dialog semantics, and trigger focus restoration are supported.
 
@@ -3363,7 +3240,7 @@ _13 components_
 
 ### `offcanvas` — Offcanvas
 
-**Status:** stable — Root-hosted responsive side panel shared by legacy drawer components.
+**Status:** beta
 
 **Level:** recommended
 
@@ -3371,7 +3248,7 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `id`, `title`, `children`, `position`, `width`, `openWhen`, `stateKey`, `backdrop`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`, `backdrop`, `backdropClose`
 
 **All allowed properties:** `ariaLabel`, `backdrop`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
@@ -3432,10 +3309,7 @@ _13 components_
       "field": "__field_key__",
       "label": "Category",
       "placeholder": "Choose category",
-      "defaultValue": "",
-      "targets": [
-        "detail_table"
-      ]
+      "defaultValue": ""
     }
   ]
 }
@@ -3443,7 +3317,7 @@ _13 components_
 
 ### `popover` — Popover
 
-**Status:** stable — Root-hosted rich contextual dialog with nested HyperPBI components.
+**Status:** beta
 
 **Level:** standard
 
@@ -3451,15 +3325,13 @@ _13 components_
 
 **Required properties:** `type`, `id`, `trigger`, `children`
 
-**Key properties:** `id`, `trigger`, `children`, `placement`, `width`, `showArrow`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `trigger`, `placement`, `closeOnOutsideClick`, `closeOnEscape`, `showArrow`
 
 **All allowed properties:** `ariaLabel`, `children`, `className`, `closeOnEscape`, `closeOnOutsideClick`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `placement`, `props`, `showArrow`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
 **Data interaction:** Yes. **UI action:** Yes.
-
-**Do not use when:** A simple command list is sufficient; use dropdown instead.
 
 **Accessibility:** Uses role=dialog, managed focus, Escape/outside dismissal, ARIA trigger relationships, and focus restoration.
 
@@ -3514,7 +3386,7 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `icon`, `title`, `description`, `primaryAction`, `secondaryAction`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `description`, `primaryAction`, `secondaryAction`, `compact`
 
 **All allowed properties:** `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `description`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `primaryAction`, `props`, `secondaryAction`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
@@ -3558,13 +3430,13 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `lines`, `placeholderVariant`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `lines`, `placeholderVariant`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `lines`, `placeholderVariant`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 **Accessibility:** Uses aria-hidden. Respects prefers-reduced-motion.
 
@@ -3600,15 +3472,13 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `label`, `inline`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `label`, `inline`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `inline`, `interaction`, `interactions`, `label`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** When you need a skeleton layout — use placeholder instead.
+**Data interaction:** No. **UI action:** Yes.
 
 **Accessibility:** Uses role=status with accessible label.
 
@@ -3640,7 +3510,7 @@ _5 components_
 
 ### `textarea` — Text area
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3648,13 +3518,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `rows`, `maxLength`, `placeholder`, `label`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Associated label via generated ID.
 
@@ -3687,9 +3557,6 @@ _5 components_
   "label": "Notes",
   "placeholder": "Enter notes...",
   "defaultValue": "",
-  "targets": [
-    "detail_table"
-  ],
   "rows": 4,
   "maxLength": 500
 }
@@ -3697,7 +3564,7 @@ _5 components_
 
 ### `checkbox` — Checkbox
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3705,13 +3572,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `label`, `defaultValue`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -3746,7 +3613,7 @@ _5 components_
 
 ### `checkboxGroup` — Checkbox group
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3754,13 +3621,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `label`, `options`, `multiple`, `defaultValue`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -3806,7 +3673,7 @@ _5 components_
 
 ### `radioGroup` — Radio group
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3814,13 +3681,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `label`, `options`, `defaultValue`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -3869,7 +3736,7 @@ _5 components_
 
 ### `inputGroup` — Input group
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -3877,15 +3744,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `field`, `prefixIcon`, `prefixText`, `suffixIcon`, `suffixText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
 
 **All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** Arbitrary HTML prefix/suffix content — only icon and safe text are supported.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -3933,13 +3798,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4024,13 +3889,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4116,13 +3981,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4199,13 +4064,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4277,7 +4142,7 @@ _16 components_
 
 ### `pieChart` — Pie chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4285,15 +4150,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** With more than 8-10 categories.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4365,7 +4228,7 @@ _16 components_
 
 ### `donutChart` — Donut chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4373,13 +4236,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4451,7 +4314,7 @@ _16 components_
 
 ### `scatterChart` — Scatter chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4459,13 +4322,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `x`, `y`
 
-**Key properties:** `x`, `y`, `pointSize`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4529,7 +4392,7 @@ _16 components_
 
 ### `gauge` — Gauge
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4537,13 +4400,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `measure`
 
-**Key properties:** `measure`, `aggregation`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -4600,7 +4463,7 @@ _16 components_
 
 ### `heatmap` — Heatmap
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4608,13 +4471,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4696,7 +4559,7 @@ _16 components_
 
 ### `comboChart` — Combo chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -4704,13 +4567,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `series`
 
-**Key properties:** `category`, `series`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `series`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `series`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Each series/category point maps back to its source rows.
 
@@ -4776,7 +4639,7 @@ _16 components_
 
 ### `waterfallChart` — Waterfall chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -4784,15 +4647,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `showStart`, `showEnd`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `showStart`, `showEnd`, `positiveIntent`, `negativeIntent`, `totalIntent`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `negativeIntent`, `options`, `pointSize`, `positiveIntent`, `props`, `setOption`, `showEnd`, `showStart`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `totalIntent`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** A simple category comparison is sufficient; use barChart.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -4831,7 +4692,7 @@ _16 components_
 
 ### `sankeyChart` — Sankey chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4839,13 +4700,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `sourceField`, `targetField`
 
-**Key properties:** `sourceField`, `targetField`, `valueField`, `aggregation`, `orientation`, `selectionTarget`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sourceField`, `targetField`, `valueField`, `orientation`, `nodeAlign`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `nodeAlign`, `options`, `orientation`, `pointSize`, `props`, `selectionTarget`, `setOption`, `size`, `slots`, `sourceField`, `span`, `style`, `subtitle`, `targetField`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `nodeAlign`, `options`, `orientation`, `pointSize`, `props`, `setOption`, `size`, `slots`, `sourceField`, `span`, `style`, `subtitle`, `targetField`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Node and edge clicks retain distinct row bindings; accompany dense flows with a table when exact values matter.
 
@@ -4878,14 +4739,13 @@ _16 components_
   "aggregation": "sum",
   "orientation": "horizontal",
   "nodeAlign": "justify",
-  "selectionTarget": "both",
   "height": 380
 }
 ```
 
 ### `treemapChart` — Treemap chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4893,13 +4753,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `pathFields`, `valueField`
 
-**Key properties:** `pathFields`, `valueField`, `aggregation`, `maxDepth`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `pathFields`, `valueField`, `labelField`, `maxDepth`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `labelField`, `maxDataRows`, `maxDepth`, `measure`, `options`, `pathFields`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Every hierarchy node maps to the contributing source rows.
 
@@ -4941,7 +4801,7 @@ _16 components_
 
 ### `funnelChart` — Funnel chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** standard
 
@@ -4949,13 +4809,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `category`, `measure`, `aggregation`, `sort`, `gap`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sort`, `gap`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `gap`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `sort`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Labels include stage values and percentages.
 
@@ -4993,7 +4853,7 @@ _16 components_
 
 ### `radarChart` — Radar chart
 
-**Status:** stable
+**Status:** beta
 
 **Level:** advanced
 
@@ -5001,15 +4861,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `indicators`
 
-**Key properties:** `groupField`, `indicators`, `height`, `options`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `groupField`, `indicators`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `groupField`, `height`, `hidden`, `icon`, `id`, `indicators`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** Exact cross-group comparisons are more important than profile shape; use comboChart or a table.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -5058,7 +4916,7 @@ _16 components_
 
 ### `smallMultiples` — Small multiples
 
-**Status:** stable
+**Status:** beta
 
 **Level:** recommended
 
@@ -5066,13 +4924,13 @@ _16 components_
 
 **Required properties:** `type`, `id`, `splitField`, `chart`
 
-**Key properties:** `splitField`, `chart`, `maxPanels`, `sharedScale`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `splitField`, `chart`, `maxPanels`, `sharedScale`, `height`
 
 **All allowed properties:** `ariaLabel`, `chart`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxPanels`, `props`, `sharedScale`, `size`, `slots`, `span`, `splitField`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 ```json
 {
@@ -5173,13 +5031,13 @@ _2 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `columns`, `pagination`, `pageSize`, `search`, `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`, `stickyHeader`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `columns`, `pagination`, `pageSize`, `search`, `resizableColumns`, `maxRows`, `stickyHeader`, `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`
 
 **All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `density`, `disabled`, `emptyState`, `engine`, `hidden`, `hover`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `pageSize`, `pageSizeOptions`, `pagination`, `props`, `resizableColumns`, `rowActions`, `search`, `showRowCount`, `size`, `slots`, `span`, `stickyHeader`, `striped`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Row actions use safe UiAction. Column resizing prevents row selection while active.
 
@@ -5262,15 +5120,13 @@ _2 components_
 
 **Required properties:** `type`, `id`, `rows`, `values`
 
-**Key properties:** `rows`, `columns`, `values`, `showTotals`, `heatmap`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `rows`, `columns`, `values`, `showTotals`, `heatmap`, `maxRows`
 
 **All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `heatmap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `props`, `rows`, `showTotals`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `values`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** For row-level detail — use table instead.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Related:** `table`
 
@@ -5329,7 +5185,7 @@ _1 components_
 
 ### `map` — Map
 
-**Status:** stable — Power BI spatial maps and the practical public ArcGIS REST runtime are connected. Supported ArcGIS sources are feature layers, tile overlays, and basic dynamic MapServer images; secured services, editing, 3D, non-4326 output, advanced label collision, and density grids are outside scope.
+**Status:** beta
 
 **Level:** recommended
 
@@ -5337,15 +5193,13 @@ _1 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `view`, `basemap`, `layers`, `layerPanel`, `toolbar`, `settings`, `style`, `popup`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `search`, `legend`, `layerPanel`, `toolbar`, `settings`, `height`
 
 **All allowed properties:** `ariaLabel`, `basemap`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerPanel`, `layers`, `legend`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** When spatial location data is not available in the semantic model.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Compatibility:** Legacy settings/style/popup fully supported. Normalized to layers[] internally.
 
@@ -5484,15 +5338,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `text`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** For structured content — use markdown or first-class components instead.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -5525,13 +5377,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `text`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
+**Data interaction:** No. **UI action:** Yes.
 
 ```json
 {
@@ -5556,7 +5408,7 @@ _5 components_
 
 ### `html` — Sanitized HTML
 
-**Status:** stable
+**Status:** beta
 
 **Level:** advanced
 
@@ -5564,15 +5416,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `html`, `slots`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `repeat`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML Yes.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** When a first-class component (card, listGroup, dataGrid) can achieve the same result.
+**Data interaction:** No. **UI action:** Yes.
 
 **Accessibility:** HTML is sanitized with DOMPurify. No scripts, iframes, or event handlers allowed.
 
@@ -5603,7 +5453,7 @@ _5 components_
 
 ### `custom` — Custom HTML/CSS
 
-**Status:** stable
+**Status:** beta
 
 **Level:** advanced
 
@@ -5611,15 +5461,13 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `html`, `repeat`, `slots`, `interactions`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `text`, `repeat`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML Yes.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** When a first-class component can achieve the same result with less custom code.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** Custom HTML is sanitized. Repeat rows support keyboard interaction.
 
@@ -5694,15 +5542,13 @@ _5 components_
 
 **Required properties:** `type`, `id`, `viewBox`, `elements`
 
-**Key properties:** `viewBox`, `elements`, `dataContext`, `motion`, `performance`, `css`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `elements`, `dataContext`, `motion`, `performance`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
 **Data interaction:** Yes. **UI action:** Yes.
-
-**Do not use when:** A standard analytical chart is available; use ECharts chart components for bars, lines, pies, scatterplots, heatmaps, Sankey, and treemaps.
 
 **Accessibility:** ariaLabel is recommended. Interactive marks are keyboard focusable and respond to Enter and Space. Motion respects the configured reduced-motion policy.
 
@@ -5822,7 +5668,7 @@ _2 components_
 
 ### `svgMarkup` — Sanitized SVG markup
 
-**Status:** stable — Advanced escape hatch. Markup is parsed by the dedicated SVG sanitizer, isolated, and sanitized again before rendering.
+**Status:** beta
 
 **Level:** advanced
 
@@ -5830,15 +5676,13 @@ _2 components_
 
 **Required properties:** `type`, `id`, `svg`
 
-**Key properties:** `svg`, `viewBox`, `ariaLabel`, `description`, `css`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `dataContext`, `motion`, `performance`
 
 **All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
-**Data interaction:** No. **UI action:** No.
-
-**Do not use when:** Declarative SVG can express the visual. Raw SVG cannot use scripts, events, foreignObject, external assets, use, image, style elements, or arbitrary URLs.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** The component wrapper supplies accessible image semantics; include title/desc content in the SVG where useful.
 
@@ -5871,7 +5715,7 @@ _2 components_
 
 ### `advancedChart` — Advanced ECharts
 
-**Status:** stable
+**Status:** experimental
 
 **Level:** advanced
 
@@ -5879,15 +5723,13 @@ _2 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `options`, `category`, `measure`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
 
 **All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
-**Data interaction:** Yes. **UI action:** No.
-
-**Do not use when:** A first-class semantic chart supports the request. Use advancedChart only for configurations the semantic schema cannot express.
+**Data interaction:** Yes. **UI action:** Yes.
 
 **Accessibility:** ECharts options are recursively sanitized. JavaScript functions, event handlers, executable markup, and external URLs are blocked.
 

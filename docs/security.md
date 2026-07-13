@@ -63,6 +63,8 @@ ArcGIS URLs must be HTTPS, contain no embedded username/password, and match the 
 
 Core has no WebAccess. Maps packages add optional WebAccess for broad or restricted hosts. Power BI host denial still disables external providers.
 
+Basemap tiles, geocoding, and ArcGIS feature/tile/dynamic services use independent effective access decisions. ArcGIS services are authorized by sanitized HTTPS origin and never inherit the configured basemap provider's tile permission. Credential-bearing URLs are rejected, and provider diagnostics do not echo tokens or query strings.
+
 Geocoding is user-triggered, has no autocomplete, requires privacy acknowledgment, and is rate-limited/cached according to provider configuration. Dashboard JSON must not contain service credentials.
 
 ## Data boundaries

@@ -59,7 +59,7 @@ Division by zero returns null and records a warning. Modulo by zero returns null
 
 Keys are required, use lowercase letters/numbers/underscore, start with a letter, and cannot collide with base fields or another calculated field. References may target base or calculated fields. Dependency cycles and unknown references are errors. Declared types are `number`, `text`, `boolean`, and `date`.
 
-Current 2.0 preparation resolves component and logical-dataset fields against the bound/static dataset schemas before root calculated fields are applied at render time. A root calculated-field key is therefore not a Field Manifest alias and is not added to the preparation-time `powerbi` dataset schema. Do not use root calculated fields as new 2.0 component/dataset bindings; use dataset `derive` for that authoring contract. Root calculated fields remain an implemented runtime/compatibility surface.
+Version 2.0 preparation validates root calculated fields first and augments the static `powerbi` schema with `origin: "calculated-field"` metadata before resolving logical datasets and component bindings. Calculated fields can therefore drive components, dataset select/derive/group/metrics, sorting, templates, and internal interactions even with zero rows. They retain source-row lineage for identity selection but have no direct Power BI model-column filter target. Root scalar metrics remain separate and are available only through metric references and metric templates.
 
 ## Root calculated metrics
 

@@ -1,5 +1,7 @@
 # HyperPBI specification reference
 
+HyperPBI 2.0 uses Field Manifest aliases as its recommended authoring contract; canonical runtime keys are internal compatibility inputs. Alias resolution covers descriptor-declared nested structures, while ArcGIS service fields and joined map aliases remain unchanged. Component maturity (`stable`, `beta`, `experimental`, `legacy`, `deprecated`) describes implementation governance and is separate from authoring complexity (`recommended`, `standard`, `advanced`).
+
 This reference describes the implemented HyperPBI 2.0 authoring contract and the intentionally preserved HyperPBI 1.0 compatibility path. Runtime implementation and validators are authoritative.
 
 ## Root object and version behavior
