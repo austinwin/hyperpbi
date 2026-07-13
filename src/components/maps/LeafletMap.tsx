@@ -3,7 +3,7 @@ import "leaflet.markercluster";
 import { useEffect, useRef, useMemo } from "preact/hooks";
 import { MapComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
-import { resolveProviderPolicy } from "../../providers/providerPolicy";
+import { externalServiceAccess, resolveProviderPolicy } from "../../providers/providerPolicy";
 import { executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
@@ -385,6 +385,8 @@ export function LeafletMap({
                     continue;
                 }
                 try {
+                    const access = externalServiceAccess(context.providerAccess, layer.tile.url, webAccessAvailable);
+                    if (!access.allowed) throw new Error(access.reason ?? "ArcGIS tile service access is unavailable.");
                     const policy = checkHostPolicy(layer.tile.url);
                     if (!policy.allowed) throw new Error(policy.reason ?? "Tile host is blocked.");
                     const tileUrl = buildArcGisTileUrl(layer.tile.url);
@@ -411,6 +413,8 @@ export function LeafletMap({
                     if (!map.hasLayer(existingDynamic)) existingDynamic.addTo(map);
                 } else {
                     try {
+                        const access = externalServiceAccess(context.providerAccess, layer.dynamic.url, webAccessAvailable);
+                        if (!access.allowed) throw new Error(access.reason ?? "ArcGIS dynamic service access is unavailable.");
                         const dynamicLayer = createArcGisDynamicLayer({
                             url: layer.dynamic.url,
                             layerIds: layer.dynamic.layerIds,
@@ -638,6 +642,7 @@ export function LeafletMap({
         context.state.mapSelectedFeatureIds[id],
         context.state.mapLayerState[id],
         runtimeConfig.providers,
+        context.providerAccess,
         webAccessAvailable,
         rendererDomains,
     ]);

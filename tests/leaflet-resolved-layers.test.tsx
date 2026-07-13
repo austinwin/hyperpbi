@@ -114,6 +114,7 @@ vi.mock("leaflet", () => ({
 vi.mock("leaflet.markercluster", () => ({}));
 vi.mock("../src/providers/providerPolicy", () => ({
     resolveProviderPolicy: () => ({ externalAvailable: true, certificationSafe: false, tilesAllowed: true, geocoderAllowed: false, warnings: [] }),
+    externalServiceAccess: () => ({ allowed: true }),
 }));
 vi.mock("../src/maps/arcgis/arcGisDynamicLayer", () => ({
     createArcGisDynamicLayer: mocks.createDynamic,

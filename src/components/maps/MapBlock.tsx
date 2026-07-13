@@ -22,6 +22,7 @@ import type { ResolvedMapLayer, ResolvedMapFeature, MapJoinDiagnostics } from ".
 import type { MapLayerDefinition, ArcGisFeatureLayerSource, ArcGisTileLayerSource, ArcGisDynamicLayerSource } from "../../schema/mapSchema";
 import { resolvedFeatureValue } from "../../maps/model/mapFeatureValue";
 import type { MapToolbarPopover as MapToolbarPopoverState } from "../../render/stateStore";
+import { externalServiceAccess } from "../../providers/providerPolicy";
 
 export interface MapViewportState {
     bounds: [number, number, number, number];
@@ -72,7 +73,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const { data, sourceRows, settings, config } = context;
     const id = component.id ?? "map";
     const rows = context.getRowsForComponent(id);
-    const webAccessAvailable = context.providerAccess?.tiles.allowed??context.webAccessAvailable;
+    const serviceAccess = useCallback((endpoint: string) =>
+        externalServiceAccess(context.providerAccess, endpoint, context.webAccessAvailable),
+    [context.providerAccess, context.webAccessAvailable]);
 
     // ── Source row identity mapping ──────────────────────────────────
     const sourceIndexMap = useMemo(
@@ -227,7 +230,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
         });
 
         try {
-            const layer = webAccessAvailable
+            const source = definition.source as ArcGisFeatureLayerSource;
+            const access = serviceAccess(source.url);
+            const layer = access.allowed
                 ? await resolveArcGisFeatureLayer(
                     definition,
                     sourceContext,
@@ -236,7 +241,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                         ? viewportRef.current
                         : null
                 )
-                : createCorePackageErrorShell(definition);
+                : createArcGisErrorShell(definition, access.reason ?? "ArcGIS service access is unavailable.");
 
             if (controller.signal.aborted ||
                 requestVersionsRef.current.get(definition.id) !== requestVersion) return;
@@ -287,7 +292,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
             }
         }
         void reason;
-    }, [sourceContext, webAccessAvailable]);
+    }, [sourceContext, serviceAccess]);
 
     // Initial/data path: resolve every feature definition, independent of viewport changes.
     useEffect(() => {

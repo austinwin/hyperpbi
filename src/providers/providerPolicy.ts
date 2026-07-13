@@ -12,6 +12,29 @@ export interface ProviderPolicy {
     warnings: string[];
 }
 
+export function providerServiceOrigin(endpoint: string): string | undefined {
+    try {
+        const url = new URL(endpoint);
+        if (url.protocol !== "https:" || url.username || url.password) return undefined;
+        return url.origin.toLowerCase();
+    } catch {
+        return undefined;
+    }
+}
+
+export function externalServiceAccess(
+    access: ProviderAccessState | undefined,
+    endpoint: string,
+    legacyWebAccess = false
+): { allowed: boolean; reason?: string } {
+    const origin = providerServiceOrigin(endpoint);
+    if (!origin) return { allowed: false, reason: "The external service endpoint must be credential-free HTTPS." };
+    const explicit = access?.services?.[origin];
+    if (explicit) return explicit;
+    if (access?.services) return { allowed: false, reason: `Power BI WebAccess has not approved external service origin ${origin}.` };
+    return { allowed: legacyWebAccess, reason: legacyWebAccess ? undefined : "External service WebAccess is unavailable or denied by the Power BI host." };
+}
+
 export function geocoderUnavailableReason(
     config: ProviderConfiguration | undefined,
     access: boolean|ProviderAccessState = EXTERNAL_PROVIDERS_AVAILABLE,
@@ -28,20 +51,21 @@ export function geocoderUnavailableReason(
 
 export function resolveProviderPolicy(
     config: ProviderConfiguration | undefined,
-    access: boolean|ProviderAccessState = EXTERNAL_PROVIDERS_AVAILABLE
+    access: boolean|ProviderAccessState = EXTERNAL_PROVIDERS_AVAILABLE,
+    externalProvidersAvailable=EXTERNAL_PROVIDERS_AVAILABLE
 ): ProviderPolicy {
-    const tileAccess=typeof access==="boolean"?access:access.tiles.allowed;const geocoderAccess=typeof access==="boolean"?access:access.geocoder.allowed;const packageAvailable=EXTERNAL_PROVIDERS_AVAILABLE&&config?.mode!=="core";const externalAvailable=packageAvailable&&(tileAccess||geocoderAccess);
+    const tileAccess=typeof access==="boolean"?access:access.tiles.allowed;const geocoderAccess=typeof access==="boolean"?access:access.geocoder.allowed;const packageAvailable=externalProvidersAvailable&&config?.mode!=="core";const externalAvailable=packageAvailable&&(tileAccess||geocoderAccess);
     const tiles = Boolean(config?.basemap?.enabled && config.basemap.provider !== "none");
     const geocoder = Boolean(config?.geocoder?.enabled && config.geocoder.provider !== "none");
     const warnings: string[] = [];
     if ((tiles&&!tileAccess || geocoder&&!geocoderAccess) || (tiles||geocoder)&&!packageAvailable) {
-        warnings.push(!EXTERNAL_PROVIDERS_AVAILABLE || config?.mode === "core"
+        warnings.push(!externalProvidersAvailable || config?.mode === "core"
             ? "External providers are unavailable in the core package. Use the maps package or disable providers."
             : "WebAccess is unavailable or denied by the Power BI host; external providers are disabled.");
     }
     if (geocoder && !config?.privacyAcknowledged) warnings.push("Acknowledge the address-data privacy warning before geocoding.");
     if(geocoder&&config?.geocoder?.provider==="nominatim"&&/^https:\/\/nominatim\.openstreetmap\.org(?:\/|$)/i.test(config.geocoder.endpoint??""))warnings.push("Public OSMF Nominatim is deliberately configured; it is rate-limited and is not a production-reliability guarantee. Autocomplete remains disabled.");
-    const geocoderReason = geocoderUnavailableReason(config, access, EXTERNAL_PROVIDERS_AVAILABLE);const tilesReason=!packageAvailable?"Core package does not include external providers.":!tiles?"The basemap provider is disabled.":!tileAccess?(typeof access==="boolean"?"WebAccess is unavailable or denied by the Power BI host.":access.tiles.reason??"Tile WebAccess is unavailable or denied by the Power BI host."):undefined;
+    const geocoderReason = geocoderUnavailableReason(config, access, externalProvidersAvailable);const tilesReason=!packageAvailable?"Core package does not include external providers.":!tiles?"The basemap provider is disabled.":!tileAccess?(typeof access==="boolean"?"WebAccess is unavailable or denied by the Power BI host.":access.tiles.reason??"Tile WebAccess is unavailable or denied by the Power BI host."):undefined;
     return {
         externalAvailable,
         certificationSafe: !tiles && !geocoder,

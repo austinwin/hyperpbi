@@ -8,7 +8,7 @@ import { useRenderContext } from "../../render/RenderContext";
 import { providerErrorMessage } from "../../providers/providerRequest";
 
 function safeSearchError(error: unknown): string {
-    const message=providerErrorMessage(error);return message||"Location search failed. Check the configured provider and try again.";
+    const message=providerErrorMessage(error);return `Location search failed: ${message||"check the configured provider and try again."}`;
 }
 
 export function MapSearchPanel({
