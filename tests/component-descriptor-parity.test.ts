@@ -1,0 +1,14 @@
+import {describe,expect,it} from "vitest";
+import {componentDescriptors} from "../src/catalog/componentDescriptors";
+import {componentDefinitions} from "../src/catalog/componentDefinitions";
+import {componentJsonExamples} from "../src/catalog/componentJsonExamples";
+import {renderedComponentTypes} from "../src/render/ComponentRegistry";
+import {validateSchema} from "../src/schema/validateSchema";
+import {v2ComponentPropertiesByType,v2RequiredPropertiesByType} from "../src/schema/validateV2Schema";
+
+describe("canonical component descriptors",()=>{
+    it("owns every derived catalog surface without duplicates",()=>{const types=componentDescriptors.map(item=>item.type);expect(new Set(types).size).toBe(types.length);expect(componentDefinitions.map(item=>item.type)).toEqual(types);expect(Object.keys(componentJsonExamples).sort()).toEqual([...types].sort());expect(Object.keys(v2ComponentPropertiesByType).sort()).toEqual([...types].sort());expect(Object.keys(v2RequiredPropertiesByType).sort()).toEqual([...types].sort());});
+    it("keeps renderer and descriptor registrations in parity",()=>{const described=new Set(componentDescriptors.map(item=>item.type));expect(renderedComponentTypes.filter(type=>!described.has(type))).toEqual([]);for(const descriptor of componentDescriptors){expect(renderedComponentTypes).toContain(descriptor.type);expect(descriptor.rendering).toMatch(/direct|overlay|legacy/);}});
+    it("requires explicit examples, field metadata, and stable inspector metadata",()=>{const invalid:string[]=[];for(const descriptor of componentDescriptors){expect(descriptor.example).toMatchObject({type:descriptor.type});expect(descriptor.schema.allowed).toContain("type");expect(descriptor.schema.required).toEqual(expect.arrayContaining(["type","id"]));if(descriptor.capabilities.fields)expect(descriptor.fields.length,descriptor.type).toBeGreaterThan(0);if(descriptor.maturity==="stable")expect(descriptor.inspector.length,descriptor.type).toBeGreaterThan(0);const validation=validateSchema({version:"2.0",components:[descriptor.example]});if(!validation.valid)invalid.push(`${descriptor.type}: ${JSON.stringify(validation.diagnostics)}`);}expect(invalid).toEqual([]);});
+    it("removes selectionTarget from strict 2.0 but warns for legacy input",()=>{const component={type:"sankeyChart",id:"flow",sourceField:"from",targetField:"to",selectionTarget:"both"};const strict=validateSchema({version:"2.0",components:[component]});expect(strict.valid).toBe(false);expect(strict.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({code:"UNKNOWN_PROPERTY",path:"/components/0/selectionTarget"})]));const legacy=validateSchema({version:"1.0",components:[component]});expect(legacy.valid).toBe(true);expect(legacy.warnings).toEqual(expect.arrayContaining([expect.stringContaining("Version 1.0 leniently accepts unknown property “selectionTarget”")]));});
+});

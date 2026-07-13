@@ -6,7 +6,7 @@ function collect(node: ExpressionNode | undefined, fields: Set<string>, messages
     if ("field" in node) { fields.add(String(node.field)); return; }
     if ("value" in node) return;
     if (!("op" in node) || !operators.has(String(node.op))) messages.push({ level: "error", path, message: `Unknown calculation operator: ${"op" in node ? String(node.op) : "missing"}.` });
-    Object.entries(node).forEach(([key, value]) => { if (key !== "op" && value && typeof value === "object") { if (Array.isArray(value)) value.forEach((item, index) => { if (item && typeof item === "object") Object.values(item as object).forEach(child => collect(child as ExpressionNode, fields, messages, `${path}.${key}[${index}]`)); }); else collect(value as ExpressionNode, fields, messages, `${path}.${key}`); } });
+    Object.entries(node).forEach(([key, value]) => { if (key !== "op" && value && typeof value === "object") { if (Array.isArray(value)) value.forEach((item, index) => { if (item && typeof item === "object") collect(item as ExpressionNode, fields, messages, `${path}.${key}[${index}]`); }); else collect(value as ExpressionNode, fields, messages, `${path}.${key}`); } });
 }
 export function validateCalculations(specification: CalculationSpecification | undefined, baseFields: Iterable<string>): CalculationMessage[] {
     if (!specification) return [];

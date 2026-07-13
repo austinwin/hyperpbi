@@ -12,5 +12,46 @@ export const patternRegistry:Record<string,PatternDefinition>={
     "map-and-details":{id:"map-and-details",required:["id"],optional:["title","dataset","height","details"],fieldProperties:[],example:{type:"pattern",pattern:"map-and-details",id:"locations",title:"Locations"},expand:p=>[{type:"grid",id:child(String(p.id),"grid"),title:p.title,children:[{type:"map",id:child(String(p.id),"map"),dataset:p.dataset,height:p.height??420,span:8,ariaLabel:`${p.title??"Locations"} map`,interaction},{type:"offcanvas",id:child(String(p.id),"details"),title:"Location details",dataset:p.dataset,openWhen:"selectedRow",ariaLabel:"Selected location details",children:[{type:"detailPanel",id:child(String(p.id),"detail-panel"),selectedRow:true,groups:[{fields:fields((p.details as RecordValue|undefined)?.fields)}]}]}]}]}
 };
 
-export function expandPatterns(value:unknown):{value:unknown;diagnostics:Diagnostic[]}{if(!value||typeof value!=="object"||Array.isArray(value))return{value,diagnostics:[]};const root={...(value as RecordValue)};const diagnostics:Diagnostic[]=[];const expandList=(items:unknown[],path:string):unknown[]=>items.flatMap((item,index)=>{if(!item||typeof item!=="object"||Array.isArray(item))return[item];const component={...(item as RecordValue)};if(component.type==="pattern"){const pattern=patternRegistry[String(component.pattern)];if(!pattern){diagnostics.push({code:"UNKNOWN_COMPONENT_TYPE",severity:"error",path:`${path}/${index}/pattern`,componentId:typeof component.id==="string"?component.id:undefined,message:`Application pattern “${String(component.pattern)}” is not supported.`,received:component.pattern,suggestions:Object.keys(patternRegistry).sort()});return[];}for(const property of pattern.required)if(component[property]===undefined)diagnostics.push({code:"MISSING_REQUIRED_PROPERTY",severity:"error",path:`${path}/${index}/${property}`,componentId:typeof component.id==="string"?component.id:undefined,message:`Pattern ${pattern.id} requires property “${property}”.`});return pattern.expand(component);}
-        if(Array.isArray(component.children))component.children=expandList(component.children,`${path}/${index}/children`);if(Array.isArray(component.footer))component.footer=expandList(component.footer,`${path}/${index}/footer`);if(Array.isArray(component.tabs))component.tabs=component.tabs.map((tab,tabIndex)=>tab&&typeof tab==="object"&&!Array.isArray(tab)?{...(tab as RecordValue),children:expandList((((tab as RecordValue).children??(tab as RecordValue).components??(tab as RecordValue).content??[]) as unknown[]),`${path}/${index}/tabs/${tabIndex}/children`)}:tab);return[component];});for(const key of ["components","toolbar","leftPanel","rightPanel"])if(Array.isArray(root[key]))root[key]=expandList(root[key] as unknown[],`/${key}`);return{value:root,diagnostics};}
+export interface PatternExpansionResult {
+    value: unknown;
+    diagnostics: Diagnostic[];
+    ownerByRuntimeId: Record<string, string>;
+}
+
+export function expandPatterns(value: unknown): PatternExpansionResult {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return { value, diagnostics: [], ownerByRuntimeId: {} };
+    }
+    const root = { ...(value as RecordValue) };
+    const diagnostics: Diagnostic[] = [];
+    const ownerByRuntimeId: Record<string, string> = {};
+    const recordOwners = (node: unknown, owner: string): void => {
+        if (Array.isArray(node)) { node.forEach(item => recordOwners(item, owner)); return; }
+        if (!node || typeof node !== "object") return;
+        const entry = node as RecordValue;
+        if (typeof entry.id === "string") ownerByRuntimeId[entry.id] = owner;
+        Object.values(entry).forEach(childValue => recordOwners(childValue, owner));
+    };
+    const expandList = (items: unknown[], path: string): unknown[] => items.flatMap((item, index) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return [item];
+        const component = { ...(item as RecordValue) };
+        if (component.type === "pattern") {
+            const pattern = patternRegistry[String(component.pattern)];
+            if (!pattern) {
+                diagnostics.push({ code: "UNKNOWN_COMPONENT_TYPE", severity: "error", path: `${path}/${index}/pattern`, componentId: typeof component.id === "string" ? component.id : undefined, message: `Application pattern “${String(component.pattern)}” is not supported.`, received: component.pattern, suggestions: Object.keys(patternRegistry).sort() });
+                return [];
+            }
+            for (const property of pattern.required) if (component[property] === undefined) diagnostics.push({ code: "MISSING_REQUIRED_PROPERTY", severity: "error", path: `${path}/${index}/${property}`, componentId: typeof component.id === "string" ? component.id : undefined, message: `Pattern ${pattern.id} requires property “${property}”.` });
+            const expanded = pattern.expand(component);
+            if (typeof component.id === "string") recordOwners(expanded, component.id);
+            return expanded;
+        }
+        if (typeof component.id === "string") ownerByRuntimeId[component.id] = component.id;
+        if (Array.isArray(component.children)) component.children = expandList(component.children, `${path}/${index}/children`);
+        if (Array.isArray(component.footer)) component.footer = expandList(component.footer, `${path}/${index}/footer`);
+        if (Array.isArray(component.tabs)) component.tabs = component.tabs.map((tab, tabIndex) => tab && typeof tab === "object" && !Array.isArray(tab) ? { ...(tab as RecordValue), children: expandList((((tab as RecordValue).children ?? (tab as RecordValue).components ?? (tab as RecordValue).content ?? []) as unknown[]), `${path}/${index}/tabs/${tabIndex}/children`) } : tab);
+        return [component];
+    });
+    for (const key of ["components", "toolbar", "leftPanel", "rightPanel"]) if (Array.isArray(root[key])) root[key] = expandList(root[key] as unknown[], `/${key}`);
+    return { value: root, diagnostics, ownerByRuntimeId };
+}
