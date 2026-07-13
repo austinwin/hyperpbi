@@ -95,7 +95,7 @@ export function AiResponseImporter({
       if (!applied.schema) {
         setErrors(applied.errors);
         setSummary(
-          `Operation ${extracted.value.operation} targeting ${extracted.value.targetId} was not applied.`,
+          `Operation ${extracted.value.operation} targeting ${extracted.value.operation === "appendRoot" ? `root:${extracted.value.containerPath}` : extracted.value.operation === "replaceDashboard" ? "the complete dashboard" : extracted.value.targetId} was not applied.`,
         );
         return;
       }

@@ -25,7 +25,7 @@ function BuilderAccordionStep({number,title,description,summary,open,onToggle,ch
     </section>;
 }
 
-export function AiPromptSettingsPanel({ value, fields, onChange, selectedTarget }: { value: AiPromptSettings; fields: string[]; onChange: (value: AiPromptSettings) => void; selectedTarget?:string }) {
+export function AiPromptSettingsPanel({ value, fields, onChange, selectedTarget, selectedTargetPath, insideContainers=[] }: { value: AiPromptSettings; fields: string[]; onChange: (value: AiPromptSettings) => void; selectedTarget?:string; selectedTargetPath?:string; insideContainers?:string[] }) {
     const [customizeOpen, setCustomizeOpen] = useState(false);
     const [openStep, setOpenStep] = useState<number | null>(null);
     const [aliasText,setAliasText]=useState(()=>JSON.stringify(value.aliasOverrides,null,2));
@@ -49,8 +49,12 @@ export function AiPromptSettingsPanel({ value, fields, onChange, selectedTarget 
                 <span class="hp-builder-customize-chevron" aria-hidden="true">{customizeOpen ? "▴" : "▾"}</span>
             </button>
         </div>
-        <div class="hp-builder-target"><strong>Selected target:</strong> {selectedTarget??"None — select a component in Inspector mode to add or redesign a section."}</div>
-        {value.job==="add-section"&&<label class="hp-builder-custom"><span>Insertion position</span><select value={value.insertionPosition} disabled={!selectedTarget} onChange={event=>update("insertionPosition",event.currentTarget.value as AiPromptSettings["insertionPosition"])}><option value="before">Before target</option><option value="after">After target</option><option value="inside">Inside target</option></select>{!selectedTarget&&<small>Select an Inspector target before adding a section.</small>}</label>}
+        <div class="hp-builder-target"><strong>Selected target:</strong> {selectedTarget??"None — select a component in Inspector mode to add or redesign a section."}{selectedTargetPath&&<small title={selectedTargetPath}>Path: {selectedTargetPath}</small>}</div>
+        {value.job==="add-section"&&<div class="hp-form-grid hp-builder-insertion-controls">
+            <label><span>Insertion target</span><select value={value.insertionContainer?.startsWith("root:")?value.insertionContainer:"selected"} onChange={event=>update("insertionContainer",event.currentTarget.value==="selected"?undefined:event.currentTarget.value)}><option value="selected" disabled={!selectedTarget}>Selected component</option><option value="root:components">Root components</option><option value="root:toolbar">Root toolbar</option><option value="root:leftPanel">Root left panel</option><option value="root:rightPanel">Root right panel</option></select></label>
+            <label><span>Insertion position</span><select value={value.insertionContainer?.startsWith("root:")?"inside":value.insertionPosition} disabled={value.insertionContainer?.startsWith("root:")} onChange={event=>update("insertionPosition",event.currentTarget.value as AiPromptSettings["insertionPosition"])}><option value="before" disabled={!selectedTarget}>Before target</option><option value="after" disabled={!selectedTarget}>After target</option><option value="inside" disabled={!selectedTarget||insideContainers.length===0}>Inside target</option></select>{!selectedTarget&&!value.insertionContainer?.startsWith("root:")&&<small>Select an Inspector target or choose a root destination.</small>}{selectedTarget&&insideContainers.length===0&&value.insertionPosition==="inside"&&<small>The selected component declares no child container.</small>}</label>
+            {value.insertionPosition==="inside"&&!value.insertionContainer?.startsWith("root:")&&<label><span>Inside container</span><select value={insideContainers.includes(value.insertionContainer??"")?value.insertionContainer:insideContainers[0]??""} disabled={!insideContainers.length} onChange={event=>update("insertionContainer",event.currentTarget.value)}>{insideContainers.map(path=><option value={path}>{path}</option>)}</select><small>Descriptor-declared relative path.</small></label>}
+        </div>}
 
         {customizeOpen && (
             <div id="hp-builder-customization" class="hp-builder-customization">

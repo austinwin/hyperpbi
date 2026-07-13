@@ -1,13 +1,16 @@
 import type { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { validateSchema } from "../schema/validateSchema";
 import {
-  appendChild,
+  appendToContainer,
   componentTree,
   deleteComponent,
   insertComponent,
   locateComponent,
+  resolveComponentContainerPath,
+  rootComponentContainerPaths,
 } from "../editor/inspector/specificationEditor";
 import type { AiChangePackage } from "./changePackage";
+import { validateAiChangePackage } from "./changePackageValidation";
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const object = (value: unknown): value is Record<string, unknown> =>
@@ -37,14 +40,14 @@ export function applyChangePackage(
   change: AiChangePackage,
   context: ChangePackageValidationContext = {},
 ): AppliedChangePackage {
+  const shape = validateAiChangePackage(change);
+  if (!shape.package) return { errors: shape.errors, summary: "No changes applied." };
   if (change.operation === "replaceDashboard") {
     const result = validateCandidate(change.specification, context);
     return result.schema ? { ...result, summary: "Replace the complete dashboard." } : result;
   }
-  const target = change.targetId.startsWith("root:")
-    ? undefined
-    : locateComponent(current, change.targetId);
-  if (!target && !change.targetId.startsWith("root:"))
+  const target = change.operation === "appendRoot" ? undefined : locateComponent(current, change.targetId);
+  if (!target && change.operation !== "appendRoot")
     return {
       errors: [`Target component “${change.targetId}” does not exist.`],
       summary: "No changes applied.",
@@ -99,10 +102,10 @@ export function applyChangePackage(
         change.operation === "insertBefore" ? "before" : "after",
         change.component as unknown as Record<string, unknown>,
       );
-    else if (change.targetId.startsWith("root:")) {
-      const key = change.targetId.slice(5);
+    else if (change.operation === "appendRoot") {
+      const key = change.containerPath;
       const next = clone(current) as unknown as Record<string, unknown>;
-      if (!["components", "toolbar", "leftPanel", "rightPanel"].includes(key))
+      if (!(rootComponentContainerPaths as readonly string[]).includes(key))
         return {
           errors: [`Root container “${key}” is not supported.`],
           summary: "No changes applied.",
@@ -110,21 +113,14 @@ export function applyChangePackage(
       if (!Array.isArray(next[key])) next[key] = [];
       (next[key] as unknown[]).push(clone(change.component));
       candidate = next;
-    } else {
-      const container = change.container ?? "children";
-      if (!["children", "footer"].includes(container))
+    } else if (change.operation === "appendChild") {
+      const resolved = resolveComponentContainerPath(current, change.targetId, change.containerPath, String(change.component.type));
+      if (!resolved.container)
         return {
-          errors: [
-            `Container “${container}” is not compatible with appendChild.`,
-          ],
+          errors: [resolved.error ?? `Container “${change.containerPath}” is not compatible with appendChild.`],
           summary: "No changes applied.",
         };
-      candidate = appendChild(
-        candidate,
-        change.targetId,
-        change.component as unknown as Record<string, unknown>,
-        container,
-      );
+      candidate = appendToContainer(candidate, resolved.container.path, change.component as unknown as Record<string, unknown>);
     }
   }
   if (!object(candidate))
@@ -140,11 +136,12 @@ export function applyChangePackage(
     insertBefore: "Insert component before target",
     insertAfter: "Insert component after target",
     appendChild: "Append child component",
+    appendRoot: "Append component to root",
     remove: "Remove selected component",
   };
   return {
     schema: validation.schema,
     errors: [],
-    summary: `${labels[change.operation]} (${change.targetId}).`,
+    summary: change.operation === "appendRoot" ? `${labels[change.operation]} (${change.containerPath}).` : `${labels[change.operation]} (${change.targetId}).`,
   };
 }

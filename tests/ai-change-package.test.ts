@@ -74,7 +74,7 @@ describe("AI change packages", () => {
           current,
           pkg("appendChild", {
             targetId: "one",
-            container: "children",
+            containerPath: "children",
             component: { type: "text", id: "new", text: "X" },
           }) as AiChangePackage,
         ).schema?.components[0] as any
@@ -99,11 +99,11 @@ describe("AI change packages", () => {
         current,
         pkg("appendChild", {
           targetId: "one",
-          container: "tabs",
+          containerPath: "tabs",
           component: { type: "text", id: "new" },
         }) as AiChangePackage,
-      ).errors[0],
-    ).toContain("not compatible");
+    ).errors[0],
+    ).toContain("not declared");
     expect(
       applyChangePackage(
         current,
@@ -113,6 +113,31 @@ describe("AI change packages", () => {
         }) as AiChangePackage,
       ).errors[0],
     ).toContain("collide");
+  });
+  it("appends through descriptor-declared nested and root containers", () => {
+    const nested = { version: "2.0" as const, components: [
+      { type: "card" as const, id: "card", children: [], footer: [] },
+      { type: "tabs" as const, id: "tabs", tabs: [{ id: "one", title: "One", children: [], components: [], content: [] }] },
+      { type: "accordion" as const, id: "accordion", items: [{ id: "item", title: "Item", children: [] }] },
+    ] };
+    const append = (targetId: string, containerPath: string, id: string) => applyChangePackage(nested, pkg("appendChild", { targetId, containerPath, component: { type: "text", id, text: id } }) as AiChangePackage);
+    expect((append("card", "footer", "footer-note").schema?.components[0] as any).footer[0].id).toBe("footer-note");
+    expect((append("tabs", "tabs/0/children", "tab-child").schema?.components[1] as any).tabs[0].children[0].id).toBe("tab-child");
+    expect((append("tabs", "tabs/0/components", "tab-component").schema?.components[1] as any).tabs[0].components[0].id).toBe("tab-component");
+    expect((append("tabs", "tabs/0/content", "tab-content").schema?.components[1] as any).tabs[0].content[0].id).toBe("tab-content");
+    expect((append("accordion", "items/0/children", "item-child").schema?.components[2] as any).items[0].children[0].id).toBe("item-child");
+    for (const containerPath of ["components", "toolbar", "leftPanel", "rightPanel"] as const) {
+      const result = applyChangePackage(nested, pkg("appendRoot", { containerPath, component: { type: "text", id: `root-${containerPath}`, text: containerPath } }) as AiChangePackage);
+      expect((result.schema as any)?.[containerPath].at(-1).id).toBe(`root-${containerPath}`);
+    }
+  });
+  it("rejects unsafe, undeclared and invalid-index destinations", () => {
+    const tabs = { version: "2.0" as const, components: [{ type: "tabs" as const, id: "tabs", tabs: [{ id: "one", title: "One", children: [] }] }] };
+    for (const containerPath of ["/tabs/0/children", "tabs/0/../children", "tabs/8/children", "children"]) {
+      const result = applyChangePackage(tabs, pkg("appendChild", { targetId: "tabs", containerPath, component: { type: "text", id: `new-${containerPath.length}`, text: "X" } }) as AiChangePackage);
+      expect(result.schema).toBeUndefined();
+      expect(result.errors.length).toBeGreaterThan(0);
+    }
   });
   it("runs full-result validation and preserves the existing dashboard on failure", () => {
     const snapshot = JSON.stringify(current);
