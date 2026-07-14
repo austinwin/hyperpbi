@@ -1127,7 +1127,7 @@ export async function resolveArcGisFeatureLayer(
     );
   } else if (
     shouldUseServiceRenderer &&
-    rendererAdaptation.renderer.type !== "simple"
+    rendererAdaptation.usedServiceSymbology
   ) {
     resolvedRenderer = rendererAdaptation.renderer;
     usedServiceSymbology = rendererAdaptation.usedServiceSymbology;

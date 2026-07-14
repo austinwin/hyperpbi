@@ -195,6 +195,13 @@ const leaflet = vi.hoisted(() => {
     }
     openPopup() {
       if (this.popupOpen || !this.popupFactory || !this.map) return this;
+      if (this.popupOptions?.autoClose !== false) {
+        const closeOtherPopups = (layer: Layer) => {
+          if (layer !== this) layer.closePopup();
+          layer.layers.forEach(closeOtherPopups);
+        };
+        this.map.layers.forEach(closeOtherPopups);
+      }
       const paneName = String(this.popupOptions?.pane ?? "popupPane");
       const pane = this.map.getPane(paneName);
       if (!pane) return this;
@@ -236,6 +243,7 @@ const leaflet = vi.hoisted(() => {
 
   const maps: MapRuntime[] = [];
   const markers: Layer[] = [];
+  const geoLayers: Layer[] = [];
   const popupOpen = vi.fn();
   const popupClose = vi.fn();
   const map = vi.fn((host: HTMLElement) => {
@@ -259,6 +267,7 @@ const leaflet = vi.hoisted(() => {
     MapRuntime,
     maps,
     markers,
+    geoLayers,
     popupOpen,
     popupClose,
     map,
@@ -267,13 +276,18 @@ const leaflet = vi.hoisted(() => {
     markerClusterGroup,
   };
 });
+const arcGisQuery = vi.hoisted(() => vi.fn());
 
 vi.mock("leaflet", () => ({
   map: leaflet.map,
   tileLayer: () => new leaflet.Layer(),
   circleMarker: leaflet.circleMarker,
   marker: (_position: unknown, options: Record<string, unknown>) => new leaflet.Layer(options),
-  geoJSON: () => new leaflet.Layer(),
+  geoJSON: () => {
+    const layer = new leaflet.Layer();
+    leaflet.geoLayers.push(layer);
+    return layer;
+  },
   featureGroup: leaflet.featureGroup,
   layerGroup: () => new leaflet.Layer(),
   markerClusterGroup: leaflet.markerClusterGroup,
@@ -281,6 +295,10 @@ vi.mock("leaflet", () => ({
   latLngBounds: () => new leaflet.Bounds(),
 }));
 vi.mock("leaflet.markercluster", () => ({}));
+vi.mock("../src/maps/arcgis/arcGisFeatureQuery", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../src/maps/arcgis/arcGisFeatureQuery")>();
+  return { ...original, executeArcGisFeatureQuery: arcGisQuery };
+});
 vi.mock("../src/providers/providerPolicy", () => ({
   resolveProviderPolicy: () => ({ tilesAllowed: true }),
   externalServiceAccess: () => ({ allowed: true }),
@@ -290,11 +308,14 @@ vi.mock("../src/components/maps/ResolvedMapLabels", () => ({
 }));
 
 import { LeafletMap } from "../src/components/maps/LeafletMap";
+import { resolveArcGisFeatureLayer } from "../src/components/maps/MapBlock";
 import { defaultConfig } from "../src/config/hyperpbiConfig";
 import { calculateAggregates } from "../src/data/aggregations";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 import type { NormalizedData } from "../src/data/normalizeData";
 import type { ResolvedMapFeature, ResolvedMapLayer } from "../src/maps/model/resolvedMapTypes";
+import type { ArcGisFeatureQueryResult } from "../src/maps/arcgis/arcGisFeatureQuery";
+import type { MapLayerDefinition } from "../src/schema/mapSchema";
 import { RenderContext, type RenderContextValue } from "../src/render/RenderContext";
 import { dashboardReducer, initialDashboardState } from "../src/render/stateStore";
 import type { MapComponent } from "../src/schema/hyperpbiSchema";
@@ -423,10 +444,12 @@ beforeEach(() => {
   vi.useFakeTimers();
   leaflet.maps.length = 0;
   leaflet.markers.length = 0;
+  leaflet.geoLayers.length = 0;
   leaflet.popupOpen.mockClear();
   leaflet.popupClose.mockClear();
   leaflet.map.mockClear();
   leaflet.circleMarker.mockClear();
+  arcGisQuery.mockReset();
   vi.stubGlobal("ResizeObserver", class {
     observe() {}
     disconnect() {}
@@ -495,5 +518,181 @@ describe("map popup lifecycle", () => {
     expect(popup.isConnected).toBe(false);
     action.click();
     expect(test.executeUiAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens a resolved ArcGIS REST feature popup after one click and retains it after selection", async () => {
+    const queryResult: ArcGisFeatureQueryResult = {
+      features: [{
+        objectId: 42,
+        attributes: { OBJECTID: 42, facilityName: "West Hospital", status: "Active", riskScore: 8.5 },
+        geometry: { type: "Point", coordinates: [-95.4, 29.8] } as GeoJSON.Point,
+      }],
+      metadata: {
+        id: 0,
+        name: "Facilities",
+        objectIdField: "OBJECTID",
+        geometryType: "esriGeometryPoint",
+        capabilities: "Query",
+        fields: [
+          { name: "OBJECTID", type: "esriFieldTypeOID" },
+          { name: "facilityName", type: "esriFieldTypeString" },
+          { name: "status", type: "esriFieldTypeString" },
+          { name: "riskScore", type: "esriFieldTypeDouble" },
+        ],
+        drawingInfo: {
+          renderer: { type: "simple", symbol: { type: "esriSMS", color: [32, 107, 196, 255], size: 12 } },
+          labelingInfo: [{ labelExpression: "[facilityName]", labelPlacement: "esriServerPointLabelPlacementAboveCenter" }],
+        },
+      },
+      requestCount: 2,
+      truncated: false,
+      objectIdField: "OBJECTID",
+      geometryType: "point",
+      spatialReference: { wkid: 4326 },
+      warnings: [],
+      sourceUrl: "https://services.example.test/Facilities/FeatureServer/0",
+      usedCache: false,
+      queryStrategy: "pagination",
+    };
+    arcGisQuery.mockResolvedValue(queryResult);
+    const definition: MapLayerDefinition = {
+      id: "facilities-runtime",
+      name: "Runtime facilities",
+      source: {
+        type: "arcgisFeature",
+        url: "https://services.example.test/Facilities/FeatureServer",
+        layerId: 0,
+        mode: "reference",
+        useServiceRenderer: true,
+        useServiceLabels: true,
+      },
+      popup: {
+        enabled: true,
+        defaultFieldSource: "service",
+        title: "Facility {{OBJECTID}}",
+        fields: [{ field: "facilityName", fieldSource: "service", label: "Facility", display: "text" }],
+      },
+      tooltip: { enabled: true, defaultFieldSource: "service", template: "{{status}}" },
+      interaction: { enabled: true, trigger: "click", internalMode: "highlight", externalMode: "none", field: "OBJECTID", fieldSource: "service" },
+    };
+    const resolved = await resolveArcGisFeatureLayer(
+      definition,
+      { rows: [], rowIndices: [], rowKeys: [], fields: {}, datasetName: "powerbi", datasetFound: true },
+      new AbortController().signal,
+      null,
+    );
+    expect(arcGisQuery).toHaveBeenCalledWith(expect.objectContaining({
+      url: definition.source.url,
+      layerId: 0,
+      outFields: expect.arrayContaining(["OBJECTID", "facilityName", "status"]),
+      useServiceRenderer: true,
+      useServiceLabels: true,
+    }));
+    expect(resolved.features[0]).toMatchObject({
+      geometryType: "point",
+      geometry: { type: "Point", coordinates: [-95.4, 29.8] },
+      serviceObjectId: 42,
+    });
+    expect(resolved.labels).toMatchObject({ enabled: true, field: "facilityName", fieldSource: "service" });
+    expect(resolved.diagnostics).toMatchObject({ featureCount: 1, requestCount: 2, usedServiceSymbology: true, usedServiceLabels: true });
+
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const test = context();
+    renderMap(host, test.value, resolved);
+    const marker = leaflet.markers[0];
+    expect(marker.tooltip).toBeTruthy();
+    marker.fire("click", { originalEvent: {} });
+    const popup = host.querySelector<HTMLElement>(".leaflet-popup")!;
+    expect(popup.textContent).toContain("Facility 42");
+    expect(popup.textContent).toContain("West Hospital");
+    expect(leaflet.popupOpen).toHaveBeenCalledTimes(1);
+    expect(leaflet.popupClose).not.toHaveBeenCalled();
+    renderMap(host, test.value, resolved);
+    expect(popup.isConnected).toBe(true);
+    expect(leaflet.circleMarker).toHaveBeenCalledTimes(1);
+    expect(leaflet.popupClose).not.toHaveBeenCalled();
+  });
+
+  it("renders Power BI, joined-cluster, and polygon popup content through real bound layers", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const test = context();
+    const powerBiFeature: ResolvedMapFeature = {
+      ...arcGisFeature(),
+      id: "powerbi-point",
+      layerId: "powerbi",
+      serviceAttributes: {},
+      powerBiAttributes: { name: "Power BI Point" },
+      powerBiRowIndices: [0],
+      powerBiRowKeys: ["row-0"],
+    };
+    const joinedFeature: ResolvedMapFeature = {
+      ...arcGisFeature(),
+      id: "joined-point",
+      layerId: "joined",
+      powerBiAttributes: { powerName: "Power Name" },
+      joinedAttributes: { totalRisk: 12 },
+    };
+    const polygonFeature: ResolvedMapFeature = {
+      ...arcGisFeature(),
+      id: "service-polygon",
+      layerId: "polygons",
+      geometryType: "polygon",
+      geometry: { type: "Polygon", coordinates: [[[-96, 29], [-94, 29], [-94, 31], [-96, 29]]] },
+      lat: null,
+      lon: null,
+    };
+    const layers: ResolvedMapLayer[] = [
+      {
+        ...arcGisLayer(powerBiFeature), id: "powerbi", name: "Power BI", sourceType: "powerbi",
+        popup: { enabled: true, defaultFieldSource: "powerbi", title: "{{name}}", fields: [] },
+      },
+      {
+        ...arcGisLayer(joinedFeature), id: "joined", name: "Joined", renderer: { type: "cluster", clusterLabel: "count" },
+        popup: { enabled: true, defaultFieldSource: "joined", title: "Risk {{totalRisk}}", fields: [{ field: "powerName", fieldSource: "powerbi", label: "Name", display: "text" }] },
+      },
+      {
+        ...arcGisLayer(polygonFeature), id: "polygons", name: "Polygons", geometryType: "polygon",
+        popup: { enabled: true, defaultFieldSource: "service", title: "Polygon {{OBJECTID}}", fields: [] },
+      },
+    ];
+    renderMap(host, test.value, layers[0]);
+    leaflet.markers[0].fire("click", { originalEvent: {} });
+    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Power BI Point");
+
+    act(() => render(
+      h(RenderContext.Provider, { value: test.value }, h(LeafletMap, { component, resolvedLayers: layers })),
+      host,
+    ));
+    leaflet.markers[1].fire("click", { originalEvent: {} });
+    expect(host.querySelectorAll(".leaflet-popup")).toHaveLength(1);
+    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Risk 12");
+    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Power Name");
+    expect(leaflet.markerClusterGroup).toHaveBeenCalledTimes(1);
+    leaflet.geoLayers[0].fire("click", { originalEvent: {} });
+    expect(host.querySelectorAll(".leaflet-popup")).toHaveLength(1);
+    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Polygon 7");
+  });
+
+  it("moves the popup to another feature and closes once when that feature is removed", () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const test = context();
+    const first = arcGisFeature();
+    const second = { ...arcGisFeature(), id: "facilities_8", serviceObjectId: 8, serviceAttributes: { OBJECTID: 8, facilityName: "South Clinic" }, lat: 31 };
+    const layer = { ...arcGisLayer(first), features: [first, second] };
+    renderMap(host, test.value, layer);
+    leaflet.markers[0].fire("click", { originalEvent: {} });
+    leaflet.markers[1].fire("click", { originalEvent: {} });
+    expect(host.querySelectorAll(".leaflet-popup")).toHaveLength(1);
+    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Facility 8");
+    expect(leaflet.popupClose).toHaveBeenCalledTimes(1);
+
+    renderMap(host, test.value, { ...layer, features: [first] });
+    expect(host.querySelector(".leaflet-popup")).toBeNull();
+    expect(leaflet.popupClose).toHaveBeenCalledTimes(2);
+    renderMap(host, test.value, { ...layer, features: [first] });
+    expect(leaflet.popupClose).toHaveBeenCalledTimes(2);
   });
 });
