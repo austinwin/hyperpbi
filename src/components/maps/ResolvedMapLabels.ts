@@ -1,7 +1,7 @@
 // ── Resolved Map Labels ───────────────────────────────────────────────
 // Creates noninteractive Leaflet label groups for resolved map layers.
 // Supports point, multipoint, polyline, polygon, and multipolygon.
-// Basic label collision: hideOverlaps is not implemented.
+// Basic bounded label collision is intentionally not an advanced cartographic engine.
 
 import * as L from "leaflet";
 import type { ResolvedMapLayer, ResolvedMapFeature } from "../../maps/model/resolvedMapTypes";
@@ -72,6 +72,8 @@ function buildLabelIcon(
     span.style.color = labels.color ?? "#333";
     span.style.fontSize = `${labels.size ?? 12}px`;
     span.style.fontWeight = String(labels.weight ?? "normal");
+    if (labels.backgroundColor) span.style.backgroundColor = labels.backgroundColor;
+    if (labels.padding !== undefined) span.style.padding = `${Math.max(0, labels.padding)}px`;
 
     if (labels.haloColor && labels.haloSize) {
         span.style.textShadow = [
@@ -116,11 +118,7 @@ export function createResolvedMapLabels(
         return { group: L.layerGroup(), cleanup: () => {}, warnings };
     }
 
-    if (labels.collision === "hideOverlaps") {
-        warnings.push(
-            "Label collision mode hideOverlaps is not supported; labels are rendered without collision suppression."
-        );
-    }
+    if (labels.collision === "hideOverlaps") warnings.push("Label collision mode hideOverlaps uses basic bounded overlap hiding, not advanced cartographic placement.");
 
     const group = L.layerGroup([], { pane: options.pane });
 
@@ -153,9 +151,27 @@ export function createResolvedMapLabels(
 
     // Enforce maxLabels
     const maxLabels = labels.maxLabels;
-    const finalEntries = maxLabels && maxLabels > 0
+    let finalEntries = maxLabels && maxLabels > 0
         ? labelEntries.slice(0, maxLabels)
         : labelEntries;
+    if (maxLabels && maxLabels > 0 && labelEntries.length > maxLabels) warnings.push(`Label limit reached: ${maxLabels.toLocaleString()} of ${labelEntries.length.toLocaleString()} labels are rendered.`);
+    if (labels.collision === "hideOverlaps") {
+        const accepted: typeof finalEntries = [];
+        const boxes: Array<{ left: number; right: number; top: number; bottom: number }> = [];
+        for (const entry of finalEntries) {
+            if (!entry.pos) continue;
+            const point = typeof map.latLngToContainerPoint === "function"
+                ? map.latLngToContainerPoint(entry.pos)
+                : { x: entry.pos[1], y: entry.pos[0] };
+            const padding = labels.padding ?? 0;
+            const width = Math.max(labels.size, entry.text.length * labels.size * 0.58) + padding * 2;
+            const height = labels.size * 1.25 + padding * 2;
+            const box = { left: point.x - width / 2, right: point.x + width / 2, top: point.y - height / 2, bottom: point.y + height / 2 };
+            if (boxes.some(other => box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top)) continue;
+            boxes.push(box); accepted.push(entry);
+        }
+        finalEntries = accepted;
+    }
 
     for (const entry of finalEntries) {
         if (!entry.pos) continue;

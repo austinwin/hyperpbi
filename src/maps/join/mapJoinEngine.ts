@@ -14,6 +14,8 @@ export interface MapJoinInput {
     powerBiRows: DataRow[];
     powerBiRowIndices: number[];
     powerBiRowKeys: string[];
+    powerBiSourceRowIndices?: number[][];
+    powerBiSourceRowKeys?: string[][];
     serviceFeatures: ParsedArcGisFeature[];
     definition: MapJoinDefinition;
     layerId: string;
@@ -25,7 +27,7 @@ export interface MapJoinResult {
 }
 
 export function executeMapJoin(input: MapJoinInput): MapJoinResult {
-    const { powerBiRows, powerBiRowIndices, powerBiRowKeys, serviceFeatures, definition, layerId } = input;
+    const { powerBiRows, powerBiRowIndices, powerBiRowKeys, powerBiSourceRowIndices, powerBiSourceRowKeys, serviceFeatures, definition, layerId } = input;
     const normalization = definition.normalization ?? ["trim", "upper"];
     const powerBiDupPolicy = definition.powerBiDuplicatePolicy ?? "aggregate";
     const serviceDupPolicy = definition.serviceDuplicatePolicy ?? "first";
@@ -48,8 +50,8 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         powerBiKeys.add(normalized);
         const match: PowerBiMatch = {
             row,
-            rowIndex: powerBiRowIndices[i] ?? i,
-            rowKey: powerBiRowKeys[i] ?? `row-${i}`,
+            rowIndices: powerBiSourceRowIndices?.[i] ?? [powerBiRowIndices[i] ?? i],
+            rowKeys: powerBiSourceRowKeys?.[i] ?? [powerBiRowKeys[i] ?? `row-${i}`],
             originalJoinValue: rawValue,
         };
 
@@ -143,7 +145,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
             }
 
             for (const pm of effectivePowerBiMatches) {
-                matchedPowerBiRowIndices.add(pm.rowIndex);
+                for (const rowIndex of pm.rowIndices) matchedPowerBiRowIndices.add(rowIndex);
             }
 
             // Aggregate joined fields
@@ -163,8 +165,8 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
                 serviceObjectId: svcFeature.objectId,
                 serviceAttributes: svcFeature.attributes,
                 powerBiAttributes: effectivePowerBiMatches[0].row as unknown as Record<string, unknown>,
-                powerBiRowIndices: effectivePowerBiMatches.map(m => m.rowIndex),
-                powerBiRowKeys: effectivePowerBiMatches.map(m => m.rowKey),
+                powerBiRowIndices: Array.from(new Set(effectivePowerBiMatches.flatMap(match => match.rowIndices))).sort((a, b) => a - b),
+                powerBiRowKeys: Array.from(new Set(effectivePowerBiMatches.flatMap(match => match.rowKeys))),
                 joinedAttributes,
                 selected: false,
             };
@@ -224,8 +226,8 @@ function mapGeometryType(feature: ParsedArcGisFeature): "point" | "multipoint" |
 
 interface PowerBiMatch {
     row: DataRow;
-    rowIndex: number;
-    rowKey: string;
+    rowIndices: number[];
+    rowKeys: string[];
     originalJoinValue: unknown;
 }
 

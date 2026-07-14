@@ -106,8 +106,19 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
     const resolver = new FieldResolver(data, aliasOverrides);
     for (const occurrence of specificationFieldReferences(specification)) {
         if (occurrence.path.startsWith("/data/")) continue;
-        const scope = datasets.datasets.get(occurrence.datasetName) ?? datasets.datasets.get("powerbi");
-        if (!scope) continue;
+        const scope = datasets.datasets.get(occurrence.datasetName);
+        if (!scope) {
+            diagnostics.push({
+                code: occurrence.path.includes("/layers/") ? "MAP_LAYER_DATASET_NOT_FOUND" : "UNKNOWN_DATASET",
+                severity: "error",
+                path: occurrence.path.includes("/layers/") ? occurrence.path.replace(/\/(source|join|renderer|labels|popup|tooltip|filter|visibility|interaction).*$/, "/dataset") : occurrence.path,
+                componentId: occurrence.componentId,
+                message: `Dataset “${occurrence.datasetName}” is not available for this field reference.`,
+                received: occurrence.datasetName,
+                suggestions: closestMatches(occurrence.datasetName, datasets.datasets.keys()),
+            });
+            continue;
+        }
         let key = occurrence.reference;
         let field = scope.fields[key];
         if (!field) {
@@ -118,7 +129,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
                 occurrence.set(key);
             } else {
                 diagnostics.push({
-                    code: resolved.status === "ambiguous" ? "AMBIGUOUS_FIELD" : occurrence.datasetName === "powerbi" ? "UNKNOWN_FIELD" : "UNKNOWN_DATASET_FIELD",
+                    code: resolved.status === "ambiguous" ? "AMBIGUOUS_FIELD" : occurrence.path.includes("/layers/") ? "MAP_LAYER_FIELD_NOT_FOUND" : occurrence.datasetName === "powerbi" ? "UNKNOWN_FIELD" : "UNKNOWN_DATASET_FIELD",
                     severity: "error",
                     path: occurrence.path,
                     componentId: occurrence.componentId,
@@ -130,7 +141,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
             }
         }
         if (occurrence.requirement === "numeric" && field.dataType && field.dataType !== "unknown" && field.dataType !== "number") diagnostics.push({
-            code: occurrence.datasetName === "powerbi" ? "FIELD_TYPE_MISMATCH" : "NON_NUMERIC_DATASET_FIELD",
+            code: occurrence.path.includes("/layers/") ? "MAP_LAYER_NUMERIC_FIELD_REQUIRED" : occurrence.datasetName === "powerbi" ? "FIELD_TYPE_MISMATCH" : "NON_NUMERIC_DATASET_FIELD",
             severity: "error",
             path: occurrence.path,
             componentId: occurrence.componentId,

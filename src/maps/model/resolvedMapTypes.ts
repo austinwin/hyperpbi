@@ -140,6 +140,8 @@ export interface ResolvedMapLabels {
     weight: number | string;
     haloColor?: string;
     haloSize?: number;
+    backgroundColor?: string;
+    padding?: number;
     collision: "none" | "hideOverlaps";
     maxLabels?: number;
 }
@@ -202,6 +204,46 @@ export interface MapLayerDiagnostics {
     queryStrategy?: string;
     /** Warning messages */
     warnings: string[];
+    /** Structured author/runtime issues with stable codes. */
+    issues?: MapLayerDiagnosticIssue[];
+    effectiveDataset?: string;
+    resolvedLocationMode?: "geometry" | "latLon" | "xy" | "address" | "none";
+    resolvedBindings?: Record<string, string | string[] | undefined>;
+    geometryTypeCounts?: Partial<Record<MapGeometryType, number>>;
+    totalInputRows?: number;
+    filteredRowCount?: number;
+    validFeatureCount?: number;
+    incompletePairCount?: number;
+    nonNumericCount?: number;
+    outOfRangeCount?: number;
+    geometryParseFailureCount?: number;
+    layerValueRequested?: string;
+    layerValueMatched?: boolean;
+    rendererFieldSource?: string;
+    labelFieldSource?: string;
+    sourceResolutionMs?: number;
+    rendererCalculationMs?: number;
+    layerRenderMs?: number;
+    requestMs?: number;
+    joinMs?: number;
+}
+
+export interface MapLayerDiagnosticIssue {
+    code:
+        | "MAP_LAYER_DATASET_NOT_FOUND"
+        | "MAP_LAYER_FIELD_NOT_FOUND"
+        | "MAP_LAYER_BINDING_INCOMPLETE"
+        | "MAP_LAYER_NUMERIC_FIELD_REQUIRED"
+        | "MAP_LAYER_EXTERNAL_FILTER_UNSUPPORTED"
+        | "MAP_LAYER_VALUE_NOT_FOUND"
+        | "MAP_LAYER_MIXED_GEOMETRY"
+        | "MAP_LAYER_FEATURE_LIMIT"
+        | "MAP_GLOBAL_FEATURE_LIMIT"
+        | "MAP_CAPABILITY_LIMITATION";
+    severity: "info" | "warning" | "error";
+    message: string;
+    path?: string;
+    details?: Record<string, unknown>;
 }
 
 export interface MapJoinDiagnostics {
@@ -266,6 +308,8 @@ export interface ResolvedMapLayer {
     visible: boolean;
     opacity: number;
     order: number;
+    groupId?: string;
+    datasetName?: string;
     features: ResolvedMapFeature[];
     renderer: ResolvedMapRenderer;
     labels?: ResolvedMapLabels;
@@ -285,4 +329,5 @@ export interface ResolvedMapLayer {
     tile?: ResolvedTileConfig;
     /** Source-specific dynamic configuration */
     dynamic?: ResolvedDynamicConfig;
+    visibility?: import("../../schema/mapSchema").MapVisibilityDefinition;
 }

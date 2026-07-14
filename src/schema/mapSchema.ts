@@ -19,6 +19,7 @@ export type MapGeometryType =
     | "multipoint"
     | "polyline"
     | "polygon"
+    | "mixed"
     | "unknown";
 
 // ── View & Basemap ────────────────────────────────────────────────────
@@ -56,11 +57,32 @@ export interface MapLegendDefinition {
     defaultOpen?: boolean;
 }
 
+export interface MapViewBookmarkDefinition {
+    id: string;
+    label: string;
+    /** Leaflet center order: [latitude, longitude]. */
+    center: [number, number];
+    zoom: number;
+}
+
+export interface MapLayerGroupDefinition {
+    id: string;
+    name: string;
+    visible?: boolean;
+    collapsed?: boolean;
+    opacity?: number;
+    order?: number;
+}
+
 // ── Layer Definition ──────────────────────────────────────────────────
 
 export interface MapLayerDefinition {
     id: string;
     name: string;
+    /** Logical row view for this layer. Falls back to the map component dataset, then powerbi. */
+    dataset?: string;
+    /** Optional canonical group membership. */
+    groupId?: string;
 
     visible?: boolean;
     opacity?: number;
@@ -75,6 +97,7 @@ export interface MapLayerDefinition {
     tooltip?: MapTooltipDefinition;
     visibility?: MapVisibilityDefinition;
     performance?: MapPerformanceDefinition;
+    filter?: MapLayerFilterDefinition | MapLayerFilterDefinition[];
 
     interaction?: ComponentInteractionDefinition;
 
@@ -83,6 +106,12 @@ export interface MapLayerDefinition {
         title?: string;
         collapsed?: boolean;
     };
+}
+
+export interface MapLayerFilterDefinition {
+    field: string;
+    operator: "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
+    value: unknown;
 }
 
 // ── Source Definitions ────────────────────────────────────────────────
@@ -200,7 +229,7 @@ export interface ClassBreaksMapRenderer {
     type: "classBreaks";
     field: string;
     fieldSource?: "powerbi" | "service" | "joined";
-    method?: "equalInterval" | "quantile" | "naturalBreaks" | "manual";
+    method?: "equalInterval" | "quantile" | "manual";
     classes?: number;
     breaks?: Array<{
         min: number;

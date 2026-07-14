@@ -21,6 +21,8 @@ import type { GeocoderSearchResult } from "../../providers/providerTypes";
 export interface LeafletMapController {
     home(): void;
     zoomToSelection(): void;
+    zoomToLayer(layerId: string): void;
+    goToBookmark(bookmarkId: string): void;
     showSearchResult(result: GeocoderSearchResult): void;
     clearSearchResult(): void;
     invalidateSize(): void;
@@ -39,7 +41,7 @@ export function LeafletMap({
     onControllerReady?: (controller: LeafletMapController) => void;
     onLayerRuntimeStateChange?: (
         layerId: string,
-        update: { loading?: boolean; error?: string; warning?: string }
+        update: { loading?: boolean; error?: string; warning?: string; renderMs?: number }
     ) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
@@ -51,6 +53,7 @@ export function LeafletMap({
     const labelLayerRefs = useRef<Map<string, ResolvedMapLabelRuntime>>(new Map());
     const searchMarkerRef = useRef<L.CircleMarker | null>(null);
     const paneNamesRef = useRef<Map<string, string>>(new Map());
+    const reportedRenderSignaturesRef = useRef<Map<string, string>>(new Map());
     const hasFitRef = useRef(false);
     const programmaticMoveCountRef = useRef(0);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -106,6 +109,8 @@ export function LeafletMap({
             zoomControl: true,
             attributionControl: true,
             preferCanvas: true,
+            minZoom: view.minZoom,
+            maxZoom: view.maxZoom,
         }).setView(mapCenter, mapZoom);
 
         // ── Basemap ─────────────────────────────────────────────
@@ -199,6 +204,22 @@ export function LeafletMap({
                         }
                     });
                 }
+            },
+            zoomToLayer(layerId) {
+                const layer = resolvedLayersRef.current.find(candidate => candidate.id === layerId);
+                if (!layer) return;
+                const bounds = boundsForFeatures(layer.features);
+                if (!bounds.isValid()) return;
+                const currentView = componentRef.current.view ?? {};
+                runProgrammaticMove(map, programmaticMoveCountRef, () => {
+                    if (bounds.getSouthWest().equals(bounds.getNorthEast())) map.setView(bounds.getCenter(), Math.min(currentView.maxZoom ?? 18, 14), { animate: false });
+                    else map.fitBounds(bounds.pad(currentView.fitPadding ?? 0.08), { maxZoom: currentView.maxZoom ?? 18, animate: false });
+                });
+            },
+            goToBookmark(bookmarkId) {
+                const bookmark = componentRef.current.bookmarks?.find(candidate => candidate.id === bookmarkId);
+                if (!bookmark) return;
+                runProgrammaticMove(map, programmaticMoveCountRef, () => map.setView(bookmark.center, bookmark.zoom, { animate: false }));
             },
             showSearchResult(result) {
                 if (!Number.isFinite(result.latitude) || !Number.isFinite(result.longitude)) return;
@@ -373,6 +394,22 @@ export function LeafletMap({
         for (const layer of sortedLayers) {
             const isVisible = mapState?.visibility?.[layer.id] ?? layer.visible ?? true;
             if (!isVisible) continue;
+            const layerRenderStarted = globalThis.performance?.now?.() ?? Date.now();
+            const renderSignature = [
+                layer.features.length,
+                layer.diagnostics.sourceResolutionMs,
+                layer.diagnostics.rendererCalculationMs,
+                layer.diagnostics.requestMs,
+                layer.diagnostics.joinMs,
+            ].join(":" );
+            const reportLayerRender = () => {
+                if (reportedRenderSignaturesRef.current.get(layer.id) === renderSignature) return;
+                reportedRenderSignaturesRef.current.set(layer.id, renderSignature);
+                onLayerRuntimeStateChangeRef.current?.(layer.id, {
+                    renderMs: (globalThis.performance?.now?.() ?? Date.now()) - layerRenderStarted,
+                });
+            };
+            const visibleAtZoom = layerVisibleAtZoom(layer, map.getZoom());
 
             const layerOpacity = clampOpacity(mapState?.opacity?.[layer.id] ?? layer.opacity ?? 1);
 
@@ -381,7 +418,9 @@ export function LeafletMap({
                 const existingTile = arcGisTileRefs.current.get(layer.id);
                 if (existingTile) {
                     existingTile.setOpacity(layerOpacity);
-                    if (!map.hasLayer(existingTile)) existingTile.addTo(map);
+                    if (visibleAtZoom && !map.hasLayer(existingTile)) existingTile.addTo(map);
+                    else if (!visibleAtZoom && map.hasLayer(existingTile)) map.removeLayer(existingTile);
+                    reportLayerRender();
                     continue;
                 }
                 try {
@@ -396,12 +435,14 @@ export function LeafletMap({
                         opacity: layerOpacity,
                         attribution: layer.tile.attribution ?? "",
                         pane: paneNamesRef.current.get(layer.id),
-                    }).addTo(map);
+                    });
+                    if (visibleAtZoom) tileLayer.addTo(map);
                     arcGisTileRefs.current.set(layer.id, tileLayer);
                 } catch (err) {
                     const msg = err instanceof Error ? err.message : String(err);
                     onLayerRuntimeStateChangeRef.current?.(layer.id, { warning: `Tile layer error: ${msg}` });
                 }
+                reportLayerRender();
                 continue;
             }
 
@@ -410,7 +451,8 @@ export function LeafletMap({
                 const existingDynamic = dynamicLayerRefs.current.get(layer.id);
                 if (existingDynamic) {
                     existingDynamic.setOpacity(layerOpacity);
-                    if (!map.hasLayer(existingDynamic)) existingDynamic.addTo(map);
+                    if (visibleAtZoom && !map.hasLayer(existingDynamic)) existingDynamic.addTo(map);
+                    else if (!visibleAtZoom && map.hasLayer(existingDynamic)) map.removeLayer(existingDynamic);
                 } else {
                     try {
                         const access = externalServiceAccess(context.providerAccess, layer.dynamic.url, webAccessAvailable);
@@ -433,21 +475,26 @@ export function LeafletMap({
                                 ...(state.error ? { error: state.error, warning: state.error } : {}),
                             });
                         });
-                        dynamicLayer.addTo(map);
+                        if (visibleAtZoom) dynamicLayer.addTo(map);
                         dynamicLayerRefs.current.set(layer.id, dynamicLayer);
                     } catch (err) {
                         const msg = err instanceof Error ? err.message : String(err);
                         onLayerRuntimeStateChangeRef.current?.(layer.id, { error: msg, warning: `Dynamic layer error: ${msg}` });
                     }
                 }
+                reportLayerRender();
                 continue;
             }
 
             // ── Render vector features ───────────────────────────
-            if (layer.features.length === 0) continue;
+            if (layer.features.length === 0) {
+                reportLayerRender();
+                continue;
+            }
 
             const layerPane = paneNamesRef.current.get(layer.id);
-            const layerGroup = L.featureGroup().addTo(map);
+            const layerGroup = L.featureGroup();
+            if (visibleAtZoom) layerGroup.addTo(map);
             const renderer = layer.renderer as ResolvedMapRenderer;
             const domain = rendererDomains.get(layer.id) ?? null;
 
@@ -576,16 +623,22 @@ export function LeafletMap({
                         if (feature.powerBiRowIndices.length > 0 && feature.powerBiRowKeys.length > 0) {
                             // Power BI or joined feature
                             const field = layerInteractionPolicy.field;
+                            const interactionContext = context.selectSourceRows ? {
+                                ...context,
+                                sourceRows: context.powerBiSourceRows ?? context.sourceRows,
+                                sourceRowKeys: context.powerBiSourceRowKeys ?? context.sourceRowKeys,
+                                selectExternal: context.selectSourceRows,
+                            } : context;
                             executeComponentInteraction(
                                 layerInteractionPolicy,
                                 createInteractionPayload(component, {
                                     rowIndices: feature.powerBiRowIndices,
                                     rowKeys: feature.powerBiRowKeys,
-                                    sourceRowKeys: context.sourceRowKeys,
+                                    sourceRowKeys: interactionContext.sourceRowKeys,
                                     field,
                                     value: field ? feature.powerBiAttributes[field] : undefined,
                                 }),
-                                context,
+                                interactionContext,
                                 { trigger: "click", multiSelect, event: event.originalEvent }
                             );
                         } else {
@@ -618,17 +671,20 @@ export function LeafletMap({
                     onLayerRuntimeStateChangeRef.current?.(layer.id, { warning });
                 }
             }
+            reportLayerRender();
         }
 
         // ── Fit bounds ───────────────────────────────────────────
         const viewDef = component.view ?? {};
         const fitMode = viewDef.fitMode ?? "data";
-        if (fitMode !== "none" && dataBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
+        const firstVisibleLayer = sortedLayers.find(layer => (mapState?.visibility?.[layer.id] ?? layer.visible ?? true) && layer.features.length > 0);
+        const effectiveFitBounds = fitMode === "firstLayer" && firstVisibleLayer ? boundsForFeatures(firstVisibleLayer.features) : dataBounds;
+        if (fitMode !== "none" && effectiveFitBounds.isValid() && hasAnyFeatures && !hasFitRef.current) {
             runProgrammaticMove(map, programmaticMoveCountRef, () => {
                 const minZoom = viewDef.minZoom ?? 1;
                 const maxZoom = viewDef.maxZoom ?? 18;
-                if (dataBounds.getSouthWest().equals(dataBounds.getNorthEast())) map.setView(dataBounds.getCenter(), Math.max(minZoom, Math.min(maxZoom, 14)), { animate: false });
-                else map.fitBounds(dataBounds.pad(viewDef.fitPadding ?? 0.08), { maxZoom, animate: false });
+                if (effectiveFitBounds.getSouthWest().equals(effectiveFitBounds.getNorthEast())) map.setView(effectiveFitBounds.getCenter(), Math.max(minZoom, Math.min(maxZoom, 14)), { animate: false });
+                else map.fitBounds(effectiveFitBounds.pad(viewDef.fitPadding ?? 0.08), { maxZoom, animate: false });
             });
             hasFitRef.current = true;
         }
@@ -646,6 +702,28 @@ export function LeafletMap({
         webAccessAvailable,
         rendererDomains,
     ]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) return;
+        const sync = () => {
+            const zoom = map.getZoom();
+            for (const layer of resolvedLayersRef.current) {
+                const show = (mapLayerStateRef.current?.visibility?.[layer.id] ?? layer.visible ?? true) && layerVisibleAtZoom(layer, zoom);
+                const candidates: L.Layer[] = [];
+                const vector = vectorLayerRefs.current.get(layer.id); if (vector) candidates.push(vector);
+                const tile = arcGisTileRefs.current.get(layer.id); if (tile) candidates.push(tile);
+                const dynamic = dynamicLayerRefs.current.get(layer.id); if (dynamic) candidates.push(dynamic);
+                for (const candidate of candidates) {
+                    if (show && !map.hasLayer(candidate)) candidate.addTo(map);
+                    else if (!show && map.hasLayer(candidate)) map.removeLayer(candidate);
+                }
+            }
+        };
+        map.on("zoomend", sync);
+        sync();
+        return () => map.off("zoomend", sync);
+    }, [resolvedLayers, context.state.mapLayerState[id]]);
 
     // Cleanup no longer needed — map instance tracked via ref
     // and cleaned up in the init effect's return.
@@ -673,4 +751,22 @@ function runProgrammaticMove(
 
 function clampOpacity(value: number): number {
     return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 1));
+}
+
+function layerVisibleAtZoom(layer: ResolvedMapLayer, zoom: number): boolean {
+    const min = layer.visibility?.minZoom;
+    const max = layer.visibility?.maxZoom;
+    return (min === undefined || zoom >= min) && (max === undefined || zoom <= max);
+}
+
+function boundsForFeatures(features: readonly ResolvedMapFeature[]): L.LatLngBounds {
+    const bounds = L.latLngBounds([]);
+    for (const feature of features) {
+        if (feature.lat !== null && feature.lon !== null) bounds.extend([feature.lat, feature.lon]);
+        else if (feature.geometry) {
+            const geometryBounds = L.geoJSON(feature.geometry).getBounds();
+            if (geometryBounds.isValid()) bounds.extend(geometryBounds);
+        }
+    }
+    return bounds;
 }

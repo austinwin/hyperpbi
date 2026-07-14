@@ -22,10 +22,10 @@ function context(state = initialDashboardState()) {
     return { value, dispatch };
 }
 
-function mount(layers = [layer("a"), layer("b")], configuration?: Parameters<typeof MapLayerPanel>[0]["configuration"], state = initialDashboardState()) {
+function mount(layers = [layer("a"), layer("b")], configuration?: Parameters<typeof MapLayerPanel>[0]["configuration"], state = initialDashboardState(), extra: Partial<Parameters<typeof MapLayerPanel>[0]> = {}) {
     const test = context(state);
     const host = document.createElement("div");
-    act(() => render(h(RenderContext.Provider, { value: test.value }, h(MapLayerPanel, { mapId: "map", layers, configuration })), host));
+    act(() => render(h(RenderContext.Provider, { value: test.value }, h(MapLayerPanel, { mapId: "map", layers, configuration, ...extra })), host));
     return { ...test, host };
 }
 
@@ -95,5 +95,18 @@ describe("MapLayerPanel", () => {
     it("shows an explicit no-layers state", () => {
         const { host } = mount([]);
         expect(host.textContent).toContain("No map layers are available.");
+    });
+
+    it("toggles canonical groups and zooms to a selected layer", () => {
+        const onZoomLayer = vi.fn();
+        const grouped = [layer("a", { groupId: "operations", features: [({ id: "a-0" } as ResolvedMapLayer["features"][number])] }), layer("b", { groupId: "operations" })];
+        const { host, dispatch } = mount(grouped, undefined, initialDashboardState(), { groups: [{ id: "operations", name: "Operations" }], onZoomLayer });
+        click(host, "Hide group Operations");
+        expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerVisibility", mapId: "map", layerId: "a", visible: false });
+        expect(dispatch).toHaveBeenCalledWith({ type: "mapLayerVisibility", mapId: "map", layerId: "b", visible: false });
+        click(host, "Zoom to Assets");
+        expect(onZoomLayer).toHaveBeenCalledWith("a");
+        click(host, "Collapse Operations");
+        expect(host.querySelector('[aria-label="Show Assets"]')).toBeNull();
     });
 });

@@ -8,12 +8,12 @@ import type {
     ListGroupItem, DataGridItem, TrackingStage,
 } from "./uiSchema";
 import type {
-    MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition,
+    MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition,
 } from "./mapSchema";
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
 
 // Re-export map types
-export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition };
+export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition };
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type Density = "compact" | "normal" | "spacious";
@@ -340,6 +340,8 @@ export interface MapComponent extends ComponentBase {
     view?: MapViewDefinition;
     basemap?: MapBasemapDefinition;
     layers?: MapLayerDefinition[];
+    layerGroups?: MapLayerGroupDefinition[];
+    bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;
     legend?: MapLegendDefinition;
 
@@ -360,6 +362,7 @@ export interface MapComponent extends ComponentBase {
         search?: boolean;
         clearSelection?: boolean;
         zoomToSelection?: boolean;
+        bookmarks?: boolean;
     };
 
     // ── Legacy properties (still supported for backward compatibility) ──

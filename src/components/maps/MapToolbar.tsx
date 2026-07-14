@@ -26,6 +26,7 @@ interface MapToolbarProps {
     onZoomToSelection: () => void;
     onSetPopover: (popover: MapToolbarPopoverState) => void;
     onClearSelection: () => void;
+    onBookmark?: (bookmarkId: string) => void;
 }
 
 export function MapToolbar({
@@ -40,6 +41,7 @@ export function MapToolbar({
     onZoomToSelection,
     onSetPopover,
     onClearSelection,
+    onBookmark = () => undefined,
 }: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
     const actions: Array<{
@@ -84,6 +86,15 @@ export function MapToolbar({
                     </div>
                 );
             })}
+            {toolbar.bookmarks !== false && component.bookmarks?.length ? (
+                <label class="hp-map-bookmark-picker">
+                    <span class="hp-map-visually-hidden">View bookmark</span>
+                    <select aria-label="View bookmark" value="" onChange={event => { const value = event.currentTarget.value; if (value) onBookmark(value); }}>
+                        <option value="">Bookmarks</option>
+                        {component.bookmarks.map(bookmark => <option value={bookmark.id}>{bookmark.label}</option>)}
+                    </select>
+                </label>
+            ) : null}
         </div>
     );
 }

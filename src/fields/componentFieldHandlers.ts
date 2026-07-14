@@ -87,35 +87,41 @@ function mapLayers(context: ComponentFieldHandlerContext): void {
     layers.forEach((raw, index) => {
         if (!object(raw)) return;
         const path = `${context.componentPath}/${context.descriptorField.property}/${index}`;
+        const layerContext: ComponentFieldHandlerContext = {
+            ...context,
+            effectiveDataset: typeof raw.dataset === "string" && raw.dataset ? raw.dataset : context.effectiveDataset,
+        };
         const source = object(raw.source) ? raw.source : {};
         const sourceType = String(source.type ?? "powerbi");
-        const defaultSource: FieldReferenceSource = sourceType === "powerbi" ? sourceFor(context) : raw.join ? "joined" : "service";
-        if (object(source.bindings)) for (const key of Object.keys(source.bindings)) emitValue(context, source.bindings, key, `${path}/source/bindings/${pointer(key)}`, ["latitude", "longitude", "x", "y", "size"].includes(key) ? "numeric" : "any", sourceFor(context));
-        if (object(raw.join)) emitValue(context, raw.join, "powerBiField", `${path}/join/powerBiField`, "any", sourceFor(context));
+        const defaultSource: FieldReferenceSource = sourceType === "powerbi" ? sourceFor(layerContext) : raw.join ? "joined" : "service";
+        if (object(source.bindings)) for (const key of Object.keys(source.bindings)) emitValue(layerContext, source.bindings, key, `${path}/source/bindings/${pointer(key)}`, ["latitude", "longitude", "x", "y", "size"].includes(key) ? "numeric" : "any", sourceFor(layerContext));
+        if (object(raw.join)) emitValue(layerContext, raw.join, "powerBiField", `${path}/join/powerBiField`, "any", sourceFor(layerContext));
         if (object(raw.renderer)) {
             const fieldSource = (raw.renderer.fieldSource ?? defaultSource) as FieldReferenceSource;
             const type = String(raw.renderer.type ?? "");
-            if (type === "heatmap") emitValue(context, raw.renderer, "weightField", `${path}/renderer/weightField`, "numeric", fieldSource);
-            else if (type === "cluster") emitValue(context, raw.renderer, "aggregateField", `${path}/renderer/aggregateField`, ["sum", "avg", "min", "max"].includes(String(raw.renderer.clusterLabel)) ? "numeric" : "any", fieldSource);
-            else emitValue(context, raw.renderer, "field", `${path}/renderer/field`, ["classBreaks", "continuousColor", "proportionalSize"].includes(type) || type === "densityGrid" && ["sum", "avg"].includes(String(raw.renderer.statistic)) ? "numeric" : "any", fieldSource);
+            if (type === "heatmap") emitValue(layerContext, raw.renderer, "weightField", `${path}/renderer/weightField`, "numeric", fieldSource);
+            else if (type === "cluster") emitValue(layerContext, raw.renderer, "aggregateField", `${path}/renderer/aggregateField`, ["sum", "avg", "min", "max"].includes(String(raw.renderer.clusterLabel)) ? "numeric" : "any", fieldSource);
+            else emitValue(layerContext, raw.renderer, "field", `${path}/renderer/field`, ["classBreaks", "continuousColor", "proportionalSize"].includes(type) || type === "densityGrid" && ["sum", "avg"].includes(String(raw.renderer.statistic)) ? "numeric" : "any", fieldSource);
         }
         if (object(raw.labels)) {
             const fieldSource = (raw.labels.fieldSource ?? defaultSource) as FieldReferenceSource;
-            emitValue(context, raw.labels, "field", `${path}/labels/field`, "any", fieldSource);
-            templateString(context, raw.labels, "template", `${path}/labels/template`, fieldSource);
+            emitValue(layerContext, raw.labels, "field", `${path}/labels/field`, "any", fieldSource);
+            templateString(layerContext, raw.labels, "template", `${path}/labels/template`, fieldSource);
         }
         for (const section of ["popup", "tooltip"]) {
             const sectionValue = raw[section];
             if (!object(sectionValue)) continue;
-            if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(context, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
-            for (const key of ["html", "template", "title"]) templateString(context, sectionValue, key, `${path}/${section}/${key}`, defaultSource);
+            if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(layerContext, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
+            for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, defaultSource);
         }
         // Visibility conditions and declarative interaction payloads operate on
         // the Power BI-backed row context even when the visual layer is joined
         // to an external service. Service/joined attributes stay explicit in
         // renderer, label, popup, and tooltip fieldSource metadata.
-        if (object(raw.visibility)) emitValue(context, raw.visibility, "conditionField", `${path}/visibility/conditionField`, "any", sourceFor(context));
-        if (object(raw.interaction)) emitValue(context, raw.interaction, "field", `${path}/interaction/field`, "any", sourceFor(context));
+        const filters = Array.isArray(raw.filter) ? raw.filter : [raw.filter];
+        filters.forEach((filter, filterIndex) => { if (object(filter)) emitValue(layerContext, filter, "field", `${path}/filter/${filterIndex}/field`, "any", sourceFor(layerContext)); });
+        if (object(raw.visibility)) emitValue(layerContext, raw.visibility, "conditionField", `${path}/visibility/conditionField`, "any", sourceFor(layerContext));
+        if (object(raw.interaction)) emitValue(layerContext, raw.interaction, "field", `${path}/interaction/field`, "any", sourceFor(layerContext));
     });
 }
 

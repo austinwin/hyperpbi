@@ -62,30 +62,50 @@ export function HyperPbiRoot({ instanceId, schema, data, settings, renderMs, ref
     const scope = `#${instanceId}`; const cssMode = config.security?.cssMode ?? "scoped"; const sanitizedCss = useMemo(() => sanitizeCss(`${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}\n${settings.customCss}`, scope, { mode: cssMode }), [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode]);
     const getRowsForComponent = useCallback((componentId:string) => rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }), [data.rows, data.rowKeys, rows, state]);
     const componentRows = useCallback((componentId:string) => selectedComponentRows(componentId, { state }), [state]);
+    const getDatasetView = useCallback((name = "powerbi", componentId?: string) => {
+        const result = datasetEvaluation.datasets.get(name);
+        if (!result) return undefined;
+        const datasetRows = result.data.rows;
+        const selectedRows = componentId
+            ? rowsForComponent(datasetRows, result.data.rowKeys, datasetRows, componentId, { state })
+            : datasetRows;
+        const indexByRow = new Map(datasetRows.map((row, index) => [row, index] as const));
+        const rowIndices = selectedRows.map(row => indexByRow.get(row) ?? -1).filter(index => index >= 0);
+        return {
+            name,
+            rows: rowIndices.map(index => datasetRows[index]),
+            fields: result.data.fields,
+            rowIndices,
+            rowKeys: rowIndices.map(index => result.data.rowKeys[index] ?? `${name}:${index}`),
+            sourceRowIndices: rowIndices.map(index => [...(result.lineage[index] ?? [])]),
+            sourceRowKeys: rowIndices.map(index => (result.lineage[index] ?? []).map(sourceIndex => data.rowKeys[sourceIndex] ?? String(sourceIndex))),
+            totalRows: datasetRows.length,
+        };
+    }, [datasetEvaluation.datasets, state, data.rowKeys]);
     const isOverlayOpen = useCallback((id: string) => state.openOverlays.includes(id), [state.openOverlays]);
 
     // Build a context object that executeUiAction can read from
     const execUiAction = useCallback((action: UiAction | UiAction[], event?: Event): UiActionResult => {
         const ctx: RenderContextValue = {
-            instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
-            getRowsForComponent, componentRows, schema, settings, state, dispatch,
+            instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys, powerBiSourceRows: data.rows, powerBiSourceRowKeys: data.rowKeys,
+            getRowsForComponent, getDatasetView, componentRows, schema, settings, state, dispatch,
             warnings: sanitizedCss.warnings,
             selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
             config, webAccessAvailable,providerAccess:effectiveProviderAccess,ownerByRuntimeId, datasets:datasetEvaluation.datasets,
             executeUiAction: (null as any), isOverlayOpen: (null as any),
         };
         return executeUiActions(action, ctx, event);
-    }, [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable,effectiveProviderAccess, datasetEvaluation.datasets]);
+    }, [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, getDatasetView, componentRows, schema, settings, state, dispatch, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction, config, webAccessAvailable,effectiveProviderAccess, datasetEvaluation.datasets]);
 
     const context = useMemo((): RenderContextValue => ({
-        instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys,
-        getRowsForComponent, componentRows, schema, settings, state, dispatch,
+        instanceId, data: filteredData, rows, sourceRows: data.rows, sourceRowKeys: data.rowKeys, powerBiSourceRows: data.rows, powerBiSourceRowKeys: data.rowKeys,
+        getRowsForComponent, getDatasetView, componentRows, schema, settings, state, dispatch,
         warnings: sanitizedCss.warnings,
         selectExternal, selectSourceRows:selectExternal, clearExternal, applyExternalFilter, clearExternalFilter, reportInteraction,
         config, webAccessAvailable,providerAccess:effectiveProviderAccess,ownerByRuntimeId, datasets:datasetEvaluation.datasets,
         executeUiAction: execUiAction,
         isOverlayOpen,
-    }), [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable,effectiveProviderAccess, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
+    }), [instanceId, filteredData, rows, data.rows, data.rowKeys, getRowsForComponent, getDatasetView, componentRows, schema, settings, state, sanitizedCss.warnings, selectExternal, clearExternal, applyExternalFilter,clearExternalFilter,reportInteraction, config, webAccessAvailable,effectiveProviderAccess, execUiAction, isOverlayOpen,datasetEvaluation.datasets]);
     const style = themeVariables(schema.theme, settings);
     const hasSidePanel = Boolean(schema.leftPanel?.length); const panelWidth = schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth; const sideCollapsible = schema.layout?.leftPanel?.collapsible === true; const collapsedState = state.collapsed.__leftPanel; const sideCollapsed = sideCollapsible && (collapsedState === undefined ? schema.layout?.leftPanel?.defaultCollapsed === true : collapsedState);
     const resolvedApp = useMemo(() => resolveAppShell(schema, settings, state), [schema, settings, state]);

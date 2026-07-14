@@ -12,13 +12,31 @@ import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
 
+export interface ResolvedDatasetView {
+    name: string;
+    rows: DataRow[];
+    fields: NormalizedData["fields"];
+    /** Row positions in the evaluated logical dataset before component interaction filtering. */
+    rowIndices: number[];
+    rowKeys: string[];
+    /** Contributing original Power BI data-view row positions for each logical row. */
+    sourceRowIndices: number[][];
+    /** Contributing original Power BI row keys/identities for each logical row. */
+    sourceRowKeys: string[][];
+    totalRows: number;
+}
+
 export interface RenderContextValue {
     instanceId?: string;
     data: NormalizedData;
     rows: DataRow[];
     sourceRows: DataRow[];
     sourceRowKeys: string[];
+    /** Unadapted rows and identities from the single Power BI data view. */
+    powerBiSourceRows?: DataRow[];
+    powerBiSourceRowKeys?: string[];
     getRowsForComponent: (componentId: string) => DataRow[];
+    getDatasetView?: (name?: string, componentId?: string) => ResolvedDatasetView | undefined;
     componentRows: (componentId: string) => number[];
     schema: HyperPbiSchema;
     settings: RuntimeSettings;

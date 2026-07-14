@@ -13,7 +13,7 @@ import { MapToolbarPopover } from "./MapToolbarPopover";
 import { MapSearchPanel } from "./MapSearchPanel";
 import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import { resolveLegacyMapLayers } from "../../maps/model/legacyMapResolver";
-import { resolvePowerBiLayer, type MapSourceContext } from "../../maps/sources/mapSourceResolver";
+import { effectiveMapLayerDataset, geometryAnalysis, resolvePowerBiLayer, type MapSourceContext } from "../../maps/sources/mapSourceResolver";
 import { executeArcGisFeatureQuery, type ArcGisFeatureQueryRequest } from "../../maps/arcgis/arcGisFeatureQuery";
 import { executeMapJoin } from "../../maps/join/mapJoinEngine";
 import { adaptArcGisRenderer, adaptArcGisLabels } from "../../maps/renderers/arcGisRendererAdapter";
@@ -23,6 +23,7 @@ import type { MapLayerDefinition, ArcGisFeatureLayerSource, ArcGisTileLayerSourc
 import { resolvedFeatureValue } from "../../maps/model/mapFeatureValue";
 import type { MapToolbarPopover as MapToolbarPopoverState } from "../../render/stateStore";
 import { externalServiceAccess } from "../../providers/providerPolicy";
+import { applyGlobalMapFeatureBudget } from "../../maps/performance/mapFeatureBudget";
 
 export interface MapViewportState {
     bounds: [number, number, number, number];
@@ -73,6 +74,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const { data, sourceRows, settings, config } = context;
     const id = component.id ?? "map";
     const rows = context.getRowsForComponent(id);
+    const legacyCompatibility = !component.layers?.length;
     const serviceAccess = useCallback((endpoint: string) =>
         externalServiceAccess(context.providerAccess, endpoint, context.webAccessAvailable),
     [context.providerAccess, context.webAccessAvailable]);
@@ -107,22 +109,47 @@ export function MapBlock({ component }: { component: MapComponent }) {
         [layerDefinitions]
     );
 
-    // ── Source context for resolvers ─────────────────────────────────
-    const sourceContext: MapSourceContext = useMemo(() => ({
-        rows,
-        rowIndices,
-        rowKeys,
-        fields: data.fields,
-        runtimeBindings: config.bindings?.map,
-        geocodeCache: config.providers?.geocoder?.cacheEntries,
-    }), [rows, rowIndices, rowKeys, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
+    // ── One source context per effective layer dataset ───────────────
+    const layerSourceContexts = useMemo(() => new Map(layerDefinitions.map((definition, index) => {
+        const datasetName = effectiveMapLayerDataset(definition, component.dataset);
+        const view = context.getDatasetView?.(datasetName, id);
+        const fallbackAllowed = !context.getDatasetView && datasetName === (component.dataset ?? "powerbi");
+        const sourceContext: MapSourceContext = view ? {
+            rows: view.rows,
+            rowIndices: view.rowIndices,
+            rowKeys: view.rowKeys,
+            sourceRowIndices: view.sourceRowIndices,
+            sourceRowKeys: view.sourceRowKeys,
+            fields: view.fields,
+            datasetName,
+            datasetFound: true,
+            totalRows: view.totalRows,
+            geocodeCache: config.providers?.geocoder?.cacheEntries,
+            legacyCompatibility,
+            layerPath: `/components/${id}/layers/${index}`,
+        } : {
+            rows: fallbackAllowed ? rows : [],
+            rowIndices: fallbackAllowed ? rowIndices : [],
+            rowKeys: fallbackAllowed ? rowKeys : [],
+            sourceRowIndices: fallbackAllowed ? rowIndices.map(value => [value]) : [],
+            sourceRowKeys: fallbackAllowed ? rowKeys.map(value => [value]) : [],
+            fields: fallbackAllowed ? data.fields : {},
+            datasetName,
+            datasetFound: fallbackAllowed,
+            totalRows: fallbackAllowed ? rows.length : 0,
+            geocodeCache: config.providers?.geocoder?.cacheEntries,
+            legacyCompatibility,
+            layerPath: `/components/${id}/layers/${index}`,
+        };
+        return [definition.id, sourceContext] as const;
+    })), [layerDefinitions, component.dataset, context.getDatasetView, id, config.providers?.geocoder?.cacheEntries, legacyCompatibility, rows, rowIndices, rowKeys, data.fields]);
 
     // ── Synchronous Power BI layer resolution ────────────────────────
     const syncedLayers: ResolvedMapLayer[] = useMemo(() => {
         return layerDefinitions
             .filter(def => def.source.type === "powerbi")
-            .map(def => resolvePowerBiLayer(def, sourceContext));
-    }, [layerDefinitions, sourceContext]);
+            .map(def => resolvePowerBiLayer(def, layerSourceContexts.get(def.id)!));
+    }, [layerDefinitions, layerSourceContexts]);
 
     // ── Viewport state ───────────────────────────────────────────────
     const [viewport, setViewport] = useState<MapViewportState | null>(null);
@@ -166,7 +193,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
         useState<Record<string, ArcGisFeatureRuntimeEntry>>({});
     const [layerRuntimeState, setLayerRuntimeState] = useState<Record<
         string,
-        { loading?: boolean; error?: string; warnings: string[] }
+        { loading?: boolean; error?: string; warnings: string[]; renderMs?: number }
     >>({});
 
     const arcGisFeatureDefinitions = useMemo(
@@ -235,7 +262,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
             const layer = access.allowed
                 ? await resolveArcGisFeatureLayer(
                     definition,
-                    sourceContext,
+                    layerSourceContexts.get(definition.id)!,
                     controller.signal,
                     definition.performance?.viewportQuery === true
                         ? viewportRef.current
@@ -292,7 +319,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
             }
         }
         void reason;
-    }, [sourceContext, serviceAccess]);
+    }, [layerSourceContexts, serviceAccess]);
 
     // Initial/data path: resolve every feature definition, independent of viewport changes.
     useEffect(() => {
@@ -351,7 +378,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
     const handleLayerRuntimeStateChange = useCallback((
         layerId: string,
-        update: { loading?: boolean; error?: string; warning?: string }
+        update: { loading?: boolean; error?: string; warning?: string; renderMs?: number }
     ) => {
         setLayerRuntimeState(previous => {
             const current = previous[layerId] ?? { warnings: [] };
@@ -364,6 +391,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                     ...current,
                     ...(update.loading !== undefined ? { loading: update.loading } : {}),
                     ...(update.error !== undefined ? { error: update.error } : {}),
+                    ...(update.renderMs !== undefined ? { renderMs: update.renderMs } : {}),
                     warnings,
                 },
             };
@@ -376,28 +404,37 @@ export function MapBlock({ component }: { component: MapComponent }) {
         .filter((layer): layer is ResolvedMapLayer => Boolean(layer)), [arcGisFeatureState]);
 
     const allResolvedLayers: ResolvedMapLayer[] = useMemo(() => {
-        return [...syncedLayers, ...resolvedArcGisFeatureLayers, ...staticExternalLayers]
+        const ordered = [...syncedLayers, ...resolvedArcGisFeatureLayers, ...staticExternalLayers]
             .map(layer => {
+                const group = layer.groupId ? component.layerGroups?.find(candidate => candidate.id === layer.groupId) : undefined;
+                const groupedLayer = group ? {
+                    ...layer,
+                    visible: (group.visible ?? true) && layer.visible,
+                    opacity: Math.max(0, Math.min(1, (group.opacity ?? 1) * layer.opacity)),
+                    order: (group.order ?? 0) * 100_000 + layer.order,
+                } : layer;
                 const runtime = layerRuntimeState[layer.id];
-                if (!runtime) return layer;
-                const warnings = [...layer.diagnostics.warnings];
+                if (!runtime) return groupedLayer;
+                const warnings = [...groupedLayer.diagnostics.warnings];
                 for (const warning of runtime.warnings) {
                     if (!warnings.includes(warning)) warnings.push(warning);
                 }
                 return {
-                    ...layer,
-                    loading: runtime.loading ?? layer.loading,
-                    error: runtime.error ?? layer.error,
+                    ...groupedLayer,
+                    loading: runtime.loading ?? groupedLayer.loading,
+                    error: runtime.error ?? groupedLayer.error,
                     diagnostics: {
-                        ...layer.diagnostics,
-                        loading: runtime.loading ?? layer.diagnostics.loading,
-                        error: runtime.error ?? layer.diagnostics.error,
+                        ...groupedLayer.diagnostics,
+                        loading: runtime.loading ?? groupedLayer.diagnostics.loading,
+                        error: runtime.error ?? groupedLayer.diagnostics.error,
+                        layerRenderMs: runtime.renderMs ?? groupedLayer.diagnostics.layerRenderMs,
                         warnings,
                     },
                 };
             })
             .sort((a, b) => a.order - b.order);
-    }, [syncedLayers, resolvedArcGisFeatureLayers, staticExternalLayers, layerRuntimeState]);
+        return applyGlobalMapFeatureBudget(ordered);
+    }, [syncedLayers, resolvedArcGisFeatureLayers, staticExternalLayers, layerRuntimeState, component.layerGroups]);
 
     // ── Determine if we should show map or empty state ───────────────
     const hasAnyFeatures = allResolvedLayers.some(l => l.features.length > 0);
@@ -413,13 +450,13 @@ export function MapBlock({ component }: { component: MapComponent }) {
     let content;
     if (!settings.map.enabled) {
         content = <EmptyState title="Maps are disabled in formatting settings" />;
-    } else if (!hasExternalLayers && map.mode === "none") {
+    } else if (legacyCompatibility && !hasExternalLayers && map.mode === "none") {
         content = <MapEmptyState reason={map.warnings[0]} />;
-    } else if (!hasExternalLayers && map.mode === "address" && !map.layers.some(layer => layer.features.some(feature => feature.type === "point"))) {
+    } else if (legacyCompatibility && !hasExternalLayers && map.mode === "address" && !map.layers.some(layer => layer.features.some(feature => feature.type === "point"))) {
         content = <MapEmptyState reason={map.warnings[0]} />;
-    } else if (!hasExternalLayers && map.mode === "xy" && coordinateSystem.toUpperCase() !== "EPSG:4326") {
+    } else if (legacyCompatibility && !hasExternalLayers && map.mode === "xy" && coordinateSystem.toUpperCase() !== "EPSG:4326") {
         content = <MapEmptyState reason={`Coordinate system ${coordinateSystem} requires an approved projection adapter.`} />;
-    } else if (!hasExternalLayers && !map.layers.some(layer => layer.features.length)) {
+    } else if (legacyCompatibility && !hasExternalLayers && !map.layers.some(layer => layer.features.length)) {
         content = <MapEmptyState reason={map.warnings[0] ?? "Bound map fields contain no valid locations."} />;
     } else if (hasExternalLayers && arcGisLoading && !hasAnyFeatures && !hasTileOrDynamicLayers) {
         content = <MapEmptyState reason="Loading ArcGIS layers…" />;
@@ -435,7 +472,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 subtitle={`${allResolvedLayers.length.toLocaleString()} total`}
                 onClose={closePopover}
             >
-                <MapLayerPanel mapId={id} layers={allResolvedLayers} configuration={component.layerPanel} />
+                <MapLayerPanel mapId={id} layers={allResolvedLayers} groups={component.layerGroups} configuration={component.layerPanel} onZoomLayer={layerId => mapControllerRef.current?.zoomToLayer(layerId)} />
             </MapToolbarPopover>
         ) : activeToolbarPopover === "legend" ? (
             <MapToolbarPopover
@@ -474,6 +511,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                         popoverContent={popoverContent}
                         onHome={() => mapControllerRef.current?.home()}
                         onZoomToSelection={() => mapControllerRef.current?.zoomToSelection()}
+                        onBookmark={bookmarkId => mapControllerRef.current?.goToBookmark(bookmarkId)}
                         onSetPopover={popover => context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover })}
                         onClearSelection={() => {
                             context.dispatch({ type: "resetInteractions" });
@@ -510,10 +548,19 @@ export async function resolveArcGisFeatureLayer(
     signal: AbortSignal,
     viewport?: MapViewportState | null
 ): Promise<ResolvedMapLayer> {
+    const resolutionStarted = globalThis.performance?.now?.() ?? Date.now();
     const source = def.source as ArcGisFeatureLayerSource;
     const warnings: string[] = [];
     let usedServiceSymbology = false;
     let usedServiceLabels = false;
+    const datasetName = context.datasetName ?? def.dataset ?? "powerbi";
+    if (context.datasetFound === false) {
+        const shell = createArcGisErrorShell(def, `Logical dataset “${datasetName}” is not available for layer “${def.name}”.`);
+        shell.datasetName = datasetName;
+        shell.diagnostics.effectiveDataset = datasetName;
+        shell.diagnostics.issues = [{ code: "MAP_LAYER_DATASET_NOT_FOUND", severity: "error", message: shell.error!, path: `${context.layerPath ?? `/layers/${def.id}`}/dataset` }];
+        return shell;
+    }
 
     // ── Build required fields for query ──────────────────────────────
     const requiredFields = collectArcGisQueryFields(def, source);
@@ -552,14 +599,17 @@ export async function resolveArcGisFeatureLayer(
         useServiceRenderer: source.useServiceRenderer === true || def.renderer?.type === "service",
         useServiceLabels: source.useServiceLabels === true && !def.labels,
     };
+    const requestStarted = globalThis.performance?.now?.() ?? Date.now();
     const queryResult = await executeArcGisFeatureQuery(queryRequest);
+    const requestMs = (globalThis.performance?.now?.() ?? Date.now()) - requestStarted;
 
     const metadata = queryResult.metadata;
     const objectIdField = queryResult.objectIdField;
 
     let features: ResolvedMapFeature[] = [];
     let joinDiagnostics: MapJoinDiagnostics | undefined = undefined;
-    let geometryType = queryResult.geometryType ?? "unknown";
+    let joinMs: number | undefined;
+    let geometryType: ResolvedMapLayer["geometryType"] = (queryResult.geometryType ?? "unknown") as ResolvedMapLayer["geometryType"];
 
     // ── Adapt service renderer ───────────────────────────────────────
     const rendererAdaptation = adaptArcGisRenderer(metadata?.drawingInfo?.renderer);
@@ -593,13 +643,15 @@ export async function resolveArcGisFeatureLayer(
             fieldSource: def.labels.fieldSource,
             template: def.labels.template,
             placement: def.labels.placement ?? "center",
-            minZoom: def.labels.minZoom,
-            maxZoom: def.labels.maxZoom,
+            minZoom: [def.labels.minZoom, def.visibility?.minZoom].filter((value): value is number => value !== undefined).reduce<number | undefined>((current, value) => current === undefined ? value : Math.max(current, value), undefined),
+            maxZoom: [def.labels.maxZoom, def.visibility?.maxZoom].filter((value): value is number => value !== undefined).reduce<number | undefined>((current, value) => current === undefined ? value : Math.min(current, value), undefined),
             color: def.labels.color ?? "#333333",
             size: def.labels.size ?? 12,
             weight: def.labels.weight ?? "normal",
             haloColor: def.labels.haloColor,
             haloSize: def.labels.haloSize,
+            backgroundColor: def.labels.backgroundColor,
+            padding: def.labels.padding,
             collision: def.labels.collision ?? "none",
             maxLabels: def.labels.maxLabels,
         }
@@ -618,10 +670,13 @@ export async function resolveArcGisFeatureLayer(
 
     if (source.mode === "join" && def.join) {
         // Execute join
+        const joinStarted = globalThis.performance?.now?.() ?? Date.now();
         const joinResult = executeMapJoin({
             powerBiRows: context.rows,
             powerBiRowIndices: context.rowIndices,
             powerBiRowKeys: context.rowKeys,
+            powerBiSourceRowIndices: context.sourceRowIndices,
+            powerBiSourceRowKeys: context.sourceRowKeys,
             serviceFeatures: queryResult.features,
             definition: def.join,
             layerId: def.id,
@@ -629,10 +684,8 @@ export async function resolveArcGisFeatureLayer(
 
         features = joinResult.features;
         joinDiagnostics = joinResult.diagnostics;
+        joinMs = (globalThis.performance?.now?.() ?? Date.now()) - joinStarted;
 
-        if (features.length > 0) {
-            geometryType = features[0].geometryType;
-        }
     } else {
         // Reference mode: convert service features directly
         features = queryResult.features.map(sf => ({
@@ -651,10 +704,14 @@ export async function resolveArcGisFeatureLayer(
             selected: false,
         } as ResolvedMapFeature));
 
-        if (features.length > 0) {
-            geometryType = features[0].geometryType;
-        }
     }
+
+    if (def.visibility?.conditionField && def.visibility.conditionValues?.length) {
+        features = features.filter(feature => def.visibility!.conditionValues!.some(value => Object.is(value, feature.powerBiAttributes[def.visibility!.conditionField!] ?? feature.joinedAttributes[def.visibility!.conditionField!])));
+    }
+    const geometry = geometryAnalysis(features);
+    geometryType = geometry.type;
+    if (geometry.type === "mixed") warnings.push(`Layer “${def.name}” contains mixed geometry types; supported features render independently.`);
 
     // Resolve renderer with actual features for continuous/proportional renderers
     if (resolvedRenderer && (def.renderer?.type === "continuousColor" ||
@@ -668,10 +725,12 @@ export async function resolveArcGisFeatureLayer(
         id: def.id,
         name: def.name ?? metadata?.name ?? `Layer ${source.layerId ?? ""}`,
         sourceType: "arcgisFeature",
-        geometryType: geometryType as "point" | "multipoint" | "polyline" | "polygon" | "unknown",
+        geometryType,
         visible: def.visible ?? true,
         opacity: def.opacity ?? 1,
         order: def.order ?? 10,
+        groupId: def.groupId,
+        datasetName,
         features,
         renderer: resolvedRenderer,
         labels: resolvedLabels,
@@ -710,6 +769,7 @@ export async function resolveArcGisFeatureLayer(
             externalMode: source.mode === "join" ? "selection" : "none",
         },
         legend: def.legend,
+        visibility: def.visibility,
         diagnostics: {
             featureCount: features.length,
             requestCount: queryResult.requestCount,
@@ -717,7 +777,7 @@ export async function resolveArcGisFeatureLayer(
             error: undefined,
             sourceType: "arcgisFeature",
             sourceUrl: queryResult.sourceUrl,
-            geometryType: geometryType as "point" | "multipoint" | "polyline" | "polygon" | "unknown",
+            geometryType,
             objectIdField: queryResult.objectIdField,
             joinField: def.join?.serviceField,
             joinDiagnostics,
@@ -726,6 +786,17 @@ export async function resolveArcGisFeatureLayer(
             cacheUsed: queryResult.usedCache,
             queryStrategy: queryResult.queryStrategy,
             warnings: [...warnings, ...queryResult.warnings],
+            issues: geometry.type === "mixed" ? [{ code: "MAP_LAYER_MIXED_GEOMETRY", severity: "warning", message: `Layer “${def.name}” contains mixed geometry types.`, details: { counts: geometry.counts } }] : [],
+            effectiveDataset: datasetName,
+            geometryTypeCounts: geometry.counts,
+            totalInputRows: context.rows.length,
+            filteredRowCount: Math.max(0, (context.totalRows ?? context.rows.length) - context.rows.length),
+            validFeatureCount: features.length,
+            rendererFieldSource: def.renderer && "fieldSource" in def.renderer ? def.renderer.fieldSource : undefined,
+            labelFieldSource: def.labels?.fieldSource,
+            sourceResolutionMs: (globalThis.performance?.now?.() ?? Date.now()) - resolutionStarted,
+            requestMs,
+            joinMs,
         },
         loading: false,
         tile: undefined,
@@ -812,6 +883,8 @@ export function createArcGisTileShell(def: MapLayerDefinition): ResolvedMapLayer
         visible: def.visible ?? true,
         opacity: def.opacity ?? 1,
         order: def.order ?? 5,
+        groupId: def.groupId,
+        datasetName: def.dataset,
         features: [],
         renderer: { type: "simple", symbol: {} },
         diagnostics: {
@@ -845,6 +918,8 @@ export function createArcGisDynamicShell(def: MapLayerDefinition): ResolvedMapLa
         visible: def.visible ?? true,
         opacity: def.opacity ?? 1,
         order: def.order ?? 6,
+        groupId: def.groupId,
+        datasetName: def.dataset,
         features: [],
         renderer: { type: "simple", symbol: {} },
         diagnostics: {
