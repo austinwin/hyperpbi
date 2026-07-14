@@ -51,6 +51,7 @@ const ICONS: Record<string, IconDefinition> = {
     location:   { name: "location",   category: "data",       path: "M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z" },
     activity:   { name: "activity",   category: "data",       path: "M3 12h4l3-9 4 18 3-9h4" },
     layers:     { name: "layers",     category: "data",       path: "M12 2l9 5-9 5-9-5 9-5zm0 7l9 5-9 5-9-5 9-5zm0 7l6.7 3.7L12 23l-6.7-3.3L12 16z" },
+    bookmark:   { name: "bookmark",   category: "actions",    path: "M6 4a2 2 0 012-2h8a2 2 0 012 2v18l-6-4-6 4V4z" },
     database:   { name: "database",   category: "data",       path: "M4 6c0 1.7 3.6 3 8 3s8-1.3 8-3M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" },
     folder:     { name: "folder",     category: "navigation", path: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6.5l-2-2H5a2 2 0 00-2 2z" },
     grid:       { name: "grid",       category: "layout",     path: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" },

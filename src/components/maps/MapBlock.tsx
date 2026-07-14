@@ -17,6 +17,7 @@ import { MapToolbar } from "./MapToolbar";
 import { mapToolbarPopoverId } from "./MapToolbar";
 import { MapToolbarPopover } from "./MapToolbarPopover";
 import { MapSearchPanel } from "./MapSearchPanel";
+import { MapBookmarkPanel } from "./MapBookmarkPanel";
 import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import { resolveLegacyMapLayers } from "../../maps/model/legacyMapResolver";
 import {
@@ -263,6 +264,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
   // ── Map controller ref ───────────────────────────────────────────
   const mapControllerRef = useRef<LeafletMapController | null>(null);
+  const [activeBookmarkId, setActiveBookmarkId] = useState<string>();
   const handleControllerReady = useCallback((ctrl: LeafletMapController) => {
     mapControllerRef.current = ctrl;
   }, []);
@@ -740,6 +742,23 @@ export function MapBlock({ component }: { component: MapComponent }) {
             onClearResult={() => mapControllerRef.current?.clearSearchResult()}
           />
         </MapToolbarPopover>
+      ) : activeToolbarPopover === "bookmarks" ? (
+        <MapToolbarPopover
+          id={mapToolbarPopoverId(id, "bookmarks")}
+          title="View bookmarks"
+          subtitle={`${component.bookmarks?.length ?? 0} saved view${component.bookmarks?.length === 1 ? "" : "s"}`}
+          onClose={closePopover}
+        >
+          <MapBookmarkPanel
+            bookmarks={component.bookmarks ?? []}
+            activeBookmarkId={activeBookmarkId}
+            onActivate={(bookmarkId) => {
+              setActiveBookmarkId(bookmarkId);
+              mapControllerRef.current?.goToBookmark(bookmarkId);
+              closePopover();
+            }}
+          />
+        </MapToolbarPopover>
       ) : undefined;
     content = (
       <>
@@ -756,9 +775,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
               onHome={() => mapControllerRef.current?.home()}
               onZoomToSelection={() =>
                 mapControllerRef.current?.zoomToSelection()
-              }
-              onBookmark={(bookmarkId) =>
-                mapControllerRef.current?.goToBookmark(bookmarkId)
               }
               onSetPopover={(popover) =>
                 context.dispatch({

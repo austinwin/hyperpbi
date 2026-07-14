@@ -447,6 +447,20 @@ describe("map popup lifecycle", () => {
     renderMap(host, test.value, layer);
 
     const mountedFeature = leaflet.markers[0];
+    expect(leaflet.maps[0].getPane("hp-map-popup")?.style.zIndex).toBe("1000");
+    expect(leaflet.maps[0].getPane("hp-map-tooltip")?.style.zIndex).toBe("850");
+    expect(mountedFeature.popupOptions).toMatchObject({
+      pane: "hp-map-popup",
+      autoPan: true,
+      keepInView: true,
+      closeButton: true,
+      autoClose: true,
+      closeOnEscapeKey: true,
+      minWidth: 220,
+      maxWidth: 420,
+      autoPanPaddingTopLeft: [16, 56],
+      autoPanPaddingBottomRight: [16, 16],
+    });
     mountedFeature.fire("click", { originalEvent: {} });
 
     expect(leaflet.popupOpen).toHaveBeenCalledTimes(1);

@@ -26,7 +26,6 @@ interface MapToolbarProps {
     onZoomToSelection: () => void;
     onSetPopover: (popover: MapToolbarPopoverState) => void;
     onClearSelection: () => void;
-    onBookmark?: (bookmarkId: string) => void;
 }
 
 export function MapToolbar({
@@ -41,7 +40,6 @@ export function MapToolbar({
     onZoomToSelection,
     onSetPopover,
     onClearSelection,
-    onBookmark = () => undefined,
 }: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
     const actions: Array<{
@@ -56,6 +54,7 @@ export function MapToolbar({
         { id: "layers", icon: "layers", label: "Layers", show: layerControlEnabled && toolbar.layers !== false, popover: "layers", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "layers")) },
         { id: "legend", icon: "list", label: "Legend", show: legendEnabled && toolbar.legend !== false, popover: "legend", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "legend")) },
         { id: "search", icon: "search", label: "Location search", show: searchEnabled && toolbar.search !== false, popover: "search", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "search")) },
+        { id: "bookmarks", icon: "bookmark", label: "View bookmarks", show: toolbar.bookmarks !== false && Boolean(component.bookmarks?.length), popover: "bookmarks", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "bookmarks")) },
         { id: "zoomToSelection", icon: "target", label: "Zoom to selected features", show: toolbar.zoomToSelection !== false, action: onZoomToSelection },
         { id: "clearSelection", icon: "close", label: "Clear selection", show: toolbar.clearSelection !== false, action: onClearSelection },
     ];
@@ -86,15 +85,6 @@ export function MapToolbar({
                     </div>
                 );
             })}
-            {toolbar.bookmarks !== false && component.bookmarks?.length ? (
-                <label class="hp-map-bookmark-picker">
-                    <span class="hp-map-visually-hidden">View bookmark</span>
-                    <select aria-label="View bookmark" value="" onChange={event => { const value = event.currentTarget.value; if (value) onBookmark(value); }}>
-                        <option value="">Bookmarks</option>
-                        {component.bookmarks.map(bookmark => <option value={bookmark.id}>{bookmark.label}</option>)}
-                    </select>
-                </label>
-            ) : null}
         </div>
     );
 }

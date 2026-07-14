@@ -17,7 +17,7 @@ export interface OverlayAnchor {
     triggerId?: string;
 }
 
-export type MapToolbarPopover = "layers" | "legend" | "search" | null;
+export type MapToolbarPopover = "layers" | "legend" | "search" | "bookmarks" | null;
 
 export interface DashboardState {
     search: string;
