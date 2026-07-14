@@ -53,19 +53,14 @@ import {
   type PreparedAuthoringData,
 } from "./prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
+import { StudioButton } from "./ui/StudioButton";
+import { StudioStatusChip } from "./ui/StudioStatusChip";
+import {
+  StudioWorkspaceNav,
+  type StudioWorkspaceId,
+} from "./ui/StudioWorkspaceNav";
 
-type EditorTab =
-  | "specification"
-  | "inspector"
-  | "mapStudio"
-  | "config"
-  | "ai"
-  | "skill"
-  | "calculations"
-  | "mapServices"
-  | "settings"
-  | "interactions"
-  | "help";
+type EditorTab = StudioWorkspaceId;
 type BottomTab =
   | "data"
   | "fields"
@@ -265,6 +260,7 @@ export function HyperPbiStudio({
   const [selectedRuntimeComponentId, setSelectedRuntimeComponentId] =
     useState("");
   const [inspectorMode, setInspectorMode] = useState(false);
+  const [focusMode, setFocusMode] = useState<"both" | "editor" | "preview">("both");
   const [mapViewports, setMapViewports] = useState<
     Record<string, MapViewportState>
   >({});
@@ -609,14 +605,6 @@ export function HyperPbiStudio({
     );
     setEditorTab("inspector");
   };
-  const tab = (id: EditorTab, label: string) => (
-    <button
-      class={editorTab === id ? "active" : ""}
-      onClick={() => setEditorTab(id)}
-    >
-      {label}
-    </button>
-  );
   const persistLayout = (next: StudioLayoutPreference) => {
     setLayout(next);
     onLayoutChange?.(JSON.stringify(next));
@@ -734,75 +722,87 @@ export function HyperPbiStudio({
             <span>H</span>
             <div>
               <strong>HyperPBI Builder</strong>
-              <small class={`hp-studio-state hp-state-${status.toLowerCase()}`}>
+              <StudioStatusChip
+                tone={status === "Invalid" ? "invalid" : status === "Unsaved" ? "warning" : status === "Ready" ? "valid" : "neutral"}
+                announce
+              >
                 {status}
-              </small>
+              </StudioStatusChip>
             </div>
           </div>
         </div>
         <div class="hp-studio-actions">
           {layout.advanced && (
             <>
-              <button type="button" onClick={formatActive}>
-                Format JSON
-              </button>
-              <button type="button" onClick={() => validate()}>
-                Validate
-              </button>
-              <button type="button" class="hp-run-button" onClick={() => run()}>
+              <div class="hp-studio-secondary-actions">
+                <StudioButton variant="secondary" onClick={formatActive}>Format JSON</StudioButton>
+                <StudioButton variant="secondary" onClick={() => validate()}>Validate</StudioButton>
+                <StudioButton
+                  variant="secondary"
+                  onClick={() => persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })}
+                >
+                  {layout.bottomOpen ? "Hide diagnostics" : "Show diagnostics"}
+                </StudioButton>
+              </div>
+              <StudioButton variant="primary" class="hp-run-button" onClick={() => run()}>
                 Validate & Preview
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })
-                }
-              >
-                {layout.bottomOpen ? "Hide Data & Fields" : "Data & Fields"}
-              </button>
+              </StudioButton>
+              {(errors.length > 0 || warnings.length > 0) && (
+                <StudioButton
+                  variant="compact"
+                  aria-label={`${errors.length + warnings.length} validation issues; open diagnostics`}
+                  onClick={() => {
+                    setBottomTab("errors");
+                    persistLayout({ ...layout, bottomOpen: true });
+                  }}
+                >
+                  {errors.length + warnings.length} issues
+                </StudioButton>
+              )}
+              <details class="hp-studio-action-overflow">
+                <summary aria-label="More Builder actions">More</summary>
+                <div>
+                  <button type="button" onClick={formatActive}>Format JSON</button>
+                  <button type="button" onClick={() => validate()}>Validate</button>
+                  <button type="button" onClick={() => persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })}>
+                    {layout.bottomOpen ? "Hide diagnostics" : "Show diagnostics"}
+                  </button>
+                </div>
+              </details>
             </>
           )}
-          <button
-            type="button"
+          <StudioButton
+            variant="secondary"
             class="hp-advanced-toggle"
             onClick={toggleAdvanced}
           >
             {layout.advanced ? "Simple mode" : "Advanced"}
-          </button>
-          <button type="button" onClick={() => setEditorTab("help")}>
+          </StudioButton>
+          <StudioButton variant="secondary" onClick={() => setEditorTab("help")}>
             Help
-          </button>
-          <button
+          </StudioButton>
+          <StudioButton
+            variant="primary"
             class={`hp-save-return ${preview ? "is-ready" : ""}`}
-            type="button"
             disabled={!layout.advanced && !preview}
             onClick={save}
           >
             Save & return
-          </button>
+          </StudioButton>
         </div>
       </header>
-      <nav class="hp-studio-tabs">
-        {tab("ai", layout.advanced ? "AI builder" : "Guided builder")}
-        {!layout.advanced && tab("help", "How it works")}
-        {layout.advanced && (
-          <>
-            {tab("inspector", "Inspector")}
-            {tab("mapStudio", "Map Studio")}
-            {tab("specification", "JSON")}
-            {tab("config", "Runtime config")}
-            {tab("skill", "AI skill")}
-            {tab("calculations", "Calculations")}
-            {tab("mapServices", "Map services")}
-            {tab("settings", "Field mapping")}
-            {tab("interactions", "Interactions")}
-            {tab("help", "Documentation")}
-          </>
+      <div class="hp-studio-navigation-row">
+        <StudioWorkspaceNav value={editorTab} advanced={layout.advanced} onChange={setEditorTab} />
+        {settings.editor.previewPosition !== "hidden" && (
+          <div class="hp-studio-focus-actions" aria-label="Workbench focus">
+            <StudioButton variant="compact" aria-pressed={focusMode === "editor"} onClick={() => setFocusMode((mode) => mode === "editor" ? "both" : "editor")}>Focus editor</StudioButton>
+            <StudioButton variant="compact" aria-pressed={focusMode === "preview"} onClick={() => setFocusMode((mode) => mode === "preview" ? "both" : "preview")}>Focus preview</StudioButton>
+          </div>
         )}
-      </nav>
+      </div>
       <div
         ref={workbenchRef}
-        class="hp-studio-workbench"
+        class={`hp-studio-workbench is-focus-${focusMode}`}
         style={{ "--hp-editor-size": `${layout.editorPercent}%` }}
       >
         <section class="hp-studio-editor-pane">

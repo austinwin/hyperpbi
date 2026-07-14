@@ -15,7 +15,8 @@ describe("Map Studio and Visual Inspector integration", () => {
         act(() => Array.from(host.querySelectorAll<HTMLButtonElement>("button")).find(item => item.textContent === "Open in Map Studio")!.click());
         expect(host.querySelector(".hp-map-studio")).not.toBeNull();
         expect((host.querySelector('[aria-label="Selected map"]') as HTMLSelectElement).value).toBe("operations");
-        act(() => Array.from(host.querySelectorAll<HTMLButtonElement>(".hp-studio-tabs button")).find(item => item.textContent === "Inspector")!.click());
+        act(() => Array.from(host.querySelectorAll<HTMLButtonElement>(".hp-studio-workspace-group > button")).find(item => item.textContent?.includes("Build"))!.click());
+        act(() => Array.from(host.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(item => item.textContent === "Inspector")!.click());
         expect(host.textContent).toContain("operations");
         act(() => render(null, host));
     });
