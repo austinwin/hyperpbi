@@ -55,3 +55,37 @@ export function createLeafletPointLayer(
         }),
     });
 }
+
+/** Update a mounted point without replacing the Leaflet feature instance. */
+export function updateLeafletPointLayerStyle(
+    layer: L.Layer,
+    style: LeafletFeatureStyle,
+    layerOpacity: number,
+): boolean {
+    const path = layer as L.Path & { setRadius?: (radius: number) => unknown };
+    if (typeof path.setStyle === "function") {
+        path.setStyle({
+            color: style.color,
+            fillColor: style.fillColor,
+            fillOpacity: Math.max(0, Math.min(1, style.fillOpacity * layerOpacity)),
+            opacity: Math.max(0, Math.min(1, style.opacity * layerOpacity)),
+            weight: style.weight,
+            dashArray: style.dashArray,
+        });
+        path.setRadius?.(style.radius || 6);
+        return true;
+    }
+
+    const shape = style.shape;
+    const marker = layer as L.Marker;
+    if (!["square", "diamond", "triangle"].includes(shape ?? "") || typeof marker.setIcon !== "function") return false;
+    const radius = Math.max(2, Math.min(64, style.radius || 6));
+    const size = Math.ceil(radius * 2 + Math.max(0, style.weight) * 2);
+    marker.setIcon(L.divIcon({
+        className: `hp-map-point-shape hp-map-point-${shape}`,
+        html: safePointSvg(shape as "square" | "diamond" | "triangle", style, layerOpacity),
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+    }));
+    return true;
+}

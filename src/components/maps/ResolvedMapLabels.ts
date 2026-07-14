@@ -10,6 +10,7 @@ import { resolveSafeTemplate } from "./ResolvedMapPopup";
 
 export interface ResolvedMapLabelRuntime {
     group: L.LayerGroup;
+    setVisible: (visible: boolean) => void;
     cleanup: () => void;
     warnings: string[];
 }
@@ -115,7 +116,7 @@ export function createResolvedMapLabels(
     const warnings: string[] = [];
     const labels = layer.labels;
     if (!labels) {
-        return { group: L.layerGroup(), cleanup: () => {}, warnings };
+        return { group: L.layerGroup(), setVisible: () => {}, cleanup: () => {}, warnings };
     }
 
     if (labels.collision === "hideOverlaps") warnings.push("Label collision mode hideOverlaps uses basic bounded overlap hiding, not advanced cartographic placement.");
@@ -189,11 +190,12 @@ export function createResolvedMapLabels(
     }
 
     // Zoom visibility
+    let visible = options.visible;
     const handleZoom = () => {
         const zoom = map.getZoom();
         const belowMin = labels.minZoom !== undefined && zoom < labels.minZoom;
         const aboveMax = labels.maxZoom !== undefined && zoom > labels.maxZoom;
-        const shouldShow = options.visible && !belowMin && !aboveMax;
+        const shouldShow = visible && !belowMin && !aboveMax;
         if (shouldShow && !map.hasLayer(group)) {
             group.addTo(map);
         } else if (!shouldShow && map.hasLayer(group)) {
@@ -206,6 +208,10 @@ export function createResolvedMapLabels(
 
     return {
         group,
+        setVisible: (nextVisible) => {
+            visible = nextVisible;
+            handleZoom();
+        },
         cleanup: () => {
             map.off("zoomend", handleZoom);
             map.removeLayer(group);

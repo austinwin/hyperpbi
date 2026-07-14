@@ -34,6 +34,8 @@ const mocks = vi.hoisted(() => {
         fire(name: string, event: unknown = {}) { for (const handler of this.listeners.get(name) ?? []) handler(event); }
         bindTooltip(content: unknown) { this.tooltip = content; return this; }
         bindPopup(content: unknown) { this.popup = content; return this; }
+        setStyle(style: Record<string, unknown>) { Object.assign(this.options, style); return this; }
+        setRadius(radius: number) { this.options.radius = radius; return this; }
         getBounds() { const bounds = new Bounds(); bounds.extend([29, -95]); return bounds; }
     }
 
@@ -474,9 +476,9 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
         expect(mocks.createLabels).toHaveBeenCalledTimes(1);
         expect(runtimeState).toHaveBeenCalledWith("labels", { warning: "label warning" });
         renderMap(host, test.value, component, [labeled], { onLayerRuntimeStateChange: runtimeState });
-        expect(mocks.labelCleanups[0]).toHaveBeenCalledTimes(1);
-        expect(mocks.featureGroup).toHaveBeenCalledTimes(2);
+        expect(mocks.labelCleanups[0]).not.toHaveBeenCalled();
+        expect(mocks.featureGroup).toHaveBeenCalledTimes(1);
         act(() => render(null, host));
-        expect(mocks.labelCleanups.at(-1)).toHaveBeenCalled();
+        expect(mocks.labelCleanups[0]).toHaveBeenCalledTimes(1);
     });
 });
