@@ -1,0 +1,235 @@
+.hp-studio {
+  --hp-studio-control-height: 32px;
+  --hp-studio-control-radius: 5px;
+  --hp-studio-control-border: #cbd5df;
+  --hp-studio-control-focus: #206bc4;
+  --hp-studio-panel-bg: #fff;
+  --hp-studio-muted-bg: #f6f8fa;
+  --hp-studio-danger-bg: #fff1f0;
+  --hp-studio-warning-bg: #fff8df;
+  --hp-studio-sidebar-width: 260px;
+  container: hp-studio / inline-size;
+}
+
+.hp-studio :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea),
+.hp-map-studio :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea),
+.hp-spec-inspector :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--hp-studio-control-height, 32px);
+  padding: 5px 8px;
+  border: 1px solid var(--hp-studio-control-border, #cbd5df);
+  border-radius: var(--hp-studio-control-radius, 5px);
+  background: var(--hp-studio-panel-bg, #fff);
+  color: inherit;
+  font: inherit;
+}
+
+.hp-studio :where(input, select, textarea):hover,
+.hp-map-studio :where(input, select, textarea):hover,
+.hp-spec-inspector :where(input, select, textarea):hover {
+  border-color: #9eabb9;
+}
+
+.hp-studio :where(input, select, textarea):focus-visible,
+.hp-map-studio :where(input, select, textarea):focus-visible,
+.hp-spec-inspector :where(input, select, textarea):focus-visible {
+  border-color: var(--hp-studio-control-focus, #206bc4);
+  outline: 2px solid color-mix(in srgb, var(--hp-studio-control-focus, #206bc4) 24%, transparent);
+  outline-offset: 1px;
+}
+
+.hp-studio :where(input, select, textarea)[aria-invalid="true"],
+.hp-map-studio :where(input, select, textarea)[aria-invalid="true"],
+.hp-spec-inspector :where(input, select, textarea)[aria-invalid="true"] {
+  border-color: #c53b32;
+  background: var(--hp-studio-danger-bg, #fff1f0);
+}
+
+.hp-studio :where(input[type="checkbox"], input[type="radio"]),
+.hp-map-studio :where(input[type="checkbox"], input[type="radio"]),
+.hp-spec-inspector :where(input[type="checkbox"], input[type="radio"]) {
+  width: 17px;
+  min-width: 17px;
+  height: 17px;
+  min-height: 17px;
+  flex: 0 0 17px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: var(--hp-studio-control-focus, #206bc4);
+}
+
+.hp-studio-check {
+  min-width: 0;
+  display: flex !important;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.hp-studio-check > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.hp-studio-check strong {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.hp-studio-check small,
+.hp-studio-field-help {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.hp-studio-field {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.hp-studio-field-label {
+  color: #445165;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.hp-studio-field-error {
+  color: #a52a22;
+  font-size: 9px;
+}
+
+.hp-studio-button,
+.hp-studio-section button,
+.hp-studio-tablist button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--hp-studio-control-border, #cbd5df);
+  border-radius: var(--hp-studio-control-radius, 5px);
+  background: var(--hp-studio-panel-bg, #fff);
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.hp-studio-button:hover,
+.hp-studio-section button:hover,
+.hp-studio-tablist button:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.hp-studio-button:active,
+.hp-studio-section button:active,
+.hp-studio-tablist button:active {
+  transform: translateY(1px);
+}
+
+.hp-studio-button:focus-visible,
+.hp-studio-section button:focus-visible,
+.hp-studio-tablist button:focus-visible {
+  outline: 2px solid var(--hp-studio-control-focus, #206bc4);
+  outline-offset: 2px;
+}
+
+.hp-studio-button:disabled,
+.hp-studio-section button:disabled,
+.hp-studio-tablist button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hp-studio-button-primary {
+  border-color: #206bc4;
+  background: #206bc4;
+  color: #fff;
+}
+
+.hp-studio-button-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.hp-studio-button-danger,
+.hp-danger-action {
+  border-color: #c53b32 !important;
+  background: #fff !important;
+  color: #a52a22 !important;
+}
+
+.hp-studio-button-icon,
+.hp-studio-button-compact {
+  min-height: 28px;
+  padding: 3px 7px;
+}
+
+.hp-studio-status-chip {
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid #cbd5df;
+  border-radius: 999px;
+  background: #f6f8fa;
+  color: #526174;
+  font-size: 9px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.hp-studio-status-chip.is-valid { border-color: #99d1ae; background: #e8f6ed; color: #17703e; }
+.hp-studio-status-chip.is-invalid { border-color: #e9aaa5; background: #fff0ef; color: #a52a22; }
+.hp-studio-status-chip.is-warning { border-color: #e7c760; background: #fff8df; color: #725514; }
+.hp-studio-status-chip.is-loading { border-color: #a8c8e8; background: #edf5fd; color: #174f87; }
+.hp-studio-status-chip.is-experimental { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
+.hp-studio-status-chip.is-service { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+.hp-studio-status-chip.is-powerbi { border-color: #f0abfc; background: #fdf4ff; color: #a21caf; }
+.hp-studio-status-chip.is-joined { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+
+.hp-studio-section {
+  min-width: 0;
+  border: 1px solid #d8dee6;
+  border-radius: 6px;
+  background: var(--hp-studio-panel-bg, #fff);
+  overflow: clip;
+}
+
+.hp-studio-section > summary {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 9px;
+  background: var(--hp-studio-muted-bg, #f6f8fa);
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.hp-studio-section-body { padding: 9px; }
+.hp-studio-tablist { display: flex; align-items: center; gap: 3px; }
+.hp-studio-tablist button[aria-selected="true"] { border-color: #206bc4; background: #edf5fd; color: #174f87; }
+
+.hp-studio-dark {
+  --hp-studio-control-border: #475569;
+  --hp-studio-panel-bg: #111827;
+  --hp-studio-muted-bg: #1e293b;
+  --hp-studio-danger-bg: #3b1717;
+  --hp-studio-warning-bg: #382f13;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-studio-button,
+  .hp-studio-section button,
+  .hp-studio-tablist button {
+    transition: none;
+  }
+}
