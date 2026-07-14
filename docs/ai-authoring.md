@@ -82,7 +82,9 @@ Any type/property/action/dataset operation/pattern/alias/token not listed in the
 
 AI-authored maps must use the single Values field-well contract and Field Manifest aliases. Prefer explicit `layers[]`, optional per-layer `dataset`, and per-layer Power BI `source.bindings`. Never depend on or recommend a fixed map bucket, and never apply one global coordinate pair to multiple explicit layers. A layer omitting `dataset` inherits the map dataset and then `powerbi`.
 
-Power BI provides one flattened data view; logical datasets only transform those received rows and cannot independently query arbitrary model tables. Never invent a service URL, host, token, credential, layer ID, join field, or relationship. Use bounded `maxFeatures`/labels/classes and acknowledge partial or experimental capability diagnostics. Geocoder policy and behavior are unchanged.
+Power BI provides one flattened data view; logical datasets only transform those received rows and cannot independently query arbitrary model tables. Map Studio and the preview use the same prepared calculations, Runtime Config aliases/transformations, logical datasets, row keys, and lineage. Use `fieldSource: "powerbi"|"service"|"joined"` wherever supported; never send Power BI keys or joined aliases as ArcGIS service fields. `view.fitPadding` is a ratio from `0` through `0.5` (normally `0.08`), not pixels. Stable point symbols are `circle`, `square`, `diamond`, and `triangle`; cluster labels support `count` and numeric `sum`.
+
+ArcGIS metadata fetch, bounded join preview, interaction compatibility, and live-view bookmark capture are explicit Map Studio workflows, not extra persisted metadata. Never invent a service URL, host, token, credential, layer ID, join field, relationship, unsupported analytical tool, secured-service behavior, or experimental renderer guarantee. Use bounded `maxFeatures`/labels/classes and acknowledge partial or experimental capability diagnostics. Geocoder policy and behavior are unchanged.
 
 ## Current-spec and selected-section behavior
 

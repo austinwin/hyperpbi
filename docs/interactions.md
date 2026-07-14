@@ -104,6 +104,8 @@ Components validate fields against their selected logical dataset. Internal row 
 
 Map layers refine this rule: `layer.dataset` overrides the map dataset, and each layer carries its own rows, schema, row keys, and arrays of contributing Power BI identities. A grouped feature may select several source rows. ArcGIS joins preserve the same lineage on the Power BI side. External filter mode still requires an actual model-column target; service/joined attributes and dataset metrics cannot directly filter the semantic model.
 
+Map Studio's layer **Interaction** tab edits the existing universal interaction contract rather than a map-only engine. Its field selector follows `fieldSource`. Power BI and joined features may use retained Power BI identities for external selection; an external filter is enabled only for a direct model column with source table/column metadata. ArcGIS reference-only features can use local highlight/filter behavior, but the editor reports external Power BI selection/filter as unavailable when no genuine model target or lineage exists. Multi-select and clear-on-second-click continue through the shared interaction runtime.
+
 ## Compatibility
 
 Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. Obsolete `selectionTarget` is ignored with one documented migration warning; it does not select nodes or edges. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.

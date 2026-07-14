@@ -47,6 +47,7 @@ The runtime resolves source bindings, renderer fields, labels, popup/tooltip fie
 {
   "type": "map",
   "id": "operations_map",
+  "view": {"fitMode":"allLayers","fitPadding":0.08},
   "layerGroups": [{"id":"operations","name":"Operations","visible":true}],
   "bookmarks": [{"id":"downtown","label":"Downtown","center":[29.76,-95.37],"zoom":13}],
   "layers": [
@@ -59,7 +60,7 @@ The runtime resolves source bindings, renderer fields, labels, popup/tooltip fie
       "renderer": {"type":"uniqueValue","field":"facilityStatus","fieldSource":"powerbi"},
       "labels": {"enabled":true,"field":"facilityName","fieldSource":"powerbi","maxLabels":300},
       "popup": {"enabled":true,"title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
-      "filter": {"field":"facilityStatus","operator":"!=","value":"Retired"},
+      "filter": {"field":"facilityStatus","fieldSource":"powerbi","operator":"!=","value":"Retired"},
       "performance": {"maxFeatures":5000}
     },
     {
@@ -76,7 +77,7 @@ The runtime resolves source bindings, renderer fields, labels, popup/tooltip fie
 
 ## Map Studio
 
-Map Studio is a permanent specialized workspace alongside the Visual Inspector. Select a map in Inspector and choose **Open in Map Studio**, or open its Studio tab directly. Both workspaces share the selected component, canonical JSON, transaction validation, undo/redo history, and live preview. Invalid candidates leave the last valid preview unchanged.
+Map Studio is a permanent specialized workspace alongside the Visual Inspector. Select a map in Inspector and choose **Open in Map Studio**, or open its Studio tab directly. Both workspaces share the selected component, canonical JSON, validation, bounded undo/redo history, and live preview. The preview, Inspector, and Map Studio also share one prepared-data result: root calculations, Runtime Config transformations and aliases, logical datasets, field metadata, row keys, and source lineage therefore agree. Text inputs keep a local draft and commit one validated transaction on blur or Enter; Escape cancels. Invalid drafts remain visible for correction without replacing the last valid preview.
 
 Map Studio provides:
 
@@ -84,11 +85,12 @@ Map Studio provides:
 - unique IDs, rename, duplicate, two-step delete, drag/keyboard reorder, grouping, group visibility/opacity/collapse
 - effective dataset selection and dataset-aware field controls
 - geometry, coordinate, address, grouping, color, size, tooltip, and detail bindings
-- provider-specific URLs and public service metadata inspection
+- provider-specific URLs and explicit, cancellable public service metadata inspection; root services expose their sublayers and metadata-backed service field selectors
 - service/simple/unique/class-break/continuous/proportional/heatmap/cluster/density renderers
 - bounded unique-value/domain previews and editable manual breaks
-- labels, safe popups/tooltips, UI actions, structured filters, joins, visibility, and performance limits
-- basemap choices, authored view, layer groups, canonical view bookmarks, and static/runtime diagnostics
+- labels, safe popups/tooltips, UI actions, a first-class layer interaction editor, source-aware structured filters, joins, visibility, and performance limits
+- an explicit, cancellable **Run join preview** action bounded to 500 service features, using the runtime query, normalization, duplicate/unmatched policies, and join engine
+- basemap choices, reactive authored view, layer groups, live-preview view bookmarks, and static/runtime diagnostics
 
 Map Studio never creates a second hidden configuration model. Provider URLs must be supplied explicitly; it does not invent endpoints or credentials.
 
@@ -101,9 +103,11 @@ Map Studio never creates a second hidden configuration model. Provider URLs must
 | `arcgisTile` | Public HTTPS raster tile overlay with attribution and zoom bounds |
 | `arcgisDynamic` | Public dynamic map image requests with layer IDs/definitions, format, transparency, debounce, and zoom bounds |
 
-ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Results and warnings are bounded. Provider and Power BI attributes remain separate, with joined attributes as an explicit overlay.
+ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Results and warnings are bounded. Query `outFields` contain only fields whose effective `fieldSource` is `service`, plus required service join keys; Power BI keys and joined aliases are never sent as ArcGIS field names.
 
-Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, `numberString`), duplicate/unmatched policies, key batching, and aggregations. The preview reports local Power BI keys immediately; service/match counts populate after a public service query. A join never creates or implies a Power BI relationship.
+Feature attributes have three exact namespaces: `powerbi`, `service`, and `joined`. Renderer, labels, popup/tooltip, visibility, structured filters, interactions, and cluster sums use the selected `fieldSource`; a missing source never falls through to a same-named value in another namespace. Power BI layers default to `powerbi`, ArcGIS reference layers to `service`, and ArcGIS join layers to `joined`. Impossible source/layer combinations and metadata/schema misses produce structured diagnostics.
+
+Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, `numberString`), duplicate/unmatched policies, key batching, and aggregations. **Run join preview** is explicit rather than keystroke-triggered and reports bounded key, duplicate, match, unmatched, output, alias, request, truncation, sample, and duration data using the same logical dataset and runtime join path. A join never creates or implies a Power BI relationship.
 
 ## Runtime correctness and safety
 
@@ -111,6 +115,8 @@ Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, 
 - Geometry analysis examines all valid features and returns point, multipoint, polyline, polygon, mixed, or unknown. Mixed layers emit `MAP_LAYER_MIXED_GEOMETRY` with type counts.
 - Per-layer `maxFeatures` and a deterministic 20,000-feature map-wide budget prevent unbounded drawing.
 - Labels, popup fields, unique classes, class breaks, join preview samples, diagnostics, ArcGIS result counts, and caches are bounded.
+- Point features render the stable `circle`, `square`, `diamond`, and `triangle` symbols through a controlled marker factory; non-circle SVG contains no author markup or external URL.
+- An explicit `cluster` renderer is authoritative for a 2.0 layer even when the legacy global cluster switch is off. `clusterLabel: "count"` shows the member count; `"sum"` sums the numeric `aggregateField` from its exact field source and honors the bounded numeric format.
 - Source, renderer, request, join, and layer rendering timings are exposed in structured diagnostics where applicable.
 - Normal viewer diagnostics show a sanitized service origin, not the full raw URL.
 
@@ -120,7 +126,7 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 
 | Status | Capabilities |
 |---|---|
-| Implemented | per-layer datasets/bindings, groups, bookmarks, structured filters, supported basemaps, ArcGIS sources/joins, simple/unique/class-break/continuous/proportional/cluster renderers, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
+| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, reactive supported basemaps/views, ratio fit padding, ArcGIS sources/joins and metadata authoring, circle/square/diamond/triangle points, simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
 | Partial | `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
 | Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid, provider-dependent generalization, per-layer rather than streamed progressive drawing |
 | Unsupported | scale/coordinate readout, rectangle/lasso selection, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
@@ -130,7 +136,9 @@ Partial and experimental properties emit `MAP_CAPABILITY_LIMITATION`; Map Studio
 
 ## Viewer controls
 
-The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, and bookmarks. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use padded bounds.
+The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, and bookmarks. Basemap visibility/type/URL/attribution/max zoom and authored center/zoom/min/max synchronize to the mounted map without remounting or removing operational overlays. Unrelated layer changes do not reset a user's live navigation. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use `view.fitPadding`, a Leaflet bounds-padding ratio from `0` through `0.5` with default `0.08` (8%).
+
+Map Studio's **Add current view** reads the selected map's latest live preview center and zoom. It falls back to the authored view only when no live viewport is available, and a pan/zoom never changes canonical JSON until the author explicitly creates the bookmark.
 
 ## Search and geocoding are unchanged
 

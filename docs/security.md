@@ -89,3 +89,5 @@ External filters require a true model-column target. Dataset-derived fields/metr
 These profiles affect network privilege only; neither relaxes JSON, HTML, CSS, chart, SVG, interaction, or dataset safety.
 
 Map Studio edits canonical JSON and does not store credentials or hidden provider configuration. Popup HTML passes the existing sanitizer; popup actions use the safe UI-action allowlist. Normal viewer diagnostics expose only sanitized service origins. Geocoding endpoint, privacy, cache, and rate-limit behavior is unchanged by layer authoring.
+
+ArcGIS metadata fetch and **Run join preview** are explicit, cancellable actions; they are not triggered on each text edit. Metadata remains ephemeral, stale results are rejected, preview services/results/samples are bounded, and only service-origin fields are submitted as ArcGIS `outFields`. Controlled square/diamond/triangle marker SVG is generated internally and accepts no author markup or external resource. Unsupported analysis, feature editing, secured-service credentials, 3D, geoprocessing, and independent semantic-model queries remain outside the accepted 2.0 contract.
