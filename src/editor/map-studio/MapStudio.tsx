@@ -34,6 +34,9 @@ import { appendJsonPointer } from "../../schema/jsonPointer";
 import { MapDiagnosticsPanel } from "./MapDiagnosticsPanel";
 import { DraftInput } from "./MapDraftInput";
 import { FieldSelect } from "./MapFieldSelect";
+import { StudioButton } from "../ui/StudioButton";
+import { StudioCheckbox } from "../ui/StudioCheckbox";
+import { StudioStatusChip } from "../ui/StudioStatusChip";
 
 type Json = Record<string, unknown>;
 type PropertyTab =
@@ -47,6 +50,18 @@ type PropertyTab =
   | "interaction"
   | "performance"
   | "diagnostics";
+const propertyTabs: readonly { id: PropertyTab; label: string }[] = [
+  { id: "source", label: "Source" },
+  { id: "renderer", label: "Renderer" },
+  { id: "labels", label: "Labels" },
+  { id: "popup", label: "Popup" },
+  { id: "tooltip", label: "Tooltip" },
+  { id: "join", label: "Join" },
+  { id: "visibility", label: "Visibility" },
+  { id: "interaction", label: "Interaction" },
+  { id: "performance", label: "Performance" },
+  { id: "diagnostics", label: "Diagnostics" },
+];
 const object = (value: unknown): value is Json =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -119,6 +134,7 @@ export function MapStudio({
   );
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
   const [candidateWarnings, setCandidateWarnings] = useState<string[]>([]);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState("");
   const [dragging, setDragging] = useState("");
   const [metadata, setMetadata] = useState<{
@@ -128,6 +144,7 @@ export function MapStudio({
     errors?: string[];
   }>({});
   const metadataCache = useRef(new Map<string, ArcGisServiceInspection>());
+  const addMenuRef = useRef<HTMLDivElement>(null);
   const metadataRequest = useRef<{
     version: number;
     controller?: AbortController;
@@ -161,6 +178,21 @@ export function MapStudio({
       setSelectedLayerId(layerIds[0] ?? "__basemap__");
     setPendingDelete("");
   }, [mapId, json]);
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    const dismiss = (event: MouseEvent) => {
+      if (!addMenuRef.current?.contains(event.target as Node)) setAddMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAddMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [addMenuOpen]);
 
   const datasetDefinitions = useMemo(
     () =>
@@ -390,6 +422,18 @@ export function MapStudio({
       setPropertyTab("source");
     }
   };
+  const addGroup = () =>
+    mutateMap((candidate) => {
+      const id = uniqueId("layer-group");
+      candidate.layerGroups = [
+        ...(candidate.layerGroups ?? []),
+        {
+          id,
+          name: "Layer group",
+          order: candidate.layerGroups?.length ?? 0,
+        },
+      ];
+    });
   const moveLayer = (id: string, direction: -1 | 1) =>
     mutateMap((candidate) => {
       const layers = candidate.layers ?? [];
@@ -606,9 +650,9 @@ export function MapStudio({
     (left, right) => (left.order ?? 0) - (right.order ?? 0),
   );
   return (
-    <div class="hp-map-studio" data-mobile-pane={mobilePane}>
+    <div class="hp-studio hp-map-studio" data-mobile-pane={mobilePane}>
       <header class="hp-map-studio-toolbar">
-        <div>
+        <div class="hp-map-studio-title">
           <strong>Map Studio</strong>
           <select
             aria-label="Selected map"
@@ -620,22 +664,35 @@ export function MapStudio({
             ))}
           </select>
         </div>
-        <div>
-          <button
+        <div class="hp-map-studio-actions">
+          <StudioButton
+            variant="compact"
             disabled={!history.canUndo}
             onClick={() => restore(history.undo())}
           >
             Undo
-          </button>
-          <button
+          </StudioButton>
+          <StudioButton
+            variant="compact"
             disabled={!history.canRedo}
             onClick={() => restore(history.redo())}
           >
             Redo
-          </button>
-          <span class={prepared.specification ? "is-valid" : "is-invalid"}>
+          </StudioButton>
+          <StudioStatusChip
+            tone={prepared.specification ? "valid" : "invalid"}
+            announce
+          >
             {prepared.specification ? "Canonical JSON valid" : "Invalid"}
-          </span>
+          </StudioStatusChip>
+          {(candidateErrors.length > 0 || visibleWarnings.length > 0) && (
+            <StudioButton
+              variant="compact"
+              onClick={() => setPropertyTab("diagnostics")}
+            >
+              {candidateErrors.length + visibleWarnings.length} issues
+            </StudioButton>
+          )}
         </div>
       </header>
       <div
@@ -659,32 +716,29 @@ export function MapStudio({
         </button>
       </div>
       {candidateErrors.length > 0 && (
-        <div class="hp-map-studio-errors" role="alert">
-          <strong>
-            Edit not applied; the last valid preview is unchanged.
-          </strong>
-          <ul>
-            {candidateErrors.slice(0, 12).map((error) => (
-              <li>{error}</li>
-            ))}
-          </ul>
-        </div>
+        <details class="hp-map-studio-issues is-error" role="alert">
+          <summary>
+            <strong>{candidateErrors.length} edit issues</strong>
+            <span>{candidateErrors[0]}</span>
+          </summary>
+          <p>Edit not applied; the last valid preview is unchanged.</p>
+          <ul>{candidateErrors.slice(0, 12).map((error) => <li>{error}</li>)}</ul>
+          <StudioButton variant="compact" onClick={() => setPropertyTab("diagnostics")}>Open diagnostics</StudioButton>
+        </details>
       )}
       {candidateErrors.length === 0 && visibleWarnings.length > 0 && (
-        <div class="hp-map-studio-warnings" role="status">
-          <strong>Map Studio warnings</strong>
-          <ul>
-            {visibleWarnings.slice(0, 12).map((warning) => (
-              <li>{warning}</li>
-            ))}
-          </ul>
-        </div>
+        <details class="hp-map-studio-issues is-warning">
+          <summary><strong>{visibleWarnings.length} warnings</strong><span>{visibleWarnings[0]}</span></summary>
+          <ul>{visibleWarnings.slice(0, 12).map((warning) => <li>{warning}</li>)}</ul>
+          <StudioButton variant="compact" onClick={() => setPropertyTab("diagnostics")}>Open diagnostics</StudioButton>
+        </details>
       )}
       <div class="hp-map-studio-body">
         <aside
           class={`hp-map-studio-layers ${mobilePane === "properties" ? "is-mobile-hidden" : ""}`}
         >
-          <button
+          <StudioButton
+            variant="ghost"
             class={selectedLayerId === "__basemap__" ? "is-selected" : ""}
             onClick={() => {
               setSelectedLayerId("__basemap__");
@@ -692,7 +746,7 @@ export function MapStudio({
             }}
           >
             Basemap & view
-          </button>
+          </StudioButton>
           {groups.map((group, index) => groupTree(group, index))}
           {orderedLayers
             .filter(
@@ -703,36 +757,28 @@ export function MapStudio({
             .map((item, index, items) =>
               layerTreeRow(item, index, items.length),
             )}
-          <div class="hp-map-studio-add">
-            <button onClick={() => addLayer("powerbi")}>
-              Add Power BI layer
-            </button>
-            <button onClick={() => addLayer("arcgisFeature")}>
-              Add ArcGIS feature layer
-            </button>
-            <button onClick={() => addLayer("arcgisTile")}>
-              Add ArcGIS tile layer
-            </button>
-            <button onClick={() => addLayer("arcgisDynamic")}>
-              Add ArcGIS dynamic layer
-            </button>
-            <button
-              onClick={() =>
-                mutateMap((candidate) => {
-                  const id = uniqueId("layer-group");
-                  candidate.layerGroups = [
-                    ...(candidate.layerGroups ?? []),
-                    {
-                      id,
-                      name: "Layer group",
-                      order: candidate.layerGroups?.length ?? 0,
-                    },
-                  ];
-                })
-              }
+          <div class="hp-map-studio-add" ref={addMenuRef}>
+            <StudioButton
+              variant="primary"
+              aria-haspopup="menu"
+              aria-expanded={addMenuOpen}
+              onClick={() => setAddMenuOpen((open) => !open)}
             >
-              Add group
-            </button>
+              + Add layer
+            </StudioButton>
+            {addMenuOpen && (
+              <div class="hp-map-studio-add-menu" role="menu" aria-label="Add layer">
+                {([
+                  ["powerbi", "Power BI layer"],
+                  ["arcgisFeature", "ArcGIS feature layer"],
+                  ["arcgisTile", "ArcGIS tile layer"],
+                  ["arcgisDynamic", "ArcGIS dynamic layer"],
+                ] as const).map(([type, label]) => (
+                  <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
+                ))}
+                <button role="menuitem" onClick={() => { setAddMenuOpen(false); addGroup(); }}>Layer group</button>
+              </div>
+            )}
           </div>
         </aside>
         <main
@@ -757,39 +803,33 @@ export function MapStudio({
                   }
                 />
                 <div>
-                  <button onClick={duplicateLayer}>Duplicate layer</button>
-                  <button onClick={deleteLayer}>
+                  <StudioButton variant="secondary" onClick={duplicateLayer}>Duplicate layer</StudioButton>
+                  <StudioButton variant="danger" onClick={deleteLayer}>
                     {pendingDelete === layer.id
                       ? "Confirm delete layer"
                       : "Delete layer"}
-                  </button>
+                  </StudioButton>
                 </div>
               </header>
-              <nav class="hp-map-property-tabs" role="tablist">
-                {(
-                  [
-                    "source",
-                    "renderer",
-                    "labels",
-                    "popup",
-                    "tooltip",
-                    "join",
-                    "visibility",
-                    "interaction",
-                    "performance",
-                    "diagnostics",
-                  ] as PropertyTab[]
-                ).map((tab) => (
+              <label class="hp-map-property-select">
+                <span>Property category</span>
+                <select value={propertyTab} onChange={(event) => setPropertyTab(event.currentTarget.value as PropertyTab)}>
+                  {propertyTabs.map((tab) => <option value={tab.id}>{tab.label}</option>)}
+                </select>
+              </label>
+              <div class="hp-map-property-workspace">
+                <nav class="hp-map-property-tabs" role="tablist" aria-orientation="vertical" aria-label="Layer properties">
+                {propertyTabs.map((tab) => (
                   <button
                     role="tab"
-                    aria-selected={propertyTab === tab}
-                    onClick={() => setPropertyTab(tab)}
+                    aria-selected={propertyTab === tab.id}
+                    onClick={() => setPropertyTab(tab.id)}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 ))}
-              </nav>
-              <section class="hp-map-property-panel">
+                </nav>
+                <section class="hp-map-property-panel" role="tabpanel">
                 {propertyTab === "source" && (
                   <SourceEditor
                     layer={layer}
@@ -875,7 +915,8 @@ export function MapStudio({
                     selectedLayerPath={selectedLayerPath}
                   />
                 )}
-              </section>
+                </section>
+              </div>
             </>
           ) : (
             <div>Select a layer.</div>
@@ -1008,7 +1049,16 @@ export function MapStudio({
         onDragOver={(event) => event.preventDefault()}
         onDrop={() => dropLayer(item.id)}
       >
-        <span aria-hidden="true">⋮⋮</span>
+        <span class="hp-map-layer-drag" aria-hidden="true">⋮⋮</span>
+        <StudioCheckbox
+          label={<span class="hp-visually-hidden">Show {item.name}</span>}
+          checked={item.visible !== false}
+          onChange={(visible) => mutateMap((candidate) => {
+            const found = candidate.layers?.find((candidateLayer) => candidateLayer.id === item.id);
+            if (found) found.visible = visible;
+          })}
+          className="hp-map-layer-visibility"
+        />
         <button
           aria-label={`Select layer ${item.name}`}
           onClick={() => {
@@ -1022,7 +1072,11 @@ export function MapStudio({
         >
           <strong title={item.name}>{item.name}</strong>
           <small>
-            {item.source.type} · {item.dataset ?? map?.dataset ?? "powerbi"}
+            <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
+              {item.join ? "Joined" : item.source.type === "powerbi" ? "Power BI" : "Service"}
+            </span>
+            <span title={item.dataset ?? map?.dataset ?? "powerbi"}>{item.dataset ?? map?.dataset ?? "powerbi"}</span>
+            <span>{rows.length} rows</span>
           </small>
         </button>
         <button

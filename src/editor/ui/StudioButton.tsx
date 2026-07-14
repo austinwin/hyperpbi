@@ -16,6 +16,7 @@ export function StudioButton({
 }: JSX.HTMLAttributes<HTMLButtonElement> & {
   variant?: StudioButtonVariant;
   children?: ComponentChildren;
+  disabled?: boolean;
 }) {
   return (
     <button

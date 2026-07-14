@@ -6,7 +6,8 @@ describe("Map Studio canonical editing", () => {
     it("opens the selected map and adds, renames, duplicates, deletes, undoes, and redoes canonical layers", () => {
         const mounted = mountMapStudio();
         expect(mounted.host.textContent).toContain("Map Studio");
-        act(() => button(mounted.host, "Add Power BI layer").click());
+        act(() => button(mounted.host, "+ Add layer").click());
+        act(() => button(mounted.host, "Power BI layer").click());
         let specification = JSON.parse(mounted.json());
         expect(specification.components[0].layers).toHaveLength(2);
         change(mounted.host.querySelector('[aria-label="Layer name"]')!, "Facilities");
