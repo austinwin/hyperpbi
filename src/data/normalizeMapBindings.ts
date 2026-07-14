@@ -25,15 +25,13 @@ function coordinateStatus(row: DataRow, latitude?: string, longitude?: string): 
     return "valid";
 }
 
-function coordinateFieldDiagnostic(field: NormalizedField | undefined, role: "mapLatitude" | "mapLongitude", label: "Latitude" | "Longitude"): MapCoordinateDiagnostic[] {
+function coordinateFieldDiagnostic(field: NormalizedField | undefined, label: "Latitude" | "Longitude"): MapCoordinateDiagnostic[] {
     if (!field) return [];
-    const dedicated = field.roles.includes(role);
     const diagnostics: MapCoordinateDiagnostic[] = [];
     const metadata = { fieldKey: field.key, fieldDisplayName: field.displayName, queryName: field.queryName, queryAggregation: field.queryAggregation, sourceTable: field.sourceTable, sourceColumn: field.sourceColumn, roles: [...field.roles] };
-    if (!dedicated) diagnostics.push({ code: "MAP_COORDINATE_ROLE_NOT_GROUPING", severity: "warning", message: `${label} uses “${field.displayName}” outside the dedicated Map ${label} Grouping role. Existing Values bindings remain supported, but the dedicated role provides reliable row-level coordinate intent.`, ...metadata });
-    if (!dedicated && field.isImplicitAggregation && field.queryAggregation) {
+    if (field.isImplicitAggregation && field.queryAggregation) {
         const reported = field.queryName || `${field.queryAggregation}(${field.sourceColumn ?? field.displayName})`;
-        diagnostics.push({ code: "MAP_COORDINATE_QUERY_AGGREGATED", severity: "warning", message: `Power BI’s current HyperPBI visual query reports ${label} as ${reported}. The model’s default summarization and this visual-query aggregation are separate. Bind the field to Map ${label} or change this field instance in the HyperPBI visual data well to Don’t summarize.`, ...metadata });
+        diagnostics.push({ code: "MAP_COORDINATE_QUERY_AGGREGATED", severity: "warning", message: `Power BI’s current HyperPBI visual query reports ${label} as ${reported}. The model’s default summarization and this visual-query aggregation are separate. Keep the field in Values and change this field instance in the HyperPBI visual query to Don’t summarize when row-level coordinates are required.`, ...metadata });
     }
     return diagnostics;
 }
@@ -82,8 +80,8 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
 
     const diagnostics: MapCoordinateDiagnostic[] = [];
     if (mode === "latLon") {
-        diagnostics.push(...coordinateFieldDiagnostic(bindings.latitude ? fields[bindings.latitude] : undefined, "mapLatitude", "Latitude"));
-        diagnostics.push(...coordinateFieldDiagnostic(bindings.longitude ? fields[bindings.longitude] : undefined, "mapLongitude", "Longitude"));
+        diagnostics.push(...coordinateFieldDiagnostic(bindings.latitude ? fields[bindings.latitude] : undefined, "Latitude"));
+        diagnostics.push(...coordinateFieldDiagnostic(bindings.longitude ? fields[bindings.longitude] : undefined, "Longitude"));
         const severity = coordinateCounts.validPairCount > 0 ? "warning" as const : "error" as const;
         if (coordinateCounts.incompletePairCount) diagnostics.push({ code: "MAP_COORDINATE_PAIR_INCOMPLETE", severity, message: `${coordinateCounts.incompletePairCount.toLocaleString()} current data-view row(s) have an incomplete latitude/longitude pair.` });
         if (coordinateCounts.nonNumericPairCount) diagnostics.push({ code: "MAP_COORDINATE_NON_NUMERIC", severity, message: `${coordinateCounts.nonNumericPairCount.toLocaleString()} current data-view row(s) contain nonnumeric latitude or longitude values.` });
@@ -98,11 +96,20 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
         const unresolved = Array.from(grouped.values()).flat().length - resolved;
         warnings.push(resolved ? `${resolved.toLocaleString()} cached address location(s) loaded; ${unresolved.toLocaleString()} remain unresolved.` : "Address fields are bound. Geocoding is user-triggered in Studio; no address data was transmitted automatically.");
     }
-    if (mode === "none") warnings.push("Bind Map Geometry, Map Latitude and Map Longitude, Map X and Map Y, or Map Address.");
+    if (mode === "none") warnings.push("Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.");
     if (invalidFeatureCount > 0 && mode !== "address" && mode !== "latLon") warnings.push(`${invalidFeatureCount.toLocaleString()} row(s) have invalid or missing map locations.`);
     if (unsupportedTypeCount > 0) warnings.push(`${unsupportedTypeCount.toLocaleString()} row(s) declare a non-point Map Type, but coordinate pairs render as points. Bind Geometry for lines or polygons.`);
     return {
         hasGeometry: Boolean(bindings.geometry), hasLatLon: Boolean(bindings.latitude && bindings.longitude), hasXY: Boolean(bindings.x && bindings.y), hasAddress: Boolean(bindings.address),
         mode, bindings, layers: Array.from(grouped, ([name, features]) => ({ name, features })), warnings, invalidFeatureCount, diagnostics, coordinateCounts,
+        locationCounts: {
+            totalInputRows: rows.length,
+            validFeatureCount: rows.length - invalidFeatureCount,
+            incompletePairCount: coordinateCounts.incompletePairCount,
+            nonNumericCount: coordinateCounts.nonNumericPairCount,
+            outOfRangeCount: coordinateCounts.outOfRangePairCount,
+            geometryParseFailureCount: mode === "geometry" ? invalidFeatureCount : 0,
+            filteredRowCount: 0,
+        },
     };
 }

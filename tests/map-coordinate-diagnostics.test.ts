@@ -18,16 +18,16 @@ describe("structured map coordinate diagnostics", () => {
         expect(map.warnings.join(" ")).toContain("model’s default summarization and this visual-query aggregation are separate");
     });
 
-    it("suppresses aggregation warnings for dedicated Grouping roles while validating values", () => {
+    it("does not treat obsolete role names as an aggregation-warning escape hatch", () => {
         const fields = { lat: coordinate("lat", "Latitude", "mapLatitude", "Sum(Assets.latitude)"), lon: coordinate("lon", "Longitude", "mapLongitude", "Sum(Assets.longitude)") };
         const map = normalizeMapBindings([{ lat: 29.76, lon: -95.37 }], fields);
-        expect(map.diagnostics?.some(item => item.code === "MAP_COORDINATE_QUERY_AGGREGATED")).toBe(false);
+        expect(map.diagnostics?.some(item => item.code === "MAP_COORDINATE_QUERY_AGGREGATED")).toBe(true);
         expect(map.diagnostics).toContainEqual(expect.objectContaining({ code: "MAP_COORDINATE_BINDING_VALID" }));
-        expect(map.warnings).toEqual([]);
+        expect(map.warnings.join(" ")).toContain("Values");
     });
 
     it("rejects incomplete, nonnumeric, and out-of-range pairs with current data-view counts", () => {
-        const fields = { lat: coordinate("lat", "Latitude", "mapLatitude"), lon: coordinate("lon", "Longitude", "mapLongitude") };
+        const fields = { lat: coordinate("lat", "Latitude", "values"), lon: coordinate("lon", "Longitude", "values") };
         const map = normalizeMapBindings([
             { lat: 29.76, lon: -95.37 }, { lat: "bad", lon: -95 }, { lat: 91, lon: -95 }, { lat: 29, lon: 181 }, { lat: 29, lon: null },
         ], fields);

@@ -132,9 +132,6 @@ export function parseQueryName(queryName?: string): ParsedQueryName {
 
 export function fieldType(source: powerbi.DataViewMetadataColumn, parsed: ParsedQueryName = parseQueryName(source.queryName)): NormalizedField["type"] {
     const roles = source.roles ?? {};
-    if (roles.mapLatitude) return "latitude";
-    if (roles.mapLongitude) return "longitude";
-    if (roles.mapGeometry) return "geometry";
     if (roles.schema) return "schema";
     if (roles.date || source.type?.dateTime) return "date";
     if (source.type?.numeric) {

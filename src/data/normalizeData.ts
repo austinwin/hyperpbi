@@ -69,7 +69,6 @@ export interface NormalizedMapLayer { name: string; features: NormalizedMapFeatu
 
 export type MapCoordinateDiagnosticCode =
     | "MAP_COORDINATE_QUERY_AGGREGATED"
-    | "MAP_COORDINATE_ROLE_NOT_GROUPING"
     | "MAP_COORDINATE_NON_NUMERIC"
     | "MAP_COORDINATE_OUT_OF_RANGE"
     | "MAP_COORDINATE_PAIR_INCOMPLETE"
@@ -96,6 +95,16 @@ export interface MapCoordinateCounts {
     outOfRangePairCount: number;
 }
 
+export interface MapLocationCounts {
+    totalInputRows: number;
+    validFeatureCount: number;
+    incompletePairCount: number;
+    nonNumericCount: number;
+    outOfRangeCount: number;
+    geometryParseFailureCount: number;
+    filteredRowCount: number;
+}
+
 export interface NormalizedMapData {
     hasGeometry: boolean;
     hasLatLon: boolean;
@@ -108,6 +117,7 @@ export interface NormalizedMapData {
     invalidFeatureCount: number;
     diagnostics?: MapCoordinateDiagnostic[];
     coordinateCounts?: MapCoordinateCounts;
+    locationCounts?: MapLocationCounts;
 }
 
 export interface Aggregates {

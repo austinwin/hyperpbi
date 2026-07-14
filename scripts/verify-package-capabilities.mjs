@@ -5,7 +5,7 @@ import { readPackagedCapabilities, webAccessParameters } from "./package-profile
 const dist = join(process.cwd(), "dist");
 const files = await readdir(dist);
 const profileManifest = JSON.parse(await readFile(join(dist, "package-capability-profiles.json"), "utf8"));
-const requiredDataRoles = ["values", "mapLatitude", "mapLongitude", "mapGeometry", "mapAddress"];
+const requiredDataRoles = [{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }];
 
 const profiles = ["core", "maps-broad", "maps-restricted"];
 for (const profile of profiles) {
@@ -15,10 +15,9 @@ for (const profile of profiles) {
     }
     const archive = join(dist, archives[0]);
     const capabilities = await readPackagedCapabilities(archive);
-    const packagedRoles = new Set((capabilities.dataRoles ?? []).map(role => role.name));
-    const missingRoles = requiredDataRoles.filter(role => !packagedRoles.has(role));
-    if (missingRoles.length) {
-        throw new Error(`${profile} package is missing required data roles: ${missingRoles.join(", ")}.`);
+    const packagedRoles = capabilities.dataRoles ?? [];
+    if (JSON.stringify(packagedRoles) !== JSON.stringify(requiredDataRoles)) {
+        throw new Error(`${profile} package must expose the shared Values-only data-role contract; received ${JSON.stringify(packagedRoles)}.`);
     }
     const actual = webAccessParameters(capabilities);
     const expected = profileManifest[profile]?.webAccessParameters;
@@ -38,7 +37,7 @@ for (const profile of profiles) {
     if (JSON.stringify(actual ?? []) !== JSON.stringify(expected)) {
         throw new Error(`${profile} packaged WebAccess parameters differ from its build profile.`);
     }
-    console.log(`${profile}: ${archives[0]} WebAccess=${JSON.stringify(actual ?? [])} roles=${requiredDataRoles.join(",")}`);
+    console.log(`${profile}: ${archives[0]} WebAccess=${JSON.stringify(actual ?? [])} roles=values`);
 }
 
 console.log("PBIVIZ capability inspection passed for Core, broad Maps, and restricted Maps archives.");

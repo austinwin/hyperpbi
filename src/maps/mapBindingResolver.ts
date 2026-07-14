@@ -1,45 +1,57 @@
 import { MapBindingKeys, MapLocationMode, NormalizedField } from "../data/normalizeData";
 import { resolveConfiguredField } from "../config/hyperpbiConfig";
 
-function firstByRole(fields: Record<string, NormalizedField>, role: string): string | undefined {
-    const explicit = Object.values(fields).find(field => field.roles.includes(role))?.key;
-    if (explicit) return explicit;
-    const semantic = role === "mapLatitude" ? Object.values(fields).find(field => field.type === "latitude")?.key
-        : role === "mapLongitude" ? Object.values(fields).find(field => field.type === "longitude")?.key
-        : role === "mapGeometry" ? Object.values(fields).find(field => field.type === "geometry")?.key : undefined;
+type SingleMapBinding = Exclude<keyof MapBindingKeys, "tooltip" | "details">;
+
+const legacyRoles: Partial<Record<SingleMapBinding, string>> = {
+    layer: "mapLayer", type: "mapType", x: "mapX", y: "mapY", city: "mapCity", state: "mapState", zip: "mapZip", color: "mapColor", size: "mapSize",
+};
+
+function inferredField(fields: Record<string, NormalizedField>, binding: SingleMapBinding): string | undefined {
+    const legacyRole = legacyRoles[binding];
+    const roleField = legacyRole ? Object.values(fields).find(field => field.roles.includes(legacyRole))?.key : undefined;
+    if (roleField) return roleField;
+    const semantic = binding === "latitude" ? Object.values(fields).find(field => field.type === "latitude")?.key
+        : binding === "longitude" ? Object.values(fields).find(field => field.type === "longitude")?.key
+        : binding === "geometry" ? Object.values(fields).find(field => field.type === "geometry")?.key : undefined;
     if (semantic) return semantic;
     const names: Record<string, string[]> = {
-        mapLatitude: ["latitude", "lat"], mapLongitude: ["longitude", "longitude", "lon", "lng"],
-        mapGeometry: ["geometry", "geojson", "wkt"], mapAddress: ["address", "street address"],
+        latitude: ["latitude", "lat"], longitude: ["longitude", "lon", "lng"],
+        geometry: ["geometry", "geojson", "wkt"], address: ["address", "street address"],
     };
-    const candidates = names[role];
+    const candidates = names[binding];
     if (candidates) return Object.values(fields).find(field => candidates.includes((field.sourceColumn ?? field.displayName ?? field.key).trim().toLowerCase()))?.key;
     return undefined;
 }
 
-function allByRole(fields: Record<string, NormalizedField>, role: string): string[] {
+function inferredFields(fields: Record<string, NormalizedField>, role: string): string[] {
     return Object.values(fields).filter(field => field.roles.includes(role)).map(field => field.key);
 }
 
 export function resolveMapBindings(fields: Record<string, NormalizedField>, overrides?: Partial<MapBindingKeys>): MapBindingKeys {
     const inferred: MapBindingKeys = {
-        layer: firstByRole(fields, "mapLayer"), type: firstByRole(fields, "mapType"),
-        latitude: firstByRole(fields, "mapLatitude"), longitude: firstByRole(fields, "mapLongitude"),
-        x: firstByRole(fields, "mapX"), y: firstByRole(fields, "mapY"), address: firstByRole(fields, "mapAddress"),
-        city: firstByRole(fields, "mapCity"), state: firstByRole(fields, "mapState"), zip: firstByRole(fields, "mapZip"),
-        geometry: firstByRole(fields, "mapGeometry"), color: firstByRole(fields, "mapColor"), size: firstByRole(fields, "mapSize"),
-        tooltip: allByRole(fields, "mapTooltip"), details: allByRole(fields, "mapDetails")
+        layer: inferredField(fields, "layer"), type: inferredField(fields, "type"),
+        latitude: inferredField(fields, "latitude"), longitude: inferredField(fields, "longitude"),
+        x: inferredField(fields, "x"), y: inferredField(fields, "y"), address: inferredField(fields, "address"),
+        city: inferredField(fields, "city"), state: inferredField(fields, "state"), zip: inferredField(fields, "zip"),
+        geometry: inferredField(fields, "geometry"), color: inferredField(fields, "color"), size: inferredField(fields, "size"),
+        tooltip: inferredFields(fields, "mapTooltip"), details: inferredFields(fields, "mapDetails")
     };
     if (!overrides) return inferred;
-    const resolve = (value: string | undefined) => resolveConfiguredField(fields, value);
+    // An explicitly supplied but unresolved binding stays unresolved. Falling
+    // through to another field would make a typo display unrelated locations.
+    const resolve = (value: string | undefined, fallback: string | undefined) =>
+        value === undefined ? fallback : resolveConfiguredField(fields, value);
+    const resolveMany = (values: string[] | undefined, fallback: string[]) => values === undefined
+        ? fallback
+        : values.map(value => resolveConfiguredField(fields, value)).filter((key): key is string => Boolean(key));
     return {
-        layer: resolve(overrides.layer) ?? inferred.layer, type: resolve(overrides.type) ?? inferred.type,
-        latitude: resolve(overrides.latitude) ?? inferred.latitude, longitude: resolve(overrides.longitude) ?? inferred.longitude,
-        x: resolve(overrides.x) ?? inferred.x, y: resolve(overrides.y) ?? inferred.y,
-        address: resolve(overrides.address) ?? inferred.address, city: resolve(overrides.city) ?? inferred.city, state: resolve(overrides.state) ?? inferred.state, zip: resolve(overrides.zip) ?? inferred.zip,
-        geometry: resolve(overrides.geometry) ?? inferred.geometry, color: resolve(overrides.color) ?? inferred.color, size: resolve(overrides.size) ?? inferred.size,
-        tooltip: overrides.tooltip?.map(resolve).filter((key): key is string => Boolean(key)) ?? inferred.tooltip,
-        details: overrides.details?.map(resolve).filter((key): key is string => Boolean(key)) ?? inferred.details
+        layer: resolve(overrides.layer, inferred.layer), type: resolve(overrides.type, inferred.type),
+        latitude: resolve(overrides.latitude, inferred.latitude), longitude: resolve(overrides.longitude, inferred.longitude),
+        x: resolve(overrides.x, inferred.x), y: resolve(overrides.y, inferred.y),
+        address: resolve(overrides.address, inferred.address), city: resolve(overrides.city, inferred.city), state: resolve(overrides.state, inferred.state), zip: resolve(overrides.zip, inferred.zip),
+        geometry: resolve(overrides.geometry, inferred.geometry), color: resolve(overrides.color, inferred.color), size: resolve(overrides.size, inferred.size),
+        tooltip: resolveMany(overrides.tooltip, inferred.tooltip), details: resolveMany(overrides.details, inferred.details)
     };
 }
 
