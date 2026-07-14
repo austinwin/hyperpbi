@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { applyCalculations } from "../calculations/calculationEngine";
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
-import { applyConfigToData } from "../data/applyConfig";
 import { NormalizedData } from "../data/normalizeData";
 import { GeocodeResult } from "../providers/providerTypes";
 import { HyperPbiRoot } from "../render/HyperPbiRoot";
@@ -23,9 +21,19 @@ import { InteractionsPanel } from "./InteractionsPanel";
 import { MapServicesPanel } from "./MapServicesPanel";
 import { StudioSettings } from "./StudioSettings";
 import { SkillTab } from "./SkillTab";
-import { defaultStudioLayout, parseStudioLayout, StudioLayoutPreference } from "./studioLayout";
+import {
+  defaultStudioLayout,
+  parseStudioLayout,
+  StudioLayoutPreference,
+} from "./studioLayout";
 import { copyText } from "./textActions";
-import { createInteractionDiagnostics, ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails, InteractionDiagnostics } from "../powerbi/interactionDiagnostics";
+import {
+  createInteractionDiagnostics,
+  ExternalSelectionFailureReason,
+  ExternalSelectionResult,
+  InteractionDetails,
+  InteractionDiagnostics,
+} from "../powerbi/interactionDiagnostics";
 import { sanitizeCss } from "../security/sanitizeCss";
 import { sanitizeHtml } from "../security/sanitizeHtml";
 import { RuntimeConfigTab } from "./config/RuntimeConfigTab";
@@ -40,63 +48,1095 @@ import { applyChangePackage } from "../ai/applyChangePackage";
 import { isAiChangePackage } from "../ai/changePackage";
 import { validateAiChangePackage } from "../ai/changePackageValidation";
 import type { ProviderAccessState } from "../providers/providerTypes";
+import {
+  prepareAuthoringData,
+  type PreparedAuthoringData,
+} from "./prepareAuthoringData";
+import type { MapViewportState } from "../components/maps/MapBlock";
 
-type EditorTab="specification"|"inspector"|"mapStudio"|"config"|"ai"|"skill"|"calculations"|"mapServices"|"settings"|"interactions"|"help";
-type BottomTab="data"|"fields"|"logs"|"errors"|"mapServices"|"geocode"|"interactions";
-const escapeAttributeValue=(value:string)=>value.replace(/\\/g,"\\\\").replace(/"/g,'\\"');
-interface StudioLog{level:"info"|"error"|"success";message:string;timestamp?:string;}
-interface ValidationResult{schema?:HyperPbiSchema;config?:HyperPbiConfig;data?:NormalizedData;errors:string[];warnings:string[];ownerByRuntimeId?:Record<string,string>;}
-
-function sanitizerWarnings(schema:HyperPbiSchema,config:HyperPbiConfig):string[]{
-    const warnings=sanitizeCss(`${schema.styles?.globalCss??""}\n${schema.css??""}`,"#studio-preview",{mode:config.security?.cssMode}).warnings.map(warning=>`Sanitizer: ${warning}`);
-    const visit=(component:DashboardComponent,path:string)=>{if(component.css)warnings.push(...sanitizeCss(component.css,`[data-hp-id="studio"]`,{mode:config.security?.cssMode}).warnings.map(warning=>`${path}: ${warning}`));if("html" in component&&component.html)warnings.push(...sanitizeHtml(component.html,{mode:config.security?.htmlMode}).warnings.map(warning=>`${path}: ${warning}`));Object.entries(component.slots??{}).forEach(([name,html])=>warnings.push(...sanitizeHtml(html,{mode:config.security?.htmlMode}).warnings.map(warning=>`${path} slot ${name}: ${warning}`)));if("children" in component)component.children?.forEach((child,index)=>visit(child,`${path}/children/${index}`));if("tabs" in component)component.tabs.forEach((tab,index)=>(tab.children??tab.components??tab.content??[]).forEach((child,childIndex)=>visit(child,`${path}/tabs/${index}/${childIndex}`)));if("chart" in component)visit(component.chart,`${path}/chart`);};
-    [schema.toolbar??[],schema.leftPanel??[],schema.components,schema.rightPanel??[]].forEach((items,group)=>items.forEach((component,index)=>visit(component,`Component ${group}/${index}`)));
-    return Array.from(new Set(warnings));
+type EditorTab =
+  | "specification"
+  | "inspector"
+  | "mapStudio"
+  | "config"
+  | "ai"
+  | "skill"
+  | "calculations"
+  | "mapServices"
+  | "settings"
+  | "interactions"
+  | "help";
+type BottomTab =
+  | "data"
+  | "fields"
+  | "logs"
+  | "errors"
+  | "mapServices"
+  | "geocode"
+  | "interactions";
+const escapeAttributeValue = (value: string) =>
+  value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+const mapIdForSelection = (
+  selected: string,
+  tree: Array<{ id: string; type: string }>,
+) =>
+  tree.find((item) => item.id === selected && item.type === "map")?.id ??
+  tree.find((item) => item.type === "map")?.id ??
+  "";
+interface StudioLog {
+  level: "info" | "error" | "success";
+  message: string;
+  timestamp?: string;
+}
+interface ValidationResult {
+  schema?: HyperPbiSchema;
+  config?: HyperPbiConfig;
+  data?: NormalizedData;
+  errors: string[];
+  warnings: string[];
+  ownerByRuntimeId?: Record<string, string>;
 }
 
-function validateDraft(specification:string,configuration:string,data:NormalizedData):ValidationResult{
-    const errors:string[]=[];const warnings:string[]=[];const config=parseConfig(configuration);errors.push(...config.errors);const parsed=parseJson(specification);if(parsed.error)errors.push(`Specification JSON: ${parsed.error}`);const prepared=parsed.value?prepareSpecification(parsed.value,data,{repair:false,aliasOverrides:config.config?.fields?.aliases}):undefined;if(prepared&&!prepared.schema)errors.push(...prepared.errors.map(error=>`Specification: ${error}`));if(prepared)warnings.push(...prepared.warnings);if(!prepared?.schema||!config.config)return{schema:prepared?.schema,config:config.config,errors,warnings,ownerByRuntimeId:prepared?.ownerByRuntimeId};warnings.push(...sanitizerWarnings(prepared.schema,config.config));const calculated=applyCalculations(data,prepared.schema.calculations);errors.push(...calculated.errors.map(error=>`Calculation: ${error}`));warnings.push(...calculated.warnings);const configured=applyConfigToData(calculated.data,config.config);warnings.push(...validateReferences(prepared.schema,configured));return{schema:prepared.schema,config:config.config,data:configured,errors,warnings,ownerByRuntimeId:prepared.ownerByRuntimeId};
+function sanitizerWarnings(
+  schema: HyperPbiSchema,
+  config: HyperPbiConfig,
+): string[] {
+  const warnings = sanitizeCss(
+    `${schema.styles?.globalCss ?? ""}\n${schema.css ?? ""}`,
+    "#studio-preview",
+    { mode: config.security?.cssMode },
+  ).warnings.map((warning) => `Sanitizer: ${warning}`);
+  const visit = (component: DashboardComponent, path: string) => {
+    if (component.css)
+      warnings.push(
+        ...sanitizeCss(component.css, `[data-hp-id="studio"]`, {
+          mode: config.security?.cssMode,
+        }).warnings.map((warning) => `${path}: ${warning}`),
+      );
+    if ("html" in component && component.html)
+      warnings.push(
+        ...sanitizeHtml(component.html, {
+          mode: config.security?.htmlMode,
+        }).warnings.map((warning) => `${path}: ${warning}`),
+      );
+    Object.entries(component.slots ?? {}).forEach(([name, html]) =>
+      warnings.push(
+        ...sanitizeHtml(html, { mode: config.security?.htmlMode }).warnings.map(
+          (warning) => `${path} slot ${name}: ${warning}`,
+        ),
+      ),
+    );
+    if ("children" in component)
+      component.children?.forEach((child, index) =>
+        visit(child, `${path}/children/${index}`),
+      );
+    if ("tabs" in component)
+      component.tabs.forEach((tab, index) =>
+        (tab.children ?? tab.components ?? tab.content ?? []).forEach(
+          (child, childIndex) =>
+            visit(child, `${path}/tabs/${index}/${childIndex}`),
+        ),
+      );
+    if ("chart" in component) visit(component.chart, `${path}/chart`);
+  };
+  [
+    schema.toolbar ?? [],
+    schema.leftPanel ?? [],
+    schema.components,
+    schema.rightPanel ?? [],
+  ].forEach((items, group) =>
+    items.forEach((component, index) =>
+      visit(component, `Component ${group}/${index}`),
+    ),
+  );
+  return Array.from(new Set(warnings));
 }
-function validateStructure(specification:string,configuration:string,data:NormalizedData):{schema?:HyperPbiSchema;errors:string[]}{const errors:string[]=[];const config=parseConfig(configuration);const parsed=parseJson(specification);if(parsed.error)errors.push(`Specification JSON: ${parsed.error}`);const prepared=parsed.value?prepareSpecification(parsed.value,data,{repair:false,aliasOverrides:config.config?.fields?.aliases}):undefined;if(prepared&&!prepared.schema)errors.push(...prepared.errors.map(error=>`Specification: ${error}`));errors.push(...config.errors);return{schema:prepared?.schema,errors};}
 
-export function HyperPbiStudio({instanceId,data,settings,initialSpecification,initialConfiguration,initialLayout,onSave,onDraftChange,onLayoutChange,selectionIdentityCount=0,hostAllowsInteractions=false,initialInteractionDiagnostics,selectExternal:externalSelect=()=>({sent:false,reason:"component did not call selectExternal"}),clearExternal:externalClear=()=>({sent:false,reason:"component did not call selectExternal"}),applyExternalFilter:externalFilter=()=>({sent:false,reason:"component did not call selectExternal"}),clearExternalFilter:externalFilterClear=()=>({sent:false,reason:"component did not call selectExternal"}),initialEditorTab="ai",webAccessAvailable=false,providerAccess}:{instanceId:string;data:NormalizedData;settings:RuntimeSettings;initialSpecification:string;initialConfiguration:string;initialLayout?:string;onSave:(specification:string,configuration:string)=>void;onDraftChange?:(specification:string,configuration:string)=>void;onLayoutChange?:(layout:string)=>void;selectionIdentityCount?:number;hostAllowsInteractions?:boolean;initialInteractionDiagnostics?:InteractionDiagnostics;selectExternal?:(indices:number[],multiSelect?:boolean,details?:InteractionDetails)=>ExternalSelectionResult;clearExternal?:(details?:InteractionDetails)=>ExternalSelectionResult;applyExternalFilter?:(field:string,operator:FilterOperator,value:unknown,details?:InteractionDetails)=>ExternalFilterResult;clearExternalFilter?:(details?:InteractionDetails)=>ExternalFilterResult;initialEditorTab?:EditorTab;webAccessAvailable?:boolean;providerAccess?:ProviderAccessState}){
-    const [specification,setSpecification]=useState(initialSpecification);const [configuration,setConfiguration]=useState(initialConfiguration);const [editorTab,setEditorTab]=useState<EditorTab>(initialEditorTab);const [bottomTab,setBottomTab]=useState<BottomTab>("data");const [selectedComponentId,setSelectedComponentId]=useState("");const [selectedRuntimeComponentId,setSelectedRuntimeComponentId]=useState("");const [inspectorMode,setInspectorMode]=useState(false);
-    const specificationHistory=useRef(new SpecificationHistory(initialSpecification));
-    const [logs,setLogs]=useState<StudioLog[]>([{level:"info",message:"Builder ready. Describe the dashboard, copy the prompt, paste the AI response, validate, preview, and save.",timestamp:new Date().toISOString()}]);const [errors,setErrors]=useState<string[]>([]);const [warnings,setWarnings]=useState<string[]>([]);const [preview,setPreview]=useState<{schema:HyperPbiSchema;config:HyperPbiConfig;data:NormalizedData;ownerByRuntimeId?:Record<string,string>}>();const [geocodeResults,setGeocodeResults]=useState<GeocodeResult[]>([]);const [layout,setLayout]=useState<StudioLayoutPreference>(()=>initialLayout?parseStudioLayout(initialLayout):defaultStudioLayout);const [interactionDiagnostics,setInteractionDiagnostics]=useState<InteractionDiagnostics>(()=>initialInteractionDiagnostics??createInteractionDiagnostics(settings.enableInteractions,hostAllowsInteractions,selectionIdentityCount));const workbenchRef=useRef<HTMLDivElement>(null);
-    const dirty=specification!==initialSpecification||configuration!==initialConfiguration;const structure=useMemo(()=>validateStructure(specification,configuration,data),[specification,configuration,data]);const status=structure.errors.length?"Invalid":dirty?"Unsaved":preview?"Ready":"Saved";
-    useEffect(()=>onDraftChange?.(specification,configuration),[specification,configuration]);
-    useEffect(()=>{if(!inspectorMode)return;const escape=(event:KeyboardEvent)=>{if(event.key==="Escape")setInspectorMode(false);};document.addEventListener("keydown",escape);return()=>document.removeEventListener("keydown",escape);},[inspectorMode]);
-    useEffect(()=>{const host=workbenchRef.current;host?.querySelectorAll(".hp-inspector-selected").forEach(element=>element.classList.remove("hp-inspector-selected"));if(selectedComponentId){const safe=escapeAttributeValue(selectedComponentId);host?.querySelector(`[data-hp-id="${safe}"]`)?.classList.add("hp-inspector-selected");}},[selectedComponentId,preview,inspectorMode]);
-    const appendLog=(message:string,level:StudioLog["level"]="info")=>setLogs(current=>[...current.slice(-199),{message,level,timestamp:new Date().toISOString()}]);
-    const updateInteraction=(indices:number[],details:InteractionDetails,result:ExternalSelectionResult)=>setInteractionDiagnostics(current=>({...current,externalInteractionEnabled:settings.enableInteractions,hostAllowsInteractions,selectionIdentityCount,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??indices.length,lastSelectedSourceRowIndices:indices.slice(0,25),externalMode:details.externalMode??"selection",filterSent:false,selectionSent:result.sent,externalSelectionSent:result.sent,filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent:result.sent?undefined:result.reason}));
-    const selectExternal=(indices:number[],multiSelect=false,details:InteractionDetails={})=>{const result=externalSelect(indices,multiSelect,details);updateInteraction(indices,details,result);return result;};
-    const clearExternal=(details:InteractionDetails={})=>{const result=externalClear(details);updateInteraction([],details,result);return result;};
-    const updateFilter=(details:InteractionDetails,result:ExternalFilterResult)=>setInteractionDiagnostics(current=>({...current,externalInteractionEnabled:settings.enableInteractions,hostAllowsInteractions,selectionIdentityCount,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??0,lastSelectedSourceRowIndices:[],externalMode:"filter",filterSent:result.sent,selectionSent:false,externalSelectionSent:false,filterTargetTable:result.target?.table,filterTargetColumn:result.target?.column,reasonExternalSelectionNotSent:result.sent?undefined:result.reason}));
-    const applyExternalFilter=(field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={})=>{const result=externalFilter(field,operator,value,details);updateFilter({...details,field},result);return result;};
-    const clearExternalFilter=(details:InteractionDetails={})=>{const result=externalFilterClear(details);updateFilter(details,result);return result;};
-    const reportInteraction=(details:InteractionDetails,reason:ExternalSelectionFailureReason="component did not call selectExternal",indices:number[]=[])=>updateInteraction(indices,details,{sent:false,reason});
-    const validate=()=>{try{const result=validateDraft(specification,configuration,data);setErrors(result.errors);setWarnings(result.warnings);if(result.errors.length){result.errors.forEach(message=>appendLog(message,"error"));setBottomTab("errors");return result;}appendLog(`Validation passed with ${result.warnings.length} warning(s).`,"success");if(result.warnings.length)result.warnings.forEach(message=>appendLog(message));setBottomTab(result.warnings.length?"errors":"logs");return result;}catch(error){const message=`Validation failed unexpectedly: ${error instanceof Error?error.message:String(error)}`;setErrors([message]);setWarnings([]);appendLog(message,"error");setBottomTab("errors");return{errors:[message],warnings:[]};}};
-    const run=(candidate=specification,candidateConfig=configuration):boolean=>{try{const result=validateDraft(candidate,candidateConfig,data);setErrors(result.errors);setWarnings(result.warnings);if(result.errors.length||!result.schema||!result.config||!result.data){result.errors.forEach(message=>appendLog(message,"error"));setBottomTab("errors");return false;}setPreview({schema:result.schema,config:result.config,data:result.data,ownerByRuntimeId:result.ownerByRuntimeId});appendLog(`Rendered ${result.data.rows.length.toLocaleString()} rows with ${result.warnings.length} warning(s).`,"success");if(result.warnings.length)setBottomTab("errors");return true;}catch(error){const message=`Render failed safely: ${error instanceof Error?error.message:String(error)}`;setErrors([message]);setWarnings([]);appendLog(message,"error");setBottomTab("errors");return false;}};
-    const save=()=>{const result=validate();if(!result.errors.length&&result.schema&&result.config&&run())onSave(specification,configuration);};
-    const formatActive=()=>{const target=editorTab==="config"?"config":"specification";try{if(target==="config")setConfiguration(JSON.stringify(JSON.parse(configuration),null,2));else setSpecification(JSON.stringify(JSON.parse(specification),null,2));setEditorTab(target);appendLog(`Formatted ${target} JSON.`,"success");}catch(error){const message=`Cannot format invalid ${target} JSON: ${error instanceof Error?error.message:String(error)}`;setErrors([message]);appendLog(message,"error");setBottomTab("errors");}};
-    const applyAi=(json:string,_merge:boolean,configJson?:string)=>{if(configJson)setConfiguration(configJson);try{const incoming=JSON.parse(json) as unknown;if(isAiChangePackage(incoming)){const checked=validateAiChangePackage(incoming);if(!checked.package){checked.errors.forEach(error=>appendLog(error,"error"));return;}const current=JSON.parse(specification) as HyperPbiSchema;const applied=applyChangePackage(current,checked.package,{validateResult:candidate=>validateDraft(JSON.stringify(candidate),configJson??configuration,data)});if(!applied.schema){applied.errors.forEach(error=>appendLog(error,"error"));return;}const next=JSON.stringify(applied.schema,null,2);setSpecification(next);appendLog(applied.summary,"success");}else setSpecification(json);if(layout.advanced)setEditorTab("specification");}catch(error){appendLog(`AI import failed without changing the dashboard: ${error instanceof Error?error.message:String(error)}`,"error");}};
-    const updateCalculations=(calculations:CalculationSpecification)=>{const parsed=parseJson(specification);if(parsed.value&&typeof parsed.value==="object")setSpecification(JSON.stringify({...parsed.value as object,calculations},null,2));};
-    const parsedConfig=parseConfig(configuration).config;const changeConfig=(config:HyperPbiConfig)=>setConfiguration(JSON.stringify(config,null,2));const showBottom=layout.advanced&&layout.bottomOpen||!layout.advanced&&Boolean(errors.length||warnings.length);const authoringTree=useMemo(()=>{try{return componentTree(JSON.parse(specification));}catch{return[];}},[specification]);const selectedMeta=authoringTree.find(item=>item.id===selectedComponentId);const authoredVersion=useMemo(()=>{try{return String((JSON.parse(specification) as {version?:unknown}).version??"unknown");}catch{return"invalid";}},[specification]);const inspectPreviewClick=(event:MouseEvent)=>{if(!inspectorMode)return;event.preventDefault();event.stopPropagation();const element=(event.target as HTMLElement|null)?.closest?.("[data-hp-id]") as HTMLElement|null;if(!element)return;const owner=element.dataset.hpOwnerId;const runtimeId=element.dataset.hpId??"";setSelectedRuntimeComponentId(runtimeId);setSelectedComponentId(owner&&authoringTree.some(item=>item.id===owner)?owner:runtimeId);setEditorTab("inspector");};
-    const tab=(id:EditorTab,label:string)=><button class={editorTab===id?"active":""} onClick={()=>setEditorTab(id)}>{label}</button>;
-    const persistLayout=(next:StudioLayoutPreference)=>{setLayout(next);onLayoutChange?.(JSON.stringify(next));};
-    const startMainResize=(event:preact.JSX.TargetedPointerEvent<HTMLDivElement>)=>{event.preventDefault();const host=workbenchRef.current;if(!host)return;const rect=host.getBoundingClientRect();const vertical=settings.editor.previewPosition==="bottom"||rect.width<780;const move=(pointer:PointerEvent)=>{const raw=vertical?(pointer.clientY-rect.top)/rect.height*100:(pointer.clientX-rect.left)/rect.width*100;setLayout(current=>({...current,editorPercent:Math.min(75,Math.max(25,raw))}));};const up=()=>{document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",up);setLayout(current=>{onLayoutChange?.(JSON.stringify(current));return current;});};document.addEventListener("pointermove",move);document.addEventListener("pointerup",up);};
-    const startBottomResize=(event:preact.JSX.TargetedPointerEvent<HTMLDivElement>)=>{event.preventDefault();const startY=event.clientY;const startHeight=layout.bottomHeight;const maxHeight=Math.max(180,window.innerHeight*.6);const move=(pointer:PointerEvent)=>setLayout(current=>({...current,bottomHeight:Math.min(maxHeight,Math.max(120,startHeight+(startY-pointer.clientY)))}));const up=()=>{document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",up);setLayout(current=>{onLayoutChange?.(JSON.stringify(current));return current;});};document.addEventListener("pointermove",move);document.addEventListener("pointerup",up);};
-    const bottomOutput=()=>{if(bottomTab==="data")return JSON.stringify((preview?.data??data).rows,null,2);if(bottomTab==="fields")return JSON.stringify((preview?.data??data).fields,null,2);if(bottomTab==="logs")return logs.map(log=>`${log.timestamp??""} ${log.level.toUpperCase()} ${log.message}`).join("\n");if(bottomTab==="errors")return [...errors,...warnings].join("\n")||"No validation issues.";if(bottomTab==="geocode")return JSON.stringify(geocodeResults,null,2);if(bottomTab==="mapServices")return JSON.stringify(parsedConfig?.providers??{},null,2);return JSON.stringify(interactionDiagnostics,null,2);};
-    const copyBottom=async()=>{const copied=await copyText(bottomOutput());appendLog(copied?`Copied ${bottomTab} output.`:`Copy was blocked by the Power BI host.`,copied?"success":"error");};
-    const toggleAdvanced=()=>{const next={...layout,advanced:!layout.advanced};persistLayout(next);if(layout.advanced)setEditorTab("ai");};
-    const bottomTabs:Array<[BottomTab,string]>=layout.advanced?[["data","Data"],["fields","Fields"],["logs","Logs"],["errors",`Issues ${errors.length+warnings.length||""}`],["mapServices","Map Services"],["geocode",`Geocode ${geocodeResults.length||""}`],["interactions","Interactions"]]:[["data","Data preview"],["fields","Fields"],["errors",`Issues ${errors.length+warnings.length||""}`]];
-    return <div class={`hp-studio hp-studio-${settings.theme.mode} hp-preview-${settings.editor.previewPosition} ${layout.advanced?"hp-studio-advanced":"hp-studio-simple"}`}>
-        <header class="hp-studio-header"><div class="hp-header-left"><div class="hp-studio-brand"><span>H</span><div><strong>HyperPBI Builder</strong><small class={`hp-studio-state hp-state-${status.toLowerCase()}`}>{status}</small></div></div></div><div class="hp-studio-actions">{layout.advanced&&<><button type="button" onClick={formatActive}>Format JSON</button><button type="button" onClick={()=>validate()}>Validate</button><button type="button" class="hp-run-button" onClick={()=>run()}>Validate & Preview</button><button type="button" onClick={()=>persistLayout({...layout,bottomOpen:!layout.bottomOpen})}>{layout.bottomOpen?"Hide Data & Fields":"Data & Fields"}</button></>}<button type="button" class="hp-advanced-toggle" onClick={toggleAdvanced}>{layout.advanced?"Simple mode":"Advanced"}</button><button type="button" onClick={()=>setEditorTab("help")}>Help</button><button class={`hp-save-return ${preview?"is-ready":""}`} type="button" disabled={!layout.advanced&&!preview} onClick={save}>Save & return</button></div></header>
-        <nav class="hp-studio-tabs">{tab("ai",layout.advanced?"AI builder":"Guided builder")}{!layout.advanced&&tab("help","How it works")}{layout.advanced&&<>{tab("inspector","Inspector")}{tab("mapStudio","Map Studio")}{tab("specification","JSON")}{tab("config","Runtime config")}{tab("skill","AI skill")}{tab("calculations","Calculations")}{tab("mapServices","Map services")}{tab("settings","Field mapping")}{tab("interactions","Interactions")}{tab("help","Documentation")}</>}</nav>
-        <div ref={workbenchRef} class="hp-studio-workbench" style={{"--hp-editor-size":`${layout.editorPercent}%`}}><section class="hp-studio-editor-pane">{editorTab==="specification"&&<CodeEditor value={specification} onChange={setSpecification} theme={settings.theme.mode} fontSize={settings.editor.fontSize} wordWrap={settings.editor.wordWrap} ariaLabel="HyperPBI specification JSON"/>}{editorTab==="inspector"&&<SpecificationInspector json={specification} data={data} aliasOverrides={parsedConfig?.fields?.aliases} selectedComponentId={selectedComponentId} generatedRuntimeId={selectedRuntimeComponentId} history={specificationHistory.current} onOpenMapStudio={()=>setEditorTab("mapStudio")} onSelect={id=>{setSelectedComponentId(id);setSelectedRuntimeComponentId("");}} onChange={next=>{setSpecification(next);run(next,configuration);}}/>}{editorTab==="mapStudio"&&<MapStudio json={specification} data={data} aliasOverrides={parsedConfig?.fields?.aliases} selectedComponentId={selectedComponentId} history={specificationHistory.current} onSelect={id=>{setSelectedComponentId(id);setSelectedRuntimeComponentId("");}} onChange={next=>{setSpecification(next);run(next,configuration);}}/>}{editorTab==="config"&&<RuntimeConfigTab data={data} configuration={configuration} onChange={setConfiguration} theme={settings.theme.mode} fontSize={settings.editor.fontSize} wordWrap={settings.editor.wordWrap}/>} {editorTab==="settings"&&<StudioSettings data={data} configuration={configuration} onChange={setConfiguration}/>} {editorTab==="ai"&&<AiPromptTab data={data} currentSpecification={specification} configuration={configuration} onConfigurationChange={setConfiguration} onApply={applyAi} onPreview={(json,configJson)=>run(json,configJson??configuration)} previewReady={Boolean(preview)} diagnostics={interactionDiagnostics} selectedComponentId={selectedComponentId} selectedComponentType={selectedMeta?.type} selectedComponentTitle={selectedMeta?.title} selectedComponentPath={selectedMeta?.path}/>} {editorTab==="skill"&&<SkillTab data={data}/>} {editorTab==="calculations"&&<CalculationsTab data={data} schema={structure.schema} onChange={updateCalculations} theme={settings.theme.mode} fontSize={settings.editor.fontSize} wordWrap={settings.editor.wordWrap}/>} {editorTab==="mapServices"&&parsedConfig&&<MapServicesPanel data={data} config={parsedConfig} onChange={changeConfig} onResults={results=>setGeocodeResults(current=>results.length>1?results:[...current.slice(-199),...results])} onLog={appendLog} webAccessAvailable={webAccessAvailable} providerAccess={providerAccess}/>} {editorTab==="interactions"&&<InteractionsPanel diagnostics={interactionDiagnostics}/>} {editorTab==="help"&&<HelpDocsPanel/>}</section>
-            {settings.editor.previewPosition!=="hidden"&&<><div class="hp-main-resize-handle" role="separator" aria-label="Resize builder and preview" onPointerDown={startMainResize}/><section class={`hp-studio-preview ${inspectorMode?"is-inspecting":""}`} data-selected-component-id={selectedComponentId} onClickCapture={inspectPreviewClick}><div class="hp-pane-label">Live preview <button type="button" class={inspectorMode?"is-active":""} aria-pressed={inspectorMode} onClick={event=>{event.stopPropagation();setInspectorMode(value=>!value);}}>{inspectorMode?"Inspector on (Esc to exit)":"Inspect preview"}</button></div>{preview?<HyperPbiRoot instanceId={`${instanceId}-preview`} schema={preview.schema} data={preview.data} settings={settings} config={preview.config} referenceWarnings={validateReferences(preview.schema,preview.data)} renderMs={0} selectExternal={selectExternal} clearExternal={clearExternal} applyExternalFilter={applyExternalFilter} clearExternalFilter={clearExternalFilter} reportInteraction={reportInteraction} webAccessAvailable={webAccessAvailable} providerAccess={providerAccess} ownerByRuntimeId={preview.ownerByRuntimeId}/>:<div class="hp-preview-empty"><span>◇</span><strong>Your validated preview will appear here</strong><p>Copy the AI prompt, paste the AI response, then select Validate & Preview.</p>{layout.advanced&&<button class="hp-primary-action hp-preview-validate" type="button" onClick={()=>run()}>Validate & Preview</button>}</div>}</section></>}
+function validateDraft(
+  specification: string,
+  configuration: string,
+  data: NormalizedData,
+): ValidationResult {
+  const prepared = prepareAuthoringData(specification, configuration, data);
+  const warnings = [...prepared.warnings];
+  if (prepared.specification && prepared.config)
+    warnings.push(
+      ...sanitizerWarnings(prepared.specification, prepared.config),
+    );
+  return {
+    schema: prepared.specification,
+    config: prepared.config,
+    data: prepared.configuredData,
+    errors: prepared.errors,
+    warnings: Array.from(new Set(warnings)),
+    ownerByRuntimeId: prepared.ownerByRuntimeId,
+  };
+}
+function validateStructure(
+  specification: string,
+  configuration: string,
+  data: NormalizedData,
+): { schema?: HyperPbiSchema; errors: string[] } {
+  const errors: string[] = [];
+  const config = parseConfig(configuration);
+  const parsed = parseJson(specification);
+  if (parsed.error) errors.push(`Specification JSON: ${parsed.error}`);
+  const prepared = parsed.value
+    ? prepareSpecification(parsed.value, data, {
+        repair: false,
+        aliasOverrides: config.config?.fields?.aliases,
+      })
+    : undefined;
+  if (prepared && !prepared.schema)
+    errors.push(...prepared.errors.map((error) => `Specification: ${error}`));
+  errors.push(...config.errors);
+  return { schema: prepared?.schema, errors };
+}
+
+export function HyperPbiStudio({
+  instanceId,
+  data,
+  settings,
+  initialSpecification,
+  initialConfiguration,
+  initialLayout,
+  onSave,
+  onDraftChange,
+  onLayoutChange,
+  selectionIdentityCount = 0,
+  hostAllowsInteractions = false,
+  initialInteractionDiagnostics,
+  selectExternal: externalSelect = () => ({
+    sent: false,
+    reason: "component did not call selectExternal",
+  }),
+  clearExternal: externalClear = () => ({
+    sent: false,
+    reason: "component did not call selectExternal",
+  }),
+  applyExternalFilter: externalFilter = () => ({
+    sent: false,
+    reason: "component did not call selectExternal",
+  }),
+  clearExternalFilter: externalFilterClear = () => ({
+    sent: false,
+    reason: "component did not call selectExternal",
+  }),
+  initialEditorTab = "ai",
+  webAccessAvailable = false,
+  providerAccess,
+}: {
+  instanceId: string;
+  data: NormalizedData;
+  settings: RuntimeSettings;
+  initialSpecification: string;
+  initialConfiguration: string;
+  initialLayout?: string;
+  onSave: (specification: string, configuration: string) => void;
+  onDraftChange?: (specification: string, configuration: string) => void;
+  onLayoutChange?: (layout: string) => void;
+  selectionIdentityCount?: number;
+  hostAllowsInteractions?: boolean;
+  initialInteractionDiagnostics?: InteractionDiagnostics;
+  selectExternal?: (
+    indices: number[],
+    multiSelect?: boolean,
+    details?: InteractionDetails,
+  ) => ExternalSelectionResult;
+  clearExternal?: (details?: InteractionDetails) => ExternalSelectionResult;
+  applyExternalFilter?: (
+    field: string,
+    operator: FilterOperator,
+    value: unknown,
+    details?: InteractionDetails,
+  ) => ExternalFilterResult;
+  clearExternalFilter?: (details?: InteractionDetails) => ExternalFilterResult;
+  initialEditorTab?: EditorTab;
+  webAccessAvailable?: boolean;
+  providerAccess?: ProviderAccessState;
+}) {
+  const [specification, setSpecification] = useState(initialSpecification);
+  const [configuration, setConfiguration] = useState(initialConfiguration);
+  const [editorTab, setEditorTab] = useState<EditorTab>(initialEditorTab);
+  const [bottomTab, setBottomTab] = useState<BottomTab>("data");
+  const [selectedComponentId, setSelectedComponentId] = useState("");
+  const [selectedRuntimeComponentId, setSelectedRuntimeComponentId] =
+    useState("");
+  const [inspectorMode, setInspectorMode] = useState(false);
+  const [mapViewports, setMapViewports] = useState<
+    Record<string, MapViewportState>
+  >({});
+  const specificationHistory = useRef(
+    new SpecificationHistory(initialSpecification),
+  );
+  const [logs, setLogs] = useState<StudioLog[]>([
+    {
+      level: "info",
+      message:
+        "Builder ready. Describe the dashboard, copy the prompt, paste the AI response, validate, preview, and save.",
+      timestamp: new Date().toISOString(),
+    },
+  ]);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [preview, setPreview] = useState<{
+    schema: HyperPbiSchema;
+    config: HyperPbiConfig;
+    data: NormalizedData;
+    ownerByRuntimeId?: Record<string, string>;
+  }>();
+  const [geocodeResults, setGeocodeResults] = useState<GeocodeResult[]>([]);
+  const [layout, setLayout] = useState<StudioLayoutPreference>(() =>
+    initialLayout ? parseStudioLayout(initialLayout) : defaultStudioLayout,
+  );
+  const [interactionDiagnostics, setInteractionDiagnostics] =
+    useState<InteractionDiagnostics>(
+      () =>
+        initialInteractionDiagnostics ??
+        createInteractionDiagnostics(
+          settings.enableInteractions,
+          hostAllowsInteractions,
+          selectionIdentityCount,
+        ),
+    );
+  const workbenchRef = useRef<HTMLDivElement>(null);
+  const dirty =
+    specification !== initialSpecification ||
+    configuration !== initialConfiguration;
+  const structure = useMemo(
+    () => validateStructure(specification, configuration, data),
+    [specification, configuration, data],
+  );
+  const preparedAuthoring = useMemo<PreparedAuthoringData>(
+    () => prepareAuthoringData(specification, configuration, data),
+    [specification, configuration, data],
+  );
+  const status = structure.errors.length
+    ? "Invalid"
+    : dirty
+      ? "Unsaved"
+      : preview
+        ? "Ready"
+        : "Saved";
+  useEffect(
+    () => onDraftChange?.(specification, configuration),
+    [specification, configuration],
+  );
+  useEffect(() => {
+    if (!inspectorMode) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setInspectorMode(false);
+    };
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [inspectorMode]);
+  useEffect(() => {
+    const host = workbenchRef.current;
+    host
+      ?.querySelectorAll(".hp-inspector-selected")
+      .forEach((element) => element.classList.remove("hp-inspector-selected"));
+    if (selectedComponentId) {
+      const safe = escapeAttributeValue(selectedComponentId);
+      host
+        ?.querySelector(`[data-hp-id="${safe}"]`)
+        ?.classList.add("hp-inspector-selected");
+    }
+  }, [selectedComponentId, preview, inspectorMode]);
+  const appendLog = (message: string, level: StudioLog["level"] = "info") =>
+    setLogs((current) => [
+      ...current.slice(-199),
+      { message, level, timestamp: new Date().toISOString() },
+    ]);
+  const updateInteraction = (
+    indices: number[],
+    details: InteractionDetails,
+    result: ExternalSelectionResult,
+  ) =>
+    setInteractionDiagnostics((current) => ({
+      ...current,
+      externalInteractionEnabled: settings.enableInteractions,
+      hostAllowsInteractions,
+      selectionIdentityCount,
+      lastClickedComponentId: details.componentId,
+      lastClickedComponentType: details.componentType,
+      lastClickedField: details.field,
+      lastClickedValue: details.value,
+      lastResolvedSourceRowCount: details.matchedRowCount ?? indices.length,
+      lastSelectedSourceRowIndices: indices.slice(0, 25),
+      externalMode: details.externalMode ?? "selection",
+      filterSent: false,
+      selectionSent: result.sent,
+      externalSelectionSent: result.sent,
+      filterTargetTable: undefined,
+      filterTargetColumn: undefined,
+      reasonExternalSelectionNotSent: result.sent ? undefined : result.reason,
+    }));
+  const selectExternal = (
+    indices: number[],
+    multiSelect = false,
+    details: InteractionDetails = {},
+  ) => {
+    const result = externalSelect(indices, multiSelect, details);
+    updateInteraction(indices, details, result);
+    return result;
+  };
+  const clearExternal = (details: InteractionDetails = {}) => {
+    const result = externalClear(details);
+    updateInteraction([], details, result);
+    return result;
+  };
+  const updateFilter = (
+    details: InteractionDetails,
+    result: ExternalFilterResult,
+  ) =>
+    setInteractionDiagnostics((current) => ({
+      ...current,
+      externalInteractionEnabled: settings.enableInteractions,
+      hostAllowsInteractions,
+      selectionIdentityCount,
+      lastClickedComponentId: details.componentId,
+      lastClickedComponentType: details.componentType,
+      lastClickedField: details.field,
+      lastClickedValue: details.value,
+      lastResolvedSourceRowCount: details.matchedRowCount ?? 0,
+      lastSelectedSourceRowIndices: [],
+      externalMode: "filter",
+      filterSent: result.sent,
+      selectionSent: false,
+      externalSelectionSent: false,
+      filterTargetTable: result.target?.table,
+      filterTargetColumn: result.target?.column,
+      reasonExternalSelectionNotSent: result.sent ? undefined : result.reason,
+    }));
+  const applyExternalFilter = (
+    field: string,
+    operator: FilterOperator,
+    value: unknown,
+    details: InteractionDetails = {},
+  ) => {
+    const result = externalFilter(field, operator, value, details);
+    updateFilter({ ...details, field }, result);
+    return result;
+  };
+  const clearExternalFilter = (details: InteractionDetails = {}) => {
+    const result = externalFilterClear(details);
+    updateFilter(details, result);
+    return result;
+  };
+  const reportInteraction = (
+    details: InteractionDetails,
+    reason: ExternalSelectionFailureReason = "component did not call selectExternal",
+    indices: number[] = [],
+  ) => updateInteraction(indices, details, { sent: false, reason });
+  const validate = () => {
+    try {
+      const result = validateDraft(specification, configuration, data);
+      setErrors(result.errors);
+      setWarnings(result.warnings);
+      if (result.errors.length) {
+        result.errors.forEach((message) => appendLog(message, "error"));
+        setBottomTab("errors");
+        return result;
+      }
+      appendLog(
+        `Validation passed with ${result.warnings.length} warning(s).`,
+        "success",
+      );
+      if (result.warnings.length)
+        result.warnings.forEach((message) => appendLog(message));
+      setBottomTab(result.warnings.length ? "errors" : "logs");
+      return result;
+    } catch (error) {
+      const message = `Validation failed unexpectedly: ${error instanceof Error ? error.message : String(error)}`;
+      setErrors([message]);
+      setWarnings([]);
+      appendLog(message, "error");
+      setBottomTab("errors");
+      return { errors: [message], warnings: [] };
+    }
+  };
+  const run = (
+    candidate = specification,
+    candidateConfig = configuration,
+  ): boolean => {
+    try {
+      const result = validateDraft(candidate, candidateConfig, data);
+      setErrors(result.errors);
+      setWarnings(result.warnings);
+      if (
+        result.errors.length ||
+        !result.schema ||
+        !result.config ||
+        !result.data
+      ) {
+        result.errors.forEach((message) => appendLog(message, "error"));
+        setBottomTab("errors");
+        return false;
+      }
+      setPreview({
+        schema: result.schema,
+        config: result.config,
+        data: result.data,
+        ownerByRuntimeId: result.ownerByRuntimeId,
+      });
+      appendLog(
+        `Rendered ${result.data.rows.length.toLocaleString()} rows with ${result.warnings.length} warning(s).`,
+        "success",
+      );
+      if (result.warnings.length) setBottomTab("errors");
+      return true;
+    } catch (error) {
+      const message = `Render failed safely: ${error instanceof Error ? error.message : String(error)}`;
+      setErrors([message]);
+      setWarnings([]);
+      appendLog(message, "error");
+      setBottomTab("errors");
+      return false;
+    }
+  };
+  const save = () => {
+    const result = validate();
+    if (!result.errors.length && result.schema && result.config && run())
+      onSave(specification, configuration);
+  };
+  const formatActive = () => {
+    const target = editorTab === "config" ? "config" : "specification";
+    try {
+      if (target === "config")
+        setConfiguration(JSON.stringify(JSON.parse(configuration), null, 2));
+      else setSpecification(JSON.stringify(JSON.parse(specification), null, 2));
+      setEditorTab(target);
+      appendLog(`Formatted ${target} JSON.`, "success");
+    } catch (error) {
+      const message = `Cannot format invalid ${target} JSON: ${error instanceof Error ? error.message : String(error)}`;
+      setErrors([message]);
+      appendLog(message, "error");
+      setBottomTab("errors");
+    }
+  };
+  const applyAi = (json: string, _merge: boolean, configJson?: string) => {
+    if (configJson) setConfiguration(configJson);
+    try {
+      const incoming = JSON.parse(json) as unknown;
+      if (isAiChangePackage(incoming)) {
+        const checked = validateAiChangePackage(incoming);
+        if (!checked.package) {
+          checked.errors.forEach((error) => appendLog(error, "error"));
+          return;
+        }
+        const current = JSON.parse(specification) as HyperPbiSchema;
+        const applied = applyChangePackage(current, checked.package, {
+          validateResult: (candidate) =>
+            validateDraft(
+              JSON.stringify(candidate),
+              configJson ?? configuration,
+              data,
+            ),
+        });
+        if (!applied.schema) {
+          applied.errors.forEach((error) => appendLog(error, "error"));
+          return;
+        }
+        const next = JSON.stringify(applied.schema, null, 2);
+        setSpecification(next);
+        appendLog(applied.summary, "success");
+      } else setSpecification(json);
+      if (layout.advanced) setEditorTab("specification");
+    } catch (error) {
+      appendLog(
+        `AI import failed without changing the dashboard: ${error instanceof Error ? error.message : String(error)}`,
+        "error",
+      );
+    }
+  };
+  const updateCalculations = (calculations: CalculationSpecification) => {
+    const parsed = parseJson(specification);
+    if (parsed.value && typeof parsed.value === "object")
+      setSpecification(
+        JSON.stringify({ ...(parsed.value as object), calculations }, null, 2),
+      );
+  };
+  const parsedConfig = parseConfig(configuration).config;
+  const changeConfig = (config: HyperPbiConfig) =>
+    setConfiguration(JSON.stringify(config, null, 2));
+  const showBottom =
+    (layout.advanced && layout.bottomOpen) ||
+    (!layout.advanced && Boolean(errors.length || warnings.length));
+  const authoringTree = useMemo(() => {
+    try {
+      return componentTree(JSON.parse(specification));
+    } catch {
+      return [];
+    }
+  }, [specification]);
+  const selectedMeta = authoringTree.find(
+    (item) => item.id === selectedComponentId,
+  );
+  const authoredVersion = useMemo(() => {
+    try {
+      return String(
+        (JSON.parse(specification) as { version?: unknown }).version ??
+          "unknown",
+      );
+    } catch {
+      return "invalid";
+    }
+  }, [specification]);
+  const inspectPreviewClick = (event: MouseEvent) => {
+    if (!inspectorMode) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const element = (event.target as HTMLElement | null)?.closest?.(
+      "[data-hp-id]",
+    ) as HTMLElement | null;
+    if (!element) return;
+    const owner = element.dataset.hpOwnerId;
+    const runtimeId = element.dataset.hpId ?? "";
+    setSelectedRuntimeComponentId(runtimeId);
+    setSelectedComponentId(
+      owner && authoringTree.some((item) => item.id === owner)
+        ? owner
+        : runtimeId,
+    );
+    setEditorTab("inspector");
+  };
+  const tab = (id: EditorTab, label: string) => (
+    <button
+      class={editorTab === id ? "active" : ""}
+      onClick={() => setEditorTab(id)}
+    >
+      {label}
+    </button>
+  );
+  const persistLayout = (next: StudioLayoutPreference) => {
+    setLayout(next);
+    onLayoutChange?.(JSON.stringify(next));
+  };
+  const startMainResize = (
+    event: preact.JSX.TargetedPointerEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    const host = workbenchRef.current;
+    if (!host) return;
+    const rect = host.getBoundingClientRect();
+    const vertical =
+      settings.editor.previewPosition === "bottom" || rect.width < 780;
+    const move = (pointer: PointerEvent) => {
+      const raw = vertical
+        ? ((pointer.clientY - rect.top) / rect.height) * 100
+        : ((pointer.clientX - rect.left) / rect.width) * 100;
+      setLayout((current) => ({
+        ...current,
+        editorPercent: Math.min(75, Math.max(25, raw)),
+      }));
+    };
+    const up = () => {
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerup", up);
+      setLayout((current) => {
+        onLayoutChange?.(JSON.stringify(current));
+        return current;
+      });
+    };
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+  };
+  const startBottomResize = (
+    event: preact.JSX.TargetedPointerEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    const startY = event.clientY;
+    const startHeight = layout.bottomHeight;
+    const maxHeight = Math.max(180, window.innerHeight * 0.6);
+    const move = (pointer: PointerEvent) =>
+      setLayout((current) => ({
+        ...current,
+        bottomHeight: Math.min(
+          maxHeight,
+          Math.max(120, startHeight + (startY - pointer.clientY)),
+        ),
+      }));
+    const up = () => {
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerup", up);
+      setLayout((current) => {
+        onLayoutChange?.(JSON.stringify(current));
+        return current;
+      });
+    };
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+  };
+  const bottomOutput = () => {
+    if (bottomTab === "data")
+      return JSON.stringify((preview?.data ?? data).rows, null, 2);
+    if (bottomTab === "fields")
+      return JSON.stringify((preview?.data ?? data).fields, null, 2);
+    if (bottomTab === "logs")
+      return logs
+        .map(
+          (log) =>
+            `${log.timestamp ?? ""} ${log.level.toUpperCase()} ${log.message}`,
+        )
+        .join("\n");
+    if (bottomTab === "errors")
+      return [...errors, ...warnings].join("\n") || "No validation issues.";
+    if (bottomTab === "geocode") return JSON.stringify(geocodeResults, null, 2);
+    if (bottomTab === "mapServices")
+      return JSON.stringify(parsedConfig?.providers ?? {}, null, 2);
+    return JSON.stringify(interactionDiagnostics, null, 2);
+  };
+  const copyBottom = async () => {
+    const copied = await copyText(bottomOutput());
+    appendLog(
+      copied
+        ? `Copied ${bottomTab} output.`
+        : `Copy was blocked by the Power BI host.`,
+      copied ? "success" : "error",
+    );
+  };
+  const toggleAdvanced = () => {
+    const next = { ...layout, advanced: !layout.advanced };
+    persistLayout(next);
+    if (layout.advanced) setEditorTab("ai");
+  };
+  const bottomTabs: Array<[BottomTab, string]> = layout.advanced
+    ? [
+        ["data", "Data"],
+        ["fields", "Fields"],
+        ["logs", "Logs"],
+        ["errors", `Issues ${errors.length + warnings.length || ""}`],
+        ["mapServices", "Map Services"],
+        ["geocode", `Geocode ${geocodeResults.length || ""}`],
+        ["interactions", "Interactions"],
+      ]
+    : [
+        ["data", "Data preview"],
+        ["fields", "Fields"],
+        ["errors", `Issues ${errors.length + warnings.length || ""}`],
+      ];
+  return (
+    <div
+      class={`hp-studio hp-studio-${settings.theme.mode} hp-preview-${settings.editor.previewPosition} ${layout.advanced ? "hp-studio-advanced" : "hp-studio-simple"}`}
+    >
+      <header class="hp-studio-header">
+        <div class="hp-header-left">
+          <div class="hp-studio-brand">
+            <span>H</span>
+            <div>
+              <strong>HyperPBI Builder</strong>
+              <small class={`hp-studio-state hp-state-${status.toLowerCase()}`}>
+                {status}
+              </small>
+            </div>
+          </div>
         </div>
-        {showBottom&&<section class="hp-studio-bottom" style={{height:`${layout.bottomHeight}px`}}><div class="hp-bottom-resize-handle" role="separator" aria-label="Resize data panel" onPointerDown={startBottomResize}/><nav>{bottomTabs.map(([id,label])=><button class={bottomTab===id?"active":""} onClick={()=>setBottomTab(id)}>{label}</button>)}<span/><button type="button" onClick={()=>void copyBottom()}>Copy output</button><button type="button" onClick={()=>persistLayout({...layout,bottomOpen:false})}>Close</button></nav><div class="hp-bottom-content">{bottomTab==="data"&&<DataPreview data={preview?.data??data}/>} {bottomTab==="fields"&&<FieldsPanel data={preview?.data??data}/>} {bottomTab==="logs"&&<div class="hp-log-view">{logs.map(log=><div class={`hp-log-${log.level}`}><span>{log.level.toUpperCase()}</span><time>{log.timestamp?.slice(11,19)}</time><div>{log.message}</div></div>)}</div>} {bottomTab==="errors"&&<div class="hp-errors-panel"><header><strong>Issues</strong><button type="button" onClick={()=>void copyBottom()}>Copy Issues</button></header>{errors.length||warnings.length?<><ul>{errors.map(error=><li>{error}</li>)}</ul><ul>{warnings.map(warning=><li>{warning}</li>)}</ul></>:<div class="hp-ready-state">✓ No validation issues</div>}</div>} {bottomTab==="mapServices"&&<div class="hp-bottom-summary"><strong>{parsedConfig?.providers?.mode??"core"} mode</strong><span>Basemap: {parsedConfig?.providers?.basemap?.provider??"none"}</span><span>Geocoder: {parsedConfig?.providers?.geocoder?.provider??"none"}</span></div>} {bottomTab==="geocode"&&<div class="hp-geocode-table"><table><thead><tr><th>Address</th><th>Status</th><th>Latitude</th><th>Longitude</th><th>Provider</th><th>Cache</th><th>Error</th></tr></thead><tbody>{geocodeResults.map(result=><tr><td>{result.sourceAddress}</td><td>{result.status}</td><td>{result.latitude??"—"}</td><td>{result.longitude??"—"}</td><td>{result.provider}</td><td>{result.cacheHit?"Yes":"No"}</td><td>{result.error??""}</td></tr>)}</tbody></table></div>} {bottomTab==="interactions"&&<InteractionsPanel diagnostics={interactionDiagnostics}/>}</div></section>}
-        <footer class="hp-studio-status"><span>Dashboard schema {authoredVersion}</span><span>{status}{preview?" · preview valid":" · preview not validated"}</span><span>Package 1.0.0.0</span><span>{data.rows.length.toLocaleString()} rows loaded{data.loadStatus?.moreRowsAvailable?" · more available":""}</span><span>{Object.keys(data.fields).length} fields</span><span>{selectionIdentityCount.toLocaleString()} selection IDs</span></footer>
-    </div>;
+        <div class="hp-studio-actions">
+          {layout.advanced && (
+            <>
+              <button type="button" onClick={formatActive}>
+                Format JSON
+              </button>
+              <button type="button" onClick={() => validate()}>
+                Validate
+              </button>
+              <button type="button" class="hp-run-button" onClick={() => run()}>
+                Validate & Preview
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })
+                }
+              >
+                {layout.bottomOpen ? "Hide Data & Fields" : "Data & Fields"}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            class="hp-advanced-toggle"
+            onClick={toggleAdvanced}
+          >
+            {layout.advanced ? "Simple mode" : "Advanced"}
+          </button>
+          <button type="button" onClick={() => setEditorTab("help")}>
+            Help
+          </button>
+          <button
+            class={`hp-save-return ${preview ? "is-ready" : ""}`}
+            type="button"
+            disabled={!layout.advanced && !preview}
+            onClick={save}
+          >
+            Save & return
+          </button>
+        </div>
+      </header>
+      <nav class="hp-studio-tabs">
+        {tab("ai", layout.advanced ? "AI builder" : "Guided builder")}
+        {!layout.advanced && tab("help", "How it works")}
+        {layout.advanced && (
+          <>
+            {tab("inspector", "Inspector")}
+            {tab("mapStudio", "Map Studio")}
+            {tab("specification", "JSON")}
+            {tab("config", "Runtime config")}
+            {tab("skill", "AI skill")}
+            {tab("calculations", "Calculations")}
+            {tab("mapServices", "Map services")}
+            {tab("settings", "Field mapping")}
+            {tab("interactions", "Interactions")}
+            {tab("help", "Documentation")}
+          </>
+        )}
+      </nav>
+      <div
+        ref={workbenchRef}
+        class="hp-studio-workbench"
+        style={{ "--hp-editor-size": `${layout.editorPercent}%` }}
+      >
+        <section class="hp-studio-editor-pane">
+          {editorTab === "specification" && (
+            <CodeEditor
+              value={specification}
+              onChange={setSpecification}
+              theme={settings.theme.mode}
+              fontSize={settings.editor.fontSize}
+              wordWrap={settings.editor.wordWrap}
+              ariaLabel="HyperPBI specification JSON"
+            />
+          )}
+          {editorTab === "inspector" && (
+            <SpecificationInspector
+              json={specification}
+              data={data}
+              prepared={preparedAuthoring}
+              aliasOverrides={parsedConfig?.fields?.aliases}
+              selectedComponentId={selectedComponentId}
+              generatedRuntimeId={selectedRuntimeComponentId}
+              history={specificationHistory.current}
+              onOpenMapStudio={() => setEditorTab("mapStudio")}
+              onSelect={(id) => {
+                setSelectedComponentId(id);
+                setSelectedRuntimeComponentId("");
+              }}
+              onChange={(next) => {
+                setSpecification(next);
+                run(next, configuration);
+              }}
+            />
+          )}
+          {editorTab === "mapStudio" && (
+            <MapStudio
+              json={specification}
+              data={data}
+              prepared={preparedAuthoring}
+              aliasOverrides={parsedConfig?.fields?.aliases}
+              selectedComponentId={selectedComponentId}
+              liveViewport={
+                mapViewports[
+                  mapIdForSelection(selectedComponentId, authoringTree)
+                ]
+              }
+              history={specificationHistory.current}
+              webAccessAvailable={webAccessAvailable}
+              providerAccess={providerAccess}
+              onSelect={(id) => {
+                setSelectedComponentId(id);
+                setSelectedRuntimeComponentId("");
+              }}
+              onChange={(next) => {
+                setSpecification(next);
+                run(next, configuration);
+              }}
+            />
+          )}
+          {editorTab === "config" && (
+            <RuntimeConfigTab
+              data={data}
+              configuration={configuration}
+              onChange={setConfiguration}
+              theme={settings.theme.mode}
+              fontSize={settings.editor.fontSize}
+              wordWrap={settings.editor.wordWrap}
+            />
+          )}{" "}
+          {editorTab === "settings" && (
+            <StudioSettings
+              data={data}
+              configuration={configuration}
+              onChange={setConfiguration}
+            />
+          )}{" "}
+          {editorTab === "ai" && (
+            <AiPromptTab
+              data={data}
+              currentSpecification={specification}
+              configuration={configuration}
+              onConfigurationChange={setConfiguration}
+              onApply={applyAi}
+              onPreview={(json, configJson) =>
+                run(json, configJson ?? configuration)
+              }
+              previewReady={Boolean(preview)}
+              diagnostics={interactionDiagnostics}
+              selectedComponentId={selectedComponentId}
+              selectedComponentType={selectedMeta?.type}
+              selectedComponentTitle={selectedMeta?.title}
+              selectedComponentPath={selectedMeta?.path}
+            />
+          )}{" "}
+          {editorTab === "skill" && <SkillTab data={data} />}{" "}
+          {editorTab === "calculations" && (
+            <CalculationsTab
+              data={data}
+              schema={structure.schema}
+              onChange={updateCalculations}
+              theme={settings.theme.mode}
+              fontSize={settings.editor.fontSize}
+              wordWrap={settings.editor.wordWrap}
+            />
+          )}{" "}
+          {editorTab === "mapServices" && parsedConfig && (
+            <MapServicesPanel
+              data={data}
+              config={parsedConfig}
+              onChange={changeConfig}
+              onResults={(results) =>
+                setGeocodeResults((current) =>
+                  results.length > 1
+                    ? results
+                    : [...current.slice(-199), ...results],
+                )
+              }
+              onLog={appendLog}
+              webAccessAvailable={webAccessAvailable}
+              providerAccess={providerAccess}
+            />
+          )}{" "}
+          {editorTab === "interactions" && (
+            <InteractionsPanel diagnostics={interactionDiagnostics} />
+          )}{" "}
+          {editorTab === "help" && <HelpDocsPanel />}
+        </section>
+        {settings.editor.previewPosition !== "hidden" && (
+          <>
+            <div
+              class="hp-main-resize-handle"
+              role="separator"
+              aria-label="Resize builder and preview"
+              onPointerDown={startMainResize}
+            />
+            <section
+              class={`hp-studio-preview ${inspectorMode ? "is-inspecting" : ""}`}
+              data-selected-component-id={selectedComponentId}
+              onClickCapture={inspectPreviewClick}
+            >
+              <div class="hp-pane-label">
+                Live preview{" "}
+                <button
+                  type="button"
+                  class={inspectorMode ? "is-active" : ""}
+                  aria-pressed={inspectorMode}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setInspectorMode((value) => !value);
+                  }}
+                >
+                  {inspectorMode
+                    ? "Inspector on (Esc to exit)"
+                    : "Inspect preview"}
+                </button>
+              </div>
+              {preview ? (
+                <HyperPbiRoot
+                  instanceId={`${instanceId}-preview`}
+                  schema={preview.schema}
+                  data={preview.data}
+                  settings={settings}
+                  config={preview.config}
+                  referenceWarnings={validateReferences(
+                    preview.schema,
+                    preview.data,
+                  )}
+                  renderMs={0}
+                  selectExternal={selectExternal}
+                  clearExternal={clearExternal}
+                  applyExternalFilter={applyExternalFilter}
+                  clearExternalFilter={clearExternalFilter}
+                  reportInteraction={reportInteraction}
+                  webAccessAvailable={webAccessAvailable}
+                  providerAccess={providerAccess}
+                  ownerByRuntimeId={preview.ownerByRuntimeId}
+                  onMapViewportChange={(id, viewport) =>
+                    setMapViewports((current) => ({
+                      ...current,
+                      [id]: viewport,
+                    }))
+                  }
+                />
+              ) : (
+                <div class="hp-preview-empty">
+                  <span>◇</span>
+                  <strong>Your validated preview will appear here</strong>
+                  <p>
+                    Copy the AI prompt, paste the AI response, then select
+                    Validate & Preview.
+                  </p>
+                  {layout.advanced && (
+                    <button
+                      class="hp-primary-action hp-preview-validate"
+                      type="button"
+                      onClick={() => run()}
+                    >
+                      Validate & Preview
+                    </button>
+                  )}
+                </div>
+              )}
+            </section>
+          </>
+        )}
+      </div>
+      {showBottom && (
+        <section
+          class="hp-studio-bottom"
+          style={{ height: `${layout.bottomHeight}px` }}
+        >
+          <div
+            class="hp-bottom-resize-handle"
+            role="separator"
+            aria-label="Resize data panel"
+            onPointerDown={startBottomResize}
+          />
+          <nav>
+            {bottomTabs.map(([id, label]) => (
+              <button
+                class={bottomTab === id ? "active" : ""}
+                onClick={() => setBottomTab(id)}
+              >
+                {label}
+              </button>
+            ))}
+            <span />
+            <button type="button" onClick={() => void copyBottom()}>
+              Copy output
+            </button>
+            <button
+              type="button"
+              onClick={() => persistLayout({ ...layout, bottomOpen: false })}
+            >
+              Close
+            </button>
+          </nav>
+          <div class="hp-bottom-content">
+            {bottomTab === "data" && (
+              <DataPreview data={preview?.data ?? data} />
+            )}{" "}
+            {bottomTab === "fields" && (
+              <FieldsPanel data={preview?.data ?? data} />
+            )}{" "}
+            {bottomTab === "logs" && (
+              <div class="hp-log-view">
+                {logs.map((log) => (
+                  <div class={`hp-log-${log.level}`}>
+                    <span>{log.level.toUpperCase()}</span>
+                    <time>{log.timestamp?.slice(11, 19)}</time>
+                    <div>{log.message}</div>
+                  </div>
+                ))}
+              </div>
+            )}{" "}
+            {bottomTab === "errors" && (
+              <div class="hp-errors-panel">
+                <header>
+                  <strong>Issues</strong>
+                  <button type="button" onClick={() => void copyBottom()}>
+                    Copy Issues
+                  </button>
+                </header>
+                {errors.length || warnings.length ? (
+                  <>
+                    <ul>
+                      {errors.map((error) => (
+                        <li>{error}</li>
+                      ))}
+                    </ul>
+                    <ul>
+                      {warnings.map((warning) => (
+                        <li>{warning}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <div class="hp-ready-state">✓ No validation issues</div>
+                )}
+              </div>
+            )}{" "}
+            {bottomTab === "mapServices" && (
+              <div class="hp-bottom-summary">
+                <strong>{parsedConfig?.providers?.mode ?? "core"} mode</strong>
+                <span>
+                  Basemap:{" "}
+                  {parsedConfig?.providers?.basemap?.provider ?? "none"}
+                </span>
+                <span>
+                  Geocoder:{" "}
+                  {parsedConfig?.providers?.geocoder?.provider ?? "none"}
+                </span>
+              </div>
+            )}{" "}
+            {bottomTab === "geocode" && (
+              <div class="hp-geocode-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Address</th>
+                      <th>Status</th>
+                      <th>Latitude</th>
+                      <th>Longitude</th>
+                      <th>Provider</th>
+                      <th>Cache</th>
+                      <th>Error</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {geocodeResults.map((result) => (
+                      <tr>
+                        <td>{result.sourceAddress}</td>
+                        <td>{result.status}</td>
+                        <td>{result.latitude ?? "—"}</td>
+                        <td>{result.longitude ?? "—"}</td>
+                        <td>{result.provider}</td>
+                        <td>{result.cacheHit ? "Yes" : "No"}</td>
+                        <td>{result.error ?? ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}{" "}
+            {bottomTab === "interactions" && (
+              <InteractionsPanel diagnostics={interactionDiagnostics} />
+            )}
+          </div>
+        </section>
+      )}
+      <footer class="hp-studio-status">
+        <span>Dashboard schema {authoredVersion}</span>
+        <span>
+          {status}
+          {preview ? " · preview valid" : " · preview not validated"}
+        </span>
+        <span>Package 1.0.0.0</span>
+        <span>
+          {data.rows.length.toLocaleString()} rows loaded
+          {data.loadStatus?.moreRowsAvailable ? " · more available" : ""}
+        </span>
+        <span>{Object.keys(data.fields).length} fields</span>
+        <span>{selectionIdentityCount.toLocaleString()} selection IDs</span>
+      </footer>
+    </div>
+  );
 }
