@@ -52,11 +52,16 @@ const mocks = vi.hoisted(() => {
         zoom = 2;
         setViewCalls: Array<{ center: [number, number]; zoom: number }> = [];
         fitBoundsCalls: unknown[] = [];
+        minZoomCalls: number[] = [];
+        maxZoomCalls: number[] = [];
+        invalidateSizeCalls = 0;
         removed = false;
         setView(center: [number, number], zoom: number) { const changed = this.center[0] !== center[0] || this.center[1] !== center[1] || this.zoom !== zoom; this.center = center; this.zoom = zoom; this.setViewCalls.push({ center, zoom }); if (changed) this.emit("moveend"); return this; }
         fitBounds(bounds: unknown) { this.fitBoundsCalls.push(bounds); this.center = [29, -95]; this.zoom = 12; this.emit("moveend"); return this; }
         getCenter() { const current = this.center; return { lat: current[0], lng: current[1], equals: (other: { lat: number; lng: number }) => current[0] === other.lat && current[1] === other.lng }; }
         getZoom() { return this.zoom; }
+        setMinZoom(value: number) { this.minZoomCalls.push(value); return this; }
+        setMaxZoom(value: number) { this.maxZoomCalls.push(value); return this; }
         getBounds() { return new Bounds(); }
         getSize() { return { x: 800, y: 600 }; }
         on(name: string, handler: () => void) { const set = this.listeners.get(name) ?? new Set(); set.add(handler); this.listeners.set(name, set); return this; }
@@ -67,7 +72,7 @@ const mocks = vi.hoisted(() => {
         hasLayer(layer: Layer) { return this.layers.has(layer); }
         createPane(name: string) { const pane = { style: { zIndex: "" } }; this.panes.set(name, pane); return pane; }
         getPane(name: string) { return this.panes.get(name); }
-        invalidateSize() { return this; }
+        invalidateSize() { this.invalidateSizeCalls += 1; return this; }
         remove() { this.removed = true; }
     }
 
@@ -135,6 +140,8 @@ import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/setting
 import type { MapComponent } from "../src/schema/hyperpbiSchema";
 import type { ResolvedMapFeature, ResolvedMapLayer } from "../src/maps/model/resolvedMapTypes";
 
+const resizeCallbacks: Array<() => void> = [];
+
 const rows: DataRow[] = [{ id: "A", value: 10 }, { id: "B", value: 20 }];
 const fields: NormalizedData["fields"] = { id: { key: "id", displayName: "ID", type: "dimension", roles: ["values"] }, value: { key: "value", displayName: "Value", type: "measure", roles: ["values"] } };
 const data: NormalizedData = { rows, rowKeys: ["row-0", "row-1"], fields, aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields) };
@@ -165,7 +172,8 @@ beforeEach(() => {
     vi.useFakeTimers();
     for (const collection of [mocks.maps, mocks.tiles, mocks.circles, mocks.geoLayers, mocks.dynamicLayers, mocks.labelCleanups]) collection.length = 0;
     for (const fn of [mocks.map, mocks.tileLayer, mocks.circleMarker, mocks.geoJSON, mocks.featureGroup, mocks.markerClusterGroup, mocks.createDynamic, mocks.createLabels]) fn.mockClear();
-    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    resizeCallbacks.length = 0;
+    vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { resizeCallbacks.push(callback); } observe() {} disconnect() {} });
 });
 afterEach(() => { vi.useRealTimers(); document.body.replaceChildren(); });
 
@@ -226,6 +234,31 @@ describe("LeafletMap controller and viewport", () => {
 });
 
 describe("LeafletMap external layer lifecycle", () => {
+    it("reactively replaces and removes basemaps without remounting operational overlays", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const base = { type: "map", id: "map", view: { fitMode: "none" as const }, layers: [{ id: "features", name: "Features", source: { type: "powerbi" as const, bindings: {} } }] };
+        renderMap(host, test.value, { ...base, basemap: { type: "osm" } }, [layer("features")]);
+        expect(mocks.maps).toHaveLength(1); expect(mocks.tiles).toHaveLength(1);
+        renderMap(host, test.value, { ...base, basemap: { type: "none" } }, [layer("features")]);
+        expect(mocks.maps).toHaveLength(1); expect(mocks.tiles[0].removed).toBe(true);
+        renderMap(host, test.value, { ...base, basemap: { type: "customTile", url: "https://tiles.arcgis.com/a/{z}/{x}/{y}.png", attribution: "A" } }, [layer("features")]);
+        renderMap(host, test.value, { ...base, basemap: { type: "customTile", url: "https://tiles.arcgis.com/b/{z}/{x}/{y}.png", attribution: "B" } }, [layer("features")]);
+        expect(mocks.tiles.at(-1)?.url).toContain("/b/"); expect(mocks.tiles.at(-2)?.removed).toBe(true);
+        expect([...mocks.maps[0].layers].filter(item => item instanceof mocks.Layer && (item as { url?: string }).url)).toHaveLength(1);
+    });
+
+    it("reactively updates authored constraints while unrelated layer edits preserve a user view and resize invalidates", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const component = { type: "map", id: "map", basemap: { type: "none" as const }, view: { center: [10, 20] as [number, number], zoom: 5, minZoom: 2, maxZoom: 16, fitMode: "none" as const }, layers: [{ id: "features", name: "Features", source: { type: "powerbi" as const, bindings: {} } }] };
+        renderMap(host, test.value, component, [layer("features")]); const runtime = mocks.maps[0];
+        expect(runtime.minZoomCalls.at(-1)).toBe(2); expect(runtime.maxZoomCalls.at(-1)).toBe(16);
+        runtime.setView([30, 40], 9);
+        renderMap(host, test.value, { ...component, layers: [{ ...component.layers[0], name: "Renamed" }] }, [layer("features", { name: "Renamed" })]);
+        expect(runtime.center).toEqual([30, 40]); expect(runtime.zoom).toBe(9);
+        renderMap(host, test.value, { ...component, view: { ...component.view, center: [11, 22], zoom: 7, minZoom: 3, maxZoom: 15 } }, [layer("features")]);
+        expect(runtime.center).toEqual([11, 22]); expect(runtime.zoom).toBe(7); expect(runtime.minZoomCalls.at(-1)).toBe(3); expect(runtime.maxZoomCalls.at(-1)).toBe(15);
+        resizeCallbacks[0](); expect(runtime.invalidateSizeCalls).toBeGreaterThan(0);
+    });
     it("renders a basemap with two tile overlays without duplicate layers", () => {
         const host = document.createElement("div"); const test = testContext();
         const tiles = [layer("tile-a", { sourceType: "arcgisTile", features: [], tile: { url: "https://tiles.arcgisonline.com/a/MapServer" } }), layer("tile-b", { sourceType: "arcgisTile", features: [], tile: { url: "https://tiles.arcgisonline.com/b/MapServer" } })];
@@ -291,7 +324,19 @@ describe("LeafletMap rendering safety", () => {
     it("uses configured cluster radius, coverage, and disable zoom", () => {
         const host = document.createElement("div"); const test = testContext();
         renderMap(host, test.value, { type: "map", id: "map", settings: { clusterPoints: true }, basemap: { type: "none" }, view: { fitMode: "none" } }, [layer("clusters", { renderer: { type: "cluster", clusterRadius: 60, disableAtZoom: 15, showCoverageOnHover: true } })]);
-        expect(mocks.markerClusterGroup).toHaveBeenCalledWith({ showCoverageOnHover: true, maxClusterRadius: 60, disableClusteringAtZoom: 15 });
+        expect(mocks.markerClusterGroup).toHaveBeenCalledWith(expect.objectContaining({ showCoverageOnHover: true, maxClusterRadius: 60, disableClusteringAtZoom: 15, iconCreateFunction: expect.any(Function) }));
+    });
+
+    it("makes an explicit cluster authoritative and formats count and sum icons", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const features = [feature("a", { layerId: "clusters", powerBiAttributes: { amount: 10 } }), feature("b", { layerId: "clusters", powerBiAttributes: { amount: 20 } })];
+        const definition = { id: "clusters", name: "Clusters", source: { type: "powerbi" as const, bindings: {} }, renderer: { type: "cluster" as const, clusterLabel: "sum" as const, aggregateField: "amount", fieldSource: "powerbi" as const } };
+        renderMap(host, test.value, { type: "map", id: "map", settings: { clusterPoints: false }, layers: [definition], basemap: { type: "none" }, view: { fitMode: "none" } }, [layer("clusters", { features, renderer: { type: "cluster", clusterLabel: "sum", aggregateField: "amount", fieldSource: "powerbi" } })]);
+        expect(mocks.markerClusterGroup).toHaveBeenCalledTimes(1);
+        const options = mocks.markerClusterGroup.mock.calls[0][0] as { iconCreateFunction(group: { getAllChildMarkers(): unknown[] }): unknown };
+        const markers = features.map(item => ({ __hpFeature: item }));
+        options.iconCreateFunction({ getAllChildMarkers: () => markers });
+        expect(mocks.divIcon).toHaveBeenLastCalledWith(expect.objectContaining({ html: expect.stringContaining("30") }));
     });
 });
 
