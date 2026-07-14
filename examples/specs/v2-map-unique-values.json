@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "title": "Unique-value renderer",
+  "components": [{
+    "type": "map", "id": "status_map", "title": "Status",
+    "layers": [{
+      "id": "assets", "name": "Assets", "dataset": "powerbi",
+      "source": {"type": "powerbi", "bindings": {"latitude": "latitude", "longitude": "longitude"}},
+      "renderer": {"type": "uniqueValue", "field": "status", "fieldSource": "powerbi", "values": [
+        {"value": "Open", "label": "Open", "symbol": {"shape": "circle", "fillColor": "#dc2626", "radius": 7}},
+        {"value": "Closed", "label": "Closed", "symbol": {"shape": "circle", "fillColor": "#16a34a", "radius": 7}}
+      ], "defaultSymbol": {"fillColor": "#64748b", "radius": 6}}
+    }]
+  }]
+}

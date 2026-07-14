@@ -8,7 +8,7 @@ const setupExperience = readFileSync(resolve(process.cwd(), "src/editor/SetupExp
 
 describe("product landing page", () => {
     it("positions the complete end-user product story", () => {
-        for (const text of ["Build, inspect, and evolve", "AI-assisted JSON", "Permanent Visual Inspector", "Declarative SVG", "Leaflet and ArcGIS maps", "Core", "Maps"]) expect(html).toContain(text);
+        for (const text of ["Build, inspect, and evolve", "AI-assisted JSON", "Permanent Visual Inspector", "Declarative SVG", "Declarative analytical Web GIS", "Core", "Maps"]) expect(html).toContain(text);
     });
     it("is GitHub Pages-ready without CDN dependencies or fake controls", () => {
         expect(html).toContain("<!doctype html>");
@@ -17,7 +17,8 @@ describe("product landing page", () => {
         expect(html).not.toContain("<button");
     });
     it("presents Inspector, SVG, and map capabilities accurately", () => {
-        for (const text of ["Inspect preview", "canonical authoring path", "invalid edit keeps the last valid", "bounded repeat", "No user JavaScript", "Map Latitude", "current visual-query aggregation", "Geocoder default is <code>none</code>"]) expect(html).toContain(text);
+        for (const text of ["Inspect preview", "canonical authoring path", "invalid edit keeps the last valid", "bounded repeat", "No user JavaScript", "Map Studio", "single Values well", "one flattened data view", "Geocoder behavior is unchanged"]) expect(html).toContain(text);
+        expect(html).not.toMatch(/Dedicated Map Latitude|Dedicated Map Longitude/i);
     });
     it("shows linked product attribution in both visual entry screens", () => {
         for (const source of [visualLanding, setupExperience]) {

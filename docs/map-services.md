@@ -1,139 +1,159 @@
-# Map services
+# Map services and Map Studio
 
-HyperPBI's `map` component combines bound Power BI locations with optional public HTTPS ArcGIS/provider services. Core and Maps PBIVIZ profiles expose different network privileges.
+HyperPBI is a declarative analytical Web GIS builder for Power BI. It is not a feature-editing, 3D, geoprocessing, network-tracing, or complete Esri Web AppBuilder/Experience Builder replacement. The saved HyperPBI JSON specification is the only canonical map authoring contract.
 
-## Power BI binding and precedence
+## Values-only Power BI contract
 
-Bindings can be supplied by the dedicated Power BI roles **Map Latitude**, **Map Longitude**, **Map Geometry**, and **Map Address**, while **Values** remains available for general fields. A valid layer `source.bindings` override wins; otherwise the dedicated role wins, followed by a normalized semantic type and a conservative exact-name fallback.
+Core and Maps expose the same single Power BI field well:
 
-Location mode precedence is exact:
+```json
+{"displayName":"Values","name":"values","kind":"GroupingOrMeasure"}
+```
 
-1. Geometry
-2. Latitude + longitude
-3. X + Y
-4. Address
-5. None
+Put every map field in **Values**. Location, geometry, styling, labels, popup, tooltip, interaction, and join fields are selected dynamically through the Field Manifest, logical datasets, and each layer's JSON. HyperPBI does not use fixed map field buckets.
 
-Geometry is parsed from supported GeoJSON/WKT-like input by the geometry parser. Latitude/longitude and X/Y must be actual finite numbers (numeric strings are invalid) and within ±90/±180; coordinate pairs render points. Diagnostics separately count valid locations, incomplete pairs, nonnumeric values, and out-of-range values, and include layer/field/query metadata. A non-point Map Type on coordinate pairs warns and still renders a point—bind Geometry for lines/polygons.
+A Power BI layer resolves bindings in this order:
 
-Address combines address, city, state, and ZIP. Normalization never sends address data automatically. It uses a cached geocode if one exists; otherwise the row remains unresolved until a user-triggered geocoder action.
+1. explicit `layer.source.bindings`
+2. Map Studio-generated bindings, which are the same canonical property
+3. legacy Runtime Config/component bindings only when a legacy map has no explicit layers
+4. semantic field type
+5. conservative exact-name inference
+6. unresolved with a structured diagnostic
 
-Power BI roles also supply layer, type, color, size, tooltip, and detail fields. A layer binding groups rows by its value.
+Explicit layers never inherit one global coordinate pair. A missing or misspelled explicit binding remains unresolved rather than falling through to unrelated data.
 
-## Conservative coordinate inference
+Location precedence within one resolved layer is geometry, latitude/longitude, X/Y, address, then none. Coordinates must be finite numbers with latitude in −90…90 and longitude in −180…180. Diagnostics report current dataset rows, valid features, incomplete pairs, nonnumeric pairs, out-of-range pairs, geometry parse failures, and filtered rows. They do not infer a semantic-model row count.
 
-HyperPBI does not guess latitude/longitude from arbitrary numeric fields. Use explicit Map Latitude/Longitude roles or verified overrides. Center order is `[latitude, longitude]`.
+Power BI query aggregation is separate from the model's default summarization. When the current visual query summarizes row-level coordinates, keep the fields in Values and set those field instances to **Don't summarize**.
 
-The Field Manifest distinguishes a summarized visual-query wrapper from a true model measure and records the model default separately. A coordinate bound through a dedicated map role is not warned merely because the model default aggregation exists. When the current HyperPBI visual query actually summarizes a coordinate, the diagnostic names that current aggregation and advises changing this visual's query to **Don't summarize**; it does not claim the semantic model must be changed. Coordinates supplied only through **Values** receive a role-specific authoring warning. Average/sum coordinates can collapse rows and create incorrect locations even when the origin is a model column.
+## One flattened Power BI data view
 
-## Declarative map model
+Power BI supplies a custom visual one flattened data view. Fields in Values may originate from different related model tables, but the Power BI visual query and semantic-model relationships determine row grain and combinations.
 
-`map` accepts:
+Logical datasets create filtered, derived, renamed, selected, grouped, distinct, sorted, or limited layer views over that received data. They do not issue independent semantic-model queries and do not create Power BI relationships.
 
-- `view`: center, zoom/min/max, fit mode, padding, view preservation
-- `basemap`
-- `layers`
-- search and legend
-- layer panel
-- toolbar
-- height and normal interaction
+Every layer selects its effective dataset by:
 
-Fit modes are `data`, `allVisibleLayers`, `firstLayer`, and `none`. A single valid point uses `setView` at a detail zoom bounded by `minZoom`/`maxZoom`; multiple points use padded `fitBounds`.
+1. `layer.dataset`
+2. map component `dataset`
+3. `powerbi`
 
-Basemap types are `none`, `osm`, `customTile`, and `arcgisTile`. OSM/custom/ArcGIS tiles require Maps WebAccess and runtime provider/host policy; Core uses no external tiles.
+The runtime resolves source bindings, renderer fields, labels, popup/tooltip fields, visibility conditions, filters, interactions, and the Power BI side of ArcGIS joins against that layer's effective schema and rows. Grouped rows retain arrays of contributing Power BI row indices and row identities for selection where Power BI supplied identities.
 
-## Layer sources
+## Canonical layer example
 
-| Source | Implemented scope |
+```json
+{
+  "type": "map",
+  "id": "operations_map",
+  "layerGroups": [{"id":"operations","name":"Operations","visible":true}],
+  "bookmarks": [{"id":"downtown","label":"Downtown","center":[29.76,-95.37],"zoom":13}],
+  "layers": [
+    {
+      "id": "facilities",
+      "name": "Facilities",
+      "dataset": "activeFacilities",
+      "groupId": "operations",
+      "source": {"type":"powerbi","bindings":{"latitude":"facilityLatitude","longitude":"facilityLongitude"}},
+      "renderer": {"type":"uniqueValue","field":"facilityStatus","fieldSource":"powerbi"},
+      "labels": {"enabled":true,"field":"facilityName","fieldSource":"powerbi","maxLabels":300},
+      "popup": {"enabled":true,"title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
+      "filter": {"field":"facilityStatus","operator":"!=","value":"Retired"},
+      "performance": {"maxFeatures":5000}
+    },
+    {
+      "id": "incidents",
+      "name": "Incidents",
+      "dataset": "recentIncidents",
+      "groupId": "operations",
+      "source": {"type":"powerbi","bindings":{"latitude":"incidentLatitude","longitude":"incidentLongitude"}}
+    }
+  ],
+  "toolbar": {"visible":true,"bookmarks":true,"layers":true,"legend":true}
+}
+```
+
+## Map Studio
+
+Map Studio is a permanent specialized workspace alongside the Visual Inspector. Select a map in Inspector and choose **Open in Map Studio**, or open its Studio tab directly. Both workspaces share the selected component, canonical JSON, transaction validation, undo/redo history, and live preview. Invalid candidates leave the last valid preview unchanged.
+
+Map Studio provides:
+
+- layer tree creation for Power BI, ArcGIS feature, ArcGIS tile, and ArcGIS dynamic layers
+- unique IDs, rename, duplicate, two-step delete, drag/keyboard reorder, grouping, group visibility/opacity/collapse
+- effective dataset selection and dataset-aware field controls
+- geometry, coordinate, address, grouping, color, size, tooltip, and detail bindings
+- provider-specific URLs and public service metadata inspection
+- service/simple/unique/class-break/continuous/proportional/heatmap/cluster/density renderers
+- bounded unique-value/domain previews and editable manual breaks
+- labels, safe popups/tooltips, UI actions, structured filters, joins, visibility, and performance limits
+- basemap choices, authored view, layer groups, canonical view bookmarks, and static/runtime diagnostics
+
+Map Studio never creates a second hidden configuration model. Provider URLs must be supplied explicitly; it does not invent endpoints or credentials.
+
+## Sources and ArcGIS queries
+
+| Source | Current scope |
 |---|---|
-| `powerbi` | Bound geometry/coordinates/address cache, renderer, labels, popup/tooltip, selection |
-| `arcgisFeature` | Public FeatureServer/MapServer layer metadata/query, reference or Power BI join mode |
-| `arcgisTile` | Public raster tile overlay |
-| `arcgisDynamic` | Basic public dynamic map image requests |
+| `powerbi` | Per-layer dataset, location bindings, renderers, labels, popup/tooltip, filters, lineage selection |
+| `arcgisFeature` | Public FeatureServer/MapServer metadata/query, reference or Power BI join mode |
+| `arcgisTile` | Public HTTPS raster tile overlay with attribution and zoom bounds |
+| `arcgisDynamic` | Public dynamic map image requests with layer IDs/definitions, format, transparency, debounce, and zoom bounds |
 
-Every layer requires `id`, `name`, and `source`; it may set visibility, opacity/order, join, renderer, labels, popup, tooltip, visibility range/condition, performance, interaction, and legend.
+ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Results and warnings are bounded. Provider and Power BI attributes remain separate, with joined attributes as an explicit overlay.
 
-### ArcGIS feature layers
+Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, `numberString`), duplicate/unmatched policies, key batching, and aggregations. The preview reports local Power BI keys immediately; service/match counts populate after a public service query. A join never creates or implies a Power BI relationship.
 
-Feature sources accept URL, optional layer ID, service renderer/label flags, definition expression, out fields, `reference|join` mode, and refresh interval.
+## Runtime correctness and safety
 
-The query system:
+- Configured `layerValue` that is absent returns an empty layer with `MAP_LAYER_VALUE_NOT_FOUND` and bounded available values. It never chooses the first group.
+- Geometry analysis examines all valid features and returns point, multipoint, polyline, polygon, mixed, or unknown. Mixed layers emit `MAP_LAYER_MIXED_GEOMETRY` with type counts.
+- Per-layer `maxFeatures` and a deterministic 20,000-feature map-wide budget prevent unbounded drawing.
+- Labels, popup fields, unique classes, class breaks, join preview samples, diagnostics, ArcGIS result counts, and caches are bounded.
+- Source, renderer, request, join, and layer rendering timings are exposed in structured diagnostics where applicable.
+- Normal viewer diagnostics show a sanitized service origin, not the full raw URL.
 
-- inspects public service/layer metadata
-- requests only needed fields plus object/join fields
-- batches join keys in groups of 200
-- batches object IDs in groups of 500
-- uses service max-record count capped to 2,000 for a reference/viewport request
-- requests output spatial reference 4326
-- parses point/multipoint/polyline/polygon geometry
-- records request/feature/join diagnostics
+## Schema/runtime capability status
 
-Viewport mode is a practical one-request planning mode. The current planner does not send a full envelope geometry filter; documentation must not claim complete spatial-query optimization.
+The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map validation rejects unknown nested properties. Every accepted capability records status, runtime/validation ownership, Map Studio support, documentation, test evidence, and a limitation when necessary.
 
-### Power BI joins
+| Status | Capabilities |
+|---|---|
+| Implemented | per-layer datasets/bindings, groups, bookmarks, structured filters, supported basemaps, ArcGIS sources/joins, simple/unique/class-break/continuous/proportional/cluster renderers, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
+| Partial | `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
+| Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid, provider-dependent generalization, per-layer rather than streamed progressive drawing |
+| Unsupported | scale/coordinate readout, rectangle/lasso selection, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
+| Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |
 
-Joins map one Power BI field to one service field. Normalization steps are `trim`, `upper`, `lower`, `removeNonAlphanumeric`, and `numberString`. Key type is auto/string/number. Cardinality is one-to-one or many-to-one.
-
-Duplicate policies, unmatched diagnostics, and join aggregations are configurable. Aggregations are `count`, `distinctCount`, `sum`, `avg`, `min`, `max`, `first`, and `last`. A join does not create a Power BI semantic-model relationship.
-
-## Renderers and labels
-
-Resolver support includes service, simple, unique value, class breaks, continuous color, proportional size, heatmap, cluster, and density-grid definitions. Class breaks support manual/equal interval/quantile; `naturalBreaks` currently falls back to quantile. Density-grid runtime output is basic and should not be presented as an advanced spatial-analysis engine.
-
-Symbols support circle/square/diamond/triangle/line/fill and safe paint/size/outline values. Renderer fields can come from Power BI, service, or joined values.
-
-Labels support field/template, source, placement, zoom range, typography/halo/background, collision policy (`none|hideOverlaps`), and maximum count. Label collision is basic; advanced cartographic placement is not implemented.
-
-Popups/tooltips use declared safe fields/templates. Popup actions are UI actions. HTML is sanitized.
+Partial and experimental properties emit `MAP_CAPABILITY_LIMITATION`; Map Studio labels them accordingly. Accepted stable input is not silently ignored.
 
 ## Viewer controls
 
-Implemented controls include layer visibility/order/opacity/labels, legend, search, Home, Clear Selection, and Zoom to Selection. Toolbar buttons can be individually enabled. Search result markers are not Power BI selection identities.
+The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, and bookmarks. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use padded bounds.
 
-## Search and geocoder policy
+## Search and geocoding are unchanged
 
-The default geocoder is `none` and disabled. Tile and geocoder WebAccess decisions are independent, so denial or disablement of one does not disable the other. Public OSMF Nominatim requires deliberate expert configuration, keeps autocomplete disabled, and is not a production-reliability guarantee. A single search result is applied automatically; multiple results apply the first unless `autoSelectFirst` is false. Clear resets the query, results, status, selection, and marker.
-
-Providers are Runtime Config, not dashboard credentials. Geocoding requires:
-
-- a Maps build
-- available Power BI WebAccess
-- an enabled valid provider
-- explicit privacy acknowledgment
-- user-triggered search
-
-Autocomplete is rejected. Nominatim is limited to one request per second, cancellable, cached when configured, and returns a bounded result count. ArcGIS/custom providers must use configured HTTPS endpoints allowed by the package. Core reports why geocoding is unavailable.
-
-## Interactions
-
-Map features can use universal internal highlight/filter and external selection/filter. External selection maps feature rows through Power BI identities or logical-dataset lineage. External filtering requires a real model-column target. A joined service field, ArcGIS attribute, derived field, or dataset metric cannot directly filter the Power BI semantic model.
+This architecture change does not alter geocoding. The default geocoder remains `none`; Nominatim, ArcGIS, and custom implementations, endpoint policies, WebAccess checks, caching, rate limiting, privacy acknowledgment, search requests, and result handling are unchanged. Address data is never transmitted automatically.
 
 ## Packaging profiles
 
-```powershell
-npm run package:core
-npm run package:maps
-```
+- **Core:** the single Values role and no WebAccess privilege; bound Power BI geometry remains available.
+- **Maps broad:** the same Values role and intended `https://*` map access.
+- **Maps restricted:** the same Values role and configured HTTPS host allowlist.
 
-- **Core:** no `WebAccess` privilege; bound Power BI geometry remains available.
-- **Maps broad (default):** `https://*` when `HYPERPBI_ALLOW_ALL_MAP_HOSTS` is not `false`.
-- **Maps restricted:** built-in OSM/Nominatim/ArcGIS hosts, default ArcGIS wildcards, plus comma-separated `HYPERPBI_MAP_HOSTS` when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
+Run `npm run package:core`, `npm run package:maps`, and `npm run package:verify`. Never store tokens, credentials, or private service secrets in dashboard JSON.
 
-Host patterns must be HTTPS, may use only a leading subdomain wildcard, and cannot contain credentials, path, query, or hash. Runtime ArcGIS policy always rejects non-HTTPS and embedded credentials even in broad mode.
+## Current limitations
 
-Packaging labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`, plus a `*-maps.pbiviz` compatibility copy. The base name is packager-derived.
-
-## Explicitly unsupported
-
-- secured/token/OAuth ArcGIS services or credentials in JSON
-- feature editing
-- 3D scenes
-- relationship queries, network tracing, geoprocessing
-- arbitrary SQL/network dataset sources
-- non-4326 output promises
-- complete advanced label collision/cartography
-- automatic/bulk address transmission
-- treating ArcGIS/join/dataset metrics as Power BI model columns
-- guaranteed full viewport-envelope server filtering
+- secured/token/OAuth ArcGIS services and credentials in JSON
+- feature editing, 3D scenes, geoprocessing, relationship queries, and network tracing
+- independent queries to arbitrary Power BI model tables
+- advanced cartographic label placement
+- natural breaks classification
+- streamed feature-by-feature progressive rendering
+- exact ArcGIS service-scale denominator parity
+- scale/coordinate readout, rectangle/lasso selection, and distance/area measurement
+- time slider, swipe/side-by-side comparison, selected-feature export, print-layout, and opening Map Studio from the viewer
 
 Use pre-geocoded coordinates and organizationally approved public services for predictable enterprise deployment.

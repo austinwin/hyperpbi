@@ -78,6 +78,12 @@ The generated prompt describes:
 
 Any type/property/action/dataset operation/pattern/alias/token not listed in the generated prompt is invalid for that job.
 
+### Map authoring
+
+AI-authored maps must use the single Values field-well contract and Field Manifest aliases. Prefer explicit `layers[]`, optional per-layer `dataset`, and per-layer Power BI `source.bindings`. Never depend on or recommend a fixed map bucket, and never apply one global coordinate pair to multiple explicit layers. A layer omitting `dataset` inherits the map dataset and then `powerbi`.
+
+Power BI provides one flattened data view; logical datasets only transform those received rows and cannot independently query arbitrary model tables. Never invent a service URL, host, token, credential, layer ID, join field, or relationship. Use bounded `maxFeatures`/labels/classes and acknowledge partial or experimental capability diagnostics. Geocoder policy and behavior are unchanged.
+
 ## Current-spec and selected-section behavior
 
 Improve prompts include the complete current specification and explicitly require a complete updated object. The AI must preserve stable IDs for unchanged components and retain unrelated content.

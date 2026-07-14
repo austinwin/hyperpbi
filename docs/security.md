@@ -71,6 +71,8 @@ Geocoding is user-triggered, has no autocomplete, requires privacy acknowledgmen
 
 Logical datasets are deterministic in-memory transformations of the current Power BI data view. They cannot execute SQL, join network data, read files, fetch URLs, or mutate the semantic model.
 
+The visual receives one flattened Power BI data view. Per-layer map datasets can filter, derive, select, group, and aggregate those received rows, but cannot independently query arbitrary model tables or bypass semantic-model relationships. Grouped identity lineage is retained only from identities Power BI supplied.
+
 External filters require a true model-column target. Dataset-derived fields/metrics and model measures cannot be smuggled into Power BI filter schemas. External identity selection uses host-provided identities/source lineage only.
 
 ## Core versus Maps
@@ -85,3 +87,5 @@ External filters require a true model-column target. Dataset-derived fields/metr
 | Credentials in JSON | No | No |
 
 These profiles affect network privilege only; neither relaxes JSON, HTML, CSS, chart, SVG, interaction, or dataset safety.
+
+Map Studio edits canonical JSON and does not store credentials or hidden provider configuration. Popup HTML passes the existing sanitizer; popup actions use the safe UI-action allowlist. Normal viewer diagnostics expose only sanitized service origins. Geocoding endpoint, privacy, cache, and rate-limit behavior is unchanged by layer authoring.

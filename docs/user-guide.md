@@ -5,7 +5,7 @@
 1. Choose a Core or Maps `.pbiviz` package.
 2. In Power BI Desktop, use **Visualizations → … → Import a visual from a file**.
 3. Add HyperPBI to the report canvas.
-4. Bind every field the dashboard needs to **Values**, including explicit map roles when applicable.
+4. Bind every field the dashboard needs to the single **Values** field well, including all map fields.
 5. Resize the visual for the intended report layout.
 6. Open the visual's **Edit** command to enter HyperPBI Studio.
 
@@ -33,7 +33,7 @@ Studio uses this setup to choose relevant prompt modules; it does not add unimpl
 
 Use the shown aliases in new 2.0 authoring. The manifest also explains canonical key, display/source names, data type, semantic role, true measure versus summarized model column, default aggregation, and external selection/filter eligibility.
 
-Prefer the dedicated **Map Latitude**, **Map Longitude**, **Map Geometry**, and **Map Address** roles. A coordinate's current visual-query aggregation is reported separately from its semantic-model default; change the visual query to **Don't summarize** when row-level coordinates were summarized.
+For maps, the manifest supplies fields to each layer's dataset-aware controls in Map Studio. Configure location and attributes through explicit `layer.source.bindings`; there are no fixed map field buckets. A coordinate's current visual-query aggregation is reported separately from its semantic-model default; change the field instance in the visual query to **Don't summarize** when row-level coordinates were summarized.
 
 ### Prompt jobs
 
@@ -79,7 +79,11 @@ Power BI external filter mode requires a model-column target. Dataset metrics, d
 
 ## Maps
 
-Bind Geometry or Latitude+Longitude (preferred), X+Y, or Address. Location precedence is Geometry → Lat/Lon → X/Y → Address, with valid explicit layer overrides ahead of roles and conservative fallback. Diagnostics report incomplete pairs, nonnumeric values, out-of-range values, valid locations, and query aggregation. One valid point centers at a bounded detail zoom; multiple points fit their bounds. Address search is user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment.
+Use **Open in Map Studio** from a selected map in Inspector, or open the permanent Map Studio tab. It shares canonical JSON, selection, validation, history, and live preview with Inspector. Create layers and groups; choose each layer's optional logical dataset; bind Geometry, Latitude+Longitude, X+Y, or Address; then configure renderer, labels, popup/tooltip, join, structured filters, visibility, limits, basemap, and bookmarks. Invalid edits keep the last valid preview.
+
+The effective dataset is `layer.dataset`, then the map's dataset, then `powerbi`. Logical datasets are views over the one flattened Power BI data view received by the custom visual; they do not query model tables independently. Explicit layers resolve independently and do not inherit global Runtime Config coordinates. Location precedence is Geometry → Lat/Lon → X/Y → Address. Diagnostics report exact layer dataset/bindings, invalid-location counts, mixed geometry, `layerValue`, lineage, requests, joins, limits, and timings.
+
+Put all fields in Values. One valid point centers at a bounded detail zoom; multiple points fit their bounds. Address search remains user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment. Geocoding behavior is unchanged by Map Studio.
 
 Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
 

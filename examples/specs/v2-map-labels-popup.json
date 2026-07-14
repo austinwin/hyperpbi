@@ -1,0 +1,13 @@
+{
+  "version": "2.0",
+  "title": "Labels and safe popup",
+  "components": [{
+    "type": "map", "id": "labeled_map", "title": "Facilities",
+    "layers": [{
+      "id": "facilities", "name": "Facilities", "dataset": "powerbi",
+      "source": {"type": "powerbi", "bindings": {"latitude": "latitude", "longitude": "longitude"}},
+      "labels": {"enabled": true, "field": "facilityName", "fieldSource": "powerbi", "placement": "above", "haloColor": "#ffffff", "haloSize": 2, "backgroundColor": "#ffffff", "padding": 2, "collision": "hideOverlaps", "maxLabels": 300},
+      "popup": {"enabled": true, "title": "{{facilityName}}", "fields": [{"field": "status", "fieldSource": "powerbi", "label": "Status", "display": "badge"}], "actions": [{"id": "notify", "label": "Show status", "uiAction": {"type": "showToast", "message": "Facility selected"}}]}
+    }]
+  }]
+}

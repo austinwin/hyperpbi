@@ -1,6 +1,7 @@
 {
-  "$schema": "https://austinwin.github.io/hyperpbi/schemas/dashboard.json",
-  "description": "ArcGIS Wastewater join map example - demonstrates Power BI field joined to ArcGIS service field, service geometry, joined features, and correct Power BI row selection. Bind the Power BI FacilityID field so it can join to the service FACILITYID field.",
+  "version": "2.0",
+  "title": "Public ArcGIS join layer — bind FacilityID through Values",
+  "description": "Bind the Power BI FacilityID field through Values; the layer joins those rows to public ArcGIS pipe geometry.",
   "components": [
     {
       "id": "wastewater-join",
@@ -17,6 +18,7 @@
         {
           "id": "powerbi-join-layer",
           "name": "Work Orders with Pipe Geometry",
+          "dataset": "powerbi",
           "source": {
             "type": "arcgisFeature",
             "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",

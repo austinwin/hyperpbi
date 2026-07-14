@@ -102,6 +102,8 @@ No JavaScript callback, handler string, arbitrary dispatch name, URL navigation,
 
 Components validate fields against their selected logical dataset. Internal row behavior maps through source keys/lineage. An interaction field is not automatically remapped to a Power BI filter target: the selected field's retained origin metadata decides eligibility.
 
+Map layers refine this rule: `layer.dataset` overrides the map dataset, and each layer carries its own rows, schema, row keys, and arrays of contributing Power BI identities. A grouped feature may select several source rows. ArcGIS joins preserve the same lineage on the Power BI side. External filter mode still requires an actual model-column target; service/joined attributes and dataset metrics cannot directly filter the semantic model.
+
 ## Compatibility
 
 Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. Obsolete `selectionTarget` is ignored with one documented migration warning; it does not select nodes or edges. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.

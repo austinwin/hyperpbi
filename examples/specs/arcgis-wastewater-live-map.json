@@ -1,6 +1,6 @@
 {
-  "$schema": "https://austinwin.github.io/hyperpbi/schemas/dashboard.json",
-  "description": "ArcGIS Wastewater live map example - demonstrates ArcGIS feature reference source, viewport query, service renderer, popup, tooltips, layer panel, legend, and performance settings. No authentication required.",
+  "version": "2.0",
+  "title": "Public ArcGIS reference layer",
   "components": [
     {
       "id": "wastewater-map",
@@ -20,6 +20,7 @@
         {
           "id": "wastewater-layer",
           "name": "Wastewater UN Public",
+          "dataset": "powerbi",
           "source": {
             "type": "arcgisFeature",
             "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",

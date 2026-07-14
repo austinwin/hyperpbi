@@ -1,0 +1,11 @@
+{
+  "version": "2.0",
+  "title": "Independent coordinate pairs",
+  "components": [{
+    "type": "map", "id": "operations_map", "title": "Operations",
+    "layers": [
+      {"id": "facilities", "name": "Facilities", "dataset": "powerbi", "source": {"type": "powerbi", "bindings": {"latitude": "facilityLatitude", "longitude": "facilityLongitude"}}},
+      {"id": "incidents", "name": "Incidents", "dataset": "powerbi", "source": {"type": "powerbi", "bindings": {"latitude": "incidentLatitude", "longitude": "incidentLongitude"}}}
+    ]
+  }]
+}

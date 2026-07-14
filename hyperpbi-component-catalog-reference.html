@@ -4284,16 +4284,16 @@
   &quot;maxRows&quot;: 200
 }</code></pre>
 </div></details></article>
-<article class="component-card" data-category="Maps" data-search="map map maps power bi geometry plus practical public arcgis rest feature, tile, and dynamic layers beta legacy settings/style/popup fully supported. normalized to layers[] internally. offcanvas datagrid">
+<article class="component-card" data-category="Maps" data-search="map map maps values-only power bi fields need independent layer datasets/bindings or practical public arcgis rest layers authored in map studio beta legacy one-layer runtime config bindings remain supported. new 2.0 maps use explicit layer dataset and source.bindings properties. offcanvas datagrid">
 <details><summary><span><code>map</code> — Map</span><span class="badge badge-beta">beta</span></summary>
 <div class="card-body">
-<p>Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers</p>
+<p>Values-only Power BI fields need independent layer datasets/bindings or practical public ArcGIS REST layers authored in Map Studio</p>
 
-<dl><div><dt>Level</dt><dd>recommended</dd></div><div><dt>Required</dt><dd><code>type</code>, <code>id</code></dd></div><div><dt>Key properties</dt><dd><code>dataset</code>, <code>title</code>, <code>subtitle</code>, <code>span</code>, <code>className</code>, <code>hidden</code>, <code>props</code>, <code>style</code>, <code>css</code>, <code>slots</code>, <code>data</code>, <code>visibility</code>, <code>interactions</code>, <code>interaction</code>, <code>ariaLabel</code>, <code>icon</code>, <code>variant</code>, <code>size</code>, <code>disabled</code>, <code>tooltip</code>, <code>uiAction</code>, <code>engine</code>, <code>view</code>, <code>basemap</code>, <code>layers</code>, <code>search</code>, <code>legend</code>, <code>layerPanel</code>, <code>toolbar</code>, <code>settings</code>, <code>height</code></dd></div><div><dt>Data interaction</dt><dd>Yes</dd></div><div><dt>UI action</dt><dd>Yes</dd></div></dl>
-<p><strong>Allowed:</strong> <code>ariaLabel</code>, <code>basemap</code>, <code>className</code>, <code>css</code>, <code>data</code>, <code>dataset</code>, <code>disabled</code>, <code>engine</code>, <code>height</code>, <code>hidden</code>, <code>icon</code>, <code>id</code>, <code>interaction</code>, <code>interactions</code>, <code>layerPanel</code>, <code>layers</code>, <code>legend</code>, <code>props</code>, <code>search</code>, <code>settings</code>, <code>size</code>, <code>slots</code>, <code>span</code>, <code>style</code>, <code>subtitle</code>, <code>title</code>, <code>toolbar</code>, <code>tooltip</code>, <code>type</code>, <code>uiAction</code>, <code>variant</code>, <code>view</code>, <code>visibility</code></p>
+<dl><div><dt>Level</dt><dd>recommended</dd></div><div><dt>Required</dt><dd><code>type</code>, <code>id</code></dd></div><div><dt>Key properties</dt><dd><code>dataset</code>, <code>title</code>, <code>subtitle</code>, <code>span</code>, <code>className</code>, <code>hidden</code>, <code>props</code>, <code>style</code>, <code>css</code>, <code>slots</code>, <code>data</code>, <code>visibility</code>, <code>interactions</code>, <code>interaction</code>, <code>ariaLabel</code>, <code>icon</code>, <code>variant</code>, <code>size</code>, <code>disabled</code>, <code>tooltip</code>, <code>uiAction</code>, <code>engine</code>, <code>view</code>, <code>basemap</code>, <code>layers</code>, <code>layerGroups</code>, <code>bookmarks</code>, <code>search</code>, <code>legend</code>, <code>layerPanel</code>, <code>toolbar</code>, <code>settings</code>, <code>height</code></dd></div><div><dt>Data interaction</dt><dd>Yes</dd></div><div><dt>UI action</dt><dd>Yes</dd></div></dl>
+<p><strong>Allowed:</strong> <code>ariaLabel</code>, <code>basemap</code>, <code>bookmarks</code>, <code>className</code>, <code>css</code>, <code>data</code>, <code>dataset</code>, <code>disabled</code>, <code>engine</code>, <code>height</code>, <code>hidden</code>, <code>icon</code>, <code>id</code>, <code>interaction</code>, <code>interactions</code>, <code>layerGroups</code>, <code>layerPanel</code>, <code>layers</code>, <code>legend</code>, <code>props</code>, <code>search</code>, <code>settings</code>, <code>size</code>, <code>slots</code>, <code>span</code>, <code>style</code>, <code>subtitle</code>, <code>title</code>, <code>toolbar</code>, <code>tooltip</code>, <code>type</code>, <code>uiAction</code>, <code>variant</code>, <code>view</code>, <code>visibility</code></p>
 
 
-<p><strong>Compatibility:</strong> Legacy settings/style/popup fully supported. Normalized to layers[] internally.</p>
+<p><strong>Compatibility:</strong> Legacy one-layer Runtime Config bindings remain supported. New 2.0 maps use explicit layer dataset and source.bindings properties.</p>
 <p><strong>Related:</strong> <code>offcanvas</code>, <code>dataGrid</code></p>
 <div class="code-head"><strong>Valid 2.0 component example</strong><button type="button" class="copy">Copy</button></div><pre><code>{
   &quot;type&quot;: &quot;map&quot;,
@@ -4339,10 +4339,31 @@
   &quot;legend&quot;: {
     &quot;defaultOpen&quot;: false
   },
+  &quot;layerGroups&quot;: [
+    {
+      &quot;id&quot;: &quot;operations&quot;,
+      &quot;name&quot;: &quot;Operations&quot;,
+      &quot;visible&quot;: true,
+      &quot;order&quot;: 0
+    }
+  ],
+  &quot;bookmarks&quot;: [
+    {
+      &quot;id&quot;: &quot;home_view&quot;,
+      &quot;label&quot;: &quot;Home view&quot;,
+      &quot;center&quot;: [
+        29.75,
+        -95.35
+      ],
+      &quot;zoom&quot;: 10
+    }
+  ],
   &quot;layers&quot;: [
     {
       &quot;id&quot;: &quot;powerbi_locations&quot;,
       &quot;name&quot;: &quot;Locations&quot;,
+      &quot;dataset&quot;: &quot;powerbi&quot;,
+      &quot;groupId&quot;: &quot;operations&quot;,
       &quot;source&quot;: {
         &quot;type&quot;: &quot;powerbi&quot;,
         &quot;bindings&quot;: {
@@ -4404,7 +4425,8 @@
     &quot;legend&quot;: true,
     &quot;search&quot;: true,
     &quot;clearSelection&quot;: true,
-    &quot;zoomToSelection&quot;: true
+    &quot;zoomToSelection&quot;: true,
+    &quot;bookmarks&quot;: true
   },
   &quot;settings&quot;: {
     &quot;showLayerControl&quot;: true,

@@ -217,9 +217,11 @@ Safe ECharts `options` may adjust presentation. Functions, URL-bearing keys, exe
 
 ## Maps
 
-`map` uses Leaflet and accepts view, basemap, layers, search, legend, layer panel, toolbar, and height. Layer source types are `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`. Public ArcGIS requests require HTTPS, a permitted Maps package host, and no embedded credentials.
+`map` uses Leaflet and accepts view, basemap, `layerGroups`, `bookmarks`, layers, search, legend, layer panel, toolbar, and height. Layer source types are `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`. Public ArcGIS requests require HTTPS, a permitted Maps package host, and no embedded credentials.
 
-Power BI geometry/location binding uses explicit layer overrides, dedicated Map roles, semantic types, then conservative exact names. Geometry overrides coordinates; latitude/longitude are strict finite numbers in range. Joins, feature queries, tile layers, basic dynamic images, safe renderers/labels/popups/tooltips, layer controls, legend, search, Home, Clear Selection, and Zoom to Selection are implemented within the limits in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
+All Power BI fields arrive through Values. Each layer may set `dataset`; precedence is layer, map, then `powerbi`. Power BI location bindings belong in that layer's `source.bindings`. Explicit layers never inherit global Runtime Config coordinates. Geometry overrides coordinates; latitude/longitude are strict finite numbers in range; missing `layerValue` returns no unrelated data; mixed geometry is classified across all features. Renderer, label, popup/tooltip, visibility, filter, interaction, and join fields validate against the effective dataset/source. Grouped logical rows retain contributing source identity arrays.
+
+Strict validation rejects unknown nested map properties and unimplemented `naturalBreaks`. Partial/experimental accepted properties emit capability limitations from the machine-readable registry. The complete contract, Map Studio behavior, capability table, performance bounds, and legacy one-layer compatibility are documented in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
 
 ## SVG
 

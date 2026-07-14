@@ -5193,19 +5193,19 @@ _1 components_
 
 **Level:** recommended
 
-**Recommended use:** Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers
+**Recommended use:** Values-only Power BI fields need independent layer datasets/bindings or practical public ArcGIS REST layers authored in Map Studio
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `search`, `legend`, `layerPanel`, `toolbar`, `settings`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `layerPanel`, `toolbar`, `settings`, `height`
 
-**All allowed properties:** `ariaLabel`, `basemap`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerPanel`, `layers`, `legend`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
+**All allowed properties:** `ariaLabel`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
 **Data interaction:** Yes. **UI action:** Yes.
 
-**Compatibility:** Legacy settings/style/popup fully supported. Normalized to layers[] internally.
+**Compatibility:** Legacy one-layer Runtime Config bindings remain supported. New 2.0 maps use explicit layer dataset and source.bindings properties.
 
 **Related:** `offcanvas`, `dataGrid`
 
@@ -5254,10 +5254,31 @@ _1 components_
   "legend": {
     "defaultOpen": false
   },
+  "layerGroups": [
+    {
+      "id": "operations",
+      "name": "Operations",
+      "visible": true,
+      "order": 0
+    }
+  ],
+  "bookmarks": [
+    {
+      "id": "home_view",
+      "label": "Home view",
+      "center": [
+        29.75,
+        -95.35
+      ],
+      "zoom": 10
+    }
+  ],
   "layers": [
     {
       "id": "powerbi_locations",
       "name": "Locations",
+      "dataset": "powerbi",
+      "groupId": "operations",
       "source": {
         "type": "powerbi",
         "bindings": {
@@ -5319,7 +5340,8 @@ _1 components_
     "legend": true,
     "search": true,
     "clearSelection": true,
-    "zoomToSelection": true
+    "zoomToSelection": true,
+    "bookmarks": true
   },
   "settings": {
     "showLayerControl": true,

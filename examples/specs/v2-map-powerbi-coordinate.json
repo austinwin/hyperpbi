@@ -1,0 +1,12 @@
+{
+  "version": "2.0",
+  "title": "One Power BI coordinate layer",
+  "components": [{
+    "type": "map", "id": "facility_map", "title": "Facilities",
+    "layers": [{
+      "id": "facilities", "name": "Facilities", "dataset": "powerbi",
+      "source": {"type": "powerbi", "bindings": {"latitude": "facilityLatitude", "longitude": "facilityLongitude", "tooltip": ["facilityName", "status"]}},
+      "performance": {"maxFeatures": 5000}
+    }]
+  }]
+}

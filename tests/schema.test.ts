@@ -57,17 +57,11 @@ describe("schema validation", () => {
         expect(joined.description).toContain("Bind the Power BI FacilityID field");
         expect(joined.components[0].layers[0].tooltip.fields.every((field: { fieldSource?: string }) => Boolean(field.fieldSource))).toBe(true);
     });
-    it("keeps the Power BI authoring surface focused while exposing dedicated map roles", () => {
+    it("keeps the Power BI authoring surface focused on one Values role", () => {
         const capabilities = JSON.parse(readFileSync(resolve(process.cwd(), "capabilities.json"), "utf8"));
         const reportRenderer = readFileSync(resolve(process.cwd(), "src/render/HyperPbiRoot.tsx"), "utf8");
         const setupExperience = readFileSync(resolve(process.cwd(), "src/editor/SetupExperience.tsx"), "utf8");
-        expect(capabilities.dataRoles).toEqual([
-            { displayName: "Values", name: "values", kind: "GroupingOrMeasure" },
-            { displayName: "Map Latitude", name: "mapLatitude", kind: "Grouping" },
-            { displayName: "Map Longitude", name: "mapLongitude", kind: "Grouping" },
-            { displayName: "Map Geometry", name: "mapGeometry", kind: "Grouping" },
-            { displayName: "Map Address", name: "mapAddress", kind: "Grouping" },
-        ]);
+        expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
         expect(capabilities.dataViewMappings[0].table.rows.select.map((entry: { for: { in: string } }) => entry.for.in)).toEqual(capabilities.dataRoles.map((role: { name: string }) => role.name));
         expect(capabilities.advancedEditModeSupport).toBe(2);
         expect(reportRenderer).not.toContain("Design with AI");

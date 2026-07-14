@@ -29,7 +29,7 @@ describe("index.html structural contract", () => {
         const levels = Array.from(document.querySelectorAll("h1,h2,h3")).map(heading => Number(heading.tagName[1]));
         expect(levels[0]).toBe(1);
         for (let index = 1; index < levels.length; index += 1) expect(levels[index] - levels[index - 1]).toBeLessThanOrEqual(1);
-        expect(html).toContain("Geocoder default is <code>none</code>");
+        expect(html).toContain("Geocoder behavior is unchanged: default <code>none</code>");
         expect(html).toContain("user-triggered");
         expect(html).not.toMatch(/automatic geocod/i);
     });

@@ -112,6 +112,12 @@ External selection and external filtering are separate:
 
 Dataset metrics and derived fields cannot directly filter Power BI. Renamed direct columns and group-by direct columns may retain a valid external-filter target. Identity selection remains unavailable when the Power BI host supplied no identities.
 
+### Map layer dataset scope
+
+Every map layer resolves a separate logical view using `layer.dataset`, then the map component dataset, then `powerbi`. Source bindings, renderer/label/popup/tooltip fields, visibility/filter fields, interaction fields, and the Power BI side of an ArcGIS join all use that view's rows and schema. A grouped map feature can therefore carry multiple contributing source row indices and row identities.
+
+This does not create independent Power BI queries. The custom visual still receives one flattened data view; fields may originate from related model tables, but the visual query and semantic-model relationships determine row grain and combinations. Logical datasets only transform the received rows.
+
 ## Cache signatures
 
 The evaluator builds canonical JSON-like signatures with object keys sorted. The base signature includes row keys, rows, field keys, and base lineage. A named dataset signature includes its definition, its input signature, and static fields.

@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "title": "Layer groups and view bookmarks",
+  "components": [{
+    "type": "map", "id": "grouped_map", "title": "Operations",
+    "view": {"center": [29.76, -95.37], "zoom": 10, "fitMode": "allVisibleLayers"},
+    "layerGroups": [{"id": "operations", "name": "Operations", "visible": true, "opacity": 1, "order": 0}],
+    "bookmarks": [{"id": "downtown", "label": "Downtown", "center": [29.76, -95.37], "zoom": 13}],
+    "layers": [
+      {"id": "facilities", "name": "Facilities", "dataset": "powerbi", "groupId": "operations", "source": {"type": "powerbi", "bindings": {"latitude": "facilityLatitude", "longitude": "facilityLongitude"}}},
+      {"id": "incidents", "name": "Incidents", "dataset": "powerbi", "groupId": "operations", "source": {"type": "powerbi", "bindings": {"latitude": "incidentLatitude", "longitude": "incidentLongitude"}}}
+    ],
+    "toolbar": {"visible": true, "layers": true, "bookmarks": true, "home": true}
+  }]
+}

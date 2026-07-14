@@ -1,0 +1,12 @@
+{
+  "version": "2.0",
+  "title": "Class-break renderer",
+  "components": [{
+    "type": "map", "id": "volume_map", "title": "Volume",
+    "layers": [{
+      "id": "sites", "name": "Sites", "dataset": "powerbi",
+      "source": {"type": "powerbi", "bindings": {"latitude": "latitude", "longitude": "longitude"}},
+      "renderer": {"type": "classBreaks", "field": "volume", "fieldSource": "powerbi", "method": "quantile", "classes": 4, "colorRamp": ["#dbeafe", "#93c5fd", "#3b82f6", "#1e3a8a"]}
+    }]
+  }]
+}

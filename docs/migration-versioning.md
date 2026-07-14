@@ -32,6 +32,12 @@ Legacy `selectionTarget` is not a 2.0 contract property and does not control run
 
 These references should be labeled compatibility/history. They are not the primary 2.0 examples.
 
+### Recent fixed map bucket migration
+
+Fixed Map Latitude, Map Longitude, Map Geometry, and Map Address buckets were briefly introduced and are no longer part of the authoring contract. To update a report, remove those fields from the fixed buckets and add the same fields to **Values**. Keep the saved JSON layer `source.bindings`; those bindings remain valid. A custom visual cannot safely rewrite report field wells automatically.
+
+Legacy maps with no explicit `layers` may continue using component/Runtime Config map bindings after the fields move to Values. New 2.0 maps should use explicit layers and per-layer bindings. This compatibility path is not a new long-term global map-binding contract.
+
 ## Preparation behavior
 
 An object without a version is assigned 1.0 by the legacy migration layer, except the bounded import repair may first add 2.0 when a components-array shape is unambiguous. Existing declared versions are preserved.

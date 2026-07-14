@@ -1,0 +1,11 @@
+{
+  "version": "2.0",
+  "title": "Power BI geometry layer",
+  "components": [{
+    "type": "map", "id": "territory_map", "title": "Territories",
+    "layers": [{
+      "id": "territories", "name": "Territories", "dataset": "powerbi",
+      "source": {"type": "powerbi", "bindings": {"geometry": "territoryGeometry", "color": "territoryStatus", "details": ["territoryName"]}}
+    }]
+  }]
+}
