@@ -10,6 +10,7 @@ import {
   MapStudio,
   type MapStudioProps,
 } from "../src/editor/map-studio/MapStudio";
+import { defaultConfigJson } from "../src/config/hyperpbiConfig";
 
 const field = (
   key: string,
@@ -96,6 +97,7 @@ export function mountMapStudio(
       <MapStudio
         json={json}
         data={mapStudioData}
+        configurationJson={defaultConfigJson}
         selectedComponentId="operations"
         onChange={(next) => {
           latest = next;

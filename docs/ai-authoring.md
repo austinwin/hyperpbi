@@ -86,6 +86,8 @@ Power BI provides one flattened data view; logical datasets only transform those
 
 ArcGIS metadata fetch, bounded join preview, interaction compatibility, and live-view bookmark capture are explicit Map Studio workflows, not extra persisted metadata. Never invent a service URL, host, token, credential, layer ID, join field, relationship, unsupported analytical tool, secured-service behavior, or experimental renderer guarantee. Use bounded `maxFeatures`/labels/classes and acknowledge partial or experimental capability diagnostics. Geocoder policy and behavior are unchanged.
 
+Map Studio validates every draft against the exact current Runtime Config supplied by its owner; do not synthesize or assume a default configuration. ArcGIS service inspection makes one root request, classifies groups, spatial layers, and tables, and fetches item metadata only after a selectable spatial layer is chosen. Map-layer interactions support `click` only. Join cardinality, unmatched-row policy, aggregation diagnostics, and class-break warnings are enforced by the shared runtime path. External tile and dynamic layers are reactive: stable definitions are reused, while meaningful URL, layer, request, opacity, visibility, scale, or access-policy changes replace or remove the mounted instance. Diagnostics use canonical JSON Pointer paths and stay scoped to the selected layer.
+
 ## Current-spec and selected-section behavior
 
 Improve prompts include the complete current specification and explicitly require a complete updated object. The AI must preserve stable IDs for unchanged components and retain unrelated content.

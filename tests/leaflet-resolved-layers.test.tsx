@@ -108,7 +108,8 @@ const mocks = vi.hoisted(() => {
         return { group, cleanup, warnings: ["label warning"] };
     });
 
-    return { Bounds, Layer, MapRuntime, maps, tiles, circles, geoLayers, dynamicLayers, labelCleanups,
+    const externalAccess = { allowed: true, reason: "Access denied" };
+    return { Bounds, Layer, Tile, MapRuntime, maps, tiles, circles, geoLayers, dynamicLayers, labelCleanups, externalAccess,
         map, tileLayer, circleMarker, geoJSON, featureGroup, layerGroup, markerClusterGroup, marker, divIcon, latLngBounds,
         createDynamic, createLabels };
 });
@@ -121,7 +122,7 @@ vi.mock("leaflet", () => ({
 vi.mock("leaflet.markercluster", () => ({}));
 vi.mock("../src/providers/providerPolicy", () => ({
     resolveProviderPolicy: () => ({ externalAvailable: true, certificationSafe: false, tilesAllowed: true, geocoderAllowed: false, warnings: [] }),
-    externalServiceAccess: () => ({ allowed: true }),
+    externalServiceAccess: () => ({ allowed: mocks.externalAccess.allowed, reason: mocks.externalAccess.reason }),
 }));
 vi.mock("../src/maps/arcgis/arcGisDynamicLayer", () => ({
     createArcGisDynamicLayer: mocks.createDynamic,
@@ -172,6 +173,7 @@ beforeEach(() => {
     vi.useFakeTimers();
     for (const collection of [mocks.maps, mocks.tiles, mocks.circles, mocks.geoLayers, mocks.dynamicLayers, mocks.labelCleanups]) collection.length = 0;
     for (const fn of [mocks.map, mocks.tileLayer, mocks.circleMarker, mocks.geoJSON, mocks.featureGroup, mocks.markerClusterGroup, mocks.createDynamic, mocks.createLabels]) fn.mockClear();
+    mocks.externalAccess.allowed = true;
     resizeCallbacks.length = 0;
     vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { resizeCallbacks.push(callback); } observe() {} disconnect() {} });
 });
@@ -234,6 +236,64 @@ describe("LeafletMap controller and viewport", () => {
 });
 
 describe("LeafletMap external layer lifecycle", () => {
+    it("replaces tile instances for definition edits, reuses unchanged definitions, and preserves the viewport", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
+        const first = layer("tile", { sourceType: "arcgisTile", features: [], tile: { url: "https://tiles.arcgisonline.com/a/MapServer", attribution: "A", minZoom: 2, maxZoom: 16 } });
+        renderMap(host, test.value, component, [first]); const runtime = mocks.maps[0];
+        runtime.setView([30, 40], 9);
+        renderMap(host, test.value, component, [{ ...first, name: "Renamed" }]);
+        expect(mocks.tiles).toHaveLength(1);
+        const second = { ...first, tile: { ...first.tile!, url: "https://tiles.arcgisonline.com/b/MapServer" } };
+        renderMap(host, test.value, component, [second]);
+        expect(mocks.tiles).toHaveLength(2); expect(mocks.tiles[0].removed).toBe(true);
+        renderMap(host, test.value, component, [{ ...second, tile: { ...second.tile!, attribution: "B" } }]);
+        renderMap(host, test.value, component, [{ ...second, tile: { ...second.tile!, attribution: "B", minZoom: 4, maxZoom: 12 } }]);
+        expect(mocks.tiles).toHaveLength(4);
+        expect(mocks.tiles.at(-1)?.options).toMatchObject({ attribution: "B", minZoom: 4, maxZoom: 12 });
+        expect(runtime.center).toEqual([30, 40]); expect(runtime.zoom).toBe(9);
+        expect([...runtime.layers].filter(item => item instanceof mocks.Tile)).toHaveLength(1);
+    });
+
+    it("replaces every dynamic instance-defining edit and rejects stale callbacks", () => {
+        const host = document.createElement("div"); const test = testContext(); const runtimeState = vi.fn();
+        const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
+        let current = layer("dynamic", { sourceType: "arcgisDynamic", features: [], dynamic: { url: "https://services.arcgis.com/a/MapServer", layerIds: [1], layerDefinitions: { 1: "A=1" }, format: "png", transparent: true, debounceMs: 100 } });
+        renderMap(host, test.value, component, [current], { onLayerRuntimeStateChange: runtimeState });
+        const old = mocks.dynamicLayers[0] as unknown as { emitState(value: { loading: boolean; error?: string }): void };
+        const edits = [
+            { url: "https://services.arcgis.com/b/MapServer" },
+            { layerIds: [2] },
+            { layerDefinitions: { 2: "B=2" } },
+            { format: "jpg" as const, transparent: false },
+            { debounceMs: 450 },
+        ];
+        for (const edit of edits) {
+            current = { ...current, dynamic: { ...current.dynamic!, ...edit } };
+            renderMap(host, test.value, component, [current], { onLayerRuntimeStateChange: runtimeState });
+        }
+        expect(mocks.dynamicLayers).toHaveLength(6);
+        expect(mocks.dynamicLayers.slice(0, -1).every(item => item.removed)).toBe(true);
+        runtimeState.mockClear(); old.emitState({ loading: false, error: "stale" });
+        expect(runtimeState).not.toHaveBeenCalled();
+        expect([...mocks.maps[0].layers].filter(item => mocks.dynamicLayers.includes(item as never))).toHaveLength(1);
+    });
+
+    it("removes denied external content and restores only the newest definition", () => {
+        const host = document.createElement("div"); const test = testContext(); const runtimeState = vi.fn();
+        const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
+        const original = layer("tile", { sourceType: "arcgisTile", features: [], tile: { url: "https://tiles.arcgisonline.com/a/MapServer" } });
+        renderMap(host, test.value, component, [original], { onLayerRuntimeStateChange: runtimeState });
+        mocks.externalAccess.allowed = false;
+        const newest = { ...original, tile: { ...original.tile!, url: "https://tiles.arcgisonline.com/new/MapServer" } };
+        renderMap(host, test.value, component, [newest], { onLayerRuntimeStateChange: runtimeState });
+        expect(mocks.tiles[0].removed).toBe(true); expect(mocks.maps[0].layers.has(mocks.tiles[0])).toBe(false);
+        const warnings = runtimeState.mock.calls.filter(call => String(call[1]?.warning).includes("Access denied"));
+        expect(warnings).toHaveLength(1);
+        mocks.externalAccess.allowed = true;
+        renderMap(host, test.value, component, [newest], { onLayerRuntimeStateChange: runtimeState });
+        expect(mocks.tiles).toHaveLength(2); expect(mocks.tiles[1].url).toContain("/new/");
+    });
     it("reactively replaces and removes basemaps without remounting operational overlays", () => {
         const host = document.createElement("div"); const test = testContext();
         const base = { type: "map", id: "map", view: { fitMode: "none" as const }, layers: [{ id: "features", name: "Features", source: { type: "powerbi" as const, bindings: {} } }] };
@@ -281,7 +341,8 @@ describe("LeafletMap external layer lifecycle", () => {
         expect(mocks.tiles[0].removed).toBe(true);
         test.value.state.mapLayerState.map = { visibility: { tile: true } };
         renderMap(host, test.value, { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } }, [tile]);
-        expect(mocks.tiles).toHaveLength(2);
+        expect(mocks.tiles).toHaveLength(1);
+        expect(mocks.maps[0].layers.has(mocks.tiles[0])).toBe(true);
     });
 
     it("hides, shows, updates opacity, and assigns a deterministic pane for dynamic overlays", () => {
@@ -297,7 +358,8 @@ describe("LeafletMap external layer lifecycle", () => {
         expect(mocks.dynamicLayers[0].removed).toBe(true);
         test.value.state.mapLayerState.map = { visibility: { dynamic: true } };
         renderMap(host, test.value, component, [dynamic], { onLayerRuntimeStateChange: runtimeState });
-        expect(mocks.dynamicLayers).toHaveLength(2);
+        expect(mocks.dynamicLayers).toHaveLength(1);
+        expect(mocks.maps[0].layers.has(mocks.dynamicLayers[0])).toBe(true);
     });
 });
 

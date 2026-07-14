@@ -77,7 +77,7 @@ The runtime resolves source bindings, renderer fields, labels, popup/tooltip fie
 
 ## Map Studio
 
-Map Studio is a permanent specialized workspace alongside the Visual Inspector. Select a map in Inspector and choose **Open in Map Studio**, or open its Studio tab directly. Both workspaces share the selected component, canonical JSON, validation, bounded undo/redo history, and live preview. The preview, Inspector, and Map Studio also share one prepared-data result: root calculations, Runtime Config transformations and aliases, logical datasets, field metadata, row keys, and source lineage therefore agree. Text inputs keep a local draft and commit one validated transaction on blur or Enter; Escape cancels. Invalid drafts remain visible for correction without replacing the last valid preview.
+Map Studio is a permanent specialized workspace alongside the Visual Inspector. Select a map in Inspector and choose **Open in Map Studio**, or open its Studio tab directly. Both workspaces share the selected component, canonical JSON, validation, bounded undo/redo history, and live preview. HyperPBI Studio owns candidate validation and passes the exact current Runtime Config into the same preparation pipeline used by the live preview; Map Studio does not synthesize a default configuration during integrated use. Provider, security, interaction, field-binding, feature-limit, geocoder, map, and alias changes therefore affect the next transaction immediately. Text inputs keep a local draft and commit one validated transaction on blur or Enter; Escape cancels. Invalid drafts remain visible for correction without replacing the last valid preview.
 
 Map Studio provides:
 
@@ -85,7 +85,7 @@ Map Studio provides:
 - unique IDs, rename, duplicate, two-step delete, drag/keyboard reorder, grouping, group visibility/opacity/collapse
 - effective dataset selection and dataset-aware field controls
 - geometry, coordinate, address, grouping, color, size, tooltip, and detail bindings
-- provider-specific URLs and explicit, cancellable public service metadata inspection; root services expose their sublayers and metadata-backed service field selectors
+- provider-specific URLs and explicit, cancellable public service metadata inspection; one root request returns bounded spatial-layer, group-layer, and table summaries, and selecting one spatial item makes one lazy metadata request for its fields
 - service/simple/unique/class-break/continuous/proportional/heatmap/cluster/density renderers
 - bounded unique-value/domain previews and editable manual breaks
 - labels, safe popups/tooltips, UI actions, a first-class layer interaction editor, source-aware structured filters, joins, visibility, and performance limits
@@ -93,6 +93,8 @@ Map Studio provides:
 - basemap choices, reactive authored view, layer groups, live-preview view bookmarks, and static/runtime diagnostics
 
 Map Studio never creates a second hidden configuration model. Provider URLs must be supplied explicitly; it does not invent endpoints or credentials.
+
+Stable map feature interactions execute from Leaflet feature clicks, so `map.layers[].interaction.trigger` accepts `"click"` only. Map Studio shows that value as read-only and strict 2.0 validation rejects `change` or `auto` for a map layer. Those generic triggers remain available to non-map component contracts.
 
 ## Sources and ArcGIS queries
 
@@ -107,7 +109,13 @@ ArcGIS feature queries request output spatial reference 4326. Viewport mode send
 
 Feature attributes have three exact namespaces: `powerbi`, `service`, and `joined`. Renderer, labels, popup/tooltip, visibility, structured filters, interactions, and cluster sums use the selected `fieldSource`; a missing source never falls through to a same-named value in another namespace. Power BI layers default to `powerbi`, ArcGIS reference layers to `service`, and ArcGIS join layers to `joined`. Impossible source/layer combinations and metadata/schema misses produce structured diagnostics.
 
-Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, `numberString`), duplicate/unmatched policies, key batching, and aggregations. **Run join preview** is explicit rather than keystroke-triggered and reports bounded key, duplicate, match, unmatched, output, alias, request, truncation, sample, and duration data using the same logical dataset and runtime join path. A join never creates or implies a Power BI relationship.
+Service-root inspection is intentionally lazy. The root response is classified without fetching every child: spatial layers are render candidates, group layers are hierarchy/navigation only, and nonspatial tables are shown separately and cannot be selected as geometry sources. Selecting a spatial layer cancels or supersedes an older item request, rejects stale responses, reuses successful metadata from the normalized URL/item cache, and preserves the root summaries. Authentication/access failures are not cached as successful metadata.
+
+Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, `numberString`), duplicate/unmatched policies, key batching, and aggregations. Cardinality is declared from Power BI rows toward service features. `oneToOne` requires unique normalized keys on both sides. `manyToOne` permits repeated Power BI keys and aggregates their rows, while repeated service keys remain a diagnosed violation; `serviceDuplicatePolicy: "first"|"all"|"error"` determines deterministic suppression, expansion, or failure. Duplicate policies never relabel a violated relationship as clean cardinality.
+
+`unmatchedPolicy: "ignore"` computes bounded counts without a layer warning; `"warn"` emits one bounded summary warning; `"diagnose"` exposes match rate, blank/duplicate counts, and bounded samples in detailed diagnostics without requiring a user-facing warning. Blank join keys are counted separately from unmatched normalized keys. Runtime and **Run join preview** use the same policy adapter.
+
+Join numeric aggregation excludes null, undefined, empty/whitespace strings, booleans, objects, NaN, and infinities. Finite numeric strings remain supported for compatibility. `sum|avg|min|max` return `null` when no valid numeric input exists; zero remains a real value. `first|last` skip blanks, `count` counts nonblank values, and `distinctCount` uses stable nonblank value semantics. Bounded per-alias diagnostics report input, valid, blank, and discarded counts without retaining rows. A join never creates or implies a Power BI relationship.
 
 ## Runtime correctness and safety
 
@@ -119,6 +127,9 @@ Joins support normalization (`trim`, `upper`, `lower`, `removeNonAlphanumeric`, 
 - An explicit `cluster` renderer is authoritative for a 2.0 layer even when the legacy global cluster switch is off. `clusterLabel: "count"` shows the member count; `"sum"` sums the numeric `aggregateField` from its exact field source and honors the bounded numeric format.
 - Source, renderer, request, join, and layer rendering timings are exposed in structured diagnostics where applicable.
 - Normal viewer diagnostics show a sanitized service origin, not the full raw URL.
+- ArcGIS tile and dynamic overlays have stable definition signatures. URL, attribution, zoom bounds, pane, source type, and every dynamic layer-ID/definition/format/transparency/debounce property replace the mounted instance; opacity and visibility update an unchanged instance in place. Access denial removes already-loaded content, restoration uses the newest definition, stale callbacks are ignored, and map center/zoom is preserved.
+- Computed class breaks cap the effective class count by the validated request, color-ramp length, and distinct finite values. Equal intervals handle a constant domain as one class; quantiles collapse repeated boundaries; no break contains `undefined`/NaN; and an explicit final inclusive boundary classifies the maximum without adding an epsilon. Manual ranges require finite ordered non-overlapping bounds.
+- Map diagnostics use RFC 6901 pointers based on the authored component location, such as `/components/3/layers/10`; IDs are never substituted for array indexes. Map Studio filters by the exact selected-layer pointer/prefix, so layer 1 cannot display layer 10 diagnostics, and keeps map/provider diagnostics separate.
 
 ## Schema/runtime capability status
 
@@ -126,8 +137,8 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 
 | Status | Capabilities |
 |---|---|
-| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, reactive supported basemaps/views, ratio fit padding, ArcGIS sources/joins and metadata authoring, circle/square/diamond/triangle points, simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
-| Partial | `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
+| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
+| Partial | map-layer interaction trigger (`click` only), `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
 | Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid, provider-dependent generalization, per-layer rather than streamed progressive drawing |
 | Unsupported | scale/coordinate readout, rectangle/lasso selection, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
 | Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |

@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { MapStudio } from "../src/editor/map-studio/MapStudio";
 import { SpecificationHistory } from "../src/editor/inspector/specificationEditor";
 import { mapStudioData, mapStudioSpecification } from "./map-studio-fixture";
+import { defaultConfigJson } from "../src/config/hyperpbiConfig";
 
 describe("Map Studio text transactions", () => {
   it("keeps a ten-character draft local, commits once on blur, and undoes the complete edit", () => {
@@ -18,6 +19,7 @@ describe("Map Studio text transactions", () => {
         <MapStudio
           json={json}
           data={mapStudioData}
+          configurationJson={defaultConfigJson}
           selectedComponentId="operations"
           history={history}
           onChange={(next) => {
@@ -70,6 +72,7 @@ describe("Map Studio text transactions", () => {
         <MapStudio
           json={latest}
           data={mapStudioData}
+          configurationJson={defaultConfigJson}
           selectedComponentId="operations"
           onChange={(next) => {
             latest = next;
