@@ -177,6 +177,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
 
     // ── Diagnostics ───────────────────────────────────────────────────
     const unmatchedPowerBiKeys = [...powerBiKeys].filter(k => !matchedPowerBiKeys.has(k));
+    const unmatchedServiceKeys = [...serviceKeys].filter(k => !matchedServiceKeys.has(k));
     const duplicatePowerBiKeys = [...powerBiIndex.entries()]
         .filter(([, matches]) => matches.length > 1)
         .map(([key]) => key);
@@ -193,9 +194,10 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         matchedServiceFeatureCount: matchedServiceFeatureIds.size,
         suppressedDuplicateServiceCount: suppressedDuplicateCount > 0 ? suppressedDuplicateCount : undefined,
         unmatchedPowerBiKeyCount: unmatchedPowerBiKeys.length,
-        unmatchedServiceFeatureCount: [...serviceIndex.entries()]
-            .filter(([key]) => !matchedServiceKeys.has(key))
-            .reduce((count, [, serviceMatches]) => count + serviceMatches.length, 0),
+        unmatchedServiceFeatureCount: unmatchedServiceKeys.reduce(
+            (count, key) => count + (serviceIndex.get(key)?.length ?? 0),
+            0,
+        ),
         blankPowerBiKeyCount: blankPowerBiKeys,
         blankServiceKeyCount: blankServiceKeys,
         duplicatePowerBiKeyCount: duplicatePowerBiKeys.length,
@@ -204,6 +206,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
             ? matchedPowerBiKeys.size / powerBiKeys.size
             : 0,
         sampleUnmatchedPowerBiKeys: unmatchedPowerBiKeys.slice(0, 10),
+        sampleUnmatchedServiceKeys: unmatchedServiceKeys.slice(0, 10),
         sampleDuplicatePowerBiKeys: duplicatePowerBiKeys.slice(0, 10),
         sampleDuplicateServiceKeys: duplicateServiceKeys.slice(0, 10),
     };

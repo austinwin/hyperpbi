@@ -270,6 +270,7 @@ export interface MapJoinDiagnostics {
     suppressedDuplicateServiceCount?: number;
     matchRate: number;
     sampleUnmatchedPowerBiKeys: string[];
+    sampleUnmatchedServiceKeys: string[];
     sampleDuplicatePowerBiKeys: string[];
     sampleDuplicateServiceKeys: string[];
 }

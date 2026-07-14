@@ -2747,6 +2747,39 @@ function JoinEditor({
                 {JSON.stringify(preview.result.normalizationSamples, null, 2)}
               </pre>
             </details>
+            <details>
+              <summary>Bounded mismatch and duplicate samples</summary>
+              <dl>
+                <div>
+                  <dt>Unmatched Power BI keys</dt>
+                  <dd>
+                    {preview.result.sampleUnmatchedPowerBiKeys.join(", ") ||
+                      "none"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Unmatched service keys</dt>
+                  <dd>
+                    {preview.result.sampleUnmatchedServiceKeys.join(", ") ||
+                      "none"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Duplicate Power BI keys</dt>
+                  <dd>
+                    {preview.result.sampleDuplicatePowerBiKeys.join(", ") ||
+                      "none"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Duplicate service keys</dt>
+                  <dd>
+                    {preview.result.sampleDuplicateServiceKeys.join(", ") ||
+                      "none"}
+                  </dd>
+                </div>
+              </dl>
+            </details>
           </>
         )}
         <p>
