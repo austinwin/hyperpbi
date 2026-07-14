@@ -23,11 +23,6 @@ import {
   createResolvedMapLabels,
   type ResolvedMapLabelRuntime,
 } from "./ResolvedMapLabels";
-import {
-  createArcGisDynamicLayer,
-  buildArcGisTileUrl,
-  type ArcGisDynamicLeafletLayer,
-} from "../../maps/arcgis/arcGisDynamicLayer";
 import { checkHostPolicy } from "../../maps/arcgis/arcGisHostPolicy";
 import type { HostPolicyResult } from "../../maps/arcgis/arcGisHostPolicy";
 import type {
@@ -42,6 +37,11 @@ import { createLeafletPointLayer } from "./createLeafletPointLayer";
 import { featureAttribute } from "../../maps/attributes/mapFeatureAttributes";
 import { formatFeatureValue } from "../../maps/model/mapFeatureValue";
 import { normalizeFitPadding } from "../../maps/view/mapFitPadding";
+import {
+  synchronizeLeafletExternalLayer,
+  type MountedDynamicLayer,
+  type MountedTileLayer,
+} from "./runtime/useLeafletExternalLayers";
 
 export interface LeafletMapController {
   home(): void;
@@ -78,10 +78,12 @@ export function LeafletMap({
   const mapRef = useRef<L.Map | null>(null);
   const basemapRef = useRef<L.TileLayer | null>(null);
   const vectorLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
-  const arcGisTileRefs = useRef<Map<string, L.TileLayer>>(new Map());
-  const dynamicLayerRefs = useRef<Map<string, ArcGisDynamicLeafletLayer>>(
+  const arcGisTileRefs = useRef<Map<string, MountedTileLayer>>(new Map());
+  const dynamicLayerRefs = useRef<Map<string, MountedDynamicLayer>>(
     new Map(),
   );
+  const externalLayerGenerationRef = useRef(0);
+  const externalWarningSignaturesRef = useRef(new Set<string>());
   const labelLayerRefs = useRef<Map<string, ResolvedMapLabelRuntime>>(
     new Map(),
   );
@@ -369,12 +371,12 @@ export function LeafletMap({
       map.off("resize", emitViewport);
       clearTimeout(initialViewportTimer);
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      for (const [, dl] of dynamicLayerRefs.current) {
-        map.removeLayer(dl);
+      for (const [, mounted] of dynamicLayerRefs.current) {
+        map.removeLayer(mounted.layer);
       }
       dynamicLayerRefs.current.clear();
-      for (const [, tl] of arcGisTileRefs.current) {
-        map.removeLayer(tl);
+      for (const [, mounted] of arcGisTileRefs.current) {
+        map.removeLayer(mounted.layer);
       }
       arcGisTileRefs.current.clear();
       map.remove();
@@ -506,33 +508,23 @@ export function LeafletMap({
     labelLayerRefs.current.clear();
 
     // Clear dynamic layers that are no longer present
-    for (const [key, dl] of dynamicLayerRefs.current) {
+    for (const [key, mounted] of dynamicLayerRefs.current) {
       const definition = resolvedLayers.find(
         (l) => l.sourceType === "arcgisDynamic" && l.id === key,
       );
-      const shouldKeep =
-        definition &&
-        (mapLayerStateRef.current?.visibility?.[key] ??
-          definition.visible ??
-          true);
-      if (!shouldKeep) {
-        map.removeLayer(dl);
+      if (!definition) {
+        map.removeLayer(mounted.layer);
         dynamicLayerRefs.current.delete(key);
       }
     }
 
     // Clear tile layers that are no longer present
-    for (const [key, tl] of arcGisTileRefs.current) {
+    for (const [key, mounted] of arcGisTileRefs.current) {
       const definition = resolvedLayers.find(
         (l) => l.sourceType === "arcgisTile" && l.id === key,
       );
-      const shouldKeep =
-        definition &&
-        (mapLayerStateRef.current?.visibility?.[key] ??
-          definition.visible ??
-          true);
-      if (!shouldKeep) {
-        map.removeLayer(tl);
+      if (!definition) {
+        map.removeLayer(mounted.layer);
         arcGisTileRefs.current.delete(key);
       }
     }
@@ -579,7 +571,8 @@ export function LeafletMap({
     for (const layer of sortedLayers) {
       const isVisible =
         mapState?.visibility?.[layer.id] ?? layer.visible ?? true;
-      if (!isVisible) continue;
+      if (!isVisible && !["arcgisTile", "arcgisDynamic"].includes(layer.sourceType))
+        continue;
       const layerRenderStarted = globalThis.performance?.now?.() ?? Date.now();
       const renderSignature = [
         layer.features.length,
@@ -606,105 +599,26 @@ export function LeafletMap({
         mapState?.opacity?.[layer.id] ?? layer.opacity ?? 1,
       );
 
-      // ── Handle tile layers ───────────────────────────────
-      if (layer.sourceType === "arcgisTile" && layer.tile) {
-        const existingTile = arcGisTileRefs.current.get(layer.id);
-        if (existingTile) {
-          existingTile.setOpacity(layerOpacity);
-          if (visibleAtZoom && !map.hasLayer(existingTile))
-            existingTile.addTo(map);
-          else if (!visibleAtZoom && map.hasLayer(existingTile))
-            map.removeLayer(existingTile);
-          reportLayerRender();
-          continue;
-        }
-        try {
-          const access = externalServiceAccess(
-            context.providerAccess,
-            layer.tile.url,
-            webAccessAvailable,
-          );
-          if (!access.allowed)
-            throw new Error(
-              access.reason ?? "ArcGIS tile service access is unavailable.",
-            );
-          const policy = checkHostPolicy(layer.tile.url);
-          if (!policy.allowed)
-            throw new Error(policy.reason ?? "Tile host is blocked.");
-          const tileUrl = buildArcGisTileUrl(layer.tile.url);
-          const tileLayer = L.tileLayer(tileUrl, {
-            maxZoom: layer.tile.maxZoom ?? 19,
-            minZoom: layer.tile.minZoom,
-            opacity: layerOpacity,
-            attribution: layer.tile.attribution ?? "",
-            pane: paneNamesRef.current.get(layer.id),
-          });
-          if (visibleAtZoom) tileLayer.addTo(map);
-          arcGisTileRefs.current.set(layer.id, tileLayer);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          onLayerRuntimeStateChangeRef.current?.(layer.id, {
-            warning: `Tile layer error: ${msg}`,
-          });
-        }
-        reportLayerRender();
-        continue;
-      }
-
-      // ── Handle dynamic layers ────────────────────────────
-      if (layer.sourceType === "arcgisDynamic" && layer.dynamic) {
-        const existingDynamic = dynamicLayerRefs.current.get(layer.id);
-        if (existingDynamic) {
-          existingDynamic.setOpacity(layerOpacity);
-          if (visibleAtZoom && !map.hasLayer(existingDynamic))
-            existingDynamic.addTo(map);
-          else if (!visibleAtZoom && map.hasLayer(existingDynamic))
-            map.removeLayer(existingDynamic);
-        } else {
-          try {
-            const access = externalServiceAccess(
-              context.providerAccess,
-              layer.dynamic.url,
-              webAccessAvailable,
-            );
-            if (!access.allowed)
-              throw new Error(
-                access.reason ??
-                  "ArcGIS dynamic service access is unavailable.",
-              );
-            const dynamicLayer = createArcGisDynamicLayer(
-              {
-                url: layer.dynamic.url,
-                layerIds: layer.dynamic.layerIds,
-                layerDefinitions: layer.dynamic.layerDefinitions,
-                format: layer.dynamic.format ?? "png",
-                transparent: layer.dynamic.transparent ?? true,
-                minZoom: layer.dynamic.minZoom,
-                maxZoom: layer.dynamic.maxZoom,
-                attribution: layer.dynamic.attribution ?? "",
-                debounceMs: layer.dynamic.debounceMs ?? 300,
-                opacity: layerOpacity,
-                pane: paneNamesRef.current.get(layer.id),
-              },
-              (state) => {
-                onLayerRuntimeStateChangeRef.current?.(layer.id, {
-                  loading: state.loading,
-                  ...(state.error
-                    ? { error: state.error, warning: state.error }
-                    : {}),
-                });
-              },
-            );
-            if (visibleAtZoom) dynamicLayer.addTo(map);
-            dynamicLayerRefs.current.set(layer.id, dynamicLayer);
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            onLayerRuntimeStateChangeRef.current?.(layer.id, {
-              error: msg,
-              warning: `Dynamic layer error: ${msg}`,
-            });
-          }
-        }
+      if (
+        synchronizeLeafletExternalLayer({
+          map,
+          layer,
+          runtime: {
+            tileLayers: arcGisTileRefs.current,
+            dynamicLayers: dynamicLayerRefs.current,
+            generation: externalLayerGenerationRef,
+            warningSignatures: externalWarningSignaturesRef.current,
+          },
+          pane: paneNamesRef.current.get(layer.id),
+          visible: isVisible,
+          visibleAtZoom,
+          opacity: layerOpacity,
+          providerAccess: context.providerAccess,
+          webAccessAvailable,
+          onRuntimeStateChange: (update) =>
+            onLayerRuntimeStateChangeRef.current?.(layer.id, update),
+        })
+      ) {
         reportLayerRender();
         continue;
       }
@@ -1066,9 +980,9 @@ export function LeafletMap({
         const candidates: L.Layer[] = [];
         const vector = vectorLayerRefs.current.get(layer.id);
         if (vector) candidates.push(vector);
-        const tile = arcGisTileRefs.current.get(layer.id);
+        const tile = arcGisTileRefs.current.get(layer.id)?.layer;
         if (tile) candidates.push(tile);
-        const dynamic = dynamicLayerRefs.current.get(layer.id);
+        const dynamic = dynamicLayerRefs.current.get(layer.id)?.layer;
         if (dynamic) candidates.push(dynamic);
         for (const candidate of candidates) {
           if (show && !map.hasLayer(candidate)) candidate.addTo(map);

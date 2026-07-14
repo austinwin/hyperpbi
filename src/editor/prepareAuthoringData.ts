@@ -35,6 +35,7 @@ export interface PreparedAuthoringData {
   errors: string[];
   warnings: string[];
   ownerByRuntimeId?: Record<string, string>;
+  componentPathById?: Record<string, string>;
   preparedSpecification?: PreparedSpecification;
 }
 
@@ -107,6 +108,7 @@ export function prepareAuthoringData(
     errors,
     warnings,
     ownerByRuntimeId: prepared?.ownerByRuntimeId,
+    componentPathById: prepared?.componentPathById,
     preparedSpecification: prepared,
   };
   if (!prepared?.schema || !parsedConfig.config) return base;

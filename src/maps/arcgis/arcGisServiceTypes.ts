@@ -237,6 +237,9 @@ export interface ArcGisServiceInspection {
 export interface ArcGisLayerSummary {
   id: number;
   name: string;
+  kind: "spatialLayer" | "table" | "groupLayer" | "unknown";
+  parentLayerId?: number;
+  subLayerIds?: number[];
   geometryType?: string;
   querySupported: boolean;
   maxRecordCount?: number;

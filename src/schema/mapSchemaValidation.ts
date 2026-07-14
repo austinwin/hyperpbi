@@ -760,6 +760,28 @@ function validateLayer(
             componentId,
             diagnostics,
           );
+        const minimum = Number(value.min);
+        const maximum = Number(value.max);
+        if (!Number.isFinite(minimum) || !Number.isFinite(maximum) || minimum > maximum)
+          diagnostics.push({
+            code: "MAP_CLASS_BREAK_INVALID_RANGE",
+            severity: "error",
+            path: breakPath,
+            componentId,
+            message: "Class-break min and max must be finite numbers with min less than or equal to max.",
+          });
+        const rendererBreaks = (raw.renderer as Json).breaks;
+        const previous = index > 0 && Array.isArray(rendererBreaks) && object(rendererBreaks[index - 1])
+          ? rendererBreaks[index - 1] as Json
+          : undefined;
+        if (previous && Number.isFinite(Number(previous.max)) && minimum < Number(previous.max))
+          diagnostics.push({
+            code: "MAP_CLASS_BREAK_OVERLAP",
+            severity: "error",
+            path: breakPath,
+            componentId,
+            message: "Manual class-break ranges must be sorted and must not overlap.",
+          });
       });
   }
   validateSection(
@@ -994,7 +1016,20 @@ function validateLayer(
     componentId,
     diagnostics,
   );
-  if (object(raw.interaction))
+  if (object(raw.interaction)) {
+    if (
+      raw.interaction.trigger !== undefined &&
+      raw.interaction.trigger !== "click"
+    )
+      diagnostics.push({
+        code: "MAP_INTERACTION_TRIGGER_UNSUPPORTED",
+        severity: "error",
+        path: `${path}/interaction/trigger`,
+        componentId,
+        message: "Map layer interactions currently support trigger “click” only.",
+        received: raw.interaction.trigger,
+        suggestions: ["click"],
+      });
     validateEnum(
       raw.interaction.fieldSource,
       ["powerbi", "service", "joined"],
@@ -1002,6 +1037,7 @@ function validateLayer(
       componentId,
       diagnostics,
     );
+  }
   const filters =
     raw.filter === undefined
       ? []

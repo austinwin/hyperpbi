@@ -59,6 +59,7 @@ import {
 import { matchesFilter } from "../../data/filtering";
 import type { Primitive } from "../../data/normalizeData";
 import { externalFilterTargetFor } from "../../powerbi/externalFilters";
+import { appendJsonPointer } from "../../schema/jsonPointer";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -116,6 +117,11 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const context = useRenderContext();
   const { data, sourceRows, settings, config } = context;
   const id = component.id ?? "map";
+  const authoredComponentId = context.ownerByRuntimeId?.[id] ?? id;
+  const componentPath =
+    context.componentPathById?.[id] ??
+    context.componentPathById?.[authoredComponentId] ??
+    "/components";
   const rows = context.getRowsForComponent(id);
   const legacyCompatibility = !component.layers?.length;
   const serviceAccess = useCallback(
@@ -195,7 +201,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 totalRows: view.totalRows,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
                 legacyCompatibility,
-                layerPath: `/components/${id}/layers/${index}`,
+                layerPath: appendJsonPointer(componentPath, "layers", index),
               }
             : {
                 rows: fallbackAllowed ? rows : [],
@@ -213,7 +219,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 totalRows: fallbackAllowed ? rows.length : 0,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
                 legacyCompatibility,
-                layerPath: `/components/${id}/layers/${index}`,
+                layerPath: appendJsonPointer(componentPath, "layers", index),
               };
           return [definition.id, sourceContext] as const;
         }),
@@ -225,6 +231,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
       id,
       config.providers?.geocoder?.cacheEntries,
       legacyCompatibility,
+      componentPath,
       rows,
       rowIndices,
       rowKeys,
@@ -1036,6 +1043,7 @@ export async function resolveArcGisFeatureLayer(
 
   let features: ResolvedMapFeature[] = [];
   let joinDiagnostics: MapJoinDiagnostics | undefined = undefined;
+  const joinIssues: MapLayerDiagnosticIssue[] = [];
   let joinMs: number | undefined;
   let geometryType: ResolvedMapLayer["geometryType"] =
     (queryResult.geometryType ?? "unknown") as ResolvedMapLayer["geometryType"];
@@ -1140,6 +1148,50 @@ export async function resolveArcGisFeatureLayer(
 
     features = joinResult.features;
     joinDiagnostics = joinResult.diagnostics;
+    warnings.push(...joinResult.warnings);
+    if (joinDiagnostics.powerBiCardinalityViolationCount)
+      joinIssues.push({
+        code: "MAP_JOIN_CARDINALITY_POWERBI_VIOLATION",
+        severity: "warning",
+        message: `${joinDiagnostics.powerBiCardinalityViolationCount} normalized Power BI keys violate ${joinDiagnostics.cardinality} cardinality.`,
+        path: `${context.layerPath}/join/cardinality`,
+        details: { samples: joinDiagnostics.samplePowerBiCardinalityViolations },
+      });
+    if (joinDiagnostics.serviceCardinalityViolationCount)
+      joinIssues.push({
+        code: "MAP_JOIN_CARDINALITY_SERVICE_VIOLATION",
+        severity: "warning",
+        message: `${joinDiagnostics.serviceCardinalityViolationCount} normalized service keys violate ${joinDiagnostics.cardinality} cardinality.`,
+        path: `${context.layerPath}/join/cardinality`,
+        details: { samples: joinDiagnostics.sampleServiceCardinalityViolations },
+      });
+    if (
+      joinDiagnostics.detailedDiagnosticsRequested &&
+      (joinDiagnostics.unmatchedPowerBiKeyCount ||
+        joinDiagnostics.unmatchedServiceFeatureCount)
+    )
+      joinIssues.push({
+        code: "MAP_JOIN_UNMATCHED",
+        severity: "info",
+        message: "The diagnose unmatched policy exposed bounded join mismatch details.",
+        path: `${context.layerPath}/join/unmatchedPolicy`,
+        details: {
+          matchRate: joinDiagnostics.matchRate,
+          powerBiSamples: joinDiagnostics.sampleUnmatchedPowerBiKeys,
+          serviceSamples: joinDiagnostics.sampleUnmatchedServiceKeys,
+        },
+      });
+    const discardedAggregationValues = joinDiagnostics.aggregationDiagnostics.reduce(
+      (sum, item) => sum + item.discardedCount,
+      0,
+    );
+    if (discardedAggregationValues)
+      joinIssues.push({
+        code: "MAP_JOIN_AGGREGATION_VALUES_DISCARDED",
+        severity: "warning",
+        message: `${discardedAggregationValues} invalid aggregation values were discarded.`,
+        path: `${context.layerPath}/join/aggregations`,
+      });
     joinMs = (globalThis.performance?.now?.() ?? Date.now()) - joinStarted;
   } else {
     // Reference mode: convert service features directly
@@ -1218,6 +1270,7 @@ export async function resolveArcGisFeatureLayer(
       features,
       defaultAttributeSource(def, "renderer"),
     );
+    warnings.push(...(resolvedRenderer.classBreakResult?.warnings ?? []));
   }
 
   return {
@@ -1296,6 +1349,7 @@ export async function resolveArcGisFeatureLayer(
       warnings: [...warnings, ...queryResult.warnings],
       issues: [
         ...sourceIssues,
+        ...joinIssues,
         ...(geometry.type === "mixed"
           ? [
               {

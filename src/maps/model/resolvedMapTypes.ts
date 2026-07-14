@@ -75,6 +75,7 @@ export interface ResolvedMapRenderer {
     method?: "equalInterval" | "quantile" | "naturalBreaks" | "manual";
     breaks?: ResolvedClassBreak[];
     colorRamp?: string[];
+    classBreakResult?: ClassBreakResult;
 
     // Continuous
     minColor?: string;
@@ -122,8 +123,19 @@ export interface ResolvedMapSymbol {
 export interface ResolvedClassBreak {
     min: number;
     max: number;
+    /** Computed classes use an exclusive upper boundary except for the final class. */
+    maxInclusive?: boolean;
     label?: string;
     symbol: ResolvedMapSymbol;
+}
+
+export interface ClassBreakResult {
+    breaks: ResolvedClassBreak[];
+    requestedClassCount: number;
+    effectiveClassCount: number;
+    validValueCount: number;
+    distinctValueCount: number;
+    warnings: string[];
 }
 
 // ── Resolved Labels ───────────────────────────────────────────────────
@@ -246,6 +258,10 @@ export interface MapLayerDiagnosticIssue {
         | "MAP_JOINED_FIELD_NOT_FOUND"
         | "MAP_FILTER_SOURCE_INVALID"
         | "MAP_VISIBILITY_SOURCE_INVALID"
+        | "MAP_JOIN_CARDINALITY_POWERBI_VIOLATION"
+        | "MAP_JOIN_CARDINALITY_SERVICE_VIOLATION"
+        | "MAP_JOIN_UNMATCHED"
+        | "MAP_JOIN_AGGREGATION_VALUES_DISCARDED"
         | "MAP_CAPABILITY_LIMITATION";
     severity: "info" | "warning" | "error";
     message: string;
@@ -254,6 +270,14 @@ export interface MapLayerDiagnosticIssue {
 }
 
 export interface MapJoinDiagnostics {
+    cardinality: "oneToOne" | "manyToOne";
+    cardinalityValid: boolean;
+    powerBiCardinalityViolationCount: number;
+    serviceCardinalityViolationCount: number;
+    samplePowerBiCardinalityViolations: string[];
+    sampleServiceCardinalityViolations: string[];
+    unmatchedPolicy: "ignore" | "warn" | "diagnose";
+    detailedDiagnosticsRequested: boolean;
     powerBiRowCount: number;
     powerBiDistinctKeyCount: number;
     serviceFeatureCount: number;
@@ -273,6 +297,17 @@ export interface MapJoinDiagnostics {
     sampleUnmatchedServiceKeys: string[];
     sampleDuplicatePowerBiKeys: string[];
     sampleDuplicateServiceKeys: string[];
+    aggregationDiagnostics: MapJoinAggregationDiagnostic[];
+}
+
+export interface MapJoinAggregationDiagnostic {
+    alias: string;
+    field: string;
+    aggregation: string;
+    inputCount: number;
+    validCount: number;
+    blankCount: number;
+    discardedCount: number;
 }
 
 // ── Resolved Tile Configuration ───────────────────────────────────────

@@ -5,17 +5,21 @@ import {
   getArcGisJson,
   ArcGisAuthError,
   ArcGisServiceError,
-  ArcGisHttpError,
 } from "./arcGisRestClient";
 import { parseArcGisUrl } from "./arcGisUrl";
 import { checkHostPolicy } from "./arcGisHostPolicy";
 import type {
   ArcGisServiceInfo,
   ArcGisLayerMetadata,
-  ArcGisLayerInfo,
   ArcGisServiceInspection,
   ArcGisLayerSummary,
 } from "./arcGisServiceTypes";
+
+const successfulInspectionCache = new Map<string, ArcGisServiceInspection>();
+
+export function clearArcGisServiceInspectionCache(): void {
+  successfulInspectionCache.clear();
+}
 
 export async function inspectArcGisService(
   serviceUrl: string,
@@ -58,20 +62,25 @@ export async function inspectArcGisService(
   }
 
   try {
+    const cached = successfulInspectionCache.get(parsed.normalizedUrl);
+    if (cached) return cached;
+    let inspection: ArcGisServiceInspection;
     if (parsed.isLayer) {
-      return await inspectLayer(
+      inspection = await inspectLayer(
         parsed.normalizedUrl,
         parsed.layerId!,
         parsed.serviceType,
         signal,
       );
     } else {
-      return await inspectServiceRoot(
+      inspection = await inspectServiceRoot(
         parsed.normalizedUrl,
         parsed.serviceType,
         signal,
       );
     }
+    if (!inspection.errors.length) successfulInspectionCache.set(parsed.normalizedUrl, inspection);
+    return inspection;
   } catch (error) {
     if (signal?.aborted) throw error;
     if (error instanceof ArcGisAuthError) {
@@ -124,51 +133,28 @@ async function inspectServiceRoot(
   const response = await getArcGisJson<any>(`${rootUrl}?f=pjson`, { signal });
 
   const serviceInfo = response as ArcGisServiceInfo;
-  const layers: ArcGisLayerSummary[] = [];
-
-  // Process layers
-  const allLayers = [
-    ...(serviceInfo.layers ?? []),
-    ...(serviceInfo.tables ?? []),
-  ];
-  for (const layerInfo of allLayers) {
-    // Skip group/parent layers that have sublayers
-    if (layerInfo.subLayerIds && layerInfo.subLayerIds.length > 0) continue;
-
-    const layerUrl = `${rootUrl}/${layerInfo.id}`;
-    let querySupported = false;
-    let geometryType: string | undefined;
-    let metadata: ArcGisLayerMetadata | undefined;
-
-    // Quick check: try to get layer metadata
-    try {
-      metadata = await getArcGisJson<ArcGisLayerMetadata>(
-        `${layerUrl}?f=pjson`,
-        { signal },
-      );
-      const caps = metadata.capabilities ?? "";
-      querySupported = caps.toLowerCase().includes("query");
-      geometryType = metadata.geometryType;
-    } catch {
-      if (signal?.aborted)
-        throw new DOMException(
-          "ArcGIS metadata inspection was aborted.",
-          "AbortError",
-        );
-      // If we can't inspect, still list the layer but mark as unavailable
-    }
-
-    layers.push({
-      id: layerInfo.id,
-      name: layerInfo.name,
-      geometryType,
-      querySupported,
-      maxRecordCount: metadata?.maxRecordCount,
-      minScale: layerInfo.minScale,
-      maxScale: layerInfo.maxScale,
-      metadata,
-    });
-  }
+  const tableIds = new Set((serviceInfo.tables ?? []).map((item) => item.id));
+  const allItems = [...(serviceInfo.layers ?? []), ...(serviceInfo.tables ?? [])];
+  const layers: ArcGisLayerSummary[] = allItems.slice(0, 10_000).map((item) => {
+    const type = item.type?.toLowerCase() ?? "";
+    const kind: ArcGisLayerSummary["kind"] = tableIds.has(item.id) || type.includes("table")
+      ? "table"
+      : item.subLayerIds?.length || type.includes("group")
+        ? "groupLayer"
+        : type.includes("feature") || type.includes("raster") || type.includes("layer") || !type
+          ? "spatialLayer"
+          : "unknown";
+    return {
+      id: item.id,
+      name: item.name,
+      kind,
+      parentLayerId: item.parentLayerId,
+      subLayerIds: item.subLayerIds,
+      querySupported: kind === "spatialLayer",
+      minScale: item.minScale,
+      maxScale: item.maxScale,
+    };
+  });
 
   return {
     url: rootUrl,
@@ -179,7 +165,10 @@ async function inspectServiceRoot(
     layers,
     publicAccess: true,
     querySupported: layers.some((l) => l.querySupported),
-    warnings: [],
+    warnings:
+      allItems.length > layers.length
+        ? [`Service summary was bounded to ${layers.length} items.`]
+        : [],
     errors: [],
   };
 }
@@ -210,6 +199,7 @@ async function inspectLayer(
       {
         id: metadata.id,
         name: metadata.name,
+        kind: metadata.geometryType ? "spatialLayer" : "table",
         geometryType: metadata.geometryType,
         querySupported,
         maxRecordCount: metadata.maxRecordCount,

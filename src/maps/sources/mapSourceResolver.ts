@@ -446,6 +446,7 @@ export function resolvePowerBiLayer(
   const counts = mapData.locationCounts;
   const warnings = [
     ...mapData.warnings,
+    ...(resolvedRenderer.classBreakResult?.warnings ?? []),
     ...issues
       .filter((item) => item.severity !== "info")
       .map((item) => item.message),

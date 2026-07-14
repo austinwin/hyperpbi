@@ -127,7 +127,10 @@ function classBreaksStyle(
   }
 
   for (const brk of renderer.breaks) {
-    if (num >= brk.min && num <= brk.max) {
+    if (
+      num >= brk.min &&
+      (num < brk.max || (brk.maxInclusive !== false && num <= brk.max))
+    ) {
       return simpleStyle(brk.symbol);
     }
   }

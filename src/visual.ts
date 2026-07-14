@@ -158,7 +158,7 @@ export class Visual implements IVisual {
         }
         const runtimeData = prepareRuntimeData(this.data, schemaResult.schema, configResult.config);
         if (!runtimeData.data) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: runtimeData.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
     }
 
     private async checkProviderAccess():Promise<void>{
@@ -197,9 +197,9 @@ export class Visual implements IVisual {
         this.renderCurrent();
     }
 
-    private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[]; ownerByRuntimeId?: Record<string,string> } {
+    private parseSpecification(text: string): { schema?: HyperPbiSchema; errors: string[]; ownerByRuntimeId?: Record<string,string>; componentPathById?: Record<string,string> } {
         const parsed = parseJson(text); if (parsed.error) return { errors: [`Specification JSON: ${parsed.error}`] };
-        const aliases=parseConfig(this.configuration).config?.fields?.aliases;const prepared=prepareSpecification(parsed.value,this.data,{repair:false,aliasOverrides:aliases});return prepared.schema?{schema:prepared.schema,errors:[],ownerByRuntimeId:prepared.ownerByRuntimeId}:{errors:prepared.errors};
+        const aliases=parseConfig(this.configuration).config?.fields?.aliases;const prepared=prepareSpecification(parsed.value,this.data,{repair:false,aliasOverrides:aliases});return prepared.schema?{schema:prepared.schema,errors:[],ownerByRuntimeId:prepared.ownerByRuntimeId,componentPathById:prepared.componentPathById}:{errors:prepared.errors};
     }
 
     private saveAndCloseStudio = (specification: string, configuration: string): void => {

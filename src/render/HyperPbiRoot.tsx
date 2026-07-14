@@ -58,6 +58,7 @@ export function HyperPbiRoot({
   webAccessAvailable = false,
   providerAccess,
   ownerByRuntimeId,
+  componentPathById,
   onMapViewportChange,
 }: {
   instanceId: string;
@@ -88,6 +89,7 @@ export function HyperPbiRoot({
   webAccessAvailable?: boolean;
   providerAccess?: ProviderAccessState;
   ownerByRuntimeId?: Readonly<Record<string, string>>;
+  componentPathById?: Readonly<Record<string, string>>;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
 }) {
   const effectiveProviderAccess = providerAccess ?? {
@@ -267,6 +269,7 @@ export function HyperPbiRoot({
         webAccessAvailable,
         providerAccess: effectiveProviderAccess,
         ownerByRuntimeId,
+        componentPathById,
         datasets: datasetEvaluation.datasets,
         onMapViewportChange,
         executeUiAction: null as any,
@@ -296,6 +299,8 @@ export function HyperPbiRoot({
       config,
       webAccessAvailable,
       effectiveProviderAccess,
+      ownerByRuntimeId,
+      componentPathById,
       datasetEvaluation.datasets,
     ],
   );
@@ -327,6 +332,7 @@ export function HyperPbiRoot({
       webAccessAvailable,
       providerAccess: effectiveProviderAccess,
       ownerByRuntimeId,
+      componentPathById,
       datasets: datasetEvaluation.datasets,
       onMapViewportChange,
       executeUiAction: execUiAction,
@@ -353,6 +359,8 @@ export function HyperPbiRoot({
       config,
       webAccessAvailable,
       effectiveProviderAccess,
+      ownerByRuntimeId,
+      componentPathById,
       execUiAction,
       isOverlayOpen,
       datasetEvaluation.datasets,

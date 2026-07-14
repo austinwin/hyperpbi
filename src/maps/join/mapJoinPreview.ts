@@ -19,7 +19,7 @@ export interface MapJoinPreviewResult extends MapJoinDiagnostics {
   queryStrategy: string;
   powerBiDuplicatePolicy: string;
   serviceDuplicatePolicy: string;
-  unmatchedPolicy: string;
+  unmatchedPolicy: "ignore" | "warn" | "diagnose";
   aggregationAliases: string[];
   normalizationSamples: Array<{ raw: unknown; normalized: string | null }>;
   warnings: string[];
@@ -97,6 +97,6 @@ export async function runMapJoinPreview(
       (item) => item.as,
     ),
     normalizationSamples,
-    warnings: service.warnings,
+    warnings: [...service.warnings, ...joined.warnings],
   };
 }

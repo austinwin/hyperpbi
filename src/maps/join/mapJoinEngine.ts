@@ -9,6 +9,8 @@ import type { ParsedArcGisFeature } from "../arcgis/arcGisResponseParser";
 import type { ResolvedMapFeature } from "../model/resolvedMapTypes";
 import type { MapJoinDiagnostics } from "../model/resolvedMapTypes";
 import { normalizeJoinKey } from "./mapJoinNormalizer";
+import { aggregateMapJoinValues } from "./mapJoinAggregation";
+import type { MapJoinAggregationDiagnostic } from "../model/resolvedMapTypes";
 
 export interface MapJoinInput {
     powerBiRows: DataRow[];
@@ -24,6 +26,10 @@ export interface MapJoinInput {
 export interface MapJoinResult {
     features: ResolvedMapFeature[];
     diagnostics: MapJoinDiagnostics;
+    /** User-facing bounded warnings requested by the join policy. */
+    warnings: string[];
+    /** Reserved for non-throwing severe policy results. */
+    errors: string[];
 }
 
 export function executeMapJoin(input: MapJoinInput): MapJoinResult {
@@ -31,6 +37,8 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
     const normalization = definition.normalization ?? ["trim", "upper"];
     const powerBiDupPolicy = definition.powerBiDuplicatePolicy ?? "aggregate";
     const serviceDupPolicy = definition.serviceDuplicatePolicy ?? "first";
+    const cardinality = definition.cardinality ?? "manyToOne";
+    const unmatchedPolicy = definition.unmatchedPolicy ?? "ignore";
 
     // ── Build Power BI index ──────────────────────────────────────────
     const powerBiIndex = new Map<string, PowerBiMatch[]>();
@@ -112,6 +120,7 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
     const matchedServiceKeys = new Set<string>();
     let suppressedDuplicateCount = 0;
     const matchedPowerBiKeys = new Set<string>();
+    const aggregationDiagnostics = new Map<string, MapJoinAggregationDiagnostic>();
 
     for (const [normalizedKey, svcFeatures] of serviceIndex) {
         const powerBiMatches = powerBiIndex.get(normalizedKey);
@@ -149,10 +158,21 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
             }
 
             // Aggregate joined fields
-            const joinedAttributes = aggregateJoinedFields(
+            const aggregated = aggregateJoinedFields(
                 effectivePowerBiMatches,
                 definition.aggregations ?? []
             );
+            const joinedAttributes = aggregated.attributes;
+            for (const diagnostic of aggregated.diagnostics) {
+                const existing = aggregationDiagnostics.get(diagnostic.alias);
+                aggregationDiagnostics.set(diagnostic.alias, existing ? {
+                    ...existing,
+                    inputCount: existing.inputCount + diagnostic.inputCount,
+                    validCount: existing.validCount + diagnostic.validCount,
+                    blankCount: existing.blankCount + diagnostic.blankCount,
+                    discardedCount: existing.discardedCount + diagnostic.discardedCount,
+                } : diagnostic);
+            }
 
             const geometryType = mapGeometryType(svcFeature);
             const feature: ResolvedMapFeature = {
@@ -185,7 +205,22 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         .filter(([, feats]) => feats.length > 1)
         .map(([key]) => key);
 
+    const powerBiCardinalityViolations = cardinality === "oneToOne"
+        ? duplicatePowerBiKeys
+        : [];
+    const serviceCardinalityViolations = duplicateServiceKeys;
+
     const diagnostics: MapJoinDiagnostics = {
+        cardinality,
+        cardinalityValid:
+            powerBiCardinalityViolations.length === 0 &&
+            serviceCardinalityViolations.length === 0,
+        powerBiCardinalityViolationCount: powerBiCardinalityViolations.length,
+        serviceCardinalityViolationCount: serviceCardinalityViolations.length,
+        samplePowerBiCardinalityViolations: powerBiCardinalityViolations.slice(0, 10),
+        sampleServiceCardinalityViolations: serviceCardinalityViolations.slice(0, 10),
+        unmatchedPolicy,
+        detailedDiagnosticsRequested: unmatchedPolicy === "diagnose",
         powerBiRowCount: powerBiRows.length,
         powerBiDistinctKeyCount: powerBiKeys.size,
         serviceFeatureCount: serviceFeatures.length,
@@ -209,9 +244,38 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         sampleUnmatchedServiceKeys: unmatchedServiceKeys.slice(0, 10),
         sampleDuplicatePowerBiKeys: duplicatePowerBiKeys.slice(0, 10),
         sampleDuplicateServiceKeys: duplicateServiceKeys.slice(0, 10),
+        aggregationDiagnostics: [...aggregationDiagnostics.values()],
     };
 
-    return { features, diagnostics };
+    const warnings: string[] = [];
+    if (unmatchedPolicy === "warn" &&
+        (diagnostics.unmatchedPowerBiKeyCount > 0 || diagnostics.unmatchedServiceFeatureCount > 0)) {
+        const matchedKeyCount = diagnostics.powerBiDistinctKeyCount - diagnostics.unmatchedPowerBiKeyCount;
+        warnings.push(
+            `Layer “${layerId}” matched ${matchedKeyCount} of ${diagnostics.powerBiDistinctKeyCount} normalized Power BI keys; ` +
+            `${diagnostics.unmatchedPowerBiKeyCount} Power BI keys and ${diagnostics.unmatchedServiceFeatureCount} service features were unmatched.`
+        );
+    }
+    if (!diagnostics.cardinalityValid) {
+        if (diagnostics.powerBiCardinalityViolationCount)
+            warnings.push(
+                `MAP_JOIN_CARDINALITY_POWERBI_VIOLATION: ${diagnostics.powerBiCardinalityViolationCount} normalized Power BI keys violate ${cardinality} cardinality.`
+            );
+        if (diagnostics.serviceCardinalityViolationCount)
+            warnings.push(
+                `MAP_JOIN_CARDINALITY_SERVICE_VIOLATION: ${diagnostics.serviceCardinalityViolationCount} normalized service keys violate ${cardinality} cardinality.`
+            );
+    }
+    const discardedCount = diagnostics.aggregationDiagnostics.reduce(
+        (sum, item) => sum + item.discardedCount,
+        0,
+    );
+    if (discardedCount > 0)
+        warnings.push(
+            `Map join aggregations discarded ${discardedCount} nonnumeric or non-finite value${discardedCount === 1 ? "" : "s"}.`
+        );
+
+    return { features, diagnostics, warnings, errors: [] };
 }
 
 function mapGeometryType(feature: ParsedArcGisFeature): "point" | "multipoint" | "polyline" | "polygon" | "unknown" {
@@ -237,46 +301,20 @@ interface PowerBiMatch {
 function aggregateJoinedFields(
     matches: PowerBiMatch[],
     aggregations: MapJoinDefinition["aggregations"]
-): Record<string, unknown> {
-    if (!aggregations || aggregations.length === 0) return {};
+): { attributes: Record<string, unknown>; diagnostics: MapJoinAggregationDiagnostic[] } {
+    if (!aggregations || aggregations.length === 0) return { attributes: {}, diagnostics: [] };
 
     const result: Record<string, unknown> = {};
+    const diagnostics: MapJoinAggregationDiagnostic[] = [];
 
     for (const agg of aggregations) {
-        const rawValues = matches
-            .map(m => m.row[agg.field])
-            .filter(v => v !== null && v !== undefined);
-        const values = rawValues.map(v => Number(v)).filter(n => !isNaN(n));
-
-        switch (agg.aggregation) {
-            case "count":
-                result[agg.as] = rawValues.length;
-                break;
-            case "distinctCount":
-                result[agg.as] = new Set(rawValues).size;
-                break;
-            case "sum":
-                result[agg.as] = values.reduce((sum, v) => sum + v, 0);
-                break;
-            case "avg":
-                result[agg.as] = values.length > 0
-                    ? values.reduce((sum, v) => sum + v, 0) / values.length
-                    : 0;
-                break;
-            case "min":
-                result[agg.as] = values.length > 0 ? Math.min(...values) : 0;
-                break;
-            case "max":
-                result[agg.as] = values.length > 0 ? Math.max(...values) : 0;
-                break;
-            case "first":
-                result[agg.as] = rawValues[0];
-                break;
-            case "last":
-                result[agg.as] = rawValues[rawValues.length - 1];
-                break;
-        }
+        const aggregation = aggregateMapJoinValues(
+            agg,
+            matches.map(m => m.row[agg.field]),
+        );
+        result[agg.as] = aggregation.value;
+        diagnostics.push(aggregation.diagnostic);
     }
 
-    return result;
+    return { attributes: result, diagnostics };
 }

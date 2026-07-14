@@ -55,6 +55,7 @@ export interface RenderContextValue {
     webAccessAvailable: boolean;
     providerAccess?:ProviderAccessState;
     ownerByRuntimeId?: Readonly<Record<string, string>>;
+    componentPathById?: Readonly<Record<string, string>>;
     // ── UI Actions ──
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;
