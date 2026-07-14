@@ -25618,7 +25618,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
     "category": "Maps",
     "maturity": "beta",
     "complexity": "recommended",
-    "useWhen": "Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers",
+    "useWhen": "Values-only Power BI fields need independent layer datasets/bindings or practical public ArcGIS REST layers authored in Map Studio",
     "capabilities": {
       "fields": true,
       "calculations": true,
@@ -25666,6 +25666,8 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "view",
         "basemap",
         "layers",
+        "layerGroups",
+        "bookmarks",
         "search",
         "legend",
         "layerPanel",
@@ -25839,6 +25841,16 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
+        "property": "layerGroups",
+        "label": "layer groups",
+        "control": "json"
+      },
+      {
+        "property": "bookmarks",
+        "label": "view bookmarks",
+        "control": "json"
+      },
+      {
         "property": "search",
         "label": "search",
         "control": "checkbox"
@@ -25870,9 +25882,9 @@ export const componentDescriptors:ComponentDescriptor[] = [
       }
     ],
     "documentation": {
-      "summary": "Power BI geometry plus practical public ArcGIS REST feature, tile, and dynamic layers",
+      "summary": "Layer-scoped Power BI logical datasets and public ArcGIS REST feature, tile, and dynamic layers with canonical Map Studio authoring",
       "compatibility": [
-        "Legacy settings/style/popup fully supported. Normalized to layers[] internally."
+        "Legacy one-layer Runtime Config bindings remain supported. New 2.0 maps use explicit layer dataset and source.bindings properties."
       ],
       "relatedTypes": [
         "offcanvas",
@@ -25923,10 +25935,28 @@ export const componentDescriptors:ComponentDescriptor[] = [
       "legend": {
         "defaultOpen": false
       },
+      "layerGroups": [
+        {
+          "id": "operations",
+          "name": "Operations",
+          "visible": true,
+          "order": 0
+        }
+      ],
+      "bookmarks": [
+        {
+          "id": "home_view",
+          "label": "Home view",
+          "center": [29.75, -95.35],
+          "zoom": 10
+        }
+      ],
       "layers": [
         {
           "id": "powerbi_locations",
           "name": "Locations",
+          "dataset": "powerbi",
+          "groupId": "operations",
           "source": {
             "type": "powerbi",
             "bindings": {
@@ -25988,7 +26018,8 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "legend": true,
         "search": true,
         "clearSelection": true,
-        "zoomToSelection": true
+        "zoomToSelection": true,
+        "bookmarks": true
       },
       "settings": {
         "showLayerControl": true,

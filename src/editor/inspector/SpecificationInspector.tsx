@@ -32,7 +32,7 @@ function groupFor(control: InspectorPropertyDescriptor): PropertyGroup {
 
 export function SpecificationInspector({
     json, data, onChange, selectedComponentId = "", onSelect = () => undefined,
-    aliasOverrides = {}, generatedRuntimeId,
+    aliasOverrides = {}, generatedRuntimeId, history: sharedHistory, onOpenMapStudio,
 }: {
     json: string;
     data: NormalizedData;
@@ -41,6 +41,8 @@ export function SpecificationInspector({
     onSelect?: (id: string) => void;
     aliasOverrides?: Record<string, string>;
     generatedRuntimeId?: string;
+    history?: SpecificationHistory;
+    onOpenMapStudio?: () => void;
 }) {
     const parsed = useMemo(() => { try { return JSON.parse(json) as Json; } catch { return undefined; } }, [json]);
     const [search, setSearch] = useState("");
@@ -54,13 +56,14 @@ export function SpecificationInspector({
     const [destination, setDestination] = useState("/components");
     const [newType, setNewType] = useState("text");
     const [revision, setRevision] = useState(0);
-    const history = useRef(new SpecificationHistory(json));
+    const localHistory = useRef(new SpecificationHistory(json));
+    const history = sharedHistory ?? localHistory.current;
     const internal = useRef(json);
     const selectedNode = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (json !== internal.current) {
-            history.current.reset(json);
+            if (history.value !== json) history.reset(json);
             internal.current = json;
             setCandidateErrors([]);
             setRevision(value => value + 1);
@@ -90,7 +93,7 @@ export function SpecificationInspector({
         const next = JSON.stringify(value, null, 2);
         setCandidateErrors([]);
         internal.current = next;
-        history.current.commit(next);
+        history.commit(next);
         setRevision(value => value + 1);
         onChange(next);
         return true;
@@ -157,7 +160,7 @@ export function SpecificationInspector({
 
     return <div class="hp-spec-inspector" data-active-pane={pane} style={{ "--hp-inspector-tree-width": `${treeWidth}px` }}>
         <header class="hp-inspector-toolbar">
-            <div class="hp-inspector-history"><button disabled={!history.current.canUndo} onClick={() => restore(history.current.undo())}>Undo</button><button disabled={!history.current.canRedo} onClick={() => restore(history.current.redo())}>Redo</button></div>
+            <div class="hp-inspector-history"><button disabled={!history.canUndo} onClick={() => restore(history.undo())}>Undo</button><button disabled={!history.canRedo} onClick={() => restore(history.redo())}>Redo</button></div>
             <div class="hp-inspector-selection-summary">
                 <strong title={`${String(item?.type ?? "No selection")} ${selectedComponentId}`}>{item ? `${String(item.type)} · ${selectedComponentId}` : "Select a component"}</strong>
                 <span class={prepared?.schema ? "is-valid" : "is-invalid"}>{prepared?.schema ? "Valid" : "Invalid"}</span>
@@ -187,6 +190,7 @@ export function SpecificationInspector({
                         <div><strong>{String(item.type)}</strong><code title={selectedTree?.path}>{selectedTree?.path}</code></div>
                         <dl><div><dt>ID</dt><dd title={selectedComponentId}>{selectedComponentId}</dd></div><div><dt>Maturity</dt><dd>{descriptor?.maturity ?? "unknown"}</dd></div><div><dt>Dataset</dt><dd>{selectedTree?.datasetName ?? "powerbi"}</dd></div><div><dt>Owner</dt><dd>{generated ? `Generated ${generatedRuntimeId} → ${selectedComponentId}` : "Authoring node"}</dd></div></dl>
                     </header>
+                    {item.type === "map" && onOpenMapStudio && <button class="hp-open-map-studio" onClick={onOpenMapStudio}>Open in Map Studio</button>}
                     <div class="hp-inspector-property-groups">{propertyGroups.map(group => {
                         const controls = controlsByGroup.get(group) ?? [];
                         if (!controls.length) return null;
