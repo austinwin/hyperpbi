@@ -13,4 +13,23 @@ export interface ComponentCapability {
 }
 
 export type InspectorControlType = "text" | "number" | "checkbox" | "enum" | "field" | "dataset" | "component" | "color" | "multiline" | "json";
-export interface InspectorPropertyDescriptor { property: string; label: string; control: InspectorControlType; options?: string[]; }
+export type InspectorPropertyGroup = "Identity" | "Data" | "Layout" | "Appearance" | "Interaction" | "Content" | "Accessibility" | "Advanced";
+export interface InspectorVisibleWhen {
+    property: string;
+    equals?: unknown;
+    notEquals?: unknown;
+    truthy?: boolean;
+    oneOf?: unknown[];
+}
+export interface InspectorPropertyDescriptor {
+    property: string;
+    label: string;
+    control: InspectorControlType;
+    options?: string[];
+    group?: InspectorPropertyGroup;
+    order?: number;
+    advanced?: boolean;
+    help?: string;
+    visibleWhen?: InspectorVisibleWhen;
+    readOnly?: boolean;
+}

@@ -48,11 +48,11 @@ describe("responsive Visual Inspector", () => {
     });
 
     it("declares desktop resizing, container-responsive single-pane behavior, and narrow-height scrolling", () => {
-        const css = readFileSync(resolve(process.cwd(), "src/styles/hyperpbi.css"), "utf8");
+        const css = readFileSync(resolve(process.cwd(), "src/styles/hyperpbi-inspector.css"), "utf8");
         expect(css).toContain("--hp-inspector-tree-width");
-        expect(css).toContain("@container hp-inspector (max-width:680px)");
-        expect(css).toContain(".hp-inspector-body .is-mobile-hidden{display:none}");
-        expect(css).toContain("min-height:0");
-        expect(css).toContain("overflow:auto");
+        expect(css).toContain("@container hp-inspector (max-width: 680px)");
+        expect(css).toContain(".hp-inspector-body .is-mobile-hidden { display: none; }");
+        expect(css).toContain("min-height: 0");
+        expect(css).toContain("overflow: auto");
     });
 });

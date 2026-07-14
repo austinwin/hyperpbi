@@ -3,7 +3,10 @@ import {
   componentDescriptors,
   getComponentDescriptor,
 } from "../../catalog/componentDescriptors";
-import type { InspectorPropertyDescriptor } from "../../catalog/componentTypes";
+import type {
+  InspectorPropertyDescriptor,
+  InspectorPropertyGroup,
+} from "../../catalog/componentTypes";
 import type { NormalizedData } from "../../data/normalizeData";
 import { aggregationFieldRequirement } from "../../fields/aggregationFieldPolicy";
 import { createFieldAliasRegistry } from "../../fields/fieldAliasRegistry";
@@ -25,19 +28,15 @@ import {
   SpecificationHistory,
   updateComponent,
 } from "./specificationEditor";
+import { StudioButton } from "../ui/StudioButton";
+import { StudioCheckbox } from "../ui/StudioCheckbox";
+import { StudioField } from "../ui/StudioField";
+import { StudioSection } from "../ui/StudioSection";
+import { StudioStatusChip } from "../ui/StudioStatusChip";
 
 type Json = Record<string, unknown>;
 type Pane = "tree" | "properties";
-type PropertyGroup =
-  | "Identity"
-  | "Data"
-  | "Layout"
-  | "Appearance"
-  | "Interaction"
-  | "Content"
-  | "Accessibility"
-  | "Advanced";
-const propertyGroups: PropertyGroup[] = [
+const propertyGroups: InspectorPropertyGroup[] = [
   "Identity",
   "Data",
   "Layout",
@@ -50,7 +49,8 @@ const propertyGroups: PropertyGroup[] = [
 const object = (value: unknown): value is Json =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
-function groupFor(control: InspectorPropertyDescriptor): PropertyGroup {
+function groupFor(control: InspectorPropertyDescriptor): InspectorPropertyGroup {
+  if (control.group) return control.group;
   const property = control.property.toLowerCase();
   if (property === "dataset") return "Identity";
   if (
@@ -82,6 +82,88 @@ function groupFor(control: InspectorPropertyDescriptor): PropertyGroup {
     return "Content";
   if (/aria|accessib|tooltip|role/.test(property)) return "Accessibility";
   return "Advanced";
+}
+
+function isControlVisible(
+  control: InspectorPropertyDescriptor,
+  item: Json | undefined,
+): boolean {
+  if (!control.visibleWhen) return true;
+  const value = item?.[control.visibleWhen.property];
+  if ("equals" in control.visibleWhen && value !== control.visibleWhen.equals) return false;
+  if ("notEquals" in control.visibleWhen && value === control.visibleWhen.notEquals) return false;
+  if (control.visibleWhen.oneOf && !control.visibleWhen.oneOf.includes(value)) return false;
+  if (control.visibleWhen.truthy !== undefined && Boolean(value) !== control.visibleWhen.truthy) return false;
+  return true;
+}
+
+function DraftInspectorControl({
+  control,
+  value,
+  onCommit,
+}: {
+  control: InspectorPropertyDescriptor;
+  value: unknown;
+  onCommit: (value: unknown) => void;
+}) {
+  const committed =
+    typeof value === "string" || typeof value === "number" ? String(value) : "";
+  const [draft, setDraft] = useState(committed);
+  useEffect(() => setDraft(committed), [committed, control.property]);
+  const reset = () => setDraft(committed);
+  const commit = () => {
+    if (draft === committed) return;
+    onCommit(
+      control.control === "number"
+        ? draft === ""
+          ? undefined
+          : Number(draft)
+        : draft || undefined,
+    );
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      reset();
+    } else if (event.key === "Enter" && control.control !== "multiline") {
+      event.preventDefault();
+      commit();
+      (event.currentTarget as HTMLInputElement).blur();
+    }
+  };
+  return (
+    <StudioField label={control.label} help={control.help}>
+      {control.control === "multiline" ? (
+        <>
+          <textarea
+            value={draft}
+            readOnly={control.readOnly}
+            onInput={(event) => setDraft(event.currentTarget.value)}
+            onKeyDown={onKeyDown}
+          />
+          <StudioButton
+            variant="compact"
+            disabled={control.readOnly || draft === committed}
+            onClick={commit}
+          >
+            Apply
+          </StudioButton>
+        </>
+      ) : (
+        <input
+          type={control.control === "number" ? "number" : "text"}
+          min={control.property === "span" ? 1 : undefined}
+          max={control.property === "span" ? 12 : undefined}
+          value={draft}
+          readOnly={control.readOnly}
+          placeholder={control.control === "color" ? "#2563eb or var(--hp-primary)" : undefined}
+          onInput={(event) => setDraft(event.currentTarget.value)}
+          onBlur={commit}
+          onKeyDown={onKeyDown}
+        />
+      )}
+    </StudioField>
+  );
 }
 
 export function SpecificationInspector({
@@ -126,6 +208,9 @@ export function SpecificationInspector({
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
   const [destination, setDestination] = useState("/components");
   const [newType, setNewType] = useState("text");
+  const [openGroups, setOpenGroups] = useState<Set<InspectorPropertyGroup>>(
+    () => new Set(["Identity", "Data"]),
+  );
   const [revision, setRevision] = useState(0);
   const localHistory = useRef(new SpecificationHistory(json));
   const history = sharedHistory ?? localHistory.current;
@@ -187,6 +272,15 @@ export function SpecificationInspector({
   useEffect(() => {
     if (!containers.includes(destination)) setDestination(containers[0] ?? "");
   }, [json, selectedComponentId]);
+  useEffect(() => {
+    const relevant = descriptor?.inspector.filter(
+      (control) => control.control !== "json" && isControlVisible(control, item),
+    ) ?? [];
+    const firstContentGroup = (["Content", "Layout"] as InspectorPropertyGroup[]).find(
+      (group) => relevant.some((control) => groupFor(control) === group),
+    );
+    setOpenGroups(new Set(["Identity", "Data", ...(firstContentGroup ? [firstContentGroup] : [])]));
+  }, [selectedComponentId, descriptor?.type]);
 
   if (!parsed)
     return (
@@ -246,9 +340,13 @@ export function SpecificationInspector({
     );
   });
   const complex =
-    descriptor?.inspector.filter((control) => control.control === "json") ?? [];
+    descriptor?.inspector.filter(
+      (control) => control.control === "json" && isControlVisible(control, item),
+    ) ?? [];
   const simple =
-    descriptor?.inspector.filter((control) => control.control !== "json") ?? [];
+    descriptor?.inspector
+      .filter((control) => control.control !== "json" && isControlVisible(control, item))
+      .sort((left, right) => (left.order ?? 1000) - (right.order ?? 1000)) ?? [];
   const controlsByGroup = new Map(
     propertyGroups.map((group) => [
       group,
@@ -258,9 +356,6 @@ export function SpecificationInspector({
   const canInsert = Boolean(location && Array.isArray(location.parent));
   const position = canInsert ? (location!.index as number) : -1;
   const siblingCount = canInsert ? (location!.parent as unknown[]).length : 0;
-  const generated = Boolean(
-    generatedRuntimeId && generatedRuntimeId !== selectedComponentId,
-  );
 
   const fieldOptionsFor = (control: InspectorPropertyDescriptor) => {
     const descriptorField = descriptor?.fields.find(
@@ -295,36 +390,21 @@ export function SpecificationInspector({
     const value = item?.[control.property];
     if (control.control === "checkbox")
       return (
-        <label>
-          <span>{control.label}</span>
-          <input
-            type="checkbox"
-            checked={value === true}
-            onChange={(event) =>
-              change(control.property, event.currentTarget.checked)
-            }
-          />
-        </label>
+        <StudioCheckbox
+          label={control.label}
+          help={control.help}
+          checked={value === true}
+          disabled={control.readOnly}
+          onChange={(checked) => change(control.property, checked)}
+        />
       );
-    if (control.control === "number")
+    if (["number", "text", "color", "multiline"].includes(control.control))
       return (
-        <label>
-          <span>{control.label}</span>
-          <input
-            type="number"
-            min={control.property === "span" ? 1 : undefined}
-            max={control.property === "span" ? 12 : undefined}
-            value={typeof value === "number" ? value : ""}
-            onChange={(event) =>
-              change(
-                control.property,
-                event.currentTarget.value === ""
-                  ? undefined
-                  : Number(event.currentTarget.value),
-              )
-            }
-          />
-        </label>
+        <DraftInspectorControl
+          control={control}
+          value={value}
+          onCommit={(next) => change(control.property, next)}
+        />
       );
     if (control.control === "field")
       return (
@@ -332,6 +412,7 @@ export function SpecificationInspector({
           <span>{control.label}</span>
           <select
             value={typeof value === "string" ? value : ""}
+            disabled={control.readOnly}
             onChange={(event) =>
               change(control.property, event.currentTarget.value || undefined)
             }
@@ -351,6 +432,7 @@ export function SpecificationInspector({
           <span>{control.label}</span>
           <select
             value={typeof value === "string" ? value : "powerbi"}
+            disabled={control.readOnly}
             onChange={(event) =>
               change(
                 control.property,
@@ -372,6 +454,7 @@ export function SpecificationInspector({
           <span>{control.label}</span>
           <select
             value={typeof value === "string" ? value : ""}
+            disabled={control.readOnly}
             onChange={(event) =>
               change(control.property, event.currentTarget.value || undefined)
             }
@@ -393,6 +476,7 @@ export function SpecificationInspector({
           <span>{control.label}</span>
           <select
             value={typeof value === "string" ? value : ""}
+            disabled={control.readOnly}
             onChange={(event) =>
               change(control.property, event.currentTarget.value || undefined)
             }
@@ -404,42 +488,7 @@ export function SpecificationInspector({
           </select>
         </label>
       );
-    if (control.control === "color")
-      return (
-        <label>
-          <span>{control.label}</span>
-          <input
-            value={typeof value === "string" ? value : ""}
-            placeholder="#2563eb or var(--hp-primary)"
-            onChange={(event) =>
-              change(control.property, event.currentTarget.value || undefined)
-            }
-          />
-        </label>
-      );
-    if (control.control === "multiline")
-      return (
-        <label>
-          <span>{control.label}</span>
-          <textarea
-            value={typeof value === "string" ? value : ""}
-            onChange={(event) =>
-              change(control.property, event.currentTarget.value || undefined)
-            }
-          />
-        </label>
-      );
-    return (
-      <label>
-        <span>{control.label}</span>
-        <input
-          value={typeof value === "string" ? value : ""}
-          onChange={(event) =>
-            change(control.property, event.currentTarget.value || undefined)
-          }
-        />
-      </label>
-    );
+    return null;
   };
 
   const add = (mode: "before" | "after" | "container") => {
@@ -476,24 +525,26 @@ export function SpecificationInspector({
 
   return (
     <div
-      class="hp-spec-inspector"
+      class="hp-studio hp-spec-inspector"
       data-active-pane={pane}
       style={{ "--hp-inspector-tree-width": `${treeWidth}px` }}
     >
       <header class="hp-inspector-toolbar">
         <div class="hp-inspector-history">
-          <button
+          <StudioButton
+            variant="compact"
             disabled={!history.canUndo}
             onClick={() => restore(history.undo())}
           >
             Undo
-          </button>
-          <button
+          </StudioButton>
+          <StudioButton
+            variant="compact"
             disabled={!history.canRedo}
             onClick={() => restore(history.redo())}
           >
             Redo
-          </button>
+          </StudioButton>
         </div>
         <div class="hp-inspector-selection-summary">
           <strong
@@ -503,9 +554,9 @@ export function SpecificationInspector({
               ? `${String(item.type)} · ${selectedComponentId}`
               : "Select a component"}
           </strong>
-          <span class={prepared?.schema ? "is-valid" : "is-invalid"}>
+          <StudioStatusChip tone={prepared?.schema ? "valid" : "invalid"} announce>
             {prepared?.schema ? "Valid" : "Invalid"}
-          </span>
+          </StudioStatusChip>
         </div>
         <label class="hp-inspector-width-control">
           Hierarchy width{" "}
@@ -655,14 +706,6 @@ export function SpecificationInspector({
                     <dt>Dataset</dt>
                     <dd>{selectedTree?.datasetName ?? "powerbi"}</dd>
                   </div>
-                  <div>
-                    <dt>Owner</dt>
-                    <dd>
-                      {generated
-                        ? `Generated ${generatedRuntimeId} → ${selectedComponentId}`
-                        : "Authoring node"}
-                    </dd>
-                  </div>
                 </dl>
               </header>
               {item.type === "map" && onOpenMapStudio && (
@@ -675,18 +718,24 @@ export function SpecificationInspector({
                   const controls = controlsByGroup.get(group) ?? [];
                   if (!controls.length) return null;
                   return (
-                    <fieldset>
-                      <legend>{group}</legend>
+                    <StudioSection
+                      title={group}
+                      open={openGroups.has(group)}
+                      onToggle={(open) => setOpenGroups((current) => {
+                        const next = new Set(current);
+                        if (open) next.add(group); else next.delete(group);
+                        return next;
+                      })}
+                    >
                       <div class="hp-inspector-control-grid">
                         {controls.map(renderControl)}
                       </div>
-                    </fieldset>
+                    </StudioSection>
                   );
                 })}
               </div>
               {complex.length > 0 && (
-                <fieldset class="hp-inspector-fragment">
-                  <legend>Structured JSON</legend>
+                <StudioSection title="Structured JSON" className="hp-inspector-fragment">
                   <label>
                     <span>Complex property</span>
                     <select
@@ -720,7 +769,8 @@ export function SpecificationInspector({
                         }
                       />
                       {fragmentError && <p role="alert">{fragmentError}</p>}
-                      <button
+                      <StudioButton
+                        variant="secondary"
                         onClick={() => {
                           try {
                             const value = JSON.parse(fragment);
@@ -736,13 +786,12 @@ export function SpecificationInspector({
                         }}
                       >
                         Apply validated fragment
-                      </button>
+                      </StudioButton>
                     </>
                   )}
-                </fieldset>
+                </StudioSection>
               )}
-              <fieldset class="hp-inspector-mutations">
-                <legend>Add, insert, or move</legend>
+              <StudioSection title="Add, insert, or move" className="hp-inspector-mutations">
                 <div class="hp-inspector-control-grid">
                   <label>
                     <span>Component type</span>
@@ -828,34 +877,37 @@ export function SpecificationInspector({
                     Move to compatible container
                   </button>
                 </div>
-              </fieldset>
+              </StudioSection>
               <div class="hp-inspector-node-actions">
-                <button
+                <StudioButton
+                  variant="secondary"
                   disabled={!canInsert || position <= 0}
                   onClick={() =>
                     commit(moveComponent(parsed, selectedComponentId, -1))
                   }
                 >
                   Move up
-                </button>
-                <button
+                </StudioButton>
+                <StudioButton
+                  variant="secondary"
                   disabled={!canInsert || position >= siblingCount - 1}
                   onClick={() =>
                     commit(moveComponent(parsed, selectedComponentId, 1))
                   }
                 >
                   Move down
-                </button>
-                <button
+                </StudioButton>
+                <StudioButton
+                  variant="secondary"
                   disabled={!canInsert}
                   onClick={() =>
                     commit(duplicateComponent(parsed, selectedComponentId))
                   }
                 >
                   Duplicate
-                </button>
-                <button
-                  class="hp-danger-action"
+                </StudioButton>
+                <StudioButton
+                  variant="danger"
                   onClick={() => {
                     const references = incomingComponentReferences(
                       parsed,
@@ -873,7 +925,7 @@ export function SpecificationInspector({
                   }}
                 >
                   Delete
-                </button>
+                </StudioButton>
               </div>
             </>
           ) : (

@@ -28163,11 +28163,31 @@ const stableMaturityTests:Record<string,string[]> = {
   text:["tests/custom-components.test.ts"],markdown:["tests/custom-components.test.ts"],svg:["tests/svg-components.test.ts","tests/svg-renderer.test.tsx"]
 };
 const emptyStateNotApplicable=new Set(["grid","flex","section","toolbar","searchBox","select","multiSelect","button","tabs","collapsible","card","icon","iconButton","emptyState","placeholder","spinner","text","markdown"]);
+// Stable Inspector controls carry explicit authoring metadata. The property sets
+// are intentionally declarative; the Inspector's name-based grouping remains a
+// compatibility fallback only for legacy and third-party descriptors.
+const stableInspectorGroups:Record<string,InspectorPropertyDescriptor["group"]> = {};
+const assignInspectorGroup=(group:NonNullable<InspectorPropertyDescriptor["group"]>, properties:string[])=>
+  properties.forEach(property=>{stableInspectorGroups[property]=group;});
+assignInspectorGroup("Identity",["dataset","dataContext","source","stateKey"]);
+assignInspectorGroup("Data",["field","measure","aggregation","filter","sort","sortDirection","category","categoryField","valueField","primaryField","secondaryField","sourceField","targetField","labelField","titleField","descriptionField","statusField","badgeField","dateField","groupField","splitField","stageField","pathFields","metrics","series","values","indicators","limit","maxDataRows","maxRows","pageSize","pageSizeOptions","pagination","showTotals","showRowCount"]);
+assignInspectorGroup("Layout",["span","width","height","gap","padding","position","placement","direction","orientation","columns","rows","inline","compact","maxPanels","maxDepth","maxItems","resizableColumns","stickyHeader","preserveAspectRatio","view","viewBox","x","y"]);
+assignInspectorGroup("Appearance",["className","style","css","color","theme","variant","intent","negativeIntent","positiveIntent","totalIntent","icon","prefixIcon","suffixIcon","density","format","heatmap","striped","shape","pointSize","motion","hover","backdrop"]);
+assignInspectorGroup("Interaction",["disabled","clickable","action","actions","actionValue","primaryAction","secondaryAction","interaction","interactions","uiAction","trigger","targets","rowActions","selectedRow","multiple","required","search","collapsible","defaultCollapsed","defaultOpen","defaultOpenItems","openWhen","closeOnEscape","closeOnOutsideClick","closeOnSelect","backdropClose","showArrow","showStart","showEnd"]);
+assignInspectorGroup("Content",["title","subtitle","description","text","html","svg","label","placeholder","helpText","emptyText","errorText","prefix","suffix","prefixText","suffixText","footer","header","toolbar","tooltip","items","items.children","children","slots","tabs","tabs.children","tabs.components","tabs.content","buttons","avatars","initials","lines","stages","groups","elements","layers","layerGroups","bookmarks","legend","options","value","defaultValue","activeStage","activeStep","step","emptyState","placeholderVariant"]);
+assignInspectorGroup("Accessibility",["ariaLabel","role"]);
+const inspectorHelp:Record<string,string>={dataset:"Logical dataset used by this component.",ariaLabel:"Accessible name announced by assistive technology.",hidden:"Hide the component without deleting its configuration.",disabled:"Prevent user interaction while retaining the component."};
 for (const descriptor of componentDescriptors) {
   for (const field of descriptorFieldExtensions[descriptor.type] ?? []) {
     if (!descriptor.fields.some(existing => existing.property === field.property && existing.handler === field.handler)) descriptor.fields.push(field);
   }
   const focusedTests=stableMaturityTests[descriptor.type];
+  if(descriptor.maturity==="stable") descriptor.inspector.forEach((control,index)=>{
+    control.group=control.group??stableInspectorGroups[control.property]??"Advanced";
+    control.order=control.order??index*10;
+    control.help=control.help??inspectorHelp[control.property];
+    control.advanced=control.advanced??control.group==="Advanced";
+  });
   if (descriptor.maturity==="stable"&&focusedTests) descriptor.maturityEvidence={
     renderer:true,schema:true,fieldTraversal:true,canonicalExample:true,inspector:true,
     emptyState:emptyStateNotApplicable.has(descriptor.type)?"not-applicable":true,
