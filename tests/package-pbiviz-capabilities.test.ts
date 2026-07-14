@@ -21,11 +21,13 @@ describe("packaged PBIVIZ capabilities", () => {
     it("opens the real Core PBIVIZ ZIP and reads its packaged capabilities payload", async () => {
         const capabilities = await readPackagedCapabilities(await archive("-core.pbiviz"));
         expect(capabilities).toHaveProperty("dataRoles");
+        expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
         expect(webAccessParameters(capabilities)).toBeNull();
     });
 
     it("opens the real Maps PBIVIZ ZIP and reads configured WebAccess from the archive", async () => {
         const capabilities = await readPackagedCapabilities(await archive("-maps.pbiviz"));
+        expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
         expect(webAccessParameters(capabilities)).toEqual(["https://*"]);
     });
 });
