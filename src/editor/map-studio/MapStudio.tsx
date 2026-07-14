@@ -18,7 +18,6 @@ import type { PreparedAuthoringData } from "../prepareAuthoringData";
 import type { MapViewportState } from "../../components/maps/MapBlock";
 import type { ProviderAccessState } from "../../providers/providerTypes";
 import { prepareAuthoringData } from "../prepareAuthoringData";
-import { defaultConfig } from "../../config/hyperpbiConfig";
 import type {
   ArcGisLayerMetadata,
   ArcGisServiceInspection,
@@ -30,6 +29,10 @@ import {
 } from "../../maps/join/mapJoinPreview";
 import type { MapAttributeSource } from "../../maps/attributes/mapFeatureAttributes";
 import { parseArcGisUrl } from "../../maps/arcgis/arcGisUrl";
+import { appendJsonPointer } from "../../schema/jsonPointer";
+import { MapDiagnosticsPanel } from "./MapDiagnosticsPanel";
+import { DraftInput } from "./MapDraftInput";
+import { FieldSelect } from "./MapFieldSelect";
 
 type Json = Record<string, unknown>;
 type PropertyTab =
@@ -70,6 +73,8 @@ export interface MapStudioProps {
   liveViewport?: MapViewportState;
   webAccessAvailable?: boolean;
   providerAccess?: ProviderAccessState;
+  configurationJson?: string;
+  validateCandidate?: (candidateSpecificationJson: string) => PreparedAuthoringData;
 }
 
 export function MapStudio({
@@ -84,6 +89,8 @@ export function MapStudio({
   liveViewport,
   webAccessAvailable = false,
   providerAccess,
+  configurationJson,
+  validateCandidate,
 }: MapStudioProps) {
   const parsed = useMemo(() => {
     try {
@@ -103,12 +110,14 @@ export function MapStudio({
     parsed && mapId
       ? (findComponent(parsed, mapId) as unknown as MapComponent | undefined)
       : undefined;
+  const selectedMapPath = maps.find((item) => item.id === mapId)?.path ?? "";
   const [selectedLayerId, setSelectedLayerId] = useState("");
   const [propertyTab, setPropertyTab] = useState<PropertyTab>("source");
   const [mobilePane, setMobilePane] = useState<"layers" | "properties">(
     "layers",
   );
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
+  const [candidateWarnings, setCandidateWarnings] = useState<string[]>([]);
   const [pendingDelete, setPendingDelete] = useState("");
   const [dragging, setDragging] = useState("");
   const [metadata, setMetadata] = useState<{
@@ -159,22 +168,30 @@ export function MapStudio({
         : {},
     [parsed],
   );
-  const fallbackConfiguration = useMemo(
-    () =>
-      JSON.stringify({
-        ...defaultConfig,
-        fields: { ...defaultConfig.fields, aliases: aliasOverrides },
-      }),
-    [aliasOverrides],
-  );
   const fallbackPrepared = useMemo(
-    () => prepareAuthoringData(json, fallbackConfiguration, data),
-    [json, fallbackConfiguration, data],
+    () =>
+      configurationJson
+        ? prepareAuthoringData(json, configurationJson, data)
+        : ({
+            aliases: aliasOverrides,
+            diagnostics: [],
+            errors: [
+              "Map Studio requires configurationJson or validateCandidate for standalone use.",
+            ],
+            warnings: [],
+          } satisfies PreparedAuthoringData),
+    [json, configurationJson, data, aliasOverrides],
   );
   const prepared = sharedPrepared ?? fallbackPrepared;
   const layer = map?.layers?.find(
     (candidate) => candidate.id === selectedLayerId,
   );
+  const selectedLayerIndex = map?.layers?.findIndex(
+    (candidate) => candidate.id === selectedLayerId,
+  ) ?? -1;
+  const selectedLayerPath = selectedLayerIndex >= 0
+    ? appendJsonPointer(selectedMapPath, "layers", selectedLayerIndex)
+    : "";
   const layerUrl =
     layer && layer.source.type !== "powerbi" ? layer.source.url : undefined;
   const selectedMetadataKey = layerUrl
@@ -186,15 +203,30 @@ export function MapStudio({
       )
     : undefined;
   useEffect(() => {
-    metadataRequest.current.controller?.abort();
     const cached = selectedMetadataKey
       ? metadataCache.current.get(selectedMetadataKey)
       : undefined;
-    setMetadata(
-      cached
-        ? { sourceUrl: layerUrl, result: cached, errors: cached.errors }
-        : {},
-    );
+    if (
+      metadata.loading &&
+      metadata.sourceUrl &&
+      selectedMetadataKey === arcGisMetadataKey(metadata.sourceUrl)
+    )
+      return;
+    if (cached) {
+      metadataRequest.current.controller?.abort();
+      setMetadata({ sourceUrl: layerUrl, result: cached, errors: cached.errors });
+      return;
+    }
+    const currentRoot = metadata.result?.url
+      ? parseArcGisUrl(metadata.result.url).serviceRootUrl ??
+        parseArcGisUrl(metadata.result.url).normalizedUrl
+      : undefined;
+    const requestedRoot = layerUrl
+      ? parseArcGisUrl(layerUrl).serviceRootUrl ?? parseArcGisUrl(layerUrl).normalizedUrl
+      : undefined;
+    if (metadata.result && currentRoot === requestedRoot) return;
+    metadataRequest.current.controller?.abort();
+    setMetadata({});
   }, [selectedMetadataKey]);
   useEffect(
     () => () => {
@@ -238,18 +270,27 @@ export function MapStudio({
   };
 
   const commit = (candidate: Json): boolean => {
-    const validation = prepareAuthoringData(
-      JSON.stringify(candidate),
-      fallbackConfiguration,
-      data,
-    );
+    const next = JSON.stringify(candidate, null, 2);
+    const validation = validateCandidate
+      ? validateCandidate(next)
+      : configurationJson
+        ? prepareAuthoringData(next, configurationJson, data)
+        : ({
+            aliases: aliasOverrides,
+            diagnostics: [],
+            errors: [
+              "Map Studio requires configurationJson or validateCandidate before it can commit edits.",
+            ],
+            warnings: [],
+          } satisfies PreparedAuthoringData);
     if (!validation.specification) {
       setCandidateErrors(validation.errors);
+      setCandidateWarnings(validation.warnings);
       return false;
     }
-    const next = JSON.stringify(candidate, null, 2);
     history.commit(next);
     setCandidateErrors([]);
+    setCandidateWarnings(validation.warnings);
     setRevision((value) => value + 1);
     onChange(next);
     return true;
@@ -273,6 +314,7 @@ export function MapStudio({
     });
   const restore = (next: string) => {
     setCandidateErrors([]);
+    setCandidateWarnings([]);
     setRevision((value) => value + 1);
     onChange(next);
   };
@@ -401,9 +443,19 @@ export function MapStudio({
     setSelectedLayerId("");
     setPendingDelete("");
   };
-  const inspectService = async (targetUrl?: string) => {
+  const inspectService = async (
+    targetUrl?: string,
+    eagerMetadata?: ArcGisLayerMetadata,
+  ) => {
     if (!layer || layer.source.type === "powerbi") return;
     const url = targetUrl ?? layer.source.url;
+    if (eagerMetadata)
+      setMetadata((previous) => ({
+        ...previous,
+        result: previous.result
+          ? { ...previous.result, selectedLayer: eagerMetadata }
+          : previous.result,
+      }));
     if (!url) {
       setMetadata({ errors: ["Enter a public ArcGIS REST URL first."] });
       return;
@@ -441,22 +493,26 @@ export function MapStudio({
         controller.signal.aborted
       )
         return;
+      const parsedTarget = parseArcGisUrl(url);
+      const rootResult =
+        metadata.result && !metadata.result.isLayer ? metadata.result : undefined;
+      const combined = result.isLayer && rootResult
+        ? {
+            ...rootResult,
+            selectedLayer: result.selectedLayer,
+            querySupported: result.querySupported,
+            warnings: [...rootResult.warnings, ...result.warnings],
+            errors: result.errors,
+          }
+        : result;
       metadataCache.current.set(
         arcGisMetadataKey(
-          url,
-          layer.source.type === "arcgisFeature"
-            ? layer.source.layerId
-            : undefined,
+          parsedTarget.serviceRootUrl ?? url,
+          parsedTarget.isLayer ? parsedTarget.layerId : undefined,
         ),
-        result,
+        combined,
       );
-      const rootUrl = parseArcGisUrl(url).serviceRootUrl ?? url;
-      for (const inspectedLayer of result.layers)
-        metadataCache.current.set(
-          arcGisMetadataKey(rootUrl, inspectedLayer.id),
-          result,
-        );
-      setMetadata({ sourceUrl: url, result, errors: result.errors });
+      setMetadata({ sourceUrl: url, result: combined, errors: combined.errors });
     } catch (error) {
       if (
         version !== metadataRequest.current.version ||
@@ -602,6 +658,16 @@ export function MapStudio({
           <ul>
             {candidateErrors.slice(0, 12).map((error) => (
               <li>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {candidateErrors.length === 0 && candidateWarnings.length > 0 && (
+        <div class="hp-map-studio-warnings" role="status">
+          <strong>Candidate validation warnings</strong>
+          <ul>
+            {candidateWarnings.slice(0, 12).map((warning) => (
+              <li>{warning}</li>
             ))}
           </ul>
         </div>
@@ -791,12 +857,14 @@ export function MapStudio({
                   <PerformanceEditor layer={layer} mutate={mutateLayer} />
                 )}
                 {propertyTab === "diagnostics" && (
-                  <DiagnosticsPanel
+                  <MapDiagnosticsPanel
                     layer={layer}
                     dataset={effectiveDataset}
                     rows={rows}
                     fields={fields}
                     prepared={prepared}
+                    selectedMapPath={selectedMapPath}
+                    selectedLayerPath={selectedLayerPath}
                   />
                 )}
               </section>
@@ -987,7 +1055,7 @@ function SourceEditor({
   rowCount: number;
   groups: NonNullable<MapComponent["layerGroups"]>;
   mutate: (fn: (layer: MapLayerDefinition) => void) => boolean;
-  inspect: () => void;
+  inspect: (targetUrl?: string, eagerMetadata?: ArcGisLayerMetadata) => void;
   metadata: {
     loading?: boolean;
     result?: ArcGisServiceInspection;
@@ -1155,7 +1223,7 @@ function SourceEditor({
               })
             }
           />
-          <button onClick={inspect} disabled={metadata.loading}>
+          <button onClick={() => inspect()} disabled={metadata.loading}>
             {metadata.loading ? "Inspecting…" : "Fetch service metadata"}
           </button>
           {metadata.result && (
@@ -1179,22 +1247,55 @@ function SourceEditor({
                   <select
                     aria-label="Service sublayer"
                     value={layer.source.layerId ?? ""}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const selectedId = Number(event.currentTarget.value);
+                      const item = metadata.result?.layers.find(
+                        (candidate) => candidate.id === selectedId,
+                      );
+                      if (!item || (item.kind !== undefined && item.kind !== "spatialLayer")) return;
                       mutate((candidate) => {
                         if (candidate.source.type === "arcgisFeature")
-                          candidate.source.layerId = Number(
-                            event.currentTarget.value,
-                          );
-                      })
-                    }
+                          candidate.source.layerId = selectedId;
+                      });
+                      inspect(
+                        `${metadata.result!.url.replace(/\/$/, "")}/${selectedId}`,
+                        item.metadata,
+                      );
+                    }}
                   >
                     <option value="">Choose a layer</option>
-                    {metadata.result.layers.map((item) => (
-                      <option value={item.id}>
-                        {item.name} · {item.geometryType ?? "unknown"}
-                      </option>
-                    ))}
+                    <optgroup label="Map layers">
+                      {metadata.result.layers
+                        .filter((item) => item.kind === "spatialLayer" || item.kind === undefined)
+                        .map((item) => (
+                          <option value={item.id}>
+                            {item.name} · spatial layer
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="Groups (navigation only)">
+                      {metadata.result.layers
+                        .filter((item) => item.kind === "groupLayer")
+                        .map((item) => (
+                          <option value={item.id} disabled>
+                            {item.name} · group layer
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="Join-only tables">
+                      {metadata.result.layers
+                        .filter((item) => item.kind === "table")
+                        .map((item) => (
+                          <option value={item.id} disabled>
+                            {item.name} · nonspatial table
+                          </option>
+                        ))}
+                    </optgroup>
                   </select>
+                  <small>
+                    Spatial layers can render. Group layers are navigation only;
+                    nonspatial tables are not renderable geometry sources.
+                  </small>
                 </label>
               )}
               <label>
@@ -2734,13 +2835,26 @@ function JoinEditor({
               </p>
             )}
             <small>
-              Policies: Power BI {preview.result.powerBiDuplicatePolicy};
+              Cardinality: {preview.result.cardinality} ({preview.result.cardinalityValid ? "valid" : "violated"}). Policies: Power BI {preview.result.powerBiDuplicatePolicy};
               service {preview.result.serviceDuplicatePolicy}; unmatched{" "}
               {preview.result.unmatchedPolicy}. Aggregations:{" "}
               {preview.result.aggregationAliases.join(", ") || "none"}.
               Requests: {preview.result.requestCount}. Duration:{" "}
               {preview.result.durationMs.toFixed(1)} ms.
             </small>
+            {preview.result.warnings.length > 0 && (
+              <ul>
+                {preview.result.warnings.map((warning) => <li>{warning}</li>)}
+              </ul>
+            )}
+            {preview.result.aggregationDiagnostics.some(
+              (item) => item.blankCount > 0 || item.discardedCount > 0,
+            ) && (
+              <details>
+                <summary>Aggregation input diagnostics</summary>
+                <pre>{JSON.stringify(preview.result.aggregationDiagnostics, null, 2)}</pre>
+              </details>
+            )}
             <details>
               <summary>Bounded normalization samples</summary>
               <pre>
@@ -3015,7 +3129,11 @@ function InteractionEditor({
     defaultFieldSource(layer)) as MapAttributeSource;
   const set = (patch: Json) =>
     mutate((candidate) => {
-      candidate.interaction = { ...(candidate.interaction ?? {}), ...patch };
+      candidate.interaction = {
+        ...(candidate.interaction ?? {}),
+        trigger: "click",
+        ...patch,
+      };
     });
   const referenceOnly =
     layer.source.type !== "powerbi" &&
@@ -3050,14 +3168,8 @@ function InteractionEditor({
       </label>
       <label>
         <span>Trigger</span>
-        <select
-          value={interaction.trigger ?? "click"}
-          onChange={(event) => set({ trigger: event.currentTarget.value })}
-        >
-          <option value="click">click</option>
-          <option value="change">change</option>
-          <option value="auto">auto</option>
-        </select>
+        <input value="click" readOnly aria-label="Map interaction trigger" />
+        <small>Map features currently run interactions on click only.</small>
       </label>
       <label>
         <span>Internal mode</span>
@@ -3242,71 +3354,6 @@ function PerformanceEditor({
           {label}
         </label>
       ))}
-    </div>
-  );
-}
-
-function DiagnosticsPanel({
-  layer,
-  dataset,
-  rows,
-  fields,
-  prepared,
-}: {
-  layer: MapLayerDefinition;
-  dataset: string;
-  rows: Json[];
-  fields: NormalizedField[];
-  prepared: PreparedAuthoringData;
-}) {
-  const issues =
-    prepared?.diagnostics.filter(
-      (item) =>
-        item.path.includes(`/layers/`) &&
-        (item.componentId === undefined || item.componentId),
-    ) ?? [];
-  return (
-    <div class="hp-map-studio-diagnostics">
-      <dl>
-        <div>
-          <dt>Effective dataset</dt>
-          <dd>{dataset}</dd>
-        </div>
-        <div>
-          <dt>Source</dt>
-          <dd>{layer.source.type}</dd>
-        </div>
-        <div>
-          <dt>Dataset rows</dt>
-          <dd>{rows.length}</dd>
-        </div>
-        <div>
-          <dt>Fields</dt>
-          <dd>{fields.length}</dd>
-        </div>
-        <div>
-          <dt>Location mode</dt>
-          <dd>
-            {layer.source.type === "powerbi"
-              ? locationMode(layer)
-              : "service geometry"}
-          </dd>
-        </div>
-      </dl>
-      {issues.length ? (
-        <ul>
-          {issues.slice(0, 25).map((item) => (
-            <li>
-              <code>{item.code}</code> {item.path}: {item.message}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>
-          No static map diagnostics. Runtime request, geometry, join, feature,
-          and timing diagnostics appear in the live layer panel.
-        </p>
-      )}
     </div>
   );
 }
@@ -3587,66 +3634,6 @@ function BasemapViewEditor({
   );
 }
 
-function DraftInput({
-  label,
-  ariaLabel,
-  value,
-  onCommit,
-  multiline = false,
-}: {
-  label?: string;
-  ariaLabel?: string;
-  value: string;
-  onCommit: (value: string) => boolean | void;
-  multiline?: boolean;
-}) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  const commit = (next = draft) => {
-    if (next !== value) onCommit(next);
-  };
-  const common = {
-    value: draft,
-    "aria-label": ariaLabel ?? label,
-    onInput: (event: Event) =>
-      setDraft(
-        (event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value,
-      ),
-    onChange: (event: Event) => {
-      const next = (
-        event.currentTarget as HTMLInputElement | HTMLTextAreaElement
-      ).value;
-      setDraft(next);
-      commit(next);
-    },
-    onBlur: (event: FocusEvent) =>
-      commit(
-        (event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value,
-      ),
-    onKeyDown: (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        (event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value =
-          value;
-        setDraft(value);
-      }
-      if (!multiline && event.key === "Enter") {
-        event.preventDefault();
-        commit((event.currentTarget as HTMLInputElement).value);
-      }
-    },
-  };
-  const control = multiline ? <textarea {...common} /> : <input {...common} />;
-  return label ? (
-    <label>
-      <span>{label}</span>
-      {control}
-    </label>
-  ) : (
-    control
-  );
-}
-
 function defaultFieldSource(layer: MapLayerDefinition): MapAttributeSource {
   return layer.source.type === "powerbi"
     ? "powerbi"
@@ -3657,7 +3644,7 @@ function defaultFieldSource(layer: MapLayerDefinition): MapAttributeSource {
 
 function arcGisMetadataKey(url: string, layerId?: number): string {
   const parsed = parseArcGisUrl(url);
-  const normalized = parsed.normalizedUrl || url.trim();
+  const normalized = parsed.serviceRootUrl ?? parsed.normalizedUrl ?? url.trim();
   return `${normalized}::${layerId ?? parsed.layerId ?? "root"}`;
 }
 
@@ -3687,6 +3674,10 @@ function previewMetrics(
     ["Unique service keys", result.serviceDistinctKeyCount],
     ["Blank service keys", result.blankServiceKeyCount],
     ["Duplicate service keys", result.duplicateServiceKeyCount],
+    ["Cardinality", result.cardinality],
+    ["Cardinality satisfied", result.cardinalityValid ? "yes" : "no"],
+    ["Power BI cardinality violations", result.powerBiCardinalityViolationCount],
+    ["Service cardinality violations", result.serviceCardinalityViolationCount],
     ["Matched Power BI rows", result.matchedPowerBiRowCount],
     ["Matched service features", result.matchedServiceFeatureCount],
     ["Unmatched Power BI keys", result.unmatchedPowerBiKeyCount],
@@ -3695,42 +3686,6 @@ function previewMetrics(
   ];
 }
 
-function FieldSelect({
-  label,
-  value,
-  fields,
-  numeric = false,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  fields: NormalizedField[];
-  numeric?: boolean;
-  onChange: (value: string) => void;
-}) {
-  const options = fields.filter(
-    (field) =>
-      !numeric || field.dataType === "number" || field.dataType === "unknown",
-  );
-  return (
-    <label>
-      <span>{label}</span>
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.currentTarget.value)}
-      >
-        <option value="">Not set</option>
-        {options.map((field) => (
-          <option value={field.key}>
-            {field.displayName} · {field.key}
-            {field.sourceTable ? ` · ${field.sourceTable}` : ""}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 function locationMode(layer: MapLayerDefinition): string {
   if (layer.source.type !== "powerbi") return "service";
   const bindings = layer.source.bindings ?? {};

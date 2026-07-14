@@ -95,6 +95,7 @@ export function SpecificationInspector({
   history: sharedHistory,
   onOpenMapStudio,
   prepared: sharedPrepared,
+  validateCandidate,
 }: {
   json: string;
   data: NormalizedData;
@@ -106,6 +107,7 @@ export function SpecificationInspector({
   history?: SpecificationHistory;
   onOpenMapStudio?: () => void;
   prepared?: PreparedAuthoringData;
+  validateCandidate?: (candidateSpecificationJson: string) => PreparedAuthoringData;
 }) {
   const parsed = useMemo(() => {
     try {
@@ -194,15 +196,18 @@ export function SpecificationInspector({
     );
 
   const commit = (value: unknown) => {
-    const validation = prepareSpecification(value, data, {
-      repair: false,
-      aliasOverrides,
-    });
-    if (!validation.schema) {
-      setCandidateErrors(validation.errors);
+    const next = JSON.stringify(value, null, 2);
+    const validation = validateCandidate?.(next);
+    const standaloneValidation = validation
+      ? undefined
+      : prepareSpecification(value, data, {
+          repair: false,
+          aliasOverrides,
+        });
+    if (!(validation?.specification ?? standaloneValidation?.schema)) {
+      setCandidateErrors(validation?.errors ?? standaloneValidation?.errors ?? []);
       return false;
     }
-    const next = JSON.stringify(value, null, 2);
     setCandidateErrors([]);
     internal.current = next;
     history.commit(next);

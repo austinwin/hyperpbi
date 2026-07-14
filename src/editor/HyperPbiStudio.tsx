@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
 import { NormalizedData } from "../data/normalizeData";
@@ -95,6 +95,7 @@ interface ValidationResult {
   errors: string[];
   warnings: string[];
   ownerByRuntimeId?: Record<string, string>;
+  componentPathById?: Record<string, string>;
 }
 
 function sanitizerWarnings(
@@ -170,6 +171,7 @@ function validateDraft(
     errors: prepared.errors,
     warnings: Array.from(new Set(warnings)),
     ownerByRuntimeId: prepared.ownerByRuntimeId,
+    componentPathById: prepared.componentPathById,
   };
 }
 function validateStructure(
@@ -284,6 +286,7 @@ export function HyperPbiStudio({
     config: HyperPbiConfig;
     data: NormalizedData;
     ownerByRuntimeId?: Record<string, string>;
+    componentPathById?: Record<string, string>;
   }>();
   const [geocodeResults, setGeocodeResults] = useState<GeocodeResult[]>([]);
   const [layout, setLayout] = useState<StudioLayoutPreference>(() =>
@@ -310,6 +313,11 @@ export function HyperPbiStudio({
   const preparedAuthoring = useMemo<PreparedAuthoringData>(
     () => prepareAuthoringData(specification, configuration, data),
     [specification, configuration, data],
+  );
+  const validateCandidate = useCallback(
+    (candidateSpecificationJson: string) =>
+      prepareAuthoringData(candidateSpecificationJson, configuration, data),
+    [configuration, data],
   );
   const status = structure.errors.length
     ? "Invalid"
@@ -478,6 +486,7 @@ export function HyperPbiStudio({
         config: result.config,
         data: result.data,
         ownerByRuntimeId: result.ownerByRuntimeId,
+        componentPathById: result.componentPathById,
       });
       appendLog(
         `Rendered ${result.data.rows.length.toLocaleString()} rows with ${result.warnings.length} warning(s).`,
@@ -812,6 +821,7 @@ export function HyperPbiStudio({
               json={specification}
               data={data}
               prepared={preparedAuthoring}
+              validateCandidate={validateCandidate}
               aliasOverrides={parsedConfig?.fields?.aliases}
               selectedComponentId={selectedComponentId}
               generatedRuntimeId={selectedRuntimeComponentId}
@@ -832,6 +842,7 @@ export function HyperPbiStudio({
               json={specification}
               data={data}
               prepared={preparedAuthoring}
+              validateCandidate={validateCandidate}
               aliasOverrides={parsedConfig?.fields?.aliases}
               selectedComponentId={selectedComponentId}
               liveViewport={
@@ -969,6 +980,7 @@ export function HyperPbiStudio({
                   webAccessAvailable={webAccessAvailable}
                   providerAccess={providerAccess}
                   ownerByRuntimeId={preview.ownerByRuntimeId}
+                  componentPathById={preview.componentPathById}
                   onMapViewportChange={(id, viewport) =>
                     setMapViewports((current) => ({
                       ...current,
