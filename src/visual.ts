@@ -4,7 +4,6 @@ import powerbi from "powerbi-visuals-api";
 import { h, render } from "preact";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import "./../style/visual.less";
-import { applyConfigToData } from "./data/applyConfig";
 import { NormalizedData } from "./data/normalizeData";
 import { mergeNormalizedData, parseDataView } from "./data/parseDataView";
 import { defaultConfigJson, parseConfig } from "./config/hyperpbiConfig";
@@ -22,7 +21,7 @@ import { toRuntimeSettings, VisualFormattingSettingsModel } from "./settings";
 import { createInstanceId } from "./utils/ids";
 import { parseJson } from "./utils/safeJson";
 import { buildRowSelectionData, persistVisualState, readVisualState } from "./powerbi/visualState";
-import { applyCalculations } from "./calculations/calculationEngine";
+import { prepareRuntimeData } from "./editor/prepareAuthoringData";
 import { defaultStudioLayout } from "./editor/studioLayout";
 import { migrateFieldReferences } from "./schema/migrateFieldReferences";
 import { prepareSpecification } from "./schema/prepareSpecification";
@@ -157,10 +156,9 @@ export class Visual implements IVisual {
             const errors = [...schemaResult.errors, ...configResult.errors];
             render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "The saved dashboard needs attention", errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return;
         }
-        const calculated = applyCalculations(this.data, schemaResult.schema.calculations);
-        if (calculated.errors.length) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: calculated.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
-        const configuredData = applyConfigToData(calculated.data, configResult.config);
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: configuredData, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, configuredData), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId }), this.target);
+        const runtimeData = prepareRuntimeData(this.data, schemaResult.schema, configResult.config);
+        if (!runtimeData.data) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: runtimeData.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId }), this.target);
     }
 
     private async checkProviderAccess():Promise<void>{

@@ -11,6 +11,7 @@ import { FilterOperator } from "../schema/hyperpbiSchema";
 import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
+import type { MapViewportState } from "../components/maps/MapBlock";
 
 export interface ResolvedDatasetView {
     name: string;
@@ -59,6 +60,7 @@ export interface RenderContextValue {
     isOverlayOpen: (id: string) => boolean;
     datasets?: Map<string,DatasetResult>;
     datasetLineage?: number[][];
+    onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
 }
 
 export const RenderContext = createContext<RenderContextValue | undefined>(undefined);

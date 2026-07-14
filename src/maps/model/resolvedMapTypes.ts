@@ -101,6 +101,7 @@ export interface ResolvedMapRenderer {
     showCoverageOnHover?: boolean;
     clusterLabel?: "count" | "sum";
     aggregateField?: string;
+    format?: string;
 }
 
 export interface ResolvedMapSymbol {
@@ -154,6 +155,7 @@ export interface ResolvedMapPopup {
     fields: ResolvedMapPopupField[];
     actions: ResolvedMapPopupAction[];
     html?: string;
+    defaultFieldSource?: "powerbi" | "service" | "joined";
 }
 
 export interface ResolvedMapPopupField {
@@ -239,6 +241,11 @@ export interface MapLayerDiagnosticIssue {
         | "MAP_LAYER_MIXED_GEOMETRY"
         | "MAP_LAYER_FEATURE_LIMIT"
         | "MAP_GLOBAL_FEATURE_LIMIT"
+        | "MAP_FIELD_SOURCE_UNAVAILABLE"
+        | "MAP_SERVICE_FIELD_NOT_FOUND"
+        | "MAP_JOINED_FIELD_NOT_FOUND"
+        | "MAP_FILTER_SOURCE_INVALID"
+        | "MAP_VISIBILITY_SOURCE_INVALID"
         | "MAP_CAPABILITY_LIMITATION";
     severity: "info" | "warning" | "error";
     message: string;
@@ -296,6 +303,7 @@ export interface ResolvedMapTooltip {
     enabled: boolean;
     fields?: ResolvedMapPopupField[];
     template?: string;
+    defaultFieldSource?: "powerbi" | "service" | "joined";
 }
 
 // ── Resolved Layer ────────────────────────────────────────────────────

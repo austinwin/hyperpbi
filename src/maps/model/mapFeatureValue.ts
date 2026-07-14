@@ -3,42 +3,20 @@
 // Power BI, service, and joined sources.
 
 import type { ResolvedMapFeature } from "./resolvedMapTypes";
+import { featureAttribute, type MapAttributeSource } from "../attributes/mapFeatureAttributes";
 
-export type FeatureFieldSource = "powerbi" | "service" | "joined";
+export type FeatureFieldSource = MapAttributeSource;
 
 /**
- * Resolve a single field value from a feature, respecting the field source priority.
- *
- * Priority for "joined" source:
- *   joinedAttributes → powerBiAttributes → serviceAttributes
- *
- * Returns undefined if the field is not found in the specified source.
+ * Resolve a single field value from exactly the declared namespace.
+ * Returns undefined if the field is not present there; no cross-namespace fallback occurs.
  */
 export function resolvedFeatureValue(
     feature: ResolvedMapFeature,
     field: string,
     source: FeatureFieldSource
 ): unknown {
-    switch (source) {
-        case "powerbi":
-            return feature.powerBiAttributes[field];
-
-        case "service":
-            return feature.serviceAttributes[field];
-
-        case "joined":
-            // Precedence: joined → powerbi → service
-            if (field in feature.joinedAttributes) {
-                return feature.joinedAttributes[field];
-            }
-            if (field in feature.powerBiAttributes) {
-                return feature.powerBiAttributes[field];
-            }
-            return feature.serviceAttributes[field];
-
-        default:
-            return undefined;
-    }
+    return featureAttribute(feature, field, source);
 }
 
 /**

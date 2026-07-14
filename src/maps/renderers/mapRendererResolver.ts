@@ -10,7 +10,8 @@ import type { ResolvedMapFeature } from "../model/resolvedMapTypes";
 
 export function resolveRenderer(
     definition: MapRendererDefinition,
-    features: readonly ResolvedMapFeature[]
+    features: readonly ResolvedMapFeature[],
+    defaultFieldSource: "powerbi" | "service" | "joined" = "joined"
 ): ResolvedMapRenderer {
     switch (definition.type) {
         case "service":
@@ -35,7 +36,7 @@ export function resolveRenderer(
             return {
                 type: "uniqueValue",
                 field: definition.field,
-                fieldSource: definition.fieldSource,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
                 valueMap,
                 valueLabels: valueLabels.size > 0 ? valueLabels : undefined,
                 defaultSymbol: definition.defaultSymbol ? resolveSymbol(definition.defaultSymbol) : undefined,
@@ -44,11 +45,11 @@ export function resolveRenderer(
         }
 
         case "classBreaks": {
-            const breaks = resolveClassBreaks(definition, features);
+            const breaks = resolveClassBreaks({ ...definition, fieldSource: definition.fieldSource ?? defaultFieldSource }, features);
             return {
                 type: "classBreaks",
                 field: definition.field,
-                fieldSource: definition.fieldSource,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
                 method: definition.method ?? "quantile",
                 breaks,
                 colorRamp: definition.colorRamp,
@@ -56,11 +57,11 @@ export function resolveRenderer(
         }
 
         case "continuousColor": {
-            const domain = computeDomain(features, definition.field, definition.fieldSource);
+            const domain = computeDomain(features, definition.field, definition.fieldSource ?? defaultFieldSource);
             return {
                 type: "continuousColor",
                 field: definition.field,
-                fieldSource: definition.fieldSource,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
                 minColor: definition.minColor,
                 maxColor: definition.maxColor,
                 clamp: definition.clamp,
@@ -70,11 +71,11 @@ export function resolveRenderer(
         }
 
         case "proportionalSize": {
-            const domain = computeDomain(features, definition.field, definition.fieldSource);
+            const domain = computeDomain(features, definition.field, definition.fieldSource ?? defaultFieldSource);
             return {
                 type: "proportionalSize",
                 field: definition.field,
-                fieldSource: definition.fieldSource,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
                 minSize: definition.minSize ?? 4,
                 maxSize: definition.maxSize ?? 24,
                 baseColor: definition.color,
@@ -87,6 +88,7 @@ export function resolveRenderer(
             return {
                 type: "heatmap",
                 weightField: definition.weightField,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
                 radius: definition.radius,
                 blur: definition.blur,
                 minOpacity: definition.minOpacity,
@@ -101,13 +103,15 @@ export function resolveRenderer(
                 showCoverageOnHover: definition.showCoverageOnHover,
                 clusterLabel: definition.clusterLabel,
                 aggregateField: definition.aggregateField,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
+                format: definition.format,
             };
 
         case "densityGrid":
             return {
                 type: "densityGrid",
                 field: definition.field,
-                fieldSource: definition.fieldSource,
+                fieldSource: definition.fieldSource ?? defaultFieldSource,
             };
 
         default:

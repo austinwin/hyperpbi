@@ -16,6 +16,7 @@ export interface ComponentInteractionDefinition {
     internalScope?: InternalInteractionScope;
     externalMode?: ExternalInteractionMode;
     field?: string;
+    fieldSource?: "powerbi" | "service" | "joined";
     operator?: FilterOperator;
     value?: unknown;
     selectionMode?: InteractionSelectionMode;

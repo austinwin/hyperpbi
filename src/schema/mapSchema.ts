@@ -110,6 +110,7 @@ export interface MapLayerDefinition {
 
 export interface MapLayerFilterDefinition {
     field: string;
+    fieldSource?: "powerbi" | "service" | "joined";
     operator: "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
     value: unknown;
 }
@@ -275,6 +276,8 @@ export interface ClusterMapRenderer {
     showCoverageOnHover?: boolean;
     clusterLabel?: "count" | "sum";
     aggregateField?: string;
+    fieldSource?: "powerbi" | "service" | "joined";
+    format?: string;
 }
 
 export interface DensityGridMapRenderer {
@@ -368,6 +371,7 @@ export interface MapVisibilityDefinition {
     maxZoom?: number;
     scaleDependent?: boolean;
     conditionField?: string;
+    conditionFieldSource?: "powerbi" | "service" | "joined";
     conditionValues?: unknown[];
 }
 
