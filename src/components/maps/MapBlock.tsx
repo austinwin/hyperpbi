@@ -865,6 +865,16 @@ export async function resolveArcGisFeatureLayer(
       `${context.layerPath ?? `/layers/${def.id}`}/tooltip/fields/${index}/fieldSource`,
     ),
   );
+  if (def.popup?.title || def.popup?.html)
+    checkSource(
+      def.popup.defaultFieldSource ?? defaultAttributeSource(def, "popup"),
+      `${context.layerPath ?? `/layers/${def.id}`}/popup/defaultFieldSource`,
+    );
+  if (def.tooltip?.template)
+    checkSource(
+      def.tooltip.defaultFieldSource ?? defaultAttributeSource(def, "tooltip"),
+      `${context.layerPath ?? `/layers/${def.id}`}/tooltip/defaultFieldSource`,
+    );
   if (def.interaction?.field)
     checkSource(
       def.interaction.fieldSource ?? defaultAttributeSource(def, "interaction"),
@@ -968,6 +978,22 @@ export async function resolveArcGisFeatureLayer(
     });
     warnings.push(message);
   };
+  const validateTemplate = (
+    template: string | undefined,
+    sourceName: "powerbi" | "service" | "joined",
+    path: string,
+  ) => {
+    if (!template) return;
+    for (const match of template.matchAll(/\{\{\s*([^{}]{1,120}?)\s*\}\}/g)) {
+      const field = match[1]?.trim();
+      if (field)
+        validateNamespaceField(
+          field,
+          sourceName,
+          `${path}#${match.index ?? 0}`,
+        );
+    }
+  };
   const rendererRaw = def.renderer as unknown as
     Record<string, unknown> | undefined;
   if (rendererRaw)
@@ -997,6 +1023,23 @@ export async function resolveArcGisFeatureLayer(
       field.fieldSource ?? defaultAttributeSource(def, "tooltip"),
       `${context.layerPath ?? `/layers/${def.id}`}/tooltip/fields/${index}/field`,
     ),
+  );
+  const popupTemplateSource =
+    def.popup?.defaultFieldSource ?? defaultAttributeSource(def, "popup");
+  validateTemplate(
+    def.popup?.title,
+    popupTemplateSource,
+    `${context.layerPath ?? `/layers/${def.id}`}/popup/title`,
+  );
+  validateTemplate(
+    def.popup?.html,
+    popupTemplateSource,
+    `${context.layerPath ?? `/layers/${def.id}`}/popup/html`,
+  );
+  validateTemplate(
+    def.tooltip?.template,
+    def.tooltip?.defaultFieldSource ?? defaultAttributeSource(def, "tooltip"),
+    `${context.layerPath ?? `/layers/${def.id}`}/tooltip/template`,
   );
   if (def.visibility?.conditionField)
     validateNamespaceField(
@@ -1305,7 +1348,8 @@ export async function resolveArcGisFeatureLayer(
             uiAction: a.uiAction,
           })),
           html: def.popup.html,
-          defaultFieldSource: defaultAttributeSource(def, "popup"),
+          defaultFieldSource:
+            def.popup.defaultFieldSource ?? defaultAttributeSource(def, "popup"),
         }
       : undefined,
     tooltip: def.tooltip
@@ -1321,7 +1365,8 @@ export async function resolveArcGisFeatureLayer(
             format: field.format,
             display: "text" as const,
           })),
-          defaultFieldSource: defaultAttributeSource(def, "tooltip"),
+          defaultFieldSource:
+            def.tooltip.defaultFieldSource ?? defaultAttributeSource(def, "tooltip"),
         }
       : undefined,
     interaction: def.interaction ?? {

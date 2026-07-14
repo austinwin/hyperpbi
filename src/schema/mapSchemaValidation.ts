@@ -827,7 +827,7 @@ function validateLayer(
   validateSection(
     raw,
     "popup",
-    allowed("enabled", "title", "fields", "actions", "html"),
+    allowed("enabled", "defaultFieldSource", "title", "fields", "actions", "html"),
     path,
     componentId,
     diagnostics,
@@ -835,14 +835,22 @@ function validateLayer(
   validateSection(
     raw,
     "tooltip",
-    allowed("enabled", "fields", "template"),
+    allowed("enabled", "defaultFieldSource", "fields", "template"),
     path,
     componentId,
     diagnostics,
   );
   for (const section of ["popup", "tooltip"]) {
     const value = raw[section];
-    if (!object(value) || value.fields === undefined) continue;
+    if (!object(value)) continue;
+    validateEnum(
+      value.defaultFieldSource,
+      ["powerbi", "service", "joined"],
+      `${path}/${section}/defaultFieldSource`,
+      componentId,
+      diagnostics,
+    );
+    if (value.fields === undefined) continue;
     if (!Array.isArray(value.fields))
       diagnostics.push({
         code: "INVALID_PROPERTY_TYPE",

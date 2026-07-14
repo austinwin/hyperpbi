@@ -495,7 +495,7 @@ export function resolvePowerBiLayer(
           })),
           actions: (layer.popup.actions ?? []).map((action) => ({ ...action })),
           html: layer.popup.html,
-          defaultFieldSource: "powerbi",
+          defaultFieldSource: layer.popup.defaultFieldSource ?? "powerbi",
         }
       : undefined,
     tooltip: layer.tooltip
@@ -507,7 +507,7 @@ export function resolvePowerBiLayer(
             fieldSource: field.fieldSource ?? "powerbi",
             display: "text",
           })),
-          defaultFieldSource: "powerbi",
+          defaultFieldSource: layer.tooltip.defaultFieldSource ?? "powerbi",
         }
       : undefined,
     interaction: layer.interaction,

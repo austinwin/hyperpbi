@@ -29,6 +29,7 @@ import {
 } from "../../maps/join/mapJoinPreview";
 import type { MapAttributeSource } from "../../maps/attributes/mapFeatureAttributes";
 import { parseArcGisUrl } from "../../maps/arcgis/arcGisUrl";
+import { collectArcGisQueryFields } from "../../maps/arcgis/mapArcGisQueryFields";
 import { appendJsonPointer } from "../../schema/jsonPointer";
 import { MapDiagnosticsPanel } from "./MapDiagnosticsPanel";
 import { DraftInput } from "./MapDraftInput";
@@ -268,6 +269,13 @@ export function MapStudio({
           : "number",
     })),
   };
+  const externalFieldWarnings = mapStudioExternalFieldWarnings(
+    layer,
+    serviceMetadata,
+  );
+  const visibleWarnings = Array.from(
+    new Set([...candidateWarnings, ...externalFieldWarnings]),
+  );
 
   const commit = (candidate: Json): boolean => {
     const next = JSON.stringify(candidate, null, 2);
@@ -662,11 +670,11 @@ export function MapStudio({
           </ul>
         </div>
       )}
-      {candidateErrors.length === 0 && candidateWarnings.length > 0 && (
+      {candidateErrors.length === 0 && visibleWarnings.length > 0 && (
         <div class="hp-map-studio-warnings" role="status">
-          <strong>Candidate validation warnings</strong>
+          <strong>Map Studio warnings</strong>
           <ul>
-            {candidateWarnings.slice(0, 12).map((warning) => (
+            {visibleWarnings.slice(0, 12).map((warning) => (
               <li>{warning}</li>
             ))}
           </ul>
@@ -2289,6 +2297,22 @@ function PopupEditor({
         />{" "}
         Enable {section}
       </label>
+      <label>
+        <span>Template field source</span>
+        <select
+          aria-label={`${section} template field source`}
+          value={definition.defaultFieldSource ?? defaultFieldSource(layer)}
+          onChange={(event) =>
+            set({
+              defaultFieldSource: event.currentTarget.value as MapAttributeSource,
+            })
+          }
+        >
+          <option value="powerbi">Power BI</option>
+          <option value="service">Service</option>
+          <option value="joined">Joined</option>
+        </select>
+      </label>
       {section === "popup" && (
         <DraftInput
           label="Title template"
@@ -2316,10 +2340,16 @@ function PopupEditor({
             fields: [
               ...items,
               {
-                field: fieldSets[defaultFieldSource(layer)][0]?.key ?? "",
-                fieldSource: defaultFieldSource(layer),
+                field:
+                  fieldSets[
+                    definition.defaultFieldSource ?? defaultFieldSource(layer)
+                  ][0]?.key ?? "",
+                fieldSource:
+                  definition.defaultFieldSource ?? defaultFieldSource(layer),
                 label:
-                  fieldSets[defaultFieldSource(layer)][0]?.displayName ??
+                  fieldSets[
+                    definition.defaultFieldSource ?? defaultFieldSource(layer)
+                  ][0]?.displayName ??
                   "Field",
               },
             ],
@@ -3660,6 +3690,26 @@ function serviceField(
     dataType: numeric ? "number" : date ? "datetime" : "text",
     roles: [],
   };
+}
+
+function mapStudioExternalFieldWarnings(
+  layer: MapLayerDefinition | undefined,
+  metadata: ArcGisLayerMetadata | undefined,
+): string[] {
+  if (!layer || layer.source.type !== "arcgisFeature") return [];
+  const referenced = collectArcGisQueryFields(layer, layer.source);
+  if (!referenced.length) return [];
+  if (!metadata)
+    return [
+      "Service metadata not inspected. ArcGIS service-field names are preserved and exact validation is deferred to runtime diagnostics.",
+    ];
+  const available = new Set((metadata.fields ?? []).map((field) => field.name));
+  return referenced
+    .filter((field) => !available.has(field))
+    .map(
+      (field) =>
+        `Unknown ArcGIS service field “${field}” in the inspected layer metadata.`,
+    );
 }
 
 function previewMetrics(

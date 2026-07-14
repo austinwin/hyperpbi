@@ -35,8 +35,11 @@ export function collectArcGisQueryFields(layer: MapLayerDefinition, source: ArcG
 
     for (const field of layer.popup?.fields ?? []) if (effectiveSource(layer, field.fieldSource, "popup") === "service") fields.add(field.field);
     for (const field of layer.tooltip?.fields ?? []) if (effectiveSource(layer, field.fieldSource, "tooltip") === "service") fields.add(field.field);
-    if (layer.tooltip?.template && defaultAttributeSource(layer, "tooltip") === "service") templateFields(layer.tooltip.template, fields);
-    if (layer.popup?.title && defaultAttributeSource(layer, "popup") === "service") templateFields(layer.popup.title, fields);
+    const tooltipTemplateSource = effectiveSource(layer, layer.tooltip?.defaultFieldSource, "tooltip");
+    if (layer.tooltip?.template && tooltipTemplateSource === "service") templateFields(layer.tooltip.template, fields);
+    const popupTemplateSource = effectiveSource(layer, layer.popup?.defaultFieldSource, "popup");
+    if (layer.popup?.title && popupTemplateSource === "service") templateFields(layer.popup.title, fields);
+    if (layer.popup?.html && popupTemplateSource === "service") templateFields(layer.popup.html, fields);
 
     if (layer.visibility?.conditionField && effectiveSource(layer, layer.visibility.conditionFieldSource, "visibility") === "service") fields.add(layer.visibility.conditionField);
     for (const filter of layer.filter ? (Array.isArray(layer.filter) ? layer.filter : [layer.filter]) : []) {

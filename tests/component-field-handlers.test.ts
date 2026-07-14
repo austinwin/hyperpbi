@@ -39,20 +39,21 @@ describe("descriptor component field handlers", () => {
         expect(specificationFieldReferences(specification)).toContainEqual(expect.objectContaining({ path: "/components/0/columns/0", reference: "month" }));
     });
 
-    it("resolves Power BI map visibility/interactions while preserving service fields", () => {
+    it("preserves authored map namespaces for visibility and interactions", () => {
         const specification = { version: "2.0", components: [{ type: "map", id: "map", layers: [{
             id: "joined", name: "Joined", source: { type: "arcgisFeature", url: "https://services.example/FeatureServer" },
             join: { powerBiField: "facilityId", serviceField: "FACILITY_ID" },
             renderer: { type: "uniqueValue", field: "SERVICE_STATUS", fieldSource: "service" },
-            visibility: { conditionField: "isVisible" },
-            interaction: { field: "facilityId" },
+            visibility: { conditionField: "SERVICE_STATUS", conditionFieldSource: "service" },
+            interaction: { field: "FACILITY_ID", fieldSource: "service" },
         }] }] };
         const occurrences = specificationFieldReferences(specification);
         expect(occurrences).toEqual(expect.arrayContaining([
             expect.objectContaining({ path: "/components/0/layers/0/join/powerBiField", reference: "facilityId", source: "powerbi" }),
-            expect.objectContaining({ path: "/components/0/layers/0/visibility/conditionField", reference: "isVisible", source: "powerbi" }),
-            expect.objectContaining({ path: "/components/0/layers/0/interaction/field", reference: "facilityId", source: "powerbi" }),
+            expect.objectContaining({ path: "/components/0/layers/0/renderer/field", reference: "SERVICE_STATUS", source: "service" }),
+            expect.objectContaining({ path: "/components/0/layers/0/visibility/conditionField", reference: "SERVICE_STATUS", source: "service" }),
+            expect.objectContaining({ path: "/components/0/layers/0/interaction/field", reference: "FACILITY_ID", source: "service" }),
         ]));
-        expect(occurrences.some(item => item.reference === "FACILITY_ID" || item.reference === "SERVICE_STATUS")).toBe(false);
+        expect(occurrences.some(item => item.reference === "FACILITY_ID" || item.reference === "SERVICE_STATUS")).toBe(true);
     });
 });

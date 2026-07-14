@@ -332,6 +332,8 @@ export interface MapLabelDefinition {
 
 export interface MapPopupDefinition {
     enabled?: boolean;
+    /** Namespace used by title and safe HTML template tokens. */
+    defaultFieldSource?: "powerbi" | "service" | "joined";
     title?: string;
     fields?: Array<{
         field: string;
@@ -360,6 +362,8 @@ export interface MapTooltipFieldDefinition {
 
 export interface MapTooltipDefinition {
     enabled?: boolean;
+    /** Namespace used by tooltip template tokens. */
+    defaultFieldSource?: "powerbi" | "service" | "joined";
     fields?: MapTooltipFieldDefinition[];
     template?: string;
 }

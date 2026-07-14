@@ -106,6 +106,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
     const resolver = new FieldResolver(data, aliasOverrides);
     for (const occurrence of specificationFieldReferences(specification)) {
         if (occurrence.path.startsWith("/data/")) continue;
+        if (occurrence.source === "service" || occurrence.source === "joined") continue;
         const scope = datasets.datasets.get(occurrence.datasetName);
         if (!scope) {
             diagnostics.push({

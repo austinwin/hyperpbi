@@ -22,7 +22,7 @@ const preserved = (reference: string) => /^(metric|state|selected|config|configu
 
 function emitValue(context: ComponentFieldHandlerContext, owner: Json, key: string, path: string, requirement: Requirement = context.descriptorField.requirement, source: FieldReferenceSource = sourceFor(context)): void {
     const value = owner[key];
-    if (typeof value !== "string" || !value || preserved(value) || source === "service" || source === "joined") return;
+    if (typeof value !== "string" || !value || preserved(value)) return;
     context.emit({ reference: value, path, componentId: context.componentId, datasetName: context.effectiveDataset, requirement, source, set: next => { owner[key] = next; } });
 }
 
@@ -112,16 +112,13 @@ function mapLayers(context: ComponentFieldHandlerContext): void {
             const sectionValue = raw[section];
             if (!object(sectionValue)) continue;
             if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(layerContext, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
-            for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, defaultSource);
+            const templateSource = (sectionValue.defaultFieldSource ?? defaultSource) as FieldReferenceSource;
+            for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, templateSource);
         }
-        // Visibility conditions and declarative interaction payloads operate on
-        // the Power BI-backed row context even when the visual layer is joined
-        // to an external service. Service/joined attributes stay explicit in
-        // renderer, label, popup, and tooltip fieldSource metadata.
         const filters = Array.isArray(raw.filter) ? raw.filter : [raw.filter];
-        filters.forEach((filter, filterIndex) => { if (object(filter)) emitValue(layerContext, filter, "field", `${path}/filter/${filterIndex}/field`, "any", sourceFor(layerContext)); });
-        if (object(raw.visibility)) emitValue(layerContext, raw.visibility, "conditionField", `${path}/visibility/conditionField`, "any", sourceFor(layerContext));
-        if (object(raw.interaction)) emitValue(layerContext, raw.interaction, "field", `${path}/interaction/field`, "any", sourceFor(layerContext));
+        filters.forEach((filter, filterIndex) => { if (object(filter)) emitValue(layerContext, filter, "field", `${path}/filter/${filterIndex}/field`, "any", (filter.fieldSource ?? defaultSource) as FieldReferenceSource); });
+        if (object(raw.visibility)) emitValue(layerContext, raw.visibility, "conditionField", `${path}/visibility/conditionField`, "any", (raw.visibility.conditionFieldSource ?? defaultSource) as FieldReferenceSource);
+        if (object(raw.interaction)) emitValue(layerContext, raw.interaction, "field", `${path}/interaction/field`, "any", (raw.interaction.fieldSource ?? defaultSource) as FieldReferenceSource);
     });
 }
 
