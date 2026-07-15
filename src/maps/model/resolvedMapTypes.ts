@@ -340,6 +340,7 @@ export interface ResolvedDynamicConfig {
     maxZoom?: number;
     attribution?: string;
     debounceMs?: number;
+    identify?: import("../../schema/mapSchema").ArcGisDynamicIdentifyDefinition;
 }
 
 // ── Resolved Tooltip ──────────────────────────────────────────────────

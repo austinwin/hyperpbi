@@ -5,6 +5,7 @@ import type { MapInteractionState } from "../../maps/interactions/mapInteraction
 import { resolveMapPopupViewModel } from "./ResolvedMapPopup";
 import type { UiAction } from "../../schema/uiSchema";
 import type { ResolvedMapPopup } from "../../maps/model/resolvedMapTypes";
+import type { DynamicIdentifyChoice } from "./runtime/dynamicIdentifyRuntime";
 
 export function MapFeatureDetails({
   mapId,
@@ -13,6 +14,8 @@ export function MapFeatureDetails({
   interaction,
   onClose,
   executeAction,
+  identifyChoices = [],
+  onIdentifyChoice,
 }: {
   mapId: string;
   component: MapComponent;
@@ -20,6 +23,8 @@ export function MapFeatureDetails({
   interaction?: MapInteractionState;
   onClose: () => void;
   executeAction: (action: UiAction | UiAction[], event?: Event) => void;
+  identifyChoices?: readonly DynamicIdentifyChoice[];
+  onIdentifyChoice?: (featureKey: string) => void;
 }) {
   const active = interaction?.activeFeature;
   const panelRef = useRef<HTMLElement>(null);
@@ -111,6 +116,7 @@ export function MapFeatureDetails({
   if (!resolved || component.featureDetails?.mode === "legacyPopup") return null;
   const { layer, feature, view } = resolved;
   const selectedCount = interaction?.selectedFeatureKeys.length ?? 0;
+  const isIdentify = active?.kind === "identify";
   return (
     <aside
       ref={panelRef}
@@ -128,7 +134,10 @@ export function MapFeatureDetails({
           <h3 id={`${mapId}-feature-details-title`}>
             {view.title ?? String(feature.serviceObjectId ?? feature.id)}
           </h3>
-          {selectedCount > 1 && (
+          {isIdentify && (
+            <span class="hp-map-identify-badge">Temporary identify result</span>
+          )}
+          {!isIdentify && selectedCount > 1 && (
             <span>{selectedCount.toLocaleString()} features selected</span>
           )}
         </div>
@@ -136,6 +145,22 @@ export function MapFeatureDetails({
           ×
         </button>
       </header>
+      {isIdentify && identifyChoices.length > 1 && (
+        <label class="hp-map-identify-picker">
+          <span>Matching feature</span>
+          <select
+            aria-label="Matching identify result"
+            value={active.featureKey}
+            onChange={(event) => onIdentifyChoice?.(event.currentTarget.value)}
+          >
+            {identifyChoices.map((choice) => (
+              <option key={choice.featureKey} value={choice.featureKey}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <div class="hp-map-feature-details-body">
         {view.html && (
           <div

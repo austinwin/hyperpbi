@@ -10,7 +10,7 @@ declare global {
       arcGisRequestCount: number;
       interaction?: {
         selectedFeatureKeys: string[];
-        activeFeature?: { featureKey: string; layerId: string; featureId: string };
+        activeFeature?: { featureKey: string; layerId: string; featureId: string; kind?: "feature" | "identify" };
       };
       updateRenderer: () => void;
       refreshArcGis: () => void;
@@ -148,4 +148,35 @@ test("ArcGIS joined selection and details survive a retained-feature refresh", a
   await expect(page.locator('[data-arcgis-object="retained"]')).toHaveCount(1);
   expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys)).toEqual([featureKey]);
   expect(await page.evaluate(() => window.hpMapDemo.selectedRows)).toHaveLength(1);
+});
+
+test("Dynamic MapServer click identify stays temporary, offers result choice, and highlights geometry", async ({ page }) => {
+  await openDemo(page, "dynamic");
+  const map = page.locator(".leaflet-container");
+  const box = await map.boundingBox();
+  expect(box).not.toBeNull();
+  await map.click({ position: { x: box!.width * 0.56, y: box!.height * 0.52 } });
+
+  const details = page.locator(".hp-map-feature-details");
+  await expect(details).toBeVisible();
+  await expect(details).toContainText("Temporary identify result");
+  await expect(details).toContainText("Texas");
+  const picker = page.getByLabel("Matching identify result");
+  await expect(picker.locator("option")).toHaveCount(2);
+  await expect(page.locator('[data-hp-identify-highlight="true"]')).toHaveCount(1);
+  expect(await page.evaluate(() => window.hpMapDemo.interaction)).toMatchObject({
+    selectedFeatureKeys: [],
+    activeFeature: { kind: "identify" },
+  });
+  expect(await page.evaluate(() => window.hpMapDemo.selectionCalls)).toBe(0);
+
+  await picker.selectOption({ label: "Detailed Counties: Demo County" });
+  await expect(details).toContainText("Demo County");
+  expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys)).toEqual([]);
+  await expect(page.locator('[data-hp-identify-highlight="true"]')).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Close feature details" }).click();
+  await expect(details).toHaveCount(0);
+  await expect(page.locator('[data-hp-identify-highlight="true"]')).toHaveCount(0);
+  expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys)).toEqual([]);
 });

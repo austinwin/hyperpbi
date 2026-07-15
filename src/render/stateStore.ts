@@ -4,6 +4,7 @@ import {
     activateMapFeature,
     emptyMapInteractionState,
     reconcileMapInteractionState,
+    showMapIdentifiedFeature,
     type ActiveMapFeature,
     type MapInteractionState,
 } from "../maps/interactions/mapInteractionState";
@@ -99,6 +100,7 @@ export type DashboardAction =
     | { type: "selectMapFeatures"; mapId: string; featureIds: string[]; selectionMode?: "replace" | "add" | "toggle" }
     | { type: "clearMapFeatures"; mapId: string }
     | { type: "activateMapFeature"; mapId: string; feature: ActiveMapFeature; multiSelect?: boolean }
+    | { type: "showMapIdentifiedFeature"; mapId: string; feature: ActiveMapFeature }
     | { type: "setMapHoveredFeature"; mapId: string; featureKey?: MapFeatureKey }
     | { type: "closeMapFeatureDetails"; mapId: string; clearSelection?: boolean }
     | { type: "reconcileMapFeatures"; mapId: string; availableFeatureKeys: MapFeatureKey[] }
@@ -265,6 +267,19 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
                 ...state.mapSelectedFeatureIds,
                 [action.mapId]: interaction.selectedFeatureKeys,
             },
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: interaction,
+            },
+        };
+    }
+    if (action.type === "showMapIdentifiedFeature") {
+        const interaction = showMapIdentifiedFeature(
+            state.mapInteractionState[action.mapId],
+            action.feature,
+        );
+        return {
+            ...state,
             mapInteractionState: {
                 ...state.mapInteractionState,
                 [action.mapId]: interaction,

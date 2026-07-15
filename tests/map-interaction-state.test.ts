@@ -3,6 +3,7 @@ import {
   activateMapFeature,
   emptyMapInteractionState,
   reconcileMapInteractionState,
+  showMapIdentifiedFeature,
 } from "../src/maps/interactions/mapInteractionState";
 import { dashboardReducer, initialDashboardState } from "../src/render/stateStore";
 
@@ -56,6 +57,22 @@ describe("map interaction state", () => {
     });
     expect(closed.mapInteractionState.map.selectedFeatureKeys).toEqual(["a"]);
     expect(closed.mapInteractionState.map.activeFeature).toBeUndefined();
+  });
+
+  it("shows temporary identify details without changing persistent selection", () => {
+    const selected = activateMapFeature(undefined, feature("a"), false);
+    const identified = showMapIdentifiedFeature(selected, {
+      featureKey: "temporary",
+      layerId: "dynamic::identify",
+      featureId: "3:17",
+    });
+    expect(identified.selectedFeatureKeys).toEqual(["a"]);
+    expect(identified.activeFeature).toMatchObject({
+      featureKey: "temporary",
+      kind: "identify",
+    });
+    expect(reconcileMapInteractionState(identified, ["a"])?.activeFeature)
+      .toEqual(identified.activeFeature);
   });
 });
 

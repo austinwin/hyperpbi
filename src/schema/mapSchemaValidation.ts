@@ -126,6 +126,7 @@ const sourceKeys: Record<string, Set<string>> = {
     "maxZoom",
     "attribution",
     "debounceMs",
+    "identify",
   ),
 };
 const rendererKeys: Record<string, Set<string>> = {
@@ -531,7 +532,7 @@ function validateLayer(
         sourceType === "powerbi" || capabilities.serviceLabels,
         "feature labels",
       ],
-      ["interaction", capabilities.featureInteraction, "feature interaction"],
+      ["interaction", capabilities.selection, "persistent feature selection"],
       [
         "renderer",
         sourceType === "powerbi" || sourceType === "arcgisFeature",
@@ -583,6 +584,65 @@ function validateLayer(
       componentId,
       diagnostics,
     );
+  if (
+    sourceType === "arcgisDynamic" &&
+    raw.source.identify !== undefined &&
+    validateObject(
+      raw.source.identify,
+      `${path}/source/identify`,
+      componentId,
+      diagnostics,
+    )
+  ) {
+    unknownKeys(
+      raw.source.identify,
+      allowed("enabled", "tolerance", "layerOption", "maxResults"),
+      `${path}/source/identify`,
+      componentId,
+      diagnostics,
+    );
+    validateEnum(
+      raw.source.identify.layerOption,
+      ["visible", "all", "top"],
+      `${path}/source/identify/layerOption`,
+      componentId,
+      diagnostics,
+    );
+    if (
+      raw.source.identify.enabled !== undefined &&
+      typeof raw.source.identify.enabled !== "boolean"
+    )
+      diagnostics.push({
+        code: "INVALID_PROPERTY_TYPE",
+        severity: "error",
+        path: `${path}/source/identify/enabled`,
+        componentId,
+        message: "Dynamic identify enabled must be a boolean.",
+        received: raw.source.identify.enabled,
+      });
+    for (const [key, minimum, maximum] of [
+      ["tolerance", 0, 50],
+      ["maxResults", 1, 25],
+    ] as const) {
+      const value = raw.source.identify[key];
+      if (
+        value === undefined ||
+        (typeof value === "number" &&
+          Number.isInteger(value) &&
+          value >= minimum &&
+          value <= maximum)
+      )
+        continue;
+      diagnostics.push({
+        code: "INVALID_PROPERTY_TYPE",
+        severity: "error",
+        path: `${path}/source/identify/${key}`,
+        componentId,
+        message: `Dynamic identify ${key} must be an integer from ${minimum} to ${maximum}.`,
+        received: value,
+      });
+    }
+  }
   if (
     sourceType.startsWith("arcgis") &&
     (typeof raw.source.url !== "string" || !raw.source.url)

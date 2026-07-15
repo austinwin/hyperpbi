@@ -66,6 +66,16 @@ export interface LeafletMapController {
   invalidateSize(): void;
 }
 
+export interface LeafletMapClickEvent {
+  anchor: {
+    lat: number;
+    lon: number;
+    containerX: number;
+    containerY: number;
+  };
+  viewport: MapViewportState;
+}
+
 interface MountedFeatureLayer {
   featureKey: MapFeatureKey;
   featureId: string;
@@ -90,6 +100,8 @@ export function LeafletMap({
   onViewportChange,
   onControllerReady,
   onLayerRuntimeStateChange,
+  onMapClick,
+  identifyHighlight,
 }: {
   component: MapComponent;
   resolvedLayers: ResolvedMapLayer[];
@@ -107,6 +119,9 @@ export function LeafletMap({
       fullLayerRebuilds?: number;
     },
   ) => void;
+  /** Return true when the background click starts an owned interaction. */
+  onMapClick?: (event: LeafletMapClickEvent) => boolean;
+  identifyHighlight?: GeoJSON.GeoJsonObject | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -129,6 +144,7 @@ export function LeafletMap({
   );
   const labelSignatureRefs = useRef<Map<string, string>>(new Map());
   const searchMarkerRef = useRef<L.CircleMarker | null>(null);
+  const identifyHighlightRef = useRef<L.GeoJSON | null>(null);
   const paneNamesRef = useRef<Map<string, string>>(new Map());
   const reportedRenderSignaturesRef = useRef<Map<string, string>>(new Map());
   const runtimeMetricsRef = useRef(
@@ -159,6 +175,7 @@ export function LeafletMap({
   const onViewportChangeRef = useRef(onViewportChange);
   const onControllerReadyRef = useRef(onControllerReady);
   const onLayerRuntimeStateChangeRef = useRef(onLayerRuntimeStateChange);
+  const onMapClickRef = useRef(onMapClick);
   const settingsMapRef = useRef(settings.map);
   const renderContextRef = useRef(context);
   const runtimeConfigRef = useRef(runtimeConfig);
@@ -180,6 +197,7 @@ export function LeafletMap({
   onViewportChangeRef.current = onViewportChange;
   onControllerReadyRef.current = onControllerReady;
   onLayerRuntimeStateChangeRef.current = onLayerRuntimeStateChange;
+  onMapClickRef.current = onMapClick;
   settingsMapRef.current = settings.map;
   renderContextRef.current = context;
   runtimeConfigRef.current = runtimeConfig;
@@ -238,6 +256,16 @@ export function LeafletMap({
     if (!map.getPane(searchPaneName)) map.createPane(searchPaneName);
     const searchPane = map.getPane(searchPaneName);
     if (searchPane) searchPane.style.zIndex = "900";
+    const identifyPaneName = `hp-${id}-identify-highlight`.replace(
+      /[^a-zA-Z0-9_-]/g,
+      "_",
+    );
+    if (!map.getPane(identifyPaneName)) map.createPane(identifyPaneName);
+    const identifyPane = map.getPane(identifyPaneName);
+    if (identifyPane) {
+      identifyPane.style.zIndex = "var(--hp-map-z-identify)";
+      identifyPane.style.pointerEvents = "none";
+    }
     if (!map.getPane(tooltipPaneName)) map.createPane(tooltipPaneName);
     const tooltipPane = map.getPane(tooltipPaneName);
     if (tooltipPane) tooltipPane.style.zIndex = "850";
@@ -435,7 +463,30 @@ export function LeafletMap({
     map.on("resize", emitViewport);
     const initialViewportFrame = requestAnimationFrame(emitViewport);
 
-    const onMapBackgroundClick = () => {
+    const onMapBackgroundClick = (event: L.LeafletMouseEvent) => {
+      const bounds = map.getBounds();
+      const size = map.getSize();
+      const handled =
+        onMapClickRef.current?.({
+          anchor: {
+            lat: event.latlng.lat,
+            lon: event.latlng.lng,
+            containerX: event.containerPoint.x,
+            containerY: event.containerPoint.y,
+          },
+          viewport: {
+            bounds: [
+              bounds.getWest(),
+              bounds.getSouth(),
+              bounds.getEast(),
+              bounds.getNorth(),
+            ],
+            center: [map.getCenter().lat, map.getCenter().lng],
+            zoom: map.getZoom(),
+            width: size.x,
+            height: size.y,
+          },
+        }) === true;
       if (!componentRef.current.featureDetails?.clearSelectionOnBackgroundClick)
         return;
       const current = renderContextRef.current;
@@ -444,10 +495,11 @@ export function LeafletMap({
       current.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
       current.dispatch({ type: "interactionSignature", id });
       current.clearExternal({ componentId: id, componentType: "map" });
-      current.dispatch({
-        type: "closeMapFeatureDetails",
-        mapId: id,
-      });
+      if (!handled)
+        current.dispatch({
+          type: "closeMapFeatureDetails",
+          mapId: id,
+        });
     };
     map.on("click", onMapBackgroundClick);
 
@@ -476,6 +528,9 @@ export function LeafletMap({
       clusterLayerRefs.current.clear();
       vectorGroupSignatureRefs.current.clear();
       openMapPopupStateRef.current = null;
+      if (identifyHighlightRef.current)
+        map.removeLayer(identifyHighlightRef.current);
+      identifyHighlightRef.current = null;
       map.remove();
       mapRef.current = null;
       vectorLayerRefs.current.clear();
@@ -486,6 +541,59 @@ export function LeafletMap({
       paneNamesRef.current.clear();
     };
   }, []);
+
+  // Dynamic identify owns one temporary, non-interactive highlight outside the
+  // persistent vector registry and selection lifecycle.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (identifyHighlightRef.current) {
+      map.removeLayer(identifyHighlightRef.current);
+      identifyHighlightRef.current = null;
+    }
+    if (!identifyHighlight) return;
+    const pane = `hp-${id}-identify-highlight`.replace(
+      /[^a-zA-Z0-9_-]/g,
+      "_",
+    );
+    const accent = settings.theme.accent;
+    const highlight = L.geoJSON(identifyHighlight, {
+      pane,
+      interactive: false,
+      style: {
+        pane,
+        color: accent,
+        weight: 5,
+        opacity: 0.95,
+        fillColor: accent,
+        fillOpacity: 0.16,
+        dashArray: "7 4",
+        interactive: false,
+      },
+      pointToLayer: (_feature, latlng) =>
+        L.circleMarker(latlng, {
+          pane,
+          interactive: false,
+          radius: 11,
+          color: "#ffffff",
+          weight: 3,
+          opacity: 1,
+          fillColor: accent,
+          fillOpacity: 0.7,
+        }),
+    }).addTo(map);
+    highlight.eachLayer((candidate) => {
+      const element = (candidate as L.Path).getElement?.();
+      element?.setAttribute("data-hp-identify-highlight", "true");
+    });
+    identifyHighlightRef.current = highlight;
+    return () => {
+      if (identifyHighlightRef.current === highlight) {
+        map.removeLayer(highlight);
+        identifyHighlightRef.current = null;
+      }
+    };
+  }, [identifyHighlight, id, settings.theme.accent]);
 
   // ── Reactive basemap synchronization ────────────────────────────
   useEffect(() => {

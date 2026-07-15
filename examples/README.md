@@ -18,10 +18,11 @@ The polished map showcase uses version 2 specifications in `specs/` and CSV inpu
 - `specs/map-multiple-geometries.json` + three layer CSVs — 5 facilities with five columns, 4 segments with four columns, and 2 areas with three columns. The facility and segment sources intentionally share raw ID `A-01`.
 - `specs/map-selection-details.json` + `data/map-selection-details.csv` — 8 response sites; columns: `site_id`, `category`, `severity`, `latitude`, `longitude`.
 - `specs/arcgis-map-join-showcase.json` + `data/arcgis-map-join-showcase.csv` — 8 fictional work summaries with four columns joined to the existing public ArcGIS Feature service. `data/arcgis-map-join-service-fixture.csv` is the deterministic three-column service response used only by automated tests.
+- `specs/arcgis-dynamic-identify-showcase.json` — a public Dynamic MapServer image layer with temporary, read-only click identify, multi-result choice, and geometry highlight. It intentionally has no dataset, join, or persistent selection.
 
 For the multiple-geometry demo, Power BI still supplies one flattened visual data view. Append or model the three narrow CSV sources into the rows received by the visual, bind their fields through Values, and let the specification's `facilities`, `segments`, and `priorityAreas` logical datasets project each layer. The browser harness performs this sparse-row union directly.
 
-Power BI coordinate and geometry layers are interactive and can select native rows. ArcGIS Feature layers can query, select, show details, and join. ArcGIS Dynamic and Tile layers are display-only; the examples do not expose unsupported identify, popup, join, or selection controls for those sources.
+Power BI coordinate and geometry layers are interactive and can select native rows. ArcGIS Feature layers can query, select, show details, and join. ArcGIS Dynamic layers display server-rendered images and can expose temporary read-only identify details, but cannot join or persistently select features. ArcGIS Tile layers remain display-only and do not expose identify, popup, join, or selection controls.
 
 ## Intentional 1.0 compatibility examples
 

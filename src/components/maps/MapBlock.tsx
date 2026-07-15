@@ -10,7 +10,11 @@ import { useRenderContext } from "../../render/RenderContext";
 import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 import { MapLayerPanel } from "./MapLayerPanel";
-import { LeafletMap, type LeafletMapController } from "./LeafletMap";
+import {
+  LeafletMap,
+  type LeafletMapClickEvent,
+  type LeafletMapController,
+} from "./LeafletMap";
 import { MapEmptyState } from "./MapEmptyState";
 import { MapLegendPanel } from "./MapLegendPanel";
 import { MapToolbar } from "./MapToolbar";
@@ -69,6 +73,11 @@ import {
   arcGisRefreshRevision,
 } from "./runtime/arcGisLayerRequestRevision";
 import { stableMapRevision } from "./runtime/mapFeatureRevisions";
+import { executeArcGisDynamicIdentify } from "../../maps/arcgis/arcGisDynamicIdentify";
+import {
+  createDynamicIdentifyPresentation,
+  type DynamicIdentifyChoice,
+} from "./runtime/dynamicIdentifyRuntime";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -84,6 +93,20 @@ export interface ArcGisFeatureRuntimeEntry {
   error?: string;
   requestVersion: number;
 }
+
+interface DynamicIdentifyRuntimeState {
+  loading: boolean;
+  error?: string;
+  layers: ResolvedMapLayer[];
+  choices: DynamicIdentifyChoice[];
+  activeFeatureKey?: string;
+}
+
+const emptyDynamicIdentifyState = (): DynamicIdentifyRuntimeState => ({
+  loading: false,
+  layers: [],
+  choices: [],
+});
 
 export function resolveMapToolbarPopover(
   stored: MapToolbarPopoverState | undefined,
@@ -308,6 +331,10 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const [arcGisFeatureState, setArcGisFeatureState] = useState<
     Record<string, ArcGisFeatureRuntimeEntry>
   >({});
+  const dynamicIdentifyControllerRef = useRef<AbortController | null>(null);
+  const dynamicIdentifyVersionRef = useRef(0);
+  const [dynamicIdentifyState, setDynamicIdentifyState] =
+    useState<DynamicIdentifyRuntimeState>(emptyDynamicIdentifyState);
   const [layerRuntimeState, setLayerRuntimeState] = useState<
     Record<
       string,
@@ -365,6 +392,13 @@ export function MapBlock({ component }: { component: MapComponent }) {
             ? createArcGisTileShell(definition)
             : createArcGisDynamicShell(definition),
         ),
+    [layerDefinitions],
+  );
+  const dynamicDefinitions = useMemo(
+    () =>
+      layerDefinitions.filter(
+        (definition) => definition.source.type === "arcgisDynamic",
+      ),
     [layerDefinitions],
   );
 
@@ -551,6 +585,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
     () => () => {
       for (const [, controller] of layerAbortControllersRef.current)
         controller.abort();
+      dynamicIdentifyControllerRef.current?.abort();
+      dynamicIdentifyControllerRef.current = null;
       for (const [, timer] of layerRefreshTimersRef.current)
         clearInterval(timer);
       layerAbortControllersRef.current.clear();
@@ -712,6 +748,222 @@ export function MapBlock({ component }: { component: MapComponent }) {
     });
   }, [id, runtimeLayers]);
 
+  const handleMapClick = useCallback(
+    (event: LeafletMapClickEvent): boolean => {
+      const visibleState = context.state.mapLayerState[id]?.visibility;
+      const candidates = dynamicDefinitions.filter((definition) => {
+        const source = definition.source;
+        if (source.type !== "arcgisDynamic" || source.identify?.enabled === false)
+          return false;
+        const resolved = runtimeLayers.find((layer) => layer.id === definition.id);
+        if ((visibleState?.[definition.id] ?? resolved?.visible ?? true) === false)
+          return false;
+        const minimum = Math.max(
+          source.minZoom ?? Number.NEGATIVE_INFINITY,
+          definition.visibility?.minZoom ?? Number.NEGATIVE_INFINITY,
+        );
+        const maximum = Math.min(
+          source.maxZoom ?? Number.POSITIVE_INFINITY,
+          definition.visibility?.maxZoom ?? Number.POSITIVE_INFINITY,
+        );
+        return event.viewport.zoom >= minimum && event.viewport.zoom <= maximum;
+      });
+      if (!candidates.length) {
+        dynamicIdentifyControllerRef.current?.abort();
+        dynamicIdentifyControllerRef.current = null;
+        dynamicIdentifyVersionRef.current += 1;
+        setDynamicIdentifyState(emptyDynamicIdentifyState());
+        if (
+          context.state.mapInteractionState[id]?.activeFeature?.kind === "identify"
+        )
+          context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
+        return false;
+      }
+
+      dynamicIdentifyControllerRef.current?.abort();
+      const controller = new AbortController();
+      dynamicIdentifyControllerRef.current = controller;
+      const version = ++dynamicIdentifyVersionRef.current;
+      setDynamicIdentifyState((previous) => ({
+        ...previous,
+        loading: true,
+        error: undefined,
+      }));
+      void Promise.allSettled(
+        candidates.map(async (definition) => {
+          const source = definition.source;
+          if (source.type !== "arcgisDynamic") return undefined;
+          const access = serviceAccess(source.url);
+          if (!access.allowed)
+            throw new Error(
+              access.reason ?? "ArcGIS dynamic identify access is unavailable.",
+            );
+          const results = await executeArcGisDynamicIdentify({
+            url: source.url,
+            latitude: event.anchor.lat,
+            longitude: event.anchor.lon,
+            mapExtent: event.viewport.bounds,
+            imageWidth: event.viewport.width,
+            imageHeight: event.viewport.height,
+            layerIds: source.layerIds,
+            layerDefinitions: source.layerDefinitions,
+            identify: source.identify,
+            signal: controller.signal,
+          });
+          return results.length
+            ? createDynamicIdentifyPresentation(id, definition, results)
+            : undefined;
+        }),
+      ).then((settled) => {
+        if (
+          controller.signal.aborted ||
+          dynamicIdentifyVersionRef.current !== version
+        )
+          return;
+        const presentations = settled.flatMap((entry) =>
+          entry.status === "fulfilled" && entry.value ? [entry.value] : [],
+        );
+        const failures = settled.flatMap((entry) =>
+          entry.status === "rejected"
+            ? [entry.reason instanceof Error ? entry.reason.message : String(entry.reason)]
+            : [],
+        );
+        const layers = presentations.map((presentation) => presentation.layer);
+        const choices = presentations.flatMap(
+          (presentation) => presentation.choices,
+        );
+        const first = choices[0];
+        if (!first) {
+          setDynamicIdentifyState({
+            loading: false,
+            error:
+              failures[0] ?? "No Dynamic MapServer features were found at this location.",
+            layers: [],
+            choices: [],
+          });
+          if (
+            context.state.mapInteractionState[id]?.activeFeature?.kind ===
+            "identify"
+          )
+            context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
+          return;
+        }
+        setDynamicIdentifyState({
+          loading: false,
+          error: failures[0],
+          layers,
+          choices,
+          activeFeatureKey: first.featureKey,
+        });
+        const feature = layers
+          .find((layer) => layer.id === first.layerId)
+          ?.features.find((candidate) => candidate.featureKey === first.featureKey);
+        if (!feature) return;
+        context.dispatch({
+          type: "showMapIdentifiedFeature",
+          mapId: id,
+          feature: {
+            featureKey: first.featureKey,
+            layerId: first.layerId,
+            featureId: feature.id,
+            anchor: event.anchor,
+          },
+        });
+      });
+      return true;
+    },
+    [
+      context.state.mapInteractionState[id]?.activeFeature?.kind,
+      context.state.mapLayerState[id]?.visibility,
+      context.dispatch,
+      dynamicDefinitions,
+      id,
+      runtimeLayers,
+      serviceAccess,
+    ],
+  );
+
+  const activateIdentifyChoice = useCallback(
+    (featureKey: string) => {
+      const choice = dynamicIdentifyState.choices.find(
+        (candidate) => candidate.featureKey === featureKey,
+      );
+      const feature = choice
+        ? dynamicIdentifyState.layers
+            .find((layer) => layer.id === choice.layerId)
+            ?.features.find((candidate) => candidate.featureKey === featureKey)
+        : undefined;
+      const anchor = context.state.mapInteractionState[id]?.activeFeature?.anchor;
+      if (!choice || !feature) return;
+      setDynamicIdentifyState((previous) => ({
+        ...previous,
+        activeFeatureKey: featureKey,
+      }));
+      context.dispatch({
+        type: "showMapIdentifiedFeature",
+        mapId: id,
+        feature: {
+          featureKey,
+          layerId: choice.layerId,
+          featureId: feature.id,
+          anchor,
+        },
+      });
+    }, [context.state.mapInteractionState[id]?.activeFeature?.anchor, context.dispatch, dynamicIdentifyState.choices, dynamicIdentifyState.layers, id],
+  );
+
+  const activeIdentifyGeometry = useMemo(() => {
+    if (!dynamicIdentifyState.activeFeatureKey) return null;
+    for (const layer of dynamicIdentifyState.layers) {
+      const feature = layer.features.find(
+        (candidate) =>
+          candidate.featureKey === dynamicIdentifyState.activeFeatureKey,
+      );
+      if (feature) return feature.geometry;
+    }
+    return null;
+  }, [dynamicIdentifyState.activeFeatureKey, dynamicIdentifyState.layers]);
+  const detailsLayers = useMemo(
+    () => [...runtimeLayers, ...dynamicIdentifyState.layers],
+    [runtimeLayers, dynamicIdentifyState.layers],
+  );
+
+  useEffect(() => {
+    const active = context.state.mapInteractionState[id]?.activeFeature;
+    if (!active || active.kind === "identify" || !dynamicIdentifyState.layers.length)
+      return;
+    dynamicIdentifyControllerRef.current?.abort();
+    dynamicIdentifyControllerRef.current = null;
+    dynamicIdentifyVersionRef.current += 1;
+    setDynamicIdentifyState(emptyDynamicIdentifyState());
+  }, [context.state.mapInteractionState[id]?.activeFeature, dynamicIdentifyState.layers.length]);
+
+  useEffect(() => {
+    const active = context.state.mapInteractionState[id]?.activeFeature;
+    if (active?.kind !== "identify") return;
+    const parentLayerId = active.layerId.endsWith("::identify")
+      ? active.layerId.slice(0, -"::identify".length)
+      : undefined;
+    const definitionExists = dynamicDefinitions.some(
+      (definition) => definition.id === parentLayerId,
+    );
+    const visible = parentLayerId
+      ? context.state.mapLayerState[id]?.visibility?.[parentLayerId] ?? true
+      : false;
+    if (definitionExists && visible) return;
+    dynamicIdentifyControllerRef.current?.abort();
+    dynamicIdentifyControllerRef.current = null;
+    dynamicIdentifyVersionRef.current += 1;
+    setDynamicIdentifyState(emptyDynamicIdentifyState());
+    context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
+  }, [
+    context.state.mapInteractionState[id]?.activeFeature,
+    context.state.mapLayerState[id]?.visibility,
+    context.dispatch,
+    dynamicDefinitions,
+    id,
+  ]);
+
   // ── Determine if we should show map or empty state ───────────────
   const hasAnyFeatures = runtimeLayers.some((l) => l.features.length > 0);
   const hasTileOrDynamicLayers = runtimeLayers.some(
@@ -864,15 +1116,28 @@ export function MapBlock({ component }: { component: MapComponent }) {
               onViewportChange={handleViewportChange}
               onControllerReady={handleControllerReady}
               onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
+              onMapClick={handleMapClick}
+              identifyHighlight={activeIdentifyGeometry}
             />
           </div>
           <div class="hp-map-overlay-root">
             <MapFeatureDetails
               mapId={id}
               component={component}
-              layers={runtimeLayers}
+              layers={detailsLayers}
               interaction={context.state.mapInteractionState[id]}
+              identifyChoices={dynamicIdentifyState.choices}
+              onIdentifyChoice={activateIdentifyChoice}
               onClose={() => {
+                if (
+                  context.state.mapInteractionState[id]?.activeFeature?.kind ===
+                  "identify"
+                ) {
+                  dynamicIdentifyControllerRef.current?.abort();
+                  dynamicIdentifyControllerRef.current = null;
+                  dynamicIdentifyVersionRef.current += 1;
+                  setDynamicIdentifyState(emptyDynamicIdentifyState());
+                }
                 const clearSelection =
                   component.featureDetails?.clearSelectionOnClose === true;
                 context.dispatch({
@@ -891,6 +1156,16 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 context.executeUiAction(action, event);
               }}
             />
+            {(dynamicIdentifyState.loading || dynamicIdentifyState.error) && (
+              <div
+                class={`hp-map-identify-status${dynamicIdentifyState.error ? " is-error" : ""}`}
+                role={dynamicIdentifyState.error ? "alert" : "status"}
+              >
+                {dynamicIdentifyState.loading
+                  ? "Identifying map features…"
+                  : dynamicIdentifyState.error}
+              </div>
+            )}
             {showToolbar && (
               <MapToolbar
               mapId={id}
@@ -1748,6 +2023,7 @@ export function createArcGisDynamicShell(
       maxZoom: source.maxZoom,
       attribution: source.attribution,
       debounceMs: source.debounceMs,
+      identify: source.identify,
     },
   };
 }

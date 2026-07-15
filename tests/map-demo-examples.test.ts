@@ -87,6 +87,10 @@ const demos: DemoExpectation[] = [
       },
     ],
   },
+  {
+    spec: "arcgis-dynamic-identify-showcase.json",
+    data: [],
+  },
 ];
 
 const specPath = (file: string) => resolve("examples/specs", file);
@@ -124,6 +128,19 @@ describe("map demo examples", () => {
   it("declares the stable details and selection contract on every interactive demo", () => {
     for (const demo of demos) {
       const component = loadSpec(demo.spec).components[0];
+      if (component.layers?.every((layer) => layer.source.type === "arcgisDynamic")) {
+        expect(component.featureDetails).toEqual({
+          mode: "auto",
+          clearSelectionOnBackgroundClick: false,
+          clearSelectionOnClose: false,
+        });
+        expect(component.layers[0].source).toMatchObject({
+          type: "arcgisDynamic",
+          identify: { enabled: true },
+        });
+        expect(component.layers[0].interaction).toBeUndefined();
+        continue;
+      }
       expect(component.featureDetails, demo.spec).toEqual({
         mode: "auto",
         clearSelectionOnBackgroundClick: true,

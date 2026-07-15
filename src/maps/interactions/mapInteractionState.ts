@@ -12,6 +12,8 @@ export interface ActiveMapFeature {
   layerId: string;
   featureId: string;
   anchor?: MapFeatureAnchor;
+  /** Identify results are temporary details and never join the selected feature set. */
+  kind?: "feature" | "identify";
 }
 
 export interface MapInteractionState {
@@ -74,6 +76,17 @@ export function activateMapFeature(
   };
 }
 
+export function showMapIdentifiedFeature(
+  state: MapInteractionState | undefined,
+  feature: ActiveMapFeature,
+): MapInteractionState {
+  const current = state ?? emptyMapInteractionState();
+  return {
+    ...current,
+    activeFeature: { ...feature, kind: "identify" },
+  };
+}
+
 export function reconcileMapInteractionState(
   state: MapInteractionState | undefined,
   availableFeatureKeys: readonly MapFeatureKey[],
@@ -89,7 +102,8 @@ export function reconcileMapInteractionState(
     ),
   );
   const activeFeature =
-    state.activeFeature && available.has(state.activeFeature.featureKey)
+    state.activeFeature?.kind === "identify" ||
+    (state.activeFeature && available.has(state.activeFeature.featureKey))
       ? state.activeFeature
       : undefined;
   const hoveredFeatureKey =

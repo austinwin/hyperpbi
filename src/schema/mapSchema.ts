@@ -167,6 +167,15 @@ export interface ArcGisDynamicLayerSource {
     maxZoom?: number;
     attribution?: string;
     debounceMs?: number;
+    /** Read-only click identify. Results are temporary and never participate in joins or selection. */
+    identify?: ArcGisDynamicIdentifyDefinition;
+}
+
+export interface ArcGisDynamicIdentifyDefinition {
+    enabled?: boolean;
+    tolerance?: number;
+    layerOption?: "visible" | "all" | "top";
+    maxResults?: number;
 }
 
 // ── Join ──────────────────────────────────────────────────────────────

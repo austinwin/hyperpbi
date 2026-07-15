@@ -38,4 +38,16 @@ describe("map schema/runtime capability parity", () => {
         for (const status of ["Implemented", "Partial", "Experimental", "Rejected"]) expect(docs).toContain(`| ${status} |`);
         expect(docs).toContain("basic `hideOverlaps`");
     });
+
+    it("accepts bounded Dynamic identify details but rejects Dynamic selection and Tile identify", () => {
+        const dynamic = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "dynamic", name: "Dynamic", source: { type: "arcgisDynamic", url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer", identify: { enabled: true, tolerance: 7, layerOption: "visible", maxResults: 8 } }, popup: { enabled: true, fields: [{ field: "NAME", fieldSource: "service" }] } }] }] });
+        expect(dynamic.valid).toBe(true);
+        const invalidDynamic = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "dynamic", name: "Dynamic", source: { type: "arcgisDynamic", url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer", identify: { tolerance: 99 } }, interaction: { enabled: true } }] }] });
+        expect(invalidDynamic.diagnostics).toEqual(expect.arrayContaining([
+            expect.objectContaining({ code: "INVALID_PROPERTY_TYPE", path: "/components/0/layers/0/source/identify/tolerance" }),
+            expect.objectContaining({ code: "MAP_CAPABILITY_LIMITATION", path: "/components/0/layers/0/interaction" }),
+        ]));
+        const tile = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "tile", name: "Tile", source: { type: "arcgisTile", url: "https://tiles.arcgisonline.com/a/MapServer", identify: { enabled: true } } }] }] });
+        expect(tile.diagnostics).toContainEqual(expect.objectContaining({ code: "UNKNOWN_PROPERTY", path: "/components/0/layers/0/source/identify" }));
+    });
 });

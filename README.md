@@ -98,14 +98,15 @@ Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, ga
 
 ## Map demos
 
-Four version 2 examples under [`examples/specs`](examples/specs) demonstrate the stabilized map runtime with compact CSV data under [`examples/data`](examples/data):
+Five version 2 examples under [`examples/specs`](examples/specs) demonstrate the stabilized map runtime; Power BI-backed examples use compact CSV data under [`examples/data`](examples/data):
 
 - **Map Feature Showcase** — a five-column Power BI coordinate map with unique status styling, stable one-click selection, tooltips, and responsive Preact feature details.
 - **Multiple Geometry Layers** — five facilities, four lines, and two polygons in independently clickable logical layers, including duplicate raw ID `A-01` in the point and line sources.
 - **Selection and Feature Details** — replace selection, Ctrl/Cmd multi-selection, explicit active-feature deselection, Escape/close behavior, background clearing, and narrow bottom-sheet layout.
 - **ArcGIS Join Showcase** — a four-column fictional Power BI dataset joined to an existing public ArcGIS Feature layer, plus a deterministic CSV service fixture used by automated browser tests.
+- **ArcGIS Dynamic Identify Showcase** — a server-rendered Dynamic MapServer layer with temporary read-only click details, multi-result choice, and returned-geometry highlight.
 
-Power BI coordinate and geometry layers support feature clicks and native row selection. ArcGIS Feature layers support queries, details, selection, and joins. ArcGIS Dynamic and Tile layers are display-only; HyperPBI does not claim per-feature identify, popup, join, or selection support for them.
+Power BI coordinate and geometry layers support feature clicks and native row selection. ArcGIS Feature layers support queries, details, selection, and joins. ArcGIS Dynamic layers support temporary click identify details but not joins or persistent selection. ArcGIS Tile layers remain display-only with no identify, popup, join, or selection.
 
 Map Studio candidate edits are validated with the exact current Runtime Config. Map feature interactions are click-only. ArcGIS tile/dynamic definition changes rebuild only the affected mounted overlay while preserving the viewport; access denial removes already-loaded content. ArcGIS root inspection is one bounded summary request, with lazy selected-item metadata and separate spatial/group/table classification. Join cardinality and unmatched policies are enforced and diagnosed; blank/invalid numeric aggregation inputs never fabricate zero, and empty numeric groups return `null`. Computed class breaks reduce to the supported distinct/ramp count, and map diagnostics use canonical RFC 6901 pointers scoped to the exact selected layer.
 

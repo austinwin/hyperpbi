@@ -58,13 +58,20 @@ test("switching property sections preserves the selected layer and Studio instan
   expect(await page.evaluate(() => window.hpMapStudioHarness.changeCount)).toBe(0);
 });
 
-test("dynamic and tile layers disclose and disable unsupported feature controls", async ({ page }) => {
-  for (const layer of ["Dynamic weather", "Tile basemap"]) {
-    await page.getByRole("button", { name: `Select layer ${layer}` }).click();
-    await expect(page.locator(".hp-map-capability-note")).toBeVisible();
-    for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Feature details", "Selection"])
-      await expect(page.getByRole("tab", { name: section })).toBeDisabled();
-  }
+test("dynamic exposes identify details while tile remains display-only", async ({ page }) => {
+  await page.getByRole("button", { name: "Select layer Dynamic weather" }).click();
+  await expect(page.locator(".hp-map-capability-note")).toContainText("read-only click identify");
+  await expect(page.getByRole("tab", { name: "Feature details" })).toBeEnabled();
+  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Selection"])
+    await expect(page.getByRole("tab", { name: section })).toBeDisabled();
+  await page.getByRole("tab", { name: "Source" }).click();
+  await expect(page.getByRole("switch", { name: "Enable read-only identify" })).toBeChecked();
+  await expect(page.getByText("Dynamic layers do not support Power BI joins or persistent feature selection.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Select layer Tile basemap" }).click();
+  await expect(page.locator(".hp-map-capability-note")).toContainText("display-only");
+  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Feature details", "Selection"])
+    await expect(page.getByRole("tab", { name: section })).toBeDisabled();
 });
 
 test("narrow Map Studio uses one pane without clipped or overlapping controls", async ({ page }) => {

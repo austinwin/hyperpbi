@@ -20,7 +20,7 @@ import {
   type DemoCsvSource,
 } from "../helpers/mapDemoCsv";
 
-type DemoId = "feature" | "geometries" | "selection" | "arcgis";
+type DemoId = "feature" | "geometries" | "selection" | "arcgis" | "dynamic";
 
 interface DemoDefinition {
   spec: string;
@@ -47,6 +47,10 @@ const demoDefinitions: Record<DemoId, DemoDefinition> = {
   arcgis: {
     spec: "arcgis-map-join-showcase.json",
     data: [{ file: "arcgis-map-join-showcase.csv", keyField: "facility_id" }],
+  },
+  dynamic: {
+    spec: "arcgis-dynamic-identify-showcase.json",
+    data: [],
   },
 };
 
@@ -148,6 +152,75 @@ async function installArcGisFixture(): Promise<() => void> {
   };
 }
 
+function installDynamicIdentifyFixture(): () => void {
+  const serviceOrigin = "https://sampleserver6.arcgisonline.com";
+  const originalFetch = window.fetch.bind(window);
+  const transparentPng = Uint8Array.from(
+    atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+X5W2WQAAAABJRU5ErkJggg=="),
+    (character) => character.charCodeAt(0),
+  );
+  setAllowedHostPatterns(["https://*"]);
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    if (!url.startsWith(serviceOrigin)) return originalFetch(input, init);
+    window.hpMapDemo.arcGisRequestCount += 1;
+    if (url.endsWith("/identify")) {
+      return new Response(
+        JSON.stringify({
+          results: [
+            {
+              layerId: 3,
+              layerName: "states",
+              displayFieldName: "STATE_NAME",
+              value: "Texas",
+              attributes: {
+                OBJECTID: 48,
+                STATE_NAME: "Texas",
+                POP2000: 20851820,
+              },
+              geometryType: "esriGeometryPolygon",
+              geometry: {
+                rings: [[[-101, 29], [-96, 29], [-96, 34], [-101, 34], [-101, 29]]],
+              },
+            },
+            {
+              layerId: 2,
+              layerName: "Detailed Counties",
+              displayFieldName: "NAME",
+              value: "Demo County",
+              attributes: {
+                OBJECTID: 101,
+                NAME: "Demo County",
+                STATE_NAME: "Texas",
+                POP2000: 812000,
+              },
+              geometryType: "esriGeometryPolygon",
+              geometry: {
+                rings: [[[-99, 30], [-97, 30], [-97, 32], [-99, 32], [-99, 30]]],
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    if (url.includes("/export"))
+      return new Response(transparentPng, {
+        status: 200,
+        headers: { "Content-Type": "image/png" },
+      });
+    return originalFetch(input, init);
+  };
+  return () => {
+    window.fetch = originalFetch;
+  };
+}
+
 function updateComponent(
   component: MapComponent,
   rendererVariant: boolean,
@@ -197,6 +270,7 @@ function DemoHarness({ demoId }: { demoId: DemoId }) {
     void (async () => {
       try {
         if (demoId === "arcgis") restoreFixture = await installArcGisFixture();
+        else if (demoId === "dynamic") restoreFixture = installDynamicIdentifyFixture();
         const result = await loadDemo(demoId);
         if (active) setLoaded(result);
       } catch (error) {

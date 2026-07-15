@@ -1,0 +1,116 @@
+{
+  "version": "2.0",
+  "title": "ArcGIS Dynamic Identify Showcase",
+  "theme": {
+    "mode": "light",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0f766e",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ec",
+    "radius": 10,
+    "gap": 12
+  },
+  "components": [
+    {
+      "type": "map",
+      "id": "dynamic-identify-showcase",
+      "title": "Read-only Census Map Identify",
+      "subtitle": "Click the map to inspect temporary MapServer results; no selection or join is created.",
+      "span": 12,
+      "heightMode": "aspectRatio",
+      "aspectRatio": 1.8,
+      "minHeight": 360,
+      "view": {
+        "center": [37.8, -96],
+        "zoom": 4,
+        "minZoom": 3,
+        "maxZoom": 12,
+        "fitMode": "none",
+        "preserveView": true
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "featureDetails": {
+        "mode": "auto",
+        "clearSelectionOnBackgroundClick": false,
+        "clearSelectionOnClose": false
+      },
+      "search": {
+        "enabled": false
+      },
+      "layers": [
+        {
+          "id": "census-dynamic",
+          "name": "Census states and counties",
+          "source": {
+            "type": "arcgisDynamic",
+            "url": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer",
+            "layerIds": [2, 3],
+            "format": "png32",
+            "transparent": true,
+            "debounceMs": 250,
+            "identify": {
+              "enabled": true,
+              "tolerance": 7,
+              "layerOption": "visible",
+              "maxResults": 8
+            }
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "service",
+            "title": "{{STATE_NAME}}",
+            "fields": [
+              {
+                "field": "NAME",
+                "fieldSource": "service",
+                "label": "County"
+              },
+              {
+                "field": "STATE_NAME",
+                "fieldSource": "service",
+                "label": "State"
+              },
+              {
+                "field": "POP2000",
+                "fieldSource": "service",
+                "label": "Population",
+                "display": "number"
+              }
+            ]
+          },
+          "legend": {
+            "visible": false
+          },
+          "visible": true,
+          "opacity": 0.82,
+          "order": 10
+        }
+      ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": false,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": false
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": false,
+        "search": false,
+        "clearSelection": false,
+        "zoomToSelection": false,
+        "bookmarks": false
+      },
+      "settings": {
+        "showLayerControl": true,
+        "showLegend": false
+      }
+    }
+  ]
+}

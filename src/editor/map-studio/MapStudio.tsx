@@ -84,7 +84,7 @@ function propertyTabSupported(
     return sourceType === "powerbi" || sourceType === "arcgisFeature";
   if (tab === "popup") return capability.popup;
   if (tab === "tooltip") return capability.tooltip;
-  if (tab === "interaction") return capability.featureInteraction;
+  if (tab === "interaction") return capability.selection;
   return true;
 }
 const object = (value: unknown): value is Json =>
@@ -1759,6 +1759,88 @@ function SourceEditor({
                   }
                 />
               </label>
+              <fieldset>
+                <legend>Click identify</legend>
+                <label>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={layer.source.identify?.enabled !== false}
+                    onChange={(event) =>
+                      mutate((candidate) => {
+                        if (candidate.source.type === "arcgisDynamic")
+                          candidate.source.identify = {
+                            ...(candidate.source.identify ?? {}),
+                            enabled: event.currentTarget.checked,
+                          };
+                      })
+                    }
+                  />{" "}
+                  Enable read-only identify
+                </label>
+                <label>
+                  <span>Pixel tolerance</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={layer.source.identify?.tolerance ?? 6}
+                    onChange={(event) =>
+                      mutate((candidate) => {
+                        if (candidate.source.type === "arcgisDynamic")
+                          candidate.source.identify = {
+                            ...(candidate.source.identify ?? {}),
+                            tolerance: Number(event.currentTarget.value),
+                          };
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Layers to identify</span>
+                  <select
+                    value={layer.source.identify?.layerOption ?? "visible"}
+                    onChange={(event) =>
+                      mutate((candidate) => {
+                        if (candidate.source.type === "arcgisDynamic")
+                          candidate.source.identify = {
+                            ...(candidate.source.identify ?? {}),
+                            layerOption: event.currentTarget.value as
+                              | "visible"
+                              | "all"
+                              | "top",
+                          };
+                      })
+                    }
+                  >
+                    <option value="visible">Visible sublayers</option>
+                    <option value="top">Top matching sublayer</option>
+                    <option value="all">All sublayers</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Maximum results</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="25"
+                    value={layer.source.identify?.maxResults ?? 10}
+                    onChange={(event) =>
+                      mutate((candidate) => {
+                        if (candidate.source.type === "arcgisDynamic")
+                          candidate.source.identify = {
+                            ...(candidate.source.identify ?? {}),
+                            maxResults: Number(event.currentTarget.value),
+                          };
+                      })
+                    }
+                  />
+                </label>
+                <small>
+                  Results are temporary details only. Dynamic layers do not
+                  support Power BI joins or persistent feature selection.
+                </small>
+              </fieldset>
             </>
           )}
         </>

@@ -53,7 +53,7 @@ export const MAP_SOURCE_TYPES: Record<string, MapLayerSourceTypeDef> = {
         supportsQuery: false,
         supportsSymbology: false,
         supportsLabels: false,
-        supportsPopup: false,
+        supportsPopup: true,
         needsHostPermission: true,
     },
 };

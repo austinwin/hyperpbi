@@ -11,15 +11,17 @@ describe("map layer capabilities", () => {
     });
     expect(resolveMapLayerCapabilities("arcgisDynamic")).toMatchObject({
       display: true,
-      popup: false,
+      featureInteraction: true,
+      popup: true,
       join: false,
       selection: false,
-      identify: false,
+      identify: true,
     });
     expect(resolveMapLayerCapabilities("arcgisTile")).toMatchObject({
       display: true,
       featureInteraction: false,
       popup: false,
+      identify: false,
     });
   });
 });
