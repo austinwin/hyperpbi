@@ -1,0 +1,9 @@
+site_id,category,severity,latitude,longitude
+ST-201,Inspection,Low,30.2795,-97.7562
+ST-202,Maintenance,Medium,30.2730,-97.7398
+ST-203,Incident,High,30.2647,-97.7501
+ST-204,Inspection,Low,30.2582,-97.7337
+ST-205,Maintenance,High,30.2505,-97.7591
+ST-206,Incident,Medium,30.2441,-97.7414
+ST-207,Inspection,Medium,30.2376,-97.7522
+ST-208,Maintenance,Low,30.2318,-97.7354

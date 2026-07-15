@@ -1,0 +1,249 @@
+{
+  "version": "2.0",
+  "title": "Multiple Geometry Layers",
+  "theme": {
+    "mode": "light",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0f766e",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ec",
+    "radius": 10,
+    "gap": 12
+  },
+  "data": {
+    "datasets": {
+      "facilities": {
+        "source": "powerbi",
+        "filter": {"field": "facility_id", "operator": "in", "value": ["A-01", "F-02", "F-03", "F-04", "F-05"]},
+        "select": ["facility_id", "facility_type", "status", "latitude", "longitude"]
+      },
+      "segments": {
+        "source": "powerbi",
+        "filter": {"field": "segment_id", "operator": "in", "value": ["A-01", "S-02", "S-03", "S-04"]},
+        "select": ["segment_id", "condition", "length_ft", "geometry"]
+      },
+      "priorityAreas": {
+        "source": "powerbi",
+        "filter": {"field": "area_id", "operator": "in", "value": ["Z-01", "Z-02"]},
+        "select": ["area_id", "priority", "geometry"]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "map",
+      "id": "multiple-geometry-map",
+      "title": "Infrastructure Network",
+      "subtitle": "Facilities, segments, and priority areas remain independently interactive.",
+      "span": 12,
+      "heightMode": "aspectRatio",
+      "aspectRatio": 1.7,
+      "minHeight": 380,
+      "view": {
+        "fitMode": "allVisibleLayers",
+        "fitPadding": 0.1,
+        "preserveView": true
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "featureDetails": {
+        "mode": "auto",
+        "clearSelectionOnBackgroundClick": true,
+        "clearSelectionOnClose": false
+      },
+      "search": {
+        "enabled": false
+      },
+      "layers": [
+        {
+          "id": "priority-areas",
+          "name": "Priority Areas",
+          "dataset": "priorityAreas",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "geometry": "geometry"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "priority",
+            "fieldSource": "powerbi",
+            "values": [
+              {
+                "value": "High",
+                "label": "High Priority",
+                "symbol": {
+                  "shape": "fill",
+                  "fillColor": "#f59e0b",
+                  "color": "#b45309",
+                  "weight": 2,
+                  "fillOpacity": 0.24
+                }
+              },
+              {
+                "value": "Standard",
+                "label": "Standard Priority",
+                "symbol": {
+                  "shape": "fill",
+                  "fillColor": "#60a5fa",
+                  "color": "#2563eb",
+                  "weight": 2,
+                  "fillOpacity": 0.2
+                }
+              }
+            ]
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {"field": "area_id", "fieldSource": "powerbi", "label": "Area"},
+              {"field": "priority", "fieldSource": "powerbi", "label": "Priority"}
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "Area {{area_id}}",
+            "fields": [
+              {"field": "priority", "fieldSource": "powerbi", "label": "Priority", "display": "badge"}
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true,
+            "clearOnSecondClick": false
+          },
+          "legend": {"visible": true, "title": "Area Priority"},
+          "visible": true,
+          "opacity": 1,
+          "order": 10
+        },
+        {
+          "id": "network-segments",
+          "name": "Network Segments",
+          "dataset": "segments",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "geometry": "geometry"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "condition",
+            "fieldSource": "powerbi",
+            "values": [
+              {"value": "Good", "label": "Good", "symbol": {"shape": "line", "color": "#2f855a", "weight": 4, "opacity": 0.95}},
+              {"value": "Monitor", "label": "Monitor", "symbol": {"shape": "line", "color": "#d97706", "weight": 4, "opacity": 0.95, "dashArray": "8 4"}},
+              {"value": "Poor", "label": "Poor", "symbol": {"shape": "line", "color": "#b91c1c", "weight": 5, "opacity": 0.95}}
+            ]
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {"field": "segment_id", "fieldSource": "powerbi", "label": "Segment"},
+              {"field": "condition", "fieldSource": "powerbi", "label": "Condition"}
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "Segment {{segment_id}}",
+            "fields": [
+              {"field": "condition", "fieldSource": "powerbi", "label": "Condition", "display": "badge"},
+              {"field": "length_ft", "fieldSource": "powerbi", "label": "Length", "format": "integer"}
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true,
+            "clearOnSecondClick": false
+          },
+          "legend": {"visible": true, "title": "Segment Condition"},
+          "visible": true,
+          "opacity": 1,
+          "order": 20
+        },
+        {
+          "id": "facilities",
+          "name": "Facilities",
+          "dataset": "facilities",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "status",
+            "fieldSource": "powerbi",
+            "values": [
+              {"value": "Operational", "label": "Operational", "symbol": {"shape": "circle", "fillColor": "#0f766e", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}},
+              {"value": "Attention", "label": "Attention", "symbol": {"shape": "circle", "fillColor": "#d97706", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}},
+              {"value": "Offline", "label": "Offline", "symbol": {"shape": "circle", "fillColor": "#b91c1c", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}}
+            ]
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {"field": "facility_id", "fieldSource": "powerbi", "label": "Facility"},
+              {"field": "status", "fieldSource": "powerbi", "label": "Status"}
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "Facility {{facility_id}}",
+            "fields": [
+              {"field": "facility_type", "fieldSource": "powerbi", "label": "Type"},
+              {"field": "status", "fieldSource": "powerbi", "label": "Status", "display": "badge"}
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true,
+            "clearOnSecondClick": false
+          },
+          "legend": {"visible": true, "title": "Facility Status"},
+          "visible": true,
+          "opacity": 1,
+          "order": 30
+        }
+      ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": false
+      },
+      "legend": {"defaultOpen": false},
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "search": false,
+        "clearSelection": true,
+        "zoomToSelection": true,
+        "bookmarks": false
+      },
+      "settings": {"showLayerControl": true, "showLegend": true}
+    }
+  ]
+}

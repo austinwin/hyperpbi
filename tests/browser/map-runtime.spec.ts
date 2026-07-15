@@ -41,6 +41,19 @@ test("normal repeat click never toggles off and modifier click supports multi-se
   await expect(page.locator(".hp-map-feature-details-header")).toContainText("2 features selected");
 });
 
+test("modifier-deselecting the active feature activates the most recent remaining selection", async ({ page }) => {
+  const alpha = page.locator('[data-hp-layer-id="points"][data-hp-feature-id="duplicate"]');
+  const beta = page.locator('[data-hp-layer-id="points"][data-hp-feature-id="second"]');
+  await alpha.click({ force: true });
+  await beta.click({ force: true, modifiers: ["Control"] });
+  await expect(page.locator(".hp-map-feature-details")).toContainText("Point Beta");
+  await beta.click({ force: true, modifiers: ["Control"] });
+  await expect(page.locator(".hp-map-feature-details")).toContainText("Point Alpha");
+  await expect(page.locator(".hp-map-feature-details-header")).not.toContainText("2 features selected");
+  await alpha.click({ force: true, modifiers: ["Control"] });
+  await expect(page.locator(".hp-map-feature-details")).toHaveCount(0);
+});
+
 test("visual, opacity, content, and retained refresh updates do not recreate geometry or close details", async ({ page }) => {
   const alpha = page.locator('[data-hp-layer-id="points"][data-hp-feature-id="duplicate"]');
   await alpha.click({ force: true });

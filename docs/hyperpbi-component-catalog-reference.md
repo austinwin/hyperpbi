@@ -5197,9 +5197,9 @@ _1 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `layerPanel`, `toolbar`, `settings`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `featureDetails`, `layerPanel`, `toolbar`, `settings`, `height`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `featureDetails`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `minHeight`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 

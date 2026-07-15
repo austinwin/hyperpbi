@@ -1,0 +1,178 @@
+{
+  "version": "2.0",
+  "title": "Map Feature Showcase",
+  "theme": {
+    "mode": "light",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0f766e",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ec",
+    "radius": 10,
+    "gap": 12
+  },
+  "components": [
+    {
+      "type": "map",
+      "id": "asset-feature-showcase",
+      "title": "Municipal Asset Status",
+      "subtitle": "Select an asset to inspect its current operating status.",
+      "span": 12,
+      "heightMode": "aspectRatio",
+      "aspectRatio": 1.8,
+      "minHeight": 340,
+      "view": {
+        "fitMode": "data",
+        "fitPadding": 0.12,
+        "preserveView": true
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "featureDetails": {
+        "mode": "auto",
+        "clearSelectionOnBackgroundClick": true,
+        "clearSelectionOnClose": false
+      },
+      "search": {
+        "enabled": false
+      },
+      "layers": [
+        {
+          "id": "municipal-assets",
+          "name": "Municipal Assets",
+          "dataset": "powerbi",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "status",
+            "fieldSource": "powerbi",
+            "values": [
+              {
+                "value": "Operational",
+                "label": "Operational",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#2f855a",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 7,
+                  "fillOpacity": 0.9
+                }
+              },
+              {
+                "value": "Attention",
+                "label": "Attention",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#d97706",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 7,
+                  "fillOpacity": 0.9
+                }
+              },
+              {
+                "value": "Offline",
+                "label": "Offline",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#b91c1c",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 7,
+                  "fillOpacity": 0.9
+                }
+              }
+            ],
+            "defaultSymbol": {
+              "fillColor": "#64748b",
+              "outlineColor": "#ffffff",
+              "outlineWidth": 2,
+              "radius": 7
+            }
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {
+                "field": "asset_id",
+                "fieldSource": "powerbi",
+                "label": "Asset ID"
+              },
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status"
+              }
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "{{asset_id}}",
+            "fields": [
+              {
+                "field": "asset_type",
+                "fieldSource": "powerbi",
+                "label": "Asset Type"
+              },
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status",
+                "display": "badge"
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true,
+            "clearOnSecondClick": false
+          },
+          "legend": {
+            "visible": true,
+            "title": "Asset Status"
+          },
+          "visible": true,
+          "opacity": 1,
+          "order": 10
+        }
+      ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": false
+      },
+      "legend": {
+        "defaultOpen": false
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "search": false,
+        "clearSelection": true,
+        "zoomToSelection": true,
+        "bookmarks": false
+      },
+      "settings": {
+        "showLayerControl": true,
+        "showLegend": true
+      }
+    }
+  ]
+}

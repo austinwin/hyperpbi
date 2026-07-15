@@ -1,0 +1,6 @@
+facility_id,facility_type,status,latitude,longitude
+A-01,Pump Station,Operational,30.2780,-97.7580
+F-02,Operations Center,Operational,30.2670,-97.7350
+F-03,Storage Facility,Attention,30.2510,-97.7480
+F-04,Pump Station,Offline,30.2410,-97.7270
+F-05,Maintenance Yard,Operational,30.2320,-97.7620

@@ -1,0 +1,9 @@
+facility_id,status,work_count,priority
+AS053027,Attention,4,High
+BW238056,Operational,2,Routine
+HS001046B,Operational,1,Medium
+II010161,Offline,6,High
+NE011005,Operational,3,Routine
+SW009010,Attention,5,Medium
+SW053057,Operational,2,Routine
+TK207019,Attention,7,High

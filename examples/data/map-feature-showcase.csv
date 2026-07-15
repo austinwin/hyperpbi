@@ -1,0 +1,11 @@
+asset_id,asset_type,status,latitude,longitude
+AS-101,Pump Station,Operational,30.2786,-97.7496
+AS-102,Manhole,Attention,30.2734,-97.7418
+AS-103,Facility,Operational,30.2678,-97.7537
+AS-104,Manhole,Operational,30.2641,-97.7442
+AS-105,Pump Station,Offline,30.2589,-97.7511
+AS-106,Facility,Attention,30.2546,-97.7395
+AS-107,Manhole,Operational,30.2498,-97.7476
+AS-108,Pump Station,Operational,30.2454,-97.7564
+AS-109,Facility,Offline,30.2407,-97.7431
+AS-110,Manhole,Attention,30.2359,-97.7519

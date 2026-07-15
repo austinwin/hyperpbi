@@ -224,16 +224,19 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             const currentInteraction = state.mapInteractionState[action.mapId];
             const mapInteractionState = { ...state.mapInteractionState };
             if (currentInteraction)
-                mapInteractionState[action.mapId] = { ...currentInteraction, selectedFeatureKeys: [] };
+                mapInteractionState[action.mapId] = { ...currentInteraction, selectedFeatureKeys: [], selectedFeaturesByKey: {} };
             return { ...state, mapSelectedFeatureIds: rest, mapInteractionState };
         }
         const currentInteraction = state.mapInteractionState[action.mapId] ?? emptyMapInteractionState();
+        const selectedFeaturesByKey = Object.fromEntries(
+            Object.entries(currentInteraction.selectedFeaturesByKey ?? {}).filter(([key]) => newIds.includes(key))
+        );
         return {
             ...state,
             mapSelectedFeatureIds: { ...state.mapSelectedFeatureIds, [action.mapId]: newIds },
             mapInteractionState: {
                 ...state.mapInteractionState,
-                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: newIds },
+                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: newIds, selectedFeaturesByKey },
             },
         };
     }
@@ -246,7 +249,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             mapSelectedFeatureIds: rest,
             mapInteractionState: {
                 ...state.mapInteractionState,
-                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: [] },
+                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: [], selectedFeaturesByKey: {} },
             },
         };
     }
@@ -290,7 +293,12 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             mapSelectedFeatureIds,
             mapInteractionState: {
                 ...state.mapInteractionState,
-                [action.mapId]: { ...current, activeFeature: undefined, selectedFeatureKeys },
+                [action.mapId]: {
+                    ...current,
+                    activeFeature: undefined,
+                    selectedFeatureKeys,
+                    selectedFeaturesByKey: action.clearSelection ? {} : current.selectedFeaturesByKey,
+                },
             },
         };
     }

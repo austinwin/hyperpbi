@@ -96,6 +96,17 @@ Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, ga
 
 `map` uses the same single **Values** field well as every other HyperPBI component. New 2.0 maps declare explicit layers, optional per-layer logical datasets, and per-layer `source.bindings`; explicit layers never inherit global Runtime Config coordinates. Map Studio and the mounted preview share calculated fields, Runtime Config transformations/aliases, logical datasets, lineage, and validation through one prepared-data pipeline. Map Studio provides source-aware fields, explicit ArcGIS metadata fetch and bounded join preview actions, layer interaction editing, transaction-based text edits, and live-preview bookmark capture. Basemap and authored view edits update the mounted map, and `view.fitPadding` is a ratio from `0` through `0.5` (default `0.08`). Public ArcGIS feature, tile, and dynamic sources require a Maps package and an approved HTTPS host. See [map services](docs/map-services.md).
 
+## Map demos
+
+Four version 2 examples under [`examples/specs`](examples/specs) demonstrate the stabilized map runtime with compact CSV data under [`examples/data`](examples/data):
+
+- **Map Feature Showcase** — a five-column Power BI coordinate map with unique status styling, stable one-click selection, tooltips, and responsive Preact feature details.
+- **Multiple Geometry Layers** — five facilities, four lines, and two polygons in independently clickable logical layers, including duplicate raw ID `A-01` in the point and line sources.
+- **Selection and Feature Details** — replace selection, Ctrl/Cmd multi-selection, explicit active-feature deselection, Escape/close behavior, background clearing, and narrow bottom-sheet layout.
+- **ArcGIS Join Showcase** — a four-column fictional Power BI dataset joined to an existing public ArcGIS Feature layer, plus a deterministic CSV service fixture used by automated browser tests.
+
+Power BI coordinate and geometry layers support feature clicks and native row selection. ArcGIS Feature layers support queries, details, selection, and joins. ArcGIS Dynamic and Tile layers are display-only; HyperPBI does not claim per-feature identify, popup, join, or selection support for them.
+
 Map Studio candidate edits are validated with the exact current Runtime Config. Map feature interactions are click-only. ArcGIS tile/dynamic definition changes rebuild only the affected mounted overlay while preserving the viewport; access denial removes already-loaded content. ArcGIS root inspection is one bounded summary request, with lazy selected-item metadata and separate spatial/group/table classification. Join cardinality and unmatched policies are enforced and diagnosed; blank/invalid numeric aggregation inputs never fabricate zero, and empty numeric groups return `null`. Computed class breaks reduce to the supported distinct/ramp count, and map diagnostics use canonical RFC 6901 pointers scoped to the exact selected layer.
 
 `svg` is the preferred governed vector system for diagrams, schematics, pictorial marks, and custom gauges. It uses structured allowlisted elements, bindings, scales, conditions, state, bounded repeats, normal interactions, ID isolation, animation presets, and reduced-motion handling. `svgMarkup` is a strictly sanitized fallback for a single raw SVG document. See [SVG visuals](docs/svg-visuals.md).

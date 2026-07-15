@@ -1,0 +1,110 @@
+{
+  "version": "2.0",
+  "title": "Selection and Feature Details",
+  "theme": {
+    "mode": "light",
+    "primaryColor": "#2563eb",
+    "accentColor": "#7c3aed",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ec",
+    "radius": 10,
+    "gap": 12
+  },
+  "components": [
+    {
+      "type": "map",
+      "id": "selection-details-map",
+      "title": "Site Response Priorities",
+      "subtitle": "Click to replace selection; Ctrl/Cmd-click to build or reduce a selection.",
+      "span": 12,
+      "heightMode": "aspectRatio",
+      "aspectRatio": 1.65,
+      "minHeight": 400,
+      "view": {
+        "fitMode": "data",
+        "fitPadding": 0.14,
+        "preserveView": true
+      },
+      "basemap": {"type": "osm"},
+      "featureDetails": {
+        "mode": "auto",
+        "clearSelectionOnBackgroundClick": true,
+        "clearSelectionOnClose": false
+      },
+      "search": {"enabled": false},
+      "layers": [
+        {
+          "id": "response-sites",
+          "name": "Response Sites",
+          "dataset": "powerbi",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "severity",
+            "fieldSource": "powerbi",
+            "values": [
+              {"value": "Low", "label": "Low", "symbol": {"shape": "circle", "fillColor": "#2f855a", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}},
+              {"value": "Medium", "label": "Medium", "symbol": {"shape": "circle", "fillColor": "#d97706", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 8}},
+              {"value": "High", "label": "High", "symbol": {"shape": "circle", "fillColor": "#b91c1c", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 9}}
+            ]
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {"field": "site_id", "fieldSource": "powerbi", "label": "Site"},
+              {"field": "severity", "fieldSource": "powerbi", "label": "Severity"}
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "{{site_id}}",
+            "fields": [
+              {"field": "category", "fieldSource": "powerbi", "label": "Category"},
+              {"field": "severity", "fieldSource": "powerbi", "label": "Severity", "display": "badge"}
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true,
+            "clearOnSecondClick": false
+          },
+          "legend": {"visible": true, "title": "Severity"},
+          "visible": true,
+          "opacity": 1,
+          "order": 10
+        }
+      ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": false
+      },
+      "legend": {"defaultOpen": false},
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "search": false,
+        "clearSelection": true,
+        "zoomToSelection": true,
+        "bookmarks": false
+      },
+      "settings": {"showLayerControl": true, "showLegend": true}
+    }
+  ]
+}

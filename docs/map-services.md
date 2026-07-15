@@ -41,13 +41,28 @@ Every layer selects its effective dataset by:
 
 The runtime resolves source bindings, renderer fields, labels, popup/tooltip fields, visibility conditions, filters, interactions, and the Power BI side of ArcGIS joins against that layer's effective schema and rows. Grouped rows retain arrays of contributing Power BI row indices and row identities for selection where Power BI supplied identities.
 
+## Map demos
+
+The current showcase specifications are intentionally map-first and use only compact CSV inputs:
+
+| Demo | Specification | CSV data | Demonstrates |
+|---|---|---|---|
+| Map Feature Showcase | [`map-feature-showcase.json`](../examples/specs/map-feature-showcase.json) | [`map-feature-showcase.csv`](../examples/data/map-feature-showcase.csv) | Power BI latitude/longitude, unique status styling, one-click details, stable repeat click, multi-selection |
+| Multiple Geometry Layers | [`map-multiple-geometries.json`](../examples/specs/map-multiple-geometries.json) | [`facilities`](../examples/data/map-multiple-geometries-facilities.csv), [`segments`](../examples/data/map-multiple-geometries-segments.csv), [`areas`](../examples/data/map-multiple-geometries-areas.csv) | Clickable points, lines, and polygons; layer visibility/order; duplicate raw IDs isolated by canonical feature keys |
+| Selection and Feature Details | [`map-selection-details.json`](../examples/specs/map-selection-details.json) | [`map-selection-details.csv`](../examples/data/map-selection-details.csv) | Replace/toggle selection, predictable active details, close/Escape/background behavior, responsive auto details mode |
+| ArcGIS Join Showcase | [`arcgis-map-join-showcase.json`](../examples/specs/arcgis-map-join-showcase.json) | [`Power BI rows`](../examples/data/arcgis-map-join-showcase.csv), [`deterministic service fixture`](../examples/data/arcgis-map-join-service-fixture.csv) | ArcGIS Feature join, joined rendering/details, match diagnostics, Power BI lineage selection, retained selection through refresh |
+
+The multiple-geometry source CSVs remain separate and narrow. Because Power BI gives a custom visual one flattened data view, a report author must append or otherwise model those rows into the visual's received table and bind the fields through Values; the specification's logical datasets then project the three layer schemas. The automated browser harness performs the same sparse-row union and renders the real Leaflet runtime.
+
+The ArcGIS join specification uses the repository's existing public Houston service URL. The service-fixture CSV is clearly test-only: it captures the eight object IDs, join keys, and point geometries used by Playwright so browser verification is deterministic and does not depend on live service availability. The Power BI-side rows are fictional.
+
 ## Canonical layer example
 
 ```json
 {
   "type": "map",
   "id": "operations_map",
-  "view": {"fitMode":"allLayers","fitPadding":0.08},
+  "view": {"fitMode":"allVisibleLayers","fitPadding":0.08},
   "layerGroups": [{"id":"operations","name":"Operations","visible":true}],
   "bookmarks": [{"id":"downtown","label":"Downtown","center":[29.76,-95.37],"zoom":13}],
   "layers": [
@@ -100,10 +115,10 @@ Stable map feature interactions execute from Leaflet feature clicks, so `map.lay
 
 | Source | Current scope |
 |---|---|
-| `powerbi` | Per-layer dataset, location bindings, renderers, labels, popup/tooltip, filters, lineage selection |
-| `arcgisFeature` | Public FeatureServer/MapServer metadata/query, reference or Power BI join mode |
-| `arcgisTile` | Public HTTPS raster tile overlay with attribution and zoom bounds |
-| `arcgisDynamic` | Public dynamic map image requests with layer IDs/definitions, format, transparency, debounce, and zoom bounds |
+| `powerbi` | Coordinate or bound geometry display, feature click/details/tooltip, renderers/labels, filters, and native lineage selection |
+| `arcgisFeature` | Public FeatureServer/MapServer metadata/query, feature click/details/tooltip/selection, service renderer/labels, and reference or Power BI join mode |
+| `arcgisTile` | Display-only public HTTPS raster tile overlay with attribution and zoom bounds; no feature identify, popup, join, or selection |
+| `arcgisDynamic` | Display-only public dynamic map images with layer IDs/definitions, format, transparency, debounce, and zoom bounds; no feature identify, popup, join, or selection |
 
 ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Results and warnings are bounded. Query `outFields` contain only fields whose effective `fieldSource` is `service`, plus required service join keys; Power BI keys and joined aliases are never sent as ArcGIS field names.
 

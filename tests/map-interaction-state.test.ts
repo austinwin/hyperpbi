@@ -20,13 +20,20 @@ describe("map interaction state", () => {
     expect(second.activeFeature?.featureKey).toBe("a");
   });
 
-  it("toggles only modifier multi-selection and keeps active details predictable", () => {
+  it("modifier-deselects the active feature and activates the most recent remaining selection", () => {
     let state = activateMapFeature(undefined, feature("a"), false);
     state = activateMapFeature(state, feature("b"), true);
     expect(state.selectedFeatureKeys).toEqual(["a", "b"]);
     state = activateMapFeature(state, feature("b"), true);
     expect(state.selectedFeatureKeys).toEqual(["a"]);
-    expect(state.activeFeature?.featureKey).toBe("b");
+    expect(state.activeFeature?.featureKey).toBe("a");
+  });
+
+  it("modifier-deselecting the only active feature closes details", () => {
+    const selected = activateMapFeature(undefined, feature("a"), false);
+    const deselected = activateMapFeature(selected, feature("a"), true);
+    expect(deselected.selectedFeatureKeys).toEqual([]);
+    expect(deselected.activeFeature).toBeUndefined();
   });
 
   it("reconciles refreshes without closing a retained active feature", () => {

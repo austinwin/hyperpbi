@@ -25670,10 +25670,14 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "bookmarks",
         "search",
         "legend",
+        "featureDetails",
         "layerPanel",
         "toolbar",
         "settings",
-        "height"
+        "height",
+        "heightMode",
+        "minHeight",
+        "aspectRatio"
       ],
       "deprecated": {
         "internal": {
@@ -25861,6 +25865,11 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
+        "property": "featureDetails",
+        "label": "feature details",
+        "control": "json"
+      },
+      {
         "property": "layerPanel",
         "label": "layerPanel",
         "control": "json"
@@ -25878,6 +25887,26 @@ export const componentDescriptors:ComponentDescriptor[] = [
       {
         "property": "height",
         "label": "height",
+        "control": "number"
+      },
+      {
+        "property": "heightMode",
+        "label": "height mode",
+        "control": "enum",
+        "options": [
+          "fixed",
+          "fill",
+          "aspectRatio"
+        ]
+      },
+      {
+        "property": "minHeight",
+        "label": "minimum height",
+        "control": "number"
+      },
+      {
+        "property": "aspectRatio",
+        "label": "aspect ratio",
         "control": "number"
       }
     ],

@@ -1,0 +1,55 @@
+:root {
+  --hp-primary: #2563eb;
+  --hp-accent: #0f766e;
+  --hp-surface: #fff;
+  --hp-text: #172033;
+  --hp-border: #dbe3ec;
+  --hp-danger: #b91c1c;
+  --hp-warning: #d97706;
+  --hp-success: #2f855a;
+  --hp-radius: 10px;
+  --hp-card-padding: 12px;
+  --hp-gap: 12px;
+  --hp-font: Inter, ui-sans-serif, system-ui, sans-serif;
+  --hp-font-size: 12px;
+  --hp-shadow-opacity: 0.08;
+}
+
+html,
+body,
+#app {
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+  background: #f4f7fa;
+}
+
+.hp-demo-root {
+  width: min(1120px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(8px, 2vw, 22px);
+  overflow: visible;
+}
+
+.hp-demo-root .hp-card-body {
+  padding: 10px;
+}
+
+.hp-demo-root .hp-card-header h3 {
+  font-size: 14px;
+}
+
+@media (max-width: 520px) {
+  .hp-demo-root {
+    padding: 4px;
+  }
+
+  .hp-demo-root .hp-card-body {
+    padding: 5px;
+  }
+}
