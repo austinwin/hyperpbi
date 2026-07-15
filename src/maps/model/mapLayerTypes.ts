@@ -1,7 +1,8 @@
 // ── Map Layer Type Definitions ────────────────────────────────────────
 // Runtime type models used by the map subsystem.
 
-import type { MapGeometryType } from "../../schema/mapSchema";
+import type { MapGeometryType, MapLayerSourceType } from "../../schema/mapSchema";
+import { resolveMapLayerCapabilities } from "./mapLayerCapabilities";
 
 export interface MapLayerSourceTypeDef {
     type: string;
@@ -58,5 +59,14 @@ export const MAP_SOURCE_TYPES: Record<string, MapLayerSourceTypeDef> = {
 };
 
 export function sourceTypeDef(type: string): MapLayerSourceTypeDef | undefined {
-    return MAP_SOURCE_TYPES[type];
+    const definition = MAP_SOURCE_TYPES[type];
+    if (!definition) return undefined;
+    const capabilities = resolveMapLayerCapabilities(type as MapLayerSourceType);
+    return {
+        ...definition,
+        supportsJoin: capabilities.join,
+        supportsSymbology: capabilities.serviceRenderer || type === "powerbi",
+        supportsLabels: capabilities.serviceLabels || type === "powerbi",
+        supportsPopup: capabilities.popup,
+    };
 }

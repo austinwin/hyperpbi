@@ -1,5 +1,13 @@
 import { ActiveFilter } from "../data/filtering";
 import type { InternalInteractionFilter } from "../interactions/interactionTypes";
+import {
+    activateMapFeature,
+    emptyMapInteractionState,
+    reconcileMapInteractionState,
+    type ActiveMapFeature,
+    type MapInteractionState,
+} from "../maps/interactions/mapInteractionState";
+import type { MapFeatureKey } from "../maps/model/mapFeatureIdentity";
 
 export interface ToastMessage {
     id: string;
@@ -36,6 +44,8 @@ export interface DashboardState {
     selectedMapFeature?: number;
     /** Map-local feature selection (reference layers without Power BI rows) */
     mapSelectedFeatureIds: Record<string, string[]>;
+    /** Authoritative map-local interaction state. mapSelectedFeatureIds is a compatibility mirror. */
+    mapInteractionState: Record<string, MapInteractionState>;
     tableSearch: Record<string, string>;
 
     // Application shell
@@ -88,6 +98,10 @@ export type DashboardAction =
     | { type: "selectMap"; index?: number }
     | { type: "selectMapFeatures"; mapId: string; featureIds: string[]; selectionMode?: "replace" | "add" | "toggle" }
     | { type: "clearMapFeatures"; mapId: string }
+    | { type: "activateMapFeature"; mapId: string; feature: ActiveMapFeature; multiSelect?: boolean }
+    | { type: "setMapHoveredFeature"; mapId: string; featureKey?: MapFeatureKey }
+    | { type: "closeMapFeatureDetails"; mapId: string; clearSelection?: boolean }
+    | { type: "reconcileMapFeatures"; mapId: string; availableFeatureKeys: MapFeatureKey[] }
     | { type: "tableSearch"; id: string; value: string }
     | { type: "clearFilters" }
     // Application shell
@@ -134,6 +148,7 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
         tableSearch: {},
         selectedMapFeature: undefined,
         mapSelectedFeatureIds: {},
+        mapInteractionState: {},
         // App shell defaults
         sidebarCollapsed: false,
         mobileSidebarOpen: false,
@@ -164,7 +179,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "interactionFilter") return { ...state, interactionFilters: [...state.interactionFilters.filter(filter => filter.originComponentId !== action.filter.originComponentId), action.filter] };
     if (action.type === "clearInteractionFilter") return { ...state, interactionFilters: state.interactionFilters.filter(filter => filter.originComponentId !== action.id) };
     if (action.type === "interactionSignature") { const interactionSignatures = { ...state.interactionSignatures }; if (action.value === undefined) delete interactionSignatures[action.id]; else interactionSignatures[action.id] = action.value; return { ...state, interactionSignatures }; }
-    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {} };
+    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {} };
     if (action.type === "reconcileRowKeys") {
         const indexByKey = new Map(
             action.rowKeys.map((key, index) => [key, index] as const)
@@ -206,17 +221,99 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         }
         if (newIds.length === 0) {
             const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
-            return { ...state, mapSelectedFeatureIds: rest };
+            const currentInteraction = state.mapInteractionState[action.mapId];
+            const mapInteractionState = { ...state.mapInteractionState };
+            if (currentInteraction)
+                mapInteractionState[action.mapId] = { ...currentInteraction, selectedFeatureKeys: [] };
+            return { ...state, mapSelectedFeatureIds: rest, mapInteractionState };
         }
-        return { ...state, mapSelectedFeatureIds: { ...state.mapSelectedFeatureIds, [action.mapId]: newIds } };
+        const currentInteraction = state.mapInteractionState[action.mapId] ?? emptyMapInteractionState();
+        return {
+            ...state,
+            mapSelectedFeatureIds: { ...state.mapSelectedFeatureIds, [action.mapId]: newIds },
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: newIds },
+            },
+        };
     }
     if (action.type === "clearMapFeatures") {
         const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
-        return { ...state, mapSelectedFeatureIds: rest };
+        const currentInteraction = state.mapInteractionState[action.mapId];
+        if (!currentInteraction) return { ...state, mapSelectedFeatureIds: rest };
+        return {
+            ...state,
+            mapSelectedFeatureIds: rest,
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: { ...currentInteraction, selectedFeatureKeys: [] },
+            },
+        };
+    }
+    if (action.type === "activateMapFeature") {
+        const interaction = activateMapFeature(
+            state.mapInteractionState[action.mapId],
+            action.feature,
+            action.multiSelect === true,
+        );
+        return {
+            ...state,
+            mapSelectedFeatureIds: {
+                ...state.mapSelectedFeatureIds,
+                [action.mapId]: interaction.selectedFeatureKeys,
+            },
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: interaction,
+            },
+        };
+    }
+    if (action.type === "setMapHoveredFeature") {
+        const current = state.mapInteractionState[action.mapId] ?? emptyMapInteractionState();
+        if (current.hoveredFeatureKey === action.featureKey) return state;
+        return {
+            ...state,
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: { ...current, hoveredFeatureKey: action.featureKey },
+            },
+        };
+    }
+    if (action.type === "closeMapFeatureDetails") {
+        const current = state.mapInteractionState[action.mapId];
+        if (!current?.activeFeature && !(action.clearSelection && current?.selectedFeatureKeys.length)) return state;
+        const selectedFeatureKeys = action.clearSelection ? [] : current.selectedFeatureKeys;
+        const mapSelectedFeatureIds = { ...state.mapSelectedFeatureIds };
+        if (action.clearSelection) delete mapSelectedFeatureIds[action.mapId];
+        return {
+            ...state,
+            mapSelectedFeatureIds,
+            mapInteractionState: {
+                ...state.mapInteractionState,
+                [action.mapId]: { ...current, activeFeature: undefined, selectedFeatureKeys },
+            },
+        };
+    }
+    if (action.type === "reconcileMapFeatures") {
+        const current = state.mapInteractionState[action.mapId];
+        const reconciled = reconcileMapInteractionState(current, action.availableFeatureKeys);
+        if (reconciled === current) return state;
+        const mapInteractionState = { ...state.mapInteractionState };
+        const mapSelectedFeatureIds = { ...state.mapSelectedFeatureIds };
+        if (!reconciled) {
+            delete mapInteractionState[action.mapId];
+            delete mapSelectedFeatureIds[action.mapId];
+        } else {
+            mapInteractionState[action.mapId] = reconciled;
+            if (reconciled.selectedFeatureKeys.length)
+                mapSelectedFeatureIds[action.mapId] = reconciled.selectedFeatureKeys;
+            else delete mapSelectedFeatureIds[action.mapId];
+        }
+        return { ...state, mapInteractionState, mapSelectedFeatureIds };
     }
     if (action.type === "tableSearch") return { ...state, tableSearch: { ...state.tableSearch, [action.id]: action.value } };
     // clearFilters does NOT reset app shell state
-    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {} };
+    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {} };
 
     // ── Application shell ─────────────────────────────────────────
     if (action.type === "sidebarCollapsed") return { ...state, sidebarCollapsed: action.value, mobileSidebarOpen: action.value ? false : state.mobileSidebarOpen };

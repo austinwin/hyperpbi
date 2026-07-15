@@ -9,3 +9,5 @@ Thumbs.db
 .env
 .env.*
 npm-debug.log*
+test-results/
+playwright-report/

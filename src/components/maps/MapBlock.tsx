@@ -61,6 +61,14 @@ import { matchesFilter } from "../../data/filtering";
 import type { Primitive } from "../../data/normalizeData";
 import { externalFilterTargetFor } from "../../powerbi/externalFilters";
 import { appendJsonPointer } from "../../schema/jsonPointer";
+import { withCanonicalMapFeatureKeys } from "../../maps/model/mapFeatureIdentity";
+import { MapFeatureDetails } from "./MapFeatureDetails";
+import { resolveMapSizing } from "./runtime/mapSizing";
+import {
+  arcGisLayerRequestRevision,
+  arcGisRefreshRevision,
+} from "./runtime/arcGisLayerRequestRevision";
+import { stableMapRevision } from "./runtime/mapFeatureRevisions";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -308,6 +316,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
         error?: string;
         warnings: string[];
         renderMs?: number;
+        featureObjectsCreated?: number;
+        featureObjectsPatched?: number;
+        fullLayerRebuilds?: number;
       }
     >
   >({});
@@ -318,6 +329,27 @@ export function MapBlock({ component }: { component: MapComponent }) {
         (definition) => definition.source.type === "arcgisFeature",
       ),
     [layerDefinitions],
+  );
+  const arcGisFeatureDefinitionsRef = useRef(arcGisFeatureDefinitions);
+  const layerSourceContextsRef = useRef(layerSourceContexts);
+  arcGisFeatureDefinitionsRef.current = arcGisFeatureDefinitions;
+  layerSourceContextsRef.current = layerSourceContexts;
+  const arcGisRequestRevision = useMemo(
+    () =>
+      stableMapRevision(
+        arcGisFeatureDefinitions.map((definition) => ({
+          id: definition.id,
+          revision: arcGisLayerRequestRevision(
+            definition,
+            layerSourceContexts.get(definition.id),
+          ),
+        })),
+      ),
+    [arcGisFeatureDefinitions, layerSourceContexts],
+  );
+  const refreshRevision = useMemo(
+    () => arcGisRefreshRevision(arcGisFeatureDefinitions),
+    [arcGisFeatureDefinitions],
   );
 
   const staticExternalLayers = useMemo(
@@ -389,7 +421,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
         const layer = access.allowed
           ? await resolveArcGisFeatureLayer(
               definition,
-              layerSourceContexts.get(definition.id)!,
+              layerSourceContextsRef.current.get(definition.id)!,
               controller.signal,
               definition.performance?.viewportQuery === true
                 ? viewportRef.current
@@ -459,13 +491,13 @@ export function MapBlock({ component }: { component: MapComponent }) {
       }
       void reason;
     },
-    [layerSourceContexts, serviceAccess],
+    [serviceAccess],
   );
 
   // Initial/data path: resolve every feature definition, independent of viewport changes.
   useEffect(() => {
     const activeIds = new Set(
-      arcGisFeatureDefinitions.map((definition) => definition.id),
+      arcGisFeatureDefinitionsRef.current.map((definition) => definition.id),
     );
     for (const [layerId, controller] of layerAbortControllersRef.current) {
       if (!activeIds.has(layerId)) {
@@ -479,26 +511,26 @@ export function MapBlock({ component }: { component: MapComponent }) {
         Object.entries(previous).filter(([layerId]) => activeIds.has(layerId)),
       ),
     );
-    for (const definition of arcGisFeatureDefinitions) {
+    for (const definition of arcGisFeatureDefinitionsRef.current) {
       void resolveArcGisFeatureDefinition(definition, "initial");
     }
-  }, [arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
+  }, [arcGisRequestRevision, resolveArcGisFeatureDefinition]);
 
   // Viewport path: only layers explicitly configured for viewport queries rerun.
   useEffect(() => {
     if (viewportSig === null) return;
-    for (const definition of arcGisFeatureDefinitions) {
+    for (const definition of arcGisFeatureDefinitionsRef.current) {
       if (definition.performance?.viewportQuery === true) {
         void resolveArcGisFeatureDefinition(definition, "viewport");
       }
     }
-  }, [viewportSig, arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
+  }, [viewportSig, resolveArcGisFeatureDefinition]);
 
   // Refresh path: one managed timer for each configured feature layer.
   useEffect(() => {
     for (const [, timer] of layerRefreshTimersRef.current) clearInterval(timer);
     layerRefreshTimersRef.current.clear();
-    for (const definition of arcGisFeatureDefinitions) {
+    for (const definition of arcGisFeatureDefinitionsRef.current) {
       const refreshMinutes = (definition.source as ArcGisFeatureLayerSource)
         .refreshIntervalMinutes;
       if (refreshMinutes === undefined || refreshMinutes < 1) continue;
@@ -512,7 +544,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
         clearInterval(timer);
       layerRefreshTimersRef.current.clear();
     };
-  }, [arcGisFeatureDefinitions, resolveArcGisFeatureDefinition]);
+  }, [refreshRevision, resolveArcGisFeatureDefinition]);
 
   // Unmount-only cleanup for outstanding requests and managed timers.
   useEffect(
@@ -536,6 +568,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
         error?: string;
         warning?: string;
         renderMs?: number;
+        featureObjectsCreated?: number;
+        featureObjectsPatched?: number;
+        fullLayerRebuilds?: number;
       },
     ) => {
       setLayerRuntimeState((previous) => {
@@ -544,19 +579,39 @@ export function MapBlock({ component }: { component: MapComponent }) {
           update.warning && !current.warnings.includes(update.warning)
             ? [...current.warnings, update.warning]
             : current.warnings;
+        const next = {
+          ...current,
+          ...(update.loading !== undefined
+            ? { loading: update.loading }
+            : {}),
+          ...(update.error !== undefined ? { error: update.error } : {}),
+          ...(update.renderMs !== undefined
+            ? { renderMs: update.renderMs }
+            : {}),
+          ...(update.featureObjectsCreated !== undefined
+            ? { featureObjectsCreated: update.featureObjectsCreated }
+            : {}),
+          ...(update.featureObjectsPatched !== undefined
+            ? { featureObjectsPatched: update.featureObjectsPatched }
+            : {}),
+          ...(update.fullLayerRebuilds !== undefined
+            ? { fullLayerRebuilds: update.fullLayerRebuilds }
+            : {}),
+          warnings,
+        };
+        if (
+          next.loading === current.loading &&
+          next.error === current.error &&
+          next.renderMs === current.renderMs &&
+          next.featureObjectsCreated === current.featureObjectsCreated &&
+          next.featureObjectsPatched === current.featureObjectsPatched &&
+          next.fullLayerRebuilds === current.fullLayerRebuilds &&
+          next.warnings === current.warnings
+        )
+          return previous;
         return {
           ...previous,
-          [layerId]: {
-            ...current,
-            ...(update.loading !== undefined
-              ? { loading: update.loading }
-              : {}),
-            ...(update.error !== undefined ? { error: update.error } : {}),
-            ...(update.renderMs !== undefined
-              ? { renderMs: update.renderMs }
-              : {}),
-            warnings,
-          },
+          [layerId]: next,
         };
       });
     },
@@ -573,28 +628,36 @@ export function MapBlock({ component }: { component: MapComponent }) {
   );
 
   const allResolvedLayers: ResolvedMapLayer[] = useMemo(() => {
+    const definitionById = new Map(
+      layerDefinitions.map((definition) => [definition.id, definition] as const),
+    );
     const ordered = [
       ...syncedLayers,
       ...resolvedArcGisFeatureLayers,
       ...staticExternalLayers,
     ]
       .map((layer) => {
-        const group = layer.groupId
+        const authored = definitionById.get(layer.id);
+        const presentedLayer =
+          layer.sourceType === "arcgisFeature" && authored
+            ? applyAuthoredArcGisLayerPresentation(layer, authored)
+            : layer;
+        const group = presentedLayer.groupId
           ? component.layerGroups?.find(
-              (candidate) => candidate.id === layer.groupId,
+              (candidate) => candidate.id === presentedLayer.groupId,
             )
           : undefined;
         const groupedLayer = group
           ? {
-              ...layer,
-              visible: (group.visible ?? true) && layer.visible,
+              ...presentedLayer,
+              visible: (group.visible ?? true) && presentedLayer.visible,
               opacity: Math.max(
                 0,
-                Math.min(1, (group.opacity ?? 1) * layer.opacity),
+                Math.min(1, (group.opacity ?? 1) * presentedLayer.opacity),
               ),
-              order: (group.order ?? 0) * 100_000 + layer.order,
+              order: (group.order ?? 0) * 100_000 + presentedLayer.order,
             }
-          : layer;
+          : presentedLayer;
         const runtime = layerRuntimeState[layer.id];
         if (!runtime) return groupedLayer;
         const warnings = [...groupedLayer.diagnostics.warnings];
@@ -611,6 +674,14 @@ export function MapBlock({ component }: { component: MapComponent }) {
             error: runtime.error ?? groupedLayer.diagnostics.error,
             layerRenderMs:
               runtime.renderMs ?? groupedLayer.diagnostics.layerRenderMs,
+            featureObjectsCreated:
+              runtime.featureObjectsCreated ??
+              groupedLayer.diagnostics.featureObjectsCreated,
+            featureObjectsPatched:
+              runtime.featureObjectsPatched ??
+              groupedLayer.diagnostics.featureObjectsPatched,
+            fullLayerRebuilds:
+              runtime.fullLayerRebuilds ?? groupedLayer.diagnostics.fullLayerRebuilds,
             warnings,
           },
         };
@@ -622,12 +693,28 @@ export function MapBlock({ component }: { component: MapComponent }) {
     resolvedArcGisFeatureLayers,
     staticExternalLayers,
     layerRuntimeState,
+    layerDefinitions,
     component.layerGroups,
   ]);
+  const runtimeLayers = useMemo(
+    () => withCanonicalMapFeatureKeys(id, allResolvedLayers),
+    [id, allResolvedLayers],
+  );
+  useEffect(() => {
+    context.dispatch({
+      type: "reconcileMapFeatures",
+      mapId: id,
+      availableFeatureKeys: runtimeLayers.flatMap((layer) =>
+        layer.features.flatMap((feature) =>
+          feature.featureKey ? [feature.featureKey] : [],
+        ),
+      ),
+    });
+  }, [id, runtimeLayers]);
 
   // ── Determine if we should show map or empty state ───────────────
-  const hasAnyFeatures = allResolvedLayers.some((l) => l.features.length > 0);
-  const hasTileOrDynamicLayers = allResolvedLayers.some(
+  const hasAnyFeatures = runtimeLayers.some((l) => l.features.length > 0);
+  const hasTileOrDynamicLayers = runtimeLayers.some(
     (l) => l.sourceType === "arcgisTile" || l.sourceType === "arcgisDynamic",
   );
   const arcGisLoading = Object.values(arcGisFeatureState).some(
@@ -692,6 +779,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
   ) {
     content = <MapEmptyState reason={arcGisError} />;
   } else {
+    const sizing = resolveMapSizing(component, {
+      studioPreview: context.instanceId?.includes("-preview") === true,
+    });
     const showToolbar = component.toolbar?.visible !== false;
     const closePopover = () =>
       context.dispatch({
@@ -704,12 +794,12 @@ export function MapBlock({ component }: { component: MapComponent }) {
         <MapToolbarPopover
           id={mapToolbarPopoverId(id, "layers")}
           title="Layers"
-          subtitle={`${allResolvedLayers.length.toLocaleString()} total`}
+          subtitle={`${runtimeLayers.length.toLocaleString()} total`}
           onClose={closePopover}
         >
           <MapLayerPanel
             mapId={id}
-            layers={allResolvedLayers}
+            layers={runtimeLayers}
             groups={component.layerGroups}
             configuration={component.layerPanel}
             onZoomLayer={(layerId) =>
@@ -724,7 +814,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
           subtitle="Visible layers"
           onClose={closePopover}
         >
-          <MapLegendPanel mapId={id} layers={allResolvedLayers} />
+          <MapLegendPanel mapId={id} layers={runtimeLayers} />
         </MapToolbarPopover>
       ) : activeToolbarPopover === "search" ? (
         <MapToolbarPopover
@@ -762,9 +852,47 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ) : undefined;
     content = (
       <>
-        <div class="hp-map-frame">
-          {showToolbar && (
-            <MapToolbar
+        <div
+          class={`hp-map-frame ${sizing.className}`}
+          style={sizing.frameStyle}
+          data-height-mode={sizing.mode}
+        >
+          <div class="hp-map-viewport-clip">
+            <LeafletMap
+              component={component}
+              resolvedLayers={runtimeLayers}
+              onViewportChange={handleViewportChange}
+              onControllerReady={handleControllerReady}
+              onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
+            />
+          </div>
+          <div class="hp-map-overlay-root">
+            <MapFeatureDetails
+              mapId={id}
+              component={component}
+              layers={runtimeLayers}
+              interaction={context.state.mapInteractionState[id]}
+              onClose={() => {
+                const clearSelection =
+                  component.featureDetails?.clearSelectionOnClose === true;
+                context.dispatch({
+                  type: "closeMapFeatureDetails",
+                  mapId: id,
+                  clearSelection,
+                });
+                if (clearSelection) {
+                  context.dispatch({ type: "selectComponentRows", id, rows: [] });
+                  context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+                  context.dispatch({ type: "interactionSignature", id });
+                  context.clearExternal({ componentId: id, componentType: "map" });
+                }
+              }}
+              executeAction={(action, event) => {
+                context.executeUiAction(action, event);
+              }}
+            />
+            {showToolbar && (
+              <MapToolbar
               mapId={id}
               component={component}
               activePopover={activeToolbarPopover}
@@ -784,18 +912,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 })
               }
               onClearSelection={() => {
-                context.dispatch({ type: "resetInteractions" });
                 context.dispatch({ type: "clearMapFeatures", mapId: id });
+                context.dispatch({ type: "selectComponentRows", id, rows: [] });
+                context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+                context.dispatch({ type: "interactionSignature", id });
+                context.clearExternal({ componentId: id, componentType: "map" });
               }}
-            />
-          )}
-          <LeafletMap
-            component={component}
-            resolvedLayers={allResolvedLayers}
-            onViewportChange={handleViewportChange}
-            onControllerReady={handleControllerReady}
-            onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
-          />
+              />
+            )}
+          </div>
         </div>
         {[...map.warnings, ...mapRuntimeWarnings].length > 0 && (
           <div class="hp-map-warning">
@@ -807,6 +932,103 @@ export function MapBlock({ component }: { component: MapComponent }) {
   }
 
   return <Card title={component.title}>{content}</Card>;
+}
+
+/** Apply authoring-only changes to retained ArcGIS features without issuing a new request. */
+export function applyAuthoredArcGisLayerPresentation(
+  layer: ResolvedMapLayer,
+  definition: MapLayerDefinition,
+): ResolvedMapLayer {
+  if (definition.source.type !== "arcgisFeature") return layer;
+  const started = globalThis.performance?.now?.() ?? Date.now();
+  const source = definition.source;
+  const renderer =
+    definition.renderer && definition.renderer.type !== "service"
+      ? resolveRenderer(
+          definition.renderer,
+          layer.features,
+          defaultAttributeSource(definition, "renderer"),
+        )
+      : layer.renderer;
+  const labels = definition.labels
+    ? {
+        enabled: definition.labels.enabled ?? false,
+        field: definition.labels.field,
+        fieldSource:
+          definition.labels.fieldSource ?? defaultAttributeSource(definition, "label"),
+        template: definition.labels.template,
+        placement: definition.labels.placement ?? "center",
+        minZoom: definition.labels.minZoom,
+        maxZoom: definition.labels.maxZoom,
+        color: definition.labels.color ?? "#333333",
+        size: definition.labels.size ?? 12,
+        weight: definition.labels.weight ?? "normal",
+        haloColor: definition.labels.haloColor,
+        haloSize: definition.labels.haloSize,
+        backgroundColor: definition.labels.backgroundColor,
+        padding: definition.labels.padding,
+        collision: definition.labels.collision ?? "none",
+        maxLabels: definition.labels.maxLabels,
+      }
+    : layer.labels;
+  const popup = definition.popup
+    ? {
+        enabled: definition.popup.enabled ?? true,
+        title: definition.popup.title,
+        fields: (definition.popup.fields ?? []).map((field) => ({
+          field: field.field,
+          fieldSource:
+            field.fieldSource ??
+            (source.mode === "join" ? "joined" as const : "service" as const),
+          label: field.label,
+          format: field.format,
+          display: field.display ?? "text" as const,
+        })),
+        actions: (definition.popup.actions ?? []).map((action) => ({ ...action })),
+        html: definition.popup.html,
+        defaultFieldSource:
+          definition.popup.defaultFieldSource ??
+          defaultAttributeSource(definition, "popup"),
+      }
+    : undefined;
+  const tooltip = definition.tooltip
+    ? {
+        enabled: definition.tooltip.enabled ?? true,
+        template: definition.tooltip.template,
+        fields: (definition.tooltip.fields ?? []).map((field) => ({
+          field: field.field,
+          fieldSource:
+            field.fieldSource ??
+            (source.mode === "join" ? "joined" as const : "service" as const),
+          label: field.label,
+          format: field.format,
+          display: "text" as const,
+        })),
+        defaultFieldSource:
+          definition.tooltip.defaultFieldSource ??
+          defaultAttributeSource(definition, "tooltip"),
+      }
+    : undefined;
+  return {
+    ...layer,
+    name: definition.name ?? layer.name,
+    visible: definition.visible ?? true,
+    opacity: definition.opacity ?? 1,
+    order: definition.order ?? 10,
+    groupId: definition.groupId,
+    renderer,
+    labels,
+    popup,
+    tooltip,
+    interaction: definition.interaction ?? layer.interaction,
+    legend: definition.legend,
+    visibility: definition.visibility,
+    diagnostics: {
+      ...layer.diagnostics,
+      rendererCalculationMs:
+        (globalThis.performance?.now?.() ?? Date.now()) - started,
+    },
+  };
 }
 
 // ── ArcGIS Feature Layer Resolution ───────────────────────────────────

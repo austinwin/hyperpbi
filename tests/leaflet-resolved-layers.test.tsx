@@ -370,8 +370,8 @@ describe("LeafletMap rendering safety", () => {
         const host = document.createElement("div"); const test = testContext();
         renderMap(host, test.value, { type: "map", id: "map", height: 180, basemap: { type: "none" }, view: { fitMode: "none" } }, []);
         const container = host.querySelector<HTMLElement>(".hp-leaflet-container")!;
-        expect(container.style.height).toBe("220px");
-        expect(container.style.width).toBe("100%");
+        expect(container.style.height).toBe("");
+        expect(container.style.width).toBe("");
     });
 
     it("multiplies point and GeoJSON stroke and fill opacity by layer opacity", () => {
@@ -427,19 +427,37 @@ describe("LeafletMap search result controller", () => {
 });
 
 describe("LeafletMap feature interactions, popups, and labels", () => {
+    it("patches renderer, opacity, and details content without recreating geometry", () => {
+        const host = document.createElement("div"); const test = testContext();
+        const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
+        const initial = layer("stable", { popup: { enabled: true, title: "{{NAME}}", fields: [], actions: [] } });
+        renderMap(host, test.value, component, [initial]);
+        const marker = mocks.circles.at(-1)!;
+        const created = mocks.circles.length;
+        renderMap(host, test.value, component, [{
+            ...initial,
+            opacity: 0.45,
+            renderer: { type: "simple", symbol: { color: "#d63939", fillColor: "#f8b4b4" } },
+            popup: { ...initial.popup!, title: "Feature {{NAME}}" },
+        }]);
+        expect(mocks.circles).toHaveLength(created);
+        expect(mocks.circles.at(-1)).toBe(marker);
+        expect(marker.options.color).toBe("#d63939");
+    });
+
     it("applies local selection styling and reference replace/toggle policies", () => {
         const host = document.createElement("div"); const test = testContext(); const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
         const reference = layer("reference", { sourceType: "arcgisFeature", features: [feature("ref", { layerId: "reference" })] });
         renderMap(host, test.value, component, [reference]);
         mocks.circles.at(-1)!.fire("click", { originalEvent: { stopPropagation: vi.fn() } });
-        expect(test.dispatchSpy).toHaveBeenCalledWith({ type: "selectMapFeatures", mapId: "map", featureIds: ["ref"], selectionMode: "replace" });
+        expect(test.dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: "activateMapFeature", mapId: "map", multiSelect: false }));
         test.value.state.mapSelectedFeatureIds.map = ["ref"];
         renderMap(host, test.value, component, [reference]);
         expect(Number(mocks.circles.at(-1)!.options.weight)).toBeGreaterThanOrEqual(4);
         mocks.circles.at(-1)!.fire("click", { originalEvent: { stopPropagation: vi.fn() } });
-        expect(test.dispatchSpy).toHaveBeenLastCalledWith({ type: "selectMapFeatures", mapId: "map", featureIds: ["ref"], selectionMode: "toggle" });
-        mocks.circles.at(-1)!.fire("click", { originalEvent: { ctrlKey: true } });
-        expect(test.dispatchSpy).toHaveBeenLastCalledWith({ type: "selectMapFeatures", mapId: "map", featureIds: ["ref"], selectionMode: "toggle" });
+        expect(test.dispatchSpy).toHaveBeenLastCalledWith(expect.objectContaining({ type: "activateMapFeature", mapId: "map", multiSelect: false }));
+        mocks.circles.at(-1)!.fire("click", { originalEvent: { ctrlKey: true, stopPropagation: vi.fn() } });
+        expect(test.dispatchSpy).toHaveBeenLastCalledWith(expect.objectContaining({ type: "activateMapFeature", mapId: "map", multiSelect: true }));
     });
 
     it("uses original joined row indices/keys and a layer-specific interaction policy", () => {
@@ -459,7 +477,7 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
     it("recreates popup action content after close and reopen", () => {
         const host = document.createElement("div"); const test = testContext();
         const popupLayer = layer("popup", { popup: { enabled: true, title: "{{NAME}}", fields: [], actions: [{ id: "open", label: "Open", uiAction: { action: "showToast", message: "Opened" } }] } });
-        renderMap(host, test.value, { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } }, [popupLayer]);
+        renderMap(host, test.value, { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" }, featureDetails: { mode: "legacyPopup" } }, [popupLayer]);
         const marker = mocks.circles.at(-1)!;
         const contentFactory = marker.popup as () => HTMLElement;
         contentFactory().querySelector("button")!.click();

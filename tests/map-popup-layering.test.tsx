@@ -10,9 +10,11 @@ describe("map popup layering contract", () => {
     expect(leafletRuntime).toContain('popupPane.style.zIndex = "1000"');
     expect(leafletRuntime).toContain("400 + index");
     expect(leafletRuntime).toContain("600 + index");
-    expect(mapCss).toMatch(/\.hp-map-toolbar\s*\{[^}]*z-index:\s*1100/);
-    expect(mapCss).toMatch(/\.hp-map-toolbar-popover\s*\{[^}]*z-index:\s*1200/);
-    expect(mapCss).not.toMatch(/\.hp-map-frame\s*\{[^}]*overflow:\s*visible/);
+    expect(mapCss).toContain("--hp-map-z-toolbar: 900");
+    expect(mapCss).toContain("--hp-map-z-details: 1000");
+    expect(mapCss).toContain("--hp-map-z-popover: 1100");
+    expect(mapCss).toMatch(/\.hp-map-viewport-clip\s*\{[^}]*overflow:\s*hidden/);
+    expect(mapCss).toMatch(/\.hp-map-overlay-root\s*\{[^}]*overflow:\s*visible/);
   });
 
   it("binds bounded auto-pan popup options to the dedicated pane", () => {

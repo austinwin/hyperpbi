@@ -50,6 +50,9 @@ export interface InteractionPayload {
     field?: string;
     value?: unknown;
     operator: FilterOperator;
+    mapFeatureKey?: string;
+    mapLayerId?: string;
+    mapFeatureId?: string;
 }
 
 export interface InteractionModifiers {

@@ -57,6 +57,13 @@ export interface MapLegendDefinition {
     defaultOpen?: boolean;
 }
 
+export interface MapFeatureDetailsDefinition {
+    /** auto anchors on roomy maps and becomes a panel/sheet in small containers. */
+    mode?: "auto" | "anchored" | "panel" | "legacyPopup";
+    clearSelectionOnBackgroundClick?: boolean;
+    clearSelectionOnClose?: boolean;
+}
+
 export interface MapViewBookmarkDefinition {
     id: string;
     label: string;

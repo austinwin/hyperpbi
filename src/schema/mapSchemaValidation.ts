@@ -3,6 +3,8 @@ import {
   mapCapabilityRegistry,
 } from "../maps/mapCapabilityRegistry";
 import { closestMatches, type Diagnostic } from "./diagnostics";
+import { resolveMapLayerCapabilities } from "../maps/model/mapLayerCapabilities";
+import type { MapLayerSourceType } from "./mapSchema";
 
 type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json =>
@@ -239,6 +241,14 @@ export function validateMapComponentSchema(
     ],
     ["legend", allowed("defaultOpen")],
     [
+      "featureDetails",
+      allowed(
+        "mode",
+        "clearSelectionOnBackgroundClick",
+        "clearSelectionOnClose",
+      ),
+    ],
+    [
       "layerPanel",
       allowed(
         "visible",
@@ -305,6 +315,36 @@ export function validateMapComponentSchema(
       componentId,
       diagnostics,
     );
+  validateEnum(
+    component.heightMode,
+    ["fixed", "fill", "aspectRatio"],
+    `${path}/heightMode`,
+    componentId,
+    diagnostics,
+  );
+  if (object(component.featureDetails))
+    validateEnum(
+      component.featureDetails.mode,
+      ["auto", "anchored", "panel", "legacyPopup"],
+      `${path}/featureDetails/mode`,
+      componentId,
+      diagnostics,
+    );
+  for (const property of ["height", "minHeight", "aspectRatio"])
+    if (
+      component[property] !== undefined &&
+      (typeof component[property] !== "number" ||
+        !Number.isFinite(component[property]) ||
+        Number(component[property]) <= 0)
+    )
+      diagnostics.push({
+        code: "INVALID_PROPERTY_TYPE",
+        severity: "error",
+        path: `${path}/${property}`,
+        componentId,
+        message: `${property} must be a positive finite number.`,
+        received: component[property],
+      });
   if (object(component.view))
     for (const key of ["fitMode", "preserveView"])
       if (component.view[key] !== undefined)
@@ -478,6 +518,38 @@ function validateLayer(
     });
   else
     unknownKeys(raw.source, keys, `${path}/source`, componentId, diagnostics);
+  if (keys) {
+    const capabilities = resolveMapLayerCapabilities(
+      sourceType as MapLayerSourceType,
+    );
+    const unsupported: Array<[string, boolean, string]> = [
+      ["join", capabilities.join, "joins"],
+      ["popup", capabilities.popup, "feature details"],
+      ["tooltip", capabilities.tooltip, "feature tooltips"],
+      [
+        "labels",
+        sourceType === "powerbi" || capabilities.serviceLabels,
+        "feature labels",
+      ],
+      ["interaction", capabilities.featureInteraction, "feature interaction"],
+      [
+        "renderer",
+        sourceType === "powerbi" || sourceType === "arcgisFeature",
+        "client feature renderers",
+      ],
+    ];
+    for (const [property, supported, label] of unsupported) {
+      if (supported || raw[property] === undefined) continue;
+      diagnostics.push({
+        code: "MAP_CAPABILITY_LIMITATION",
+        severity: "error",
+        path: `${path}/${property}`,
+        componentId,
+        message: `${sourceType} layers do not support ${label}; this setting cannot execute and must be removed or the source type changed.`,
+        received: sourceType,
+      });
+    }
+  }
   if (
     sourceType === "powerbi" &&
     raw.source.bindings !== undefined &&

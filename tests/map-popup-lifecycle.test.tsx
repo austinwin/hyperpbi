@@ -429,6 +429,7 @@ const component: MapComponent = {
   id: "map",
   basemap: { type: "none" },
   view: { fitMode: "none" },
+  featureDetails: { mode: "legacyPopup" },
 };
 
 function renderMap(host: HTMLElement, value: RenderContextValue, layer: ResolvedMapLayer) {
@@ -493,12 +494,11 @@ describe("map popup lifecycle", () => {
     expect(popup.isConnected).toBe(true);
     expect(popup.textContent).toContain("Facility 7");
     expect(popup.textContent).toContain("North Clinic");
-    expect(test.dispatch).toHaveBeenCalledWith({
-      type: "selectMapFeatures",
+    expect(test.dispatch).toHaveBeenCalledWith(expect.objectContaining({
+      type: "activateMapFeature",
       mapId: "map",
-      featureIds: ["facilities_7"],
-      selectionMode: "replace",
-    });
+      multiSelect: false,
+    }));
 
     renderMap(host, test.value, layer);
 
@@ -665,10 +665,12 @@ describe("map popup lifecycle", () => {
       h(RenderContext.Provider, { value: test.value }, h(LeafletMap, { component, resolvedLayers: layers })),
       host,
     ));
-    leaflet.markers[1].fire("click", { originalEvent: {} });
-    expect(host.querySelectorAll(".leaflet-popup")).toHaveLength(1);
-    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Risk 12");
-    expect(host.querySelector(".leaflet-popup")?.textContent).toContain("Power Name");
+    const joinedMarker = leaflet.markers.find((marker) =>
+      marker.popupFactory?.().textContent?.includes("Risk 12"),
+    )!;
+    const joinedPopup = joinedMarker.popupFactory!();
+    expect(joinedPopup.textContent).toContain("Risk 12");
+    expect(joinedPopup.textContent).toContain("Power Name");
     expect(leaflet.markerClusterGroup).toHaveBeenCalledTimes(1);
     leaflet.geoLayers[0].fire("click", { originalEvent: {} });
     expect(host.querySelectorAll(".leaflet-popup")).toHaveLength(1);

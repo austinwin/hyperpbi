@@ -344,6 +344,7 @@ export interface MapComponent extends ComponentBase {
     bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;
     legend?: MapLegendDefinition;
+    featureDetails?: import("./mapSchema").MapFeatureDetailsDefinition;
 
     layerPanel?: {
         visible?: boolean;
@@ -393,7 +394,11 @@ export interface MapComponent extends ComponentBase {
         opacity?: number;
     };
     popup?: { html?: string };
+    /** Legacy fixed height. Used when heightMode is omitted or fixed. */
     height?: number;
+    heightMode?: "fixed" | "fill" | "aspectRatio";
+    minHeight?: number;
+    aspectRatio?: number;
 }
 
 export interface ContentComponent extends ComponentBase {

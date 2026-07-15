@@ -32,6 +32,62 @@ export interface RenderedResolvedPopup {
   cleanup: () => void;
 }
 
+export interface ResolvedMapPopupFieldView {
+  label: string;
+  value: string;
+  display: "text" | "badge" | "number" | "date";
+}
+
+export interface ResolvedMapPopupViewModel {
+  title?: string;
+  html?: string;
+  fields: ResolvedMapPopupFieldView[];
+  actions: ResolvedMapPopupAction[];
+}
+
+/** Pure content resolution shared by Preact details and legacy Leaflet popups. */
+export function resolveMapPopupViewModel(
+  popup: ResolvedMapPopup,
+  feature: ResolvedMapFeature,
+): ResolvedMapPopupViewModel {
+  const title = popup.title
+    ? resolveSafeTemplate(
+        popup.title,
+        feature,
+        popup.defaultFieldSource ?? "joined",
+      )
+    : undefined;
+  const html = popup.html
+    ? sanitizeHtml(
+        resolveSafeTemplate(
+          popup.html,
+          feature,
+          popup.defaultFieldSource ?? "joined",
+          true,
+        ),
+        { allowInlineSvg: false, allowSafeImages: false },
+      ).html
+    : undefined;
+  return {
+    title,
+    html,
+    fields: (popup.fields ?? []).map((fieldDef) => ({
+      label: fieldDef.label ?? fieldDef.field,
+      value: formatFeatureValue(
+        resolvedFeatureValue(
+          feature,
+          fieldDef.field,
+          fieldDef.fieldSource ?? "joined",
+        ),
+        fieldDef.format,
+        fieldDef.display,
+      ),
+      display: fieldDef.display,
+    })),
+    actions: popup.actions ?? [],
+  };
+}
+
 /**
  * Render a popup HTML element for a resolved map feature.
  * Supports templates, structured fields, safe HTML output, and bound action execution.
@@ -44,58 +100,34 @@ export function renderResolvedPopup(
   const container = document.createElement("div");
   container.className = "hp-map-popup hp-map-popup-resolved";
   const cleanups: Array<() => void> = [];
+  const view = resolveMapPopupViewModel(popup, feature);
 
   // ── Title ──────────────────────────────────────────────────────
-  if (popup.title) {
+  if (view.title) {
     const title = document.createElement("h4");
     title.className = "hp-map-popup-title";
-    title.textContent = resolveSafeTemplate(
-      popup.title,
-      feature,
-      popup.defaultFieldSource ?? "joined",
-    );
+    title.textContent = view.title;
     container.appendChild(title);
   }
 
   // ── HTML template ──────────────────────────────────────────────
-  if (popup.html) {
-    const rendered = resolveSafeTemplate(
-      popup.html,
-      feature,
-      popup.defaultFieldSource ?? "joined",
-      true,
-    );
-    const sanitized = sanitizeHtml(rendered, {
-      allowInlineSvg: false,
-      allowSafeImages: false,
-    });
-    const parsed = new DOMParser().parseFromString(sanitized.html, "text/html");
+  if (view.html) {
+    const parsed = new DOMParser().parseFromString(view.html, "text/html");
     while (parsed.body.firstChild) {
       container.appendChild(parsed.body.firstChild);
     }
   }
 
   // ── Structured fields ──────────────────────────────────────────
-  if (popup.fields && popup.fields.length > 0) {
+  if (view.fields.length > 0) {
     const table = document.createElement("table");
     table.className = "hp-map-popup-fields";
 
-    for (const fieldDef of popup.fields) {
-      const rawValue = resolvedFeatureValue(
-        feature,
-        fieldDef.field,
-        fieldDef.fieldSource ?? "joined",
-      );
-      const formatted = formatFeatureValue(
-        rawValue,
-        fieldDef.format,
-        fieldDef.display,
-      );
-
+    for (const fieldDef of view.fields) {
       const row = document.createElement("tr");
 
       const labelCell = document.createElement("th");
-      labelCell.textContent = fieldDef.label ?? fieldDef.field;
+      labelCell.textContent = fieldDef.label;
       row.appendChild(labelCell);
 
       const valueCell = document.createElement("td");
@@ -103,10 +135,10 @@ export function renderResolvedPopup(
       if (fieldDef.display === "badge") {
         const badge = document.createElement("span");
         badge.className = "hp-badge";
-        badge.textContent = formatted;
+        badge.textContent = fieldDef.value;
         valueCell.appendChild(badge);
       } else {
-        valueCell.textContent = formatted;
+        valueCell.textContent = fieldDef.value;
       }
 
       row.appendChild(valueCell);
@@ -117,11 +149,11 @@ export function renderResolvedPopup(
   }
 
   // ── Actions ────────────────────────────────────────────────────
-  if (popup.actions && popup.actions.length > 0) {
+  if (view.actions.length > 0) {
     const actionsContainer = document.createElement("div");
     actionsContainer.className = "hp-map-popup-actions";
 
-    for (const action of popup.actions) {
+    for (const action of view.actions) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "hp-btn hp-btn-sm";

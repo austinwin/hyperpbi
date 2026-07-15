@@ -19,6 +19,8 @@ export function StudioCheckbox({
     <label class={`hp-studio-check ${className}`.trim()}>
       <input
         type="checkbox"
+        role="switch"
+        aria-checked={checked}
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange(event.currentTarget.checked)}

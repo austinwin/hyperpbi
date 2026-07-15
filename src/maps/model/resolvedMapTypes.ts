@@ -6,10 +6,16 @@ import type { ComponentInteractionDefinition } from "../../interactions/interact
 import type { DataRow } from "../../data/normalizeData";
 import type { UiAction } from "../../schema/uiSchema";
 import type { ArcGisQueryStrategy } from "../arcgis/arcGisFeatureQuery";
+import type { MapFeatureKey } from "./mapFeatureIdentity";
+import type { MapLayerCapabilities } from "./mapLayerCapabilities";
 
 // ── Resolved Feature ──────────────────────────────────────────────────
 
 export interface ResolvedMapFeature {
+    /** Canonical map/layer/source/feature identity assigned at the map runtime boundary. */
+    featureKey?: MapFeatureKey;
+    /** Stable dataset or service identity used to construct featureKey. */
+    sourceIdentity?: string;
     id: string;
     layerId: string;
     geometryType: MapGeometryType;
@@ -238,6 +244,9 @@ export interface MapLayerDiagnostics {
     sourceResolutionMs?: number;
     rendererCalculationMs?: number;
     layerRenderMs?: number;
+    featureObjectsCreated?: number;
+    featureObjectsPatched?: number;
+    fullLayerRebuilds?: number;
     requestMs?: number;
     joinMs?: number;
 }
@@ -348,6 +357,9 @@ export interface ResolvedMapLayer {
     id: string;
     name: string;
     sourceType: MapLayerSourceType;
+    /** Stable dataset/service identity; layerId remains an independent namespace. */
+    sourceIdentity?: string;
+    capabilities?: MapLayerCapabilities;
     geometryType: MapGeometryType;
     visible: boolean;
     opacity: number;

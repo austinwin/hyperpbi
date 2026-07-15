@@ -8,7 +8,7 @@ export function claimInteractionEvent(event?: Event): boolean {
     if (!event) return true;
     if (handledEvents.has(event)) return false;
     handledEvents.add(event);
-    event.stopPropagation();
+    if (typeof event.stopPropagation === "function") event.stopPropagation();
     return true;
 }
 
@@ -29,6 +29,9 @@ export function createInteractionPayload(component: ComponentBase, options: {
     field?: string;
     value?: unknown;
     operator?: FilterOperator;
+    mapFeatureKey?: string;
+    mapLayerId?: string;
+    mapFeatureId?: string;
 } = {}): InteractionPayload {
     const field = component.interaction?.field ?? options.field;
     const value = component.interaction?.value !== undefined ? component.interaction.value : options.value;
@@ -61,7 +64,10 @@ export function createInteractionPayload(component: ComponentBase, options: {
         rowKeys,
         field,
         value,
-        operator: component.interaction?.operator ?? options.operator ?? (Array.isArray(value) ? "in" : "=")
+        operator: component.interaction?.operator ?? options.operator ?? (Array.isArray(value) ? "in" : "="),
+        mapFeatureKey: options.mapFeatureKey,
+        mapLayerId: options.mapLayerId,
+        mapFeatureId: options.mapFeatureId,
     };
 }
 

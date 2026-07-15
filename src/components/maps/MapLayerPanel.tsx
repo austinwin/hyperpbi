@@ -175,6 +175,13 @@ export function MapLayerPanel({ mapId, layers, groups = [], configuration, onZoo
                                             <dt>Dataset</dt><dd>{layer.diagnostics.effectiveDataset ?? layer.datasetName ?? "powerbi"}</dd>
                                             <dt>Features</dt><dd>{layer.diagnostics.featureCount}</dd>
                                             <dt>Requests</dt><dd>{layer.diagnostics.requestCount}</dd>
+                                            {layer.diagnostics.featureObjectsCreated !== undefined && <><dt>Created</dt><dd>{layer.diagnostics.featureObjectsCreated} Leaflet features</dd></>}
+                                            {layer.diagnostics.featureObjectsPatched !== undefined && <><dt>Patched</dt><dd>{layer.diagnostics.featureObjectsPatched} feature styles/content</dd></>}
+                                            {layer.diagnostics.fullLayerRebuilds !== undefined && <><dt>Rebuilds</dt><dd>{layer.diagnostics.fullLayerRebuilds}</dd></>}
+                                            {layer.diagnostics.requestMs !== undefined && <><dt>Request</dt><dd>{layer.diagnostics.requestMs.toFixed(1)} ms</dd></>}
+                                            {layer.diagnostics.joinMs !== undefined && <><dt>Join</dt><dd>{layer.diagnostics.joinMs.toFixed(1)} ms</dd></>}
+                                            {layer.diagnostics.rendererCalculationMs !== undefined && <><dt>Renderer</dt><dd>{layer.diagnostics.rendererCalculationMs.toFixed(1)} ms</dd></>}
+                                            {layer.diagnostics.layerRenderMs !== undefined && <><dt>Map render</dt><dd>{layer.diagnostics.layerRenderMs.toFixed(1)} ms</dd></>}
                                             {layer.diagnostics.objectIdField && <><dt>OID field</dt><dd>{layer.diagnostics.objectIdField}</dd></>}
                                             {layer.diagnostics.queryStrategy && <><dt>Strategy</dt><dd>{layer.diagnostics.queryStrategy}</dd></>}
                                             {layer.diagnostics.joinDiagnostics && <><dt>Join</dt><dd>{layer.diagnostics.joinDiagnostics.matchedPowerBiRowCount} Power BI rows and {layer.diagnostics.joinDiagnostics.matchedServiceFeatureCount} service features matched.</dd></>}

@@ -34,7 +34,7 @@ describe("map feature interaction trigger contract", () => {
 
   it("offers a fixed click-only value in Map Studio", () => {
     const mounted = mountMapStudio();
-    act(() => button(mounted.host, "interaction").click());
+    act(() => button(mounted.host, "Selection").click());
     const trigger = mounted.host.querySelector('[aria-label="Map interaction trigger"]') as HTMLInputElement;
     expect(trigger.value).toBe("click");
     expect(trigger.readOnly).toBe(true);
@@ -50,7 +50,7 @@ describe("map feature interaction trigger contract", () => {
       internalMode: "highlight",
     };
     const mounted = mountMapStudio(JSON.stringify(candidate));
-    act(() => button(mounted.host, "interaction").click());
+    act(() => button(mounted.host, "Selection").click());
     const enabled = mounted.host.querySelector(
       '.hp-map-form-grid input[type="checkbox"]',
     ) as HTMLInputElement;

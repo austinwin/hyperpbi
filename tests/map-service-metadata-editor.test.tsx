@@ -70,7 +70,8 @@ describe("metadata-driven ArcGIS authoring", () => {
   });
   it("fetches explicitly, selects root sublayers, and populates service field controls", async () => {
     const mounted = mountMapStudio(undefined, { webAccessAvailable: true });
-    act(() => button(mounted.host, "Add ArcGIS feature layer").click());
+    act(() => button(mounted.host, "+ Add layer").click());
+    act(() => button(mounted.host, "ArcGIS feature layer").click());
     change(
       mounted.host.querySelector('[aria-label="ArcGIS service URL"]')!,
       "https://services.arcgis.com/x/FeatureServer",
@@ -88,7 +89,7 @@ describe("metadata-driven ArcGIS authoring", () => {
     });
     expect(mounted.host.textContent).toContain("FID");
     expect(mounted.host.textContent).toContain("REGION");
-    act(() => button(mounted.host, "renderer").click());
+    act(() => button(mounted.host, "Renderer").click());
     const type = mounted.host.querySelector(
       '[aria-label="Renderer type"]',
     ) as HTMLSelectElement;
@@ -116,7 +117,8 @@ describe("metadata-driven ArcGIS authoring", () => {
       },
     );
     const mounted = mountMapStudio(undefined, { webAccessAvailable: true });
-    act(() => button(mounted.host, "Add ArcGIS feature layer").click());
+    act(() => button(mounted.host, "+ Add layer").click());
+    act(() => button(mounted.host, "ArcGIS feature layer").click());
     const input = mounted.host.querySelector(
       '[aria-label="ArcGIS service URL"]',
     ) as HTMLInputElement;

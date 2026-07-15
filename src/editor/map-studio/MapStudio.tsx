@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import type { NormalizedData, NormalizedField } from "../../data/normalizeData";
 import type { DatasetDefinition } from "../../data/datasets";
 import type { MapComponent } from "../../schema/hyperpbiSchema";
@@ -27,6 +27,7 @@ import {
   runMapJoinPreview,
   type MapJoinPreviewResult,
 } from "../../maps/join/mapJoinPreview";
+import { normalizeJoinKey } from "../../maps/join/mapJoinNormalizer";
 import type { MapAttributeSource } from "../../maps/attributes/mapFeatureAttributes";
 import { parseArcGisUrl } from "../../maps/arcgis/arcGisUrl";
 import { collectArcGisQueryFields } from "../../maps/arcgis/mapArcGisQueryFields";
@@ -37,6 +38,14 @@ import { FieldSelect } from "./MapFieldSelect";
 import { StudioButton } from "../ui/StudioButton";
 import { StudioCheckbox } from "../ui/StudioCheckbox";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
+import {
+  mapLayerCapabilityExplanation,
+  resolveMapLayerCapabilities,
+} from "../../maps/model/mapLayerCapabilities";
+import {
+  createMapStudioDraftState,
+  mapStudioDraftReducer,
+} from "./mapStudioDraftState";
 
 type Json = Record<string, unknown>;
 type PropertyTab =
@@ -50,18 +59,34 @@ type PropertyTab =
   | "interaction"
   | "performance"
   | "diagnostics";
-const propertyTabs: readonly { id: PropertyTab; label: string }[] = [
-  { id: "source", label: "Source" },
-  { id: "renderer", label: "Renderer" },
-  { id: "labels", label: "Labels" },
-  { id: "popup", label: "Popup" },
-  { id: "tooltip", label: "Tooltip" },
-  { id: "join", label: "Join" },
-  { id: "visibility", label: "Visibility" },
-  { id: "interaction", label: "Interaction" },
-  { id: "performance", label: "Performance" },
-  { id: "diagnostics", label: "Diagnostics" },
+type PropertyGroup = "Data" | "Appearance" | "Interaction" | "Advanced";
+const propertyTabs: readonly { id: PropertyTab; label: string; group: PropertyGroup }[] = [
+  { id: "source", label: "Source", group: "Data" },
+  { id: "join", label: "Join", group: "Data" },
+  { id: "renderer", label: "Renderer", group: "Appearance" },
+  { id: "labels", label: "Labels", group: "Appearance" },
+  { id: "tooltip", label: "Tooltip", group: "Appearance" },
+  { id: "popup", label: "Feature details", group: "Interaction" },
+  { id: "visibility", label: "Visibility", group: "Interaction" },
+  { id: "interaction", label: "Selection", group: "Interaction" },
+  { id: "performance", label: "Performance", group: "Advanced" },
+  { id: "diagnostics", label: "Diagnostics", group: "Advanced" },
 ];
+const propertyGroups: readonly PropertyGroup[] = ["Data", "Appearance", "Interaction", "Advanced"];
+
+function propertyTabSupported(
+  tab: PropertyTab,
+  sourceType: MapLayerSourceType,
+): boolean {
+  const capability = resolveMapLayerCapabilities(sourceType);
+  if (tab === "join") return capability.join;
+  if (tab === "renderer" || tab === "labels")
+    return sourceType === "powerbi" || sourceType === "arcgisFeature";
+  if (tab === "popup") return capability.popup;
+  if (tab === "tooltip") return capability.tooltip;
+  if (tab === "interaction") return capability.featureInteraction;
+  return true;
+}
 const object = (value: unknown): value is Json =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -127,8 +152,16 @@ export function MapStudio({
       ? (findComponent(parsed, mapId) as unknown as MapComponent | undefined)
       : undefined;
   const selectedMapPath = maps.find((item) => item.id === mapId)?.path ?? "";
-  const [selectedLayerId, setSelectedLayerId] = useState("");
-  const [propertyTab, setPropertyTab] = useState<PropertyTab>("source");
+  const [draftState, draftDispatch] = useReducer(
+    mapStudioDraftReducer,
+    createMapStudioDraftState(mapId),
+  );
+  const selectedLayerId = draftState.activeLayerId;
+  const setSelectedLayerId = (layerId: string) =>
+    draftDispatch({ type: "activateLayer", layerId });
+  const propertyTab = draftState.activeSection as PropertyTab;
+  const setPropertyTab = (section: PropertyTab) =>
+    draftDispatch({ type: "activateSection", section });
   const [mobilePane, setMobilePane] = useState<"layers" | "properties">(
     "layers",
   );
@@ -166,6 +199,7 @@ export function MapStudio({
     if (history.value !== json) history.reset(json);
   }, [json, history]);
   useEffect(() => {
+    draftDispatch({ type: "activateMap", mapId });
     if (!mapId) return;
     if (selectedComponentId !== mapId) onSelect(mapId);
   }, [mapId]);
@@ -222,6 +256,13 @@ export function MapStudio({
   const selectedLayerIndex = map?.layers?.findIndex(
     (candidate) => candidate.id === selectedLayerId,
   ) ?? -1;
+  const capabilityExplanation = layer
+    ? mapLayerCapabilityExplanation(layer.source.type)
+    : undefined;
+  useEffect(() => {
+    if (!layer || propertyTabSupported(propertyTab, layer.source.type)) return;
+    setPropertyTab("source");
+  }, [layer?.source.type, propertyTab]);
   const selectedLayerPath = selectedLayerIndex >= 0
     ? appendJsonPointer(selectedMapPath, "layers", selectedLayerIndex)
     : "";
@@ -582,7 +623,7 @@ export function MapStudio({
     if (
       !layer ||
       layer.source.type !== "arcgisFeature" ||
-      !layer.join?.enabled ||
+      !layer.join ||
       !dataset
     )
       return;
@@ -814,22 +855,45 @@ export function MapStudio({
               <label class="hp-map-property-select">
                 <span>Property category</span>
                 <select value={propertyTab} onChange={(event) => setPropertyTab(event.currentTarget.value as PropertyTab)}>
-                  {propertyTabs.map((tab) => <option value={tab.id}>{tab.label}</option>)}
+                  {propertyTabs.map((tab) => (
+                    <option
+                      value={tab.id}
+                      disabled={!propertyTabSupported(tab.id, layer.source.type)}
+                    >
+                      {tab.label}
+                    </option>
+                  ))}
                 </select>
               </label>
               <div class="hp-map-property-workspace">
                 <nav class="hp-map-property-tabs" role="tablist" aria-orientation="vertical" aria-label="Layer properties">
-                {propertyTabs.map((tab) => (
-                  <button
-                    role="tab"
-                    aria-selected={propertyTab === tab.id}
-                    onClick={() => setPropertyTab(tab.id)}
-                  >
-                    {tab.label}
-                  </button>
+                {propertyGroups.map((group) => (
+                  <div class="hp-map-property-group" data-property-group={group.toLowerCase()}>
+                    <strong>{group}</strong>
+                    {propertyTabs.filter((tab) => tab.group === group).map((tab) => {
+                      const supported = propertyTabSupported(tab.id, layer.source.type);
+                      return (
+                        <button
+                          role="tab"
+                          aria-selected={propertyTab === tab.id}
+                          aria-disabled={!supported}
+                          disabled={!supported}
+                          title={supported ? undefined : capabilityExplanation}
+                          onClick={() => setPropertyTab(tab.id)}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 ))}
                 </nav>
                 <section class="hp-map-property-panel" role="tabpanel">
+                {capabilityExplanation && (
+                  <p class="hp-map-capability-note" role="note">
+                    {capabilityExplanation}
+                  </p>
+                )}
                 {propertyTab === "source" && (
                   <SourceEditor
                     layer={layer}
@@ -885,6 +949,7 @@ export function MapStudio({
                     serviceMetadata={serviceMetadata}
                     preview={joinPreview}
                     runPreview={() => void runJoin()}
+                    invalidatePreview={() => setJoinPreview({})}
                   />
                 )}
                 {propertyTab === "visibility" && (
@@ -1041,6 +1106,37 @@ export function MapStudio({
     count: number,
   ) {
     const selected = selectedLayerId === item.id;
+    const sourceLabel: Record<MapLayerSourceType, string> = {
+      powerbi: "Power BI",
+      arcgisFeature: "ArcGIS Feature",
+      arcgisDynamic: "ArcGIS Dynamic",
+      arcgisTile: "ArcGIS Tile",
+    };
+    const authoredIndex = map?.layers?.findIndex(
+      (candidate) => candidate.id === item.id,
+    ) ?? -1;
+    const itemPath = authoredIndex >= 0
+      ? appendJsonPointer(selectedMapPath, "layers", authoredIndex)
+      : "";
+    const itemIssues = itemPath
+      ? prepared.diagnostics.filter(
+          (diagnostic) =>
+            diagnostic.path === itemPath || diagnostic.path.startsWith(`${itemPath}/`),
+        )
+      : [];
+    const errorCount = itemIssues.filter(
+      (diagnostic) => diagnostic.severity === "error",
+    ).length;
+    const warningCount = itemIssues.filter(
+      (diagnostic) => diagnostic.severity === "warning",
+    ).length;
+    const loading = selected && metadata.loading === true;
+    const featureCount =
+      item.source.type === "powerbi"
+        ? `${rows.length.toLocaleString()} features`
+        : selected && joinPreview.result
+          ? `${joinPreview.result.outputFeatureCount.toLocaleString()} preview features`
+          : "Count after preview";
     return (
       <div
         class={`hp-map-studio-layer ${selected ? "is-selected" : ""}`}
@@ -1073,26 +1169,45 @@ export function MapStudio({
           <strong title={item.name}>{item.name}</strong>
           <small>
             <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
-              {item.join ? "Joined" : item.source.type === "powerbi" ? "Power BI" : "Service"}
+              {item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
             </span>
-            <span title={item.dataset ?? map?.dataset ?? "powerbi"}>{item.dataset ?? map?.dataset ?? "powerbi"}</span>
-            <span>{rows.length} rows</span>
+            <span title={featureCount}>{featureCount}</span>
           </small>
         </button>
-        <button
-          disabled={index === 0}
-          aria-label={`Move ${item.name} up`}
-          onClick={() => moveLayer(item.id, -1)}
+        <span
+          class={`hp-map-layer-status ${loading ? "is-loading" : errorCount ? "is-error" : warningCount ? "is-warning" : "is-ready"}`}
+          title={
+            loading
+              ? "Loading source metadata"
+              : errorCount
+                ? `${errorCount} error${errorCount === 1 ? "" : "s"}`
+                : warningCount
+                  ? `${warningCount} warning${warningCount === 1 ? "" : "s"}`
+                  : "Ready"
+          }
+          aria-label={loading ? "Loading" : errorCount ? "Error" : warningCount ? "Warning" : "Ready"}
         >
-          ↑
-        </button>
-        <button
-          disabled={index === count - 1}
-          aria-label={`Move ${item.name} down`}
-          onClick={() => moveLayer(item.id, 1)}
-        >
-          ↓
-        </button>
+          {loading ? "…" : errorCount ? "!" : warningCount ? "△" : "✓"}
+        </span>
+        <details class="hp-map-layer-actions">
+          <summary aria-label={`Actions for ${item.name}`}>⋯</summary>
+          <div>
+            <button
+              disabled={index === 0}
+              aria-label={`Move ${item.name} up`}
+              onClick={() => moveLayer(item.id, -1)}
+            >
+              Move up
+            </button>
+            <button
+              disabled={index === count - 1}
+              aria-label={`Move ${item.name} down`}
+              onClick={() => moveLayer(item.id, 1)}
+            >
+              Move down
+            </button>
+          </div>
+        </details>
       </div>
     );
   }
@@ -2621,6 +2736,7 @@ function JoinEditor({
   serviceMetadata,
   preview,
   runPreview,
+  invalidatePreview,
 }: {
   layer: MapLayerDefinition;
   fields: NormalizedField[];
@@ -2629,6 +2745,7 @@ function JoinEditor({
   serviceMetadata?: ArcGisLayerMetadata;
   preview: { loading?: boolean; result?: MapJoinPreviewResult; error?: string };
   runPreview: () => void;
+  invalidatePreview: () => void;
 }) {
   if (layer.source.type !== "arcgisFeature")
     return <p>Join mode is available for ArcGIS feature layers.</p>;
@@ -2637,43 +2754,94 @@ function JoinEditor({
     powerBiField: fields[0]?.key ?? "",
     serviceField: "",
   };
-  const set = (patch: Json) =>
-    mutate((candidate) => {
-      candidate.join = { ...(candidate.join ?? join), ...patch } as typeof join;
+  const set = (patch: Json) => {
+    invalidatePreview();
+    return mutate((candidate) => {
+      candidate.join = {
+        ...(candidate.join ?? join),
+        ...patch,
+        enabled: false,
+      } as typeof join;
       if (candidate.source.type === "arcgisFeature")
-        candidate.source.mode =
-          (patch.enabled ?? candidate.join.enabled) ? "join" : "reference";
+        candidate.source.mode = "reference";
     });
+  };
+  const normalization = join.normalization ?? ["trim", "upper"];
   const values = rows.map((row) => row[join.powerBiField]);
   const normalized = values
-    .map((value) =>
-      String(value ?? "")
-        .trim()
-        .toUpperCase(),
-    )
-    .filter(Boolean);
+    .map((value) => normalizeJoinKey(value, normalization))
+    .filter((value): value is string => value !== null);
   const counts = new Map<string, number>();
   normalized.forEach((value) =>
     counts.set(value, (counts.get(value) ?? 0) + 1),
   );
   const duplicates = [...counts.entries()].filter(([, count]) => count > 1);
-  const normalization = join.normalization ?? ["trim", "upper"];
+  const powerBiFieldExists = fields.some((field) => field.key === join.powerBiField);
+  const serviceFieldExists = Boolean(
+    join.serviceField &&
+      serviceMetadata?.fields?.some((field) => field.name === join.serviceField),
+  );
+  const matchRate = preview.result?.matchRate;
+  const previewReady = Boolean(preview.result && !preview.loading && !preview.error);
+  const discardedAggregationValues =
+    preview.result?.aggregationDiagnostics.some(
+      (item) => item.discardedCount > 0,
+    ) ?? false;
+  const saveBlocked =
+    !previewReady ||
+    !powerBiFieldExists ||
+    !serviceFieldExists ||
+    preview.result?.cardinalityValid === false ||
+    discardedAggregationValues;
   return (
     <div class="hp-map-form-grid">
-      <label>
-        <input
-          type="checkbox"
-          checked={join.enabled}
-          onChange={(event) => set({ enabled: event.currentTarget.checked })}
-        />{" "}
-        Enable join
-      </label>
+      <header class="hp-map-join-intro">
+        <strong>Guided feature join</strong>
+        <p>Build and validate the relationship before saving it to the map layer.</p>
+      </header>
+      <ol class="hp-map-join-steps" aria-label="Join workflow progress">
+        {[
+          ["ArcGIS feature source", true],
+          ["Power BI dataset", true],
+          ["Power BI key", powerBiFieldExists],
+          ["Service key", serviceFieldExists],
+          ["Key normalization", normalization.length > 0],
+          ["Normalized key samples", normalized.length > 0],
+          ["Match rate", previewReady],
+          ["Unmatched samples", previewReady],
+          ["Duplicate samples", previewReady],
+          ["Expected cardinality", Boolean(join.cardinality)],
+          ["Required aggregations", (join.aggregations?.length ?? 0) > 0 || join.cardinality !== "manyToOne"],
+          ["Resulting joined fields", previewReady],
+          ["Selection behavior", Boolean(layer.interaction)],
+          ["Save join", join.enabled && previewReady],
+        ].map(([label, complete], index) => (
+          <li class={complete ? "is-complete" : ""}>
+            <span>{index + 1}</span>{label}
+          </li>
+        ))}
+      </ol>
+      <div class="hp-map-join-status" role="status">
+        <strong>{join.enabled ? "Join is active" : "Join is not active"}</strong>
+        <span>
+          Configuration edits disable the runtime join until a current preview
+          is confirmed.
+        </span>
+        {join.enabled && (
+          <StudioButton variant="secondary" onClick={() => set({})}>
+            Disable join
+          </StudioButton>
+        )}
+      </div>
       <FieldSelect
         label="Power BI / logical dataset field"
         value={join.powerBiField}
         fields={fields}
         onChange={(value) => set({ powerBiField: value })}
       />
+      {!powerBiFieldExists && join.powerBiField && (
+        <p class="hp-map-join-blocker" role="alert">The selected Power BI key does not exist in this dataset.</p>
+      )}
       <label>
         <span>Service field</span>
         <select
@@ -2689,6 +2857,9 @@ function JoinEditor({
           ))}
         </select>
       </label>
+      {join.serviceField && !serviceFieldExists && (
+        <p class="hp-map-join-blocker" role="alert">Inspect the service and choose an existing service key before previewing.</p>
+      )}
       <label>
         <span>Cardinality</span>
         <select
@@ -2893,9 +3064,8 @@ function JoinEditor({
         )}
         <button
           disabled={
-            !join.enabled ||
-            !join.powerBiField ||
-            !join.serviceField ||
+            !powerBiFieldExists ||
+            !serviceFieldExists ||
             preview.loading
           }
           onClick={runPreview}
@@ -2903,6 +3073,11 @@ function JoinEditor({
           {preview.loading ? "Running join preview…" : "Run join preview"}
         </button>
         {preview.error && <p role="alert">{preview.error}</p>}
+        {matchRate !== undefined && matchRate < 0.2 && (
+          <p class="hp-map-join-blocker" role="alert">
+            Match rate is extremely low ({(matchRate * 100).toFixed(1)}%). Review both keys and normalization before saving.
+          </p>
+        )}
         {preview.result && (
           <>
             <dl>
@@ -2936,14 +3111,23 @@ function JoinEditor({
             ) && (
               <details>
                 <summary>Aggregation input diagnostics</summary>
-                <pre>{JSON.stringify(preview.result.aggregationDiagnostics, null, 2)}</pre>
+                <dl>
+                  {preview.result.aggregationDiagnostics.map((item) => (
+                    <div>
+                      <dt>{item.alias}</dt>
+                      <dd>{item.validCount} valid · {item.blankCount} blank · {item.discardedCount} discarded</dd>
+                    </div>
+                  ))}
+                </dl>
               </details>
             )}
             <details>
               <summary>Bounded normalization samples</summary>
-              <pre>
-                {JSON.stringify(preview.result.normalizationSamples, null, 2)}
-              </pre>
+              <ul>
+                {preview.result.normalizationSamples.map((sample) => (
+                  <li>{String(sample.raw)} → {sample.normalized ?? "blank"}</li>
+                ))}
+              </ul>
             </details>
             <details>
               <summary>Bounded mismatch and duplicate samples</summary>
@@ -2980,6 +3164,28 @@ function JoinEditor({
             </details>
           </>
         )}
+        {discardedAggregationValues && (
+          <p class="hp-map-join-blocker" role="alert">
+            The configured aggregations discard invalid values. Choose
+            compatible fields or aggregations before saving.
+          </p>
+        )}
+        <StudioButton
+          variant="primary"
+          disabled={saveBlocked}
+          onClick={() =>
+            mutate((candidate) => {
+              candidate.join = {
+                ...(candidate.join ?? join),
+                enabled: true,
+              } as typeof join;
+              if (candidate.source.type === "arcgisFeature")
+                candidate.source.mode = "join";
+            })
+          }
+        >
+          Save join
+        </StudioButton>
         <p>
           This explicit preview uses the runtime query and join engines, is
           bounded to 500 service features, and does not create a Power BI model
@@ -3460,6 +3666,42 @@ function BasemapViewEditor({
     });
   return (
     <div class="hp-map-form-grid">
+      <fieldset>
+        <legend>Container sizing</legend>
+        <label>
+          <span>Height mode</span>
+          <select
+            aria-label="Map height mode"
+            value={map.heightMode ?? "fixed"}
+            onChange={(event) =>
+              mutateMap((candidate) => {
+                candidate.heightMode = event.currentTarget.value as MapComponent["heightMode"];
+              })
+            }
+          >
+            <option value="fixed">Fixed</option>
+            <option value="fill">Fill available space</option>
+            <option value="aspectRatio">Aspect ratio</option>
+          </select>
+        </label>
+        {(!map.heightMode || map.heightMode === "fixed") && (
+          <label>
+            <span>Height (pixels)</span>
+            <input type="number" min="160" value={map.height ?? 420} onChange={(event) => mutateMap((candidate) => { candidate.height = Number(event.currentTarget.value); })} />
+          </label>
+        )}
+        <label>
+          <span>Minimum height (pixels)</span>
+          <input type="number" min="160" value={map.minHeight ?? 220} onChange={(event) => mutateMap((candidate) => { candidate.minHeight = Number(event.currentTarget.value); })} />
+        </label>
+        {map.heightMode === "aspectRatio" && (
+          <label>
+            <span>Aspect ratio</span>
+            <input type="number" min="0.25" max="8" step="0.05" value={map.aspectRatio ?? 16 / 9} onChange={(event) => mutateMap((candidate) => { candidate.aspectRatio = Number(event.currentTarget.value); })} />
+          </label>
+        )}
+        <p>Fill mode is used by Studio preview when no explicit mode is authored. The runtime still respects the Power BI host viewport.</p>
+      </fieldset>
       <fieldset>
         <legend>Basemap gallery</legend>
         <label>

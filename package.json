@@ -21,6 +21,7 @@
     "certification:audit": "node scripts/package-profile.mjs core audit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:browser": "playwright test",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -41,6 +42,7 @@
     "preact": "^10.29.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/css-tree": "^2.3.11",
     "@types/jsdom": "^28.0.3",
     "@types/leaflet": "^1.9.21",
@@ -52,6 +54,7 @@
     "jsdom": "^24.1.3",
     "powerbi-visuals-tools": "^6.1.3",
     "typescript": "5.5.4",
+    "vite": "^6.4.3",
     "vitest": "^4.1.9"
   }
 }

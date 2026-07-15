@@ -41,11 +41,13 @@ export function createLeafletPointLayer(
         weight: style.weight,
         dashArray: style.dashArray,
         pane,
+        bubblingMouseEvents: false,
     });
     const radius = Math.max(2, Math.min(64, style.radius || 6));
     const size = Math.ceil(radius * 2 + Math.max(0, style.weight) * 2);
     return L.marker(position, {
         pane,
+        bubblingMouseEvents: false,
         title: title ? title.slice(0, 160) : undefined,
         icon: L.divIcon({
             className: `hp-map-point-shape hp-map-point-${pointShape}`,
