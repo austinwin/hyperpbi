@@ -1,0 +1,168 @@
+{
+  "version": "2.0",
+  "title": "Map Feature Showcase",
+"css": ".hp-shell { height: 100%; min-height: 0; } .hp-main { height: 100%; min-height: 0; display: flex; flex-direction: column; } .hp-main > .hp-grid { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); align-items: stretch; } [data-hp-id=\"asset-feature-showcase\"] { height: 100%; min-height: 0; } [data-hp-id=\"asset-feature-showcase\"] > .hp-card { height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); } [data-hp-id=\"asset-feature-showcase\"] > .hp-card > .hp-card-body { position: relative; min-height: 0; overflow: hidden; } [data-hp-id=\"asset-feature-showcase\"] .hp-map-frame[data-height-mode=\"fill\"] { position: absolute; inset: 0; width: 100%; height: auto !important; min-height: 0 !important; }",
+  "theme": {
+    "mode": "light",
+    "gap": 12
+  },
+  "components": [
+    {
+      "type": "map",
+      "id": "asset-feature-showcase",
+      "span": 12,
+      "heightMode": "fill",
+      "minHeight": 340,
+      "view": {
+        "fitMode": "data",
+        "fitPadding": 0.12,
+        "preserveView": true
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "featureDetails": {
+        "mode": "auto",
+        "clearSelectionOnBackgroundClick": true,
+        "clearSelectionOnClose": false
+      },
+      "search": {
+        "enabled": true
+      },
+      "layers": [
+        {
+          "id": "municipal-assets",
+          "name": "Municipal Assets",
+          "dataset": "powerbi",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "status",
+            "fieldSource": "powerbi",
+            "values": [],
+            "defaultSymbol": {
+              "fillColor": "#64748b",
+              "outlineColor": "#ffffff",
+              "outlineWidth": 2,
+              "radius": 7
+            }
+          },
+          "tooltip": {
+            "enabled": true,
+            "fields": [
+              {
+                "field": "asset_id",
+                "fieldSource": "powerbi",
+                "label": "Asset ID"
+              },
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status"
+              }
+            ]
+          },
+          "popup": {
+            "enabled": true,
+            "defaultFieldSource": "powerbi",
+            "title": "{{asset_id}}",
+            "fields": [
+              {
+                "field": "asset_type",
+                "fieldSource": "powerbi",
+                "label": "Asset Type"
+              },
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status",
+                "display": "badge"
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "internalScope": "others",
+            "externalMode": "filter",
+            "field": "asset_id",
+            "fieldSource": "powerbi",
+            "operator": "=",
+            "multiSelect": true,
+            "clearOnSecondClick": true
+          },
+          "legend": {
+            "visible": true,
+            "title": "Asset Status"
+          },
+          "visible": true,
+          "opacity": 1,
+          "order": 10,
+          "labels": {
+            "enabled": true,
+            "field": "map_feature_showcase_status",
+            "fieldSource": "powerbi",
+            "placement": "lineCenter",
+            "collision": "hideOverlaps"
+          }
+        },
+        {
+          "id": "arcgis-dynamic",
+          "name": "ArcGIS dynamic layer",
+          "source": {
+            "type": "arcgisDynamic",
+            "url": "https://geogimsms.houstontx.gov/arcgis/rest/services/HW/OutsideWastewater_gx/MapServer",
+            "layerIds": [
+              25
+            ]
+          }
+        },
+        {
+          "id": "arcgis-feature",
+          "name": "ArcGIS feature layer",
+          "source": {
+            "type": "arcgisFeature",
+            "url": "https://geogimsms.houstontx.gov/arcgis/rest/services/HW/OutsideWastewater_gx/MapServer",
+            "layerId": 53,
+            "useServiceRenderer": true,
+            "useServiceLabels": true,
+            "definitionExpression": "1=1"
+          }
+        }
+      ],
+      "layerPanel": {
+        "visible": true,
+        "position": "right",
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": false
+      },
+      "legend": {
+        "defaultOpen": false
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "search": true,
+        "clearSelection": true,
+        "zoomToSelection": true,
+        "bookmarks": true
+      },
+      "settings": {
+        "showLayerControl": true,
+        "showLegend": true
+      },
+      "height": 100
+    }
+  ]
+}
