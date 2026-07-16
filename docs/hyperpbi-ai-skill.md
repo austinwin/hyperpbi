@@ -73,7 +73,7 @@ Overlay components require unique IDs. Target existing IDs with `openOverlay`, `
 
 ## Targeted change packages
 
-Use `kind: "hyperpbi-change"` and only the properties permitted by the operation. `replace` requires a matching `targetId` and `component.id`; `insertBefore` and `insertAfter` target a component in an ordered array; `appendChild` requires a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/content`, or `items/0/children`; `appendRoot` uses exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`; `remove` carries only `targetId`. Never use absolute or parent paths. Preview and validate the complete resulting dashboard first, then wait for explicit Apply change.
+Use `kind: "hyperpbi-change"` and only the properties permitted by the operation. `replace` requires a matching `targetId` and `component.id`; `insertBefore` and `insertAfter` target a component in an ordered array; `appendChild` requires a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/content`, or `items/0/children`; `appendRoot` uses exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`; `remove` carries only `targetId`. Never use absolute or parent paths. Validate the complete resulting dashboard; a successful result becomes the working JSON and preview together.
 
 ## Three interaction systems
 

@@ -13,6 +13,7 @@ import {
   resolvedFeatureValue,
   formatFeatureValue,
   mergedFeatureAttributes,
+  mapFeatureDisplayValue,
 } from "../../maps/model/mapFeatureValue";
 import type { FeatureFieldSource } from "../../maps/model/mapFeatureValue";
 import { sanitizeHtml } from "../../security/sanitizeHtml";
@@ -197,9 +198,10 @@ export function renderResolvedTooltip(
   }
   const fields = tooltip?.fields;
   if (!fields || fields.length === 0) {
-    // Fallback: layer name + feature ID
-    const id = feature.serviceObjectId ?? feature.id;
-    return `${layerName ?? "Feature"}: ${id}`;
+    const display = mapFeatureDisplayValue(feature);
+    return display
+      ? `${layerName ?? "Feature"}: ${display}`
+      : (layerName ?? "Map feature");
   }
 
   const parts: string[] = [];
@@ -268,8 +270,10 @@ export function createResolvedTooltipElement(
 
   const tooltipFields = tooltip?.fields;
   if (!tooltipFields || tooltipFields.length === 0) {
-    const id = feature.serviceObjectId ?? feature.id;
-    node.textContent = `${layerName ?? "Feature"}: ${id}`;
+    const display = mapFeatureDisplayValue(feature);
+    node.textContent = display
+      ? `${layerName ?? "Feature"}: ${display}`
+      : (layerName ?? "Map feature");
     return node;
   }
 

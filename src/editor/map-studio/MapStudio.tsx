@@ -68,7 +68,7 @@ const propertyTabs: readonly { id: PropertyTab; label: string; group: PropertyGr
   { id: "tooltip", label: "Tooltip", group: "Appearance" },
   { id: "popup", label: "Feature details", group: "Interaction" },
   { id: "visibility", label: "Visibility", group: "Interaction" },
-  { id: "interaction", label: "Selection", group: "Interaction" },
+  { id: "interaction", label: "Interactions", group: "Interaction" },
   { id: "performance", label: "Performance", group: "Advanced" },
   { id: "diagnostics", label: "Diagnostics", group: "Advanced" },
 ];
@@ -3529,126 +3529,136 @@ function InteractionEditor({
       filterField.origin !== "dataset-metric",
     );
   return (
-    <div class="hp-map-form-grid">
-      <label>
+    <div class="hp-map-form-grid hp-map-interaction-editor">
+      <label class="hp-map-switch hp-map-interaction-master">
         <input
           type="checkbox"
+          role="switch"
           checked={interaction.enabled !== false}
           onChange={(event) => set({ enabled: event.currentTarget.checked })}
-        />{" "}
-        Enable layer interaction
+        />
+        <span>
+          <strong>Enable map feature interactions</strong>
+          <small>One feature click can update HyperPBI components and Power BI selection as a single transaction.</small>
+        </span>
       </label>
       <label>
         <span>Trigger</span>
         <input value="click" readOnly aria-label="Map interaction trigger" />
         <small>Map features currently run interactions on click only.</small>
       </label>
-      <label>
-        <span>Internal mode</span>
-        <select
-          value={interaction.internalMode ?? "highlight"}
-          onChange={(event) => set({ internalMode: event.currentTarget.value })}
-        >
-          <option value="none">none</option>
-          <option value="highlight">highlight</option>
-          <option value="filter">filter</option>
-        </select>
-      </label>
-      <label>
-        <span>Internal scope</span>
-        <select
-          value={interaction.internalScope ?? "self"}
-          onChange={(event) =>
-            set({ internalScope: event.currentTarget.value })
-          }
-        >
-          <option value="self">self</option>
-          <option value="others">others</option>
-          <option value="all">all</option>
-        </select>
-      </label>
-      <label>
-        <span>External mode</span>
-        <select
-          value={interaction.externalMode ?? "selection"}
-          onChange={(event) => set({ externalMode: event.currentTarget.value })}
-        >
-          <option value="none">none</option>
-          <option value="auto">auto</option>
-          <option value="selection" disabled={!selectionAvailable}>
-            selection
-          </option>
-          <option value="filter" disabled={!filterAvailable}>
-            filter
-          </option>
-        </select>
-      </label>
-      <label>
-        <span>Interaction field source</span>
-        <select
-          aria-label="Interaction field source"
-          value={source}
-          onChange={(event) => {
-            const next = event.currentTarget.value as MapAttributeSource;
-            set({ fieldSource: next, field: fieldSets[next][0]?.key });
-          }}
-        >
-          <option value="powerbi">Power BI</option>
-          <option value="service">ArcGIS service</option>
-          <option value="joined">Joined output</option>
-        </select>
-      </label>
-      <FieldSelect
-        label="Interaction field"
-        value={interaction.field ?? ""}
-        fields={fieldSets[source]}
-        onChange={(value) => set({ field: value || undefined })}
-      />
-      <label>
-        <span>Operator</span>
-        <select
-          value={interaction.operator ?? "="}
-          onChange={(event) => set({ operator: event.currentTarget.value })}
-        >
-          {["=", "!=", ">", ">=", "<", "<=", "contains", "in", "between"].map(
-            (value) => (
-              <option>{value}</option>
-            ),
-          )}
-        </select>
-      </label>
-      <DraftInput
-        label="Explicit value"
-        value={interaction.value === undefined ? "" : String(interaction.value)}
-        onCommit={(value) => set({ value: value || undefined })}
-      />
-      <label>
-        <span>Selection mode</span>
-        <select
-          value={interaction.selectionMode ?? "replace"}
-          onChange={(event) =>
-            set({ selectionMode: event.currentTarget.value })
-          }
-        >
-          <option value="replace">replace</option>
-          <option value="toggle">toggle</option>
-          <option value="add">add</option>
-        </select>
-      </label>
-      {[
-        ["Multi-select", "multiSelect"],
-        ["Show selector", "showSelector"],
-        ["Clear on second click", "clearOnSecondClick"],
-      ].map(([label, key]) => (
+      <fieldset disabled={interaction.enabled === false}>
+        <legend>Internal HyperPBI components</legend>
+        <p class="hp-map-interaction-help">Control how this map feature affects components inside the same HyperPBI dashboard.</p>
         <label>
-          <input
-            type="checkbox"
-            checked={(interaction as unknown as Json)[key] === true}
-            onChange={(event) => set({ [key]: event.currentTarget.checked })}
-          />{" "}
-          {label}
+          <span>Internal mode</span>
+          <select
+            value={interaction.internalMode ?? "highlight"}
+            onChange={(event) => set({ internalMode: event.currentTarget.value })}
+          >
+            <option value="none">No internal update</option>
+            <option value="highlight">Highlight matching rows</option>
+            <option value="filter">Filter matching rows</option>
+          </select>
         </label>
-      ))}
+        <label>
+          <span>Internal scope</span>
+          <select
+            value={interaction.internalScope ?? "all"}
+            onChange={(event) => set({ internalScope: event.currentTarget.value })}
+          >
+            <option value="self">This map only</option>
+            <option value="others">Other components</option>
+            <option value="all">Map and other components</option>
+          </select>
+        </label>
+      </fieldset>
+      <fieldset disabled={interaction.enabled === false}>
+        <legend>External Power BI visuals</legend>
+        <p class="hp-map-interaction-help">Use retained Power BI row identities for report selection, or a direct model column for filtering.</p>
+        <label>
+          <span>External mode</span>
+          <select
+            value={interaction.externalMode ?? "selection"}
+            onChange={(event) => set({ externalMode: event.currentTarget.value })}
+          >
+            <option value="none">No external update</option>
+            <option value="auto">Automatic</option>
+            <option value="selection" disabled={!selectionAvailable}>Power BI selection</option>
+            <option value="filter" disabled={!filterAvailable}>Power BI filter</option>
+          </select>
+        </label>
+      </fieldset>
+      <fieldset disabled={interaction.enabled === false}>
+        <legend>Matching field and value</legend>
+        <p class="hp-map-interaction-help">The selected field drives internal filtering and external filter mode. Selection mode uses retained row identities.</p>
+        <label>
+          <span>Interaction field source</span>
+          <select
+            aria-label="Interaction field source"
+            value={source}
+            onChange={(event) => {
+              const next = event.currentTarget.value as MapAttributeSource;
+              set({ fieldSource: next, field: fieldSets[next][0]?.key });
+            }}
+          >
+            <option value="powerbi">Power BI</option>
+            <option value="service">ArcGIS service</option>
+            <option value="joined">Joined output</option>
+          </select>
+        </label>
+        <FieldSelect
+          label="Interaction field"
+          value={interaction.field ?? ""}
+          fields={fieldSets[source]}
+          onChange={(value) => set({ field: value || undefined })}
+        />
+        <label>
+          <span>Operator</span>
+          <select
+            value={interaction.operator ?? "="}
+            onChange={(event) => set({ operator: event.currentTarget.value })}
+          >
+            {["=", "!=", ">", ">=", "<", "<=", "contains", "in", "between"].map(
+              (value) => <option>{value}</option>,
+            )}
+          </select>
+        </label>
+        <DraftInput
+          label="Explicit value"
+          value={interaction.value === undefined ? "" : String(interaction.value)}
+          onCommit={(value) => set({ value: value || undefined })}
+        />
+      </fieldset>
+      <fieldset disabled={interaction.enabled === false}>
+        <legend>Selection behavior</legend>
+        <label>
+          <span>Selection mode</span>
+          <select
+            value={interaction.selectionMode ?? "replace"}
+            onChange={(event) => set({ selectionMode: event.currentTarget.value })}
+          >
+            <option value="replace">Replace selection</option>
+            <option value="toggle">Toggle selection</option>
+            <option value="add">Add to selection</option>
+          </select>
+        </label>
+        {[
+          ["Allow Ctrl/Cmd multi-select", "multiSelect", interaction.multiSelect !== false],
+          ["Show selector", "showSelector", interaction.showSelector === true],
+          ["Clear on second click", "clearOnSecondClick", interaction.clearOnSecondClick === true],
+        ].map(([label, key, checked]) => (
+          <label class="hp-map-switch">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={Boolean(checked)}
+              onChange={(event) => set({ [String(key)]: event.currentTarget.checked })}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </fieldset>
       <fieldset>
         <legend>Compatibility</legend>
         <dl>

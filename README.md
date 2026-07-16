@@ -126,7 +126,7 @@ HyperPBI has three separate declarative systems:
 
 ## Studio, prompts, and repair
 
-Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification. Add-section returns a strict change package for before, after, a descriptor-compatible nested `containerPath`, or a root `components|toolbar|leftPanel|rightPanel` destination; redesign returns one replacement using the selected stable ID. Studio validates and previews the complete resulting dashboard, shows the mutation summary and warnings, and waits for explicit Apply. Normal improvements and repairs return complete JSON, not JSON Patch.
+Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification. Add-section returns a strict change package for before, after, a descriptor-compatible nested `containerPath`, or a root `components|toolbar|leftPanel|rightPanel` destination; redesign returns one replacement using the selected stable ID. Studio validates the complete result, then promotes that same prepared JSON to the working draft and preview in one transaction. Advanced JSON and Save & return therefore always use the dashboard that was validated. Normal improvements and repairs return complete JSON, not JSON Patch.
 
 Prompt composition includes only relevant component modules, Field Manifest data under the chosen privacy mode, recommended patterns, applicable datasets/maps/tables/charts/SVG guidance, current JSON for improvement, selected ID for redesign, and structured diagnostics for repair.
 

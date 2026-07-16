@@ -137,7 +137,6 @@ export function MapLayerPanel({ mapId, layers, groups = [], configuration, onZoo
                                     </button>
                                     <span class="hp-map-layer-icon" title={layer.sourceType}><Icon name={iconName} size="xs" decorative /></span>
                                     <span class="hp-map-layer-name" title={`${layer.name} · dataset ${layer.datasetName ?? "powerbi"}`}>{layer.name}</span>
-                                    <span class="hp-map-layer-count" title={`${layer.features.length} features`}>{layer.features.length.toLocaleString()}</span>
                                     {loading && <span class="hp-map-layer-loading" title="Loading" aria-label={`${layer.name} is loading`} />}
                                     {(hasError || hasWarnings) && (
                                         <button

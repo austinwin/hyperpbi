@@ -73,6 +73,19 @@ describe("resolved map popup", () => {
 });
 
 describe("resolved map tooltip", () => {
+    it("never exposes an internal Power BI selection identity as fallback content", () => {
+        const internalIdentityFeature: ResolvedMapFeature = {
+            ...feature,
+            id: '[{"identityIndex":8},{"identityIndex":8}]',
+            serviceObjectId: undefined,
+            serviceAttributes: {},
+            joinedAttributes: {},
+            powerBiAttributes: { asset_id: "AS-108", latitude: 30.1, longitude: -97.7 },
+        };
+        expect(renderResolvedTooltip(internalIdentityFeature, undefined, "Municipal assets")).toBe("Municipal assets: AS-108");
+        expect(createResolvedTooltipElement(internalIdentityFeature, undefined, "Municipal assets").textContent).not.toContain("identityIndex");
+    });
+
     it("uses a tooltip template before configured fields", () => {
         const tooltip: ResolvedMapTooltip = { enabled: true, template: "Asset {{NAME}}", fields: [{ field: "COUNT", fieldSource: "service", display: "text" }] };
         expect(renderResolvedTooltip(feature, tooltip, "Assets")).toBe("Asset Joined name");

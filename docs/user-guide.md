@@ -25,7 +25,7 @@ Describe the goal, audience, supported decisions, primary entity, application ty
 
 The permanent **Inspector** tab works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested or generated runtime components without firing runtime interactions; Escape exits inspection. The searchable hierarchy supports keyboard navigation. Wide layouts show resizable Tree and Properties panes; narrow layouts expose accessible Tree/Properties pane tabs while retaining selection. Inspector edits are complete-dashboard validated transactions with bounded undo/redo and support add child, insert before/after, move up/down/to another compatible container, recursive duplicate, and reference-aware deletion.
 
-Selected-section redesign and add-section jobs return a discriminated `hyperpbi-change` package. Studio validates and previews the entire resulting dashboard first, shows a mutation summary, and requires an explicit **Apply change** action.
+Selected-section redesign and add-section jobs return a discriminated `hyperpbi-change` package. Studio validates the entire resulting dashboard first, shows a mutation summary, and promotes the same prepared result to the working JSON and preview together.
 
 Studio uses this setup to choose relevant prompt modules; it does not add unimplemented features.
 

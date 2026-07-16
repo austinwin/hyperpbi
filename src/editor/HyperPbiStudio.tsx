@@ -44,9 +44,6 @@ import { SpecificationInspector } from "./inspector/SpecificationInspector";
 import { componentTree } from "./inspector/specificationEditor";
 import { SpecificationHistory } from "./inspector/specificationEditor";
 import { MapStudio } from "./map-studio/MapStudio";
-import { applyChangePackage } from "../ai/applyChangePackage";
-import { isAiChangePackage } from "../ai/changePackage";
-import { validateAiChangePackage } from "../ai/changePackageValidation";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import {
   prepareAuthoringData,
@@ -519,40 +516,17 @@ export function HyperPbiStudio({
       setBottomTab("errors");
     }
   };
-  const applyAi = (json: string, _merge: boolean, configJson?: string) => {
+  const previewAi = (json: string, configJson?: string): boolean => {
+    const nextConfiguration = configJson ?? configuration;
+    if (!run(json, nextConfiguration)) return false;
+    specificationHistory.current.commit(json);
+    setSpecification(json);
     if (configJson) setConfiguration(configJson);
-    try {
-      const incoming = JSON.parse(json) as unknown;
-      if (isAiChangePackage(incoming)) {
-        const checked = validateAiChangePackage(incoming);
-        if (!checked.package) {
-          checked.errors.forEach((error) => appendLog(error, "error"));
-          return;
-        }
-        const current = JSON.parse(specification) as HyperPbiSchema;
-        const applied = applyChangePackage(current, checked.package, {
-          validateResult: (candidate) =>
-            validateDraft(
-              JSON.stringify(candidate),
-              configJson ?? configuration,
-              data,
-            ),
-        });
-        if (!applied.schema) {
-          applied.errors.forEach((error) => appendLog(error, "error"));
-          return;
-        }
-        const next = JSON.stringify(applied.schema, null, 2);
-        setSpecification(next);
-        appendLog(applied.summary, "success");
-      } else setSpecification(json);
-      if (layout.advanced) setEditorTab("specification");
-    } catch (error) {
-      appendLog(
-        `AI import failed without changing the dashboard: ${error instanceof Error ? error.message : String(error)}`,
-        "error",
-      );
-    }
+    appendLog(
+      "Validated AI result promoted to the working JSON and preview together.",
+      "success",
+    );
+    return true;
   };
   const updateCalculations = (calculations: CalculationSpecification) => {
     const parsed = parseJson(specification);
@@ -886,10 +860,7 @@ export function HyperPbiStudio({
               currentSpecification={specification}
               configuration={configuration}
               onConfigurationChange={setConfiguration}
-              onApply={applyAi}
-              onPreview={(json, configJson) =>
-                run(json, configJson ?? configuration)
-              }
+              onPreview={previewAi}
               previewReady={Boolean(preview)}
               diagnostics={interactionDiagnostics}
               selectedComponentId={selectedComponentId}

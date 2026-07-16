@@ -7,7 +7,7 @@ export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
 HyperPBI compiles declarative JSON into a Power BI dashboard. Use **version 2.0 for new authoring**. Existing version 1.0 specifications remain supported as compatibility input.
 
-Canonical component descriptors own schema, field traversal, Inspector controls/containers, maturity, documentation, and valid example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; direct/row/item/datum templates resolve through the shared field engine while metric, state, selected, runtime, ArcGIS service, and joined namespaces remain separate. The permanent responsive Inspector validates transactions, supports preview selection and generated-owner mapping, and retains invalid complex drafts without replacing the last valid dashboard. AI section jobs use strict descriptor-compatible change packages with full-result preview-before-apply. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile, geocoder, and sanitized-origin ArcGIS service access are independent, and the geocoder defaults to none.
+Canonical component descriptors own schema, field traversal, Inspector controls/containers, maturity, documentation, and valid example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; direct/row/item/datum templates resolve through the shared field engine while metric, state, selected, runtime, ArcGIS service, and joined namespaces remain separate. The permanent responsive Inspector validates transactions, supports preview selection and generated-owner mapping, and retains invalid complex drafts without replacing the last valid dashboard. AI section jobs use strict descriptor-compatible change packages and atomically promote the fully validated result to the working JSON and preview. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile, geocoder, and sanitized-origin ArcGIS service access are independent, and the geocoder defaults to none.
 
 ## Studio workflow
 
@@ -133,7 +133,7 @@ Overlay components require unique IDs. Target existing IDs with \`openOverlay\`,
 
 ## Targeted change packages
 
-Use \`kind: "hyperpbi-change"\` and only the properties permitted by the operation. \`replace\` requires a matching \`targetId\` and \`component.id\`; \`insertBefore\` and \`insertAfter\` target a component in an ordered array; \`appendChild\` requires a descriptor-compatible relative \`containerPath\` such as \`children\`, \`footer\`, \`tabs/1/content\`, or \`items/0/children\`; \`appendRoot\` uses exactly \`components\`, \`toolbar\`, \`leftPanel\`, or \`rightPanel\`; \`remove\` carries only \`targetId\`. Never use absolute or parent paths. Preview and validate the complete resulting dashboard first, then wait for explicit Apply change.
+Use \`kind: "hyperpbi-change"\` and only the properties permitted by the operation. \`replace\` requires a matching \`targetId\` and \`component.id\`; \`insertBefore\` and \`insertAfter\` target a component in an ordered array; \`appendChild\` requires a descriptor-compatible relative \`containerPath\` such as \`children\`, \`footer\`, \`tabs/1/content\`, or \`items/0/children\`; \`appendRoot\` uses exactly \`components\`, \`toolbar\`, \`leftPanel\`, or \`rightPanel\`; \`remove\` carries only \`targetId\`. Never use absolute or parent paths. Validate the complete resulting dashboard; a successful result becomes the working JSON and preview together.
 
 ## Three interaction systems
 

@@ -35,13 +35,12 @@ export function AiResponseImporter({
   data,
   currentSpecification,
   aliasOverrides = {},
-  onApply,
   onPreview,
 }: {
   data: NormalizedData;
   currentSpecification: string;
   aliasOverrides?: Record<string, string>;
-  onApply: (json: string, merge: boolean, configJson?: string) => void;
+  /** Validates, renders, and promotes the resulting dashboard to the working draft. */
   onPreview: (json: string, configJson?: string) => boolean;
 }) {
   const [response, setResponse] = useState("");
@@ -50,10 +49,6 @@ export function AiResponseImporter({
   const [warnings, setWarnings] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
-  const [pending, setPending] = useState<{
-    applyJson: string;
-    configJson?: string;
-  }>();
   const [diagnostics, setDiagnostics] = useState<
     import("../../schema/diagnostics").Diagnostic[]
   >([]);
@@ -61,7 +56,6 @@ export function AiResponseImporter({
     const extracted = extractJsonFromAiResponse(response);
     if (extracted.error) {
       setErrors([extracted.error]);
-      setPending(undefined);
       return;
     }
     const configErrors = extracted.configJson
@@ -77,7 +71,6 @@ export function AiResponseImporter({
       const checked = validateAiChangePackage(extracted.value);
       if (!checked.package) {
         setErrors([...checked.errors, ...configErrors]);
-        setPending(undefined);
         return;
       }
       let current: HyperPbiSchema;
@@ -112,10 +105,12 @@ export function AiResponseImporter({
         data,
         aliasOverrides,
       );
-    const next =
-      validation.authoring && !isAiChangePackage(extracted.value)
-        ? JSON.stringify(validation.authoring, null, 2)
-        : applyJson;
+    // The preview and the authoring draft must use the same prepared result.
+    // For a change package, previewJson already contains the complete applied
+    // dashboard; for a replacement, authoring contains any safe normalization.
+    const next = validation.authoring
+      ? JSON.stringify(validation.authoring, null, 2)
+      : previewJson;
     const allErrors = [...validation.errors, ...configErrors];
     setJson(next);
     setErrors(allErrors);
@@ -123,14 +118,12 @@ export function AiResponseImporter({
     setDiagnostics(validation.diagnostics);
     setSummary(mutation);
     return {
-      applyJson: next,
-      previewJson,
+      previewJson: next,
       configJson: extracted.configJson,
       errors: allErrors,
     };
   };
   const preview = () => {
-    setPending(undefined);
     const result = inspect();
     if (!result || result.errors.length) {
       setMessage(
@@ -139,12 +132,8 @@ export function AiResponseImporter({
       return;
     }
     if (onPreview(result.previewJson, result.configJson)) {
-      setPending({
-        applyJson: result.applyJson,
-        configJson: result.configJson,
-      });
       setMessage(
-        "Preview is valid. Review the mutation summary, then select Apply change.",
+        "Preview is valid and synchronized with the working JSON. Save & return will persist this dashboard.",
       );
     } else
       setMessage(
@@ -173,25 +162,12 @@ export function AiResponseImporter({
         value={response}
         onInput={(event) => {
           setResponse(event.currentTarget.value);
-          setPending(undefined);
         }}
         placeholder="Paste a complete dashboard or hyperpbi-change package…"
       />
       <div class="hp-button-row">
         <button class="hp-primary-action" type="button" onClick={preview}>
           Validate resulting dashboard &amp; Preview
-        </button>
-        <button
-          type="button"
-          disabled={!pending}
-          onClick={() => {
-            if (!pending) return;
-            onApply(pending.applyJson, false, pending.configJson);
-            setPending(undefined);
-            setMessage("Validated change applied to the authoring dashboard.");
-          }}
-        >
-          Apply change
         </button>
       </div>
       {summary && (

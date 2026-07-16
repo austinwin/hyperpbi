@@ -6,6 +6,7 @@ import { resolveMapPopupViewModel } from "./ResolvedMapPopup";
 import type { UiAction } from "../../schema/uiSchema";
 import type { ResolvedMapPopup } from "../../maps/model/resolvedMapTypes";
 import type { DynamicIdentifyChoice } from "./runtime/dynamicIdentifyRuntime";
+import { mapFeatureDisplayValue } from "../../maps/model/mapFeatureValue";
 
 export function MapFeatureDetails({
   mapId,
@@ -132,7 +133,7 @@ export function MapFeatureDetails({
         <div>
           <small>{layer.name}</small>
           <h3 id={`${mapId}-feature-details-title`}>
-            {view.title ?? String(feature.serviceObjectId ?? feature.id)}
+            {view.title ?? mapFeatureDisplayValue(feature) ?? "Feature details"}
           </h3>
           {isIdentify && (
             <span class="hp-map-identify-badge">Temporary identify result</span>

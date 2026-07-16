@@ -48,6 +48,39 @@ export function mergedFeatureAttributes(
     return merged;
 }
 
+const INTERNAL_IDENTITY_PATTERN = /(?:^|[\[{,])\s*"?identityIndex"?\s*:/i;
+const DISPLAY_ID_KEYS = /(^id$|_id$|id$|^name$|_name$|name$|^title$|^label$|^code$|_code$)/i;
+const NON_DISPLAY_FIELDS = /^(latitude|longitude|lat|lon|lng|x|y|geometry|shape|__.*)$/i;
+
+function displayablePrimitive(value: unknown): string | undefined {
+    if (value instanceof Date) return value.toLocaleDateString();
+    if (!["string", "number", "boolean"].includes(typeof value)) return undefined;
+    const text = String(value).trim();
+    if (!text || INTERNAL_IDENTITY_PATTERN.test(text)) return undefined;
+    return text.length > 160 ? `${text.slice(0, 157)}…` : text;
+}
+
+/**
+ * Returns a human-readable attribute for default details/tooltip labels.
+ * Runtime row keys and Power BI selection identities remain internal even when
+ * no popup fields were authored.
+ */
+export function mapFeatureDisplayValue(feature: ResolvedMapFeature): string | undefined {
+    const entries = Object.entries(mergedFeatureAttributes(feature)).filter(
+        ([key]) => !NON_DISPLAY_FIELDS.test(key),
+    );
+    for (const [, value] of entries.filter(([key]) => DISPLAY_ID_KEYS.test(key))) {
+        const display = displayablePrimitive(value);
+        if (display) return display;
+    }
+    for (const [, value] of entries) {
+        const display = displayablePrimitive(value);
+        if (display) return display;
+    }
+    if (feature.serviceObjectId !== undefined) return String(feature.serviceObjectId);
+    return undefined;
+}
+
 /**
  * Format a resolved value for display, respecting field metadata when available.
  */

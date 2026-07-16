@@ -15,13 +15,14 @@ export type StudioWorkspaceId =
 
 export const studioWorkspaceGroups: readonly {
   label: string;
+  direct?: boolean;
   items: readonly { id: StudioWorkspaceId; label: string }[];
 }[] = [
   { label: "Build", items: [{ id: "ai", label: "AI Builder" }, { id: "inspector", label: "Inspector" }, { id: "mapStudio", label: "Map Studio" }] },
   { label: "Data", items: [{ id: "calculations", label: "Calculations" }, { id: "settings", label: "Field Mapping" }, { id: "config", label: "Runtime Config" }] },
   { label: "Test", items: [{ id: "interactions", label: "Interactions" }, { id: "mapServices", label: "Map Services" }] },
-  { label: "Code", items: [{ id: "specification", label: "JSON" }, { id: "skill", label: "AI Skill" }] },
-  { label: "Help", items: [{ id: "help", label: "Documentation" }] },
+  { label: "JSON", direct: true, items: [{ id: "specification", label: "JSON" }] },
+  { label: "Help", items: [{ id: "help", label: "Documentation" }, { id: "skill", label: "AI Skill" }] },
 ];
 
 export function StudioWorkspaceNav({
@@ -84,6 +85,21 @@ export function StudioWorkspaceNav({
       <div class="hp-studio-workspace-groups">
         {groups.map((group) => {
           const active = group.items.find((item) => item.id === value);
+          if (group.direct) {
+            const item = group.items[0];
+            return (
+              <div class="hp-studio-workspace-group is-direct">
+                <button
+                  type="button"
+                  class={active ? "is-active" : ""}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => select(item.id)}
+                >
+                  <span>{item.label}</span>
+                </button>
+              </div>
+            );
+          }
           return (
             <div class="hp-studio-workspace-group">
               <button

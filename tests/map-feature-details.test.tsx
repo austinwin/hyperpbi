@@ -96,5 +96,30 @@ describe("MapFeatureDetails", () => {
     act(() => host.querySelector<HTMLButtonElement>('[aria-label="Close feature details"]')!.click());
     expect(close).toHaveBeenCalledOnce();
   });
+
+  it("uses a meaningful attribute instead of an internal Power BI row identity", () => {
+    const host = document.createElement("div");
+    const fallbackLayer = layer("unused");
+    fallbackLayer.popup = { enabled: true, fields: [], actions: [] };
+    fallbackLayer.features[0] = {
+      ...fallbackLayer.features[0],
+      id: '[{"identityIndex":8},{"identityIndex":8}]',
+      serviceAttributes: {},
+      powerBiAttributes: { asset_id: "AS-108", latitude: 30, longitude: -95 },
+    };
+    act(() => render(
+      <MapFeatureDetails
+        mapId="map"
+        component={{ type: "map", id: "map" }}
+        layers={[fallbackLayer]}
+        interaction={interaction}
+        onClose={() => undefined}
+        executeAction={() => undefined}
+      />,
+      host,
+    ));
+    expect(host.querySelector(".hp-map-feature-details")?.textContent).toContain("AS-108");
+    expect(host.textContent).not.toContain("identityIndex");
+  });
 });
 

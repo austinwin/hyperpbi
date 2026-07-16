@@ -97,6 +97,13 @@ describe("MapLayerPanel", () => {
         expect(host.textContent).toContain("No map layers are available.");
     });
 
+    it("does not crowd layer names with per-layer feature counts", () => {
+        const { host } = mount([layer("a", { features: Array.from({ length: 10 }, (_, index) => ({ id: String(index) }) as ResolvedMapLayer["features"][number]) })]);
+        expect(host.querySelector(".hp-map-layer-count")).toBeNull();
+        expect(host.querySelector(".hp-map-layer-name")?.textContent).toBe("Assets");
+        expect(host.querySelector('[title="10 features"]')).toBeNull();
+    });
+
     it("toggles canonical groups and zooms to a selected layer", () => {
         const onZoomLayer = vi.fn();
         const grouped = [layer("a", { groupId: "operations", features: [({ id: "a-0" } as ResolvedMapLayer["features"][number])] }), layer("b", { groupId: "operations" })];

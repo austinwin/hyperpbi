@@ -1,6 +1,6 @@
 # Repair workflow
 
-Failed targeted AI mutations preserve the prior dashboard. Repair material includes the discriminated change package, operation, target ID/path/container, and full resulting-dashboard diagnostics. Package shape is validated per operation, nested destinations are checked against canonical descriptor container metadata, and a cloned result is prepared with current data/aliases. A package is previewed only after full validation and is applied only through the explicit Apply change action.
+Failed targeted AI mutations preserve the prior dashboard. Repair material includes the discriminated change package, operation, target ID/path/container, and full resulting-dashboard diagnostics. Package shape is validated per operation, nested destinations are checked against canonical descriptor container metadata, and a cloned result is prepared with current data/aliases. After full validation, the same prepared result becomes the working JSON and preview atomically; invalid results never replace the prior draft.
 
 Repair is diagnostic-driven and conservative. HyperPBI never replaces the last valid saved dashboard with invalid input.
 

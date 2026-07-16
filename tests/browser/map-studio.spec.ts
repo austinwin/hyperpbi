@@ -62,7 +62,7 @@ test("dynamic exposes identify details while tile remains display-only", async (
   await page.getByRole("button", { name: "Select layer Dynamic weather" }).click();
   await expect(page.locator(".hp-map-capability-note")).toContainText("read-only click identify");
   await expect(page.getByRole("tab", { name: "Feature details" })).toBeEnabled();
-  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Selection"])
+  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Interactions"])
     await expect(page.getByRole("tab", { name: section })).toBeDisabled();
   await page.getByRole("tab", { name: "Source" }).click();
   await expect(page.getByRole("switch", { name: "Enable read-only identify" })).toBeChecked();
@@ -70,7 +70,7 @@ test("dynamic exposes identify details while tile remains display-only", async (
 
   await page.getByRole("button", { name: "Select layer Tile basemap" }).click();
   await expect(page.locator(".hp-map-capability-note")).toContainText("display-only");
-  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Feature details", "Selection"])
+  for (const section of ["Join", "Renderer", "Labels", "Tooltip", "Feature details", "Interactions"])
     await expect(page.getByRole("tab", { name: section })).toBeDisabled();
 });
 

@@ -307,6 +307,13 @@
 .hp-map-form-grid > label { min-width: 0; display: grid; gap: 4px; }
 .hp-map-form-grid fieldset { min-width: 0; display: grid; gap: 9px; margin: 0; padding: 11px; border: 1px solid #d8dee6; border-radius: 7px; }
 .hp-map-form-grid legend { padding: 0 5px; font-size: 12px; font-weight: 750; }
+.hp-map-interaction-editor > fieldset > label { min-width: 0; display: grid; gap: 4px; }
+.hp-map-interaction-master { grid-column: 1 / -1; padding: 10px 11px; border: 1px solid #b9d2ec; border-radius: 7px; background: #f3f8fe; }
+.hp-map-switch { display: flex !important; grid-template-columns: none !important; align-items: flex-start; gap: 8px !important; }
+.hp-map-switch > span { min-width: 0; display: grid; gap: 2px; }
+.hp-map-switch small, .hp-map-interaction-help { color: #64748b; font-size: 11px; font-weight: 400; }
+.hp-map-interaction-help { margin: -2px 0 2px; line-height: 1.4; }
+.hp-map-interaction-editor fieldset:disabled { opacity: .62; }
 .hp-map-form-grid input:not([type="checkbox"]):not([type="radio"]),
 .hp-map-form-grid select,
 .hp-map-form-grid textarea { width: 100%; min-width: 0; padding: 5px 8px; border: 1px solid #c5ced9; border-radius: 5px; background: #fff; color: inherit; box-sizing: border-box; }
@@ -331,6 +338,37 @@
   min-width: 17px;
   height: 17px;
 }
+.hp-map-studio .hp-map-form-grid .hp-map-switch > input[type="checkbox"] {
+  position: relative;
+  width: 34px;
+  min-width: 34px;
+  height: 19px;
+  margin: 1px 0 0;
+  appearance: none;
+  border: 1px solid #9ba9b8;
+  border-radius: 999px;
+  background: #dce3ea;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.hp-map-studio .hp-map-form-grid .hp-map-switch > input[type="checkbox"]::after {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 30%);
+  content: "";
+  transition: transform .15s ease;
+}
+.hp-map-studio .hp-map-form-grid .hp-map-switch > input[type="checkbox"]:checked {
+  border-color: #206bc4;
+  background: #206bc4;
+}
+.hp-map-studio .hp-map-form-grid .hp-map-switch > input[type="checkbox"]:checked::after { transform: translateX(15px); }
+.hp-map-studio .hp-map-form-grid .hp-map-switch > input[type="checkbox"]:focus-visible { outline: 2px solid rgb(32 107 196 / 35%); outline-offset: 2px; }
 
 @container hp-map-studio (max-width: 720px) {
   .hp-map-studio-toolbar { align-items: flex-start; }
@@ -355,6 +393,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  .hp-map-interaction-master { border-color: #31577f; background: #14263d; }
+  .hp-map-switch small, .hp-map-interaction-help { color: #9eabbc; }
   .hp-map-studio-layer > button,
   .hp-map-layer-actions > summary,
   .hp-map-layer-actions > div,
