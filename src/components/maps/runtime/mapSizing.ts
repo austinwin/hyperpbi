@@ -12,12 +12,15 @@ export function resolveMapSizing(
 ): ResolvedMapSizing {
   const mode = component.heightMode ?? (options.studioPreview ? "fill" : "fixed");
   const minHeight = Math.max(160, Math.min(2000, component.minHeight ?? 220));
-  if (mode === "fill")
-    return {
-      mode,
-      className: "is-fill",
-      frameStyle: { minHeight: `${minHeight}px`, height: "100%" },
-    };
+if (mode === "fill")
+  return {
+    mode,
+    className: "is-fill",
+    frameStyle: {
+      minHeight: `${minHeight}px`,
+      flex: "1 1 auto",
+    },
+  };
   if (mode === "aspectRatio") {
     const ratio = Math.max(0.25, Math.min(8, component.aspectRatio ?? 16 / 9));
     return {

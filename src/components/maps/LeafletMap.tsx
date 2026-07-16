@@ -538,19 +538,30 @@ export function LeafletMap({
             height: size.y,
           },
         }) === true;
-      if (!componentRef.current.featureDetails?.clearSelectionOnBackgroundClick)
-        return;
-      const current = renderContextRef.current;
-      current.dispatch({ type: "clearMapFeatures", mapId: id });
-      current.dispatch({ type: "selectComponentRows", id, rows: [] });
-      current.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
-      current.dispatch({ type: "interactionSignature", id });
-      current.clearExternal({ componentId: id, componentType: "map" });
-      if (!handled)
-        current.dispatch({
-          type: "closeMapFeatureDetails",
-          mapId: id,
-        });
+    if (!componentRef.current.featureDetails?.clearSelectionOnBackgroundClick)
+      return;
+
+    const current = renderContextRef.current;
+    current.dispatch({ type: "clearMapFeatures", mapId: id });
+    current.dispatch({ type: "selectComponentRows", id, rows: [] });
+    current.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+    current.dispatch({ type: "interactionSignature", id });
+
+    current.clearExternal({
+      componentId: id,
+      componentType: "map",
+    });
+
+    current.clearExternalFilter({
+      componentId: id,
+      componentType: "map",
+    });
+
+    if (!handled)
+      current.dispatch({
+        type: "closeMapFeatureDetails",
+        mapId: id,
+      });
     };
     map.on("click", onMapBackgroundClick);
 
@@ -1207,32 +1218,44 @@ export function LeafletMap({
                   selectExternal: currentContext.selectSourceRows,
                 }
               : currentContext;
-            executeComponentInteraction(
-              {
-                ...interactionPolicy,
-                selectionMode: multiSelect ? "toggle" : "replace",
-                clearOnSecondClick: false,
-              },
-              createInteractionPayload(componentRef.current, {
-                rowIndices: currentFeature.powerBiRowIndices,
-                rowKeys: currentFeature.powerBiRowKeys,
-                sourceRowKeys: interactionContext.sourceRowKeys,
-                field,
-                value: field
-                  ? featureAttribute(
-                      currentFeature,
-                      field,
-                      currentLayer.interaction?.fieldSource ??
-                        resolvedDefaultAttributeSource(currentLayer),
-                    )
-                  : undefined,
-                mapFeatureKey: mounted.featureKey,
-                mapLayerId: mounted.layerId,
-                mapFeatureId: mounted.featureId,
-              }),
-              interactionContext,
-              { trigger: "click", multiSelect, event: event.originalEvent },
-            );
+const interactionResult = executeComponentInteraction(
+  {
+    ...interactionPolicy,
+    selectionMode: multiSelect ? "toggle" : "replace",
+  },
+  createInteractionPayload(componentRef.current, {
+    rowIndices: currentFeature.powerBiRowIndices,
+    rowKeys: currentFeature.powerBiRowKeys,
+    sourceRowKeys: interactionContext.sourceRowKeys,
+    field,
+    value: field
+      ? featureAttribute(
+          currentFeature,
+          field,
+          currentLayer.interaction?.fieldSource ??
+            resolvedDefaultAttributeSource(currentLayer),
+        )
+      : undefined,
+    mapFeatureKey: mounted.featureKey,
+    mapLayerId: mounted.layerId,
+    mapFeatureId: mounted.featureId,
+  }),
+  interactionContext,
+  { trigger: "click", multiSelect, event: event.originalEvent },
+);
+
+if (interactionResult.cleared) {
+  currentContext.dispatch({
+    type: "clearMapFeatures",
+    mapId: id,
+  });
+
+  currentContext.dispatch({
+    type: "closeMapFeatureDetails",
+    mapId: id,
+    clearSelection: true,
+  });
+}
           }
         };
         const onMouseOver = () =>

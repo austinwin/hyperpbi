@@ -1150,12 +1150,21 @@ export function MapBlock({ component }: { component: MapComponent }) {
                   mapId: id,
                   clearSelection,
                 });
-                if (clearSelection) {
-                  context.dispatch({ type: "selectComponentRows", id, rows: [] });
-                  context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
-                  context.dispatch({ type: "interactionSignature", id });
-                  context.clearExternal({ componentId: id, componentType: "map" });
-                }
+if (clearSelection) {
+  context.dispatch({ type: "selectComponentRows", id, rows: [] });
+  context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+  context.dispatch({ type: "interactionSignature", id });
+
+  context.clearExternal({
+    componentId: id,
+    componentType: "map",
+  });
+
+  context.clearExternalFilter({
+    componentId: id,
+    componentType: "map",
+  });
+}
               }}
               executeAction={(action, event) => {
                 context.executeUiAction(action, event);
@@ -1191,13 +1200,27 @@ export function MapBlock({ component }: { component: MapComponent }) {
                   popover,
                 })
               }
-              onClearSelection={() => {
-                context.dispatch({ type: "clearMapFeatures", mapId: id });
-                context.dispatch({ type: "selectComponentRows", id, rows: [] });
-                context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
-                context.dispatch({ type: "interactionSignature", id });
-                context.clearExternal({ componentId: id, componentType: "map" });
-              }}
+onClearSelection={() => {
+  context.dispatch({ type: "clearMapFeatures", mapId: id });
+  context.dispatch({ type: "selectComponentRows", id, rows: [] });
+  context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+  context.dispatch({ type: "interactionSignature", id });
+
+  context.clearExternal({
+    componentId: id,
+    componentType: "map",
+  });
+
+  context.clearExternalFilter({
+    componentId: id,
+    componentType: "map",
+  });
+
+  context.dispatch({
+    type: "closeMapFeatureDetails",
+    mapId: id,
+  });
+}}
               />
             )}
           </div>

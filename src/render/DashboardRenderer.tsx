@@ -1,4 +1,7 @@
-import { DashboardComponent } from "../schema/hyperpbiSchema";
+import {
+  DashboardComponent,
+  MapComponent,
+} from "../schema/hyperpbiSchema";
 import { ComponentRegistry } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
@@ -9,7 +12,11 @@ import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
 import { rowsForComponent } from "../interactions/componentInteraction";
-
+function isMapComponent(
+  component: DashboardComponent,
+): component is MapComponent {
+  return component.type === "map";
+}
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
     const context=useRenderContext();const { schema, config } = context;
     const renderChildren = (children: DashboardComponent[]) => <DashboardRenderer components={children} />;
@@ -61,13 +68,24 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const disabledClass = component.disabled ? "hp-is-disabled" : "";
         const tooltipClass = component.tooltip ? "hp-has-tooltip" : "";
 
-        const componentClasses = [
-            "hp-component",
-            `hp-component-${component.type}`,
-            showWrapperHighlight ? "hp-interaction-highlight" : "",
-            variantClass, sizeClass, disabledClass, tooltipClass,
-            classes,
-        ].filter(Boolean).join(" ");
+const fillHeightClass =
+  isMapComponent(component) && component.heightMode === "fill"
+    ? "hp-height-fill"
+    : "";
+
+const componentClasses = [
+  "hp-component",
+  `hp-component-${component.type}`,
+  showWrapperHighlight ? "hp-interaction-highlight" : "",
+  fillHeightClass,
+  variantClass,
+  sizeClass,
+  disabledClass,
+  tooltipClass,
+  classes,
+]
+  .filter(Boolean)
+  .join(" ");
 
         const wrapperRole = !isOverlayOnly && (wrapperAdapter || hasUiAction) ? "button" : undefined;
         const wrapperTabIndex = !isOverlayOnly && (wrapperAdapter || hasUiAction) ? 0 : undefined;
