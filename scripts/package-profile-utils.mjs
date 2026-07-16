@@ -35,9 +35,12 @@ export async function acquirePackageProfileLock(
                 throw error;
             }
             const heartbeatIntervalMs = Math.max(10, Math.min(60_000, staleMs / 3));
+            let heartbeatUpdate = Promise.resolve();
             const heartbeat = setInterval(() => {
                 const timestamp = new Date();
-                void handle.utimes(timestamp, timestamp).catch(() => undefined);
+                heartbeatUpdate = heartbeatUpdate
+                    .then(() => handle.utimes(timestamp, timestamp))
+                    .catch(() => undefined);
             }, heartbeatIntervalMs);
             heartbeat.unref?.();
             let released = false;
@@ -45,6 +48,7 @@ export async function acquirePackageProfileLock(
                 if (released) return;
                 released = true;
                 clearInterval(heartbeat);
+                await heartbeatUpdate;
                 await handle.close();
                 await unlink(lockPath).catch(error => {
                     if (error?.code !== "ENOENT") throw error;
@@ -55,6 +59,12 @@ export async function acquirePackageProfileLock(
             try {
                 const details = await stat(lockPath);
                 if (Date.now() - details.mtimeMs > staleMs) {
+                    if (await packageLockOwnerIsRunning(lockPath)) {
+                        if (Date.now() - started >= timeoutMs)
+                            throw new Error(`Timed out waiting for package profile lock: ${lockPath}`);
+                        await new Promise(resolve => setTimeout(resolve, pollMs));
+                        continue;
+                    }
                     await unlink(lockPath);
                     continue;
                 }
@@ -66,6 +76,18 @@ export async function acquirePackageProfileLock(
                 throw new Error(`Timed out waiting for package profile lock: ${lockPath}`);
             await new Promise(resolve => setTimeout(resolve, pollMs));
         }
+    }
+}
+
+async function packageLockOwnerIsRunning(lockPath) {
+    try {
+        const owner = JSON.parse(await readFile(lockPath, "utf8"));
+        if (!Number.isInteger(owner?.pid) || owner.pid <= 0) return false;
+        if (owner.pid === process.pid) return true;
+        process.kill(owner.pid, 0);
+        return true;
+    } catch (error) {
+        return error?.code === "EPERM";
     }
 }
 
