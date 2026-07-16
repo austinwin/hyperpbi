@@ -3,7 +3,7 @@
 // Renders PNG image overlays on Leaflet maps, refreshing on move/resize.
 
 import * as L from "leaflet";
-import { ArcGisServiceError } from "./arcGisRestClient";
+import { getArcGisBlob } from "./arcGisRestClient";
 import { parseArcGisUrl } from "./arcGisUrl";
 import { checkHostPolicy } from "./arcGisHostPolicy";
 
@@ -86,8 +86,10 @@ export function createArcGisDynamicLayer(
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let mapRef: L.Map | null = null;
     let activeObjectUrl: string | null = null;
-    let pendingObjectUrl: string | null = null;
     let wasWithinZoom = false;
+    let requestGeneration = 0;
+    let disposed = true;
+    let externalAbortAttached = false;
 
     // Extend the layer with map event binding
     const originalOnAdd = imageOverlay.onAdd;
@@ -95,7 +97,9 @@ export function createArcGisDynamicLayer(
 
     (imageOverlay as unknown as { onAdd: (map: L.Map) => HTMLElement | undefined }).onAdd = function (map: L.Map) {
         if (originalOnAdd) originalOnAdd.call(imageOverlay, map);
+        disposed = false;
         mapRef = map;
+        attachExternalAbort();
         setupMapListeners(map);
         wasWithinZoom = isWithinZoom(map);
         checkZoomVisibility();
@@ -106,18 +110,26 @@ export function createArcGisDynamicLayer(
     const onExternalAbort = () => {
         cancelCurrentRequest();
     };
-    if (externalSignal) {
+    const attachExternalAbort = () => {
+        if (!externalSignal || externalAbortAttached) return;
         if (externalSignal.aborted) onExternalAbort();
-        else externalSignal.addEventListener("abort", onExternalAbort);
-    }
+        else {
+            externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+            externalAbortAttached = true;
+        }
+    };
+    const detachExternalAbort = () => {
+        if (!externalSignal || !externalAbortAttached) return;
+        externalSignal.removeEventListener("abort", onExternalAbort);
+        externalAbortAttached = false;
+    };
 
     (imageOverlay as unknown as Record<string, unknown>).onRemove = function (map: L.Map) {
+        disposed = true;
         if (originalOnRemove) originalOnRemove.call(imageOverlay, map);
         removeMapListeners(map);
         cancelCurrentRequest();
-        if (externalSignal) {
-            externalSignal.removeEventListener("abort", onExternalAbort);
-        }
+        detachExternalAbort();
         if (debounceTimer) {
             clearTimeout(debounceTimer);
             debounceTimer = null;
@@ -125,10 +137,6 @@ export function createArcGisDynamicLayer(
         if (activeObjectUrl) {
             URL.revokeObjectURL(activeObjectUrl);
             activeObjectUrl = null;
-        }
-        if (pendingObjectUrl) {
-            URL.revokeObjectURL(pendingObjectUrl);
-            pendingObjectUrl = null;
         }
         mapRef = null;
         return imageOverlay;
@@ -172,6 +180,7 @@ export function createArcGisDynamicLayer(
     };
 
     function cancelCurrentRequest() {
+        requestGeneration++;
         if (currentAbortController) {
             currentAbortController.abort();
             currentAbortController = null;
@@ -183,8 +192,18 @@ export function createArcGisDynamicLayer(
         cancelCurrentRequest();
         const controller = new AbortController();
         currentAbortController = controller;
+        const generation = requestGeneration;
 
         if (externalSignal?.aborted || controller.signal.aborted) return;
+
+        const isCurrent = () =>
+            !disposed &&
+            mapRef === map &&
+            currentAbortController === controller &&
+            requestGeneration === generation &&
+            !controller.signal.aborted &&
+            !externalSignal?.aborted;
+        let requestObjectUrl: string | null = null;
 
         try {
             onStateChange?.({ loading: true });
@@ -220,76 +239,37 @@ export function createArcGisDynamicLayer(
 
             const fullUrl = `${exportUrl}?${params.toString()}`;
 
-            // Load as blob for image data
-            const response = await fetch(fullUrl, {
-                signal: controller.signal,
-                credentials: "omit",
-                referrerPolicy: "no-referrer",
-                cache: "no-store",
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const contentType = response.headers.get("content-type") ?? "";
-            if (contentType.includes("application/json") || contentType.includes("text/")) {
-                // ArcGIS may return JSON errors even for image requests
-                const json = await response.json().catch(() => null);
-                if (json?.error) {
-                    throw new ArcGisServiceError(
-                        json.error.code,
-                        json.error.message ?? "Export error",
-                        fullUrl,
-                        json.error.details ?? []
-                    );
-                }
-                throw new Error("Unexpected JSON response from export endpoint.");
-            }
-
-            const blob = await response.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            pendingObjectUrl = objectUrl;
+            const { blob } = await getArcGisBlob(fullUrl, { signal: controller.signal });
+            if (!isCurrent()) return;
+            requestObjectUrl = URL.createObjectURL(blob);
 
             // Preload image to ensure it's ready before swap
             const img = new Image();
-            await new Promise<void>((resolve, reject) => {
-                img.onload = () => resolve();
-                img.onerror = () => reject(new Error("Image preload failed"));
-                img.src = objectUrl;
-            });
+            await preloadImage(img, requestObjectUrl, controller.signal);
+            if (!isCurrent()) return;
 
             // Swap: capture old URL, set new image, then revoke old
             const previous = activeObjectUrl;
-            imageOverlay.setUrl(objectUrl);
+            imageOverlay.setUrl(requestObjectUrl);
             imageOverlay.setBounds(map.getBounds());
-            activeObjectUrl = objectUrl;
-            pendingObjectUrl = null;
+            activeObjectUrl = requestObjectUrl;
+            requestObjectUrl = null;
 
             if (previous) {
                 URL.revokeObjectURL(previous);
             }
 
-            onStateChange?.({ loading: false, lastRequestTime: Date.now() });
+            if (isCurrent())
+                onStateChange?.({ loading: false, lastRequestTime: Date.now() });
 
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
-                if (pendingObjectUrl) {
-                    URL.revokeObjectURL(pendingObjectUrl);
-                    pendingObjectUrl = null;
-                }
                 return;
             }
-
-            // Revoke pending URL on preload failure
-            if (pendingObjectUrl) {
-                URL.revokeObjectURL(pendingObjectUrl);
-                pendingObjectUrl = null;
-            }
-
             const message = error instanceof Error ? error.message : String(error);
-            onStateChange?.({ loading: false, error: message });
+            if (isCurrent()) onStateChange?.({ loading: false, error: message });
         } finally {
+            if (requestObjectUrl) URL.revokeObjectURL(requestObjectUrl);
             if (currentAbortController === controller) {
                 currentAbortController = null;
             }
@@ -303,6 +283,29 @@ export function createArcGisDynamicLayer(
     }
 
     return imageOverlay as unknown as ArcGisDynamicLeafletLayer;
+}
+
+function preloadImage(image: HTMLImageElement, source: string, signal: AbortSignal): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (signal.aborted) {
+            reject(signal.reason ?? new DOMException("Image preload was aborted.", "AbortError"));
+            return;
+        }
+        let settled = false;
+        const finish = (callback: () => void) => {
+            if (settled) return;
+            settled = true;
+            image.onload = null;
+            image.onerror = null;
+            signal.removeEventListener("abort", onAbort);
+            callback();
+        };
+        const onAbort = () => finish(() => reject(signal.reason ?? new DOMException("Image preload was aborted.", "AbortError")));
+        image.onload = () => finish(resolve);
+        image.onerror = () => finish(() => reject(new Error("Image preload failed")));
+        signal.addEventListener("abort", onAbort, { once: true });
+        image.src = source;
+    });
 }
 
 /**

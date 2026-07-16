@@ -227,7 +227,9 @@ describe("MapBlock ArcGIS runtime", () => {
   it("requeries only viewport-enabled feature layers after a meaningful viewport change", async () => {
     mount(component([featureLayer("static"), featureLayer("viewport", true)]));
     await settle();
-    expect(queryMock).toHaveBeenCalledTimes(2);
+    // Static layers resolve immediately; viewport layers wait for real bounds
+    // instead of issuing a duplicate unbounded request during mount.
+    expect(queryMock).toHaveBeenCalledTimes(1);
     act(() =>
       latestLeafletProps?.onViewportChange?.({
         bounds: [-96, 29, -94, 31],
@@ -238,12 +240,12 @@ describe("MapBlock ArcGIS runtime", () => {
       }),
     );
     await settle();
-    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenCalledTimes(2);
     expect(
-      (queryMock.mock.calls[2][0] as ArcGisFeatureQueryRequest).url,
+      (queryMock.mock.calls[1][0] as ArcGisFeatureQueryRequest).url,
     ).toContain("viewport");
     expect(
-      (queryMock.mock.calls[2][0] as ArcGisFeatureQueryRequest).viewportQuery,
+      (queryMock.mock.calls[1][0] as ArcGisFeatureQueryRequest).viewportQuery,
     ).toBe(true);
   });
 
@@ -261,8 +263,18 @@ describe("MapBlock ArcGIS runtime", () => {
         new Promise((resolve) => {
           resolveSecondViewport = resolve;
         }),
-      );
+    );
     mount(component([featureLayer("viewport", true)]));
+    await settle();
+    act(() =>
+      latestLeafletProps?.onViewportChange?.({
+        bounds: [-95.5, 29.5, -94.5, 30.5],
+        center: [30, -95],
+        zoom: 9,
+        width: 800,
+        height: 600,
+      }),
+    );
     await settle();
     expect(
       latestLeafletProps?.resolvedLayers[0].features[0].serviceAttributes.NAME,

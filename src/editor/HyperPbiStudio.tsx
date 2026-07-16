@@ -296,6 +296,7 @@ export function HyperPbiStudio({
         ),
     );
   const workbenchRef = useRef<HTMLDivElement>(null);
+  const activePointerCleanupRef = useRef<(() => void) | null>(null);
   const dirty =
     specification !== initialSpecification ||
     configuration !== initialConfiguration;
@@ -343,6 +344,7 @@ export function HyperPbiStudio({
         ?.classList.add("hp-inspector-selected");
     }
   }, [selectedComponentId, preview, inspectorMode]);
+  useEffect(() => () => activePointerCleanupRef.current?.(), []);
   const appendLog = (message: string, level: StudioLog["level"] = "info") =>
     setLogs((current) => [
       ...current.slice(-199),
@@ -601,14 +603,21 @@ export function HyperPbiStudio({
         editorPercent: Math.min(75, Math.max(25, raw)),
       }));
     };
-    const up = () => {
+    activePointerCleanupRef.current?.();
+    const cleanup = () => {
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerup", up);
+      if (activePointerCleanupRef.current === cleanup)
+        activePointerCleanupRef.current = null;
+    };
+    const up = () => {
+      cleanup();
       setLayout((current) => {
         onLayoutChange?.(JSON.stringify(current));
         return current;
       });
     };
+    activePointerCleanupRef.current = cleanup;
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup", up);
   };
@@ -627,14 +636,21 @@ export function HyperPbiStudio({
           Math.max(120, startHeight + (startY - pointer.clientY)),
         ),
       }));
-    const up = () => {
+    activePointerCleanupRef.current?.();
+    const cleanup = () => {
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerup", up);
+      if (activePointerCleanupRef.current === cleanup)
+        activePointerCleanupRef.current = null;
+    };
+    const up = () => {
+      cleanup();
       setLayout((current) => {
         onLayoutChange?.(JSON.stringify(current));
         return current;
       });
     };
+    activePointerCleanupRef.current = cleanup;
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup", up);
   };

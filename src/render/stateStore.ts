@@ -209,17 +209,22 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             case "add":
                 newIds = [...new Set([...current, ...action.featureIds])];
                 break;
-            case "toggle":
-                newIds = [...current];
+            case "toggle": {
+                const ordered: Array<string | undefined> = [...current];
+                const positions = new Map(current.map((id, index) => [id, index] as const));
                 for (const id of action.featureIds) {
-                    const idx = newIds.indexOf(id);
-                    if (idx >= 0) {
-                        newIds.splice(idx, 1);
+                    const position = positions.get(id);
+                    if (position !== undefined) {
+                        ordered[position] = undefined;
+                        positions.delete(id);
                     } else {
-                        newIds.push(id);
+                        positions.set(id, ordered.length);
+                        ordered.push(id);
                     }
                 }
+                newIds = ordered.filter((value): value is string => value !== undefined);
                 break;
+            }
         }
         if (newIds.length === 0) {
             const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
@@ -230,8 +235,9 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             return { ...state, mapSelectedFeatureIds: rest, mapInteractionState };
         }
         const currentInteraction = state.mapInteractionState[action.mapId] ?? emptyMapInteractionState();
+        const selectedIdSet = new Set(newIds);
         const selectedFeaturesByKey = Object.fromEntries(
-            Object.entries(currentInteraction.selectedFeaturesByKey ?? {}).filter(([key]) => newIds.includes(key))
+            Object.entries(currentInteraction.selectedFeaturesByKey ?? {}).filter(([key]) => selectedIdSet.has(key))
         );
         return {
             ...state,

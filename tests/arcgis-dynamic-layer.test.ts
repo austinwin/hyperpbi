@@ -143,4 +143,24 @@ describe("ArcGIS dynamic layer", () => {
         expect(map.off).toHaveBeenCalledWith("zoomend", expect.any(Function));
         expect(revoked).toContain("blob:test-1");
     });
+
+    it("cannot install a stale preloaded image after removal", async () => {
+        const pendingImages: Array<{
+            onload: (() => void) | null;
+            onerror: (() => void) | null;
+        }> = [];
+        vi.stubGlobal("Image", class {
+            onload: (() => void) | null = null;
+            onerror: (() => void) | null = null;
+            constructor() { pendingImages.push(this); }
+            set src(_value: string) {}
+        });
+        const { layer, map, overlay } = addLayer();
+        await vi.waitFor(() => expect(pendingImages).toHaveLength(1));
+        (layer.onRemove as (map: unknown) => unknown)(map);
+        pendingImages[0].onload?.();
+        await Promise.resolve();
+        expect(overlay.urls).toEqual([]);
+        expect(revoked).toContain("blob:test-1");
+    });
 });

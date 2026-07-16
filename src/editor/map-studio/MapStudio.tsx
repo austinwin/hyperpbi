@@ -177,6 +177,15 @@ export function MapStudio({
     errors?: string[];
   }>({});
   const metadataCache = useRef(new Map<string, ArcGisServiceInspection>());
+  const cacheMetadata = (key: string, value: ArcGisServiceInspection) => {
+    metadataCache.current.delete(key);
+    metadataCache.current.set(key, value);
+    while (metadataCache.current.size > 50) {
+      const oldest = metadataCache.current.keys().next().value as string | undefined;
+      if (oldest === undefined) break;
+      metadataCache.current.delete(oldest);
+    }
+  };
   const addMenuRef = useRef<HTMLDivElement>(null);
   const metadataRequest = useRef<{
     version: number;
@@ -311,6 +320,19 @@ export function MapStudio({
   );
   const effectiveDataset = layer?.dataset ?? map?.dataset ?? "powerbi";
   const dataset = prepared.datasets?.get(effectiveDataset);
+  const joinPreviewRevision = JSON.stringify({
+    selectedLayerId,
+    source: layer?.source,
+    join: layer?.join,
+    effectiveDataset,
+    datasetDefinition: datasetDefinitions[effectiveDataset],
+  });
+  useEffect(() => {
+    joinPreviewRequest.current.controller?.abort();
+    joinPreviewRequest.current.controller = undefined;
+    joinPreviewRequest.current.version += 1;
+    setJoinPreview({});
+  }, [joinPreviewRevision, data]);
   const fields = Object.values(dataset?.data.fields ?? {}).map((field) => ({
     ...field,
     displayName: prepared.aliases[field.key] ?? field.displayName,
@@ -598,7 +620,7 @@ export function MapStudio({
             errors: result.errors,
           }
         : result;
-      metadataCache.current.set(
+      cacheMetadata(
         arcGisMetadataKey(
           parsedTarget.serviceRootUrl ?? url,
           parsedTarget.isLayer ? parsedTarget.layerId : undefined,

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { readdir } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import {
     buildWebAccessParameters,
+    acquirePackageProfileLock,
     normalizeMapHostPattern,
     parseMapHostPatterns,
     readPackagedCapabilities,
@@ -33,6 +35,52 @@ describe("packaged PBIVIZ capabilities", () => {
 });
 
 describe("package profile host helpers", () => {
+    it("serializes concurrent package profiles that share workspace files", async () => {
+        const directory = await mkdtemp(resolve(tmpdir(), "hyperpbi-package-lock-"));
+        const lockPath = resolve(directory, "profile.lock");
+        try {
+            const releaseFirst = await acquirePackageProfileLock(lockPath, { pollMs: 5, timeoutMs: 1_000 });
+            let secondAcquired = false;
+            const second = acquirePackageProfileLock(lockPath, { pollMs: 5, timeoutMs: 1_000 })
+                .then(release => { secondAcquired = true; return release; });
+            await new Promise(resolveDelay => setTimeout(resolveDelay, 25));
+            expect(secondAcquired).toBe(false);
+            await releaseFirst();
+            const releaseSecond = await second;
+            expect(secondAcquired).toBe(true);
+            await releaseSecond();
+        } finally {
+            await rm(directory, { recursive: true, force: true });
+        }
+    });
+
+    it("keeps a long-running package lock fresh until its owner releases it", async () => {
+        const directory = await mkdtemp(resolve(tmpdir(), "hyperpbi-package-heartbeat-"));
+        const lockPath = resolve(directory, "profile.lock");
+        try {
+            const release = await acquirePackageProfileLock(lockPath, {
+                pollMs: 5,
+                staleMs: 30,
+                timeoutMs: 1_000,
+            });
+            await new Promise(resolveDelay => setTimeout(resolveDelay, 70));
+            await expect(acquirePackageProfileLock(lockPath, {
+                pollMs: 5,
+                staleMs: 30,
+                timeoutMs: 30,
+            })).rejects.toThrow("Timed out waiting for package profile lock");
+            await release();
+            const releaseNext = await acquirePackageProfileLock(lockPath, {
+                pollMs: 5,
+                staleMs: 30,
+                timeoutMs: 1_000,
+            });
+            await releaseNext();
+        } finally {
+            await rm(directory, { recursive: true, force: true });
+        }
+    });
+
     it("normalizes exact and subdomain hosts and deduplicates configured values", () => {
         expect(normalizeMapHostPattern(" HTTPS://Example.COM ")).toBe("https://example.com");
         expect(parseMapHostPatterns("https://*.houstontx.gov, https://example.com,https://example.com"))

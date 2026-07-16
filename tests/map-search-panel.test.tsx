@@ -108,6 +108,21 @@ describe("MapSearchPanel", () => {
         expect(searchRuntime.search).toHaveBeenCalledTimes(2);
     });
 
+    it("invalidates an older result when a later submit fails validation", async () => {
+        let resolveSearch!: (value: Array<{ latitude: number; longitude: number; provider: string }>) => void;
+        searchRuntime.search.mockImplementation(() => new Promise(resolve => { resolveSearch = resolve; }));
+        const { host, onResult } = mount();
+        type(host, "Houston");
+        void submit(host);
+        await Promise.resolve();
+        type(host, "ab");
+        await submit(host);
+        resolveSearch([{ latitude: 29.76, longitude: -95.37, provider: "nominatim" }]);
+        await Promise.resolve();
+        expect(host.textContent).toContain("at least 3 characters");
+        expect(onResult).not.toHaveBeenCalled();
+    });
+
     it("aborts an outstanding request on unmount", async () => {
         let signal: AbortSignal | undefined;
         searchRuntime.search.mockImplementation((_query: string, _config: unknown, current: AbortSignal) => { signal = current; return new Promise(() => undefined); });

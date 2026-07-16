@@ -1,4 +1,5 @@
 import { GeocoderConfig, GeocoderProvider, GeocoderSearchResult } from "../providerTypes";
+import { providerFetch, ProviderRequestError } from "../providerRequest";
 
 type CustomResult = {
     lat?: number | string;
@@ -22,9 +23,13 @@ async function request(query: string, config: GeocoderConfig, signal?: AbortSign
     const url = new URL(config.endpoint);
     url.searchParams.set("q", query);
     url.searchParams.set("limit", String(Math.min(5, Math.max(1, Math.floor(config.resultLimit ?? 1)))));
-    const response = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error(`Geocoder HTTP ${response.status}`);
-    const body = await response.json() as CustomResult | CustomResult[] | { results?: CustomResult[] };
+    const response = await providerFetch(url.toString(), { signal, headers: { Accept: "application/json" } });
+    let body: CustomResult | CustomResult[] | { results?: CustomResult[] };
+    try {
+        body = await response.json() as typeof body;
+    } catch {
+        throw new ProviderRequestError("INVALID_RESPONSE", "The custom geocoder returned invalid JSON.");
+    }
     const items = Array.isArray(body) ? body : "results" in body && Array.isArray(body.results) ? body.results : [body as CustomResult];
     return items.slice(0, Math.min(5, Math.max(1, config.resultLimit ?? 1))).flatMap(item => {
         const latitude = Number(item.latitude ?? item.lat);

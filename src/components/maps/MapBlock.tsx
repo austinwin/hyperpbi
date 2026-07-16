@@ -283,11 +283,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const viewportRef = useRef<MapViewportState | null>(null);
   const handleViewportChange = useCallback(
     (next: MapViewportState) => {
-      setViewport((previous) => {
-        if (viewportEqual(previous, next)) return previous;
-        viewportRef.current = next;
-        return next;
-      });
+      if (viewportEqual(viewportRef.current, next)) return;
+      viewportRef.current = next;
+      setViewport(next);
       context.onMapViewportChange?.(id, next);
     },
     [context.onMapViewportChange, id],
@@ -546,6 +544,13 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ),
     );
     for (const definition of arcGisFeatureDefinitionsRef.current) {
+      // Leaflet supplies the initial bounds shortly after mount. Avoid an
+      // unbounded request that would be immediately cancelled and replaced.
+      if (
+        definition.performance?.viewportQuery === true &&
+        viewportRef.current === null
+      )
+        continue;
       void resolveArcGisFeatureDefinition(definition, "initial");
     }
   }, [arcGisRequestRevision, resolveArcGisFeatureDefinition]);

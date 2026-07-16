@@ -23,7 +23,12 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     const buildContext = useMemo<ChartBuildContext>(() => ({ theme: context.settings.theme, sourceRows: context.sourceRows, sourceRowKeys: context.sourceRowKeys, sourceIndex }), [context.settings.theme, context.sourceRows, context.sourceRowKeys, sourceIndex]);
     const missing = adapter.fields(component).filter(field => !context.data.fields[field]);
     const result = useMemo(() => adapter.build(component, rows, buildContext), [adapter, component, rows, buildContext]);
-    const selectionRefs = useMemo<EChartSelectionRef[]>(() => result.bindings.filter(binding => binding.sourceRowIndices.some(index => selectedRows.includes(index))).map(binding => ({ seriesIndex: binding.seriesIndex, dataIndex: binding.dataIndex, dataType: binding.dataType })), [result.bindings, selectedRows]);
+    const selectionRefs = useMemo<EChartSelectionRef[]>(() => {
+        const selected = new Set(selectedRows);
+        return result.bindings
+            .filter(binding => binding.sourceRowIndices.some(index => selected.has(index)))
+            .map(binding => ({ seriesIndex: binding.seriesIndex, dataIndex: binding.dataIndex, dataType: binding.dataType }));
+    }, [result.bindings, selectedRows]);
 
     const onDataPoint = (event: EChartDataEvent) => {
         const candidates = result.bindings.filter(candidate => candidate.seriesIndex === event.seriesIndex && candidate.dataIndex === event.dataIndex);

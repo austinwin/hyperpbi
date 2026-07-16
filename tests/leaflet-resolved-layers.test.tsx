@@ -500,3 +500,27 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
         expect(mocks.labelCleanups[0]).toHaveBeenCalledTimes(1);
     });
 });
+
+describe("LeafletMap large local layer viewport rendering", () => {
+    it("mounts only indexed features near the current viewport", async () => {
+        const host = document.createElement("div");
+        const test = testContext();
+        const features = Array.from({ length: 2_000 }, (_value, index) =>
+            feature(`large-${index}`, {
+                layerId: "large",
+                lat: index < 20 ? 30 + index / 1_000 : 45 + index / 10_000,
+                lon: index < 20 ? -95 + index / 1_000 : -120 + index / 10_000,
+            }),
+        );
+        renderMap(
+            host,
+            test.value,
+            { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } },
+            [layer("large", { features })],
+        );
+        await act(async () => { await vi.runAllTimersAsync(); });
+        expect(mocks.circles.length).toBeGreaterThan(0);
+        expect(mocks.circles.length).toBeLessThan(100);
+        act(() => render(null, host));
+    });
+});

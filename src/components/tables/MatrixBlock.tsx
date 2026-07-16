@@ -7,6 +7,7 @@ import { Card } from "../layout/LayoutBlocks";
 import { executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
+import { useMemo } from "preact/hooks";
 
 const MATRIX_COLUMN_LIMIT = 50;
 const MATRIX_CELL_BUDGET = 5_000;
@@ -40,7 +41,11 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
     const rows = context.getRowsForComponent(id);
     const policy = resolveInteractionPolicy(component, context.config, "dataPoint");
     const selectedRows = context.componentRows(id);
-    const sourceIndices = new Map(sourceRows.map((row, index) => [row, index] as const));
+    const selectedRowSet = useMemo(() => new Set(selectedRows), [selectedRows]);
+    const sourceIndices = useMemo(
+        () => new Map(sourceRows.map((row, index) => [row, index] as const)),
+        [sourceRows],
+    );
     const rowFields = component.rows;
     const columnField = component.columns?.[0];
     const allColumnValues = columnField ? Array.from(new Set(rows.map(row => String(row[columnField] ?? BLANK)))) : [""];
@@ -77,10 +82,11 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
         const value = valueFor(subset, metric);
         const formatted = formatValue(value, metric.format);
         const intensity = Math.abs(Number(value) || 0) / maxima[metricIndex];
-        const selected = indices.some(index => selectedRows.includes(index));
+        const selected = indices.some(index => selectedRowSet.has(index));
         const columnLabel = columnField ? `${column}, ` : "";
         const accessibleLabel = `${keys.join(", ")}, ${columnLabel}${metricLabel(metric, data.fields)}: ${formatted}`;
         return <td
+            key={`${column}\u0000${metric.field ?? "count"}\u0000${metricIndex}`}
             data-metric-index={metricIndex}
             class={selected ? "hp-row-selected" : ""}
             aria-label={accessibleLabel}
@@ -94,16 +100,17 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
         {truncated && <p class="hp-inline-warning" role="status">Matrix truncated to {rowKeys.length} rows and {columnValues.length} column groups to stay within the {MATRIX_CELL_BUDGET.toLocaleString()}-cell rendering budget.</p>}
         <div class="hp-table-wrap"><table class="hp-matrix" aria-label={component.ariaLabel ?? component.title ?? "Matrix"}>
             <thead><tr>
-                {rowFields.map(field => <th scope="col">{data.fields[field]?.displayName ?? field}</th>)}
-                {columnValues.flatMap(column => metrics.map(metric => <th scope="col">{columnField ? `${column} — ${metricLabel(metric, data.fields)}` : metricLabel(metric, data.fields)}</th>))}
-                {component.showTotals && metrics.map(metric => <th scope="col">{metricLabel(metric, data.fields)} total</th>)}
+                {rowFields.map(field => <th key={field} scope="col">{data.fields[field]?.displayName ?? field}</th>)}
+                {columnValues.flatMap(column => metrics.map((metric, metricIndex) => <th key={`${column}\u0000${metric.field ?? "count"}\u0000${metricIndex}`} scope="col">{columnField ? `${column} — ${metricLabel(metric, data.fields)}` : metricLabel(metric, data.fields)}</th>))}
+                {component.showTotals && metrics.map((metric, metricIndex) => <th key={`total-${metric.field ?? "count"}-${metricIndex}`} scope="col">{metricLabel(metric, data.fields)} total</th>)}
             </tr></thead>
             <tbody>{rowKeys.map(keys => {
-                const rowSubset = rowGroups.get(JSON.stringify(keys)) ?? [];
-                return <tr>
-                    {keys.map(value => <th scope="row">{value}</th>)}
+                const serializedKeys = JSON.stringify(keys);
+                const rowSubset = rowGroups.get(serializedKeys) ?? [];
+                return <tr key={serializedKeys}>
+                    {keys.map((value, index) => <th key={`${index}-${value}`} scope="row">{value}</th>)}
                     {columnValues.flatMap(column => metrics.map((metric, metricIndex) => renderCell(keys, column, metric, metricIndex)))}
-                    {component.showTotals && metrics.map(metric => <td><strong>{formatValue(valueFor(rowSubset, metric), metric.format)}</strong></td>)}
+                    {component.showTotals && metrics.map((metric, metricIndex) => <td key={`total-${metric.field ?? "count"}-${metricIndex}`}><strong>{formatValue(valueFor(rowSubset, metric), metric.format)}</strong></td>)}
                 </tr>;
             })}</tbody>
         </table></div>

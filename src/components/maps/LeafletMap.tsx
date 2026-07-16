@@ -1,6 +1,6 @@
 import * as L from "leaflet";
 import "leaflet.markercluster";
-import { useEffect, useRef, useMemo } from "preact/hooks";
+import { useEffect, useRef, useMemo, useState } from "preact/hooks";
 import { MapComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
 import {
@@ -55,6 +55,14 @@ import {
   resolvedMapFeatureKey,
   type MapFeatureKey,
 } from "../../maps/model/mapFeatureIdentity";
+import {
+  buildMapFeatureSpatialIndex,
+  geometryGeographicBounds,
+  LOCAL_MAP_FEATURE_CULL_THRESHOLD,
+  queryMapFeatureSpatialIndex,
+  resolvedFeatureGeographicBounds,
+  type GeographicBounds,
+} from "../../maps/performance/mapFeatureSpatialIndex";
 
 export interface LeafletMapController {
   home(): void;
@@ -163,13 +171,12 @@ export function LeafletMap({
   const id = component.id ?? "map";
   const resolvedLayersRef = useRef(resolvedLayers);
   const componentRef = useRef(component);
-  const selectedRowKeysRef = useRef(
-    context.state.componentSelectedRowKeys[id] ?? [],
+  const selectedRowKeysRef = useRef<ReadonlySet<string>>(
+    new Set(context.state.componentSelectedRowKeys[id] ?? []),
   );
-  const selectedMapIdsRef = useRef(
-    context.state.mapInteractionState[id]?.selectedFeatureKeys ??
-      context.state.mapSelectedFeatureIds[id] ??
-      [],
+  const selectedMapIdsRef = useRef<ReadonlySet<string>>(
+    new Set(context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+      context.state.mapSelectedFeatureIds[id] ?? []),
   );
   const mapLayerStateRef = useRef(context.state.mapLayerState[id]);
   const onViewportChangeRef = useRef(onViewportChange);
@@ -188,11 +195,12 @@ export function LeafletMap({
 
   resolvedLayersRef.current = resolvedLayers;
   componentRef.current = component;
-  selectedRowKeysRef.current = context.state.componentSelectedRowKeys[id] ?? [];
-  selectedMapIdsRef.current =
+  selectedRowKeysRef.current = new Set(context.state.componentSelectedRowKeys[id] ?? []);
+  selectedMapIdsRef.current = new Set(
     context.state.mapInteractionState[id]?.selectedFeatureKeys ??
-    context.state.mapSelectedFeatureIds[id] ??
-    [];
+      context.state.mapSelectedFeatureIds[id] ??
+      [],
+  );
   mapLayerStateRef.current = context.state.mapLayerState[id];
   onViewportChangeRef.current = onViewportChange;
   onControllerReadyRef.current = onControllerReady;
@@ -201,6 +209,38 @@ export function LeafletMap({
   settingsMapRef.current = settings.map;
   renderContextRef.current = context;
   runtimeConfigRef.current = runtimeConfig;
+
+  const [renderViewport, setRenderViewport] = useState<GeographicBounds | null>(null);
+  const featureSpatialIndexes = useMemo(
+    () => new Map(resolvedLayers
+      .filter(layer => !isExternalLeafletLayer(layer))
+      .map(layer => [layer.id, buildMapFeatureSpatialIndex(layer.features)] as const)),
+    [resolvedLayers],
+  );
+  const renderedLayers = useMemo(() => {
+    const legacyCluster = !component.layers?.length &&
+      (component.settings?.clusterPoints ?? settings.map.clusterPoints);
+    return resolvedLayers.map(layer => {
+      if (
+        isExternalLeafletLayer(layer) ||
+        layer.features.length <= LOCAL_MAP_FEATURE_CULL_THRESHOLD ||
+        layer.renderer.type === "cluster" ||
+        legacyCluster
+      ) return layer;
+      const index = featureSpatialIndexes.get(layer.id);
+      const features = index && renderViewport
+        ? queryMapFeatureSpatialIndex(index, renderViewport)
+        : [];
+      return features === layer.features ? layer : { ...layer, features };
+    });
+  }, [
+    resolvedLayers,
+    featureSpatialIndexes,
+    renderViewport,
+    component.layers?.length,
+    component.settings?.clusterPoints,
+    settings.map.clusterPoints,
+  ]);
 
   // ── Precompute renderer domains ──────────────────────────────────
   const rendererDomains = useMemo(() => {
@@ -293,21 +333,20 @@ export function LeafletMap({
         for (const layer of resolvedLayersRef.current) {
           for (const feat of layer.features) {
             const isPbSelected = feat.powerBiRowKeys.some((k) =>
-              selRowKeys.includes(k),
+              selRowKeys.has(k),
             );
-            const isLocalSelected = selMapIds.includes(
+            const isLocalSelected = selMapIds.has(
               resolvedMapFeatureKey(id, layer, feat),
-            ) || selMapIds.includes(feat.id);
+            ) || selMapIds.has(feat.id);
             if (!isPbSelected && !isLocalSelected) continue;
             if (feat.lat !== null && feat.lon !== null) {
               selBounds.extend([feat.lat, feat.lon]);
               selectedPoints.push([feat.lat, feat.lon]);
               selectedGeometryCount++;
             } else if (feat.geometry) {
-              const geoLayer = L.geoJSON(feat.geometry);
-              const gb = geoLayer.getBounds();
-              if (gb.isValid()) {
-                selBounds.extend(gb);
+              const geographicBounds = geometryGeographicBounds(feat.geometry);
+              if (geographicBounds) {
+                extendLeafletBounds(selBounds, geographicBounds);
                 selectedGeometryCount++;
                 if (feat.geometry.type === "Point") {
                   const coordinates = (feat.geometry as GeoJSON.Point)
@@ -434,7 +473,18 @@ export function LeafletMap({
     onControllerReadyRef.current?.(controller);
 
     // ── Viewport emission ───────────────────────────────────
+    const updateRenderViewport = () => {
+      const bounds = map.getBounds();
+      const next: GeographicBounds = [
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ];
+      setRenderViewport(previous => geographicBoundsEqual(previous, next) ? previous : next);
+    };
     const emitViewport = () => {
+      updateRenderViewport();
       if (programmaticMoveCountRef.current > 0) {
         programmaticMoveCountRef.current--;
         return;
@@ -461,6 +511,7 @@ export function LeafletMap({
     };
     map.on("moveend", emitViewport);
     map.on("resize", emitViewport);
+    updateRenderViewport();
     const initialViewportFrame = requestAnimationFrame(emitViewport);
 
     const onMapBackgroundClick = (event: L.LeafletMouseEvent) => {
@@ -539,6 +590,9 @@ export function LeafletMap({
       labelLayerRefs.current.clear();
       labelSignatureRefs.current.clear();
       paneNamesRef.current.clear();
+      externalWarningSignaturesRef.current.clear();
+      reportedRenderSignaturesRef.current.clear();
+      runtimeMetricsRef.current.clear();
     };
   }, []);
 
@@ -698,12 +752,12 @@ export function LeafletMap({
   const resolvedLayerStructuralSignature = useMemo(
     () =>
       resolvedLayerStructuralRevision(
-        resolvedLayers,
+        renderedLayers,
         !component.layers?.length &&
           (component.settings?.clusterPoints ?? settings.map.clusterPoints),
       ),
     [
-      resolvedLayers,
+      renderedLayers,
       component.layers?.length,
       component.settings?.clusterPoints,
       settings.map.clusterPoints,
@@ -716,7 +770,7 @@ export function LeafletMap({
     if (!map) return;
 
     const mapState = mapLayerStateRef.current;
-    const sortedLayers = effectiveLayerOrder(resolvedLayers, mapState?.order);
+    const sortedLayers = effectiveLayerOrder(renderedLayers, mapState?.order);
     const activeVectorLayerIds = new Set(
       sortedLayers
         .filter((layer) => !isExternalLeafletLayer(layer))
@@ -928,10 +982,10 @@ export function LeafletMap({
       for (const feature of layer.features) {
         const featureKey = resolvedMapFeatureKey(id, layer, feature);
         const selected =
-          (selectedMapIdsRef.current.includes(featureKey) ||
-            selectedMapIdsRef.current.includes(feature.id)) ||
+          (selectedMapIdsRef.current.has(featureKey) ||
+            selectedMapIdsRef.current.has(feature.id)) ||
           feature.powerBiRowKeys.some((rowKey) =>
-            selectedRowKeysRef.current.includes(rowKey),
+            selectedRowKeysRef.current.has(rowKey),
           );
         const style = resolvedFeatureStyle(
           feature,
@@ -1213,14 +1267,15 @@ export function LeafletMap({
         }
       }
 
-      for (const feature of layer.features) {
-        const point = resolvedPointPosition(feature);
-        if (point) {
-          if (isVisible) dataBounds.extend(point);
-          if (isVisible) hasAnyFeatures = true;
-        } else if (feature.geometry && isVisible) {
-          const geometryBounds = L.geoJSON(feature.geometry).getBounds();
-          if (geometryBounds.isValid()) dataBounds.extend(geometryBounds);
+      if (
+        isVisible &&
+        !hasFitRef.current &&
+        (componentRef.current.view?.fitMode ?? "data") !== "none"
+      ) {
+        const fullLayer = resolvedLayersRef.current.find(candidate => candidate.id === layer.id) ?? layer;
+        const fullBounds = boundsForFeatures(fullLayer.features);
+        if (fullBounds.isValid()) {
+          dataBounds.extend(fullBounds);
           hasAnyFeatures = true;
         }
       }
@@ -1230,7 +1285,8 @@ export function LeafletMap({
 
     const view = componentRef.current.view ?? {};
     const fitMode = view.fitMode ?? "data";
-    const firstVisibleLayer = sortedLayers.find(
+    const fullSortedLayers = effectiveLayerOrder(resolvedLayersRef.current, mapState?.order);
+    const firstVisibleLayer = fullSortedLayers.find(
       (layer) =>
         (mapState?.visibility?.[layer.id] ?? layer.visible ?? true) &&
         layer.features.length > 0,
@@ -1305,50 +1361,24 @@ export function LeafletMap({
       if (active.has(layerId)) continue;
       map.removeLayer(mounted.layer);
       arcGisTileRefs.current.delete(layerId);
+      clearExternalWarningSignatures(externalWarningSignaturesRef.current, layerId);
     }
     for (const [layerId, mounted] of dynamicLayerRefs.current) {
       if (active.has(layerId)) continue;
       map.removeLayer(mounted.layer);
       dynamicLayerRefs.current.delete(layerId);
+      clearExternalWarningSignatures(externalWarningSignaturesRef.current, layerId);
     }
   });
 
   // Labels own independent noninteractive Leaflet layers; label/content edits do
   // not participate in feature geometry lifecycle.
-  const resolvedLabelSignature = useMemo(
-    () =>
-      stableMapRevision(
-        resolvedLayers.map((layer) => ({
-          id: layer.id,
-          labels: layer.labels,
-          features: layer.features.map((feature) => ({
-            key: feature.featureKey ?? feature.id,
-            labelValue: feature.labelValue,
-            lat: feature.lat,
-            lon: feature.lon,
-            geometry: feature.geometry,
-            serviceAttributes: feature.serviceAttributes,
-            powerBiAttributes: feature.powerBiAttributes,
-            joinedAttributes: feature.joinedAttributes,
-          })),
-        })),
-      ),
-    [resolvedLayers],
-  );
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const activeIds = new Set(resolvedLayers.map((layer) => layer.id));
-    for (const [layerId, runtime] of labelLayerRefs.current) {
-      if (activeIds.has(layerId)) continue;
-      runtime.cleanup();
-      labelLayerRefs.current.delete(layerId);
-      labelSignatureRefs.current.delete(layerId);
-    }
-    for (const layer of resolvedLayers) {
-      const signature = stableMapRevision({
+  const resolvedLabelRevisions = useMemo(() => new Map(
+    renderedLayers
+      .filter(layer => Boolean(layer.labels))
+      .map(layer => [layer.id, stableMapRevision({
         labels: layer.labels,
-        features: layer.features.map((feature) => ({
+        features: layer.features.map(feature => ({
           key: feature.featureKey ?? feature.id,
           labelValue: feature.labelValue,
           lat: feature.lat,
@@ -1358,9 +1388,26 @@ export function LeafletMap({
           powerBiAttributes: feature.powerBiAttributes,
           joinedAttributes: feature.joinedAttributes,
         })),
-      });
+      })] as const),
+  ), [renderedLayers]);
+  const resolvedLabelSignature = useMemo(
+    () => stableMapRevision([...resolvedLabelRevisions]),
+    [resolvedLabelRevisions],
+  );
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const activeIds = new Set(renderedLayers.map((layer) => layer.id));
+    for (const [layerId, runtime] of labelLayerRefs.current) {
+      if (activeIds.has(layerId)) continue;
+      runtime.cleanup();
+      labelLayerRefs.current.delete(layerId);
+      labelSignatureRefs.current.delete(layerId);
+    }
+    for (const layer of renderedLayers) {
+      const signature = resolvedLabelRevisions.get(layer.id);
       const current = labelLayerRefs.current.get(layer.id);
-      if (!layer.labels) {
+      if (!layer.labels || !signature) {
         current?.cleanup();
         labelLayerRefs.current.delete(layer.id);
         labelSignatureRefs.current.delete(layer.id);
@@ -1380,12 +1427,17 @@ export function LeafletMap({
       for (const warning of runtime.warnings)
         onLayerRuntimeStateChangeRef.current?.(layer.id, { warning });
     }
-  }, [resolvedLabelSignature]);
+  }, [resolvedLabelSignature, resolvedLabelRevisions, renderedLayers]);
 
   // ── Transient selection and opacity synchronization ──────────────
   useEffect(() => {
     const mapState = context.state.mapLayerState[id];
-    for (const layer of resolvedLayers) {
+    const selectedRowKeySet = new Set(context.state.componentSelectedRowKeys[id] ?? []);
+    const selectedFeatureKeySet = new Set(
+      context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+        context.state.mapSelectedFeatureIds[id] ?? [],
+    );
+    for (const layer of renderedLayers) {
       const renderer = layer.renderer as ResolvedMapRenderer;
       const domain = rendererDomains.get(layer.id) ?? null;
       const opacity = clampOpacity(
@@ -1403,20 +1455,15 @@ export function LeafletMap({
           feature,
           renderer,
           domain,
-          context.state.componentSelectedRowKeys[id] ?? [],
-          context.state.mapInteractionState[id]?.selectedFeatureKeys ??
-            context.state.mapSelectedFeatureIds[id] ??
-            [],
+          selectedRowKeySet,
+          selectedFeatureKeySet,
           settings.theme.accent,
           featureKey,
         );
         const powerBiSelected = feature.powerBiRowKeys.some((rowKey) =>
-          (context.state.componentSelectedRowKeys[id] ?? []).includes(rowKey),
+          selectedRowKeySet.has(rowKey),
         );
-        const locallySelected =
-          context.state.mapInteractionState[id]?.selectedFeatureKeys.includes(
-            featureKey,
-          ) ?? false;
+        const locallySelected = selectedFeatureKeySet.has(featureKey);
         const revision = resolveMapFeatureRevision(feature, layer, {
           pane: paneNamesRef.current.get(layer.id),
           clusterParent:
@@ -1466,7 +1513,7 @@ export function LeafletMap({
       );
     }
   }, [
-    resolvedLayers,
+    renderedLayers,
     rendererDomains,
     context.state.componentSelectedRowKeys[id],
     context.state.mapSelectedFeatureIds[id],
@@ -1560,6 +1607,21 @@ function clampOpacity(value: number): number {
   return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 1));
 }
 
+function geographicBoundsEqual(
+  left: GeographicBounds | null,
+  right: GeographicBounds,
+): boolean {
+  return Boolean(left && left.every((value, index) =>
+    Math.abs(value - right[index]) < 0.00001,
+  ));
+}
+
+function clearExternalWarningSignatures(signatures: Set<string>, layerId: string): void {
+  for (const signature of [...signatures])
+    if (signature.startsWith(`tile:${layerId}:`) || signature.startsWith(`dynamic:${layerId}:`))
+      signatures.delete(signature);
+}
+
 function stableSerialize(value: unknown): string {
   return JSON.stringify(value, (_key, next) => {
     if (next instanceof Map)
@@ -1648,8 +1710,8 @@ function resolvedFeatureStyle(
   feature: ResolvedMapFeature,
   renderer: ResolvedMapRenderer,
   domain: [number, number] | null,
-  selectedRowKeys: readonly string[],
-  selectedMapIds: readonly string[],
+  selectedRowKeys: ReadonlySet<string>,
+  selectedMapIds: ReadonlySet<string>,
   accent: string,
   featureKey: MapFeatureKey,
 ): LeafletFeatureStyle {
@@ -1660,9 +1722,9 @@ function resolvedFeatureStyle(
       ? featureStyleWithDomain(feature, renderer, domain)
       : featureStyle(feature, renderer);
   const selected =
-    feature.powerBiRowKeys.some((rowKey) => selectedRowKeys.includes(rowKey)) ||
-    selectedMapIds.includes(featureKey) ||
-    selectedMapIds.includes(feature.id);
+    feature.powerBiRowKeys.some((rowKey) => selectedRowKeys.has(rowKey)) ||
+    selectedMapIds.has(featureKey) ||
+    selectedMapIds.has(feature.id);
   if (selected)
     style = {
       ...style,
@@ -1714,14 +1776,16 @@ function boundsForFeatures(
 ): L.LatLngBounds {
   const bounds = L.latLngBounds([]);
   for (const feature of features) {
-    if (feature.lat !== null && feature.lon !== null)
-      bounds.extend([feature.lat, feature.lon]);
-    else if (feature.geometry) {
-      const geometryBounds = L.geoJSON(feature.geometry).getBounds();
-      if (geometryBounds.isValid()) bounds.extend(geometryBounds);
-    }
+    const featureBounds = resolvedFeatureGeographicBounds(feature);
+    if (featureBounds) extendLeafletBounds(bounds, featureBounds);
   }
   return bounds;
+}
+
+function extendLeafletBounds(bounds: L.LatLngBounds, value: GeographicBounds): void {
+  bounds.extend([value[1], value[0]]);
+  if (value[0] !== value[2] || value[1] !== value[3])
+    bounds.extend([value[3], value[2]]);
 }
 
 function annotateLeafletFeature(

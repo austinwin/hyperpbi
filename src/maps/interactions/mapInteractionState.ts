@@ -96,9 +96,10 @@ export function reconcileMapInteractionState(
   const selectedFeatureKeys = state.selectedFeatureKeys.filter((key) =>
     available.has(key),
   );
+  const selectedFeatureKeySet = new Set(selectedFeatureKeys);
   const selectedFeaturesByKey = Object.fromEntries(
     Object.entries(state.selectedFeaturesByKey ?? {}).filter(([key]) =>
-      selectedFeatureKeys.includes(key),
+      selectedFeatureKeySet.has(key),
     ),
   );
   const activeFeature =

@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, open, readFile, stat, unlink } from "node:fs/promises";
+import { dirname } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
 export const DEFAULT_MAP_HOSTS = [
@@ -11,6 +12,62 @@ export const RESTRICTED_BUILT_IN_HOSTS = [
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
 ];
+
+/**
+ * Serialize packaging profiles because pbiviz reads fixed workspace files.
+ * Without this lock, parallel Core/Maps jobs can package each other's
+ * capabilities and provider flags under the wrong archive name.
+ */
+export async function acquirePackageProfileLock(
+    lockPath,
+    { timeoutMs = 10 * 60_000, staleMs = 15 * 60_000, pollMs = 100 } = {},
+) {
+    await mkdir(dirname(lockPath), { recursive: true });
+    const started = Date.now();
+    while (true) {
+        try {
+            const handle = await open(lockPath, "wx");
+            try {
+                await handle.writeFile(JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }));
+            } catch (error) {
+                await handle.close();
+                await unlink(lockPath).catch(() => undefined);
+                throw error;
+            }
+            const heartbeatIntervalMs = Math.max(10, Math.min(60_000, staleMs / 3));
+            const heartbeat = setInterval(() => {
+                const timestamp = new Date();
+                void handle.utimes(timestamp, timestamp).catch(() => undefined);
+            }, heartbeatIntervalMs);
+            heartbeat.unref?.();
+            let released = false;
+            return async () => {
+                if (released) return;
+                released = true;
+                clearInterval(heartbeat);
+                await handle.close();
+                await unlink(lockPath).catch(error => {
+                    if (error?.code !== "ENOENT") throw error;
+                });
+            };
+        } catch (error) {
+            if (error?.code !== "EEXIST") throw error;
+            try {
+                const details = await stat(lockPath);
+                if (Date.now() - details.mtimeMs > staleMs) {
+                    await unlink(lockPath);
+                    continue;
+                }
+            } catch (inspectionError) {
+                if (inspectionError?.code === "ENOENT") continue;
+                throw inspectionError;
+            }
+            if (Date.now() - started >= timeoutMs)
+                throw new Error(`Timed out waiting for package profile lock: ${lockPath}`);
+            await new Promise(resolve => setTimeout(resolve, pollMs));
+        }
+    }
+}
 
 export function normalizeMapHostPattern(value, { allowBroad = false } = {}) {
     if (typeof value !== "string" || value.trim().length === 0) {
