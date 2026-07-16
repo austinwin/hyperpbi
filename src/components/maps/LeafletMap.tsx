@@ -483,15 +483,25 @@ export function LeafletMap({
       ];
       setRenderViewport(previous => geographicBoundsEqual(previous, next) ? previous : next);
     };
-    const emitViewport = () => {
+    const emitViewport = (navigationCompleted: boolean) => {
       updateRenderViewport();
-      if (programmaticMoveCountRef.current > 0) {
+      const programmatic = programmaticMoveCountRef.current > 0;
+      if (programmatic) {
         programmaticMoveCountRef.current--;
-        return;
       }
+      // Once a viewer or controller navigation has completed, late-arriving
+      // features must not apply the one-time automatic data fit over it.
+      // Initial publication and resize are not navigation and intentionally
+      // leave the initial fit available.
+      if (navigationCompleted) hasFitRef.current = true;
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      if (searchMarkerRef.current) map.removeLayer(searchMarkerRef.current);
-      searchMarkerRef.current = null;
+      // Programmatic navigation must publish its final viewport so ArcGIS
+      // viewport queries refresh. Retain the existing search-result marker
+      // behavior; only direct viewer navigation clears it.
+      if (!programmatic) {
+        if (searchMarkerRef.current) map.removeLayer(searchMarkerRef.current);
+        searchMarkerRef.current = null;
+      }
       debounceTimerRef.current = setTimeout(() => {
         const bounds = map.getBounds();
         const size = map.getSize ? map.getSize() : { x: 0, y: 0 };
@@ -509,10 +519,14 @@ export function LeafletMap({
         });
       }, 250);
     };
-    map.on("moveend", emitViewport);
-    map.on("resize", emitViewport);
+    const onMoveEnd = () => emitViewport(true);
+    const onResize = () => emitViewport(false);
+    map.on("moveend", onMoveEnd);
+    map.on("resize", onResize);
     updateRenderViewport();
-    const initialViewportFrame = requestAnimationFrame(emitViewport);
+    const initialViewportFrame = requestAnimationFrame(() =>
+      emitViewport(false),
+    );
 
     const onMapBackgroundClick = (event: L.LeafletMouseEvent) => {
       const bounds = map.getBounds();
@@ -570,8 +584,8 @@ export function LeafletMap({
 
     return () => {
       observer.disconnect();
-      map.off("moveend", emitViewport);
-      map.off("resize", emitViewport);
+      map.off("moveend", onMoveEnd);
+      map.off("resize", onResize);
       map.off("click", onMapBackgroundClick);
       cancelAnimationFrame(initialViewportFrame);
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);

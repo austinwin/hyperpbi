@@ -101,8 +101,7 @@
             "maxFeatures": 12,
             "requestBatchSize": 12,
             "viewportQuery": false,
-            "cacheMinutes": 0,
-            "progressiveRendering": false
+            "cacheMinutes": 0
           },
           "visible": true,
           "opacity": 1,

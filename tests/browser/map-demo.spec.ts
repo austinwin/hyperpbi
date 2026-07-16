@@ -14,6 +14,7 @@ declare global {
       };
       updateRenderer: () => void;
       refreshArcGis: () => void;
+      releaseArcGis: () => void;
     };
   }
 }
@@ -148,6 +149,33 @@ test("ArcGIS joined selection and details survive a retained-feature refresh", a
   await expect(page.locator('[data-arcgis-object="retained"]')).toHaveCount(1);
   expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys)).toEqual([featureKey]);
   expect(await page.evaluate(() => window.hpMapDemo.selectedRows)).toHaveLength(1);
+});
+
+test("delayed viewport queries keep the wastewater map mounted through navigation", async ({ page }) => {
+  await openDemo(page, "wastewater");
+  const map = page.locator(".leaflet-container");
+  await map.evaluate((element) =>
+    element.setAttribute("data-viewport-lifecycle", "stable"),
+  );
+
+  await expect
+    .poll(() => page.evaluate(() => window.hpMapDemo.arcGisRequestCount))
+    .toBeGreaterThan(1);
+  await expect(page.locator('[data-viewport-lifecycle="stable"]')).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  const requestsBeforeRelease = await page.evaluate(
+    () => window.hpMapDemo.arcGisRequestCount,
+  );
+  await expect
+    .poll(() => page.evaluate(() => window.hpMapDemo.arcGisRequestCount))
+    .toBeGreaterThan(requestsBeforeRelease);
+  await page.evaluate(() => window.hpMapDemo.releaseArcGis());
+
+  await expect(page.locator('[data-viewport-lifecycle="stable"]')).toHaveCount(1);
+  await expect(map).toBeVisible();
+  await expect(page.getByText("Bind fields to create a map")).toHaveCount(0);
+  await expect(page.getByText("All source fields must be present in Values")).toHaveCount(0);
 });
 
 test("Dynamic MapServer click identify stays temporary, offers result choice, and highlights geometry", async ({ page }) => {

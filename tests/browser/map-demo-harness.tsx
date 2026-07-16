@@ -20,7 +20,13 @@ import {
   type DemoCsvSource,
 } from "../helpers/mapDemoCsv";
 
-type DemoId = "feature" | "geometries" | "selection" | "arcgis" | "dynamic";
+type DemoId =
+  | "feature"
+  | "geometries"
+  | "selection"
+  | "arcgis"
+  | "dynamic"
+  | "wastewater";
 
 interface DemoDefinition {
   spec: string;
@@ -52,6 +58,10 @@ const demoDefinitions: Record<DemoId, DemoDefinition> = {
     spec: "arcgis-dynamic-identify-showcase.json",
     data: [],
   },
+  wastewater: {
+    spec: "arcgis-wastewater-live-map.json",
+    data: [],
+  },
 };
 
 declare global {
@@ -65,6 +75,7 @@ declare global {
       interaction?: ReturnType<typeof initialDashboardState>["mapInteractionState"][string];
       updateRenderer: () => void;
       refreshArcGis: () => void;
+      releaseArcGis: () => void;
     };
   }
 }
@@ -77,6 +88,7 @@ window.hpMapDemo = {
   arcGisRequestCount: 0,
   updateRenderer: () => undefined,
   refreshArcGis: () => undefined,
+  releaseArcGis: () => undefined,
 };
 
 async function loadDemo(id: DemoId) {
@@ -148,6 +160,79 @@ async function installArcGisFixture(): Promise<() => void> {
     });
   };
   return () => {
+    window.fetch = originalFetch;
+  };
+}
+
+function installDelayedWastewaterFixture(): () => void {
+  const serviceOrigin = "https://geogimstest.houstontx.gov";
+  const originalFetch = window.fetch.bind(window);
+  const pendingQueries = new Set<() => void>();
+  setAllowedHostPatterns(["https://*"]);
+  window.hpMapDemo.releaseArcGis = () => {
+    for (const release of pendingQueries) release();
+    pendingQueries.clear();
+  };
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    if (!url.startsWith(serviceOrigin)) return originalFetch(input, init);
+    window.hpMapDemo.arcGisRequestCount += 1;
+    if (url.includes("/query")) {
+      await new Promise<void>((resolve) => pendingQueries.add(resolve));
+      if (init?.signal?.aborted)
+        throw new DOMException("The query was superseded.", "AbortError");
+      return new Response(
+        JSON.stringify({
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              id: 1,
+              properties: {
+                OBJECTID: 1,
+                FACILITYID: "WW-1",
+                DIAMETER: 24,
+                MATERIAL: "PVC",
+              },
+              geometry: {
+                type: "Point",
+                coordinates: [-95.35, 29.75],
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        id: 9,
+        name: "Delayed wastewater fixture",
+        type: "Feature Layer",
+        geometryType: "esriGeometryPoint",
+        objectIdField: "OBJECTID",
+        capabilities: "Map,Query,Data",
+        maxRecordCount: 2000,
+        supportedQueryFormats: "JSON,geoJSON",
+        advancedQueryCapabilities: { supportsPagination: true },
+        fields: [
+          { name: "OBJECTID", type: "esriFieldTypeOID" },
+          { name: "FACILITYID", type: "esriFieldTypeString" },
+          { name: "DIAMETER", type: "esriFieldTypeDouble" },
+          { name: "MATERIAL", type: "esriFieldTypeString" },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  };
+  return () => {
+    window.hpMapDemo.releaseArcGis();
+    window.hpMapDemo.releaseArcGis = () => undefined;
     window.fetch = originalFetch;
   };
 }
@@ -271,6 +356,8 @@ function DemoHarness({ demoId }: { demoId: DemoId }) {
       try {
         if (demoId === "arcgis") restoreFixture = await installArcGisFixture();
         else if (demoId === "dynamic") restoreFixture = installDynamicIdentifyFixture();
+        else if (demoId === "wastewater")
+          restoreFixture = installDelayedWastewaterFixture();
         const result = await loadDemo(demoId);
         if (active) setLoaded(result);
       } catch (error) {

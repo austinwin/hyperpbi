@@ -9,7 +9,7 @@ describe("map sizing", () => {
     });
     expect(resolveMapSizing({ type: "map", heightMode: "fill", minHeight: 180 })).toMatchObject({
       mode: "fill",
-      frameStyle: { height: "100%", minHeight: "180px" },
+      frameStyle: { flex: "1 1 auto", minHeight: "180px" },
     });
     expect(resolveMapSizing({ type: "map", heightMode: "aspectRatio", aspectRatio: 2 }).frameStyle.aspectRatio).toBe("2");
     expect(resolveMapSizing({ type: "map" }, { studioPreview: true }).mode).toBe("fill");

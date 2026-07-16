@@ -5,7 +5,7 @@
 1. Choose a Core or Maps `.pbiviz` package.
 2. In Power BI Desktop, use **Visualizations → … → Import a visual from a file**.
 3. Add HyperPBI to the report canvas.
-4. Bind every field the dashboard needs to the single **Values** field well, including all map fields.
+4. Bind every Power BI field the dashboard needs to the single **Values** field well. ArcGIS reference-only maps need no Values fields.
 5. Resize the visual for the intended report layout.
 6. Open the visual's **Edit** command to enter HyperPBI Studio.
 
@@ -85,7 +85,7 @@ Every Map Studio transaction uses the current Runtime Config owned by HyperPBI S
 
 The effective dataset is `layer.dataset`, then the map's dataset, then `powerbi`. Logical datasets are views over the one flattened Power BI data view received by the custom visual; they do not query model tables independently. Explicit layers resolve independently and do not inherit global Runtime Config coordinates. Location precedence is Geometry → Lat/Lon → X/Y → Address. Diagnostics report exact layer dataset/bindings, invalid-location counts, mixed geometry, `layerValue`, lineage, requests, joins, limits, and timings.
 
-Put all fields in Values. ArcGIS authoring fetches metadata only when you click **Fetch service metadata**; choose a root sublayer to populate service field controls. Click **Run join preview** for a bounded runtime-equivalent preview. `fieldSource` distinguishes `powerbi`, `service`, and `joined` attributes. Stable point shapes are circle, square, diamond, and triangle; cluster labels support count and numeric sum. Basemap/view changes are reactive, `view.fitPadding` is a `0`–`0.5` ratio (default `0.08`), and **Add current view** captures the latest live preview center/zoom. Address search remains user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment. Geocoding behavior is unchanged by this work.
+Put fields used by Power BI-backed layers and joins in Values. ArcGIS reference-only maps need no Values fields and continue to run with an empty data view. Fields from different tables must have an unambiguous semantic-model relationship or bridge; Power BI rejects unrelated combinations before the visual runs. ArcGIS authoring fetches metadata only when you click **Fetch service metadata**; choose a root sublayer to populate service field controls. Click **Run join preview** for a bounded runtime-equivalent preview. `fieldSource` distinguishes `powerbi`, `service`, and `joined` attributes. Stable point shapes are circle, square, diamond, and triangle; cluster labels support count and numeric sum. Basemap/view changes are reactive, `view.fitPadding` is a `0`–`0.5` ratio (default `0.08`), and **Add current view** captures the latest live preview center/zoom. Address search remains user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment. Geocoding behavior is unchanged by this work.
 
 Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
 

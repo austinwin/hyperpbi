@@ -33,6 +33,8 @@ Power BI supplies a custom visual one flattened data view. Fields in Values may 
 
 Logical datasets create filtered, derived, renamed, selected, grouped, distinct, sorted, or limited layer views over that received data. They do not issue independent semantic-model queries and do not create Power BI relationships.
 
+An ArcGIS `reference` layer does not require a field in Values; a saved reference-only map continues to run with an empty data view. Leave Values empty when the map uses only service attributes. If fields from unrelated model tables are added, Power BI can reject the visual query with **Can't determine relationships between the fields** before HyperPBI runs. Create an unambiguous model relationship or bridge table for a real Power BI join; the visual cannot infer or bypass semantic-model relationships.
+
 Every layer selects its effective dataset by:
 
 1. `layer.dataset`
@@ -121,7 +123,7 @@ Stable map feature interactions execute from Leaflet feature clicks, so `map.lay
 | `arcgisTile` | Display-only public HTTPS raster tile overlay with attribution and zoom bounds; no feature identify, popup, join, or selection |
 | `arcgisDynamic` | Public dynamic map images plus user-driven `/identify`; results are temporary read-only details with optional returned-geometry highlight, never joins or persistent selection |
 
-ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Results and warnings are bounded. Query `outFields` contain only fields whose effective `fieldSource` is `service`, plus required service join keys; Power BI keys and joined aliases are never sent as ArcGIS field names.
+ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Every completed map navigation publishes the new viewport, including Home, bookmarks, authored-view changes, fit-to-data, layer/selection zoom, and search results. Invisible and out-of-range viewport layers do not request data; an in-flight request is cancelled, retained results remain available, and entering the visible zoom range requests the current extent. Results and warnings are bounded. Query `outFields` contain only fields whose effective `fieldSource` is `service`, plus required service join keys; Power BI keys and joined aliases are never sent as ArcGIS field names.
 
 Dynamic identify captures the clicked WGS84 location together with the current map extent and rendered image size, then posts to the MapServer `/identify` endpoint. A newer click aborts and versions out an older request. Matching sublayers share the Preact feature-details surface through an accessible result chooser; returned geometry is highlighted in a non-interactive temporary layer. Closing details, clicking elsewhere, hiding the source, or activating a persistent feature removes the temporary result. Identify output never enters canonical layer selection, Power BI selection, joins, refresh state, or the persistent Leaflet feature registry. Tile layers do not call identify.
 
@@ -157,11 +159,12 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 |---|---|
 | Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, temporary Dynamic MapServer identify, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
 | Partial | map-layer interaction trigger (`click` only), `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
-| Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid, provider-dependent generalization, per-layer rather than streamed progressive drawing |
+| Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid |
+| Deprecated | generalization and progressive-rendering properties remain accepted for schema compatibility but are not executed or exposed by Map Studio |
 | Unsupported | scale/coordinate readout, rectangle/lasso selection, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
 | Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |
 
-Partial and experimental properties emit `MAP_CAPABILITY_LIMITATION`; Map Studio labels them accordingly. Accepted stable input is not silently ignored.
+Partial, experimental, and deprecated properties emit `MAP_CAPABILITY_LIMITATION`. Deprecated no-op input remains accepted only to preserve existing schemas and is not exposed as an authoring option. Accepted stable input is not silently ignored.
 
 ## Viewer controls
 

@@ -78,6 +78,10 @@ import {
   createDynamicIdentifyPresentation,
   type DynamicIdentifyChoice,
 } from "./runtime/dynamicIdentifyRuntime";
+import {
+  DEFAULT_ARCGIS_CACHE_MINUTES,
+  DEFAULT_ARCGIS_FEATURE_MAX_FEATURES,
+} from "../../maps/performance/mapPerformanceDefaults";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -143,6 +147,37 @@ export function viewportEqual(
     left.width === right.width &&
     left.height === right.height
   );
+}
+
+export type ArcGisViewportQueryEligibility =
+  | "eligible"
+  | "waitingForViewport"
+  | "hidden"
+  | "outsideZoomRange";
+
+export function arcGisViewportQueryEligibility(
+  definition: MapLayerDefinition,
+  layerGroups: MapComponent["layerGroups"],
+  runtimeVisibility: Readonly<Record<string, boolean>> | undefined,
+  viewport: MapViewportState | null,
+): ArcGisViewportQueryEligibility {
+  if (definition.performance?.viewportQuery !== true) return "eligible";
+  if (!viewport) return "waitingForViewport";
+  const group = definition.groupId
+    ? layerGroups?.find((candidate) => candidate.id === definition.groupId)
+    : undefined;
+  const authoredVisible =
+    (definition.visible ?? true) && (group?.visible ?? true);
+  if ((runtimeVisibility?.[definition.id] ?? authoredVisible) === false)
+    return "hidden";
+  const minimum = definition.visibility?.minZoom;
+  const maximum = definition.visibility?.maxZoom;
+  if (
+    (minimum !== undefined && viewport.zoom < minimum) ||
+    (maximum !== undefined && viewport.zoom > maximum)
+  )
+    return "outsideZoomRange";
+  return "eligible";
 }
 
 export function MapBlock({ component }: { component: MapComponent }) {
@@ -357,8 +392,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
   );
   const arcGisFeatureDefinitionsRef = useRef(arcGisFeatureDefinitions);
   const layerSourceContextsRef = useRef(layerSourceContexts);
+  const layerGroupsRef = useRef(component.layerGroups);
+  const runtimeLayerVisibilityRef = useRef(
+    context.state.mapLayerState[id]?.visibility,
+  );
   arcGisFeatureDefinitionsRef.current = arcGisFeatureDefinitions;
   layerSourceContextsRef.current = layerSourceContexts;
+  layerGroupsRef.current = component.layerGroups;
+  runtimeLayerVisibilityRef.current =
+    context.state.mapLayerState[id]?.visibility;
   const arcGisRequestRevision = useMemo(
     () =>
       stableMapRevision(
@@ -375,6 +417,37 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const refreshRevision = useMemo(
     () => arcGisRefreshRevision(arcGisFeatureDefinitions),
     [arcGisFeatureDefinitions],
+  );
+  const viewportQueryEligibilityRevision = useMemo(
+    () =>
+      stableMapRevision(
+        arcGisFeatureDefinitions.flatMap((definition) =>
+          definition.performance?.viewportQuery === true
+            ? [
+                {
+                  id: definition.id,
+                  visible: definition.visible,
+                  groupId: definition.groupId,
+                  groupVisible: definition.groupId
+                    ? component.layerGroups?.find(
+                        (candidate) => candidate.id === definition.groupId,
+                      )?.visible
+                    : undefined,
+                  runtimeVisible:
+                    context.state.mapLayerState[id]?.visibility?.[definition.id],
+                  minZoom: definition.visibility?.minZoom,
+                  maxZoom: definition.visibility?.maxZoom,
+                },
+              ]
+            : [],
+        ),
+      ),
+    [
+      arcGisFeatureDefinitions,
+      component.layerGroups,
+      context.state.mapLayerState[id]?.visibility,
+      id,
+    ],
   );
 
   const staticExternalLayers = useMemo(
@@ -411,11 +484,56 @@ export function MapBlock({ component }: { component: MapComponent }) {
     ].join(",");
   }, [viewport]);
 
+  const suspendArcGisFeatureDefinition = useCallback(
+    (definition: MapLayerDefinition) => {
+      const controller = layerAbortControllersRef.current.get(definition.id);
+      if (controller) {
+        controller.abort(
+          new DOMException("ArcGIS layer query is not currently needed.", "AbortError"),
+        );
+        layerAbortControllersRef.current.delete(definition.id);
+      }
+      setArcGisFeatureState((previous) => {
+        const current = previous[definition.id];
+        if (current?.layer && current.loading === false) return previous;
+        const layer = current?.layer ?? createArcGisFeatureShell(definition);
+        return {
+          ...previous,
+          [definition.id]: {
+            ...current,
+            layer: {
+              ...layer,
+              loading: false,
+              diagnostics: { ...layer.diagnostics, loading: false },
+            },
+            loading: false,
+            requestVersion:
+              current?.requestVersion ??
+              requestVersionsRef.current.get(definition.id) ??
+              0,
+          },
+        };
+      });
+    },
+    [],
+  );
+
   const resolveArcGisFeatureDefinition = useCallback(
     async (
       definition: MapLayerDefinition,
       reason: "initial" | "viewport" | "refresh",
     ) => {
+      if (
+        arcGisViewportQueryEligibility(
+          definition,
+          layerGroupsRef.current,
+          runtimeLayerVisibilityRef.current,
+          viewportRef.current,
+        ) !== "eligible"
+      ) {
+        suspendArcGisFeatureDefinition(definition);
+        return;
+      }
       const previousController = layerAbortControllersRef.current.get(
         definition.id,
       );
@@ -429,13 +547,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
       setArcGisFeatureState((previous) => {
         const current = previous[definition.id];
-        const retainedLayer = current?.layer
-          ? {
-              ...current.layer,
-              loading: true,
-              diagnostics: { ...current.layer.diagnostics, loading: true },
-            }
-          : undefined;
+        const baseLayer = current?.layer ?? createArcGisFeatureShell(definition);
+        const retainedLayer = {
+          ...baseLayer,
+          loading: true,
+          diagnostics: {
+            ...baseLayer.diagnostics,
+            loading: true,
+          },
+        };
         return {
           ...previous,
           [definition.id]: {
@@ -523,7 +643,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
       }
       void reason;
     },
-    [serviceAccess],
+    [serviceAccess, suspendArcGisFeatureDefinition],
   );
 
   // Initial/data path: resolve every feature definition, independent of viewport changes.
@@ -544,13 +664,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ),
     );
     for (const definition of arcGisFeatureDefinitionsRef.current) {
-      // Leaflet supplies the initial bounds shortly after mount. Avoid an
-      // unbounded request that would be immediately cancelled and replaced.
-      if (
-        definition.performance?.viewportQuery === true &&
-        viewportRef.current === null
-      )
-        continue;
       void resolveArcGisFeatureDefinition(definition, "initial");
     }
   }, [arcGisRequestRevision, resolveArcGisFeatureDefinition]);
@@ -563,7 +676,11 @@ export function MapBlock({ component }: { component: MapComponent }) {
         void resolveArcGisFeatureDefinition(definition, "viewport");
       }
     }
-  }, [viewportSig, resolveArcGisFeatureDefinition]);
+  }, [
+    viewportSig,
+    viewportQueryEligibilityRevision,
+    resolveArcGisFeatureDefinition,
+  ]);
 
   // Refresh path: one managed timer for each configured feature layer.
   useEffect(() => {
@@ -970,17 +1087,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
   ]);
 
   // ── Determine if we should show map or empty state ───────────────
-  const hasAnyFeatures = runtimeLayers.some((l) => l.features.length > 0);
-  const hasTileOrDynamicLayers = runtimeLayers.some(
-    (l) => l.sourceType === "arcgisTile" || l.sourceType === "arcgisDynamic",
-  );
-  const arcGisLoading = Object.values(arcGisFeatureState).some(
-    (entry) => entry.loading,
-  );
-  const arcGisError = Object.values(arcGisFeatureState).find(
-    (entry) => entry.error,
-  )?.error;
   const mapRuntimeWarnings = layerRuntimeState.__basemap__?.warnings ?? [];
+  const displayedMapWarnings = legacyCompatibility ? map.warnings : [];
 
   const coordinateSystem = component.settings?.coordinateSystem ?? "EPSG:4326";
 
@@ -1021,20 +1129,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
         }
       />
     );
-  } else if (
-    hasExternalLayers &&
-    arcGisLoading &&
-    !hasAnyFeatures &&
-    !hasTileOrDynamicLayers
-  ) {
-    content = <MapEmptyState reason="Loading ArcGIS layers…" />;
-  } else if (
-    hasExternalLayers &&
-    arcGisError &&
-    !hasAnyFeatures &&
-    !hasTileOrDynamicLayers
-  ) {
-    content = <MapEmptyState reason={arcGisError} />;
   } else {
     const sizing = resolveMapSizing(component, {
       studioPreview: context.instanceId?.includes("-preview") === true,
@@ -1225,9 +1319,9 @@ onClearSelection={() => {
             )}
           </div>
         </div>
-        {[...map.warnings, ...mapRuntimeWarnings].length > 0 && (
+        {[...displayedMapWarnings, ...mapRuntimeWarnings].length > 0 && (
           <div class="hp-map-warning">
-            {[...map.warnings, ...mapRuntimeWarnings].join(" ")}
+            {[...displayedMapWarnings, ...mapRuntimeWarnings].join(" ")}
           </div>
         )}
       </>
@@ -1465,11 +1559,12 @@ export async function resolveArcGisFeatureLayer(
     where: source.mode === "reference" ? "1=1" : undefined,
     definitionExpression: source.definitionExpression,
     outFields: [...requiredFields],
-    maxFeatures: perf?.maxFeatures ?? 2000,
+    maxFeatures:
+      perf?.maxFeatures ?? DEFAULT_ARCGIS_FEATURE_MAX_FEATURES,
     requestBatchSize: perf?.requestBatchSize,
     viewportQuery: isViewportQuery,
     viewport: isViewportQuery ? viewport!.bounds : undefined,
-    cacheMinutes: perf?.cacheMinutes,
+    cacheMinutes: perf?.cacheMinutes ?? DEFAULT_ARCGIS_CACHE_MINUTES,
     signal,
     joinKeys,
     queryStrategy,
@@ -1974,7 +2069,38 @@ export async function resolveArcGisFeatureLayer(
 // ── ArcGIS Query Field Collection ─────────────────────────────────────
 export { collectArcGisQueryFields };
 
-// ── Tile/Dynamic Layer Shells ─────────────────────────────────────────
+// ── External Layer Shells ─────────────────────────────────────────────
+
+export function createArcGisFeatureShell(
+  def: MapLayerDefinition,
+): ResolvedMapLayer {
+  return {
+    id: def.id,
+    name: def.name,
+    sourceType: "arcgisFeature",
+    geometryType: "unknown",
+    visible: def.visible ?? true,
+    opacity: def.opacity ?? 1,
+    order: def.order ?? 10,
+    groupId: def.groupId,
+    datasetName: def.dataset,
+    features: [],
+    renderer: { type: "simple", symbol: {} },
+    diagnostics: {
+      featureCount: 0,
+      requestCount: 0,
+      loading: false,
+      sourceType: "arcgisFeature",
+      sourceUrl:
+        def.source.type === "arcgisFeature" ? def.source.url : undefined,
+      geometryType: "unknown",
+      usedServiceSymbology: false,
+      usedServiceLabels: false,
+      warnings: [],
+    },
+    loading: false,
+  };
+}
 
 export function createArcGisTileShell(
   def: MapLayerDefinition,
@@ -2066,29 +2192,7 @@ export function createArcGisErrorShell(
       ? createArcGisTileShell(def)
       : sourceType === "arcgisDynamic"
         ? createArcGisDynamicShell(def)
-        : {
-            id: def.id,
-            name: def.name,
-            sourceType,
-            geometryType: "unknown",
-            visible: def.visible ?? true,
-            opacity: def.opacity ?? 1,
-            order: def.order ?? 10,
-            features: [],
-            renderer: { type: "simple", symbol: {} },
-            diagnostics: {
-              featureCount: 0,
-              requestCount: 0,
-              loading: false,
-              error,
-              sourceType,
-              geometryType: "unknown",
-              usedServiceSymbology: false,
-              usedServiceLabels: false,
-              warnings: [error],
-            },
-            loading: false,
-          };
+        : createArcGisFeatureShell(def);
   return {
     ...shell,
     error,

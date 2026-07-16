@@ -101,6 +101,25 @@ const loadSpec = (file: string) =>
   };
 
 describe("map demo examples", () => {
+  it("keeps the live wastewater reference map independent of Power BI fields and authored-view stable", () => {
+    const specification = loadSpec("arcgis-wastewater-live-map.json");
+    const component = specification.components[0];
+    const layer = component.layers?.[0];
+
+    expect(validateSchema(specification).errors).toEqual([]);
+    expect(prepareSpecification(specification, createDemoData([])).errors).toEqual([]);
+    expect(component.view?.fitMode).toBe("none");
+    expect(layer?.source).toMatchObject({
+      type: "arcgisFeature",
+      mode: "reference",
+    });
+    expect(layer?.dataset).toBeUndefined();
+    expect(layer?.performance).toMatchObject({
+      viewportQuery: true,
+      cacheMinutes: 0,
+    });
+  });
+
   it.each(demos)("keeps $spec schema-valid with its CSV field manifest", (demo) => {
     const specification = loadSpec(demo.spec);
     const sources: DemoCsvSource[] = demo.data

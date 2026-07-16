@@ -51,6 +51,7 @@ vi.mock("../src/components/maps/LeafletMap", () => ({
 
 import {
   MapBlock,
+  arcGisViewportQueryEligibility,
   collectArcGisQueryFields,
   createArcGisErrorShell,
   createCorePackageErrorShell,
@@ -190,6 +191,23 @@ function mount(mapComponent: MapComponent, webAccess = true) {
   return { host, value };
 }
 
+function rerender(
+  host: HTMLElement,
+  value: RenderContextValue,
+  mapComponent: MapComponent,
+) {
+  act(() =>
+    render(
+      h(
+        RenderContext.Provider,
+        { value },
+        h(MapBlock, { component: mapComponent }),
+      ),
+      host,
+    ),
+  );
+}
+
 beforeEach(() => {
   queryMock.mockReset();
   queryMock.mockResolvedValue(result("Default"));
@@ -200,6 +218,24 @@ afterEach(() => {
 });
 
 describe("MapBlock ArcGIS runtime", () => {
+  it("keeps the map mounted while the first ArcGIS feature request is pending", async () => {
+    queryMock.mockReturnValue(new Promise(() => undefined));
+    const { host } = mount(component([featureLayer("pending")]));
+    await settle();
+
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(host.querySelector(".leaflet-stub")).not.toBeNull();
+    expect(host.textContent).not.toContain("Bind fields to create a map");
+    expect(host.textContent).not.toContain("Loading ArcGIS layers");
+    expect(host.textContent).not.toContain("All source fields must be present in Values");
+    expect(latestLeafletProps?.resolvedLayers[0]).toMatchObject({
+      id: "pending",
+      sourceType: "arcgisFeature",
+      loading: true,
+      features: [],
+    });
+  });
+
   it("runs the initial query for every feature definition and builds static shells without querying them", async () => {
     mount(
       component([
@@ -247,6 +283,96 @@ describe("MapBlock ArcGIS runtime", () => {
     expect(
       (queryMock.mock.calls[1][0] as ArcGisFeatureQueryRequest).viewportQuery,
     ).toBe(true);
+    expect(
+      queryMock.mock.calls[1][0] as ArcGisFeatureQueryRequest,
+    ).toMatchObject({ maxFeatures: 2000, cacheMinutes: 0 });
+  });
+
+  it("defers hidden and out-of-range viewport layers, then queries the current extent when eligible", async () => {
+    const viewportLayer = {
+      ...featureLayer("viewport", true),
+      groupId: "operations",
+      visibility: { minZoom: 10, maxZoom: 12 },
+    };
+    const mapComponent = component([viewportLayer], {
+      layerGroups: [
+        { id: "operations", name: "Operations", visible: false },
+      ],
+    });
+    const mounted = mount(mapComponent);
+    await settle();
+    expect(queryMock).not.toHaveBeenCalled();
+    expect(
+      latestLeafletProps?.resolvedLayers.find(
+        (layer) => layer.id === "viewport",
+      ),
+    ).toMatchObject({ loading: false, features: [] });
+
+    act(() =>
+      latestLeafletProps?.onViewportChange?.({
+        bounds: [-96, 29, -94, 31],
+        center: [30, -95],
+        zoom: 10,
+        width: 800,
+        height: 600,
+      }),
+    );
+    await settle();
+    expect(queryMock).not.toHaveBeenCalled();
+
+    mounted.value.state.mapLayerState.map = {
+      visibility: { viewport: true },
+    };
+    rerender(mounted.host, mounted.value, mapComponent);
+    await settle();
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(
+      (queryMock.mock.calls[0][0] as ArcGisFeatureQueryRequest).viewport,
+    ).toEqual([-96, 29, -94, 31]);
+
+    act(() =>
+      latestLeafletProps?.onViewportChange?.({
+        bounds: [-97, 28, -93, 32],
+        center: [30, -95],
+        zoom: 13,
+        width: 800,
+        height: 600,
+      }),
+    );
+    await settle();
+    expect(queryMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels an in-flight viewport request when its layer becomes invisible", async () => {
+    queryMock.mockReturnValue(new Promise(() => undefined));
+    const mapComponent = component([featureLayer("viewport", true)]);
+    const mounted = mount(mapComponent);
+    await settle();
+    act(() =>
+      latestLeafletProps?.onViewportChange?.({
+        bounds: [-96, 29, -94, 31],
+        center: [30, -95],
+        zoom: 10,
+        width: 800,
+        height: 600,
+      }),
+    );
+    await settle();
+    const request = queryMock.mock.calls[0][0] as ArcGisFeatureQueryRequest;
+    expect(request.signal?.aborted).toBe(false);
+
+    mounted.value.state.mapLayerState.map = {
+      visibility: { viewport: false },
+    };
+    rerender(mounted.host, mounted.value, mapComponent);
+    await settle();
+    expect(request.signal?.aborted).toBe(true);
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(
+      latestLeafletProps?.resolvedLayers.find(
+        (layer) => layer.id === "viewport",
+      )?.loading,
+    ).toBe(false);
   });
 
   it("ignores stale responses and retains the previous successful layer while the replacement loads", async () => {
@@ -460,6 +586,44 @@ describe("MapBlock ArcGIS runtime", () => {
 });
 
 describe("MapBlock exported runtime helpers", () => {
+  it("resolves effective viewport-query visibility and zoom eligibility", () => {
+    const definition = {
+      ...featureLayer("viewport", true),
+      groupId: "group",
+      visibility: { minZoom: 5, maxZoom: 10 },
+    };
+    const groups = [{ id: "group", name: "Group", visible: false }];
+    const viewport = {
+      bounds: [-96, 29, -94, 31] as [number, number, number, number],
+      center: [30, -95] as [number, number],
+      zoom: 7,
+      width: 800,
+      height: 600,
+    };
+    expect(
+      arcGisViewportQueryEligibility(definition, groups, undefined, null),
+    ).toBe("waitingForViewport");
+    expect(
+      arcGisViewportQueryEligibility(definition, groups, undefined, viewport),
+    ).toBe("hidden");
+    expect(
+      arcGisViewportQueryEligibility(
+        definition,
+        groups,
+        { viewport: true },
+        { ...viewport, zoom: 4 },
+      ),
+    ).toBe("outsideZoomRange");
+    expect(
+      arcGisViewportQueryEligibility(
+        definition,
+        groups,
+        { viewport: true },
+        viewport,
+      ),
+    ).toBe("eligible");
+  });
+
   it("compares rounded bounds plus zoom and size", () => {
     const left = {
       bounds: [-95.00001, 29.00001, -94.00001, 30.00001] as [

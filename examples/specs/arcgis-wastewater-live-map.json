@@ -11,7 +11,7 @@
         "zoom": 12,
         "minZoom": 8,
         "maxZoom": 18,
-        "fitMode": "data"
+        "fitMode": "none"
       },
       "basemap": {
         "type": "osm"
@@ -20,7 +20,6 @@
         {
           "id": "wastewater-layer",
           "name": "Wastewater UN Public",
-          "dataset": "powerbi",
           "source": {
             "type": "arcgisFeature",
             "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",
@@ -33,7 +32,7 @@
             "maxFeatures": 2000,
             "requestBatchSize": 500,
             "viewportQuery": true,
-            "cacheMinutes": 5
+            "cacheMinutes": 0
           },
           "popup": {
             "enabled": true,

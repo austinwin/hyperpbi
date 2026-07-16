@@ -223,17 +223,77 @@ describe("LeafletMap controller and viewport", () => {
         expect(mocks.maps[0].setViewCalls.at(-1)?.center).toEqual([30, -96]);
     });
 
-    it("emits one initial viewport, emits user moves, and suppresses programmatic Home movement", async () => {
+    it("emits viewport changes after Home and bookmark navigation", async () => {
         const host = document.createElement("div"); const test = testContext(); const viewport = vi.fn(); let controller: LeafletMapController | undefined;
-        renderMap(host, test.value, { type: "map", id: "map", view: { center: [10, 20], zoom: 5, fitMode: "none" } }, [], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
+        renderMap(host, test.value, { type: "map", id: "map", view: { center: [10, 20], zoom: 5, fitMode: "none" }, bookmarks: [{ id: "far", label: "Far", center: [30, 40], zoom: 9 }] }, [], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
         await vi.advanceTimersByTimeAsync(300);
         expect(viewport).toHaveBeenCalledTimes(1);
         mocks.maps[0].emit("moveend");
         await vi.advanceTimersByTimeAsync(300);
         expect(viewport).toHaveBeenCalledTimes(2);
+        controller!.goToBookmark("far");
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(3);
         controller!.home();
         await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(4);
+    });
+
+    it("emits viewport changes after late fit-to-data, layer zoom, selection zoom, search, and authored view navigation", async () => {
+        const host = document.createElement("div"); const test = testContext(); const viewport = vi.fn(); let controller: LeafletMapController | undefined;
+        const component: MapComponent = { type: "map", id: "map", view: { center: [10, 20], zoom: 5, fitMode: "data" } };
+        renderMap(host, test.value, component, [], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(1);
+
+        const fitted = layer("features", { features: [
+            feature("one", { layerId: "features", lat: 29, lon: -95 }),
+            feature("two", { layerId: "features", lat: 31, lon: -93 }),
+        ] });
+        renderMap(host, test.value, component, [fitted], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
+        await vi.advanceTimersByTimeAsync(300);
         expect(viewport).toHaveBeenCalledTimes(2);
+
+        controller!.zoomToLayer("features");
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(3);
+
+        test.value.state.mapSelectedFeatureIds.map = ["one"];
+        renderMap(host, test.value, component, [fitted], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
+        controller!.zoomToSelection();
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(4);
+
+        controller!.showSearchResult({ label: "Result", latitude: 35, longitude: -90 });
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(5);
+
+        renderMap(host, test.value, { ...component, view: { ...component.view, center: [40, -80], zoom: 7 } }, [fitted], { onViewportChange: viewport, onControllerReady: value => { controller = value; } });
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenCalledTimes(6);
+    });
+
+    it("does not fit late-arriving data over completed viewer navigation", async () => {
+        const host = document.createElement("div"); const test = testContext(); const viewport = vi.fn();
+        const component: MapComponent = { type: "map", id: "map", view: { center: [10, 20], zoom: 5, fitMode: "data" } };
+        renderMap(host, test.value, component, [], { onViewportChange: viewport });
+        await vi.advanceTimersByTimeAsync(300);
+
+        mocks.maps[0].setView([35, -90], 10);
+        await vi.advanceTimersByTimeAsync(300);
+        expect(viewport).toHaveBeenLastCalledWith(expect.objectContaining({
+            center: [35, -90],
+            zoom: 10,
+        }));
+
+        renderMap(host, test.value, component, [layer("late", { features: [
+            feature("one", { layerId: "late", lat: 29, lon: -95 }),
+            feature("two", { layerId: "late", lat: 31, lon: -93 }),
+        ] })], { onViewportChange: viewport });
+
+        expect(mocks.maps[0].fitBoundsCalls).toHaveLength(0);
+        expect(mocks.maps[0].getCenter()).toMatchObject({ lat: 35, lng: -90 });
+        expect(mocks.maps[0].getZoom()).toBe(10);
     });
 });
 

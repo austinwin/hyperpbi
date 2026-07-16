@@ -25,5 +25,19 @@ describe("ArcGIS request revisions", () => {
       arcGisLayerRequestRevision(initial, undefined),
     );
   });
+
+  it("does not restart requests for deprecated no-op performance input", () => {
+    const initial = layer();
+    const compatibility = layer();
+    compatibility.performance = {
+      generalizeByZoom: true,
+      minimumGeneralization: 1,
+      maximumGeneralization: 10,
+      progressiveRendering: true,
+    };
+    expect(arcGisLayerRequestRevision(compatibility, undefined)).toBe(
+      arcGisLayerRequestRevision(initial, undefined),
+    );
+  });
 });
 

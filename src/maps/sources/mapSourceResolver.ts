@@ -22,6 +22,7 @@ import type { GeocodeCacheEntry } from "../../providers/providerTypes";
 import { resolveRenderer } from "../renderers/mapRendererResolver";
 import { matchesFilter } from "../../data/filtering";
 import { externalFilterTargetFor } from "../../powerbi/externalFilters";
+import { DEFAULT_POWER_BI_MAP_MAX_FEATURES } from "../performance/mapPerformanceDefaults";
 
 export interface MapSourceContext {
   /** Rows in this layer's effective dataset after dashboard interaction filtering. */
@@ -407,7 +408,9 @@ export function resolvePowerBiLayer(
   const requestedCount = normalizedFeatures.length;
   const featureLimit = Math.max(
     0,
-    Math.floor(layer.performance?.maxFeatures ?? 10_000),
+    Math.floor(
+      layer.performance?.maxFeatures ?? DEFAULT_POWER_BI_MAP_MAX_FEATURES,
+    ),
   );
   if (requestedCount > featureLimit) {
     normalizedFeatures = normalizedFeatures.slice(0, featureLimit);

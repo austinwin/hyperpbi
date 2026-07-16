@@ -46,6 +46,11 @@ import {
   createMapStudioDraftState,
   mapStudioDraftReducer,
 } from "./mapStudioDraftState";
+import {
+  DEFAULT_ARCGIS_CACHE_MINUTES,
+  DEFAULT_ARCGIS_FEATURE_MAX_FEATURES,
+  DEFAULT_POWER_BI_MAP_MAX_FEATURES,
+} from "../../maps/performance/mapPerformanceDefaults";
 
 type Json = Record<string, unknown>;
 type PropertyTab =
@@ -85,6 +90,8 @@ function propertyTabSupported(
   if (tab === "popup") return capability.popup;
   if (tab === "tooltip") return capability.tooltip;
   if (tab === "interaction") return capability.selection;
+  if (tab === "performance")
+    return sourceType === "powerbi" || sourceType === "arcgisFeature";
   return true;
 }
 const object = (value: unknown): value is Json =>
@@ -3722,42 +3729,91 @@ function PerformanceEditor({
     mutate((candidate) => {
       candidate.performance = { ...(candidate.performance ?? {}), ...patch };
     });
+  const arcGisFeature = layer.source.type === "arcgisFeature";
+  const defaultMaximum = arcGisFeature
+    ? DEFAULT_ARCGIS_FEATURE_MAX_FEATURES
+    : DEFAULT_POWER_BI_MAP_MAX_FEATURES;
+  const hasDeprecatedOptions = Boolean(
+    performance.generalizeByZoom !== undefined ||
+      performance.minimumGeneralization !== undefined ||
+      performance.maximumGeneralization !== undefined ||
+      performance.progressiveRendering !== undefined,
+  );
   return (
     <div class="hp-map-form-grid">
-      {[
-        ["Maximum features", "maxFeatures", 10000],
-        ["Cache minutes", "cacheMinutes", 5],
-        ["Request batch size", "requestBatchSize", 500],
-      ].map(([label, key, fallback]) => (
+      <label>
+        <span>Maximum features</span>
+        <input
+          type="number"
+          min="1"
+          max="100000"
+          value={performance.maxFeatures ?? defaultMaximum}
+          onChange={(event) =>
+            set({
+              maxFeatures: event.currentTarget.value
+                ? Number(event.currentTarget.value)
+                : undefined,
+            })
+          }
+        />
+      </label>
+      {arcGisFeature && (
         <label>
-          <span>{label}</span>
+          <span>Cache minutes</span>
           <input
             type="number"
-            value={Number(
-              (performance as unknown as Json)[String(key)] ?? fallback,
-            )}
+            min="0"
+            max="1440"
+            value={
+              performance.cacheMinutes ?? DEFAULT_ARCGIS_CACHE_MINUTES
+            }
             onChange={(event) =>
-              set({ [String(key)]: Number(event.currentTarget.value) })
+              set({
+                cacheMinutes: event.currentTarget.value
+                  ? Number(event.currentTarget.value)
+                  : undefined,
+              })
             }
           />
         </label>
-      ))}
-      {[
-        ["Viewport query", "viewportQuery"],
-        ["Generalize by zoom (experimental)", "generalizeByZoom"],
-        ["Progressive rendering (experimental)", "progressiveRendering"],
-      ].map(([label, key]) => (
+      )}
+      {arcGisFeature && (
+        <label>
+          <span>Request batch size</span>
+          <input
+            type="number"
+            min="1"
+            max="10000"
+            placeholder="Service maximum"
+            value={performance.requestBatchSize ?? ""}
+            onChange={(event) =>
+              set({
+                requestBatchSize: event.currentTarget.value
+                  ? Number(event.currentTarget.value)
+                  : undefined,
+              })
+            }
+          />
+        </label>
+      )}
+      {arcGisFeature && (
         <label>
           <input
             type="checkbox"
-            checked={(performance as unknown as Json)[String(key)] === true}
+            checked={performance.viewportQuery === true}
             onChange={(event) =>
-              set({ [String(key)]: event.currentTarget.checked })
+              set({ viewportQuery: event.currentTarget.checked })
             }
           />{" "}
-          {label}
+          Query the current viewport
         </label>
-      ))}
+      )}
+      {hasDeprecatedOptions && (
+        <p class="hp-map-form-help">
+          Legacy generalization and progressive-rendering settings are retained
+          in JSON for compatibility but are not executed or editable.
+        </p>
+      )}
     </div>
   );
 }

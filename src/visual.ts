@@ -30,6 +30,7 @@ import { applyExternalFilter as applyPowerBiFilter, clearExternalFilter as clear
 import { FilterOperator } from "./schema/hyperpbiSchema";
 import type { ProviderAccessState } from "./providers/providerTypes";
 import { providerServiceOrigin } from "./providers/providerPolicy";
+import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -145,7 +146,7 @@ export class Visual implements IVisual {
 
     private renderCurrent(): void {
         const settings = toRuntimeSettings(this.formattingSettings);
-        if (!Object.keys(this.data.fields).length) { render(h(LandingPage, {}), this.target); return; }
+        if (shouldRenderLandingPage(this.data, this.specification)) { render(h(LandingPage, {}), this.target); return; }
         if (this.editMode === powerbi.EditMode.Advanced) {
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
             render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target); return;
