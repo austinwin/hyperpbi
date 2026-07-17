@@ -7,15 +7,31 @@ export const HYPERPBI_HELP_MARKDOWN = `# HyperPBI authoring guide
 
 HyperPBI compiles declarative JSON into a Power BI dashboard. Use **version 2.0 for new authoring**. Existing version 1.0 specifications remain supported as compatibility input.
 
-Canonical component descriptors own schema, field traversal, Inspector controls/containers, maturity, documentation, and valid example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; direct/row/item/datum templates resolve through the shared field engine while metric, state, selected, runtime, ArcGIS service, and joined namespaces remain separate. The permanent responsive Inspector validates transactions, supports preview selection and generated-owner mapping, and retains invalid complex drafts without replacing the last valid dashboard. AI section jobs use strict descriptor-compatible change packages and atomically promote the fully validated result to the working JSON and preview. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile, geocoder, and sanitized-origin ArcGIS service access are independent, and the geocoder defaults to none.
+Canonical component descriptors own schema, field traversal, Visual Inspector controls/containers, maturity, documentation, and valid example metadata. Field Manifest aliases are recommended for nested 2.0 bindings; direct/row/item/datum templates resolve through the shared field engine while metric, state, selected, runtime, ArcGIS service, and joined namespaces remain separate. Visual Inspector transactions and AI section jobs prepare and validate the complete dashboard before changing the preview. Invalid drafts remain available for correction without replacing the last valid preview or saved dashboard. Root calculated fields are first-class row fields but never direct Power BI model-filter targets. Tile, geocoder, and sanitized-origin ArcGIS service access are independent, and the geocoder defaults to none.
 
-## Studio workflow
+## Edit Mode workflow
 
-1. Review the Field Manifest and dashboard setup.
-2. Copy the generated prompt to an externally approved AI. HyperPBI does not call an AI API and stores no AI key.
-3. Paste one complete JSON response into Studio.
-4. Validate and preview; use structured diagnostics or the repair prompt when necessary.
-5. Save and return to the report.
+1. Open the visual's **Edit** command. Guided mode keeps the normal create-and-help path focused.
+2. Review the Field Manifest and dashboard setup.
+3. Copy the generated prompt to an externally approved AI. HyperPBI does not call an AI API and stores no AI key.
+4. Paste one complete JSON response into Guided Builder and select **Validate resulting dashboard & Preview**. Use **Preview changes** after normal edits.
+5. Review Errors and Warnings separately, then select **Save & return**. HyperPBI validates the exact current working values again and exits only when they succeed.
+
+## Guided and advanced workspaces
+
+Select **Advanced controls** to open the complete workspace navigation: **Create** contains AI Builder, Visual Inspector, and Map Studio; **Data & logic** contains Field mapping and Calculations; **Test** contains Interaction testing and Map services; **Advanced** contains Runtime settings and JSON editor; and **Learn** contains Documentation and the AI skill guide. Select **Guided mode** to return to the focused path. Narrow layouts use the shorter **Advanced** and **Guided** labels. Changing modes does not discard the working specification, current preview, component selection, or validation history.
+
+On wide layouts, workspace menus support arrow-key navigation, Home, End, and Escape. Compact layouts use one labeled workspace selector so every advanced tool remains available without a crowded toolbar.
+
+## Workbench, preview, and diagnostics
+
+Use **Split** to compare the active editor with the preview, **Editor** for a single authoring surface, or **Preview** for a single dashboard surface. Wide Split layouts have a pointer- and keyboard-adjustable separator. Compact and mobile layouts use one pane at a time, retain the active workspace and selection, and wrap actions instead of overflowing.
+
+**Preview current** means the visible result was prepared from the exact working specification and Runtime settings. A later edit changes the state to **Preview out of date** while preserving the last valid result for comparison. **Not previewed** means no current candidate has completed preview preparation. Errors block preview and save; Warnings remain a separate review group. Loading, empty, and failure states provide distinct next actions.
+
+## Visual Inspector
+
+Turn on **Inspect preview** to select a rendered or generated component without firing runtime interactions; Escape exits inspection. The searchable hierarchy supports keyboard navigation, dataset-aware controls, validated add/insert/move/duplicate/delete operations, and bounded undo/redo. Wide layouts show resizable **Tree** and **Properties** panes. Narrow layouts show one pane at a time; selecting a tree item opens Properties and **Back to hierarchy** returns to the tree. No-result search offers **Clear search**, an empty valid dashboard reports **No components yet**, and invalid root JSON reports **Inspector unavailable** with a corrective action.
 
 ## Version 2.0 contract
 
@@ -51,7 +67,7 @@ Prefer declarative \`svg\` for governed diagrams, pictorial marks, schematics, a
 
 HyperPBI exposes one flexible Power BI **Values** field well. For new maps, declare explicit \`layers[]\`, select each layer's optional logical \`dataset\`, and bind geometry, coordinates, attributes, labels, popups, interactions, and joins through canonical layer JSON. A Power BI layer's \`source.bindings\` wins; otherwise conservative semantic-type and exact-name inference may resolve a field. Runtime Config map bindings are compatibility input only for a legacy map without explicit layers.
 
-Map Studio edits that same canonical JSON and uses the preview's prepared calculations, Runtime Config transformations/aliases, logical datasets, field metadata, row keys, and source lineage. It provides a layer tree, metadata-driven service fields after an explicit fetch, renderers, labels, popup/tooltip configuration, an explicit bounded runtime-equivalent join preview, source-aware filters/visibility/interactions, transaction-based text editing, groups, and live-preview bookmarks. Logical datasets produce filtered, derived, selected, or grouped layer views over the one flattened Power BI data view received by the visual; they never issue independent semantic-model queries. Grouped features retain all contributing source identities where Power BI supplied them.
+Open **Create → Map Studio** or use **Open in Map Studio** from a selected map in Visual Inspector. Map Studio edits that same canonical JSON and uses the preview's prepared calculations, Runtime Config transformations/aliases, logical datasets, field metadata, row keys, and source lineage. It provides a layer tree, metadata-driven service fields after an explicit fetch, renderers, labels, popup/tooltip configuration, an explicit bounded runtime-equivalent join preview, source-aware filters/visibility/interactions, transaction-based text editing, groups, and live-preview bookmarks. Logical datasets produce filtered, derived, selected, or grouped layer views over the one flattened Power BI data view received by the visual; they never issue independent semantic-model queries. Grouped features retain all contributing source identities where Power BI supplied them.
 
 Map attributes use exact \`powerbi\`, \`service\`, or \`joined\` field sources. Stable point shapes are circle, square, diamond, and triangle; explicit clusters support count and numeric sum labels. Basemap and authored view edits update the mounted map; \`view.fitPadding\` is a ratio from 0 through 0.5 with default 0.08. Metadata and join requests are explicit, cancellable, policy-gated actions and never persist credentials. Unsupported analytical tools, secured services, feature editing, 3D, geoprocessing, and independent semantic-model queries remain unavailable. Geocoder behavior is unchanged.
 

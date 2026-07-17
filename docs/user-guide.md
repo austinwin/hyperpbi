@@ -7,11 +7,11 @@
 3. Add HyperPBI to the report canvas.
 4. Bind every Power BI field the dashboard needs to the single **Values** field well. ArcGIS reference-only maps need no Values fields.
 5. Resize the visual for the intended report layout.
-6. Open the visual's **Edit** command to enter HyperPBI Studio.
+6. Open the visual's **Edit** command to enter HyperPBI Edit Mode.
 
 Core has no external provider access. Use a Maps package only when the report needs approved tiles, geocoding, or public ArcGIS services.
 
-## Studio workflow
+## Edit Mode workflow
 
 The normal path is:
 
@@ -19,15 +19,39 @@ The normal path is:
 
 HyperPBI never sends the prompt itself. Review selected fields and privacy mode before copying.
 
+### Guided mode and Advanced controls
+
+Edit Mode opens in guided mode. It keeps **Guided Builder** and **How it works** prominent so a report author can complete the normal workflow without learning the expert tool layout. Dashboard setup asks for the goal, audience, supported decisions, primary entity, application type, layout, important KPIs, sections and filters, device priority, interaction expectations, and complexity. Choose whether maps, tables, charts, controls, calculations, or detail panels are required.
+
+Select **Advanced controls** to expose every authoring workspace. Select **Guided mode** to return to the focused guided experience; at narrow widths those button labels shorten to **Advanced** and **Guided**. This changes navigation density only and does not discard the working specification, preview, selection, or validation history.
+
+| Workspace | Tools | Use it for |
+|---|---|---|
+| **Create** | AI Builder, Visual Inspector, Map Studio | Create or revise the dashboard, select components, and configure maps |
+| **Data & logic** | Field mapping, Calculations | Review aliases and add governed calculated values |
+| **Test** | Interaction testing, Map services | Verify Power BI behavior and provider access |
+| **Advanced** | Runtime settings, JSON editor | Change expert settings or edit the complete JSON directly |
+| **Learn** | Documentation, AI skill guide | Review the human workflow or copy the full AI authoring reference |
+
+On wide layouts, each workspace group opens a described menu. Arrow keys move through menu items, Home and End jump to the first or last item, and Escape closes the menu. On compact layouts the same workspaces appear in one labeled selector, avoiding a crowded toolbar without removing advanced access.
+
+### Workbench views and responsive behavior
+
+Use the explicit workbench view controls according to the task:
+
+- **Split** keeps the active editor workspace and validated preview visible together.
+- **Editor** gives the active workspace the available area for long forms, trees, or JSON.
+- **Preview** gives the dashboard the available area for visual review and interaction testing.
+
+Changing views never changes the active workspace or dashboard data. In a wide Split view, the separator between editor and preview supports pointer dragging and keyboard adjustment. The diagnostics drawer is also resizable. At narrow or mobile visual sizes, Edit Mode becomes a stable single-pane experience: the selected Editor or Preview surface fills the available area, workspace navigation becomes the compact selector, controls wrap instead of overflowing, and the current selection is retained when the user switches surfaces.
+
 ### Dashboard setup
 
-Describe the goal, audience, supported decisions, primary entity, application type, layout, important KPIs, sections/filters, device priority, interaction expectations, and complexity. Choose whether maps, tables, charts, controls, calculations, or detail panels are required.
+Studio uses the setup choices to include only relevant prompt modules; it does not add unimplemented features. Optional advanced prompt controls expose privacy, sample, selected-field, application-pattern, and targeted-change settings without putting them in the normal path.
 
-The permanent **Inspector** tab works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested or generated runtime components without firing runtime interactions; Escape exits inspection. The searchable hierarchy supports keyboard navigation. Wide layouts show resizable Tree and Properties panes; narrow layouts expose accessible Tree/Properties pane tabs while retaining selection. Inspector edits are complete-dashboard validated transactions with bounded undo/redo and support add child, insert before/after, move up/down/to another compatible container, recursive duplicate, and reference-aware deletion.
+The permanent **Visual Inspector** works with saved, manually edited, imported, and AI-generated dashboards. Turn on **Inspect preview** to select nested or generated runtime components without firing runtime interactions; Escape exits inspection. Inspector edits are complete-dashboard validated transactions with bounded undo/redo and support add child, insert before/after, move up/down or to another compatible container, recursive duplicate, and reference-aware deletion.
 
 Selected-section redesign and add-section jobs return a discriminated `hyperpbi-change` package. Studio validates the entire resulting dashboard first, shows a mutation summary, and promotes the same prepared result to the working JSON and preview together.
-
-Studio uses this setup to choose relevant prompt modules; it does not add unimplemented features.
 
 ### Field Manifest
 
@@ -45,15 +69,25 @@ For maps, the manifest supplies fields to each layer's dataset-aware controls in
 
 Do not accept JSON Patch for normal improve/repair responses.
 
-## Validate and preview
+## Validate, preview, and save
 
 The importer extracts one JSON object, prepares aliases/definitions/patterns/datasets, and reports structured diagnostics. Version 2.0 is strict: unknown properties, invalid IDs, wrong enums, missing required properties, bad dataset stages, unknown fields/targets, and SVG limits are errors.
 
-Use the JSON path and component ID in each diagnostic. Applied automatic repairs are listed separately. HyperPBI will not overwrite the last valid saved dashboard when validation fails.
+Before the first successful validation, the Preview surface presents an empty state with the next action. Use **Preview changes** for the current working dashboard. A targeted AI package uses **Validate resulting dashboard & Preview** before it is promoted. Both actions validate the exact current specification and Runtime settings and, when successful, prepare them through the same pipeline used by the saved visual.
+
+- **Preview current** means the visible preview matches the exact working specification and Runtime settings.
+- **Preview out of date** means the user changed something after the last successful preview. The previous valid preview remains visible for comparison, but it is not represented as the current candidate.
+- **Not previewed** means no current candidate has completed preview preparation yet.
+
+Diagnostics are grouped by severity. **Errors** block preview and save and should be resolved first. **Warnings** describe limitations or compatibility concerns without being styled as equivalent failures. Use the JSON path and component ID in each issue; applied automatic repairs remain listed separately. Loading states for bounded provider and map actions remain distinct from empty and error states, so an in-progress request does not look like missing data or failed validation.
+
+**Save & return** is a guarded action, not a blind persistence shortcut. It validates and prepares the current working specification and Runtime settings again. HyperPBI saves and exits only if that current candidate succeeds; an error leaves Edit Mode open, keeps the last valid preview and saved dashboard intact, and opens actionable diagnostics. Warnings remain available for review but do not by themselves block saving.
 
 ## Visual Inspector
 
-Select a rendered component to locate its stable authoring owner and exact JSON path. Field controls use the component's effective logical-dataset schema, dataset controls list valid datasets, component controls list compatible IDs, and structured fragments retain parse/validation errors inline. Preserve the ID when the component's role remains. A failed candidate keeps the current valid dashboard and the uncommitted local draft.
+Open **Create → Visual Inspector**, or turn on **Inspect preview** and select a rendered component, to locate its stable authoring owner and exact JSON path. Field controls use the component's effective logical-dataset schema, dataset controls list valid datasets, component controls list compatible IDs, and structured fragments retain parse/validation errors inline. Preserve the ID when the component's role remains. A failed candidate keeps the current valid dashboard, the last valid preview, and the uncommitted local draft.
+
+The searchable hierarchy supports keyboard navigation. Wide layouts show resizable **Tree** and **Properties** panes. At narrow widths those names become accessible pane tabs; selecting a tree item opens Properties and **Back to hierarchy** returns to the same tree context. A search with no result shows **No matching components** and a **Clear search** action. A valid dashboard with no components shows **No components yet**. Invalid root JSON shows an actionable **Inspector unavailable** state rather than an empty or broken tree.
 
 ## Application shell
 
@@ -97,9 +131,9 @@ Enable `export` with one or both `formats: ["csv", "xlsx"]`, `scope: "filtered" 
 
 ## Maps
 
-Use **Open in Map Studio** from a selected map in Inspector, or open the permanent Map Studio tab. It shares canonical JSON, selection, bounded history, prepared calculated/configured/logical data, and live preview with Inspector. Create layers and groups; choose each layer's optional logical dataset; bind Geometry, Latitude+Longitude, X+Y, or Address; then configure renderer, labels, popup/tooltip, source-aware filters/visibility, interactions, limits, basemap, and bookmarks. Text drafts commit as one transaction on blur/Enter, and invalid edits keep the last valid preview.
+Use **Open in Map Studio** from a selected map in Visual Inspector, or open **Create → Map Studio**. It shares canonical JSON, selection, bounded history, prepared calculated/configured/logical data, and live preview with Visual Inspector. Create layers and groups; choose each layer's optional logical dataset; bind Geometry, Latitude+Longitude, X+Y, or Address; then configure renderer, labels, popup/tooltip, source-aware filters/visibility, interactions, limits, basemap, and bookmarks. Text drafts commit as one transaction on blur or Enter; Escape cancels, and invalid edits keep the last valid preview while marking the current candidate out of date.
 
-Every Map Studio transaction uses the current Runtime Config owned by HyperPBI Studio. Map-layer interactions author `trigger: "click"` only. The Basemap & view editor exposes rectangle and lasso spatial-selection tools; the same canonical `tools` properties drive Studio preview and the viewer toolbar. ArcGIS service roots load as one bounded spatial/group/table summary; selecting a spatial layer lazily loads that item's fields, while tables remain nonspatial and groups remain navigation-only. Tile/dynamic source edits replace the mounted overlay without resetting the map view. Join preview and runtime share cardinality, unmatched-policy, blank/invalid aggregation, and bounded diagnostics semantics. Class breaks reduce their effective count for small or repeated data. Diagnostic paths are canonical JSON pointers and the selected-layer panel excludes siblings.
+Every Map Studio transaction uses the current Runtime Config owned by HyperPBI Edit Mode. Map-layer interactions author `trigger: "click"` only. The Basemap & view editor exposes rectangle and lasso spatial-selection tools; the same canonical `tools` properties drive Edit Mode preview and the viewer toolbar. ArcGIS service roots load as one bounded spatial/group/table summary; selecting a spatial layer lazily loads that item's fields, while tables remain nonspatial and groups remain navigation-only. Tile/dynamic source edits replace the mounted overlay without resetting the map view. Join preview and runtime share cardinality, unmatched-policy, blank/invalid aggregation, and bounded diagnostics semantics. Class breaks reduce their effective count for small or repeated data. Diagnostic paths are canonical JSON pointers and the selected-layer panel excludes siblings.
 
 The effective dataset is `layer.dataset`, then the map's dataset, then `powerbi`. Logical datasets are views over the one flattened Power BI data view received by the custom visual; they do not query model tables independently. Explicit layers resolve independently and do not inherit global Runtime Config coordinates. Location precedence is Geometry → Lat/Lon → X/Y → Address. Diagnostics report exact layer dataset/bindings, invalid-location counts, mixed geometry, `layerValue`, lineage, requests, joins, limits, and timings.
 
@@ -125,6 +159,10 @@ Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by t
 | External map/provider disabled | Use Maps package; verify WebAccess, HTTPS host, runtime config |
 | Raw SVG disappears | Review sanitizer warnings, exact limits, forbidden resource/element use |
 | AI response rejected | Return one complete JSON object; remove comments/fences/prose/multiple objects |
+| Preview says out of date | Select **Preview changes** to prepare the current specification and Runtime settings |
+| Save & return stays in Edit Mode | Resolve blocking Errors; the current candidate is revalidated before saving |
+| Workspace controls feel crowded | Use the compact workspace selector or choose **Editor** / **Preview** single-pane view |
+| Inspector search is empty | Select **Clear search**; **No components yet** means the valid dashboard has no component nodes |
 
 ## Package commands for maintainers
 

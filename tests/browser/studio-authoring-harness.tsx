@@ -1,9 +1,16 @@
 import { render } from "preact";
+import "@tabler/core/dist/css/tabler.css";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "../../src/styles/tabler-overrides.css";
 import "../../src/styles/hyperpbi.css";
-import "../../src/styles/hyperpbi-map.css";
 import "../../src/styles/hyperpbi-studio.css";
 import "../../src/styles/hyperpbi-map-studio.css";
+import "../../src/styles/hyperpbi-inspector.css";
+import "../../src/styles/hyperpbi-shell.css";
+import "../../src/styles/hyperpbi-map.css";
+import "../../src/styles/hyperpbi-svg.css";
 import { calculateAggregates } from "../../src/data/aggregations";
 import { normalizeMapBindings } from "../../src/data/normalizeMapBindings";
 import type { NormalizedData, NormalizedField } from "../../src/data/normalizeData";
@@ -45,6 +52,14 @@ const data: NormalizedData = {
   rowKeys,
   aggregates: calculateAggregates(rows),
   map: normalizeMapBindings(rows, fields, { latitude: "latitude", longitude: "longitude" }, {}, rowKeys),
+};
+
+const emptyData: NormalizedData = {
+  rows: [],
+  fields: {},
+  rowKeys: [],
+  aggregates: calculateAggregates([]),
+  map: normalizeMapBindings([], {}),
 };
 
 const initialSpecification = JSON.stringify({
@@ -133,34 +148,72 @@ const candidate = JSON.stringify({
   ],
 });
 
+const invalidCandidate = JSON.stringify({
+  version: "2.0",
+  components: [{ type: "text", id: "invalid-card", text: "Invalid", span: 99 }],
+});
+
+const parameters = new URLSearchParams(window.location.search);
+const requestedScenario = parameters.get("scenario");
+const scenario = requestedScenario === "empty" || requestedScenario === "invalid"
+  ? requestedScenario
+  : "default";
+const advanced = parameters.get("advanced") !== "false";
+const previewPosition = parameters.get("preview") ?? "right";
+const activeData = scenario === "empty" ? emptyData : data;
+const activeSpecification = scenario === "empty"
+  ? JSON.stringify({ version: "2.0", components: [] })
+  : scenario === "invalid"
+    ? invalidCandidate
+    : initialSpecification;
+const initialLayout = JSON.stringify({
+  editorPercent: 42,
+  bottomHeight: 180,
+  bottomOpen: parameters.get("diagnostics") === "open",
+  advanced,
+});
+const runtimeSettings = toRuntimeSettings(new VisualFormattingSettingsModel());
+const settings = {
+  ...runtimeSettings,
+  editor: { ...runtimeSettings.editor, previewPosition },
+};
+
 declare global {
   interface Window {
     hpStudioAuthoringHarness: {
       candidate: string;
+      invalidCandidate: string;
       draft: string;
       saved: string;
       externalSelections: number[][];
+      layout: string;
+      layoutChanges: string[];
+      scenario: "default" | "empty" | "invalid";
     };
   }
 }
 
 window.hpStudioAuthoringHarness = {
   candidate,
-  draft: initialSpecification,
+  invalidCandidate,
+  draft: activeSpecification,
   saved: "",
   externalSelections: [],
+  layout: initialLayout,
+  layoutChanges: [],
+  scenario,
 };
 
 render(
   <HyperPbiStudio
     instanceId="studio-authoring-browser"
-    data={data}
-    settings={toRuntimeSettings(new VisualFormattingSettingsModel())}
-    initialSpecification={initialSpecification}
+    data={activeData}
+    settings={settings}
+    initialSpecification={activeSpecification}
     initialConfiguration={defaultConfigJson}
     initialEditorTab="ai"
-    initialLayout={JSON.stringify({ editorPercent: 42, bottomHeight: 180, bottomOpen: false, advanced: true })}
-    selectionIdentityCount={rows.length}
+    initialLayout={initialLayout}
+    selectionIdentityCount={activeData.rowKeys.length}
     hostAllowsInteractions
     selectExternal={(indices) => {
       window.hpStudioAuthoringHarness.externalSelections.push(indices);
@@ -169,6 +222,10 @@ render(
     clearExternal={() => ({ sent: true })}
     onDraftChange={(specification) => {
       window.hpStudioAuthoringHarness.draft = specification;
+    }}
+    onLayoutChange={(layout) => {
+      window.hpStudioAuthoringHarness.layout = layout;
+      window.hpStudioAuthoringHarness.layoutChanges.push(layout);
     }}
     onSave={(specification) => {
       window.hpStudioAuthoringHarness.saved = specification;

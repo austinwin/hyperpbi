@@ -17,8 +17,10 @@ describe("AI response importer", () => {
         const response = JSON.stringify({ kind: "hyperpbi-change", version: "1.0", operation: "remove", targetId: "two" });
         const textarea = host.querySelector("textarea")!;
         act(() => { textarea.value = response; textarea.dispatchEvent(new Event("input", { bubbles: true })); });
-        const buttons = Array.from(host.querySelectorAll<HTMLButtonElement>("button"));
-        act(() => buttons.find(button => button.textContent?.includes("Validate resulting dashboard"))!.click());
+        const validateButton = Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
+            .find(button => button.textContent?.includes("Validate response & preview"));
+        expect(validateButton).toBeDefined();
+        act(() => validateButton!.click());
         expect(onPreview).toHaveBeenCalledOnce();
         const promoted = JSON.parse(onPreview.mock.calls[0][0]);
         expect(promoted.components.map((component: { id: string }) => component.id)).toEqual(["one"]);
@@ -33,7 +35,10 @@ describe("AI response importer", () => {
         act(() => render(<AiResponseImporter data={data} currentSpecification={current} onPreview={onPreview} />, host));
         const textarea = host.querySelector("textarea")!;
         act(() => { textarea.value = JSON.stringify({ kind: "hyperpbi-change", version: "1.0", operation: "remove", targetId: "missing" }); textarea.dispatchEvent(new Event("input", { bubbles: true })); });
-        act(() => Array.from(host.querySelectorAll<HTMLButtonElement>("button")).find(button => button.textContent?.includes("Validate resulting dashboard"))!.click());
+        const validateButton = Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
+            .find(button => button.textContent?.includes("Validate response & preview"));
+        expect(validateButton).toBeDefined();
+        act(() => validateButton!.click());
         expect(onPreview).not.toHaveBeenCalled();
         expect(host.textContent).toContain("does not exist");
         expect(host.textContent).toContain("Copy targeted repair prompt");

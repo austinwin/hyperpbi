@@ -2,7 +2,7 @@
 
 HyperPBI is a schema-driven Power BI custom visual that turns declarative JSON into interactive dashboards and application-style report experiences. It binds to the current Power BI data view, validates authoring input, prepares logical datasets and reusable structures, and renders only implemented components and safe behaviors.
 
-HyperPBI does not call an AI service. Studio builds a prompt from the current Field Manifest and authoring settings; the user copies that prompt to an externally approved AI, then pastes one JSON response back into HyperPBI for extraction, validation, preview, and saving.
+HyperPBI does not call an AI service. Edit Mode builds a prompt from the current Field Manifest and authoring settings; the user copies that prompt to an externally approved AI, then pastes one JSON response back into HyperPBI for extraction, validation, preview, and saving.
 
 ## Current status and schema versions
 
@@ -16,14 +16,16 @@ HyperPBI does not call an AI service. Studio builds a prompt from the current Fi
 ## Core workflow
 
 1. Import the appropriate PBIVIZ package and bind the required Power BI fields to **Values**.
-2. Open HyperPBI Studio and review the field list/Field Manifest.
-3. Choose a prompt job and authoring settings.
-4. Copy the generated prompt to an approved external AI.
-5. Paste one JSON response into Studio.
-6. Validate and preview. If invalid, use the structured diagnostics and repair prompt.
-7. Save and return to the report.
+2. Open the visual's **Edit** command. Edit Mode starts in a focused guided experience for creating or revising a dashboard without navigating expert tools.
+3. Review the Field Manifest and dashboard setup, choose a prompt job, and copy the generated prompt to an approved external AI.
+4. Paste one JSON response into the Guided Builder and select **Validate & Preview**.
+5. Use **Split**, **Editor**, or **Preview** to compare the working dashboard with its validated result. A subsequent edit changes the status from **Preview current** to **Preview out of date** until **Preview changes** succeeds again.
+6. Resolve blocking errors in the Errors group and review non-blocking Warnings separately. Invalid input never replaces the last valid preview.
+7. Select **Save & return**. HyperPBI revalidates the current specification and runtime settings before it persists them and exits Edit Mode.
 
-The permanent Visual Inspector can select a rendered component, locate its canonical authoring JSON (including generated runtime ownership), edit that fragment, and preserve stable IDs. It provides searchable keyboard navigation, dataset-aware controls, descriptor-validated add/insert/move/duplicate/delete operations, responsive Tree/Properties panes, and bounded transaction undo/redo. Every candidate is prepared and validated as a complete dashboard; invalid input remains a local draft and never replaces the last valid specification.
+The default guided mode keeps the main workflow and help visible. Select **Advanced controls** when you need the complete workspace navigation: **Create** (AI Builder, Visual Inspector, Map Studio), **Data & logic** (Field mapping, Calculations), **Test** (Interaction testing, Map services), **Advanced** (Runtime settings, JSON editor), and **Learn** (Documentation, AI skill guide). Select **Guided mode** to return to the focused path. Narrow layouts shorten those two mode buttons to **Advanced** and **Guided**. Changing modes does not discard the dashboard or its validated preview.
+
+The permanent Visual Inspector can select a rendered component, locate its canonical authoring JSON (including generated runtime ownership), edit that fragment, and preserve stable IDs. It provides searchable keyboard navigation, dataset-aware controls, descriptor-validated add/insert/move/duplicate/delete operations, responsive **Tree** and **Properties** panes, and bounded transaction undo/redo. Wide layouts support keyboard-accessible resizing. Compact layouts show one Inspector pane at a time, move a tree selection into Properties, and provide **Back to hierarchy**. Empty, no-match, and invalid-JSON states explain the next safe action. Every candidate is prepared and validated as a complete dashboard; invalid input remains a local draft and never replaces the last valid specification or preview.
 
 ## HyperPBI 2.0 authoring model
 
@@ -132,9 +134,11 @@ HyperPBI has three separate declarative systems:
 
 `externalMode: "auto"` resolves to filter for controls and selection for data-point/custom components. `target`/`targets` can restrict internal linked behavior to named component IDs. External filter mode requires a model-column target; true measures, dataset-derived fields, and dataset metrics cannot directly filter Power BI. Dataset lineage can map a derived/grouped row back to contributing source identities for selection. See [interactions](docs/interactions.md).
 
-## Studio, prompts, and repair
+## Edit Mode, prompts, and repair
 
-Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification. Add-section returns a strict change package for before, after, a descriptor-compatible nested `containerPath`, or a root `components|toolbar|leftPanel|rightPanel` destination; redesign returns one replacement using the selected stable ID. Studio validates the complete result, then promotes that same prepared JSON to the working draft and preview in one transaction. Advanced JSON and Save & return therefore always use the dashboard that was validated. Normal improvements and repairs return complete JSON, not JSON Patch.
+Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesign selected section, and Repair invalid JSON. Create/improve/repair normally return a complete specification. Add-section returns a strict change package for before, after, a descriptor-compatible nested `containerPath`, or a root `components|toolbar|leftPanel|rightPanel` destination; redesign returns one replacement using the selected stable ID. Edit Mode validates the complete result, then promotes that same prepared JSON to the working draft and preview in one transaction. Normal improvements and repairs return complete JSON, not JSON Patch.
+
+**Preview current** means the visible preview was prepared from the exact working specification and Runtime settings. Any later change makes it **Preview out of date** while leaving the last valid result visible for comparison; **Not previewed** means no current candidate has completed preview preparation. Use **Preview changes** for normal edits; targeted AI packages use **Validate resulting dashboard & Preview** before promotion. Diagnostics are separated by severity: errors block preview and save, while warnings remain visible without being presented as equivalent failures. **Save & return** performs final validation and preview preparation against the current working values; it saves only when that validation succeeds.
 
 Prompt composition includes only relevant component modules, Field Manifest data under the chosen privacy mode, recommended patterns, applicable datasets/maps/tables/charts/SVG guidance, current JSON for improvement, selected ID for redesign, and structured diagnostics for repair.
 
@@ -172,6 +176,7 @@ npm install
 npm run start
 npm run typecheck
 npm test
+npm run test:browser
 npm run lint
 npm run docs:generate
 npm run docs:check
@@ -180,17 +185,24 @@ npm run package:maps
 npm run package:verify
 ```
 
-`npm run docs:generate` is documentation-only. It executes canonical TypeScript metadata without building the visual and regenerates:
+`npm run docs:generate` is documentation-only. It executes canonical TypeScript metadata without building the visual. It fully regenerates:
 
 - `docs/hyperpbi-component-catalog-reference.md`
 - `hyperpbi-component-catalog-reference.html`
 - `docs/hyperpbi-ai-skill.md`
 
+It also refreshes only the marked generated inventory regions in:
+
+- `README.md` (`component-summary`)
+- `index.html` (`hero-component-count`, `inventory-stats`, and `catalog-heading`)
+
+Do not hand-edit the fully generated reference outputs or the marked regions. The rest of `README.md` and `index.html` remains hand-maintained.
+
 ## Documentation index
 
 | Document | Purpose |
 |---|---|
-| [User guide](docs/user-guide.md) | Power BI and Studio workflow |
+| [User guide](docs/user-guide.md) | Power BI and Edit Mode workflow |
 | [2.0 specification](docs/hyperpbi-spec-reference.md) | Root, components, app, styles, behavior, diagnostics |
 | [Generated component catalog](docs/hyperpbi-component-catalog-reference.md) | Canonical component inventory and examples |
 | [AI authoring](docs/ai-authoring.md) | Prompt jobs, modules, privacy, and output contracts |

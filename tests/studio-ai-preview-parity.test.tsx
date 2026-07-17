@@ -84,18 +84,22 @@ describe("Studio AI preview and saved JSON parity", () => {
       textarea.value = validatedMap;
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    act(() => Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
-      .find((button) => button.textContent?.includes("Validate resulting dashboard"))!.click());
+    const validateButton = Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
+      .find((button) => button.textContent?.includes("Validate response & preview"));
+    expect(validateButton).toBeDefined();
+    act(() => validateButton!.click());
 
     const draft = JSON.parse(onDraftChange.mock.calls.at(-1)![0]);
     expect(draft.components[0].layers[0].renderer.type).toBe("uniqueValue");
     expect(draft.components[0].layers[0].tooltip.fields[0].field).toBe("code");
     expect(draft.components[0].layers[0].popup.title).toBe("{{code}}");
 
-    const jsonButton = Array.from(host.querySelectorAll<HTMLButtonElement>(".hp-studio-workspace-group > button"))
-      .find((button) => button.textContent === "JSON")!;
-    act(() => jsonButton.click());
-    expect(host.querySelector<HTMLSelectElement>(".hp-studio-workspace-select select")?.value).toBe("specification");
+    const workspaceSelect = host.querySelector<HTMLSelectElement>(".hp-studio-workspace-select select")!;
+    act(() => {
+      workspaceSelect.value = "specification";
+      workspaceSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(workspaceSelect.value).toBe("specification");
 
     act(() => Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
       .find((button) => button.textContent === "Save & return")!.click());

@@ -22,9 +22,10 @@ describe("Inspector form controls", () => {
     expect(hidden.querySelector('input[type="checkbox"]')).not.toBeNull();
     expect(hidden.querySelector("strong")?.textContent).toBe("hidden");
 
-    const text = Array.from(host.querySelectorAll<HTMLLabelElement>("label"))
-      .find((label) => label.querySelector(".hp-studio-field-label")?.textContent === "title")!
-      .querySelector<HTMLInputElement>("input")!;
+    const textLabel = Array.from(
+      host.querySelectorAll<HTMLLabelElement>("label.hp-studio-field-label"),
+    ).find((label) => label.textContent === "title")!;
+    const text = host.querySelector<HTMLInputElement>(`#${textLabel.htmlFor}`)!;
     act(() => {
       text.value = "Draft";
       text.dispatchEvent(new Event("input", { bubbles: true }));
@@ -41,9 +42,10 @@ describe("Inspector form controls", () => {
       <SpecificationInspector json={specification} data={mapStudioData} selectedComponentId="note" onChange={onChange} />,
       host,
     ));
-    const text = Array.from(host.querySelectorAll<HTMLLabelElement>("label"))
-      .find((label) => label.querySelector(".hp-studio-field-label")?.textContent === "title")!
-      .querySelector<HTMLInputElement>("input")!;
+    const textLabel = Array.from(
+      host.querySelectorAll<HTMLLabelElement>("label.hp-studio-field-label"),
+    ).find((label) => label.textContent === "title")!;
+    const text = host.querySelector<HTMLInputElement>(`#${textLabel.htmlFor}`)!;
     act(() => {
       text.value = "Discard me";
       text.dispatchEvent(new Event("input", { bubbles: true }));

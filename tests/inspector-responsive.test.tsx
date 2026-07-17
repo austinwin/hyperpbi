@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { h, render } from "preact";
 import { act } from "preact/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -20,18 +18,19 @@ const specification = JSON.stringify({ version: "2.0", data: { datasets: { regio
 afterEach(() => document.body.replaceChildren());
 
 describe("responsive Visual Inspector", () => {
-    it.each([1440, 1024, 768, 480])("keeps pane state and selection at %spx", width => {
-        Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
-        Object.defineProperty(window, "innerHeight", { configurable: true, value: 360 });
+    it("connects pane tabs to their panels and preserves selection while switching", () => {
         const host = document.createElement("div");
         act(() => render(<SpecificationInspector json={specification} data={data} selectedComponentId="total" onSelect={vi.fn()} onChange={vi.fn()} />, host));
         const inspector = host.querySelector<HTMLElement>(".hp-spec-inspector")!;
         expect(inspector.dataset.activePane).toBe("tree");
-        expect(host.querySelector(".hp-inspector-tree")).not.toBeNull();
-        expect(host.querySelector(".hp-inspector-properties")).not.toBeNull();
-        const properties = Array.from(host.querySelectorAll<HTMLButtonElement>('.hp-inspector-pane-switch [role="tab"]')).find(button => button.textContent === "Properties")!;
+        const tabs = Array.from(host.querySelectorAll<HTMLButtonElement>('.hp-inspector-pane-switch [role="tab"]'));
+        const [tree, properties] = tabs;
+        expect(tree.getAttribute("aria-selected")).toBe("true");
+        expect(host.querySelector(`#${tree.getAttribute("aria-controls")}`)?.getAttribute("role")).toBe("tabpanel");
+        expect(host.querySelector(`#${properties.getAttribute("aria-controls")}`)?.getAttribute("role")).toBe("tabpanel");
         act(() => properties.click());
         expect(inspector.dataset.activePane).toBe("properties");
+        expect(properties.getAttribute("aria-selected")).toBe("true");
         expect(host.textContent).toContain("/components/0/children/0");
         expect(host.textContent).toContain("total");
     });
@@ -40,19 +39,29 @@ describe("responsive Visual Inspector", () => {
         const onSelect = vi.fn();
         const host = document.createElement("div");
         act(() => render(<SpecificationInspector json={specification} data={data} selectedComponentId="total" onSelect={onSelect} onChange={vi.fn()} />, host));
-        const fieldLabel = Array.from(host.querySelectorAll("label")).find(label => label.textContent?.startsWith("field"));
-        expect(Array.from(fieldLabel!.querySelectorAll("option")).map(option => option.value)).toContain("double");
+        const fieldLabel = Array.from(host.querySelectorAll<HTMLLabelElement>("label")).find(label => label.textContent?.trim() === "field")!;
+        const field = host.querySelector<HTMLSelectElement>(`#${fieldLabel.htmlFor}`)!;
+        expect(Array.from(field.options).map(option => option.value)).toContain("double");
         const first = host.querySelector<HTMLButtonElement>('[role="treeitem"]')!;
         act(() => first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })));
         expect(onSelect).toHaveBeenCalledWith("total");
     });
 
-    it("declares desktop resizing, container-responsive single-pane behavior, and narrow-height scrolling", () => {
-        const css = readFileSync(resolve(process.cwd(), "src/styles/hyperpbi-inspector.css"), "utf8");
-        expect(css).toContain("--hp-inspector-tree-width");
-        expect(css).toContain("@container hp-inspector (max-width: 680px)");
-        expect(css).toContain(".hp-inspector-body .is-mobile-hidden { display: none; }");
-        expect(css).toContain("min-height: 0");
-        expect(css).toContain("overflow: auto");
+    it("uses a roving tree tab stop and presents an actionable empty search state", () => {
+        const host = document.createElement("div");
+        act(() => render(<SpecificationInspector json={specification} data={data} selectedComponentId="total" onSelect={vi.fn()} onChange={vi.fn()} />, host));
+        const items = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="treeitem"]'));
+        expect(items.map(item => item.tabIndex)).toEqual([-1, 0]);
+        expect(items.map(item => item.getAttribute("aria-level"))).toEqual(["1", "2"]);
+        expect(items[0].getAttribute("aria-expanded")).toBe("true");
+
+        const search = host.querySelector<HTMLInputElement>('input[type="search"]')!;
+        act(() => {
+            search.value = "does-not-exist";
+            search.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        expect(host.querySelector('[role="tree"] [role="treeitem"]')).toBeNull();
+        expect(host.querySelector(".hp-inspector-search-empty")?.textContent).toContain("No matching components");
+        expect(host.querySelector<HTMLButtonElement>('[aria-label="Clear component search"]')).not.toBeNull();
     });
 });

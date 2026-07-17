@@ -16,7 +16,7 @@ interface BuilderAccordionStepProps {
 function BuilderAccordionStep({number,title,description,summary,open,onToggle,children}:BuilderAccordionStepProps){
     return <section class={`hp-builder-accordion-step ${open?"is-open":"is-collapsed"}`}>
         <button type="button" class="hp-builder-step-toggle" aria-expanded={open} aria-controls={`builder-step-${number}`} onClick={onToggle}>
-            <span class="hp-builder-step-number">{number}</span>
+            <span class="hp-builder-step-number" aria-hidden="true">•</span>
             <span class="hp-builder-step-copy"><strong>{title}</strong><small>{description}</small></span>
             <span class="hp-builder-step-summary" title={summary}>{summary}</span>
             <span class="hp-builder-chevron" aria-hidden="true">{open?"−":"+"}</span>

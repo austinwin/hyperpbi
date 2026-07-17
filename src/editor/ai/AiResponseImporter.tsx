@@ -53,6 +53,12 @@ export function AiResponseImporter({
     import("../../schema/diagnostics").Diagnostic[]
   >([]);
   const inspect = () => {
+    setJson("");
+    setErrors([]);
+    setWarnings([]);
+    setMessage("");
+    setSummary("");
+    setDiagnostics([]);
     const extracted = extractJsonFromAiResponse(response);
     if (extracted.error) {
       setErrors([extracted.error]);
@@ -149,7 +155,7 @@ export function AiResponseImporter({
   return (
     <section class="hp-ai-import hp-builder-step">
       <header>
-        <span>7</span>
+        <span>2</span>
         <div>
           <strong>Paste AI response</strong>
           <small>
@@ -159,15 +165,28 @@ export function AiResponseImporter({
         </div>
       </header>
       <textarea
+        aria-label="AI dashboard response"
+        aria-invalid={errors.length > 0}
         value={response}
         onInput={(event) => {
           setResponse(event.currentTarget.value);
+          setJson("");
+          setErrors([]);
+          setWarnings([]);
+          setMessage("");
+          setSummary("");
+          setDiagnostics([]);
         }}
         placeholder="Paste a complete dashboard or hyperpbi-change package…"
       />
       <div class="hp-button-row">
-        <button class="hp-primary-action" type="button" onClick={preview}>
-          Validate resulting dashboard &amp; Preview
+        <button
+          class="hp-primary-action"
+          type="button"
+          disabled={!response.trim()}
+          onClick={preview}
+        >
+          Validate response &amp; preview
         </button>
       </div>
       {summary && (
@@ -178,12 +197,13 @@ export function AiResponseImporter({
       {message && (
         <div
           class={`hp-import-message ${errors.length ? "is-error" : "is-ok"}`}
+          role="status"
         >
           {message}
         </div>
       )}
       {errors.length > 0 && (
-        <section class="hp-repair-panel">
+        <section class="hp-repair-panel" role="alert">
           <button
             type="button"
             onClick={() =>
@@ -200,7 +220,12 @@ export function AiResponseImporter({
           >
             Copy error log
           </button>
-          <p>{errors[0]}</p>
+          <strong>Response issues</strong>
+          <ul>
+            {errors.map((error) => (
+              <li>{error}</li>
+            ))}
+          </ul>
           <button type="button" onClick={() => void copyText(repair)}>
             Copy targeted repair prompt
           </button>

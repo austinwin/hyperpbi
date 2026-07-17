@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import type { ComponentChildren } from "preact";
+import { useEffect, useId, useMemo, useRef, useState } from "preact/hooks";
 import {
   componentDescriptors,
   getComponentDescriptor,
@@ -30,7 +31,6 @@ import {
 } from "./specificationEditor";
 import { StudioButton } from "../ui/StudioButton";
 import { StudioCheckbox } from "../ui/StudioCheckbox";
-import { StudioField } from "../ui/StudioField";
 import { StudioSection } from "../ui/StudioSection";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
 
@@ -101,11 +101,15 @@ function DraftInspectorControl({
   control,
   value,
   onCommit,
+  error,
 }: {
   control: InspectorPropertyDescriptor;
   value: unknown;
-  onCommit: (value: unknown) => void;
+  onCommit: (value: unknown) => boolean | void;
+  error?: string;
 }) {
+  const controlId = useId();
+  const messageId = `${controlId}-message`;
   const committed =
     typeof value === "string" || typeof value === "number" ? String(value) : "";
   const [draft, setDraft] = useState(committed);
@@ -132,12 +136,18 @@ function DraftInspectorControl({
     }
   };
   return (
-    <StudioField label={control.label} help={control.help}>
+    <div class={`hp-studio-field ${error ? "is-invalid" : ""}`}>
+      <label class="hp-studio-field-label" for={controlId}>
+        {control.label}
+      </label>
       {control.control === "multiline" ? (
         <>
           <textarea
+            id={controlId}
             value={draft}
             readOnly={control.readOnly}
+            aria-invalid={error ? "true" : undefined}
+            aria-describedby={error || control.help ? messageId : undefined}
             onInput={(event) => setDraft(event.currentTarget.value)}
             onKeyDown={onKeyDown}
           />
@@ -151,18 +161,73 @@ function DraftInspectorControl({
         </>
       ) : (
         <input
+          id={controlId}
           type={control.control === "number" ? "number" : "text"}
           min={control.property === "span" ? 1 : undefined}
           max={control.property === "span" ? 12 : undefined}
           value={draft}
           readOnly={control.readOnly}
+          aria-invalid={error ? "true" : undefined}
+          aria-describedby={error || control.help ? messageId : undefined}
           placeholder={control.control === "color" ? "#2563eb or var(--hp-primary)" : undefined}
           onInput={(event) => setDraft(event.currentTarget.value)}
           onBlur={commit}
           onKeyDown={onKeyDown}
         />
       )}
-    </StudioField>
+      {error ? (
+        <small id={messageId} class="hp-studio-field-error" role="alert">
+          {error}
+        </small>
+      ) : control.help ? (
+        <small id={messageId} class="hp-studio-field-help">
+          {control.help}
+        </small>
+      ) : null}
+    </div>
+  );
+}
+
+function InspectorSelectControl({
+  control,
+  value,
+  onChange,
+  error,
+  children,
+}: {
+  control: InspectorPropertyDescriptor;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  children: ComponentChildren;
+}) {
+  const controlId = useId();
+  const messageId = `${controlId}-message`;
+  return (
+    <div class={`hp-studio-field ${error ? "is-invalid" : ""}`}>
+      <label class="hp-studio-field-label" for={controlId}>
+        {control.label}
+      </label>
+      <select
+        id={controlId}
+        value={value}
+        disabled={control.readOnly}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={error || control.help ? messageId : undefined}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      >
+        {children}
+      </select>
+      {error ? (
+        <small id={messageId} class="hp-studio-field-error" role="alert">
+          {error}
+        </small>
+      ) : control.help ? (
+        <small id={messageId} class="hp-studio-field-help">
+          {control.help}
+        </small>
+      ) : null}
+    </div>
   );
 }
 
@@ -191,13 +256,21 @@ export function SpecificationInspector({
   prepared?: PreparedAuthoringData;
   validateCandidate?: (candidateSpecificationJson: string) => PreparedAuthoringData;
 }) {
-  const parsed = useMemo(() => {
+  const parsedResult = useMemo(() => {
     try {
-      return JSON.parse(json) as Json;
-    } catch {
-      return undefined;
+      const value = JSON.parse(json) as unknown;
+      if (!object(value))
+        return {
+          error: "The specification must be a JSON object.",
+        };
+      return { value };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }, [json]);
+  const parsed = parsedResult.value;
   const [search, setSearch] = useState("");
   const [pane, setPane] = useState<Pane>("tree");
   const [treeWidth, setTreeWidth] = useState(280);
@@ -206,6 +279,8 @@ export function SpecificationInspector({
   const [fragmentProperty, setFragmentProperty] = useState("");
   const [fragmentError, setFragmentError] = useState("");
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
+  const [rejectedProperty, setRejectedProperty] = useState("");
+  const [pendingDeleteId, setPendingDeleteId] = useState("");
   const [destination, setDestination] = useState("/components");
   const [newType, setNewType] = useState("text");
   const [openGroups, setOpenGroups] = useState<Set<InspectorPropertyGroup>>(
@@ -215,13 +290,21 @@ export function SpecificationInspector({
   const localHistory = useRef(new SpecificationHistory(json));
   const history = sharedHistory ?? localHistory.current;
   const internal = useRef(json);
-  const selectedNode = useRef<HTMLButtonElement>(null);
+  const treeItems = useRef(new Map<string, HTMLButtonElement>());
+  const treeTab = useRef<HTMLButtonElement>(null);
+  const propertiesTab = useRef<HTMLButtonElement>(null);
+  const inspectorId = useId();
+  const treeTabId = `${inspectorId}-tree-tab`;
+  const propertiesTabId = `${inspectorId}-properties-tab`;
+  const treePanelId = `${inspectorId}-tree-panel`;
+  const propertiesPanelId = `${inspectorId}-properties-panel`;
 
   useEffect(() => {
     if (json !== internal.current) {
       if (history.value !== json) history.reset(json);
       internal.current = json;
       setCandidateErrors([]);
+      setRejectedProperty("");
       setRevision((value) => value + 1);
     }
   }, [json]);
@@ -229,9 +312,16 @@ export function SpecificationInspector({
     setFragmentProperty("");
     setFragment("");
     setFragmentError("");
+    setRejectedProperty("");
+    setPendingDeleteId("");
   }, [selectedComponentId]);
   useEffect(() => {
-    selectedNode.current?.scrollIntoView?.({ block: "nearest" });
+    if (generatedRuntimeId && selectedComponentId) setPane("properties");
+  }, [generatedRuntimeId, selectedComponentId]);
+  useEffect(() => {
+    treeItems.current
+      .get(selectedComponentId)
+      ?.scrollIntoView?.({ block: "nearest" });
   }, [selectedComponentId, search, collapsed]);
 
   const tree = useMemo(() => componentTree(parsed), [json]);
@@ -284,12 +374,26 @@ export function SpecificationInspector({
 
   if (!parsed)
     return (
-      <div class="hp-spec-inspector hp-inspector-paused" role="status">
-        Inspector is paused until the JSON is valid.
+      <div
+        class="hp-spec-inspector hp-inspector-paused"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="hp-inspector-state-card">
+          <span class="hp-inspector-state-icon" aria-hidden="true">!</span>
+          <div>
+            <strong>Inspector unavailable</strong>
+            <p>
+              Fix the specification in the JSON workspace, then return here.
+              Your last valid preview is unchanged.
+            </p>
+            {parsedResult.error && <code>{parsedResult.error}</code>}
+          </div>
+        </div>
       </div>
     );
 
-  const commit = (value: unknown) => {
+  const commit = (value: unknown, property = "") => {
     const next = JSON.stringify(value, null, 2);
     const validation = validateCandidate?.(next);
     const standaloneValidation = validation
@@ -300,9 +404,11 @@ export function SpecificationInspector({
         });
     if (!(validation?.specification ?? standaloneValidation?.schema)) {
       setCandidateErrors(validation?.errors ?? standaloneValidation?.errors ?? []);
+      setRejectedProperty(property);
       return false;
     }
     setCandidateErrors([]);
+    setRejectedProperty("");
     internal.current = next;
     history.commit(next);
     setRevision((value) => value + 1);
@@ -310,7 +416,10 @@ export function SpecificationInspector({
     return true;
   };
   const change = (property: string, value: unknown) =>
-    commit(updateComponent(parsed, selectedComponentId, { [property]: value }));
+    commit(
+      updateComponent(parsed, selectedComponentId, { [property]: value }),
+      property,
+    );
   const restore = (next: string) => {
     internal.current = next;
     if (
@@ -321,6 +430,7 @@ export function SpecificationInspector({
     )
       onSelect("");
     setCandidateErrors([]);
+    setRejectedProperty("");
     setRevision((value) => value + 1);
     onChange(next);
   };
@@ -388,105 +498,107 @@ export function SpecificationInspector({
 
   const renderControl = (control: InspectorPropertyDescriptor) => {
     const value = item?.[control.property];
+    const controlError =
+      rejectedProperty === control.property ? candidateErrors[0] : undefined;
     if (control.control === "checkbox")
       return (
-        <StudioCheckbox
-          label={control.label}
-          help={control.help}
-          checked={value === true}
-          disabled={control.readOnly}
-          onChange={(checked) => change(control.property, checked)}
-        />
+        <div
+          key={control.property}
+          class={`hp-inspector-control-block ${controlError ? "is-invalid" : ""}`}
+        >
+          <StudioCheckbox
+            label={control.label}
+            help={control.help}
+            checked={value === true}
+            disabled={control.readOnly}
+            onChange={(checked) => change(control.property, checked)}
+          />
+          {controlError && (
+            <small class="hp-studio-field-error" role="alert">
+              {controlError}
+            </small>
+          )}
+        </div>
       );
     if (["number", "text", "color", "multiline"].includes(control.control))
       return (
         <DraftInspectorControl
+          key={control.property}
           control={control}
           value={value}
+          error={controlError}
           onCommit={(next) => change(control.property, next)}
         />
       );
     if (control.control === "field")
       return (
-        <label>
-          <span>{control.label}</span>
-          <select
-            value={typeof value === "string" ? value : ""}
-            disabled={control.readOnly}
-            onChange={(event) =>
-              change(control.property, event.currentTarget.value || undefined)
-            }
-          >
-            <option value="">Not set</option>
-            {fieldOptionsFor(control).map((field) => (
-              <option value={field.value}>
-                {field.value} — {field.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <InspectorSelectControl
+          key={control.property}
+          control={control}
+          value={typeof value === "string" ? value : ""}
+          error={controlError}
+          onChange={(next) => change(control.property, next || undefined)}
+        >
+          <option value="">Not set</option>
+          {fieldOptionsFor(control).map((field) => (
+            <option key={field.value} value={field.value}>
+              {field.value} — {field.label}
+            </option>
+          ))}
+        </InspectorSelectControl>
       );
     if (control.control === "dataset")
       return (
-        <label>
-          <span>{control.label}</span>
-          <select
-            value={typeof value === "string" ? value : "powerbi"}
-            disabled={control.readOnly}
-            onChange={(event) =>
-              change(
-                control.property,
-                event.currentTarget.value === "powerbi"
-                  ? undefined
-                  : event.currentTarget.value,
-              )
-            }
-          >
-            {datasets.map((name) => (
-              <option value={name}>{name}</option>
-            ))}
-          </select>
-        </label>
+        <InspectorSelectControl
+          key={control.property}
+          control={control}
+          value={typeof value === "string" ? value : "powerbi"}
+          error={controlError}
+          onChange={(next) =>
+            change(
+              control.property,
+              next === "powerbi" ? undefined : next,
+            )
+          }
+        >
+          {datasets.map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </InspectorSelectControl>
       );
     if (control.control === "component")
       return (
-        <label>
-          <span>{control.label}</span>
-          <select
-            value={typeof value === "string" ? value : ""}
-            disabled={control.readOnly}
-            onChange={(event) =>
-              change(control.property, event.currentTarget.value || undefined)
-            }
-          >
-            <option value="">Not set</option>
-            {tree
-              .filter((entry) => entry.id !== selectedComponentId)
-              .map((entry) => (
-                <option value={entry.id}>
-                  {entry.id} ({entry.type})
-                </option>
-              ))}
-          </select>
-        </label>
+        <InspectorSelectControl
+          key={control.property}
+          control={control}
+          value={typeof value === "string" ? value : ""}
+          error={controlError}
+          onChange={(next) => change(control.property, next || undefined)}
+        >
+          <option value="">Not set</option>
+          {tree
+            .filter((entry) => entry.id !== selectedComponentId)
+            .map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.id} ({entry.type})
+              </option>
+            ))}
+        </InspectorSelectControl>
       );
     if (control.control === "enum")
       return (
-        <label>
-          <span>{control.label}</span>
-          <select
-            value={typeof value === "string" ? value : ""}
-            disabled={control.readOnly}
-            onChange={(event) =>
-              change(control.property, event.currentTarget.value || undefined)
-            }
-          >
-            <option value="">Not set</option>
-            {control.options?.map((option) => (
-              <option value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
+        <InspectorSelectControl
+          key={control.property}
+          control={control}
+          value={typeof value === "string" ? value : ""}
+          error={controlError}
+          onChange={(next) => change(control.property, next || undefined)}
+        >
+          <option value="">Not set</option>
+          {control.options?.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </InspectorSelectControl>
       );
     return null;
   };
@@ -499,28 +611,102 @@ export function SpecificationInspector({
         : insertComponent(parsed, selectedComponentId, mode, child);
     if (commit(candidate)) onSelect(String(child.id));
   };
+  const activeTreeId = visibleTree.some(
+    (entry) => entry.id === selectedComponentId,
+  )
+    ? selectedComponentId
+    : (visibleTree[0]?.id ?? "");
+  const hasTreeChildren = (entry: (typeof tree)[number]) => {
+    const index = tree.indexOf(entry);
+    return Boolean(tree[index + 1] && tree[index + 1].depth > entry.depth);
+  };
+  const focusTreeItem = (id: string) => {
+    treeItems.current.get(id)?.focus();
+    onSelect(id);
+    requestAnimationFrame(() => treeItems.current.get(id)?.focus());
+  };
+  const toggleTreeItem = (id: string, collapse?: boolean) =>
+    setCollapsed((current) => {
+      const next = new Set(current);
+      const shouldCollapse = collapse ?? !next.has(id);
+      if (shouldCollapse) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   const keyboardSelect = (event: KeyboardEvent, index: number) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    const entry = visibleTree[index];
+    if (!entry) return;
+    if (
+      event.key === "ArrowDown" ||
+      event.key === "ArrowUp" ||
+      event.key === "Home" ||
+      event.key === "End"
+    ) {
       event.preventDefault();
-      const next =
-        visibleTree[
-          Math.max(
-            0,
-            Math.min(
-              visibleTree.length - 1,
-              index + (event.key === "ArrowDown" ? 1 : -1),
-            ),
-          )
-        ];
-      if (next) onSelect(next.id);
-    } else if (event.key === "ArrowRight")
-      setCollapsed((current) => {
-        const next = new Set(current);
-        next.delete(visibleTree[index].id);
-        return next;
-      });
-    else if (event.key === "ArrowLeft")
-      setCollapsed((current) => new Set(current).add(visibleTree[index].id));
+      const nextIndex =
+        event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? visibleTree.length - 1
+            : Math.max(
+                0,
+                Math.min(
+                  visibleTree.length - 1,
+                  index + (event.key === "ArrowDown" ? 1 : -1),
+                ),
+              );
+      const next = visibleTree[nextIndex];
+      if (next) focusTreeItem(next.id);
+      return;
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      if (!hasTreeChildren(entry)) return;
+      if (collapsed.has(entry.id)) {
+        toggleTreeItem(entry.id, false);
+        return;
+      }
+      const child = visibleTree
+        .slice(index + 1)
+        .find(
+          (candidate) =>
+            candidate.depth === entry.depth + 1 &&
+            candidate.path.startsWith(`${entry.path}/`),
+        );
+      if (child) focusTreeItem(child.id);
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (hasTreeChildren(entry) && !collapsed.has(entry.id)) {
+        toggleTreeItem(entry.id, true);
+        return;
+      }
+      const parent = [...visibleTree]
+        .slice(0, index)
+        .reverse()
+        .find(
+          (candidate) =>
+            candidate.depth === entry.depth - 1 &&
+            entry.path.startsWith(`${candidate.path}/`),
+        );
+      if (parent) focusTreeItem(parent.id);
+    }
+  };
+  const switchPaneFromKeyboard = (event: KeyboardEvent) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+      return;
+    event.preventDefault();
+    const nextPane: Pane =
+      event.key === "ArrowLeft" || event.key === "Home"
+        ? "tree"
+        : item
+          ? "properties"
+          : "tree";
+    setPane(nextPane);
+    requestAnimationFrame(() =>
+      (nextPane === "tree" ? treeTab.current : propertiesTab.current)?.focus(),
+    );
   };
 
   return (
@@ -574,17 +760,26 @@ export function SpecificationInspector({
         class="hp-inspector-pane-switch"
         role="tablist"
         aria-label="Inspector pane"
+        onKeyDown={switchPaneFromKeyboard}
       >
         <button
+          ref={treeTab}
+          id={treeTabId}
           role="tab"
           aria-selected={pane === "tree"}
+          aria-controls={treePanelId}
+          tabIndex={pane === "tree" ? 0 : -1}
           onClick={() => setPane("tree")}
         >
           Tree
         </button>
         <button
+          ref={propertiesTab}
+          id={propertiesTabId}
           role="tab"
           aria-selected={pane === "properties"}
+          aria-controls={propertiesPanelId}
+          tabIndex={pane === "properties" ? 0 : -1}
           onClick={() => setPane("properties")}
           disabled={!item}
         >
@@ -592,100 +787,169 @@ export function SpecificationInspector({
         </button>
       </div>
       {candidateErrors.length > 0 && (
-        <div class="hp-inspector-errors" role="alert">
-          <strong>
-            Edit not applied; the last valid preview is unchanged.
-          </strong>
-          <ul>
-            {candidateErrors.map((error) => (
-              <li>{error}</li>
-            ))}
-          </ul>
-        </div>
+        <section class="hp-inspector-errors" role="alert" aria-live="assertive">
+          <div class="hp-inspector-error-summary">
+            <span aria-hidden="true">!</span>
+            <div>
+              <strong>Change wasn’t applied</strong>
+              <p>The last valid specification and preview are unchanged.</p>
+            </div>
+          </div>
+          <details open={candidateErrors.length <= 3}>
+            <summary>
+              Review {candidateErrors.length} validation {candidateErrors.length === 1 ? "issue" : "issues"}
+            </summary>
+            <ul>
+              {candidateErrors.map((error, index) => (
+                <li key={`${index}-${error}`}>{error}</li>
+              ))}
+            </ul>
+          </details>
+        </section>
       )}
       <div class="hp-inspector-body">
         <nav
+          id={treePanelId}
+          role="tabpanel"
+          aria-labelledby={treeTabId}
           class={`hp-inspector-tree ${pane === "properties" ? "is-mobile-hidden" : ""}`}
-          aria-label="Dashboard component hierarchy"
         >
-          <label class="hp-inspector-search">
-            <span class="hp-visually-hidden">Search hierarchy</span>
-            <input
-              placeholder="Search ID, title, type, or path"
-              value={search}
-              onInput={(event) => setSearch(event.currentTarget.value)}
-            />
-          </label>
-          <div role="tree">
-            {visibleTree.map((entry, index) => {
-              const next = tree[tree.indexOf(entry) + 1];
-              const hasChildren = Boolean(next && next.depth > entry.depth);
-              const maturity = getComponentDescriptor(entry.type)?.maturity;
-              return (
-                <div
-                  class="hp-inspector-tree-row"
-                  style={{ paddingLeft: `${8 + entry.depth * 14}px` }}
+          <div class="hp-inspector-search">
+            <label for={`${inspectorId}-tree-search`}>Search components</label>
+            <div>
+              <input
+                id={`${inspectorId}-tree-search`}
+                type="search"
+                placeholder="ID, title, type, or path"
+                value={search}
+                onInput={(event) => setSearch(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape" && search) {
+                    event.preventDefault();
+                    setSearch("");
+                  } else if (event.key === "ArrowDown" && activeTreeId) {
+                    event.preventDefault();
+                    focusTreeItem(activeTreeId);
+                  }
+                }}
+              />
+              {search && (
+                <button
+                  type="button"
+                  aria-label="Clear component search"
+                  onClick={() => setSearch("")}
                 >
-                  {hasChildren ? (
-                    <button
-                      class="hp-tree-toggle"
-                      aria-label={`${collapsed.has(entry.id) ? "Expand" : "Collapse"} ${entry.id}`}
-                      aria-expanded={!collapsed.has(entry.id)}
-                      onClick={() =>
-                        setCollapsed((current) => {
-                          const nextSet = new Set(current);
-                          if (nextSet.has(entry.id)) nextSet.delete(entry.id);
-                          else nextSet.add(entry.id);
-                          return nextSet;
-                        })
-                      }
-                    >
-                      {collapsed.has(entry.id) ? "▸" : "▾"}
-                    </button>
-                  ) : (
-                    <span class="hp-tree-spacer" />
-                  )}
-                  <button
-                    ref={
-                      selectedComponentId === entry.id
-                        ? selectedNode
-                        : undefined
-                    }
-                    data-tree-id={entry.id}
-                    role="treeitem"
-                    aria-selected={selectedComponentId === entry.id}
-                    class={
-                      selectedComponentId === entry.id ? "is-selected" : ""
-                    }
-                    onClick={() => {
-                      onSelect(entry.id);
-                      setPane("properties");
-                    }}
-                    onKeyDown={(event) => keyboardSelect(event, index)}
-                    title={entry.path}
+                  Clear
+                </button>
+              )}
+            </div>
+            <small role="status" aria-live="polite">
+              {lowerSearch
+                ? `${visibleTree.length} matching ${visibleTree.length === 1 ? "component" : "components"}`
+                : `${tree.length} ${tree.length === 1 ? "component" : "components"}`}
+            </small>
+          </div>
+          <div role="tree" aria-label="Dashboard components">
+            {visibleTree.length > 0 ? (
+              visibleTree.map((entry, index) => {
+                const hasChildren = hasTreeChildren(entry);
+                const maturity = getComponentDescriptor(entry.type)?.maturity;
+                const isSelected = selectedComponentId === entry.id;
+                return (
+                  <div
+                    key={entry.id}
+                    role="none"
+                    class="hp-inspector-tree-row"
+                    style={{ paddingLeft: `${6 + entry.depth * 14}px` }}
                   >
-                    <span>
-                      <code>{entry.id}</code>
-                      {maturity && (
-                        <em class={`hp-maturity hp-maturity-${maturity}`}>
-                          {maturity}
-                        </em>
+                    <button
+                      ref={(node) => {
+                        if (node) treeItems.current.set(entry.id, node);
+                        else treeItems.current.delete(entry.id);
+                      }}
+                      data-tree-id={entry.id}
+                      role="treeitem"
+                      aria-level={entry.depth + 1}
+                      aria-expanded={
+                        hasChildren ? !collapsed.has(entry.id) : undefined
+                      }
+                      aria-selected={isSelected}
+                      tabIndex={activeTreeId === entry.id ? 0 : -1}
+                      class={isSelected ? "is-selected" : ""}
+                      onClick={() => {
+                        onSelect(entry.id);
+                        setPane("properties");
+                      }}
+                      onKeyDown={(event) => keyboardSelect(event, index)}
+                      title={entry.path}
+                    >
+                      {hasChildren ? (
+                        <span
+                          class="hp-tree-toggle"
+                          aria-hidden="true"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggleTreeItem(entry.id);
+                          }}
+                        >
+                          {collapsed.has(entry.id) ? "▸" : "▾"}
+                        </span>
+                      ) : (
+                        <span class="hp-tree-spacer" aria-hidden="true" />
                       )}
-                    </span>
-                    <small>
-                      {entry.type}
-                      {entry.title ? ` · ${entry.title}` : ""}
-                    </small>
-                  </button>
-                </div>
-              );
-            })}
+                      <span class="hp-inspector-tree-copy">
+                        <span>
+                          <code>{entry.id}</code>
+                          {maturity && (
+                            <em class={`hp-maturity hp-maturity-${maturity}`}>
+                              {maturity}
+                            </em>
+                          )}
+                        </span>
+                        <small>
+                          {entry.type}
+                          {entry.title ? ` · ${entry.title}` : ""}
+                        </small>
+                      </span>
+                    </button>
+                  </div>
+                );
+              })
+            ) : (
+              <div class="hp-inspector-search-empty" role="status">
+                <strong>{lowerSearch ? "No matching components" : "No components yet"}</strong>
+                <p>
+                  {lowerSearch
+                    ? "Try a shorter name, component type, or JSON path."
+                    : "Add a component to the dashboard before editing properties."}
+                </p>
+                {lowerSearch && (
+                  <StudioButton variant="secondary" onClick={() => setSearch("")}>
+                    Clear search
+                  </StudioButton>
+                )}
+              </div>
+            )}
           </div>
         </nav>
         <section
+          id={propertiesPanelId}
+          role="tabpanel"
+          aria-labelledby={propertiesTabId}
           class={`hp-inspector-properties ${pane === "tree" ? "is-mobile-hidden" : ""}`}
-          aria-label="Selected component properties"
         >
+          <StudioButton
+            variant="ghost"
+            class="hp-inspector-mobile-back"
+            onClick={() => {
+              setPane("tree");
+              requestAnimationFrame(() =>
+                treeItems.current.get(selectedComponentId)?.focus(),
+              );
+            }}
+          >
+            ← Back to hierarchy
+          </StudioButton>
           {item ? (
             <>
               <header class="hp-inspector-component-summary">
@@ -879,62 +1143,98 @@ export function SpecificationInspector({
                 </div>
               </StudioSection>
               <div class="hp-inspector-node-actions">
-                <StudioButton
-                  variant="secondary"
-                  disabled={!canInsert || position <= 0}
-                  onClick={() =>
-                    commit(moveComponent(parsed, selectedComponentId, -1))
-                  }
-                >
-                  Move up
-                </StudioButton>
-                <StudioButton
-                  variant="secondary"
-                  disabled={!canInsert || position >= siblingCount - 1}
-                  onClick={() =>
-                    commit(moveComponent(parsed, selectedComponentId, 1))
-                  }
-                >
-                  Move down
-                </StudioButton>
-                <StudioButton
-                  variant="secondary"
-                  disabled={!canInsert}
-                  onClick={() =>
-                    commit(duplicateComponent(parsed, selectedComponentId))
-                  }
-                >
-                  Duplicate
-                </StudioButton>
-                <StudioButton
-                  variant="danger"
-                  onClick={() => {
-                    const references = incomingComponentReferences(
-                      parsed,
-                      selectedComponentId,
-                    );
-                    if (
-                      references.length &&
-                      !globalThis.confirm(
-                        `Delete ${selectedComponentId}? Referenced by ${references.join(", ")}`,
-                      )
-                    )
-                      return;
-                    if (commit(deleteComponent(parsed, selectedComponentId)))
-                      onSelect("");
-                  }}
-                >
-                  Delete
-                </StudioButton>
+                {pendingDeleteId === selectedComponentId ? (
+                  <div class="hp-inspector-delete-confirm" role="alert">
+                    <div>
+                      <strong>Delete {selectedComponentId}?</strong>
+                      <span>
+                        {incomingComponentReferences(parsed, selectedComponentId)
+                          .length
+                          ? `Referenced by ${incomingComponentReferences(parsed, selectedComponentId).join(", ")}. Those references may also need attention.`
+                          : "This removes the component from the dashboard."}
+                      </span>
+                    </div>
+                    <div>
+                      <StudioButton
+                        variant="secondary"
+                        onClick={() => setPendingDeleteId("")}
+                      >
+                        Cancel
+                      </StudioButton>
+                      <StudioButton
+                        variant="danger"
+                        onClick={() => {
+                          if (
+                            commit(
+                              deleteComponent(parsed, selectedComponentId),
+                            )
+                          ) {
+                            setPendingDeleteId("");
+                            onSelect("");
+                          }
+                        }}
+                      >
+                        Confirm delete
+                      </StudioButton>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div class="hp-inspector-order-actions">
+                      <StudioButton
+                        variant="secondary"
+                        disabled={!canInsert || position <= 0}
+                        onClick={() =>
+                          commit(moveComponent(parsed, selectedComponentId, -1))
+                        }
+                      >
+                        Move up
+                      </StudioButton>
+                      <StudioButton
+                        variant="secondary"
+                        disabled={!canInsert || position >= siblingCount - 1}
+                        onClick={() =>
+                          commit(moveComponent(parsed, selectedComponentId, 1))
+                        }
+                      >
+                        Move down
+                      </StudioButton>
+                    </div>
+                    <div class="hp-inspector-object-actions">
+                      <StudioButton
+                        variant="secondary"
+                        disabled={!canInsert}
+                        onClick={() =>
+                          commit(duplicateComponent(parsed, selectedComponentId))
+                        }
+                      >
+                        Duplicate
+                      </StudioButton>
+                      <StudioButton
+                        variant="danger"
+                        onClick={() => setPendingDeleteId(selectedComponentId)}
+                      >
+                        Delete
+                      </StudioButton>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           ) : (
             <div class="hp-inspector-empty">
-              <strong>Select a component</strong>
+              <span class="hp-inspector-state-icon" aria-hidden="true">◇</span>
+              <strong>{tree.length ? "Select a component" : "No components yet"}</strong>
               <p>
-                Choose an authoring node in the hierarchy or use Inspect
-                preview. Tree paths are canonical JSON pointers.
+                {tree.length
+                  ? "Choose a component in the hierarchy, or turn on Inspect preview and select it directly on the canvas."
+                  : "Add a component in the JSON workspace or Guided Builder, then return here to configure it visually."}
               </p>
+              {tree.length > 0 && (
+                <StudioButton variant="secondary" onClick={() => setPane("tree")}>
+                  Browse hierarchy
+                </StudioButton>
+              )}
             </div>
           )}
         </section>

@@ -1,47 +1,125 @@
 import { render } from "preact";
 import { act } from "preact/test-utils";
-import { describe, expect, it, vi } from "vitest";
-import {
-  StudioWorkspaceNav,
-  studioWorkspaceGroups,
-} from "../src/editor/ui/StudioWorkspaceNav";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { StudioWorkspaceNav } from "../src/editor/ui/StudioWorkspaceNav";
+
+const expectedWorkspaceIds = [
+  "ai",
+  "inspector",
+  "mapStudio",
+  "settings",
+  "calculations",
+  "interactions",
+  "mapServices",
+  "config",
+  "specification",
+  "help",
+  "skill",
+];
+
+let host: HTMLDivElement;
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.stubGlobal(
+    "requestAnimationFrame",
+    (callback: FrameRequestCallback) =>
+      setTimeout(() => callback(performance.now()), 0) as unknown as number,
+  );
+  host = document.createElement("div");
+  document.body.append(host);
+});
+
+afterEach(() => {
+  act(() => render(null, host));
+  document.body.replaceChildren();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
+
+function mount(value: Parameters<typeof StudioWorkspaceNav>[0]["value"] = "mapStudio") {
+  const onChange = vi.fn();
+  act(() =>
+    render(
+      <StudioWorkspaceNav value={value} advanced onChange={onChange} />,
+      host,
+    ),
+  );
+  return onChange;
+}
 
 describe("Studio workspace navigation", () => {
-  it("exposes every existing workspace in grouped menus and the narrow selector", () => {
-    const host = document.createElement("div");
-    const onChange = vi.fn();
-    act(() => render(<StudioWorkspaceNav value="mapStudio" advanced onChange={onChange} />, host));
-    const expected = studioWorkspaceGroups.flatMap((group) => group.items.map((item) => item.id));
-    const selector = host.querySelector<HTMLSelectElement>(".hp-studio-workspace-select select")!;
-    expect(Array.from(selector.options).map((option) => option.value)).toEqual(expected);
-    expect(Array.from(host.querySelectorAll(".hp-studio-workspace-group > button")).map((button) => button.textContent)).toEqual(
-      expect.arrayContaining([expect.stringContaining("Build"), "Data", "Test", "JSON", "Help"]),
+  it("exposes an explicit, complete workspace list in grouped menus and the selector", () => {
+    const onChange = mount();
+    const selector = host.querySelector<HTMLSelectElement>(
+      ".hp-studio-workspace-select select",
+    )!;
+    expect(Array.from(selector.options).map((option) => option.value)).toEqual(
+      expectedWorkspaceIds,
     );
+    expect(
+      Array.from(
+        host.querySelectorAll<HTMLElement>("[data-workspace-trigger]"),
+      ).map((button) => button.dataset.workspaceTrigger),
+    ).toEqual(["Create", "Data & logic", "Test", "Advanced", "Learn"]);
 
-    const json = Array.from(host.querySelectorAll<HTMLButtonElement>(".hp-studio-workspace-group > button")).find((button) => button.textContent === "JSON")!;
-    expect(json.getAttribute("aria-haspopup")).toBeNull();
-    act(() => json.click());
+    act(() => {
+      selector.value = "specification";
+      selector.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     expect(onChange).toHaveBeenCalledWith("specification");
 
-    const help = Array.from(host.querySelectorAll<HTMLButtonElement>(".hp-studio-workspace-group > button")).find((button) => button.textContent === "Help")!;
-    act(() => help.click());
-    expect(Array.from(host.querySelectorAll('[role="menuitem"]')).map((item) => item.textContent)).toEqual(["Documentation", "AI Skill"]);
-
-    const build = host.querySelector<HTMLButtonElement>(".hp-studio-workspace-group > button")!;
-    act(() => build.click());
-    expect(build.getAttribute("aria-expanded")).toBe("true");
-    const inspector = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find((item) => item.textContent === "Inspector")!;
-    act(() => inspector.click());
-    expect(onChange).toHaveBeenCalledWith("inspector");
+    const advanced = host.querySelector<HTMLButtonElement>(
+      '[data-workspace-trigger="Advanced"]',
+    )!;
+    act(() => advanced.click());
+    expect(
+      Array.from(host.querySelectorAll('[role="menuitem"]')).map(
+        (item) => item.querySelector("span")?.textContent,
+      ),
+    ).toEqual(["Runtime settings", "JSON editor"]);
   });
 
-  it("closes an open group on Escape", () => {
-    const host = document.createElement("div");
-    act(() => render(<StudioWorkspaceNav value="ai" advanced onChange={vi.fn()} />, host));
-    const build = host.querySelector<HTMLButtonElement>(".hp-studio-workspace-group > button")!;
-    act(() => build.click());
-    expect(host.querySelector('[role="menu"]')).not.toBeNull();
-    act(() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
+  it("supports complete menu keyboard navigation and restores trigger focus", () => {
+    mount("ai");
+    const create = host.querySelector<HTMLButtonElement>(
+      '[data-workspace-trigger="Create"]',
+    )!;
+    create.focus();
+
+    act(() =>
+      create.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      ),
+    );
+    act(() => vi.runAllTimers());
+
+    const menu = host.querySelector<HTMLElement>('[role="menu"]')!;
+    const items = Array.from(
+      menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'),
+    );
+    expect(items[0]).toBe(document.activeElement);
+
+    act(() =>
+      menu.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "End", bubbles: true }),
+      ),
+    );
+    expect(items.at(-1)).toBe(document.activeElement);
+
+    act(() =>
+      menu.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      ),
+    );
+    expect(items[0]).toBe(document.activeElement);
+
+    act(() =>
+      menu.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      ),
+    );
     expect(host.querySelector('[role="menu"]')).toBeNull();
+    expect(create).toBe(document.activeElement);
   });
 });

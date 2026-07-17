@@ -4,13 +4,15 @@ Failed targeted AI mutations preserve the prior dashboard. Repair material inclu
 
 Repair is diagnostic-driven and conservative. HyperPBI never replaces the last valid saved dashboard with invalid input.
 
+In Edit Mode, diagnostics are separated into **Errors** and **Warnings**. Errors block preview and **Save & return**. Warnings remain visible for review but are not presented as equivalent failures. A failed candidate changes the workbench state to **Preview out of date** while the last valid preview stays available for comparison; **Not previewed** means no current candidate has completed preview preparation.
+
 ## Workflow
 
 1. Paste one AI response.
 2. Extract exactly one JSON object (or one packaged `specification`).
 3. Prepare aliases, definitions, patterns, datasets, and compatibility migrations.
 4. Validate strict schema, fields, references, calculations, interactions, targets, and SVG limits.
-5. Review structured diagnostics and any explicitly recorded automatic repairs.
+5. Review blocking Errors first, then Warnings and any explicitly recorded automatic repairs.
 6. Copy the repair prompt to an approved external AI.
 7. Paste one complete corrected specification and validate again.
 
@@ -47,6 +49,6 @@ The external repair prompt follows the same rule: correct only diagnosed issues,
 
 ## Structured diagnostics
 
-Diagnostics include a code, severity, JSON pointer-like path, message, and—where available—component ID, received value, suggestions, and auto-fix availability. Dataset and definition cycles show their chain. Unknown fields in a named dataset identify that dataset scope. External-interaction diagnostics distinguish disabled behavior, missing identities, and a field without a Power BI filter target.
+Diagnostics include a code, severity, JSON pointer-like path, message, and—where available—component ID, received value, suggestions, and auto-fix availability. Dataset and definition cycles show their chain. Unknown fields in a named dataset identify that dataset scope. External-interaction diagnostics distinguish disabled behavior, missing identities, and a field without a Power BI filter target. Selecting an issue should lead to its actionable context rather than replacing the current editor with a generic failure page.
 
-Warnings do not grant permission to remove behavior. Resolve the underlying condition or keep the valid compatibility behavior.
+Warnings do not grant permission to remove behavior. Resolve the underlying condition or keep the valid compatibility behavior. After a normal correction, select **Preview changes**; for a targeted AI package, select **Validate resulting dashboard & Preview**. **Preview current** confirms that the visible result matches the working specification and Runtime settings. **Save & return** performs the same guarded validation against the current values and leaves Edit Mode open when an error remains.

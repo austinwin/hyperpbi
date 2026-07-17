@@ -258,6 +258,9 @@ export function HyperPbiStudio({
     useState("");
   const [inspectorMode, setInspectorMode] = useState(false);
   const [focusMode, setFocusMode] = useState<"both" | "editor" | "preview">("both");
+  const [workbenchStacked, setWorkbenchStacked] = useState(
+    settings.editor.previewPosition === "bottom",
+  );
   const [mapViewports, setMapViewports] = useState<
     Record<string, MapViewportState>
   >({});
@@ -274,10 +277,16 @@ export function HyperPbiStudio({
   ]);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [issueSource, setIssueSource] = useState<{
+    specification: string;
+    configuration: string;
+  }>();
   const [preview, setPreview] = useState<{
     schema: HyperPbiSchema;
     config: HyperPbiConfig;
     data: NormalizedData;
+    sourceSpecification: string;
+    sourceConfiguration: string;
     ownerByRuntimeId?: Record<string, string>;
     componentPathById?: Record<string, string>;
   }>();
@@ -313,11 +322,24 @@ export function HyperPbiStudio({
       prepareAuthoringData(candidateSpecificationJson, configuration, data),
     [configuration, data],
   );
-  const status = structure.errors.length
+  const issuesAreCurrent =
+    issueSource?.specification === specification &&
+    issueSource.configuration === configuration;
+  const visibleErrors = issuesAreCurrent ? errors : structure.errors;
+  const visibleWarnings = issuesAreCurrent ? warnings : [];
+  const issueCount = visibleErrors.length + visibleWarnings.length;
+  const previewCurrent = Boolean(
+    preview &&
+      preview.sourceSpecification === specification &&
+      preview.sourceConfiguration === configuration,
+  );
+  const status = visibleErrors.length
     ? "Invalid"
     : dirty
-      ? "Unsaved"
-      : preview
+      ? previewCurrent
+        ? "Unsaved"
+        : "Not previewed"
+      : previewCurrent
         ? "Ready"
         : "Saved";
   useEffect(
@@ -345,6 +367,25 @@ export function HyperPbiStudio({
     }
   }, [selectedComponentId, preview, inspectorMode]);
   useEffect(() => () => activePointerCleanupRef.current?.(), []);
+  useEffect(() => {
+    const host = workbenchRef.current;
+    if (!host) return;
+    const update = () => {
+      const width = host.getBoundingClientRect().width;
+      setWorkbenchStacked(
+        settings.editor.previewPosition === "bottom" ||
+          (width > 0 && width < 900),
+      );
+    };
+    update();
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(update);
+      observer.observe(host);
+      return () => observer.disconnect();
+    }
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [settings.editor.previewPosition]);
   const appendLog = (message: string, level: StudioLog["level"] = "info") =>
     setLogs((current) => [
       ...current.slice(-199),
@@ -436,6 +477,7 @@ export function HyperPbiStudio({
       const result = validateDraft(specification, configuration, data);
       setErrors(result.errors);
       setWarnings(result.warnings);
+      setIssueSource({ specification, configuration });
       if (result.errors.length) {
         result.errors.forEach((message) => appendLog(message, "error"));
         setBottomTab("errors");
@@ -453,6 +495,7 @@ export function HyperPbiStudio({
       const message = `Validation failed unexpectedly: ${error instanceof Error ? error.message : String(error)}`;
       setErrors([message]);
       setWarnings([]);
+      setIssueSource({ specification, configuration });
       appendLog(message, "error");
       setBottomTab("errors");
       return { errors: [message], warnings: [] };
@@ -466,6 +509,10 @@ export function HyperPbiStudio({
       const result = validateDraft(candidate, candidateConfig, data);
       setErrors(result.errors);
       setWarnings(result.warnings);
+      setIssueSource({
+        specification: candidate,
+        configuration: candidateConfig,
+      });
       if (
         result.errors.length ||
         !result.schema ||
@@ -480,6 +527,8 @@ export function HyperPbiStudio({
         schema: result.schema,
         config: result.config,
         data: result.data,
+        sourceSpecification: candidate,
+        sourceConfiguration: candidateConfig,
         ownerByRuntimeId: result.ownerByRuntimeId,
         componentPathById: result.componentPathById,
       });
@@ -493,6 +542,10 @@ export function HyperPbiStudio({
       const message = `Render failed safely: ${error instanceof Error ? error.message : String(error)}`;
       setErrors([message]);
       setWarnings([]);
+      setIssueSource({
+        specification: candidate,
+        configuration: candidateConfig,
+      });
       appendLog(message, "error");
       setBottomTab("errors");
       return false;
@@ -514,6 +567,8 @@ export function HyperPbiStudio({
     } catch (error) {
       const message = `Cannot format invalid ${target} JSON: ${error instanceof Error ? error.message : String(error)}`;
       setErrors([message]);
+      setWarnings([]);
+      setIssueSource({ specification, configuration });
       appendLog(message, "error");
       setBottomTab("errors");
     }
@@ -542,7 +597,7 @@ export function HyperPbiStudio({
     setConfiguration(JSON.stringify(config, null, 2));
   const showBottom =
     (layout.advanced && layout.bottomOpen) ||
-    (!layout.advanced && Boolean(errors.length || warnings.length));
+    (!layout.advanced && issueCount > 0);
   const authoringTree = useMemo(() => {
     try {
       return componentTree(JSON.parse(specification));
@@ -553,6 +608,7 @@ export function HyperPbiStudio({
   const selectedMeta = authoringTree.find(
     (item) => item.id === selectedComponentId,
   );
+  const studioDomId = instanceId.replace(/[^a-zA-Z0-9_-]/g, "-");
   const authoredVersion = useMemo(() => {
     try {
       return String(
@@ -585,6 +641,54 @@ export function HyperPbiStudio({
     setLayout(next);
     onLayoutChange?.(JSON.stringify(next));
   };
+  const clampEditorPercent = (value: number) =>
+    Math.min(75, Math.max(25, value));
+  const mainResizeKeyDown = (
+    event: preact.JSX.TargetedKeyboardEvent<HTMLDivElement>,
+  ) => {
+    const delta =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 2
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -2
+          : 0;
+    if (!delta && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const editorPercent =
+      event.key === "Home"
+        ? 25
+        : event.key === "End"
+          ? 75
+          : clampEditorPercent(layout.editorPercent + delta);
+    persistLayout({ ...layout, editorPercent });
+  };
+  const studioHeight = () =>
+    workbenchRef.current?.closest<HTMLElement>(".hp-studio")?.clientHeight ??
+    window.innerHeight;
+  const maxBottomHeight = () =>
+    Math.min(520, Math.max(120, studioHeight() * 0.55));
+  const bottomResizeKeyDown = (
+    event: preact.JSX.TargetedKeyboardEvent<HTMLDivElement>,
+  ) => {
+    const delta =
+      event.key === "ArrowUp"
+        ? 16
+        : event.key === "ArrowDown"
+          ? -16
+          : 0;
+    if (!delta && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const bottomHeight =
+      event.key === "Home"
+        ? 120
+        : event.key === "End"
+          ? maxBottomHeight()
+          : Math.min(
+              maxBottomHeight(),
+              Math.max(120, layout.bottomHeight + delta),
+            );
+    persistLayout({ ...layout, bottomHeight });
+  };
   const startMainResize = (
     event: preact.JSX.TargetedPointerEvent<HTMLDivElement>,
   ) => {
@@ -593,14 +697,14 @@ export function HyperPbiStudio({
     if (!host) return;
     const rect = host.getBoundingClientRect();
     const vertical =
-      settings.editor.previewPosition === "bottom" || rect.width < 780;
+      settings.editor.previewPosition === "bottom" || rect.width < 900;
     const move = (pointer: PointerEvent) => {
       const raw = vertical
         ? ((pointer.clientY - rect.top) / rect.height) * 100
         : ((pointer.clientX - rect.left) / rect.width) * 100;
       setLayout((current) => ({
         ...current,
-        editorPercent: Math.min(75, Math.max(25, raw)),
+        editorPercent: clampEditorPercent(raw),
       }));
     };
     activePointerCleanupRef.current?.();
@@ -626,8 +730,8 @@ export function HyperPbiStudio({
   ) => {
     event.preventDefault();
     const startY = event.clientY;
-    const startHeight = layout.bottomHeight;
-    const maxHeight = Math.max(180, window.innerHeight * 0.6);
+    const maxHeight = maxBottomHeight();
+    const startHeight = Math.min(layout.bottomHeight, maxHeight);
     const move = (pointer: PointerEvent) =>
       setLayout((current) => ({
         ...current,
@@ -667,7 +771,8 @@ export function HyperPbiStudio({
         )
         .join("\n");
     if (bottomTab === "errors")
-      return [...errors, ...warnings].join("\n") || "No validation issues.";
+      return [...visibleErrors, ...visibleWarnings].join("\n") ||
+        "No validation issues.";
     if (bottomTab === "geocode") return JSON.stringify(geocodeResults, null, 2);
     if (bottomTab === "mapServices")
       return JSON.stringify(parsedConfig?.providers ?? {}, null, 2);
@@ -692,7 +797,7 @@ export function HyperPbiStudio({
         ["data", "Data"],
         ["fields", "Fields"],
         ["logs", "Logs"],
-        ["errors", `Issues ${errors.length + warnings.length || ""}`],
+        ["errors", `Issues ${issueCount || ""}`],
         ["mapServices", "Map Services"],
         ["geocode", `Geocode ${geocodeResults.length || ""}`],
         ["interactions", "Interactions"],
@@ -700,8 +805,32 @@ export function HyperPbiStudio({
     : [
         ["data", "Data preview"],
         ["fields", "Fields"],
-        ["errors", `Issues ${errors.length + warnings.length || ""}`],
+        ["errors", `Issues ${issueCount || ""}`],
       ];
+  const bottomTabKeyDown = (
+    event: preact.JSX.TargetedKeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+      return;
+    event.preventDefault();
+    const nextIndex =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? bottomTabs.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) +
+              bottomTabs.length) %
+            bottomTabs.length;
+    const tablist = event.currentTarget.parentElement;
+    setBottomTab(bottomTabs[nextIndex][0]);
+    requestAnimationFrame(() => {
+      const tabs = Array.from(
+        tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? [],
+      );
+      tabs[nextIndex]?.focus();
+    });
+  };
   return (
     <div
       class={`hp-studio hp-studio-${settings.theme.mode} hp-preview-${settings.editor.previewPosition} ${layout.advanced ? "hp-studio-advanced" : "hp-studio-simple"}`}
@@ -709,84 +838,135 @@ export function HyperPbiStudio({
       <header class="hp-studio-header">
         <div class="hp-header-left">
           <div class="hp-studio-brand">
-            <span>H</span>
-            <div>
-              <strong>HyperPBI Builder</strong>
-              <StudioStatusChip
-                tone={status === "Invalid" ? "invalid" : status === "Unsaved" ? "warning" : status === "Ready" ? "valid" : "neutral"}
-                announce
-              >
-                {status}
-              </StudioStatusChip>
+            <span class="hp-studio-mark" aria-hidden="true">H</span>
+            <div class="hp-studio-brand-copy">
+              <strong>HyperPBI</strong>
+              <small>Dashboard Builder</small>
             </div>
+            <StudioStatusChip
+              tone={
+                status === "Invalid"
+                  ? "invalid"
+                  : status === "Unsaved" || status === "Not previewed"
+                    ? "warning"
+                    : status === "Ready"
+                      ? "valid"
+                      : "neutral"
+              }
+              announce
+            >
+              {status}
+            </StudioStatusChip>
           </div>
         </div>
         <div class="hp-studio-actions">
-          {layout.advanced && (
-            <>
-              <div class="hp-studio-secondary-actions">
-                <StudioButton variant="secondary" onClick={formatActive}>Format JSON</StudioButton>
-                <StudioButton variant="secondary" onClick={() => validate()}>Validate</StudioButton>
-                <StudioButton
-                  variant="secondary"
-                  onClick={() => persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })}
-                >
-                  {layout.bottomOpen ? "Hide diagnostics" : "Show diagnostics"}
-                </StudioButton>
-              </div>
-              <StudioButton variant="primary" class="hp-run-button" onClick={() => run()}>
-                Validate & Preview
-              </StudioButton>
-              {(errors.length > 0 || warnings.length > 0) && (
-                <StudioButton
-                  variant="compact"
-                  aria-label={`${errors.length + warnings.length} validation issues; open diagnostics`}
-                  onClick={() => {
-                    setBottomTab("errors");
-                    persistLayout({ ...layout, bottomOpen: true });
-                  }}
-                >
-                  {errors.length + warnings.length} issues
-                </StudioButton>
-              )}
-              <details class="hp-studio-action-overflow">
-                <summary aria-label="More Builder actions">More</summary>
-                <div>
-                  <button type="button" onClick={formatActive}>Format JSON</button>
-                  <button type="button" onClick={() => validate()}>Validate</button>
-                  <button type="button" onClick={() => persistLayout({ ...layout, bottomOpen: !layout.bottomOpen })}>
-                    {layout.bottomOpen ? "Hide diagnostics" : "Show diagnostics"}
-                  </button>
-                </div>
-              </details>
-            </>
-          )}
           <StudioButton
-            variant="secondary"
+            variant="ghost"
             class="hp-advanced-toggle"
+            aria-pressed={layout.advanced}
             onClick={toggleAdvanced}
           >
-            {layout.advanced ? "Simple mode" : "Advanced"}
+            <span class="hp-studio-wide-label">
+              {layout.advanced ? "Guided mode" : "Advanced controls"}
+            </span>
+            <span class="hp-studio-short-label">
+              {layout.advanced ? "Guided" : "Advanced"}
+            </span>
           </StudioButton>
-          <StudioButton variant="secondary" onClick={() => setEditorTab("help")}>
-            Help
+          {issueCount > 0 && (
+            <StudioButton
+              variant="compact"
+              class="hp-studio-issues-action"
+              aria-label={`${issueCount} validation ${issueCount === 1 ? "issue" : "issues"}; open diagnostics`}
+              onClick={() => {
+                setBottomTab("errors");
+                persistLayout({ ...layout, bottomOpen: true });
+              }}
+            >
+              {issueCount} {issueCount === 1 ? "issue" : "issues"}
+            </StudioButton>
+          )}
+          <details class="hp-studio-action-overflow">
+            <summary aria-label="More Builder actions">More</summary>
+            <div>
+              {layout.advanced && (
+                <>
+                  <button type="button" onClick={formatActive}>
+                    Format current JSON
+                  </button>
+                  <button type="button" onClick={() => validate()}>
+                    Validate without previewing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      persistLayout({
+                        ...layout,
+                        bottomOpen: !layout.bottomOpen,
+                      })
+                    }
+                  >
+                    {layout.bottomOpen
+                      ? "Hide diagnostics"
+                      : "Show diagnostics"}
+                  </button>
+                </>
+              )}
+              <button type="button" onClick={() => setEditorTab("help")}>
+                Open documentation
+              </button>
+            </div>
+          </details>
+          <StudioButton
+            variant="secondary"
+            class="hp-run-button"
+            aria-label="Preview changes"
+            onClick={() => run()}
+          >
+            <span class="hp-studio-action-label">Preview changes</span>
+            <span class="hp-studio-compact-label" aria-hidden="true">Preview</span>
           </StudioButton>
           <StudioButton
             variant="primary"
-            class={`hp-save-return ${preview ? "is-ready" : ""}`}
-            disabled={!layout.advanced && !preview}
+            class={`hp-save-return ${previewCurrent ? "is-ready" : ""}`}
+            aria-label="Save & return"
+            disabled={!layout.advanced && !previewCurrent}
             onClick={save}
           >
-            Save & return
+            <span class="hp-studio-action-label">Save & return</span>
+            <span class="hp-studio-compact-label" aria-hidden="true">Save</span>
           </StudioButton>
         </div>
       </header>
       <div class="hp-studio-navigation-row">
         <StudioWorkspaceNav value={editorTab} advanced={layout.advanced} onChange={setEditorTab} />
         {settings.editor.previewPosition !== "hidden" && (
-          <div class="hp-studio-focus-actions" aria-label="Workbench focus">
-            <StudioButton variant="compact" aria-pressed={focusMode === "editor"} onClick={() => setFocusMode((mode) => mode === "editor" ? "both" : "editor")}>Focus editor</StudioButton>
-            <StudioButton variant="compact" aria-pressed={focusMode === "preview"} onClick={() => setFocusMode((mode) => mode === "preview" ? "both" : "preview")}>Focus preview</StudioButton>
+          <div
+            class="hp-studio-focus-actions"
+            role="group"
+            aria-label="Workbench view"
+          >
+            <StudioButton
+              variant="compact"
+              aria-pressed={focusMode === "both"}
+              onClick={() => setFocusMode("both")}
+            >
+              Split
+            </StudioButton>
+            <StudioButton
+              variant="compact"
+              aria-pressed={focusMode === "editor"}
+              onClick={() => setFocusMode("editor")}
+            >
+              Editor
+            </StudioButton>
+            <StudioButton
+              variant="compact"
+              aria-pressed={focusMode === "preview"}
+              onClick={() => setFocusMode("preview")}
+            >
+              Preview
+            </StudioButton>
           </div>
         )}
       </div>
@@ -877,7 +1057,7 @@ export function HyperPbiStudio({
               configuration={configuration}
               onConfigurationChange={setConfiguration}
               onPreview={previewAi}
-              previewReady={Boolean(preview)}
+              previewReady={previewCurrent}
               diagnostics={interactionDiagnostics}
               selectedComponentId={selectedComponentId}
               selectedComponentType={selectedMeta?.type}
@@ -924,19 +1104,44 @@ export function HyperPbiStudio({
               class="hp-main-resize-handle"
               role="separator"
               aria-label="Resize builder and preview"
+              aria-orientation={workbenchStacked ? "horizontal" : "vertical"}
+              aria-valuemin={25}
+              aria-valuemax={75}
+              aria-valuenow={Math.round(layout.editorPercent)}
+              aria-valuetext={`${Math.round(layout.editorPercent)}% editor`}
+              tabIndex={0}
               onPointerDown={startMainResize}
-            />
+              onKeyDown={mainResizeKeyDown}
+            >
+              <span aria-hidden="true" />
+            </div>
             <section
               class={`hp-studio-preview ${inspectorMode ? "is-inspecting" : ""}`}
               data-selected-component-id={selectedComponentId}
               onClickCapture={inspectPreviewClick}
+              aria-label="Live preview"
             >
-              <div class="hp-pane-label">
-                Live preview{" "}
+              <header class="hp-preview-toolbar">
+                <div>
+                  <strong>Live preview</strong>
+                  <StudioStatusChip
+                    tone={
+                      previewCurrent ? "valid" : preview ? "warning" : "neutral"
+                    }
+                    announce
+                  >
+                    {previewCurrent
+                      ? "Preview current"
+                      : preview
+                        ? "Preview out of date"
+                        : "Not previewed"}
+                  </StudioStatusChip>
+                </div>
                 <button
                   type="button"
-                  class={inspectorMode ? "is-active" : ""}
+                  class={`hp-preview-inspect ${inspectorMode ? "is-active" : ""}`}
                   aria-pressed={inspectorMode}
+                  disabled={!preview}
                   onClick={(event) => {
                     event.stopPropagation();
                     setInspectorMode((value) => !value);
@@ -946,54 +1151,54 @@ export function HyperPbiStudio({
                     ? "Inspector on (Esc to exit)"
                     : "Inspect preview"}
                 </button>
-              </div>
-              {preview ? (
-                <HyperPbiRoot
-                  instanceId={`${instanceId}-preview`}
-                  schema={preview.schema}
-                  data={preview.data}
-                  settings={settings}
-                  config={preview.config}
-                  referenceWarnings={validateReferences(
-                    preview.schema,
-                    preview.data,
-                  )}
-                  renderMs={0}
-                  selectExternal={selectExternal}
-                  clearExternal={clearExternal}
-                  applyExternalFilter={applyExternalFilter}
-                  clearExternalFilter={clearExternalFilter}
-                  reportInteraction={reportInteraction}
-                  webAccessAvailable={webAccessAvailable}
-                  providerAccess={providerAccess}
-                  ownerByRuntimeId={preview.ownerByRuntimeId}
-                  componentPathById={preview.componentPathById}
-                  onMapViewportChange={(id, viewport) =>
-                    setMapViewports((current) => ({
-                      ...current,
-                      [id]: viewport,
-                    }))
-                  }
-                />
-              ) : (
-                <div class="hp-preview-empty">
-                  <span>◇</span>
-                  <strong>Your validated preview will appear here</strong>
-                  <p>
-                    Copy the AI prompt, paste the AI response, then select
-                    Validate & Preview.
-                  </p>
-                  {layout.advanced && (
+              </header>
+              <div class="hp-preview-content">
+                {preview ? (
+                  <HyperPbiRoot
+                    instanceId={`${instanceId}-preview`}
+                    schema={preview.schema}
+                    data={preview.data}
+                    settings={settings}
+                    config={preview.config}
+                    referenceWarnings={validateReferences(
+                      preview.schema,
+                      preview.data,
+                    )}
+                    renderMs={0}
+                    selectExternal={selectExternal}
+                    clearExternal={clearExternal}
+                    applyExternalFilter={applyExternalFilter}
+                    clearExternalFilter={clearExternalFilter}
+                    reportInteraction={reportInteraction}
+                    webAccessAvailable={webAccessAvailable}
+                    providerAccess={providerAccess}
+                    ownerByRuntimeId={preview.ownerByRuntimeId}
+                    componentPathById={preview.componentPathById}
+                    onMapViewportChange={(id, viewport) =>
+                      setMapViewports((current) => ({
+                        ...current,
+                        [id]: viewport,
+                      }))
+                    }
+                  />
+                ) : (
+                  <div class="hp-preview-empty" role="status">
+                    <span class="hp-preview-empty-icon" aria-hidden="true">▣</span>
+                    <h2>Preview your working dashboard</h2>
+                    <p>
+                      Preview validates the current draft without changing the
+                      saved Power BI visual.
+                    </p>
                     <button
-                      class="hp-primary-action hp-preview-validate"
+                      class="hp-studio-button hp-studio-button-primary hp-preview-validate"
                       type="button"
                       onClick={() => run()}
                     >
-                      Validate & Preview
+                      Preview changes
                     </button>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </section>
           </>
         )}
@@ -1001,35 +1206,65 @@ export function HyperPbiStudio({
       {showBottom && (
         <section
           class="hp-studio-bottom"
-          style={{ height: `${layout.bottomHeight}px` }}
+          style={{ height: `${Math.min(layout.bottomHeight, maxBottomHeight())}px` }}
         >
           <div
             class="hp-bottom-resize-handle"
             role="separator"
-            aria-label="Resize data panel"
+            aria-label="Resize diagnostics panel"
+            aria-orientation="horizontal"
+            aria-valuemin={120}
+            aria-valuemax={Math.round(maxBottomHeight())}
+            aria-valuenow={Math.round(
+              Math.min(layout.bottomHeight, maxBottomHeight()),
+            )}
+            aria-valuetext={`${Math.round(
+              Math.min(layout.bottomHeight, maxBottomHeight()),
+            )} pixels high`}
+            tabIndex={0}
             onPointerDown={startBottomResize}
-          />
-          <nav>
-            {bottomTabs.map(([id, label]) => (
-              <button
-                class={bottomTab === id ? "active" : ""}
-                onClick={() => setBottomTab(id)}
-              >
-                {label}
+            onKeyDown={bottomResizeKeyDown}
+          >
+            <span aria-hidden="true" />
+          </div>
+          <nav class="hp-bottom-toolbar" aria-label="Diagnostics panel">
+            <div class="hp-bottom-tabs" role="tablist" aria-label="Diagnostics">
+              {bottomTabs.map(([id, label], index) => (
+                <button
+                  id={`${studioDomId}-diagnostics-tab-${id}`}
+                  class={bottomTab === id ? "active" : ""}
+                  type="button"
+                  role="tab"
+                  aria-selected={bottomTab === id}
+                  aria-controls={`${studioDomId}-diagnostics-panel-${id}`}
+                  tabIndex={bottomTab === id ? 0 : -1}
+                  onClick={() => setBottomTab(id)}
+                  onKeyDown={(event) => bottomTabKeyDown(event, index)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div class="hp-bottom-actions">
+              <button type="button" onClick={() => void copyBottom()}>
+                Copy
               </button>
-            ))}
-            <span />
-            <button type="button" onClick={() => void copyBottom()}>
-              Copy output
-            </button>
-            <button
-              type="button"
-              onClick={() => persistLayout({ ...layout, bottomOpen: false })}
-            >
-              Close
-            </button>
+              <button
+                type="button"
+                aria-label="Close diagnostics"
+                onClick={() => persistLayout({ ...layout, bottomOpen: false })}
+              >
+                Close
+              </button>
+            </div>
           </nav>
-          <div class="hp-bottom-content">
+          <div
+            id={`${studioDomId}-diagnostics-panel-${bottomTab}`}
+            class="hp-bottom-content"
+            role="tabpanel"
+            aria-labelledby={`${studioDomId}-diagnostics-tab-${bottomTab}`}
+            tabIndex={0}
+          >
             {bottomTab === "data" && (
               <DataPreview data={preview?.data ?? data} />
             )}{" "}
@@ -1048,28 +1283,58 @@ export function HyperPbiStudio({
               </div>
             )}{" "}
             {bottomTab === "errors" && (
-              <div class="hp-errors-panel">
+              <div
+                class="hp-errors-panel"
+                role={visibleErrors.length ? "alert" : "status"}
+                aria-live="polite"
+              >
                 <header>
-                  <strong>Issues</strong>
+                  <div>
+                    <strong>Validation issues</strong>
+                    <span>
+                      {visibleErrors.length} errors · {visibleWarnings.length}{" "}
+                      warnings
+                    </span>
+                  </div>
                   <button type="button" onClick={() => void copyBottom()}>
-                    Copy Issues
+                    Copy issues
                   </button>
                 </header>
-                {errors.length || warnings.length ? (
-                  <>
-                    <ul>
-                      {errors.map((error) => (
-                        <li>{error}</li>
-                      ))}
-                    </ul>
-                    <ul>
-                      {warnings.map((warning) => (
-                        <li>{warning}</li>
-                      ))}
-                    </ul>
-                  </>
+                {issueCount ? (
+                  <div class="hp-issue-groups">
+                    {visibleErrors.length > 0 && (
+                      <section class="hp-issue-group is-error">
+                        <h3>
+                          Errors <span>{visibleErrors.length}</span>
+                        </h3>
+                        <ul>
+                          {visibleErrors.map((error) => (
+                            <li>{error}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                    {visibleWarnings.length > 0 && (
+                      <section class="hp-issue-group is-warning">
+                        <h3>
+                          Warnings <span>{visibleWarnings.length}</span>
+                        </h3>
+                        <ul>
+                          {visibleWarnings.map((warning) => (
+                            <li>{warning}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                  </div>
                 ) : (
-                  <div class="hp-ready-state">✓ No validation issues</div>
+                  <div class="hp-ready-state">
+                    <span aria-hidden="true">✓</span>
+                    <div>
+                      <strong>No validation issues</strong>
+                      <p>The current draft is ready to preview or save.</p>
+                    </div>
+                  </div>
                 )}
               </div>
             )}{" "}
@@ -1087,34 +1352,44 @@ export function HyperPbiStudio({
               </div>
             )}{" "}
             {bottomTab === "geocode" && (
-              <div class="hp-geocode-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Address</th>
-                      <th>Status</th>
-                      <th>Latitude</th>
-                      <th>Longitude</th>
-                      <th>Provider</th>
-                      <th>Cache</th>
-                      <th>Error</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {geocodeResults.map((result) => (
+              geocodeResults.length ? (
+                <div class="hp-geocode-table">
+                  <table>
+                    <caption class="hp-visually-hidden">
+                      Geocoding request results
+                    </caption>
+                    <thead>
                       <tr>
-                        <td>{result.sourceAddress}</td>
-                        <td>{result.status}</td>
-                        <td>{result.latitude ?? "—"}</td>
-                        <td>{result.longitude ?? "—"}</td>
-                        <td>{result.provider}</td>
-                        <td>{result.cacheHit ? "Yes" : "No"}</td>
-                        <td>{result.error ?? ""}</td>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Provider</th>
+                        <th>Cache</th>
+                        <th>Error</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {geocodeResults.map((result) => (
+                        <tr>
+                          <td>{result.sourceAddress}</td>
+                          <td>{result.status}</td>
+                          <td>{result.latitude ?? "—"}</td>
+                          <td>{result.longitude ?? "—"}</td>
+                          <td>{result.provider}</td>
+                          <td>{result.cacheHit ? "Yes" : "No"}</td>
+                          <td>{result.error ?? ""}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div class="hp-bottom-empty" role="status">
+                  <strong>No geocoding requests yet</strong>
+                  <p>Test an address in Map services to see results here.</p>
+                </div>
+              )
             )}{" "}
             {bottomTab === "interactions" && (
               <InteractionsPanel diagnostics={interactionDiagnostics} />
@@ -1122,19 +1397,27 @@ export function HyperPbiStudio({
           </div>
         </section>
       )}
-      <footer class="hp-studio-status">
-        <span>Dashboard schema {authoredVersion}</span>
-        <span>
+      <footer class="hp-studio-status" aria-label="Builder status">
+        <span class={`hp-studio-status-primary is-${status.toLowerCase().replace(/\s+/g, "-")}`}>
+          <span class="hp-studio-status-dot" aria-hidden="true" />
           {status}
-          {preview ? " · preview valid" : " · preview not validated"}
+          {previewCurrent
+            ? " · Preview current"
+            : preview
+              ? " · Preview out of date"
+              : " · Not previewed"}
         </span>
-        <span>Package 1.0.0.0</span>
-        <span>
-          {data.rows.length.toLocaleString()} rows loaded
-          {data.loadStatus?.moreRowsAvailable ? " · more available" : ""}
+        <span class="hp-studio-data-status">
+          {data.rows.length.toLocaleString()} rows
+          {data.loadStatus?.moreRowsAvailable ? "+" : ""} ·{" "}
+          {Object.keys(data.fields).length} fields
         </span>
-        <span>{Object.keys(data.fields).length} fields</span>
-        <span>{selectionIdentityCount.toLocaleString()} selection IDs</span>
+        {layout.advanced && (
+          <span class="hp-studio-technical-status">
+            Schema {authoredVersion} · {selectionIdentityCount.toLocaleString()}{" "}
+            selection IDs · Package 1.0.0.0
+          </span>
+        )}
       </footer>
     </div>
   );
