@@ -39,7 +39,8 @@ export function componentRows(componentId: string, context: Pick<RenderContextVa
     for(const [origin,selected] of Object.entries(context.state.componentSelectedRows)){
         if(context.state.componentSelectionModes[origin]!=="highlight")continue;
         const scope=context.state.componentSelectionScopes[origin]??"self";
-        const applies=origin===componentId?scope!=="others":scope!=="self";
+        const targets=context.state.componentSelectionTargets[origin];
+        const applies=targets?.length?targets.includes(componentId):origin===componentId?scope!=="others":scope!=="self";
         if(applies)selected.forEach(index=>rows.add(index));
     }
     return Array.from(rows);
@@ -51,6 +52,7 @@ export function clearComponentInteraction(policy: ResolvedInteractionPolicy, com
     context.dispatch({ type: "selectComponentRowKeys", id: componentId, keys: [] });
     context.dispatch({ type: "componentSelectionScope", id: componentId });
     context.dispatch({ type: "componentSelectionMode", id: componentId });
+    context.dispatch({ type: "componentSelectionTargets", id: componentId });
     context.dispatch({ type: "selectRows", rows: [] });
     context.dispatch({ type: "selectRowKeys", keys: [] });
     context.dispatch({ type: "clearInteractionFilter", id: componentId });
@@ -64,10 +66,45 @@ export function clearComponentInteraction(policy: ResolvedInteractionPolicy, com
     return { executed: true, cleared: true, selectedRows: previous, internalApplied: policy.internalMode !== "none", externalSent };
 }
 
-export function executeComponentInteraction(policy: ResolvedInteractionPolicy, payload: InteractionPayload, context: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
-    if (!policy.enabled) return { executed: false, cleared: false, selectedRows: componentRows(payload.componentId, context), internalApplied: false, externalSent: false, reason: "interaction disabled" };
-    if (policy.trigger !== modifiers.trigger) return { executed: false, cleared: false, selectedRows: componentRows(payload.componentId, context), internalApplied: false, externalSent: false, reason: "trigger mismatch" };
-    if (!claimInteractionEvent(modifiers.event)) return { executed: false, cleared: false, selectedRows: componentRows(payload.componentId, context), internalApplied: false, externalSent: false, reason: "interaction event already handled" };
+function normalizeDatasetInteraction(
+    policy: ResolvedInteractionPolicy,
+    payload: InteractionPayload,
+    context: RenderContextValue,
+): { policy: ResolvedInteractionPolicy; payload: InteractionPayload; context: RenderContextValue; translated: boolean } {
+    const lineage = context.datasetLineage;
+    const sourceRows = context.powerBiSourceRows;
+    const sourceRowKeys = context.powerBiSourceRowKeys;
+    if (context.interactionIndexSpace !== "component" || !lineage || !sourceRows || !sourceRowKeys) return { policy, payload, context, translated: false };
+    const localIndexByKey = new Map(context.sourceRowKeys.map((key, index) => [key, index] as const));
+    const localIndices = new Set(payload.rowIndices);
+    payload.rowKeys.forEach(key => { const index = localIndexByKey.get(key);if(index !== undefined)localIndices.add(index); });
+    if (!localIndices.size) return { policy, payload, context, translated: false };
+    const sourceIndices = Array.from(new Set([...localIndices].flatMap(index => lineage[index] ?? []))).sort((left, right) => left - right);
+    return {
+        policy,
+        payload: {
+            ...payload,
+            rowIndices: sourceIndices,
+            rowKeys: sourceIndices.map(index => sourceRowKeys[index]).filter((key): key is string => Boolean(key)),
+        },
+        context: {
+            ...context,
+            sourceRows,
+            sourceRowKeys,
+            datasetLineage: undefined,
+            interactionIndexSpace: "powerbi",
+            selectExternal: context.selectSourceRows ?? context.selectExternal,
+        },
+        translated: true,
+    };
+}
+
+export function executeComponentInteraction(inputPolicy: ResolvedInteractionPolicy, inputPayload: InteractionPayload, inputContext: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
+    if (!inputPolicy.enabled) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "interaction disabled" };
+    if (inputPolicy.trigger !== modifiers.trigger) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "trigger mismatch" };
+    if (!claimInteractionEvent(modifiers.event)) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "interaction event already handled" };
+    const normalized = normalizeDatasetInteraction(inputPolicy, inputPayload, inputContext);
+    const { policy, payload, context } = normalized;
     let effectivePayload: InteractionPayload = {
         ...payload,
         field: policy.field ?? payload.field,
@@ -117,25 +154,25 @@ export function executeComponentInteraction(policy: ResolvedInteractionPolicy, p
         if(values.length)effectivePayload={...effectivePayload,value:values.length>1?values:values[0],operator:values.length>1?"in":effectivePayload.operator};
     }
     context.dispatch({ type: "selectComponentRows", id: payload.componentId, rows: selectedRows });
-    if (selectedRowKeys.length) {
-        context.dispatch({ type: "selectComponentRowKeys", id: payload.componentId, keys: selectedRowKeys });
-    }
+    context.dispatch({ type: "selectComponentRowKeys", id: payload.componentId, keys: selectedRowKeys });
     context.dispatch({ type: "componentSelectionScope", id: payload.componentId, scope: policy.internalMode==="highlight"?policy.internalScope:"self" });
     context.dispatch({ type: "componentSelectionMode", id: payload.componentId, mode: policy.internalMode });
+    context.dispatch({ type: "componentSelectionTargets", id: payload.componentId, targets: policy.targets });
     if(policy.internalMode!=="none") {
         context.dispatch({ type: "selectRows", rows: selectedRows });
-        if (selectedRowKeys.length) {
-            context.dispatch({ type: "selectRowKeys", keys: selectedRowKeys });
-        }
+        context.dispatch({ type: "selectRowKeys", keys: selectedRowKeys });
     }
     context.dispatch({ type: "interactionSignature", id: payload.componentId, value: nextSignature });
 
     let internalApplied = false;
     if (policy.internalMode === "filter") {
-        const field = effectivePayload.field ?? (hasSourceKeys ? "__source_row_key__" : "__source_row_index__");
-        const value = effectivePayload.field ? effectivePayload.value : (hasSourceKeys ? selectedRowKeys : selectedRows);
+        // A logical dataset may rename or aggregate fields. Fan linked filtering out by
+        // original row identity while retaining the semantic field for an external filter.
+        const useSourceIdentity = normalized.translated || context.interactionUsesSourceIdentity === true || !effectivePayload.field;
+        const field = useSourceIdentity ? (hasSourceKeys ? "__source_row_key__" : "__source_row_index__") : effectivePayload.field!;
+        const value = useSourceIdentity ? (hasSourceKeys ? selectedRowKeys : selectedRows) : effectivePayload.value;
         if (!payloadValueIsEmpty(value)) {
-            context.dispatch({ type: "interactionFilter", filter: { originComponentId: payload.componentId, field, operator: effectivePayload.field ? effectivePayload.operator : "in", value, scope: policy.internalScope } });
+            context.dispatch({ type: "interactionFilter", filter: { originComponentId: payload.componentId, field, operator: useSourceIdentity ? "in" : effectivePayload.operator, value, scope: policy.internalScope, targets: policy.targets } });
             internalApplied = true;
         } else context.dispatch({ type: "clearInteractionFilter", id: payload.componentId });
     } else context.dispatch({ type: "clearInteractionFilter", id: payload.componentId });
@@ -154,10 +191,17 @@ export function executeComponentInteraction(policy: ResolvedInteractionPolicy, p
     return { executed: true, cleared: false, selectedRows, internalApplied, externalSent };
 }
 
-export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[], dashboardRows: DataRow[], componentId: string, context: Pick<RenderContextValue, "state">): DataRow[] {
+type ComponentRowFilterContext = Pick<RenderContextValue, "state"> & Partial<Pick<RenderContextValue, "datasetLineage" | "powerBiSourceRowKeys">>;
+
+export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[], dashboardRows: DataRow[], componentId: string, context: ComponentRowFilterContext): DataRow[] {
     const sourceIndex = new Map(sourceRows.map((row, index) => [row, index] as const));
+    const sourceIndicesForRow = (row: DataRow): number[] => {
+        const index = sourceIndex.get(row);
+        if (index === undefined) return [];
+        return context.datasetLineage?.[index] ?? [index];
+    };
     return context.state.interactionFilters.reduce((rows, filter) => {
-        const applies = filter.scope === "all" || filter.scope === "self" && filter.originComponentId === componentId || filter.scope === "others" && filter.originComponentId !== componentId;
+        const applies = filter.targets?.length ? filter.targets.includes(componentId) : filter.scope === "all" || filter.scope === "self" && filter.originComponentId === componentId || filter.scope === "others" && filter.originComponentId !== componentId;
         if (!applies) return rows;
         if (filter.field === "__source_row_key__") {
             const allowed = new Set(
@@ -166,10 +210,15 @@ export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[],
                     : []
             );
             return rows.filter(row => {
-                const index = sourceIndex.get(row);
-                if (index === undefined) return false;
-                return allowed.has(sourceRowKeys[index]);
+                const localIndex = sourceIndex.get(row);
+                if (localIndex === undefined) return false;
+                const originalKeys = context.powerBiSourceRowKeys;
+                return sourceIndicesForRow(row).some(index => allowed.has(originalKeys?.[index] ?? sourceRowKeys[localIndex]));
             });
+        }
+        if (filter.field === "__source_row_index__") {
+            const allowed = new Set(Array.isArray(filter.value) ? filter.value as number[] : []);
+            return rows.filter(row => sourceIndicesForRow(row).some(index => allowed.has(index)));
         }
         const compare = (left: unknown, operator: FilterOperator, right: unknown) => operator === "in" && Array.isArray(right) ? right.some(value => value === left) : operator === "=" ? left === right : operator === "!=" ? left !== right : operator === "contains" ? String(left ?? "").toLowerCase().includes(String(right ?? "").toLowerCase()) : operator === ">" ? Number(left) > Number(right) : operator === ">=" ? Number(left) >= Number(right) : operator === "<" ? Number(left) < Number(right) : operator === "<=" ? Number(left) <= Number(right) : operator === "between" && Array.isArray(right) ? String(left ?? "") >= String(right[0] ?? "") && String(left ?? "") <= String(right[1] ?? "") : false;
         return rows.filter(row => compare(row[filter.field], filter.operator, filter.value));

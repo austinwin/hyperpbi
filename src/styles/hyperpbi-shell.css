@@ -7,7 +7,7 @@
 .hp-app-shell.hp-app-horizontal .hp-app-body { flex-direction: column; }
 
 .hp-app-content { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: auto; }
-.hp-app-main { flex: 1; min-height: 0; padding: var(--hp-gap, 12px); }
+.hp-app-main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: var(--hp-gap, 12px); }
 .hp-app-padding-compact .hp-app-main { padding: 6px; }
 .hp-app-padding-none .hp-app-main { padding: 0; }
 

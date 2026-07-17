@@ -151,11 +151,28 @@ Every 2.0 component requires:
 - `type`: a canonical type
 - `id`: globally unique; `^[A-Za-z][A-Za-z0-9_-]{0,99}$`
 
-Shared allowed properties are `type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, and `uiAction`.
+Shared allowed properties are `type`, `id`, `dataset`, `title`, `subtitle`, `span`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, and `uiAction`.
 
 `span`, when supplied, is numeric from 1 through 12. `title`, `subtitle`, `dataset`, and `ariaLabel` must be strings; `hidden` must be Boolean. A component inherits its ancestor dataset unless it names another dataset. Unknown datasets and fields outside the selected dataset schema are errors.
 
 Exact per-type required/allowed properties, status, capabilities, accessibility notes, compatibility, and examples are generated in the [component catalog](hyperpbi-component-catalog-reference.md). Do not maintain a second handwritten list.
+
+### Responsive layout and sizing
+
+`responsive` is a mobile-first object keyed by `xs`, `sm`, `md`, `lg`, and `xl`. HyperPBI uses component-container widths of 0, 480, 768, 1024, and 1280 pixels, so an embedded dashboard responds to its own allocated space rather than the browser viewport. Each rule may set:
+
+- integer `span` from 1 through 12
+- integer `order`
+- either Boolean `visible` or `hidden`
+- `direction: "row"|"column"`
+- Boolean `stack`
+- integer `columns` from 1 through 24
+
+Compact components are full width by default. Grids and split panes stack at `xs`; splits restore their authored direction at `md`, while grids restore authored columns and component desktop spans at `lg`. Explicit breakpoint rules win. The base `hidden` property remains an unconditional authoring hide and is not reversed by a responsive rule.
+
+`heightMode` is `auto|fixed|fill|aspectRatio`. `fill` establishes a reusable height chain through root/app content, nested grids/flex/splits, cards, tabs, map frames, chart canvases, and virtual tables; every ancestor still needs a bounded host height. `aspectRatio` uses `aspectRatio` (default 16:9 for shared components) plus optional `minHeight`. Maps retain their existing map-specific fixed/fill/aspect sizing and default heights.
+
+`split` supports `direction`, `children`, `sizes`, `minSizes`, `maxSizes`, `resizable`, `persist`, and `storageKey`. Pane arrays align one-to-one with children, use percentages, and are normalized to 100. Feasible minimum/maximum bounds are enforced both initially and during resize. Resizable handles support pointer drag, arrow keys (Shift changes by five percentage points), double-click reset, ResizeObserver propagation, and an accessible separator value. `persist` is `none|session|local`; a resizable split defaults to per-visual local persistence, namespaced by the visual instance and stable component ID.
 
 ## Interaction systems
 
@@ -190,6 +207,7 @@ Toast duration is persistent when omitted/zero; otherwise runtime clamps it to 1
 - `operator: =|!=|>|>=|<|<=|contains|in|between`
 - `selectionMode: replace|toggle|add`
 - `multiSelect`, `showSelector`, `clearOnSecondClick`
+- `target` or `targets` to restrict internal linked behavior to one or more existing component IDs
 
 It is optional. `auto` trigger resolves to change for controls and click otherwise. `auto` external mode resolves to filter for controls and selection for data-point/custom components.
 
@@ -209,15 +227,25 @@ Semantic chart bindings are schema properties: category/measure, x/y, series, so
 
 Safe ECharts `options` may adjust presentation. Functions, URL-bearing keys, executable strings, and unsupported series types are removed. On semantic charts, options cannot replace datasets/transforms, generated axis data/type, semantic series data/type/links/nodes/encode/transform/dimensions, radar indicators, or series counts. `advancedChart` permits broader sanitized JSON options but still no functions or unsafe URLs.
 
+`events` accepts `zoom`, `rangeSelect`, and `brush`. Each event has `enabled`, optional `field`, optional linked `targets`, and an optional universal `interaction` override. Zoom state is persisted per chart. `rangeSelect` maps the visible data-zoom window to adapter bindings; brush maps ECharts rectangle/polygon selections to exact binding rows. Both deduplicate original source lineage before internal linking or Power BI selection. Event configuration remains data: no callbacks or handler strings are accepted.
+
+`drill` performs hierarchical navigation over already evaluated logical datasets. It requires at least two `levels`; every level has a stable `id`, a named `dataset`, and optional `label`, `category`, `measure`, `x`, `y`, and `pointSize`. A child `parentField` is compared with the selected parent binding value. `initialLevel`, `trigger: "click"|"doubleClick"`, and `showBreadcrumbs` control navigation. Breadcrumb state stores level IDs and selected values, and every chart binding continues to resolve through each dataset row's original Power BI lineage. Drill never issues a network or semantic-model query.
+
 ## Tables and matrix
 
 `table` accepts native columns, pagination, page size, search, column resizing, maximum rows, sticky header, compact/normal density, stripes, hover, row count, page-size choices, row actions, and an empty state. Columns can specify field/title/width/format/alignment, conditions, sorting, resizing, visibility, wrapping, freezing, text/badge/progress cell type, and intent mapping.
+
+`virtualization` accepts `enabled`, `threshold` from 1 through 5,000, `rowHeight` from 22 through 80 pixels, and `overscan` from 1 through 100. When pagination is off and the threshold is exceeded, the runtime measures the actual scroll viewport and renders only the visible range plus overscan. Explicitly disabling virtualization retains a 5,000-row non-virtual DOM guard. The Power BI formatting data limit remains authoritative; a 250,000-row final memory guard prevents unbounded author input. Search indexing is built once when search becomes active and reused across subsequent query text.
+
+`export` accepts `enabled`, `formats: ["csv","xlsx"]`, `scope: "filtered"|"selected"|"selectedOrFiltered"`, and `fileName`. Export uses the complete prepared/filter/sort result rather than the virtual DOM or display truncation. Selected scope intersects selection with currently filtered rows; `selectedOrFiltered` falls back to filtered rows when nothing is selected. Hidden columns are excluded. CSV includes a UTF-8 BOM and RFC-style escaping; XLSX is a deterministic OOXML workbook. Text beginning with spreadsheet formula sigils is neutralized in both formats.
 
 `matrix` requires nonempty `rows` and `values` and renders every value descriptor. Each value may define `field`, `aggregation`, `where`, `title`, and `format`; metric titles fall back deterministically when omitted. `count`/`countWhere` can omit a field, while numeric aggregations require a numeric field and `countWhere`/`sumWhere`/`avgWhere` require `where`. With `columns`, output headers are column group × metric. Totals and heatmap normalization are per metric. `maxRows` is deterministic, and the runtime enforces a 5,000-cell budget with a visible truncation warning. Row/column headers use table scopes and data-cell labels include their row, column, and metric context. `engine: "tabulator"` is compatibility input normalized to native because Tabulator is not bundled.
 
 ## Maps
 
 `map` uses Leaflet and accepts view, basemap, `layerGroups`, `bookmarks`, layers, search, legend, layer panel, toolbar, and height. Layer source types are `powerbi`, `arcgisFeature`, `arcgisTile`, and `arcgisDynamic`. Public ArcGIS requests require HTTPS, a permitted Maps package host, and no embedded credentials.
+
+`tools.rectangleSelection` and `tools.lassoSelection` are Boolean or objects with `enabled` and `selectionMode: "replace"|"toggle"|"add"`; lasso also accepts `minimumPoints` from 3 through 100, and runtime draft points are bounded. Matching `toolbar.rectangleSelection` and `toolbar.lassoSelection` flags control button visibility. A drag tests visible resolved points, independent multipoints, crossing lines, and polygon area (including holes), then updates canonical feature keys and passes deduplicated Power BI row lineage through the universal interaction engine. Ctrl/Cmd toggles and Shift adds without changing the authored default. Service-only features remain locally selectable without fabricating Power BI identities.
 
 All Power BI fields arrive through Values. Each layer may set `dataset`; precedence is layer, map, then `powerbi`. Power BI location bindings belong in that layer's `source.bindings`. Explicit layers never inherit global Runtime Config coordinates. Geometry overrides coordinates; latitude/longitude are strict finite numbers in range; missing `layerValue` returns no unrelated data; mixed geometry is classified across all features. Renderer, label, popup/tooltip, visibility, filter, interaction, and cluster aggregation fields resolve from the exact `powerbi|service|joined` `fieldSource`; defaults are Power BI for Power BI layers, service for ArcGIS references, and joined for ArcGIS joins. Grouped logical rows retain contributing source identity arrays.
 

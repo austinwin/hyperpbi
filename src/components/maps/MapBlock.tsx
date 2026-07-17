@@ -82,6 +82,10 @@ import {
   DEFAULT_ARCGIS_CACHE_MINUTES,
   DEFAULT_ARCGIS_FEATURE_MAX_FEATURES,
 } from "../../maps/performance/mapPerformanceDefaults";
+import { executeComponentInteraction } from "../../interactions/componentInteraction";
+import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
+import { resolveMapFeatureSelection, type MapSelectionTool, type MapSpatialSelectionResult } from "../../maps/interactions/mapSpatialSelection";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -328,10 +332,50 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
   // ── Map controller ref ───────────────────────────────────────────
   const mapControllerRef = useRef<LeafletMapController | null>(null);
+  const runtimeLayersRef = useRef<ResolvedMapLayer[]>([]);
   const [activeBookmarkId, setActiveBookmarkId] = useState<string>();
+  const [selectionTool, setSelectionTool] = useState<MapSelectionTool | null>(null);
+  const [selectionStatus, setSelectionStatus] = useState<string>();
   const handleControllerReady = useCallback((ctrl: LeafletMapController) => {
     mapControllerRef.current = ctrl;
   }, []);
+
+  const handleSpatialSelect = useCallback((result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => {
+    const configured = selectionTool === "rectangle" ? component.tools?.rectangleSelection : component.tools?.lassoSelection;
+    const authoredMode = configured && typeof configured === "object" ? configured.selectionMode : undefined;
+    const selectionMode = modifiers.ctrlKey || modifiers.metaKey ? "toggle" : modifiers.shiftKey ? "add" : authoredMode ?? "replace";
+    const currentFeatureKeys = context.state.mapInteractionState[id]?.selectedFeatureKeys ?? context.state.mapSelectedFeatureIds[id] ?? [];
+    const nextFeatureKeys = resolveMapFeatureSelection(currentFeatureKeys, result.featureKeys, selectionMode);
+    const nextFeatureKeySet = new Set(nextFeatureKeys);
+    const selectedFeatures = runtimeLayersRef.current.flatMap(layer => layer.features.filter(feature => feature.featureKey && nextFeatureKeySet.has(feature.featureKey)));
+    const synchronizedRowIndices = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowIndices))).sort((left, right) => left - right);
+    const synchronizedRowKeys = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowKeys)));
+    context.dispatch({ type: "selectMapFeatures", mapId: id, featureIds: result.featureKeys, selectionMode });
+    const sourceRows = context.powerBiSourceRows ?? context.sourceRows;
+    const sourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+    const interactionContext = {
+      ...context,
+      sourceRows,
+      sourceRowKeys,
+      datasetLineage: undefined,
+      interactionIndexSpace: "powerbi" as const,
+      interactionUsesSourceIdentity: true,
+      selectExternal: context.selectSourceRows ?? context.selectExternal,
+    };
+    const policy = {
+      ...resolveInteractionPolicy(component, config, "dataPoint"),
+      // Submit the exact next union. This keeps linked rows and Power BI in sync
+      // when multiple selected features share the same source identity.
+      selectionMode: "replace" as const,
+    };
+    executeComponentInteraction(policy, createInteractionPayload(component, {
+      rowIndices: synchronizedRowIndices,
+      rowKeys: synchronizedRowKeys,
+      sourceRowKeys,
+      field: policy.field,
+    }), interactionContext, { trigger: "click" });
+    setSelectionStatus(`${nextFeatureKeys.length.toLocaleString()} feature${nextFeatureKeys.length === 1 ? "" : "s"} selected${synchronizedRowIndices.length ? ` across ${synchronizedRowIndices.length.toLocaleString()} Power BI row${synchronizedRowIndices.length === 1 ? "" : "s"}` : ""}.`);
+  }, [selectionTool, component, context, id, config]);
 
   // ── UI state from reducer (maps to mapUiState[id]) ───────────────
   const mapUiState = context.state.mapUiState[id] ?? {};
@@ -858,6 +902,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     () => withCanonicalMapFeatureKeys(id, allResolvedLayers),
     [id, allResolvedLayers],
   );
+  runtimeLayersRef.current = runtimeLayers;
   useEffect(() => {
     context.dispatch({
       type: "reconcileMapFeatures",
@@ -1217,6 +1262,10 @@ export function MapBlock({ component }: { component: MapComponent }) {
               onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
               onMapClick={handleMapClick}
               identifyHighlight={activeIdentifyGeometry}
+              selectionTool={selectionTool}
+              minimumLassoPoints={typeof component.tools?.lassoSelection === "object" ? component.tools.lassoSelection.minimumPoints : undefined}
+              onSpatialSelect={handleSpatialSelect}
+              onSpatialSelectionClear={() => setSelectionStatus(undefined)}
             />
           </div>
           <div class="hp-map-overlay-root">
@@ -1245,8 +1294,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
                   clearSelection,
                 });
 if (clearSelection) {
+  setSelectionStatus(undefined);
   context.dispatch({ type: "selectComponentRows", id, rows: [] });
   context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+  context.dispatch({ type: "componentSelectionScope", id });
+  context.dispatch({ type: "componentSelectionMode", id });
+  context.dispatch({ type: "componentSelectionTargets", id });
+  context.dispatch({ type: "selectRows", rows: [] });
+  context.dispatch({ type: "selectRowKeys", keys: [] });
+  context.dispatch({ type: "clearInteractionFilter", id });
   context.dispatch({ type: "interactionSignature", id });
 
   context.clearExternal({
@@ -1274,6 +1330,7 @@ if (clearSelection) {
                   : dynamicIdentifyState.error}
               </div>
             )}
+            {selectionStatus && <div class="hp-map-selection-status" role="status">{selectionStatus}</div>}
             {showToolbar && (
               <MapToolbar
               mapId={id}
@@ -1294,10 +1351,16 @@ if (clearSelection) {
                   popover,
                 })
               }
-onClearSelection={() => {
+              onClearSelection={() => {
   context.dispatch({ type: "clearMapFeatures", mapId: id });
   context.dispatch({ type: "selectComponentRows", id, rows: [] });
   context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+  context.dispatch({ type: "componentSelectionScope", id });
+  context.dispatch({ type: "componentSelectionMode", id });
+  context.dispatch({ type: "componentSelectionTargets", id });
+  context.dispatch({ type: "selectRows", rows: [] });
+  context.dispatch({ type: "selectRowKeys", keys: [] });
+  context.dispatch({ type: "clearInteractionFilter", id });
   context.dispatch({ type: "interactionSignature", id });
 
   context.clearExternal({
@@ -1314,7 +1377,14 @@ onClearSelection={() => {
     type: "closeMapFeatureDetails",
     mapId: id,
   });
+  setSelectionStatus(undefined);
 }}
+              activeSelectionTool={selectionTool}
+              onSetSelectionTool={(tool) => {
+                setSelectionTool(tool);
+                setSelectionStatus(tool ? `${tool === "rectangle" ? "Rectangle" : "Lasso"} selection active. Drag on the map to select features.` : undefined);
+                context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
+              }}
               />
             )}
           </div>

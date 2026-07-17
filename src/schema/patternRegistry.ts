@@ -49,7 +49,15 @@ export function expandPatterns(value: unknown): PatternExpansionResult {
         if (typeof component.id === "string") ownerByRuntimeId[component.id] = component.id;
         if (Array.isArray(component.children)) component.children = expandList(component.children, `${path}/${index}/children`);
         if (Array.isArray(component.footer)) component.footer = expandList(component.footer, `${path}/${index}/footer`);
-        if (Array.isArray(component.tabs)) component.tabs = component.tabs.map((tab, tabIndex) => tab && typeof tab === "object" && !Array.isArray(tab) ? { ...(tab as RecordValue), children: expandList((((tab as RecordValue).children ?? (tab as RecordValue).components ?? (tab as RecordValue).content ?? []) as unknown[]), `${path}/${index}/tabs/${tabIndex}/children`) } : tab);
+        if (Array.isArray(component.tabs)) component.tabs = component.tabs.map((tab, tabIndex) => {
+            if (!tab || typeof tab !== "object" || Array.isArray(tab)) return tab;
+            const canonical = { ...(tab as RecordValue) };
+            const children = (canonical.children ?? canonical.components ?? canonical.content ?? []) as unknown[];
+            delete canonical.components;
+            delete canonical.content;
+            canonical.children = expandList(children, `${path}/${index}/tabs/${tabIndex}/children`);
+            return canonical;
+        });
         return [component];
     });
     for (const key of ["components", "toolbar", "leftPanel", "rightPanel"]) if (Array.isArray(root[key])) root[key] = expandList(root[key] as unknown[], `/${key}`);

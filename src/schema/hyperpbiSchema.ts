@@ -20,6 +20,27 @@ export type Density = "compact" | "normal" | "spacious";
 export type FilterOperator = "=" | "!=" | ">" | ">=" | "<" | "<=" | "contains" | "in" | "between";
 export type ChartType = "barChart" | "horizontalBarChart" | "lineChart" | "areaChart" | "pieChart" | "donutChart" | "scatterChart" | "gauge" | "heatmap" | "comboChart" | "waterfallChart" | "sankeyChart" | "treemapChart" | "funnelChart" | "radarChart" | "advancedChart";
 export type OverlayPlacement = "top-start" | "top" | "top-end" | "right-start" | "right" | "right-end" | "bottom-start" | "bottom" | "bottom-end" | "left-start" | "left" | "left-end";
+export type ResponsiveBreakpoint = "xs" | "sm" | "md" | "lg" | "xl";
+export type ComponentHeightMode = "auto" | "fixed" | "fill" | "aspectRatio";
+
+export interface ResponsiveComponentRule {
+    /** Grid span at this breakpoint. */
+    span?: number;
+    /** Visual order at this breakpoint. Lower values render first. */
+    order?: number;
+    /** Prefer visible over hidden when authoring new specifications. */
+    visible?: boolean;
+    /** Compatibility-friendly inverse of visible. */
+    hidden?: boolean;
+    /** Layout direction for flex and split containers. */
+    direction?: "row" | "column";
+    /** Stack layout children and suppress split handles at this breakpoint. */
+    stack?: boolean;
+    /** Grid column count for a layout container at this breakpoint. */
+    columns?: number;
+}
+
+export type ResponsiveComponentDefinition = Partial<Record<ResponsiveBreakpoint, ResponsiveComponentRule>>;
 
 // Re-export UI types for convenience
 export type { AppShellConfig, UiVariant, UiSize, IconName, UiAction, UiIntent, TooltipDefinition,
@@ -52,6 +73,13 @@ export interface ComponentBase {
     title?: string;
     subtitle?: string;
     span?: number;
+    order?: number;
+    /** Mobile-first, container-relative layout overrides. */
+    responsive?: ResponsiveComponentDefinition;
+    /** Shared sizing contract. Component-specific fixed height properties remain supported. */
+    heightMode?: ComponentHeightMode;
+    minHeight?: number;
+    aspectRatio?: number;
     className?: string;
     hidden?: boolean;
     props?: Record<string, unknown>;
@@ -99,6 +127,18 @@ export interface ContainerComponent extends ComponentBase {
     collapsible?: boolean;
     defaultCollapsed?: boolean;
     defaultOpen?: boolean;
+    /** Split-pane percentages. Values are normalized when they do not total 100. */
+    sizes?: number[];
+    /** Minimum pane percentages, aligned with children. */
+    minSizes?: number[];
+    /** Maximum pane percentages, aligned with children. */
+    maxSizes?: number[];
+    /** Opt in to pointer and keyboard split handles. */
+    resizable?: boolean;
+    /** Persist viewer-adjusted sizes. Defaults to local when resizable is enabled. */
+    persist?: "none" | "session" | "local";
+    /** Optional stable persistence namespace. The component ID is the fallback. */
+    storageKey?: string;
 }
 
 export interface FilterDefinition { operator: FilterOperator; value?: unknown; }
@@ -165,6 +205,48 @@ export interface BaseChartComponent extends ComponentBase {
     initOptions?: EChartsInitOpts;
     setOption?: SetOptionOpts;
     options?: Record<string, unknown>;
+    events?: ChartEventsDefinition;
+    drill?: ChartDrillDefinition;
+}
+
+export interface ChartEventDefinition {
+    enabled?: boolean;
+    /** Optional event-specific interaction override. */
+    interaction?: ComponentInteractionDefinition;
+    /** Restrict linked internal highlighting/filtering to these component IDs. */
+    targets?: string[];
+    /** Event payload field. Falls back to the adapter binding field. */
+    field?: string;
+}
+
+export interface ChartEventsDefinition {
+    /** Persist the current ECharts data-zoom window and optionally link it. */
+    zoom?: ChartEventDefinition;
+    /** Convert the visible zoom window into a row range selection. */
+    rangeSelect?: ChartEventDefinition;
+    /** Convert ECharts rectangle/polygon brush selections into source rows. */
+    brush?: ChartEventDefinition;
+}
+
+export interface ChartDrillLevelDefinition {
+    id: string;
+    label?: string;
+    /** Preloaded logical dataset for this resolution. */
+    dataset: string;
+    category?: string;
+    measure?: string;
+    x?: string;
+    y?: string;
+    pointSize?: string;
+    /** Field on this level's dataset that links it to the selected parent value. */
+    parentField?: string;
+}
+
+export interface ChartDrillDefinition {
+    levels: ChartDrillLevelDefinition[];
+    initialLevel?: string;
+    trigger?: "click" | "doubleClick";
+    showBreadcrumbs?: boolean;
 }
 
 export interface CategoryChartComponent extends BaseChartComponent {
@@ -319,6 +401,19 @@ export interface TableComponent extends ComponentBase {
         title?: string;
         description?: string;
     };
+    export?: {
+        enabled?: boolean;
+        formats?: Array<"csv" | "xlsx">;
+        /** selectedOrFiltered exports highlighted/selected rows when present, otherwise filtered rows. */
+        scope?: "filtered" | "selected" | "selectedOrFiltered";
+        fileName?: string;
+    };
+    virtualization?: {
+        enabled?: boolean;
+        threshold?: number;
+        rowHeight?: number;
+        overscan?: number;
+    };
     /** Tabulator is not bundled; this is normalized to native with a warning. */
 }
 
@@ -364,6 +459,13 @@ export interface MapComponent extends ComponentBase {
         clearSelection?: boolean;
         zoomToSelection?: boolean;
         bookmarks?: boolean;
+        rectangleSelection?: boolean;
+        lassoSelection?: boolean;
+    };
+
+    tools?: {
+        rectangleSelection?: boolean | { enabled?: boolean; selectionMode?: SelectionMode };
+        lassoSelection?: boolean | { enabled?: boolean; selectionMode?: SelectionMode; minimumPoints?: number };
     };
 
     // ── Legacy properties (still supported for backward compatibility) ──
@@ -396,7 +498,7 @@ export interface MapComponent extends ComponentBase {
     popup?: { html?: string };
     /** Legacy fixed height. Used when heightMode is omitted or fixed. */
     height?: number;
-    heightMode?: "fixed" | "fill" | "aspectRatio";
+    heightMode?: ComponentHeightMode;
     minHeight?: number;
     aspectRatio?: number;
 }

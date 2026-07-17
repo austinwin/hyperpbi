@@ -53,7 +53,7 @@ export function Accordion({
 
             return (
                 <div class="hp-accordion">
-                    <div class="hp-accordion-item">
+                    <div class={`hp-accordion-item ${isOpen ? "is-open" : ""}`}>
                         <button
                             type="button"
                             class="hp-accordion-header"
@@ -83,7 +83,7 @@ export function Accordion({
                 const isDisabled = item.disabled ?? false;
 
                 return (
-                    <div key={item.id} class={`hp-accordion-item ${isDisabled ? "hp-accordion-disabled" : ""}`}>
+                    <div key={item.id} class={`hp-accordion-item ${isOpen ? "is-open" : ""} ${isDisabled ? "hp-accordion-disabled" : ""}`}>
                         <button
                             type="button"
                             class="hp-accordion-header"

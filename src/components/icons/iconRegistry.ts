@@ -20,6 +20,8 @@ const ICONS: Record<string, IconDefinition> = {
     filter:     { name: "filter",     category: "actions",    path: "M3 4a1 1 0 011-1h16a1 1 0 011 1v2.6a1 1 0 01-.3.7L14 14.6V19a1 1 0 01-.6.9l-4 2a1 1 0 01-1.4-.9v-6.4L1.3 7.3A1 1 0 011 6.6V4z" },
     search:     { name: "search",     category: "actions",    path: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
     target:     { name: "target",     category: "actions",    path: "M12 2v3m0 14v3M2 12h3m14 0h3M12 8a4 4 0 100 8 4 4 0 000-8z" },
+    "select-rectangle": { name: "select-rectangle", category: "actions", path: "M5 3H3v2m16-2h2v2M5 21H3v-2m16 2h2v-2M7 7h10v10H7V7z" },
+    lasso:      { name: "lasso",      category: "actions",    path: "M4 8c0-3 3.6-5 8-5s8 2.1 8 6-3 7-8 7-8-2.2-8-6c0-2 1-3.6 3-4.5M12 16c-1 3-2.5 5-5 5-1.7 0-3-1-3-2.2 0-1.1.9-1.8 2-1.8 1.5 0 2.5 1.5 2.5 3" },
     menu:       { name: "menu",       category: "navigation", path: "M4 6h16M4 12h16M4 18h16" },
     "chevron-left":  { name: "chevron-left",  category: "navigation", path: "M15 19l-7-7 7-7" },
     "chevron-right": { name: "chevron-right", category: "navigation", path: "M9 5l7 7-7 7" },

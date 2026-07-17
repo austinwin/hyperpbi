@@ -1,7 +1,7 @@
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity, InspectorPropertyDescriptor } from "./componentTypes";
 
 export type ComponentRenderMode = "direct" | "overlay" | "legacy";
-export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart";
+export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
 export interface FieldReferenceDescriptor { property:string; requirement:"any"|"numeric"; handler:FieldTraversalHandler; }
 export interface ComponentContainerDescriptor { property:string; kind:"array"|"tabs"|"accordion"|"single"; allowedTypes?:string[]; }
 export interface ComponentMaturityEvidence {
@@ -28181,6 +28181,38 @@ const descriptorFieldExtensions:Record<string,FieldReferenceDescriptor[]> = {
     { property: "chart", requirement: "any", handler: "nested-chart" }
   ]
 };
+const sharedApplicationProperties:InspectorPropertyDescriptor[] = [
+  {property:"order",label:"Base order",control:"number",group:"Layout",help:"Base visual order before responsive overrides."},
+  {property:"responsive",label:"Responsive breakpoints",control:"json",group:"Layout",help:"Mobile-first xs, sm, md, lg, and xl span/order/visibility/layout overrides."},
+  {property:"heightMode",label:"Height mode",control:"enum",options:["auto","fixed","fill","aspectRatio"],group:"Layout",help:"Fill propagates a bounded height through nested layouts, tabs, cards, maps, tables, and charts."},
+  {property:"minHeight",label:"Minimum height",control:"number",group:"Layout"},
+  {property:"aspectRatio",label:"Aspect ratio",control:"number",group:"Layout"},
+];
+const extendDescriptor=(type:string,properties:InspectorPropertyDescriptor[],fields:FieldReferenceDescriptor[]=[])=>{
+  const descriptor=componentDescriptors.find(item=>item.type===type);if(!descriptor)return;
+  for(const property of properties){if(!descriptor.schema.allowed.includes(property.property))descriptor.schema.allowed.push(property.property);if(!descriptor.inspector.some(item=>item.property===property.property))descriptor.inspector.push(property);}
+  for(const field of fields)if(!descriptor.fields.some(item=>item.property===field.property&&item.handler===field.handler))descriptor.fields.push(field);
+};
+for(const descriptor of componentDescriptors)for(const property of sharedApplicationProperties){if(!descriptor.schema.allowed.includes(property.property))descriptor.schema.allowed.push(property.property);if(!descriptor.inspector.some(item=>item.property===property.property))descriptor.inspector.push({...property});}
+extendDescriptor("split",[
+  {property:"sizes",label:"Initial pane sizes",control:"json",group:"Layout"},
+  {property:"minSizes",label:"Minimum pane sizes",control:"json",group:"Layout"},
+  {property:"maxSizes",label:"Maximum pane sizes",control:"json",group:"Layout"},
+  {property:"resizable",label:"Resizable",control:"checkbox",group:"Interaction"},
+  {property:"persist",label:"Persist sizes",control:"enum",options:["none","session","local"],group:"Interaction"},
+  {property:"storageKey",label:"Persistence key",control:"text",group:"Advanced"},
+]);
+extendDescriptor("table",[
+  {property:"export",label:"CSV / Excel export",control:"json",group:"Data",help:"Enable CSV/XLSX export and choose filtered or selected scope."},
+  {property:"virtualization",label:"Virtualization",control:"json",group:"Advanced",help:"Configure threshold, measured row height, and overscan."},
+]);
+extendDescriptor("map",[{property:"tools",label:"Spatial selection tools",control:"json",group:"Interaction",help:"Enable rectangle and/or lasso selection."}]);
+const eventChartTypes=new Set(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","advancedChart"]);
+for(const type of eventChartTypes)extendDescriptor(type,[
+  {property:"events",label:"Chart events",control:"json",group:"Interaction",help:"Declarative zoom, range-selection, brush, and linked-filter behavior."},
+  {property:"drill",label:"Dataset drill hierarchy",control:"json",group:"Interaction",help:"Preloaded dataset levels with breadcrumb drill state."},
+],[{property:"events",requirement:"any",handler:"chart-events"},{property:"drill",requirement:"any",handler:"chart-drill"}]);
+
 const stableMaturityTests:Record<string,string[]> = {
   grid:["tests/component-catalog.test.tsx"],flex:["tests/component-catalog.test.tsx"],section:["tests/component-catalog.test.tsx"],toolbar:["tests/component-catalog.test.tsx"],
   searchBox:["tests/universal-interactions.test.ts"],select:["tests/universal-interactions.test.ts"],multiSelect:["tests/universal-interactions.test.ts"],button:["tests/universal-interactions.test.ts"],
@@ -28200,7 +28232,7 @@ const assignInspectorGroup=(group:NonNullable<InspectorPropertyDescriptor["group
   properties.forEach(property=>{stableInspectorGroups[property]=group;});
 assignInspectorGroup("Identity",["dataset","dataContext","source","stateKey"]);
 assignInspectorGroup("Data",["field","measure","aggregation","filter","sort","sortDirection","category","categoryField","valueField","primaryField","secondaryField","sourceField","targetField","labelField","titleField","descriptionField","statusField","badgeField","dateField","groupField","splitField","stageField","pathFields","metrics","series","values","indicators","limit","maxDataRows","maxRows","pageSize","pageSizeOptions","pagination","showTotals","showRowCount"]);
-assignInspectorGroup("Layout",["span","width","height","gap","padding","position","placement","direction","orientation","columns","rows","inline","compact","maxPanels","maxDepth","maxItems","resizableColumns","stickyHeader","preserveAspectRatio","view","viewBox","x","y"]);
+assignInspectorGroup("Layout",["span","order","responsive","heightMode","minHeight","aspectRatio","width","height","gap","padding","position","placement","direction","orientation","columns","rows","inline","compact","maxPanels","maxDepth","maxItems","resizableColumns","sizes","minSizes","maxSizes","stickyHeader","preserveAspectRatio","view","viewBox","x","y"]);
 assignInspectorGroup("Appearance",["className","style","css","color","theme","variant","intent","negativeIntent","positiveIntent","totalIntent","icon","prefixIcon","suffixIcon","density","format","heatmap","striped","shape","pointSize","motion","hover","backdrop"]);
 assignInspectorGroup("Interaction",["disabled","clickable","action","actions","actionValue","primaryAction","secondaryAction","interaction","interactions","uiAction","trigger","targets","rowActions","selectedRow","multiple","required","search","collapsible","defaultCollapsed","defaultOpen","defaultOpenItems","openWhen","closeOnEscape","closeOnOutsideClick","closeOnSelect","backdropClose","showArrow","showStart","showEnd"]);
 assignInspectorGroup("Content",["title","subtitle","description","text","html","svg","label","placeholder","helpText","emptyText","errorText","prefix","suffix","prefixText","suffixText","footer","header","toolbar","tooltip","items","items.children","children","slots","tabs","tabs.children","tabs.components","tabs.content","buttons","avatars","initials","lines","stages","groups","elements","layers","layerGroups","bookmarks","legend","options","value","defaultValue","activeStage","activeStep","step","emptyState","placeholderVariant"]);

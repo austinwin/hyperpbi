@@ -1,7 +1,7 @@
 import { ComponentChildren, h } from "preact";
 import type { DataRow } from "../../data/normalizeData";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
-import { executeComponentInteraction } from "../../interactions/componentInteraction";
+import { componentRows as selectedSourceRows, executeComponentInteraction } from "../../interactions/componentInteraction";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import type { RenderContextValue } from "../../render/RenderContext";
 import type { SvgComponent } from "../../schema/hyperpbiSchema";
@@ -22,12 +22,28 @@ export function SvgElementRenderer({ element, component, context, binding, ids, 
     if (element.repeat) {
         budget.repeats++;
         const dataset = element.repeat.dataset ? context.datasets?.get(element.repeat.dataset) : undefined;
-        const rows = dataset?.data.rows ?? context.rows, keys = dataset?.data.rowKeys ?? context.sourceRowKeys, limit = Math.min(element.repeat.limit ?? SVG_LIMITS.defaultRepeatRows, budget.maxRepeatedRows, SVG_LIMITS.maxRepeatRows, rows.length);
+        const datasetView = element.repeat.dataset ? context.getDatasetView?.(element.repeat.dataset, component.id ?? "svg") : undefined;
+        const rows = datasetView?.rows ?? dataset?.data.rows ?? context.rows;
+        const keys = datasetView?.rowKeys ?? dataset?.data.rowKeys ?? context.sourceRowKeys;
+        const lineage = datasetView?.sourceRowIndices ?? dataset?.lineage;
+        const limit = Math.min(element.repeat.limit ?? SVG_LIMITS.defaultRepeatRows, budget.maxRepeatedRows, SVG_LIMITS.maxRepeatRows, rows.length);
         return rows.slice(0, limit).map((row, index) => {
             const key = element.repeat!.keyField && row[element.repeat!.keyField!] != null ? String(row[element.repeat!.keyField!]!) : keys[index] ?? index;
             const repeatNamespace = createSvgNamespace(context.instanceId ?? "visual", component.id ?? "svg", key), repeatIds = new Map(ids);
             for (const id of collectSvgLocalIds(element.repeat!.children)) repeatIds.set(id, `${repeatNamespace}-${safeSvgIdentifier(id)}`);
-            const repeatContext = dataset ? { ...context, data: dataset.data, rows, sourceRows: rows, sourceRowKeys: keys, datasetLineage: dataset.lineage, selectExternal: (indices: number[], multi?: boolean, details?: Parameters<RenderContextValue["selectExternal"]>[2]) => { const source = Array.from(new Set(indices.flatMap(item => dataset.lineage[item] ?? []))); return (context.selectSourceRows ?? context.selectExternal)(source, multi, { ...details, matchedRowCount: source.length }); } } : context;
+            const repeatContext: RenderContextValue = dataset && lineage ? {
+                ...context,
+                data: { ...dataset.data, rows, rowKeys: keys },
+                rows,
+                sourceRows: rows,
+                sourceRowKeys: keys,
+                datasetLineage: lineage,
+                interactionIndexSpace: "component",
+                componentRows: id => {
+                    const selected = new Set(selectedSourceRows(id, { state: context.state }));
+                    return lineage.flatMap((indices, itemIndex) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [itemIndex] : []);
+                },
+            } : context;
             const childBinding: SvgBindingContext = { row, rows, state: context.state, index, count: limit, warnings: budget.warnings };
             return h("g", { key: String(key), "data-hp-repeat-key": String(key) }, element.repeat!.children.map(child => SvgElementRenderer({ element: child, component, context: repeatContext, binding: childBinding, ids: repeatIds, namespace: repeatNamespace, budget, rowIndex: index, repeatKey: key })));
         });

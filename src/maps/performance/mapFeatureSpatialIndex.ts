@@ -66,9 +66,11 @@ export function geometryGeographicBounds(geometry: GeoJSON.GeoJsonObject | null 
 }
 
 export function resolvedFeatureGeographicBounds(feature: ResolvedMapFeature): GeographicBounds | null {
-    if (Number.isFinite(feature.lon) && Number.isFinite(feature.lat))
-        return [feature.lon!, feature.lat!, feature.lon!, feature.lat!];
-    return geometryGeographicBounds(feature.geometry);
+    const geometryBounds = geometryGeographicBounds(feature.geometry);
+    if (geometryBounds) return geometryBounds;
+    return Number.isFinite(feature.lon) && Number.isFinite(feature.lat)
+        ? [feature.lon!, feature.lat!, feature.lon!, feature.lat!]
+        : null;
 }
 
 export function buildMapFeatureSpatialIndex(features: readonly ResolvedMapFeature[]): MapFeatureSpatialIndex {

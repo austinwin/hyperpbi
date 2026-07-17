@@ -6,12 +6,12 @@ import { ComponentRegistry } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
 import { sanitizeStyleObject } from "../security/sanitizeCss";
-import { RenderContext, useRenderContext } from "./RenderContext";
-import { executeComponentInteraction } from "../interactions/componentInteraction";
+import { RenderContext, useRenderContext, type RenderContextValue } from "./RenderContext";
+import { componentRows as selectedComponentRows, executeComponentInteraction, rowsForComponent } from "../interactions/componentInteraction";
 import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
-import { rowsForComponent } from "../interactions/componentInteraction";
+import { componentOwnsResponsiveLayout, componentSubtreeRequestsFill, responsiveComponentStyle } from "../components/layout/responsiveLayout";
 function isMapComponent(
   component: DashboardComponent,
 ): component is MapComponent {
@@ -24,8 +24,27 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const componentId = component.id ?? `${component.type}-${index}`;
         const authoringOwnerId = context.ownerByRuntimeId?.[componentId] ?? componentId;
         const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
-        const sourceIndices=(indices:number[])=>Array.from(new Set(indices.flatMap(index=>datasetResult?.lineage[index]??[]))).sort((a,b)=>a-b);
-        const componentContext=datasetResult?{...context,data:datasetResult.data,rows:datasetResult.data.rows,sourceRows:datasetResult.data.rows,sourceRowKeys:datasetResult.data.rowKeys,datasetLineage:datasetResult.lineage,getRowsForComponent:(id:string)=>rowsForComponent(datasetResult.data.rows,datasetResult.data.rowKeys,datasetResult.data.rows,id,{state:context.state}),selectExternal:(indices:number[],multiSelect?:boolean,details?:Parameters<typeof context.selectExternal>[2])=>context.selectExternal(sourceIndices(indices),multiSelect,{...details,matchedRowCount:sourceIndices(indices).length}),reportInteraction:(details:Parameters<typeof context.reportInteraction>[0],reason?:Parameters<typeof context.reportInteraction>[1],indices:number[]=[])=>context.reportInteraction({...details,matchedRowCount:sourceIndices(indices).length},reason,sourceIndices(indices))}:context;
+        const powerBiSourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+        const componentContext: RenderContextValue = datasetResult ? {
+            ...context,
+            data: datasetResult.data,
+            rows: datasetResult.data.rows,
+            sourceRows: datasetResult.data.rows,
+            sourceRowKeys: datasetResult.data.rowKeys,
+            datasetLineage: datasetResult.lineage,
+            interactionIndexSpace: "component",
+            getRowsForComponent: (id: string) => rowsForComponent(
+                datasetResult.data.rows,
+                datasetResult.data.rowKeys,
+                datasetResult.data.rows,
+                id,
+                { state: context.state, datasetLineage: datasetResult.lineage, powerBiSourceRowKeys },
+            ),
+            componentRows: (id: string) => {
+                const selected = new Set(selectedComponentRows(id, { state: context.state }));
+                return datasetResult.lineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [index] : []);
+            },
+        } : context;
         const rules = schema.styles?.components ?? {};
         const globalRule = rules["*"] ?? {};
         const typeRule = rules[component.type] ?? {};
@@ -68,16 +87,19 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const disabledClass = component.disabled ? "hp-is-disabled" : "";
         const tooltipClass = component.tooltip ? "hp-has-tooltip" : "";
 
-const fillHeightClass =
-  isMapComponent(component) && component.heightMode === "fill"
-    ? "hp-height-fill"
-    : "";
+const fillHeightClass = component.heightMode === "fill" ? "hp-height-fill" : "";
+const aspectHeightClass = component.heightMode === "aspectRatio" && !isMapComponent(component) ? "hp-height-aspect" : "";
+const fillChainClass = !fillHeightClass && !aspectHeightClass && componentSubtreeRequestsFill(component) ? "hp-fill-chain" : "";
+const responsiveContainerClass = componentOwnsResponsiveLayout(component) ? "hp-responsive-container" : "";
 
 const componentClasses = [
   "hp-component",
   `hp-component-${component.type}`,
   showWrapperHighlight ? "hp-interaction-highlight" : "",
   fillHeightClass,
+  aspectHeightClass,
+  fillChainClass,
+  responsiveContainerClass,
   variantClass,
   sizeClass,
   disabledClass,
@@ -109,7 +131,8 @@ const componentClasses = [
                     else handleUiAction(event);
                 }
             } : undefined}
-            style={{ "--hp-span": Math.max(1, Math.min(12, component.span ?? 12)), ...safeStyle }}
+            data-hp-height-mode={component.heightMode ?? "auto"}
+            style={{ ...safeStyle, ...responsiveComponentStyle(component), "--hp-span": Math.max(1, Math.min(12, component.span ?? 12)), ...(component.heightMode === "fixed" && "height" in component && typeof component.height === "number" ? { height: `${component.height}px` } : {}), ...(component.minHeight !== undefined ? { minHeight: `${component.minHeight}px` } : {}), ...(component.heightMode === "aspectRatio" && !isMapComponent(component) ? { aspectRatio: String(component.aspectRatio ?? 16 / 9) } : {}) }}
         >
             <style>{scoped.css}</style>
             <RenderContext.Provider value={componentContext}>

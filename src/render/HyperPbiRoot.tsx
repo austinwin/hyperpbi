@@ -33,6 +33,7 @@ import { ToastHost } from "../components/overlays/ToastHost";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import { prepareLogicalDatasets } from "../editor/prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
+import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
@@ -205,7 +206,11 @@ export function HyperPbiRoot({
             result.data.rowKeys,
             datasetRows,
             componentId,
-            { state },
+            {
+              state,
+              datasetLineage: result.lineage,
+              powerBiSourceRowKeys: data.rowKeys,
+            },
           )
         : datasetRows;
       const indexByRow = new Map(
@@ -251,6 +256,7 @@ export function HyperPbiRoot({
         sourceRowKeys: data.rowKeys,
         powerBiSourceRows: data.rows,
         powerBiSourceRowKeys: data.rowKeys,
+        interactionIndexSpace: "powerbi",
         getRowsForComponent,
         getDatasetView,
         componentRows,
@@ -314,6 +320,7 @@ export function HyperPbiRoot({
       sourceRowKeys: data.rowKeys,
       powerBiSourceRows: data.rows,
       powerBiSourceRowKeys: data.rowKeys,
+      interactionIndexSpace: "powerbi",
       getRowsForComponent,
       getDatasetView,
       componentRows,
@@ -381,6 +388,7 @@ export function HyperPbiRoot({
     () => resolveAppShell(schema, settings, state),
     [schema, settings, state],
   );
+  const rootComponentsFill = componentListRequestsFill(schema.components);
 
   return (
     <div
@@ -406,7 +414,7 @@ export function HyperPbiRoot({
                   <DashboardRenderer components={schema.toolbar} />
                 </div>
               ) : null}
-              <div class="hp-grid">
+              <div class={`hp-grid ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
                 <DashboardRenderer components={schema.components} />
               </div>
               {schema.rightPanel?.length ? (
@@ -463,7 +471,7 @@ export function HyperPbiRoot({
                 </aside>
               )}
               <main class="hp-main">
-                <div class="hp-grid">
+                <div class={`hp-grid ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
                   <DashboardRenderer components={schema.components} />
                 </div>
                 {schema.rightPanel?.length ? (

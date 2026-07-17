@@ -13,7 +13,7 @@ export interface ChartDatumBinding {
 }
 
 export interface ChartBuildResult { option: EChartsCoreOption; bindings: ChartDatumBinding[]; warnings: string[]; }
-export interface ChartBuildContext { theme: RuntimeSettings["theme"]; sourceRows: DataRow[]; sourceRowKeys: string[]; sourceIndex: Map<DataRow, number>; }
+export interface ChartBuildContext { theme: RuntimeSettings["theme"]; sourceRows: DataRow[]; sourceRowKeys: string[]; sourceIndex: Map<DataRow, number>; sourceIndicesForRow?: (row: DataRow) => number[]; }
 
 export interface ChartAdapter<T extends ChartComponent = ChartComponent> {
     type: T["type"];

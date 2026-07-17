@@ -1,0 +1,193 @@
+{
+  "version": "2.0",
+  "title": "Flexible operations workspace",
+  "data": {
+    "datasets": {
+      "facility_detail": {
+        "source": "powerbi",
+        "select": ["region", "facility", "latitude", "longitude", "amount", "status"]
+      },
+      "region_summary": {
+        "source": "powerbi",
+        "groupBy": ["region"],
+        "metrics": {
+          "total_amount": { "op": "sum", "field": "amount" }
+        }
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "split",
+      "id": "operations-workspace",
+      "title": "Operations workspace",
+      "heightMode": "fill",
+      "minHeight": 420,
+      "direction": "row",
+      "resizable": true,
+      "persist": "local",
+      "sizes": [58, 42],
+      "minSizes": [30, 25],
+      "maxSizes": [75, 70],
+      "responsive": {
+        "xs": { "stack": true },
+        "md": { "stack": false }
+      },
+      "children": [
+        {
+          "type": "map",
+          "id": "facility-map",
+          "dataset": "facility_detail",
+          "heightMode": "fill",
+          "minHeight": 300,
+          "basemap": { "type": "none" },
+          "tools": {
+            "rectangleSelection": { "enabled": true, "selectionMode": "replace" },
+            "lassoSelection": { "enabled": true, "selectionMode": "add", "minimumPoints": 4 }
+          },
+          "toolbar": {
+            "rectangleSelection": true,
+            "lassoSelection": true,
+            "clearSelection": true,
+            "zoomToSelection": true
+          },
+          "interaction": {
+            "enabled": true,
+            "internalMode": "filter",
+            "internalScope": "others",
+            "externalMode": "selection",
+            "targets": ["facility-table", "amount-trend"]
+          },
+          "layers": [
+            {
+              "id": "facilities",
+              "name": "Facilities",
+              "dataset": "facility_detail",
+              "source": {
+                "type": "powerbi",
+                "bindings": {
+                  "latitude": "latitude",
+                  "longitude": "longitude",
+                  "color": "status",
+                  "size": "amount",
+                  "tooltip": ["facility", "status", "amount"]
+                }
+              },
+              "renderer": {
+                "type": "proportionalSize",
+                "field": "amount",
+                "fieldSource": "powerbi",
+                "minSize": 6,
+                "maxSize": 24,
+                "color": "#2563eb"
+              }
+            }
+          ]
+        },
+        {
+          "type": "tabs",
+          "id": "analysis-tabs",
+          "heightMode": "fill",
+          "tabs": [
+            {
+              "id": "trend-tab",
+              "title": "Trend and drill",
+              "content": [
+                {
+                  "type": "barChart",
+                  "id": "amount-trend",
+                  "dataset": "region_summary",
+                  "heightMode": "fill",
+                  "category": "region",
+                  "measure": "total_amount",
+                  "events": {
+                    "zoom": { "enabled": true },
+                    "rangeSelect": {
+                      "enabled": true,
+                      "targets": ["facility-table"],
+                      "interaction": {
+                        "internalMode": "filter",
+                        "internalScope": "others",
+                        "externalMode": "selection"
+                      }
+                    },
+                    "brush": {
+                      "enabled": true,
+                      "targets": ["facility-table", "facility-map"],
+                      "interaction": {
+                        "internalMode": "filter",
+                        "internalScope": "others",
+                        "externalMode": "selection"
+                      }
+                    }
+                  },
+                  "drill": {
+                    "trigger": "doubleClick",
+                    "showBreadcrumbs": true,
+                    "levels": [
+                      {
+                        "id": "regions",
+                        "label": "Regions",
+                        "dataset": "region_summary",
+                        "category": "region",
+                        "measure": "total_amount"
+                      },
+                      {
+                        "id": "facilities",
+                        "label": "Facilities",
+                        "dataset": "facility_detail",
+                        "category": "facility",
+                        "measure": "amount",
+                        "parentField": "region"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "detail-tab",
+              "title": "Filtered detail",
+              "content": [
+                {
+                  "type": "table",
+                  "id": "facility-table",
+                  "dataset": "facility_detail",
+                  "heightMode": "fill",
+                  "columns": [
+                    { "field": "facility", "title": "Facility" },
+                    { "field": "region", "title": "Region" },
+                    { "field": "status", "title": "Status" },
+                    { "field": "amount", "title": "Amount" }
+                  ],
+                  "pagination": false,
+                  "search": true,
+                  "maxRows": 100000,
+                  "virtualization": {
+                    "enabled": true,
+                    "threshold": 100,
+                    "rowHeight": 30,
+                    "overscan": 12
+                  },
+                  "export": {
+                    "enabled": true,
+                    "formats": ["csv", "xlsx"],
+                    "scope": "selectedOrFiltered",
+                    "fileName": "facility-detail"
+                  },
+                  "interaction": {
+                    "enabled": true,
+                    "internalMode": "highlight",
+                    "internalScope": "all",
+                    "externalMode": "selection",
+                    "showSelector": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

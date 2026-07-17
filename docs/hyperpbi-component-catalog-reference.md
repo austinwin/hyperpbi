@@ -11,7 +11,7 @@ Every 2.0 component requires `type` and a globally unique stable `id` matching `
 
 Allowed shared properties:
 
-`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
 The three behavior systems are independent: `uiAction` changes interface state; `interaction` controls universal internal/Power BI data behavior; `interactions` maps safe component-specific events to allowlisted payloads. None is mandatory on every component.
 
@@ -146,9 +146,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -223,9 +223,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -326,9 +326,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `sizes`, `minSizes`, `maxSizes`, `resizable`, `persist`, `storageKey`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxSizes`, `minHeight`, `minSizes`, `order`, `persist`, `props`, `resizable`, `responsive`, `size`, `sizes`, `slots`, `span`, `storageKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -437,9 +437,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -495,9 +495,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -588,9 +588,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -696,9 +696,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -773,9 +773,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -812,9 +812,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -855,9 +855,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -909,9 +909,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -963,9 +963,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1020,9 +1020,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1077,9 +1077,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1143,9 +1143,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1208,9 +1208,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -1278,9 +1278,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1332,9 +1332,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1381,9 +1381,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1441,9 +1441,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1487,9 +1487,9 @@ _12 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1551,9 +1551,9 @@ _7 components_
 
 **Required properties:** `type`, `id`, `tabs`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `tabs`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `tabs`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `tabs`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `tabs`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1642,9 +1642,9 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1700,9 +1700,9 @@ _7 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `multiple`, `defaultOpenItems`, `items`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `multiple`, `defaultOpenItems`, `items`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `defaultOpenItems`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `multiple`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `defaultOpenItems`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `minHeight`, `multiple`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1761,9 +1761,9 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `openWhen`, `order`, `position`, `props`, `responsive`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1844,9 +1844,9 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `openWhen`, `order`, `position`, `props`, `responsive`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -1952,9 +1952,9 @@ _7 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `orientation`, `activeStep`, `stateKey`, `clickable`, `items`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `orientation`, `activeStep`, `stateKey`, `clickable`, `items`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `activeStep`, `ariaLabel`, `className`, `clickable`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `orientation`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `activeStep`, `ariaLabel`, `aspectRatio`, `className`, `clickable`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `minHeight`, `order`, `orientation`, `props`, `responsive`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2013,9 +2013,9 @@ _7 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2095,9 +2095,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2137,9 +2137,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2206,9 +2206,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2250,9 +2250,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2293,9 +2293,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2337,9 +2337,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2381,9 +2381,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2436,9 +2436,9 @@ _9 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `format`, `intent`, `metrics`, `value`, `text`, `items`, `max`, `selectedRow`, `groups`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `props`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `field`, `format`, `groups`, `heightMode`, `hidden`, `icon`, `id`, `intent`, `interaction`, `interactions`, `items`, `max`, `metrics`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2516,9 +2516,9 @@ _9 components_
 
 **Required properties:** `type`, `id`, `dateField`, `titleField`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `dateField`, `titleField`, `categoryField`, `statusField`, `descriptionField`, `sortDirection`, `limit`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `dateField`, `titleField`, `categoryField`, `statusField`, `descriptionField`, `sortDirection`, `limit`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `categoryField`, `className`, `css`, `data`, `dataset`, `dateField`, `descriptionField`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `limit`, `props`, `size`, `slots`, `sortDirection`, `span`, `statusField`, `style`, `subtitle`, `title`, `titleField`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `categoryField`, `className`, `css`, `data`, `dataset`, `dateField`, `descriptionField`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `limit`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `sortDirection`, `span`, `statusField`, `style`, `subtitle`, `title`, `titleField`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2571,9 +2571,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `padding`, `header`, `actions`, `footer`, `status`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `padding`, `header`, `actions`, `footer`, `status`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `actions`, `ariaLabel`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `header`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `padding`, `props`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `actions`, `ariaLabel`, `aspectRatio`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `header`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `padding`, `props`, `responsive`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2654,9 +2654,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `icon`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2697,9 +2697,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `icon`, `ariaLabel`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2747,9 +2747,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `initials`, `label`, `shape`, `status`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `initials`, `label`, `shape`, `status`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `initials`, `interaction`, `interactions`, `label`, `props`, `shape`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `initials`, `interaction`, `interactions`, `label`, `minHeight`, `order`, `props`, `responsive`, `shape`, `size`, `slots`, `span`, `status`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2790,9 +2790,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `avatars`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `avatars`, `max`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `avatars`, `max`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `avatars`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `max`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `avatars`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `max`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -2871,9 +2871,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `primaryField`, `secondaryField`, `badgeField`, `valueField`, `maxItems`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `primaryField`, `secondaryField`, `badgeField`, `valueField`, `maxItems`, `compact`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `badgeField`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `maxItems`, `primaryField`, `props`, `secondaryField`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `badgeField`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `maxItems`, `minHeight`, `order`, `primaryField`, `props`, `responsive`, `secondaryField`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2923,9 +2923,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `columns`, `selectedRow`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `items`, `source`, `columns`, `selectedRow`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `props`, `selectedRow`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `minHeight`, `order`, `props`, `responsive`, `selectedRow`, `size`, `slots`, `source`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -2982,9 +2982,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `value`, `prefix`, `suffix`, `duration`, `format`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `aggregation`, `value`, `prefix`, `suffix`, `duration`, `format`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `duration`, `field`, `format`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `prefix`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `suffix`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `duration`, `field`, `format`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `prefix`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `suffix`, `title`, `tooltip`, `type`, `uiAction`, `value`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -3028,9 +3028,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `stages`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `stages`, `activeStage`, `stageField`, `orientation`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `stages`, `activeStage`, `stageField`, `orientation`, `compact`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `activeStage`, `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `orientation`, `props`, `size`, `slots`, `span`, `stageField`, `stages`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `activeStage`, `ariaLabel`, `aspectRatio`, `className`, `compact`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `orientation`, `props`, `responsive`, `size`, `slots`, `span`, `stageField`, `stages`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -3088,9 +3088,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `items`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `trigger`, `items`, `placement`, `closeOnSelect`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `trigger`, `items`, `placement`, `closeOnSelect`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `closeOnSelect`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `placement`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `closeOnSelect`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `items`, `minHeight`, `order`, `placement`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3156,9 +3156,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `backdropClose`, `footer`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `backdropClose`, `footer`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `footer`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3252,9 +3252,9 @@ _13 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`, `backdrop`, `backdropClose`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `position`, `openWhen`, `stateKey`, `backdrop`, `backdropClose`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `backdrop`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `openWhen`, `position`, `props`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `backdrop`, `backdropClose`, `children`, `className`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `openWhen`, `order`, `position`, `props`, `responsive`, `size`, `slots`, `span`, `stateKey`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3329,9 +3329,9 @@ _13 components_
 
 **Required properties:** `type`, `id`, `trigger`, `children`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `trigger`, `placement`, `closeOnOutsideClick`, `closeOnEscape`, `showArrow`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `children`, `direction`, `columns`, `gap`, `width`, `collapsible`, `defaultCollapsed`, `defaultOpen`, `trigger`, `placement`, `closeOnOutsideClick`, `closeOnEscape`, `showArrow`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `children`, `className`, `closeOnEscape`, `closeOnOutsideClick`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `placement`, `props`, `showArrow`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `children`, `className`, `closeOnEscape`, `closeOnOutsideClick`, `collapsible`, `columns`, `css`, `data`, `dataset`, `defaultCollapsed`, `defaultOpen`, `direction`, `disabled`, `gap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `placement`, `props`, `responsive`, `showArrow`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`, `width`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3390,9 +3390,9 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `description`, `primaryAction`, `secondaryAction`, `compact`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `description`, `primaryAction`, `secondaryAction`, `compact`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `compact`, `css`, `data`, `dataset`, `description`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `primaryAction`, `props`, `secondaryAction`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `compact`, `css`, `data`, `dataset`, `description`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `primaryAction`, `props`, `responsive`, `secondaryAction`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -3434,9 +3434,9 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `lines`, `placeholderVariant`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `lines`, `placeholderVariant`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `lines`, `placeholderVariant`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `lines`, `minHeight`, `order`, `placeholderVariant`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -3476,9 +3476,9 @@ _3 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `label`, `inline`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `label`, `inline`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `inline`, `interaction`, `interactions`, `label`, `props`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `inline`, `interaction`, `interactions`, `label`, `minHeight`, `order`, `props`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -3522,9 +3522,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3576,9 +3576,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3625,9 +3625,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3685,9 +3685,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3748,9 +3748,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `field`, `label`, `placeholder`, `min`, `max`, `step`, `multiple`, `defaultValue`, `options`, `targets`, `filter`, `action`, `actionValue`, `buttons`, `description`, `helpText`, `errorText`, `required`, `orientation`, `rows`, `maxLength`, `prefixText`, `prefixIcon`, `suffixText`, `suffixIcon`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `multiple`, `options`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `action`, `actionValue`, `ariaLabel`, `aspectRatio`, `buttons`, `className`, `css`, `data`, `dataset`, `defaultValue`, `description`, `disabled`, `errorText`, `field`, `filter`, `heightMode`, `helpText`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `label`, `max`, `maxLength`, `min`, `minHeight`, `multiple`, `options`, `order`, `orientation`, `placeholder`, `prefixIcon`, `prefixText`, `props`, `required`, `responsive`, `rows`, `size`, `slots`, `span`, `step`, `style`, `subtitle`, `suffixIcon`, `suffixText`, `targets`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -3802,9 +3802,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -3893,9 +3893,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -3985,9 +3985,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4068,9 +4068,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4154,9 +4154,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4240,9 +4240,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4326,9 +4326,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `x`, `y`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4404,9 +4404,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -4475,9 +4475,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -4571,9 +4571,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `series`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `series`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `series`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `series`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `series`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4651,9 +4651,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `showStart`, `showEnd`, `positiveIntent`, `negativeIntent`, `totalIntent`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `showStart`, `showEnd`, `positiveIntent`, `negativeIntent`, `totalIntent`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `negativeIntent`, `options`, `pointSize`, `positiveIntent`, `props`, `setOption`, `showEnd`, `showStart`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `totalIntent`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `negativeIntent`, `options`, `order`, `pointSize`, `positiveIntent`, `props`, `responsive`, `setOption`, `showEnd`, `showStart`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `totalIntent`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4704,9 +4704,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `sourceField`, `targetField`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sourceField`, `targetField`, `valueField`, `orientation`, `nodeAlign`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sourceField`, `targetField`, `valueField`, `orientation`, `nodeAlign`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `nodeAlign`, `options`, `orientation`, `pointSize`, `props`, `setOption`, `size`, `slots`, `sourceField`, `span`, `style`, `subtitle`, `targetField`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `nodeAlign`, `options`, `order`, `orientation`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `sourceField`, `span`, `style`, `subtitle`, `targetField`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4757,9 +4757,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `pathFields`, `valueField`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `pathFields`, `valueField`, `labelField`, `maxDepth`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `pathFields`, `valueField`, `labelField`, `maxDepth`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `labelField`, `maxDataRows`, `maxDepth`, `measure`, `options`, `pathFields`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `labelField`, `maxDataRows`, `maxDepth`, `measure`, `minHeight`, `options`, `order`, `pathFields`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `valueField`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4813,9 +4813,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `category`, `measure`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sort`, `gap`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `sort`, `gap`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `gap`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `sort`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `gap`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `sort`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4865,9 +4865,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `indicators`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `groupField`, `indicators`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `groupField`, `indicators`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `groupField`, `height`, `hidden`, `icon`, `id`, `indicators`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `groupField`, `height`, `heightMode`, `hidden`, `icon`, `id`, `indicators`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -4928,9 +4928,9 @@ _16 components_
 
 **Required properties:** `type`, `id`, `splitField`, `chart`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `splitField`, `chart`, `maxPanels`, `sharedScale`, `height`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `splitField`, `chart`, `maxPanels`, `sharedScale`, `height`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `chart`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxPanels`, `props`, `sharedScale`, `size`, `slots`, `span`, `splitField`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `chart`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxPanels`, `minHeight`, `order`, `props`, `responsive`, `sharedScale`, `size`, `slots`, `span`, `splitField`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -5035,9 +5035,9 @@ _2 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `columns`, `pagination`, `pageSize`, `search`, `resizableColumns`, `maxRows`, `stickyHeader`, `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `columns`, `pagination`, `pageSize`, `search`, `resizableColumns`, `maxRows`, `stickyHeader`, `density`, `striped`, `hover`, `showRowCount`, `pageSizeOptions`, `rowActions`, `emptyState`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `export`, `virtualization`
 
-**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `density`, `disabled`, `emptyState`, `engine`, `hidden`, `hover`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `pageSize`, `pageSizeOptions`, `pagination`, `props`, `resizableColumns`, `rowActions`, `search`, `showRowCount`, `size`, `slots`, `span`, `stickyHeader`, `striped`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `columns`, `css`, `data`, `dataset`, `density`, `disabled`, `emptyState`, `engine`, `export`, `heightMode`, `hidden`, `hover`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `minHeight`, `order`, `pageSize`, `pageSizeOptions`, `pagination`, `props`, `resizableColumns`, `responsive`, `rowActions`, `search`, `showRowCount`, `size`, `slots`, `span`, `stickyHeader`, `striped`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `virtualization`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -5124,9 +5124,9 @@ _2 components_
 
 **Required properties:** `type`, `id`, `rows`, `values`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `rows`, `columns`, `values`, `showTotals`, `heatmap`, `maxRows`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `rows`, `columns`, `values`, `showTotals`, `heatmap`, `maxRows`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `heatmap`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `props`, `rows`, `showTotals`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `values`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `columns`, `css`, `data`, `dataset`, `disabled`, `heatmap`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `maxRows`, `minHeight`, `order`, `props`, `responsive`, `rows`, `showTotals`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `values`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -5197,9 +5197,9 @@ _1 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `featureDetails`, `layerPanel`, `toolbar`, `settings`, `height`, `heightMode`, `minHeight`, `aspectRatio`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `featureDetails`, `layerPanel`, `toolbar`, `settings`, `height`, `heightMode`, `minHeight`, `aspectRatio`, `order`, `responsive`, `tools`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `featureDetails`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `minHeight`, `props`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `featureDetails`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `minHeight`, `order`, `props`, `responsive`, `search`, `settings`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tools`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -5364,9 +5364,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `repeat`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -5403,9 +5403,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `text`, `repeat`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `repeat`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML No.
 
@@ -5442,9 +5442,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `repeat`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `repeat`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `repeat`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields No; calculations No; scoped CSS Yes; slots Yes; interactions No; identity selection No; custom HTML Yes.
 
@@ -5487,9 +5487,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `text`, `repeat`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `html`, `text`, `repeat`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataset`, `disabled`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `props`, `repeat`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `heightMode`, `hidden`, `html`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `props`, `repeat`, `responsive`, `size`, `slots`, `span`, `style`, `subtitle`, `text`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML Yes.
 
@@ -5568,9 +5568,9 @@ _5 components_
 
 **Required properties:** `type`, `id`, `viewBox`, `elements`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `elements`, `dataContext`, `motion`, `performance`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `elements`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -5702,9 +5702,9 @@ _2 components_
 
 **Required properties:** `type`, `id`, `svg`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `dataContext`, `motion`, `performance`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `motion`, `performance`, `preserveAspectRatio`, `props`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 
@@ -5749,9 +5749,9 @@ _2 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `maxDataRows`, `initOptions`, `setOption`, `options`, `category`, `measure`, `aggregation`, `x`, `y`, `pointSize`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `events`, `drill`
 
-**All allowed properties:** `aggregation`, `ariaLabel`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `options`, `pointSize`, `props`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
+**All allowed properties:** `aggregation`, `ariaLabel`, `aspectRatio`, `category`, `className`, `css`, `data`, `dataset`, `disabled`, `drill`, `events`, `height`, `heightMode`, `hidden`, `icon`, `id`, `initOptions`, `interaction`, `interactions`, `maxDataRows`, `measure`, `minHeight`, `options`, `order`, `pointSize`, `props`, `responsive`, `setOption`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`, `x`, `y`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 

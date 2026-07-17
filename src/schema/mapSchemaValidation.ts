@@ -271,8 +271,11 @@ export function validateMapComponentSchema(
         "clearSelection",
         "zoomToSelection",
         "bookmarks",
+        "rectangleSelection",
+        "lassoSelection",
       ),
     ],
+    ["tools", allowed("rectangleSelection", "lassoSelection")],
   ];
   for (const [property, keys] of nested)
     if (
@@ -331,6 +334,66 @@ export function validateMapComponentSchema(
       componentId,
       diagnostics,
     );
+  if (object(component.toolbar))
+    for (const property of ["rectangleSelection", "lassoSelection"])
+      if (
+        component.toolbar[property] !== undefined &&
+        typeof component.toolbar[property] !== "boolean"
+      )
+        diagnostics.push({
+          code: "INVALID_PROPERTY_TYPE",
+          severity: "error",
+          path: `${path}/toolbar/${property}`,
+          componentId,
+          message: `${property} must be a boolean.`,
+          received: component.toolbar[property],
+        });
+  if (object(component.tools)) {
+    for (const property of ["rectangleSelection", "lassoSelection"]) {
+      const value = component.tools[property];
+      const toolPath = `${path}/tools/${property}`;
+      if (value === undefined || typeof value === "boolean") continue;
+      if (!validateObject(value, toolPath, componentId, diagnostics)) continue;
+      unknownKeys(
+        value,
+        property === "lassoSelection"
+          ? allowed("enabled", "selectionMode", "minimumPoints")
+          : allowed("enabled", "selectionMode"),
+        toolPath,
+        componentId,
+        diagnostics,
+      );
+      if (value.enabled !== undefined && typeof value.enabled !== "boolean")
+        diagnostics.push({
+          code: "INVALID_PROPERTY_TYPE",
+          severity: "error",
+          path: `${toolPath}/enabled`,
+          componentId,
+          message: "Spatial selection enabled must be a boolean.",
+          received: value.enabled,
+        });
+      validateEnum(
+        value.selectionMode,
+        ["replace", "toggle", "add"],
+        `${toolPath}/selectionMode`,
+        componentId,
+        diagnostics,
+      );
+      if (
+        property === "lassoSelection" &&
+        value.minimumPoints !== undefined &&
+        (!Number.isInteger(value.minimumPoints) || Number(value.minimumPoints) < 3 || Number(value.minimumPoints) > 100)
+      )
+        diagnostics.push({
+          code: "INVALID_PROPERTY_TYPE",
+          severity: "error",
+          path: `${toolPath}/minimumPoints`,
+          componentId,
+          message: "Lasso minimumPoints must be an integer from 3 through 100.",
+          received: value.minimumPoints,
+        });
+    }
+  }
   for (const property of ["height", "minHeight", "aspectRatio"])
     if (
       component[property] !== undefined &&

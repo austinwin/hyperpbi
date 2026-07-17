@@ -10,15 +10,18 @@ import { SlotRenderer } from "../custom/slotRenderer";
 import { clearComponentInteraction, executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
+import { downloadTableExport, rowsForTableExport, tableExportColumns } from "./tableExport";
 
 function columnDefinition(column: string | TableColumn): TableColumn {
     return typeof column === "string" ? { field: column } : column;
 }
 
-export const MAX_RENDERED_TABLE_ROWS = 5_000;
+/** A final memory guard; the authored/format-pane data limit remains authoritative. */
+export const MAX_RENDERED_TABLE_ROWS = 250_000;
+export const MAX_NON_VIRTUAL_TABLE_ROWS = 5_000;
 export const TABLE_VIRTUALIZATION_THRESHOLD = 100;
 export const TABLE_ROW_HEIGHT = 31;
-const TABLE_OVERSCAN_ROWS = 8;
+export const TABLE_OVERSCAN_ROWS = 8;
 
 export interface TableVirtualRange {
     start: number;
@@ -102,6 +105,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>();
     const [scrollTop, setScrollTop] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(480);
     const scrollFrameRef = useRef<number>();
     const pendingScrollTopRef = useRef(0);
     const tableWrapRef = useRef<HTMLDivElement>(null);
@@ -111,14 +115,20 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const columns = useMemo<TableColumn[]>(
         () => (component.columns?.length
             ? component.columns.map(columnDefinition)
-            : Object.keys(data.fields).map(field => ({ field })))
-            .filter(column => data.fields[column.field]),
+            : Object.keys(data.fields).map<TableColumn>(field => ({ field })))
+            .filter(column => data.fields[column.field] && column.visible !== false),
         [component.columns, data.fields],
     );
     const columnFields = useMemo(() => columns.map(column => column.field), [columns]);
-    const maxRows = Math.min(component.maxRows ?? settings.table.maxRows, settings.table.maxRows, MAX_RENDERED_TABLE_ROWS);
+    const configuredMaxRows = Math.min(component.maxRows ?? settings.table.maxRows, settings.table.maxRows, MAX_RENDERED_TABLE_ROWS);
     const needle = (state.tableSearch[id] ?? "").trim().toLowerCase();
-    const selectedRows = state.componentSelectedRows[id] ?? [];
+    const searchActive = needle.length > 0;
+    const selectedSourceRows = state.componentSelectedRows[id] ?? [];
+    const selectedRows = useMemo(() => {
+        if (context.interactionIndexSpace !== "component" || !context.datasetLineage) return selectedSourceRows;
+        const selected = new Set(selectedSourceRows);
+        return context.datasetLineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [index] : []);
+    }, [selectedSourceRows, context.interactionIndexSpace, context.datasetLineage]);
     const highlightedRows = componentRows(id);
     const selectedRowSet = useMemo(() => new Set(selectedRows), [selectedRows]);
     const highlightedRowSet = useMemo(() => new Set(highlightedRows), [highlightedRows]);
@@ -127,20 +137,25 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
         [sourceRows],
     );
     const searchIndex = useMemo(
-        () => buildTableSearchIndex(rows, columnFields),
-        [rows, columnFields],
+        () => searchActive ? buildTableSearchIndex(rows, columnFields) : [],
+        [rows, columnFields, searchActive],
     );
     const prepared = useMemo(() => {
         const matching = needle ? rows.filter((_row, index) => searchIndex[index].includes(needle)) : rows;
         return sort ? sortRows(matching, sort.field, sort.direction) : matching;
     }, [rows, searchIndex, needle, sort]);
-    const limited = useMemo(() => prepared.slice(0, maxRows), [prepared, maxRows]);
     const pageSize = Math.max(5, component.pageSize ?? 25);
     const paginate = component.pagination ?? settings.table.pagination;
+    const virtualizationAllowed = component.virtualization?.enabled !== false && !paginate;
+    const maxRows = virtualizationAllowed || paginate ? configuredMaxRows : Math.min(configuredMaxRows, MAX_NON_VIRTUAL_TABLE_ROWS);
+    const limited = useMemo(() => prepared.slice(0, maxRows), [prepared, maxRows]);
     const pages = Math.max(1, Math.ceil(limited.length / pageSize));
-    const virtualized = !paginate && limited.length > TABLE_VIRTUALIZATION_THRESHOLD;
+    const rowHeight = Math.max(22, Math.min(80, component.virtualization?.rowHeight ?? (component.density === "compact" ? 27 : TABLE_ROW_HEIGHT)));
+    const virtualizationThreshold = Math.max(1, component.virtualization?.threshold ?? TABLE_VIRTUALIZATION_THRESHOLD);
+    const overscan = Math.max(1, Math.min(100, component.virtualization?.overscan ?? TABLE_OVERSCAN_ROWS));
+    const virtualized = virtualizationAllowed && limited.length > Math.min(virtualizationThreshold, MAX_NON_VIRTUAL_TABLE_ROWS);
     const range = virtualized
-        ? tableVirtualRange(limited.length, scrollTop, 480)
+        ? tableVirtualRange(limited.length, scrollTop, viewportHeight, rowHeight, overscan)
         : { start: 0, end: limited.length, topSpacer: 0, bottomSpacer: 0 };
     const visible = paginate
         ? limited.slice((page - 1) * pageSize, page * pageSize)
@@ -155,6 +170,18 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     useEffect(() => () => {
         if (scrollFrameRef.current !== undefined) cancelAnimationFrame(scrollFrameRef.current);
     }, []);
+    useEffect(() => {
+        const node = tableWrapRef.current;
+        if (!node || !virtualized || typeof ResizeObserver === "undefined") return;
+        const measure = () => {
+            const measured = node.clientHeight;
+            if (measured > 0) setViewportHeight(current => current === measured ? current : measured);
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, [virtualized, component.heightMode]);
 
     const toggleSort = (field: string) =>
         setSort(current => ({
@@ -181,13 +208,29 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
         return key;
     };
 
+    const exportConfig = component.export;
+    const exportEnabled = exportConfig?.enabled === true;
+    const exportFormats = exportConfig?.formats?.length ? exportConfig.formats : ["csv" as const, "xlsx" as const];
+    const exportScope = exportConfig?.scope ?? "selectedOrFiltered";
+    const selectedExportIndices = useMemo(() => new Set([...selectedRows, ...highlightedRows]), [selectedRows, highlightedRows]);
+    const exportedColumns = useMemo(() => tableExportColumns(columns, Object.fromEntries(Object.entries(data.fields).map(([field, definition]) => [field, definition.displayName]))), [columns, data.fields]);
+    const runExport = (format: "csv" | "xlsx") => {
+        const exportRows = rowsForTableExport(prepared, sourceRows, selectedExportIndices, exportScope);
+        downloadTableExport(format, exportConfig?.fileName ?? component.title ?? id, exportRows, exportedColumns);
+    };
+    const toolbarVisible = (component.search ?? settings.table.search) || exportEnabled;
+    const effectiveExportScope = exportScope === "selectedOrFiltered" ? selectedExportIndices.size ? "selected" : "filtered" : exportScope;
+
     return <>
-        {(component.search ?? settings.table.search) && <div class="hp-table-toolbar">
-            <input class="form-control form-control-sm" type="search" placeholder="Search table…" value={state.tableSearch[id] ?? ""} onInput={event => dispatch({ type: "tableSearch", id, value: event.currentTarget.value })} />
-            {selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => clearComponentInteraction(policy, id, context)}>{policy.internalMode === "filter" ? "Show all" : "Clear selection"}</button>}
-            <span>{limited.length.toLocaleString()} rows</span>
+        {toolbarVisible && <div class="hp-table-toolbar">
+            {(component.search ?? settings.table.search) && <input class="form-control form-control-sm" type="search" placeholder="Search table…" value={state.tableSearch[id] ?? ""} onInput={event => dispatch({ type: "tableSearch", id, value: event.currentTarget.value })} />}
+            <div class="hp-table-toolbar-actions">
+                {selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => clearComponentInteraction(policy, id, context)}>{policy.internalMode === "filter" ? "Show all" : "Clear selection"}</button>}
+                {exportEnabled && exportFormats.map(format => <button type="button" class="btn btn-sm hp-table-export" onClick={() => runExport(format)} disabled={effectiveExportScope === "selected" && selectedExportIndices.size === 0}>Export {effectiveExportScope} {format.toUpperCase()}</button>)}
+            </div>
+            <span>{prepared.length.toLocaleString()} rows</span>
         </div>}
-        {columns.length > 0 && rows.length > 0 ? <div ref={tableWrapRef} class={`hp-table-wrap${virtualized ? " hp-table-virtual" : ""}`} onScroll={virtualized ? onScroll : undefined}>
+        {columns.length > 0 && rows.length > 0 ? <div ref={tableWrapRef} class={`hp-table-wrap${virtualized ? " hp-table-virtual" : ""}${component.density === "compact" ? " is-compact" : ""}`} style={{ "--hp-table-row-height": `${rowHeight}px` }} onScroll={virtualized ? onScroll : undefined}>
             <table class="table table-sm table-vcenter hp-table" aria-rowcount={limited.length}>
                 <thead><tr>
                     {policy.showSelector && <th aria-label="Selection" />}

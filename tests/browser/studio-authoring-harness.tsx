@@ -68,6 +68,17 @@ const candidate = JSON.stringify({
       title: "Municipal Asset Status",
       heightMode: "fixed",
       height: 380,
+      tools: {
+        rectangleSelection: { enabled: true, selectionMode: "replace" },
+        lassoSelection: { enabled: true, selectionMode: "replace", minimumPoints: 3 },
+      },
+      interaction: {
+        enabled: true,
+        internalMode: "highlight",
+        internalScope: "all",
+        externalMode: "selection",
+        targets: ["asset-list"],
+      },
       featureDetails: { mode: "auto", clearSelectionOnBackgroundClick: true, clearSelectionOnClose: false },
       layers: [{
         id: "municipal-assets",
@@ -109,7 +120,7 @@ const candidate = JSON.stringify({
       }],
       layerPanel: { visible: true },
       settings: { showLayerControl: true, showLegend: true },
-      toolbar: { visible: true, layers: true, legend: true, search: false },
+      toolbar: { visible: true, layers: true, legend: true, search: false, rectangleSelection: true, lassoSelection: true },
     },
     {
       type: "table",

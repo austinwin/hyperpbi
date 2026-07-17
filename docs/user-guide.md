@@ -59,6 +59,14 @@ Select a rendered component to locate its stable authoring owner and exact JSON 
 
 Configure the shell at root `app`, not `schema.app`. It can provide brand, navbar, sidebar, page header, footer, navigation, and actions. Use it for a sufficiently large app-style visual. Prefer offcanvas/modal/dropdown/popover components for narrow layouts.
 
+## Responsive application layouts
+
+Every component accepts the shared `heightMode`, `minHeight`, `aspectRatio`, `order`, and mobile-first `responsive` contract. `heightMode: "fill"` propagates a bounded available height through nested grid/flex/split containers, cards, tabs, charts, maps, and virtual tables. Use `aspectRatio` for self-sized analytical panels and preserve existing component `height` properties for fixed-height compatibility.
+
+Responsive rules are container-relative at `xs`, `sm`, `md`, `lg`, and `xl`. A rule can change `span`, `order`, `visible`/`hidden`, `direction`, `columns`, or `stack`. Author the narrow layout first; for example, stack a split at `xs` and restore its row direction at `md`. Hidden components do not retain layout space.
+
+`split` is a first-class resizable container. Set `resizable: true`, aligned `sizes`, optional `minSizes`/`maxSizes`, and `persist: "none" | "session" | "local"`. Viewer sizes are normalized, constrained, scoped to the visual and stable component ID (or `storageKey`), restored only when compatible, and updated with pointer or keyboard handles. Nested charts and maps receive a real resize notification while dragging and after breakpoint changes.
+
 ## Components and catalogs
 
 Use the generated [component catalog](hyperpbi-component-catalog-reference.md) for canonical types and properties. Prefer semantic charts, native table/matrix, first-class cards/lists/detail/overlays, `map`, and declarative `svg` before advanced/custom fallbacks.
@@ -77,15 +85,25 @@ Keep interface and data behavior separate:
 
 Power BI external filter mode requires a model-column target. Dataset metrics, derived fields, and true measures cannot directly filter the semantic model. Identity selection may work through source lineage.
 
+Set `interaction.target` or `interaction.targets` to link only named components; omit both for the existing report-wide internal behavior. Charts add declarative `events.zoom`, `events.rangeSelect`, and `events.brush`. Each event can enable its own interaction, targets, and binding field. Zoom state survives rerenders, range and brush selections resolve back to original Power BI row lineage, and an empty brush clears stale state.
+
+For hierarchical navigation, define `drill.levels` with at least two already-declared logical datasets. Each level supplies its dataset and chart bindings; child levels use `parentField` to match the selected parent value. `trigger` can be `click` or `doubleClick`, and breadcrumbs navigate back without querying or executing arbitrary data. Preload each resolution in `data.datasets`; drill state switches prepared views rather than mutating the semantic model.
+
+## Tables and exports
+
+Native tables virtualize large result sets by default once the threshold is reached. `virtualization` can explicitly set `enabled`, `threshold` (up to the 5,000-row non-virtual DOM guard), measured `rowHeight` (`22`–`80` pixels), and bounded `overscan`. Only the viewport window plus overscan is mounted, while search, sort, filters, row count, selection, pagination, and export continue to use the complete prepared result. Explicitly disabling virtualization keeps the existing 5,000-row DOM safety limit. The visual-format maximum-row setting remains the authoritative ingestion guard.
+
+Enable `export` with one or both `formats: ["csv", "xlsx"]`, `scope: "filtered" | "selected" | "selectedOrFiltered"`, and an optional `fileName`. Exports use visible columns and the complete filtered/selected row set, not only mounted virtual rows. CSV is UTF-8 with a BOM; both formats neutralize spreadsheet-formula prefixes. XLSX output is generated locally without sending data to a provider.
+
 ## Maps
 
 Use **Open in Map Studio** from a selected map in Inspector, or open the permanent Map Studio tab. It shares canonical JSON, selection, bounded history, prepared calculated/configured/logical data, and live preview with Inspector. Create layers and groups; choose each layer's optional logical dataset; bind Geometry, Latitude+Longitude, X+Y, or Address; then configure renderer, labels, popup/tooltip, source-aware filters/visibility, interactions, limits, basemap, and bookmarks. Text drafts commit as one transaction on blur/Enter, and invalid edits keep the last valid preview.
 
-Every Map Studio transaction uses the current Runtime Config owned by HyperPBI Studio. Map-layer interactions author `trigger: "click"` only. ArcGIS service roots load as one bounded spatial/group/table summary; selecting a spatial layer lazily loads that item's fields, while tables remain nonspatial and groups remain navigation-only. Tile/dynamic source edits replace the mounted overlay without resetting the map view. Join preview and runtime share cardinality, unmatched-policy, blank/invalid aggregation, and bounded diagnostics semantics. Class breaks reduce their effective count for small or repeated data. Diagnostic paths are canonical JSON pointers and the selected-layer panel excludes siblings.
+Every Map Studio transaction uses the current Runtime Config owned by HyperPBI Studio. Map-layer interactions author `trigger: "click"` only. The Basemap & view editor exposes rectangle and lasso spatial-selection tools; the same canonical `tools` properties drive Studio preview and the viewer toolbar. ArcGIS service roots load as one bounded spatial/group/table summary; selecting a spatial layer lazily loads that item's fields, while tables remain nonspatial and groups remain navigation-only. Tile/dynamic source edits replace the mounted overlay without resetting the map view. Join preview and runtime share cardinality, unmatched-policy, blank/invalid aggregation, and bounded diagnostics semantics. Class breaks reduce their effective count for small or repeated data. Diagnostic paths are canonical JSON pointers and the selected-layer panel excludes siblings.
 
 The effective dataset is `layer.dataset`, then the map's dataset, then `powerbi`. Logical datasets are views over the one flattened Power BI data view received by the custom visual; they do not query model tables independently. Explicit layers resolve independently and do not inherit global Runtime Config coordinates. Location precedence is Geometry → Lat/Lon → X/Y → Address. Diagnostics report exact layer dataset/bindings, invalid-location counts, mixed geometry, `layerValue`, lineage, requests, joins, limits, and timings.
 
-Put fields used by Power BI-backed layers and joins in Values. ArcGIS reference-only maps need no Values fields and continue to run with an empty data view. Fields from different tables must have an unambiguous semantic-model relationship or bridge; Power BI rejects unrelated combinations before the visual runs. ArcGIS authoring fetches metadata only when you click **Fetch service metadata**; choose a root sublayer to populate service field controls. Click **Run join preview** for a bounded runtime-equivalent preview. `fieldSource` distinguishes `powerbi`, `service`, and `joined` attributes. Stable point shapes are circle, square, diamond, and triangle; cluster labels support count and numeric sum. Basemap/view changes are reactive, `view.fitPadding` is a `0`–`0.5` ratio (default `0.08`), and **Add current view** captures the latest live preview center/zoom. Address search remains user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment. Geocoding behavior is unchanged by this work.
+Put fields used by Power BI-backed layers and joins in Values. ArcGIS reference-only maps need no Values fields and continue to run with an empty data view. Fields from different tables must have an unambiguous semantic-model relationship or bridge; Power BI rejects unrelated combinations before the visual runs. ArcGIS authoring fetches metadata only when you click **Fetch service metadata**; choose a root sublayer to populate service field controls. Click **Run join preview** for a bounded runtime-equivalent preview. `fieldSource` distinguishes `powerbi`, `service`, and `joined` attributes. Stable point shapes are circle, square, diamond, and triangle; cluster labels support count and numeric sum. Rectangle/lasso selections intersect point, multipoint, line, and polygon geometry, update canonical feature selection, target linked components, and send only real contributing Power BI identities externally. Basemap/view changes are reactive, `view.fitPadding` is a `0`–`0.5` ratio (default `0.08`), and **Add current view** captures the latest live preview center/zoom. Address search remains user-triggered and requires a Maps package, provider configuration, WebAccess, and privacy acknowledgment. Geocoding behavior is unchanged by this work.
 
 Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
 
@@ -102,6 +120,8 @@ Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by t
 | Component sees no field | Its named dataset may have renamed/selected/grouped the field away |
 | Map has no locations | Bind geometry or a complete valid coordinate/address pair |
 | Coordinates collapse | Set latitude/longitude to Don't summarize |
+| Fill panel stays short | Give its bounded ancestor `heightMode: "fill"`; use a fixed or report-canvas height at the outer boundary |
+| Split size does not restore | Keep a stable component `id`/`storageKey`; persisted sizes are ignored when pane count or constraints change |
 | External map/provider disabled | Use Maps package; verify WebAccess, HTTPS host, runtime config |
 | Raw SVG disappears | Review sanitizer warnings, exact limits, forbidden resource/element use |
 | AI response rejected | Return one complete JSON object; remove comments/fences/prose/multiple objects |

@@ -109,4 +109,30 @@ describe("large table runtime", () => {
         expect(sorted[0].name).toBe("Facility 99999");
         expect(elapsed).toBeLessThan(5_000);
     });
+
+    it("renders a 100,000-row configured table with a bounded DOM window", () => {
+        const host = document.createElement("div");
+        const value = largeContext(100_000);
+        value.settings.table.maxRows = 100_000;
+        const started = performance.now();
+        act(() => render(
+            h(RenderContext.Provider, { value }, h(SimpleVirtualTable, {
+                component: {
+                    type: "table",
+                    id: "stress-table",
+                    columns: ["id", "name", "status"],
+                    pagination: false,
+                    search: false,
+                    maxRows: 100_000,
+                    virtualization: { enabled: true, threshold: 50, rowHeight: 28, overscan: 10 },
+                },
+            })),
+            host,
+        ));
+        expect(host.querySelector("table")?.getAttribute("aria-rowcount")).toBe("100000");
+        expect(host.querySelectorAll("tbody tr").length).toBeLessThan(60);
+        expect(host.textContent).not.toContain("Showing the first");
+        expect(performance.now() - started).toBeLessThan(5_000);
+        act(() => render(null, host));
+    });
 });

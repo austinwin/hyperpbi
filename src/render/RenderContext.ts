@@ -61,6 +61,10 @@ export interface RenderContextValue {
     isOverlayOpen: (id: string) => boolean;
     datasets?: Map<string,DatasetResult>;
     datasetLineage?: number[][];
+    /** Internal interaction payload row indices are local to this dataset unless marked as Power BI source indices. */
+    interactionIndexSpace?: "component" | "powerbi";
+    /** Use original row keys for linked internal filtering while retaining semantic external-filter fields. */
+    interactionUsesSourceIdentity?: boolean;
     onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
 }
 

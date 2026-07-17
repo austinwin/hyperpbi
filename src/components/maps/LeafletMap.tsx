@@ -63,6 +63,14 @@ import {
   resolvedFeatureGeographicBounds,
   type GeographicBounds,
 } from "../../maps/performance/mapFeatureSpatialIndex";
+import {
+  selectMapFeaturesByShape,
+  type MapSelectionTool,
+  type MapSpatialSelectionResult,
+  type GeographicPoint,
+} from "../../maps/interactions/mapSpatialSelection";
+
+const MAX_LASSO_DRAFT_POINTS = 2_000;
 
 export interface LeafletMapController {
   home(): void;
@@ -110,6 +118,10 @@ export function LeafletMap({
   onLayerRuntimeStateChange,
   onMapClick,
   identifyHighlight,
+  selectionTool,
+  onSpatialSelect,
+  onSpatialSelectionClear,
+  minimumLassoPoints = 3,
 }: {
   component: MapComponent;
   resolvedLayers: ResolvedMapLayer[];
@@ -130,6 +142,10 @@ export function LeafletMap({
   /** Return true when the background click starts an owned interaction. */
   onMapClick?: (event: LeafletMapClickEvent) => boolean;
   identifyHighlight?: GeoJSON.GeoJsonObject | null;
+  selectionTool?: MapSelectionTool | null;
+  onSpatialSelect?: (result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => void;
+  onSpatialSelectionClear?: () => void;
+  minimumLassoPoints?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -153,6 +169,9 @@ export function LeafletMap({
   const labelSignatureRefs = useRef<Map<string, string>>(new Map());
   const searchMarkerRef = useRef<L.CircleMarker | null>(null);
   const identifyHighlightRef = useRef<L.GeoJSON | null>(null);
+  const selectionShapeLayerRef = useRef<L.Rectangle | L.Polygon | null>(null);
+  const selectionDraftRef = useRef<{ start: GeographicPoint; points: GeographicPoint[] } | null>(null);
+  const selectionJustCompletedRef = useRef(false);
   const paneNamesRef = useRef<Map<string, string>>(new Map());
   const reportedRenderSignaturesRef = useRef<Map<string, string>>(new Map());
   const runtimeMetricsRef = useRef(
@@ -183,6 +202,10 @@ export function LeafletMap({
   const onControllerReadyRef = useRef(onControllerReady);
   const onLayerRuntimeStateChangeRef = useRef(onLayerRuntimeStateChange);
   const onMapClickRef = useRef(onMapClick);
+  const selectionToolRef = useRef(selectionTool);
+  const onSpatialSelectRef = useRef(onSpatialSelect);
+  const onSpatialSelectionClearRef = useRef(onSpatialSelectionClear);
+  const minimumLassoPointsRef = useRef(minimumLassoPoints);
   const settingsMapRef = useRef(settings.map);
   const renderContextRef = useRef(context);
   const runtimeConfigRef = useRef(runtimeConfig);
@@ -206,6 +229,10 @@ export function LeafletMap({
   onControllerReadyRef.current = onControllerReady;
   onLayerRuntimeStateChangeRef.current = onLayerRuntimeStateChange;
   onMapClickRef.current = onMapClick;
+  selectionToolRef.current = selectionTool;
+  onSpatialSelectRef.current = onSpatialSelect;
+  onSpatialSelectionClearRef.current = onSpatialSelectionClear;
+  minimumLassoPointsRef.current = minimumLassoPoints;
   settingsMapRef.current = settings.map;
   renderContextRef.current = context;
   runtimeConfigRef.current = runtimeConfig;
@@ -529,6 +556,7 @@ export function LeafletMap({
     );
 
     const onMapBackgroundClick = (event: L.LeafletMouseEvent) => {
+      if (selectionJustCompletedRef.current || selectionToolRef.current) return;
       const bounds = map.getBounds();
       const size = map.getSize();
       const handled =
@@ -559,7 +587,14 @@ export function LeafletMap({
     current.dispatch({ type: "clearMapFeatures", mapId: id });
     current.dispatch({ type: "selectComponentRows", id, rows: [] });
     current.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+    current.dispatch({ type: "componentSelectionScope", id });
+    current.dispatch({ type: "componentSelectionMode", id });
+    current.dispatch({ type: "componentSelectionTargets", id });
+    current.dispatch({ type: "selectRows", rows: [] });
+    current.dispatch({ type: "selectRowKeys", keys: [] });
+    current.dispatch({ type: "clearInteractionFilter", id });
     current.dispatch({ type: "interactionSignature", id });
+    onSpatialSelectionClearRef.current?.();
 
     current.clearExternal({
       componentId: id,
@@ -579,14 +614,84 @@ export function LeafletMap({
     };
     map.on("click", onMapBackgroundClick);
 
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(ref.current);
+    const removeSelectionShape = () => {
+      if (selectionShapeLayerRef.current) map.removeLayer(selectionShapeLayerRef.current);
+      selectionShapeLayerRef.current = null;
+    };
+    const onSelectionStart = (event: L.LeafletMouseEvent) => {
+      if (!selectionToolRef.current || event.originalEvent?.button !== 0) return;
+      event.originalEvent.preventDefault?.();
+      event.originalEvent.stopPropagation?.();
+      const start: GeographicPoint = [event.latlng.lat, event.latlng.lng];
+      selectionDraftRef.current = { start, points: [start] };
+      removeSelectionShape();
+    };
+    const onSelectionMove = (event: L.LeafletMouseEvent) => {
+      const draft = selectionDraftRef.current;
+      const tool = selectionToolRef.current;
+      if (!draft || !tool) return;
+      const point: GeographicPoint = [event.latlng.lat, event.latlng.lng];
+      if (tool === "lasso") {
+        const previous = draft.points[draft.points.length - 1];
+        if (draft.points.length < MAX_LASSO_DRAFT_POINTS && (!previous || Math.abs(previous[0] - point[0]) + Math.abs(previous[1] - point[1]) > 0.00001)) draft.points.push(point);
+      }
+      removeSelectionShape();
+      const style = { color: renderContextRef.current.settings.theme.primary, weight: 2, opacity: 0.9, fillOpacity: 0.12, interactive: false };
+      selectionShapeLayerRef.current = tool === "rectangle"
+        ? L.rectangle(L.latLngBounds([draft.start, point]), style)
+        : L.polygon([...draft.points, point], style);
+      selectionShapeLayerRef.current.addTo(map);
+    };
+    const onSelectionEnd = (event: L.LeafletMouseEvent) => {
+      const draft = selectionDraftRef.current;
+      const tool = selectionToolRef.current;
+      if (!draft || !tool) return;
+      onSelectionMove(event);
+      const end: GeographicPoint = [event.latlng.lat, event.latlng.lng];
+      const shape = tool === "rectangle"
+        ? {
+            type: "rectangle" as const,
+            bounds: {
+              west: Math.min(draft.start[1], end[1]),
+              south: Math.min(draft.start[0], end[0]),
+              east: Math.max(draft.start[1], end[1]),
+              north: Math.max(draft.start[0], end[0]),
+            },
+          }
+        : { type: "lasso" as const, points: [...draft.points, end] };
+      selectionDraftRef.current = null;
+      removeSelectionShape();
+      if (shape.type === "lasso" && shape.points.length < Math.max(3, minimumLassoPointsRef.current)) return;
+      selectionJustCompletedRef.current = true;
+      requestAnimationFrame(() => { selectionJustCompletedRef.current = false; });
+      const original = event.originalEvent;
+      onSpatialSelectRef.current?.(selectMapFeaturesByShape(id, resolvedLayersRef.current, shape), {
+        ctrlKey: Boolean(original?.ctrlKey),
+        metaKey: Boolean(original?.metaKey),
+        shiftKey: Boolean(original?.shiftKey),
+      });
+    };
+    map.on("mousedown", onSelectionStart);
+    map.on("mousemove", onSelectionMove);
+    map.on("mouseup", onSelectionEnd);
+
+    const observer = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => map.invalidateSize());
+    observer?.observe(ref.current);
+    const invalidateSize = () => map.invalidateSize();
+    globalThis.addEventListener("resize", invalidateSize);
+    globalThis.addEventListener("hyperpbi:layout-resize", invalidateSize);
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
+      globalThis.removeEventListener("resize", invalidateSize);
+      globalThis.removeEventListener("hyperpbi:layout-resize", invalidateSize);
       map.off("moveend", onMoveEnd);
       map.off("resize", onResize);
       map.off("click", onMapBackgroundClick);
+      map.off("mousedown", onSelectionStart);
+      map.off("mousemove", onSelectionMove);
+      map.off("mouseup", onSelectionEnd);
+      removeSelectionShape();
       cancelAnimationFrame(initialViewportFrame);
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       for (const [, mounted] of dynamicLayerRefs.current) {
@@ -620,6 +725,19 @@ export function LeafletMap({
       runtimeMetricsRef.current.clear();
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const node = ref.current;
+    if (!map || !node) return;
+    node.classList.toggle("is-spatial-selecting", Boolean(selectionTool));
+    if (selectionTool) map.dragging?.disable();
+    else map.dragging?.enable();
+    return () => {
+      node.classList.remove("is-spatial-selecting");
+      if (mapRef.current === map) map.dragging?.enable();
+    };
+  }, [selectionTool]);
 
   // Dynamic identify owns one temporary, non-interactive highlight outside the
   // persistent vector registry and selection lifecycle.
@@ -1181,6 +1299,10 @@ export function LeafletMap({
         }
 
         const onClick = (event: L.LeafletMouseEvent) => {
+          if (selectionToolRef.current) {
+            event.originalEvent?.stopPropagation?.();
+            return;
+          }
           const currentFeature = mounted.feature;
           const currentLayer = mounted.layer;
           const currentContext = renderContextRef.current;
@@ -1229,6 +1351,9 @@ export function LeafletMap({
                     currentContext.powerBiSourceRows ?? currentContext.sourceRows,
                   sourceRowKeys:
                     currentContext.powerBiSourceRowKeys ?? currentContext.sourceRowKeys,
+                  datasetLineage: undefined,
+                  interactionIndexSpace: "powerbi" as const,
+                  interactionUsesSourceIdentity: true,
                   selectExternal: currentContext.selectSourceRows,
                 }
               : currentContext;

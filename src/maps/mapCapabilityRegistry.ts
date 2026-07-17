@@ -58,7 +58,8 @@ export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
         "map.layers[].filter", "map.layers[].filter[].field", "map.layers[].filter[].fieldSource", "map.layers[].filter[].operator", "map.layers[].filter[].value", "map.layers[].performance.maxFeatures", "map.layers[].performance.cacheMinutes", "map.layers[].performance.viewportQuery", "map.layers[].performance.requestBatchSize",
         "map.layers[].interaction", "map.layers[].interaction.enabled", "map.layers[].interaction.internalMode", "map.layers[].interaction.internalScope", "map.layers[].interaction.externalMode", "map.layers[].interaction.field", "map.layers[].interaction.fieldSource", "map.layers[].interaction.operator", "map.layers[].interaction.value", "map.layers[].interaction.selectionMode", "map.layers[].interaction.multiSelect", "map.layers[].interaction.showSelector", "map.layers[].interaction.clearOnSecondClick", "map.layers[].legend.visible", "map.layers[].legend.title", "map.layers[].legend.collapsed",
         "map.layerPanel.visible", "map.layerPanel.position", "map.layerPanel.defaultOpen", "map.layerPanel.allowViewerReorder", "map.layerPanel.allowViewerOpacity", "map.layerPanel.allowViewerLabels",
-        "map.toolbar.visible", "map.toolbar.home", "map.toolbar.layers", "map.toolbar.legend", "map.toolbar.search", "map.toolbar.clearSelection", "map.toolbar.zoomToSelection", "map.toolbar.bookmarks",
+        "map.toolbar.visible", "map.toolbar.home", "map.toolbar.layers", "map.toolbar.legend", "map.toolbar.search", "map.toolbar.clearSelection", "map.toolbar.zoomToSelection", "map.toolbar.bookmarks", "map.toolbar.rectangleSelection", "map.toolbar.lassoSelection",
+        "map.tools.rectangleSelection", "map.tools.lassoSelection", "map.tools.rectangleSelection.enabled", "map.tools.rectangleSelection.selectionMode", "map.tools.lassoSelection.enabled", "map.tools.lassoSelection.selectionMode", "map.tools.lassoSelection.minimumPoints",
     ]),
     ...entries("partial", ["map.view.fitMode"], "data and allVisibleLayers use all supported visible feature bounds; firstLayer uses the first visible feature layer."),
     ...entries("partial", ["map.layers[].join.keyType"], "Join normalization determines comparison values; keyType is retained for diagnostics and Studio guidance."),
@@ -75,7 +76,7 @@ export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
     ...entries("deprecated", ["map.layers[].performance.generalizeByZoom", "map.layers[].performance.minimumGeneralization", "map.layers[].performance.maximumGeneralization"], "Retained for schema compatibility only; the runtime does not generalize service or Power BI geometry and Map Studio does not expose these options."),
     ...entries("deprecated", ["map.layers[].performance.progressiveRendering"], "Retained for schema compatibility only; resolved layers are committed atomically and Map Studio does not expose this option."),
     ...entries("unsupported", [
-        "map.tools.scaleBar", "map.tools.coordinateDisplay", "map.tools.rectangleSelection", "map.tools.lassoSelection",
+        "map.tools.scaleBar", "map.tools.coordinateDisplay",
         "map.tools.distanceMeasurement", "map.tools.areaMeasurement", "map.tools.timeSlider", "map.tools.swipe",
         "map.tools.sideBySide", "map.tools.exportSelected", "map.tools.printLayout", "map.layerPanel.openInMapStudio",
     ], "This requested P1 viewer capability is registered for future work and is not accepted by the current schema.", "Not implemented"),

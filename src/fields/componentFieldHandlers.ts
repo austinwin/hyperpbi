@@ -191,6 +191,14 @@ export const componentFieldHandlers: Record<FieldTraversalHandler, Handler> = {
     "map-layers": mapLayers,
     "svg-elements": svgElements,
     "nested-chart"() { /* Traversed as a descriptor-declared single component container. */ },
+    "chart-events"(context) {
+        const events=context.component[context.descriptorField.property];if(!object(events))return;
+        for(const [eventName,event] of Object.entries(events)){if(!object(event))continue;emitValue(context,event,"field",`${context.componentPath}/${context.descriptorField.property}/${pointer(eventName)}/field`);if(object(event.interaction))emitValue(context,event.interaction,"field",`${context.componentPath}/${context.descriptorField.property}/${pointer(eventName)}/interaction/field`);}
+    },
+    "chart-drill"(context) {
+        const drill=context.component[context.descriptorField.property];if(!object(drill)||!Array.isArray(drill.levels))return;
+        drill.levels.forEach((level,index)=>{if(!object(level))return;const datasetName=typeof level.dataset==="string"&&level.dataset?level.dataset:context.effectiveDataset;const levelContext={...context,effectiveDataset:datasetName};const emitDrillField=(field:string,requirement:Requirement)=>{const path=`${context.componentPath}/${context.descriptorField.property}/levels/${index}/${field}`;if(typeof level[field]==="string")emitValue(levelContext,level,field,path,requirement);else{const reference=context.component[field];if(typeof reference!=="string"||!reference||preserved(reference))return;levelContext.emit({reference,path,componentId:context.componentId,datasetName,requirement,source:sourceFor(levelContext),set:next=>{level[field]=next;}});}};for(const field of ["category","parentField"])emitDrillField(field,"any");for(const field of ["measure","x","y","pointSize"])emitDrillField(field,"numeric");});
+    },
 };
 
 export const registeredComponentFieldHandlers = Object.freeze(Object.keys(componentFieldHandlers) as FieldTraversalHandler[]);

@@ -43,6 +43,37 @@ describe("universal interaction execution",()=>{
     it("supports external none, selection, filter, and auto",()=>{const none=harness();let item=component({enabled:true,externalMode:"none",internalMode:"none"});executeComponentInteraction(resolveInteractionPolicy(item,none.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0]}),none.context,{trigger:"click"});expect(none.selectExternal).not.toHaveBeenCalled();const selection=harness();item=component({enabled:true,externalMode:"selection",internalMode:"none"});executeComponentInteraction(resolveInteractionPolicy(item,selection.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0]}),selection.context,{trigger:"click"});expect(selection.selectExternal).toHaveBeenCalledWith([0],false,expect.any(Object));const filter=harness();item=component({enabled:true,externalMode:"filter",internalMode:"none",field:"status"});executeComponentInteraction(resolveInteractionPolicy(item,filter.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0],field:"status",value:"Open"}),filter.context,{trigger:"click"});expect(filter.applyExternalFilter).toHaveBeenCalledWith("status","=","Open",expect.any(Object));});
     it("sends one In filter for multi-select and clears on the second click",()=>{const test=harness();const item=component({enabled:true,externalMode:"filter",internalMode:"highlight",field:"status",selectionMode:"add",multiSelect:true});const policy=resolveInteractionPolicy(item,test.context.config,"dataPoint");executeComponentInteraction(policy,createInteractionPayload(item,{rowIndices:[0],field:"status",value:"Open"}),test.context,{trigger:"click"});executeComponentInteraction(policy,createInteractionPayload(item,{rowIndices:[1],field:"status",value:"Closed"}),test.context,{trigger:"click"});expect(test.applyExternalFilter).toHaveBeenLastCalledWith("status","in",expect.arrayContaining(["Open","Closed"]),expect.any(Object));const clearItem=component({enabled:true,externalMode:"selection",internalMode:"highlight",clearOnSecondClick:true});const clearPolicy=resolveInteractionPolicy(clearItem,test.context.config,"dataPoint");const payload=createInteractionPayload(clearItem,{rowIndices:[2]});executeComponentInteraction(clearPolicy,payload,test.context,{trigger:"click"});executeComponentInteraction(clearPolicy,payload,test.context,{trigger:"click"});expect(test.clearExternal).toHaveBeenCalled();expect(test.context.componentRows("source")).toEqual([]);});
     it("keeps internal behavior when the global external gate is off",()=>{const test=harness({...defaultConfig,interactions:{...defaultConfig.interactions,crossFilter:false}});const item=component({enabled:true,externalMode:"selection",internalMode:"filter",field:"status"});executeComponentInteraction(resolveInteractionPolicy(item,test.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0,2],field:"status",value:"Open"}),test.context,{trigger:"click"});expect(test.context.state.interactionFilters).toHaveLength(1);expect(test.selectExternal).not.toHaveBeenCalled();expect(test.reportInteraction).toHaveBeenCalledWith(expect.any(Object),"interactions disabled",[0,2]);});
+    it("translates logical dataset selections through Power BI lineage for linked targets",()=>{
+        const test=harness();
+        const logicalRows:DataRow[]=[{group:"Open",total:40},{group:"Closed",total:20}];
+        const logicalKeys=["logical-open","logical-closed"];
+        const lineage=[[0,2],[1]];
+        Object.assign(test.context,{
+            rows:logicalRows,
+            sourceRows:logicalRows,
+            sourceRowKeys:logicalKeys,
+            datasetLineage:lineage,
+            interactionIndexSpace:"component" as const,
+            powerBiSourceRows:rows,
+            powerBiSourceRowKeys:data.rowKeys,
+            selectSourceRows:test.selectExternal,
+        });
+        const item=component({enabled:true,internalMode:"filter",internalScope:"others",externalMode:"selection",targets:["target"]});
+        executeComponentInteraction(resolveInteractionPolicy(item,test.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0],sourceRowKeys:logicalKeys,field:"group",value:"Open"}),test.context,{trigger:"click"});
+        expect(test.context.state.componentSelectedRows.source).toEqual([0,2]);
+        expect(test.context.state.componentSelectedRowKeys.source).toEqual(["row-0","row-2"]);
+        expect(test.selectExternal).toHaveBeenCalledWith([0,2],false,expect.any(Object));
+        expect(test.context.state.interactionFilters[0]).toMatchObject({field:"__source_row_key__",value:["row-0","row-2"],targets:["target"]});
+        expect(rowsForComponent(logicalRows,logicalKeys,logicalRows,"target",{state:test.context.state,datasetLineage:lineage,powerBiSourceRowKeys:data.rowKeys})).toEqual([logicalRows[0]]);
+    });
+    it("uses exact internal row identity without discarding an external filter field",()=>{
+        const test=harness();
+        test.context.interactionUsesSourceIdentity=true;
+        const item=component({enabled:true,internalMode:"filter",internalScope:"others",externalMode:"filter",field:"status",targets:["target"]});
+        executeComponentInteraction(resolveInteractionPolicy(item,test.context.config,"dataPoint"),createInteractionPayload(item,{rowIndices:[0],sourceRowKeys:data.rowKeys,field:"status",value:"Open"}),test.context,{trigger:"click"});
+        expect(test.context.state.interactionFilters[0]).toMatchObject({field:"__source_row_key__",value:["row-0"]});
+        expect(test.applyExternalFilter).toHaveBeenCalledWith("status","=","Open",expect.any(Object));
+    });
     it("reports an ambiguous filter field and explicit clearing",()=>{const test=harness();const item=component({enabled:true,externalMode:"filter",internalMode:"none"});const policy=resolveInteractionPolicy(item,test.context.config,"dataPoint");executeComponentInteraction(policy,createInteractionPayload(item,{rowIndices:[0]}),test.context,{trigger:"click"});expect(test.reportInteraction).toHaveBeenCalledWith(expect.any(Object),"field has no Power BI filter target",[0]);clearComponentInteraction(policy,"source",test.context);expect(test.clearExternalFilter).toHaveBeenCalled();});
 });
 

@@ -3830,6 +3830,12 @@ function BasemapViewEditor({
   const basemap = map.basemap ?? { type: "none" as const };
   const view = map.view ?? {};
   const bookmarks = map.bookmarks ?? [];
+  const rectangleSelection = map.tools?.rectangleSelection;
+  const lassoSelection = map.tools?.lassoSelection;
+  const toolEnabled = (value: typeof rectangleSelection) =>
+    value === true || (typeof value === "object" && value?.enabled !== false);
+  const toolMode = (value: typeof rectangleSelection) =>
+    typeof value === "object" ? value.selectionMode ?? "replace" : "replace";
   const setView = (patch: Json) =>
     mutateMap((candidate) => {
       candidate.view = { ...(candidate.view ?? {}), ...patch };
@@ -3871,6 +3877,126 @@ function BasemapViewEditor({
           </label>
         )}
         <p>Fill mode is used by Studio preview when no explicit mode is authored. The runtime still respects the Power BI host viewport.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Spatial selection</legend>
+        <label>
+          <input
+            type="checkbox"
+            checked={toolEnabled(rectangleSelection)}
+            onChange={(event) =>
+              mutateMap((candidate) => {
+                candidate.tools = {
+                  ...(candidate.tools ?? {}),
+                  rectangleSelection: event.currentTarget.checked
+                    ? { enabled: true, selectionMode: toolMode(rectangleSelection) }
+                    : false,
+                };
+                candidate.toolbar = {
+                  ...(candidate.toolbar ?? {}),
+                  rectangleSelection: event.currentTarget.checked,
+                };
+              })
+            }
+          />{" "}
+          Rectangle selection
+        </label>
+        {toolEnabled(rectangleSelection) && (
+          <label>
+            <span>Rectangle selection mode</span>
+            <select
+              aria-label="Rectangle selection mode"
+              value={toolMode(rectangleSelection)}
+              onChange={(event) =>
+                mutateMap((candidate) => {
+                  candidate.tools = {
+                    ...(candidate.tools ?? {}),
+                    rectangleSelection: {
+                      enabled: true,
+                      selectionMode: event.currentTarget.value as "replace" | "toggle" | "add",
+                    },
+                  };
+                })
+              }
+            >
+              <option value="replace">Replace</option>
+              <option value="toggle">Toggle</option>
+              <option value="add">Add</option>
+            </select>
+          </label>
+        )}
+        <label>
+          <input
+            type="checkbox"
+            checked={toolEnabled(lassoSelection)}
+            onChange={(event) =>
+              mutateMap((candidate) => {
+                candidate.tools = {
+                  ...(candidate.tools ?? {}),
+                  lassoSelection: event.currentTarget.checked
+                    ? { enabled: true, selectionMode: toolMode(lassoSelection), minimumPoints: 3 }
+                    : false,
+                };
+                candidate.toolbar = {
+                  ...(candidate.toolbar ?? {}),
+                  lassoSelection: event.currentTarget.checked,
+                };
+              })
+            }
+          />{" "}
+          Lasso selection
+        </label>
+        {toolEnabled(lassoSelection) && (
+          <>
+            <label>
+              <span>Lasso selection mode</span>
+              <select
+                aria-label="Lasso selection mode"
+                value={toolMode(lassoSelection)}
+                onChange={(event) =>
+                  mutateMap((candidate) => {
+                    const previous = candidate.tools?.lassoSelection;
+                    candidate.tools = {
+                      ...(candidate.tools ?? {}),
+                      lassoSelection: {
+                        enabled: true,
+                        minimumPoints: typeof previous === "object" ? previous.minimumPoints ?? 3 : 3,
+                        selectionMode: event.currentTarget.value as "replace" | "toggle" | "add",
+                      },
+                    };
+                  })
+                }
+              >
+                <option value="replace">Replace</option>
+                <option value="toggle">Toggle</option>
+                <option value="add">Add</option>
+              </select>
+            </label>
+            <label>
+              <span>Minimum lasso points</span>
+              <input
+                type="number"
+                min="3"
+                max="100"
+                value={typeof lassoSelection === "object" ? lassoSelection.minimumPoints ?? 3 : 3}
+                onChange={(event) =>
+                  mutateMap((candidate) => {
+                    const previous = candidate.tools?.lassoSelection;
+                    candidate.tools = {
+                      ...(candidate.tools ?? {}),
+                      lassoSelection: {
+                        enabled: true,
+                        selectionMode: typeof previous === "object" ? previous.selectionMode : "replace",
+                        minimumPoints: Math.min(100, Math.max(3, Number(event.currentTarget.value))),
+                      },
+                    };
+                  })
+                }
+              />
+            </label>
+          </>
+        )}
+        <p>Selections use canonical map lineage, update linked components, and synchronize eligible Power BI identities.</p>
       </fieldset>
       <fieldset>
         <legend>Basemap gallery</legend>

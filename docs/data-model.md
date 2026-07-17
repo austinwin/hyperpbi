@@ -188,6 +188,27 @@ The example uses aliases from a hypothetical Field Manifest: `region`, `status`,
 
 The component can identity-select contributing Power BI rows through lineage. It must not use `totalRevenue` as `interaction.field` with external filter mode because `totalRevenue` is a dataset metric.
 
+## Preloaded multi-resolution chart drill
+
+Hierarchical chart drill is a view switch across declared logical datasets, not an on-demand query. Define one bounded dataset per resolution, retain source lineage through every group, and reference them in the chart's ordered `drill.levels`. The first level has no `parentField`; each child level names the field in its own dataset that equals the selected parent category.
+
+```json
+{
+  "type": "barChart",
+  "id": "operational_drill",
+  "drill": {
+    "trigger": "doubleClick",
+    "showBreadcrumbs": true,
+    "levels": [
+      {"id":"region","dataset":"byRegion","category":"region","measure":"amount"},
+      {"id":"facility","dataset":"byFacility","category":"facility","measure":"amount","parentField":"region"}
+    ]
+  }
+}
+```
+
+The runtime filters the already-prepared child view by the breadcrumb path and maps chart points back through dataset lineage. Missing datasets/fields, duplicate level IDs, an unknown initial level, or fewer than two levels fail strict validation. Because every resolution is prepared up front, navigation is deterministic, offline, and subject to the same dataset row and calculation limits as the rest of HyperPBI.
+
 ## Deliberately unsupported data features
 
 - SQL or DAX text execution

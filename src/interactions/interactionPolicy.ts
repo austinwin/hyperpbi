@@ -63,6 +63,7 @@ export function resolveInteractionPolicy(component: ComponentBase, runtimeConfig
         multiSelect: definition?.multiSelect ?? runtimeConfig.interactions?.multiSelect !== false,
         showSelector: definition?.showSelector ?? (component.type === "table" && (component as TableComponent).selectable === true),
         clearOnSecondClick: definition?.clearOnSecondClick ?? false,
+        targets: definition?.targets?.length ? Array.from(new Set(definition.targets)) : definition?.target ? [definition.target] : undefined,
         componentKind,
         explicit
     };

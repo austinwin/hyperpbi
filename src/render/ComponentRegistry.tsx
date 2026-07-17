@@ -39,6 +39,8 @@ import { Avatar, AvatarGroup } from "../components/display/Avatar";
 import { OverlayTrigger } from "../components/overlays/OverlayTrigger";
 import { SvgBlock } from "../components/svg/SvgBlock";
 import { SvgMarkupBlock } from "../components/svg/SvgMarkupBlock";
+import { SplitLayout } from "../components/layout/SplitLayout";
+import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 
 type RenderChildren = (children: DashboardComponent[]) => ComponentChildren;
 type ComponentRenderer = (component: DashboardComponent, renderChildren: RenderChildren) => ComponentChildren;
@@ -63,9 +65,10 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     divider: () => h(Divider, {}),
     spacer: () => h(Spacer, {}),
     // Layout containers
-    grid: (c, rc) => { const comp = c as ContainerComponent; return h(GridLayout, { columns: comp.columns, gap: comp.gap }, rc(comp.children ?? [])); },
-    flex: (c, rc) => { const comp = c as ContainerComponent; return h(FlexLayout, { direction: comp.direction, gap: comp.gap }, rc(comp.children ?? [])); },
-    toolbar: (c, rc) => { const comp = c as ContainerComponent; return h(FlexLayout, { direction: comp.direction, gap: comp.gap }, rc(comp.children ?? [])); },
+    grid: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(GridLayout, { columns: comp.columns, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
+    flex: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(FlexLayout, { direction: comp.direction, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
+    toolbar: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(FlexLayout, { direction: comp.direction, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
+    split: (c, rc) => h(SplitLayout,{component:c as ContainerComponent,renderChildren:rc}),
     // New primitives
     card: (c, rc) => h(CardBlock, { component: c as CardComponent, renderChildren: rc }),
     accordion: (c, rc) => h(Accordion, { component: c as AccordionComponent, renderChildren: rc }),
@@ -104,8 +107,8 @@ for (const type of dataTypes) {
 for (const type of chartTypes) {
     componentRenderers[type] = c => h(ChartBlock, { component: c as ChartComponent });
 }
-// section, leftPanel, rightPanel, split
-for (const type of ["section", "leftPanel", "rightPanel", "split"]) {
+// section and legacy panel containers
+for (const type of ["section", "leftPanel", "rightPanel"]) {
     componentRenderers[type] = (c, rc) => {
         const comp = c as ContainerComponent;
         return h(Section, { title: comp.title }, rc(comp.children ?? []));

@@ -66,6 +66,11 @@ The ArcGIS join specification uses the repository's existing public Houston serv
   "type": "map",
   "id": "operations_map",
   "view": {"fitMode":"allVisibleLayers","fitPadding":0.08},
+  "heightMode": "fill",
+  "tools": {
+    "rectangleSelection": {"enabled":true,"selectionMode":"replace"},
+    "lassoSelection": {"enabled":true,"selectionMode":"replace","minimumPoints":3}
+  },
   "layerGroups": [{"id":"operations","name":"Operations","visible":true}],
   "bookmarks": [{"id":"downtown","label":"Downtown","center":[29.76,-95.37],"zoom":13}],
   "layers": [
@@ -89,7 +94,7 @@ The ArcGIS join specification uses the repository's existing public Houston serv
       "source": {"type":"powerbi","bindings":{"latitude":"incidentLatitude","longitude":"incidentLongitude"}}
     }
   ],
-  "toolbar": {"visible":true,"bookmarks":true,"layers":true,"legend":true}
+  "toolbar": {"visible":true,"bookmarks":true,"layers":true,"legend":true,"rectangleSelection":true,"lassoSelection":true}
 }
 ```
 
@@ -109,6 +114,7 @@ Map Studio provides:
 - labels, safe popups/tooltips, UI actions, a first-class layer interaction editor, source-aware structured filters, joins, visibility, and performance limits
 - an explicit, cancellable **Run join preview** action bounded to 500 service features, using the runtime query, normalization, duplicate/unmatched policies, and join engine
 - basemap choices, reactive authored view, layer groups, live-preview view bookmarks, and static/runtime diagnostics
+- rectangle and lasso selection controls with authored selection mode and minimum lasso-point validation
 
 Map Studio never creates a second hidden configuration model. Provider URLs must be supplied explicitly; it does not invent endpoints or credentials.
 
@@ -157,18 +163,18 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 
 | Status | Capabilities |
 |---|---|
-| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, temporary Dynamic MapServer identify, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
+| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, rectangle/lasso geometry selection with Power BI lineage and linked targets, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, temporary Dynamic MapServer identify, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
 | Partial | map-layer interaction trigger (`click` only), `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
 | Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid |
 | Deprecated | generalization and progressive-rendering properties remain accepted for schema compatibility but are not executed or exposed by Map Studio |
-| Unsupported | scale/coordinate readout, rectangle/lasso selection, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
+| Unsupported | scale/coordinate readout, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
 | Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |
 
 Partial, experimental, and deprecated properties emit `MAP_CAPABILITY_LIMITATION`. Deprecated no-op input remains accepted only to preserve existing schemas and is not exposed as an authoring option. Accepted stable input is not silently ignored.
 
 ## Viewer controls
 
-The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, and bookmarks. Basemap visibility/type/URL/attribution/max zoom and authored center/zoom/min/max synchronize to the mounted map without remounting or removing operational overlays. Unrelated layer changes do not reset a user's live navigation. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use `view.fitPadding`, a Leaflet bounds-padding ratio from `0` through `0.5` with default `0.08` (8%).
+The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, bookmarks, rectangle selection, and lasso selection. Enabling a spatial tool temporarily owns pointer drag, draws a bounded preview, then intersects the authored geometry against visible selectable features. Replace/add/toggle semantics update canonical feature keys and contributing Power BI row lineage; reference-only features remain local. Basemap visibility/type/URL/attribution/max zoom and authored center/zoom/min/max synchronize to the mounted map without remounting or removing operational overlays. Unrelated layer changes do not reset a user's live navigation. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use `view.fitPadding`, a Leaflet bounds-padding ratio from `0` through `0.5` with default `0.08` (8%).
 
 Map Studio's **Add current view** reads the selected map's latest live preview center and zoom. It falls back to the authored view only when no live viewport is available, and a pan/zoom never changes canonical JSON until the author explicitly creates the bookmark.
 
@@ -193,7 +199,7 @@ Run `npm run package:core`, `npm run package:maps`, and `npm run package:verify`
 - natural breaks classification
 - streamed feature-by-feature progressive rendering
 - exact ArcGIS service-scale denominator parity
-- scale/coordinate readout, rectangle/lasso selection, and distance/area measurement
+- scale/coordinate readout and distance/area measurement
 - time slider, swipe/side-by-side comparison, selected-feature export, print-layout, and opening Map Studio from the viewer
 
 Use pre-geocoded coordinates and organizationally approved public services for predictable enterprise deployment.

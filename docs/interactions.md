@@ -38,6 +38,7 @@ Toast duration is persistent when omitted/zero, otherwise clamped to 1–30 seco
     "field": "status",
     "operator": "=",
     "selectionMode": "replace",
+    "targets": ["detail_table", "operations_map"],
     "multiSelect": true,
     "showSelector": false,
     "clearOnSecondClick": true
@@ -53,6 +54,8 @@ Exact enums:
 - `externalMode`: `none|auto|selection|filter`
 - `operator`: `=|!=|>|>=|<|<=|contains|in|between`
 - `selectionMode`: `replace|toggle|add`
+
+`target` is the compatibility shorthand for one linked component; `targets` is an array of existing stable component IDs. When present, internal highlight/filter behavior applies only to those components instead of deriving recipients from `internalScope`. Strict 2.0 validation rejects missing target IDs. External Power BI behavior is report-level and is not limited by component targets.
 
 `auto` trigger resolves to change for controls and click otherwise. `auto` external mode resolves to filter for controls and selection for data-point/custom components.
 
@@ -84,6 +87,31 @@ Dataset-derived fields and dataset metrics cannot directly filter Power BI. Rena
 
 Runtime Config `crossFilter: false` is a global gate; it does not redefine component semantics.
 
+### Chart zoom, range, brush, and drill
+
+Charts expose a declarative `events` object separate from safe custom-content `interactions`:
+
+```json
+{
+  "events": {
+    "zoom": { "enabled": true },
+    "rangeSelect": {
+      "enabled": true,
+      "targets": ["detail_table"],
+      "interaction": { "internalMode": "filter", "externalMode": "selection" }
+    },
+    "brush": {
+      "enabled": true,
+      "targets": ["detail_table", "operations_map"]
+    }
+  }
+}
+```
+
+Zoom persists an ECharts data-zoom window. Range selection converts that visible window to adapter bindings; categorical ranges follow series order rather than lexical label order. Brush converts rectangle/polygon ECharts selections to exact series/data-index bindings. Both flatten and deduplicate original source-row lineage before calling the universal engine, so a grouped point can select every contributing Power BI identity. An empty brush clears stale row keys and its internal filter.
+
+Chart `drill.levels` is navigation state, not an executable drill callback. Each level names a preloaded logical dataset and binding fields; `parentField` filters the child dataset by the selected parent binding value. Breadcrumbs move to an earlier level without reevaluating or fetching data, and source lineage remains available at every resolution.
+
 ## 3. Safe event-specific interactions
 
 `interactions` is primarily used by custom content to map a supported event to one allowlisted payload or an allowed action array:
@@ -107,6 +135,8 @@ Map layers refine this rule: `layer.dataset` overrides the map dataset, and each
 Map Studio's layer **Interaction** tab edits the existing universal interaction contract rather than a map-only engine. Its field selector follows `fieldSource`. Power BI and joined features may use retained Power BI identities for external selection; an external filter is enabled only for a direct model column with source table/column metadata. ArcGIS reference-only features can use local highlight/filter behavior, but the editor reports external Power BI selection/filter as unavailable when no genuine model target or lineage exists. Multi-select and clear-on-second-click continue through the shared interaction runtime.
 
 Map feature events have one stable trigger contract: `map.layers[].interaction.trigger` must be `"click"`. Leaflet runs the interaction from the feature click handler, Map Studio exposes a fixed click value, and strict 2.0 validation emits `MAP_INTERACTION_TRIGGER_UNSUPPORTED` for map-layer `change` or `auto`. This restriction does not remove those trigger values from non-map components.
+
+Map-level rectangle and lasso tools use the same engine. The spatial pass first updates canonical `mapId/layer/source/feature` keys, then submits the union of matching `powerBiRowIndices` and row keys. Authored `selectionMode` is used unless Ctrl/Cmd requests toggle or Shift requests add. Linked tables/charts receive the map component's `targets`; eligible source identities are sent to Power BI selection. ArcGIS reference-only features can still be selected locally and never manufacture an external identity.
 
 ## Compatibility
 

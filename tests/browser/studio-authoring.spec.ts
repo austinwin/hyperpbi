@@ -61,3 +61,29 @@ test("validated AI map remains identical in preview, JSON, interactions, and sav
     return [layer.renderer.type, layer.tooltip.fields[0].field, layer.popup.title];
   })).toEqual(["uniqueValue", "asset_id", "{{asset_id}}"]);
 });
+
+test("rectangle selection synchronizes map, table, and Power BI lineage", async ({ page }) => {
+  const candidate = await page.evaluate(() => window.hpStudioAuthoringHarness.candidate);
+  await page.locator(".hp-ai-import textarea").fill(candidate);
+  await page.getByRole("button", { name: "Validate resulting dashboard & Preview" }).click();
+  await expect(page.locator(".hp-import-message")).toContainText("synchronized with the working JSON");
+
+  const firstFeature = page.locator(".hp-map-frame path.leaflet-interactive").first();
+  await expect(firstFeature).toBeVisible();
+  const box = await firstFeature.boundingBox();
+  expect(box).not.toBeNull();
+  await page.getByRole("button", { name: "Select features by rectangle" }).click();
+  await expect(page.getByRole("button", { name: "Select features by rectangle" })).toHaveAttribute("aria-pressed", "true");
+
+  await page.mouse.move(box!.x - 12, box!.y - 12);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width + 12, box!.y + box!.height + 12, { steps: 5 });
+  await page.mouse.up();
+
+  await expect(page.locator(".hp-map-selection-status")).toContainText("1 feature selected across 1 Power BI row");
+  await expect(page.locator("tr.hp-row-selected")).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => window.hpStudioAuthoringHarness.externalSelections.at(-1))).toEqual([0]);
+  await page.getByRole("button", { name: "Clear selection" }).click();
+  await expect(page.locator("tr.hp-row-selected")).toHaveCount(0);
+  await expect(page.locator(".hp-map-selection-status")).toHaveCount(0);
+});

@@ -146,4 +146,23 @@ describe("EChartRenderer lifecycle", () => {
         act(() => render(h(EChartRenderer, { option: {}, selectedDataPoints: [], onDataPoint }), host));
         expect(runtime.charts[0].dispatchAction).toHaveBeenCalledWith({ type: "downplay", seriesIndex: 2, dataIndex: 4, dataType: "edge" });
     });
+
+    it("emits zoom, brush, and drill events and restores zoom silently", () => {
+        const host = document.createElement("div");
+        const onZoom = vi.fn();
+        const onBrush = vi.fn();
+        const onDrill = vi.fn();
+        act(() => render(h(EChartRenderer, {
+            option: {}, onZoom, onBrush, onDrill,
+            restoredZoom: { start: 15, end: 75 },
+        }), host));
+        const chart = runtime.charts[0];
+        expect(chart.dispatchAction).toHaveBeenCalledWith({ type: "dataZoom", start: 15, end: 75 }, { silent: true });
+        chart.handlers.datazoom({ batch: [{ start: 20, end: 60 }] });
+        expect(onZoom).toHaveBeenCalledWith({ start: 20, end: 60, startValue: undefined, endValue: undefined });
+        chart.handlers.brushselected({ batch: [{ selected: [{ seriesIndex: 2, dataIndex: [1, 3] }] }] });
+        expect(onBrush).toHaveBeenCalledWith({ selections: [{ seriesIndex: 2, dataIndices: [1, 3] }] });
+        chart.handlers.dblclick({ seriesIndex: 1, dataIndex: 4, name: "North" });
+        expect(onDrill).toHaveBeenCalledWith(expect.objectContaining({ seriesIndex: 1, dataIndex: 4, name: "North" }));
+    });
 });

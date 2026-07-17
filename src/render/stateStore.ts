@@ -9,6 +9,7 @@ import {
     type MapInteractionState,
 } from "../maps/interactions/mapInteractionState";
 import type { MapFeatureKey } from "../maps/model/mapFeatureIdentity";
+import { resolveMapFeatureSelection } from "../maps/interactions/mapSpatialSelection";
 
 export interface ToastMessage {
     id: string;
@@ -28,6 +29,23 @@ export interface OverlayAnchor {
 
 export type MapToolbarPopover = "layers" | "legend" | "search" | "bookmarks" | null;
 
+export interface ChartViewState {
+    zoom?: { start?: number; end?: number; startValue?: unknown; endValue?: unknown };
+    brushRowKeys?: string[];
+}
+
+export interface ChartDrillPathEntry {
+    levelId: string;
+    label: string;
+    field?: string;
+    value: unknown;
+}
+
+export interface ChartDrillState {
+    levelId: string;
+    path: ChartDrillPathEntry[];
+}
+
 export interface DashboardState {
     search: string;
     activeTabs: Record<string, string>;
@@ -40,6 +58,7 @@ export interface DashboardState {
     componentSelectedRowKeys: Record<string, string[]>;
     componentSelectionScopes: Record<string, InternalInteractionFilter["scope"]>;
     componentSelectionModes: Record<string, "none"|"highlight"|"filter">;
+    componentSelectionTargets: Record<string, string[]>;
     interactionFilters: InternalInteractionFilter[];
     interactionSignatures: Record<string, string>;
     selectedMapFeature?: number;
@@ -48,6 +67,8 @@ export interface DashboardState {
     /** Authoritative map-local interaction state. mapSelectedFeatureIds is a compatibility mirror. */
     mapInteractionState: Record<string, MapInteractionState>;
     tableSearch: Record<string, string>;
+    chartViewState: Record<string, ChartViewState>;
+    chartDrillState: Record<string, ChartDrillState>;
 
     // Application shell
     sidebarCollapsed: boolean;
@@ -91,6 +112,7 @@ export type DashboardAction =
     | { type: "selectComponentRowKeys"; id: string; keys: string[] }
     | { type: "componentSelectionScope"; id: string; scope?: InternalInteractionFilter["scope"] }
     | { type: "componentSelectionMode"; id: string; mode?: "none"|"highlight"|"filter" }
+    | { type: "componentSelectionTargets"; id: string; targets?: string[] }
     | { type: "interactionFilter"; filter: InternalInteractionFilter }
     | { type: "clearInteractionFilter"; id: string }
     | { type: "interactionSignature"; id: string; value?: string }
@@ -105,6 +127,8 @@ export type DashboardAction =
     | { type: "closeMapFeatureDetails"; mapId: string; clearSelection?: boolean }
     | { type: "reconcileMapFeatures"; mapId: string; availableFeatureKeys: MapFeatureKey[] }
     | { type: "tableSearch"; id: string; value: string }
+    | { type: "chartView"; id: string; value?: ChartViewState }
+    | { type: "chartDrill"; id: string; value?: ChartDrillState }
     | { type: "clearFilters" }
     // Application shell
     | { type: "sidebarCollapsed"; value: boolean }
@@ -145,9 +169,12 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
         componentSelectedRowKeys: {},
         componentSelectionScopes: {},
         componentSelectionModes: {},
+        componentSelectionTargets: {},
         interactionFilters: [],
         interactionSignatures: {},
         tableSearch: {},
+        chartViewState: {},
+        chartDrillState: {},
         selectedMapFeature: undefined,
         mapSelectedFeatureIds: {},
         mapInteractionState: {},
@@ -178,10 +205,11 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "selectComponentRowKeys") return { ...state, componentSelectedRowKeys: { ...state.componentSelectedRowKeys, [action.id]: action.keys } };
     if (action.type === "componentSelectionScope") { const componentSelectionScopes={...state.componentSelectionScopes};if(action.scope)componentSelectionScopes[action.id]=action.scope;else delete componentSelectionScopes[action.id];return{...state,componentSelectionScopes}; }
     if (action.type === "componentSelectionMode") { const componentSelectionModes={...state.componentSelectionModes};if(action.mode)componentSelectionModes[action.id]=action.mode;else delete componentSelectionModes[action.id];return{...state,componentSelectionModes}; }
+    if (action.type === "componentSelectionTargets") { const componentSelectionTargets={...state.componentSelectionTargets};if(action.targets?.length)componentSelectionTargets[action.id]=Array.from(new Set(action.targets));else delete componentSelectionTargets[action.id];return{...state,componentSelectionTargets}; }
     if (action.type === "interactionFilter") return { ...state, interactionFilters: [...state.interactionFilters.filter(filter => filter.originComponentId !== action.filter.originComponentId), action.filter] };
     if (action.type === "clearInteractionFilter") return { ...state, interactionFilters: state.interactionFilters.filter(filter => filter.originComponentId !== action.id) };
     if (action.type === "interactionSignature") { const interactionSignatures = { ...state.interactionSignatures }; if (action.value === undefined) delete interactionSignatures[action.id]; else interactionSignatures[action.id] = action.value; return { ...state, interactionSignatures }; }
-    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {} };
+    if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, componentSelectionTargets: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {}, chartViewState: {}, chartDrillState: {} };
     if (action.type === "reconcileRowKeys") {
         const indexByKey = new Map(
             action.rowKeys.map((key, index) => [key, index] as const)
@@ -201,31 +229,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "selectMapFeatures") {
         const current = state.mapSelectedFeatureIds[action.mapId] ?? [];
         const mode = action.selectionMode ?? "add";
-        let newIds: string[];
-        switch (mode) {
-            case "replace":
-                newIds = action.featureIds;
-                break;
-            case "add":
-                newIds = [...new Set([...current, ...action.featureIds])];
-                break;
-            case "toggle": {
-                const ordered: Array<string | undefined> = [...current];
-                const positions = new Map(current.map((id, index) => [id, index] as const));
-                for (const id of action.featureIds) {
-                    const position = positions.get(id);
-                    if (position !== undefined) {
-                        ordered[position] = undefined;
-                        positions.delete(id);
-                    } else {
-                        positions.set(id, ordered.length);
-                        ordered.push(id);
-                    }
-                }
-                newIds = ordered.filter((value): value is string => value !== undefined);
-                break;
-            }
-        }
+        const newIds = resolveMapFeatureSelection(current, action.featureIds, mode);
         if (newIds.length === 0) {
             const { [action.mapId]: _, ...rest } = state.mapSelectedFeatureIds;
             const currentInteraction = state.mapInteractionState[action.mapId];
@@ -341,8 +345,10 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
         return { ...state, mapInteractionState, mapSelectedFeatureIds };
     }
     if (action.type === "tableSearch") return { ...state, tableSearch: { ...state.tableSearch, [action.id]: action.value } };
+    if (action.type === "chartView") { const chartViewState={...state.chartViewState};if(action.value)chartViewState[action.id]=action.value;else delete chartViewState[action.id];return{...state,chartViewState}; }
+    if (action.type === "chartDrill") { const chartDrillState={...state.chartDrillState};if(action.value)chartDrillState[action.id]=action.value;else delete chartDrillState[action.id];return{...state,chartDrillState}; }
     // clearFilters does NOT reset app shell state
-    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {} };
+    if (action.type === "clearFilters") return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, componentSelectionTargets: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {}, chartViewState: {}, chartDrillState: {} };
 
     // ── Application shell ─────────────────────────────────────────
     if (action.type === "sidebarCollapsed") return { ...state, sidebarCollapsed: action.value, mobileSidebarOpen: action.value ? false : state.mobileSidebarOpen };
@@ -465,5 +471,5 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     }
 
     // Default: clearFilters fallback (shouldn't normally reach here)
-    return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
+    return { ...state, filters: [], search: "", values: {}, tableSearch: {}, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, componentSelectionTargets: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined };
 }

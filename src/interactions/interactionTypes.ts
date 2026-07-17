@@ -23,6 +23,10 @@ export interface ComponentInteractionDefinition {
     multiSelect?: boolean;
     showSelector?: boolean;
     clearOnSecondClick?: boolean;
+    /** Compatibility shorthand for one linked target. */
+    target?: string;
+    /** Restrict internal linked behavior to these component IDs. */
+    targets?: string[];
 }
 
 export interface ResolvedInteractionPolicy {
@@ -38,6 +42,7 @@ export interface ResolvedInteractionPolicy {
     multiSelect: boolean;
     showSelector: boolean;
     clearOnSecondClick: boolean;
+    targets?: string[];
     componentKind: ComponentKind;
     explicit: boolean;
 }
@@ -67,6 +72,7 @@ export interface InternalInteractionFilter {
     operator: FilterOperator;
     value: unknown;
     scope: InternalInteractionScope;
+    targets?: string[];
 }
 
 export interface InteractionExecutionResult {
