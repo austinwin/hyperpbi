@@ -1397,7 +1397,12 @@ export function HyperPbiStudio({
           </div>
         </section>
       )}
-      <footer class="hp-studio-status" aria-label="Builder status">
+      <footer
+        class="hp-studio-status"
+        role="status"
+        aria-live="polite"
+        aria-label="Builder status"
+      >
         <span class={`hp-studio-status-primary is-${status.toLowerCase().replace(/\s+/g, "-")}`}>
           <span class="hp-studio-status-dot" aria-hidden="true" />
           {status}

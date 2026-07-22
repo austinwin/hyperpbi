@@ -101,8 +101,7 @@ describe("Studio AI preview and saved JSON parity", () => {
     });
     expect(workspaceSelect.value).toBe("specification");
 
-    act(() => Array.from(host.querySelectorAll<HTMLButtonElement>("button"))
-      .find((button) => button.textContent === "Save & return")!.click());
+    act(() => host.querySelector<HTMLButtonElement>('[aria-label="Save & return"]')!.click());
     expect(onSave).toHaveBeenCalledOnce();
     const saved = JSON.parse(onSave.mock.calls[0][0]);
     expect(saved.components[0].layers[0].renderer.type).toBe("uniqueValue");

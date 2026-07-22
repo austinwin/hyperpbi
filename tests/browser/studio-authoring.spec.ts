@@ -450,7 +450,28 @@ test("mobile Inspector keeps selection, form edits, pane semantics, and keyboard
   await mapItem.click();
   await expect(propertiesTab).toHaveAttribute("aria-selected", "true");
   const propertiesPanelId = await propertiesTab.getAttribute("aria-controls");
-  await expect(page.locator(`#${propertiesPanelId}`)).toBeVisible();
+  const propertiesPanel = page.locator(`#${propertiesPanelId}`);
+  await expect(propertiesPanel).toBeVisible();
+  const componentSummary = propertiesPanel.locator(
+    ".hp-inspector-component-summary",
+  );
+  const componentActions = componentSummary.locator(
+    ".hp-inspector-component-actions",
+  );
+  await expect(componentActions).toBeVisible();
+  await expect(componentActions.getByRole("button")).toHaveCount(4);
+  await expect(inspector.locator(".hp-inspector-node-actions")).toHaveCount(0);
+  expect(await propertiesPanel.evaluate((panel) => ({
+    summaryPosition: getComputedStyle(panel.querySelector(".hp-inspector-component-summary")!).position,
+    backPosition: getComputedStyle(panel.querySelector(".hp-inspector-mobile-back")!).position,
+    actionsPosition: getComputedStyle(panel.querySelector(".hp-inspector-component-actions")!).position,
+    paddingBottom: getComputedStyle(panel).paddingBottom,
+  }))).toEqual({
+    summaryPosition: "static",
+    backPosition: "static",
+    actionsPosition: "static",
+    paddingBottom: "0px",
+  });
 
   const title = page.getByRole("textbox", { name: "title", exact: true });
   await title.fill("Mobile asset map");
@@ -458,6 +479,21 @@ test("mobile Inspector keeps selection, form edits, pane semantics, and keyboard
   await expect.poll(async () => page.evaluate(() =>
     JSON.parse(window.hpStudioAuthoringHarness.draft).components[0].title,
   )).toBe("Mobile asset map");
+
+  await propertiesPanel.evaluate((panel) => {
+    panel.scrollTop = panel.scrollHeight;
+  });
+  const scrolledLayout = await propertiesPanel.evaluate((panel) => {
+    const panelRect = panel.getBoundingClientRect();
+    const actionsRect = panel.querySelector(".hp-inspector-component-actions")!.getBoundingClientRect();
+    return {
+      scrollTop: panel.scrollTop,
+      panelTop: panelRect.top,
+      actionsBottom: actionsRect.bottom,
+    };
+  });
+  expect(scrolledLayout.scrollTop).toBeGreaterThan(0);
+  expect(scrolledLayout.actionsBottom).toBeLessThanOrEqual(scrolledLayout.panelTop);
 
   await treeTab.click();
   await expect(mapItem).toHaveAttribute("aria-selected", "true");

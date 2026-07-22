@@ -191,6 +191,19 @@
 .hp-studio-button-icon,
 .hp-studio-button-compact { min-height: 32px; padding: 5px 9px; }
 
+.hp-ai-empty-fields {
+  padding: 12px;
+  border: 1px solid var(--hp-studio-control-border);
+  border-radius: 7px;
+  background: var(--hp-studio-panel-bg);
+}
+.hp-ai-empty-fields strong { display: block; }
+.hp-ai-empty-fields p {
+  margin: 3px 0 0;
+  color: var(--hp-studio-muted);
+  font-size: 11px;
+}
+
 .hp-studio .hp-studio-status-chip {
   width: auto;
   height: auto;

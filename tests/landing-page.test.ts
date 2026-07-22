@@ -5,6 +5,8 @@ import { resolve } from "node:path";
 const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
 const visualLanding = readFileSync(resolve(process.cwd(), "src/editor/LandingPage.tsx"), "utf8");
 const setupExperience = readFileSync(resolve(process.cwd(), "src/editor/SetupExperience.tsx"), "utf8");
+const packageMetadata = JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf8"));
+const visualMetadata = JSON.parse(readFileSync(resolve(process.cwd(), "pbiviz.json"), "utf8"));
 
 describe("product landing page", () => {
     it("positions the complete end-user product story", () => {
@@ -23,9 +25,18 @@ describe("product landing page", () => {
     it("shows linked product attribution in both visual entry screens", () => {
         for (const source of [visualLanding, setupExperience]) {
             expect(source).toContain("Designed, Developed and Maintained by H.Nguyen - WWO");
-            expect(source).toContain("https://austinwin.github.io/hyperpbi");
+            expect(source).toContain("https://hyperpbi.com");
             expect(source).toContain('target="_blank"');
             expect(source).toContain('rel="noreferrer"');
         }
+    });
+    it("publishes the canonical website and source repository in product metadata", () => {
+        expect(packageMetadata.homepage).toBe("https://hyperpbi.com");
+        expect(packageMetadata.repository.url).toBe("https://github.com/austinwin/hyperpbi.git");
+        expect(visualMetadata.visual.supportUrl).toBe("https://hyperpbi.com");
+        expect(visualMetadata.visual.gitHubUrl).toBe("https://github.com/austinwin/hyperpbi");
+        expect(visualMetadata.author.email).toBe("support@hyperpbi.com");
+        expect(html).toContain('<link rel="canonical" href="https://hyperpbi.com/">');
+        expect(html).toContain("https://github.com/austinwin/hyperpbi");
     });
 });

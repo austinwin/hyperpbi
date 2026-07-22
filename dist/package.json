@@ -1,6 +1,6 @@
 {
 		"version": "1.0.0.0",
-		"author": {"name":"HyperPBI","email":"support@hyperpbi.dev"},
+		"author": {"name":"HyperPBI","email":"support@hyperpbi.com"},
 		"resources": [
 			{
 				"resourceId": "rId0",
@@ -8,7 +8,7 @@
 				"file": "resources/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.pbiviz.json"
 			}
 		],
-		"visual": {"name":"HyperPBI","displayName":"HyperPBI","guid":"HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31","visualClassName":"Visual","version":"1.0.0.0","description":"AI-schema-powered enterprise dashboard renderer for Power BI-bound data.","supportUrl":"https://github.com/hyperpbi/hyperpbi","gitHubUrl":"https://github.com/hyperpbi/hyperpbi"},
+		"visual": {"name":"HyperPBI","displayName":"HyperPBI","guid":"HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31","visualClassName":"Visual","version":"1.0.0.0","description":"AI-schema-powered enterprise dashboard renderer for Power BI-bound data.","supportUrl":"https://hyperpbi.com","gitHubUrl":"https://github.com/austinwin/hyperpbi"},
 		"metadata": {
 			"pbivizjson": {
 				"resourceId": "rId0"

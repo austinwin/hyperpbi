@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/austinwin/hyperpbi.git"
   },
-  "homepage": "https://austinwin.github.io/hyperpbi/",
+  "homepage": "https://hyperpbi.com",
   "license": "Apache-2.0",
   "scripts": {
     "pbiviz": "pbiviz",

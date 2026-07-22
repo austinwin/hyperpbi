@@ -99,4 +99,46 @@ describe("SpecificationInspector", () => {
     });
     expect(host.querySelector('[role="alert"]')).not.toBeNull();
   });
+
+  it("keeps component actions in the metadata header and confirms deletion inline", () => {
+    const host = document.createElement("div");
+    act(() =>
+      render(
+        h(SpecificationInspector, {
+          json: JSON.stringify({
+            version: "2.0",
+            components: [
+              { type: "text", id: "first", text: "First" },
+              { type: "text", id: "second", text: "Second" },
+            ],
+          }),
+          data,
+          onChange: vi.fn(),
+          onSelect: vi.fn(),
+          selectedComponentId: "second",
+        }),
+        host,
+      ),
+    );
+
+    const summary = host.querySelector<HTMLElement>(
+      ".hp-inspector-component-summary",
+    )!;
+    const actions = summary.querySelector<HTMLElement>(
+      ".hp-inspector-component-actions",
+    )!;
+    expect(actions).not.toBeNull();
+    expect(actions.querySelectorAll("button")).toHaveLength(4);
+    expect(host.querySelector(".hp-inspector-node-actions")).toBeNull();
+
+    act(() =>
+      actions.querySelector<HTMLButtonElement>('[aria-label="Delete second"]')!.click(),
+    );
+    const confirmation = host.querySelector<HTMLElement>(
+      ".hp-inspector-delete-confirm",
+    )!;
+    expect(confirmation).not.toBeNull();
+    expect(summary.nextElementSibling).toBe(confirmation);
+    expect(confirmation.textContent).toContain("Delete second?");
+  });
 });

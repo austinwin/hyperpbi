@@ -28,6 +28,7 @@ describe("Inspector property groups", () => {
     expect(advanced.open).toBe(false);
     expect(structured.open).toBe(false);
     expect(host.querySelector(".hp-inspector-property-groups fieldset")).toBeNull();
-    expect(host.querySelector(".hp-inspector-node-actions .hp-studio-button-danger")).not.toBeNull();
+    expect(host.querySelector(".hp-inspector-node-actions")).toBeNull();
+    expect(host.querySelector(".hp-inspector-component-actions .hp-inspector-delete-action")).not.toBeNull();
   });
 });

@@ -2,6 +2,8 @@
 
 HyperPBI is a schema-driven Power BI custom visual that turns declarative JSON into interactive dashboards and application-style report experiences. It binds to the current Power BI data view, validates authoring input, prepares logical datasets and reusable structures, and renders only implemented components and safe behaviors.
 
+**Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
+
 HyperPBI does not call an AI service. Edit Mode builds a prompt from the current Field Manifest and authoring settings; the user copies that prompt to an externally approved AI, then pastes one JSON response back into HyperPBI for extraction, validation, preview, and saving.
 
 ## Current status and schema versions

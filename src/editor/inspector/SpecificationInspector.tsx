@@ -8,6 +8,7 @@ import type {
   InspectorPropertyDescriptor,
   InspectorPropertyGroup,
 } from "../../catalog/componentTypes";
+import { Icon } from "../../components/icons/Icon";
 import type { NormalizedData } from "../../data/normalizeData";
 import { aggregationFieldRequirement } from "../../fields/aggregationFieldPolicy";
 import { createFieldAliasRegistry } from "../../fields/fieldAliasRegistry";
@@ -953,9 +954,59 @@ export function SpecificationInspector({
           {item ? (
             <>
               <header class="hp-inspector-component-summary">
-                <div>
-                  <strong>{String(item.type)}</strong>
-                  <code title={selectedTree?.path}>{selectedTree?.path}</code>
+                <div class="hp-inspector-component-heading">
+                  <div class="hp-inspector-component-identity">
+                    <strong>{String(item.type)}</strong>
+                    <code title={selectedTree?.path}>{selectedTree?.path}</code>
+                  </div>
+                  <div
+                    class="hp-inspector-component-actions"
+                    role="group"
+                    aria-label={`Actions for ${selectedComponentId}`}
+                  >
+                    <StudioButton
+                      variant="icon"
+                      disabled={!canInsert || position <= 0}
+                      aria-label={`Move ${selectedComponentId} up`}
+                      title="Move up"
+                      onClick={() =>
+                        commit(moveComponent(parsed, selectedComponentId, -1))
+                      }
+                    >
+                      <Icon name="chevron-up" size="xs" decorative />
+                    </StudioButton>
+                    <StudioButton
+                      variant="icon"
+                      disabled={!canInsert || position >= siblingCount - 1}
+                      aria-label={`Move ${selectedComponentId} down`}
+                      title="Move down"
+                      onClick={() =>
+                        commit(moveComponent(parsed, selectedComponentId, 1))
+                      }
+                    >
+                      <Icon name="chevron-down" size="xs" decorative />
+                    </StudioButton>
+                    <StudioButton
+                      variant="icon"
+                      disabled={!canInsert}
+                      aria-label={`Duplicate ${selectedComponentId}`}
+                      title="Duplicate"
+                      onClick={() =>
+                        commit(duplicateComponent(parsed, selectedComponentId))
+                      }
+                    >
+                      <Icon name="copy" size="xs" decorative />
+                    </StudioButton>
+                    <StudioButton
+                      variant="icon"
+                      class="hp-inspector-delete-action"
+                      aria-label={`Delete ${selectedComponentId}`}
+                      title="Delete"
+                      onClick={() => setPendingDeleteId(selectedComponentId)}
+                    >
+                      <Icon name="trash" size="xs" decorative />
+                    </StudioButton>
+                  </div>
                 </div>
                 <dl>
                   <div>
@@ -972,6 +1023,40 @@ export function SpecificationInspector({
                   </div>
                 </dl>
               </header>
+              {pendingDeleteId === selectedComponentId && (
+                <div class="hp-inspector-delete-confirm" role="alert">
+                  <div>
+                    <strong>Delete {selectedComponentId}?</strong>
+                    <span>
+                      {incomingComponentReferences(parsed, selectedComponentId)
+                        .length
+                        ? `Referenced by ${incomingComponentReferences(parsed, selectedComponentId).join(", ")}. Those references may also need attention.`
+                        : "This removes the component from the dashboard."}
+                    </span>
+                  </div>
+                  <div>
+                    <StudioButton
+                      variant="secondary"
+                      onClick={() => setPendingDeleteId("")}
+                    >
+                      Cancel
+                    </StudioButton>
+                    <StudioButton
+                      variant="danger"
+                      onClick={() => {
+                        if (
+                          commit(deleteComponent(parsed, selectedComponentId))
+                        ) {
+                          setPendingDeleteId("");
+                          onSelect("");
+                        }
+                      }}
+                    >
+                      Confirm delete
+                    </StudioButton>
+                  </div>
+                </div>
+              )}
               {item.type === "map" && onOpenMapStudio && (
                 <button class="hp-open-map-studio" onClick={onOpenMapStudio}>
                   Open in Map Studio
@@ -1142,84 +1227,6 @@ export function SpecificationInspector({
                   </button>
                 </div>
               </StudioSection>
-              <div class="hp-inspector-node-actions">
-                {pendingDeleteId === selectedComponentId ? (
-                  <div class="hp-inspector-delete-confirm" role="alert">
-                    <div>
-                      <strong>Delete {selectedComponentId}?</strong>
-                      <span>
-                        {incomingComponentReferences(parsed, selectedComponentId)
-                          .length
-                          ? `Referenced by ${incomingComponentReferences(parsed, selectedComponentId).join(", ")}. Those references may also need attention.`
-                          : "This removes the component from the dashboard."}
-                      </span>
-                    </div>
-                    <div>
-                      <StudioButton
-                        variant="secondary"
-                        onClick={() => setPendingDeleteId("")}
-                      >
-                        Cancel
-                      </StudioButton>
-                      <StudioButton
-                        variant="danger"
-                        onClick={() => {
-                          if (
-                            commit(
-                              deleteComponent(parsed, selectedComponentId),
-                            )
-                          ) {
-                            setPendingDeleteId("");
-                            onSelect("");
-                          }
-                        }}
-                      >
-                        Confirm delete
-                      </StudioButton>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div class="hp-inspector-order-actions">
-                      <StudioButton
-                        variant="secondary"
-                        disabled={!canInsert || position <= 0}
-                        onClick={() =>
-                          commit(moveComponent(parsed, selectedComponentId, -1))
-                        }
-                      >
-                        Move up
-                      </StudioButton>
-                      <StudioButton
-                        variant="secondary"
-                        disabled={!canInsert || position >= siblingCount - 1}
-                        onClick={() =>
-                          commit(moveComponent(parsed, selectedComponentId, 1))
-                        }
-                      >
-                        Move down
-                      </StudioButton>
-                    </div>
-                    <div class="hp-inspector-object-actions">
-                      <StudioButton
-                        variant="secondary"
-                        disabled={!canInsert}
-                        onClick={() =>
-                          commit(duplicateComponent(parsed, selectedComponentId))
-                        }
-                      >
-                        Duplicate
-                      </StudioButton>
-                      <StudioButton
-                        variant="danger"
-                        onClick={() => setPendingDeleteId(selectedComponentId)}
-                      >
-                        Delete
-                      </StudioButton>
-                    </div>
-                  </>
-                )}
-              </div>
             </>
           ) : (
             <div class="hp-inspector-empty">

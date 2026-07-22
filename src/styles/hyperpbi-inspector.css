@@ -388,8 +388,7 @@
 }
 
 .hp-inspector-properties {
-  position: relative;
-  padding: 0 0 76px;
+  padding: 0;
   background: var(--hp-studio-panel-bg, #fff);
 }
 
@@ -398,32 +397,54 @@
 }
 
 .hp-inspector-component-summary {
-  position: sticky;
-  top: 0;
-  z-index: 4;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 9px;
   margin: 0;
   padding: 10px 12px;
   border: 0;
   border-bottom: 1px solid var(--hp-inspector-border);
   border-radius: 0;
   background: color-mix(in srgb, var(--hp-studio-panel-bg, #fff) 96%, var(--hp-inspector-selected));
-  box-shadow: 0 2px 5px rgb(15 23 42 / 5%);
 }
 
-.hp-inspector-component-summary > div {
+.hp-inspector-component-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hp-inspector-component-identity {
   min-width: 0;
   display: grid;
-  align-items: initial;
-  justify-content: initial;
   gap: 2px;
 }
 
-.hp-inspector-component-summary > div strong {
+.hp-inspector-component-identity strong {
   font-size: 13px;
+}
+
+.hp-inspector-component-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hp-spec-inspector .hp-inspector-component-actions .hp-studio-button {
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  padding: 4px;
+}
+
+.hp-spec-inspector .hp-inspector-component-actions .hp-inspector-delete-action {
+  border-color: var(--hp-inspector-danger-border);
+  color: var(--hp-inspector-danger);
 }
 
 .hp-inspector-component-summary code {
@@ -595,45 +616,14 @@
   overflow: visible;
 }
 
-.hp-inspector-node-actions {
-  position: sticky;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 6;
-  min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 7px;
-  margin: 0;
-  padding: 9px 12px;
-  border-top: 1px solid var(--hp-inspector-border);
-  background: color-mix(in srgb, var(--hp-studio-panel-bg, #fff) 97%, transparent);
-  box-shadow: 0 -5px 14px rgb(15 23 42 / 7%);
-  backdrop-filter: blur(8px);
-}
-
-.hp-inspector-order-actions,
-.hp-inspector-object-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.hp-inspector-object-actions {
-  margin-left: auto;
-}
-
 .hp-inspector-delete-confirm {
-  width: 100%;
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 8px;
+  margin: 10px 12px 0;
+  padding: 9px;
   border: 1px solid var(--hp-inspector-danger-border);
   border-radius: 7px;
   background: var(--hp-inspector-danger-bg);
@@ -736,14 +726,7 @@
     border-right: 0;
   }
 
-  .hp-inspector-properties {
-    padding-bottom: 82px;
-  }
-
   .hp-inspector-mobile-back {
-    position: sticky;
-    top: 0;
-    z-index: 7;
     width: 100%;
     min-height: 42px;
     display: inline-flex;
@@ -752,10 +735,6 @@
     border-bottom: 1px solid var(--hp-inspector-border);
     border-radius: 0;
     background: var(--hp-studio-panel-bg, #fff);
-  }
-
-  .hp-inspector-component-summary {
-    top: 42px;
   }
 
   .hp-inspector-property-groups,
@@ -772,9 +751,6 @@
     margin: 0 9px 9px;
   }
 
-  .hp-inspector-node-actions {
-    padding: 8px 9px;
-  }
 }
 
 @container hp-inspector (max-width: 480px) {
@@ -787,7 +763,11 @@
   }
 
   .hp-inspector-component-summary {
-    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .hp-inspector-component-heading {
+    align-items: flex-start;
   }
 
   .hp-inspector-component-summary dl {
@@ -798,26 +778,9 @@
     max-width: 100%;
   }
 
-  .hp-inspector-node-actions,
-  .hp-inspector-order-actions,
-  .hp-inspector-object-actions {
-    width: 100%;
-  }
-
-  .hp-inspector-order-actions,
-  .hp-inspector-object-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-left: 0;
-  }
-
-  .hp-inspector-order-actions .hp-studio-button,
-  .hp-inspector-object-actions .hp-studio-button {
-    width: 100%;
-  }
-
   .hp-inspector-delete-confirm {
     grid-template-columns: minmax(0, 1fr);
+    margin-inline: 9px;
   }
 
   .hp-inspector-delete-confirm > div:last-child {

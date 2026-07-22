@@ -1,6 +1,8 @@
 <!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->
 # HyperPBI component catalog reference
 
+**Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
+
 HyperPBI currently defines **84 component types across 12 categories**. This file is generated from the canonical explicit `componentDescriptors.ts` registry and `patternRegistry.ts`; compatibility catalogs and strict 2.0 validator maps are derived from those descriptors.
 
 For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
