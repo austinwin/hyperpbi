@@ -1,7 +1,7 @@
 import type { EChartsCoreOption } from "echarts/core";
 import type { DataRow } from "../../../data/normalizeData";
 import type { ChartComponent } from "../../../schema/hyperpbiSchema";
-import type { RuntimeSettings } from "../../../settings";
+import type { RuntimeSettings } from "../../../runtime/runtimeSettings";
 
 export interface ChartDatumBinding {
     seriesIndex: number;

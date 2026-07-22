@@ -119,9 +119,19 @@ function propagateDefinition(name: string, definition: DatasetDefinition, input:
     return { name, fields };
 }
 
-export function resolveDatasetSchemas(base: NormalizedData, definitions: Record<string, DatasetDefinition> = {}): DatasetSchemaEvaluation {
+export function resolveDatasetSchemas(
+    base: NormalizedData,
+    definitions: Record<string, DatasetDefinition> = {},
+    sourceData: Record<string, NormalizedData> = {}
+): DatasetSchemaEvaluation {
     const diagnostics: Diagnostic[] = [];
     const datasets = new Map<string, DatasetSchemaResult>([["powerbi", { name: "powerbi", fields: cloneFields(base.fields) }]]);
+    const sourceSchemas = new Map(
+        Object.entries(sourceData).map(([name, data]) => [
+            name,
+            { name, fields: cloneFields(data.fields) } satisfies DatasetSchemaResult
+        ])
+    );
     const visiting: string[] = [];
     const failed = new Set<string>();
     const resolve = (name: string): DatasetSchemaResult | undefined => {
@@ -139,7 +149,8 @@ export function resolveDatasetSchemas(base: NormalizedData, definitions: Record<
         visiting.push(name);
         let input: DatasetSchemaResult | undefined;
         if (definition.source === "powerbi") input = datasets.get("powerbi");
-        else if (!definitions[definition.source]) diagnostics.push({ code: "UNKNOWN_DATASET", severity: "error", path: pathFor(name, "source"), message: `Dataset “${name}” references unknown source dataset “${definition.source}”.`, received: definition.source });
+        else if (sourceSchemas.has(definition.source)) input = sourceSchemas.get(definition.source);
+        else if (!definitions[definition.source]) diagnostics.push({ code: "UNKNOWN_DATASET", severity: "error", path: pathFor(name, "source"), message: `Dataset “${name}” references unknown source dataset or workspace source “${definition.source}”.`, received: definition.source });
         else input = resolve(definition.source);
         visiting.pop();
         if (!input) { failed.add(name); return undefined; }

@@ -10,6 +10,7 @@ export type QueryAggregation =
 export type FieldOrigin =
     | "powerbi-column"
     | "powerbi-measure"
+    | "uploaded-column"
     | "calculated-field"
     | "dataset-group"
     | "dataset-derived"

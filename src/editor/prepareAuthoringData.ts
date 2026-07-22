@@ -8,6 +8,8 @@ import {
 } from "../data/datasets";
 import type { DatasetSchemaEvaluation } from "../data/datasetSchema";
 import type { NormalizedData } from "../data/normalizeData";
+import type { DataWorkspace } from "../data/dataWorkspace";
+import { workspaceSourceData } from "../data/dataWorkspace";
 import {
   prepareSpecification,
   type PreparedSpecification,
@@ -64,12 +66,14 @@ export function prepareLogicalDatasets(
   data: NormalizedData,
   specification: HyperPbiSchema,
   lineageOptions: { sourceIndices?: number[]; sourceRowKeys?: string[] } = {},
+  workspace?: DataWorkspace,
 ): DatasetEvaluation {
   return evaluateDatasets(
     data,
     specification.data?.datasets ?? {},
     new Map(),
     lineageOptions,
+    workspace ? workspaceSourceData(workspace) : {},
   );
 }
 
@@ -77,6 +81,7 @@ export function prepareAuthoringData(
   specificationJson: string,
   configurationJson: string,
   data: NormalizedData,
+  workspace?: DataWorkspace,
 ): PreparedAuthoringData {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -88,9 +93,10 @@ export function prepareAuthoringData(
 
   const aliases = parsedConfig.config?.fields?.aliases ?? {};
   const prepared = parsedSpecification.value
-    ? prepareSpecification(parsedSpecification.value, data, {
+      ? prepareSpecification(parsedSpecification.value, data, {
         repair: false,
         aliasOverrides: aliases,
+        sourceData: workspace ? workspaceSourceData(workspace) : {},
       })
     : undefined;
   if (prepared) {
@@ -125,13 +131,21 @@ export function prepareAuthoringData(
   const datasetEvaluation = prepareLogicalDatasets(
     runtime.data,
     prepared.schema,
+    {},
+    workspace,
   );
   errors.push(
     ...datasetEvaluation.errors.map(
       (error) => `Dataset ${error.dataset}: ${error.message}`,
     ),
   );
-  warnings.push(...validateReferences(prepared.schema, runtime.data));
+  warnings.push(
+    ...validateReferences(
+      prepared.schema,
+      runtime.data,
+      workspace ? workspaceSourceData(workspace) : {},
+    ),
+  );
 
   return {
     ...base,

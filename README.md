@@ -1,10 +1,37 @@
 # HyperPBI
 
-HyperPBI is a schema-driven Power BI custom visual that turns declarative JSON into interactive dashboards and application-style report experiences. It binds to the current Power BI data view, validates authoring input, prepares logical datasets and reusable structures, and renders only implemented components and safe behaviors.
+HyperPBI is an AI-native analytics runtime and portable dashboard specification. Declarative HyperPBI 2.0 JSON is prepared by one validation and dataset pipeline, then rendered by the same Studio and runtime in either the Power BI custom visual or the standalone web Playground. HyperPBI renders only implemented components and safe behaviors; it is not a general-purpose HTML or JavaScript application platform.
 
 **Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
 
 HyperPBI does not call an AI service. Edit Mode builds a prompt from the current Field Manifest and authoring settings; the user copies that prompt to an externally approved AI, then pastes one JSON response back into HyperPBI for extraction, validation, preview, and saving.
+
+```text
+AI / Visual Editor / JSON / Templates
+                  ↓
+         HyperPBI 2.0 Specification
+                  ↓
+        Shared HyperPBI Runtime
+                  ↓
+       Power BI Host | Web Host
+```
+
+## HyperPBI Playground
+
+The Vite/Preact application in `apps/playground` is the reference web host for HyperPBI 2.0. It reuses `HyperPbiStudio`, `HyperPbiRoot`, schema preparation, runtime configuration, sanitizers, calculations, logical datasets, field handling, and component rendering from `src`; there is no web-only dashboard format or duplicate renderer.
+
+The local workflow is:
+
+1. Create or import a project.
+2. Upload one or more CSV/XLSX files. A CSV creates one source and every workbook sheet creates one source.
+3. Inspect fields and preview rows, name sources, and select the default source exposed to the specification as `powerbi`.
+4. Author in the existing Studio, validate through the 2.0 preparation pipeline, and open full-viewport Play Mode.
+5. Let IndexedDB save specification, Runtime Configuration, editor state, source manifests, normalized fields/rows, and deterministic row keys.
+6. Copy/download portable specification and Runtime Configuration JSON, or export/import the complete `.hyperpbi` local project.
+
+A `.hyperpbi` project is a Playground backup containing local normalized data and editor state. A portable Power BI specification contains the declarative dashboard only; Power BI must provide the required data to the visual. Before Power BI export, the Playground reports whether the project is compatible, safely compatible after rewriting the selected default source ID to `powerbi`, or not fully portable. It never collapses genuinely separate uploaded sources into one.
+
+See [architecture](docs/architecture.md) for host contracts, persistence, portability, Vercel deployment, and future service boundaries.
 
 ## Current status and schema versions
 
@@ -15,7 +42,7 @@ HyperPBI does not call an AI service. Edit Mode builds a prompt from the current
 <!-- component-summary:end -->
 - Power BI visual package version `1.0.0.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
-## Core workflow
+## Power BI workflow
 
 1. Import the appropriate PBIVIZ package and bind the required Power BI fields to **Values**.
 2. Open the visual's **Edit** command. Edit Mode starts in a focused guided experience for creating or revising a dashboard without navigating expert tools.
@@ -69,7 +96,7 @@ Alias privacy modes range from sample-bearing profiles to masked, summary, field
 
 ## Logical datasets
 
-Named datasets live at `data.datasets`. Every definition has a `source` of `powerbi` or another named dataset. After source resolution, both runtime evaluation and static schema propagation use this order:
+Named datasets live at `data.datasets`. Every definition has a `source` of `powerbi`, another named dataset, or—in the Playground—an uploaded source ID. After source resolution, both runtime evaluation and static schema propagation use this order:
 
 `filter → derive → rename → select → groupBy/metrics → distinct → sort → limit`
 
@@ -175,6 +202,11 @@ The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `
 
 ```powershell
 npm install
+npm run dev
+npm run playground:typecheck
+npm run playground:test
+npm run playground:build
+npm run playground:preview
 npm run start
 npm run typecheck
 npm test
@@ -204,6 +236,7 @@ Do not hand-edit the fully generated reference outputs or the marked regions. Th
 
 | Document | Purpose |
 |---|---|
+| [Architecture and Playground](docs/architecture.md) | Shared runtime, host bridges, projects, portability, Vercel, future services |
 | [User guide](docs/user-guide.md) | Power BI and Edit Mode workflow |
 | [2.0 specification](docs/hyperpbi-spec-reference.md) | Root, components, app, styles, behavior, diagnostics |
 | [Generated component catalog](docs/hyperpbi-component-catalog-reference.md) | Canonical component inventory and examples |
@@ -232,6 +265,9 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 
 - Dashboard schema 2.0 is the only runtime contract. See [migration/versioning](docs/migration-versioning.md) for the isolated development converter and the removed aliases.
 - Logical datasets are in-memory transformations of the current Power BI data view: no joins, SQL, arbitrary JavaScript, or network sources.
+- The Playground accepts local CSV and XLSX only. It has no joins, relationships, DAX, Power Query, databases, scheduled refresh, authentication, collaboration, or cloud publishing.
+- One Power BI visual receives one flattened data view. A Playground project that depends on multiple independent uploaded sources is intentionally reported as not fully portable.
+- Browser-host selection and filtering stay inside HyperPBI unless they use an implemented declarative internal interaction. Power BI-only external selection/filter requests are reported as unsupported, never as successful.
 - Power BI supplies one flattened visual data view. Logical datasets can create different layer views over it, but cannot independently query arbitrary semantic-model tables; visual-query grain and relationships still control received rows.
 - Root calculated-field metadata is added before logical-dataset schema propagation, so calculated fields can drive components and dataset stages even with zero rows. Root scalar metrics remain a separate namespace consumed through metric-grid metric references/templates.
 - External filter mode targets model columns only; model measures and dataset outputs are not direct Power BI filter targets.

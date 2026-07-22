@@ -1,4 +1,7 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import { createRuntimeSettings, RuntimeSettings } from "./runtime/runtimeSettings";
+
+export type { RuntimeSettings } from "./runtime/runtimeSettings";
 
 const f = formattingSettings;
 type Slice = formattingSettings.Slice;
@@ -40,29 +43,12 @@ export class VisualFormattingSettingsModel extends f.Model {
     cards = [this.interface, this.editor, this.renderedVisual, this.dataLimit];
 }
 
-export interface RuntimeSettings {
-    schemaJson: string; useSchemaField: boolean; validationMode: string; showExample: boolean;
-    enableHtml: boolean; customCss: string; showWarnings: boolean; allowInlineSvg: boolean; allowSafeImages: boolean;
-    theme: { mode: string; primary: string; accent: string; surface: string; text: string; border: string; danger: string; warning: string; success: string; fontFamily: string; baseFontSize: number; radius: number; shadow: number };
-    layout: { density: string; gap: number; cardPadding: number; leftPanelWidth: number; headerHeight: number; internalScrolling: boolean; stickyToolbar: boolean };
-    table: { maxRows: number; rowHeight: number; stickyHeader: boolean; pagination: boolean; columnResize: boolean; search: boolean };
-    map: { enabled: boolean; center: [number, number]; zoom: number; tileUrl: string; allowExternalTiles: boolean; clusterPoints: boolean };
-    debug: { showFieldDictionary: boolean; showSchemaErrors: boolean; showDataSample: boolean; showPerformance: boolean };
-    editor: { previewPosition: string; fontSize: number; wordWrap: boolean; showDataPane: boolean; showLogPane: boolean };
-    enableInteractions: boolean;
-}
-
 export function toRuntimeSettings(model: VisualFormattingSettingsModel): RuntimeSettings {
     const mode = String(model.interface.theme.value.value); const dark = mode === "dark";
-    return {
-        schemaJson: "", useSchemaField: false, validationMode: "strict", showExample: true,
-        enableHtml: true, customCss: "", showWarnings: true, allowInlineSvg: false, allowSafeImages: false,
-        theme: { mode, primary: "#206bc4", accent: "#4299e1", surface: dark ? "#182433" : "#ffffff", text: dark ? "#f1f5f9" : "#182433", border: dark ? "#334155" : "#dce1e7", danger: "#d63939", warning: "#f59f00", success: "#2fb344", fontFamily: "Inter, Segoe UI, sans-serif", baseFontSize: 12, radius: 8, shadow: 1 },
-        layout: { density: "compact", gap: 8, cardPadding: 12, leftPanelWidth: 280, headerHeight: 44, internalScrolling: true, stickyToolbar: true },
-        table: { maxRows: Math.max(100, model.dataLimit.maxRows.value), rowHeight: 32, stickyHeader: true, pagination: true, columnResize: true, search: true },
-        map: { enabled: true, center: [0, 0], zoom: 2, tileUrl: "", allowExternalTiles: false, clusterPoints: false },
-        debug: { showFieldDictionary: false, showSchemaErrors: true, showDataSample: false, showPerformance: false },
+    return createRuntimeSettings({
+        theme: { mode, surface: dark ? "#182433" : "#ffffff", text: dark ? "#f1f5f9" : "#182433", border: dark ? "#334155" : "#dce1e7" },
+        table: { maxRows: Math.max(100, model.dataLimit.maxRows.value) },
         editor: { previewPosition: String(model.editor.previewPosition.value.value), fontSize: Math.max(10, Math.min(22, model.editor.fontSize.value)), wordWrap: model.editor.wordWrap.value, showDataPane: model.editor.showDataPane.value, showLogPane: model.editor.showLogPane.value },
         enableInteractions: model.renderedVisual.enableInteractions.value
-    };
+    });
 }

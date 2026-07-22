@@ -10,6 +10,7 @@ const help: Record<ExternalSelectionFailureReason,{message:string;fix:string}> =
     "unsupported external filter operator": { message: "The filter operator is not supported for Power BI propagation.", fix: "Use =, in, contains, a numeric comparison, or between." },
     "host filter failed": { message: "Power BI rejected the external filter.", fix: "Verify the filter target, report permissions, and visual interaction settings." },
     "unsupported interaction action": { message: "This interaction action is not supported by the safe engine.", fix: "Use selectRow, selectWhere, setFilter, clearSelection, or another documented safe action." },
+    "unsupported by web host": { message: "This Power BI-only interaction is unavailable in the browser host.", fix: "Use a declarative internal filter or selection for Play Mode, or open the specification in Power BI for report-level propagation." },
     "component did not call selectExternal": { message: "This component did not request an external interaction.", fix: "Use component.interaction.externalMode when report propagation is intended." },
     "external interaction disabled": { message: "This component is configured for internal interaction only.", fix: "Set interaction.externalMode to auto, selection, or filter when Power BI propagation is intended." },
     "interaction payload unavailable": { message: "The component could not produce an unambiguous interaction payload.", fix: "Set interaction.field and, for static components, interaction.value explicitly." }

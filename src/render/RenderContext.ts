@@ -2,7 +2,7 @@ import { createContext } from "preact";
 import { useContext } from "preact/hooks";
 import { DataRow, NormalizedData } from "../data/normalizeData";
 import { HyperPbiSchema } from "../schema/hyperpbiSchema";
-import { RuntimeSettings } from "../settings";
+import { RuntimeSettings } from "../runtime/runtimeSettings";
 import { DashboardAction, DashboardState } from "./stateStore";
 import { HyperPbiConfig } from "../config/hyperpbiConfig";
 import { ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails } from "../powerbi/interactionDiagnostics";

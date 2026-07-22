@@ -1,6 +1,8 @@
 node_modules/
 .tmp/
 dist/
+!apps/playground/dist/
+!apps/playground/dist/**
 webpack.statistics*.html
 *.pfx
 *.pbiviz

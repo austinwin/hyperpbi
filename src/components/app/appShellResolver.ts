@@ -1,5 +1,5 @@
 import { HyperPbiSchema } from "../../schema/hyperpbiSchema";
-import { RuntimeSettings } from "../../settings";
+import { RuntimeSettings } from "../../runtime/runtimeSettings";
 import { DashboardState } from "../../render/stateStore";
 import type { ResolvedAppShell } from "../../schema/uiSchema";
 

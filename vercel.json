@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run playground:build",
+  "outputDirectory": "apps/playground/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

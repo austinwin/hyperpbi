@@ -1,10 +1,10 @@
 # HyperPBI data model
 
-HyperPBI receives one normalized Power BI data view, augments its static schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current data view has zero rows. Root scalar metrics remain separate from row fields. HyperPBI never queries SQL, joins arbitrary sources, downloads a dataset, or executes user code.
+HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI never queries SQL, joins arbitrary sources, downloads a network dataset, or executes user code.
 
 ## Base `powerbi` dataset
 
-The built-in dataset name is `powerbi`. It contains normalized rows, stable row keys, field metadata, Power BI selection identities when supplied, calculated aggregates, and normalized map bindings/warnings.
+The built-in dataset name is `powerbi`. In Power BI it is the normalized visual data view and can carry selection identities. In the Playground it is an alias for the currently selected default source. In both hosts it contains normalized rows, stable row keys, field metadata, calculated aggregates, and normalized map bindings/warnings.
 
 Normalized field metadata includes canonical key, display/query/qualified names, source table/column, type, kind, data type, format, Power BI roles, query aggregation, implicit-aggregation flag, origin, and selection/filter capability.
 
@@ -16,7 +16,7 @@ New 2.0 JSON uses Field Manifest aliases. Preparation resolves aliases in datase
 
 | Property | Type | Contract |
 |---|---|---|
-| `source` | string | Required: `powerbi` or another named dataset |
+| `source` | string | Required: `powerbi`, another named dataset, or a Playground uploaded-source ID |
 | `filter` | object or array | `{field, operator, value}`; all filters must pass |
 | `derive` | expression record | Adds/replaces row fields using the safe calculation DSL |
 | `rename` | record | Old field → nonblank new field |

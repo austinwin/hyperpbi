@@ -2,6 +2,8 @@
 
 HyperPBI is a prompt builder, validator, and renderer. It does not call an AI API, store an AI key, or send data automatically. A user reviews and copies a generated prompt to an externally approved AI, then pastes one response back into Studio.
 
+The provider-neutral `SpecificationAuthoringService` boundary lives in `src/authoring/SpecificationAuthoringService.ts`. A future service can create or revise a schema from an `AuthoringContext`, but its output must still enter the existing strict preparation, diagnostics, preview, and save path. Provider credentials, network calls, publishing, and automatic data disclosure are deliberately absent from the current Playground.
+
 The normal Edit Mode path stays in **Guided Builder**. Select **Advanced controls**, then **Create → AI Builder**, when a job needs targeted component selection or the surrounding expert workspaces. Both paths use the same prompt composer and validation pipeline; the advanced navigation does not create a second authoring model.
 
 ## Prompt jobs and output contracts

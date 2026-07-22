@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
 import { NormalizedData } from "../data/normalizeData";
+import type { DataWorkspace } from "../data/dataWorkspace";
+import { workspaceSourceData } from "../data/dataWorkspace";
 import { GeocodeResult } from "../providers/providerTypes";
 import { HyperPbiRoot } from "../render/HyperPbiRoot";
 import { DashboardComponent, HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { validateReferences } from "../schema/validateReferences";
 import { validateSchema } from "../schema/validateSchema";
-import { RuntimeSettings } from "../settings";
+import { RuntimeSettings } from "../runtime/runtimeSettings";
 import { parseJson } from "../utils/safeJson";
 import { AiPromptTab } from "./ai/AiPromptTab";
 import { CalculationsTab } from "./CalculationsTab";
@@ -147,8 +149,9 @@ function validateDraft(
   specification: string,
   configuration: string,
   data: NormalizedData,
+  dataWorkspace?: DataWorkspace,
 ): ValidationResult {
-  const prepared = prepareAuthoringData(specification, configuration, data);
+  const prepared = prepareAuthoringData(specification, configuration, data, dataWorkspace);
   const warnings = [...prepared.warnings];
   if (prepared.specification && prepared.config)
     warnings.push(
@@ -168,6 +171,7 @@ function validateStructure(
   specification: string,
   configuration: string,
   data: NormalizedData,
+  dataWorkspace?: DataWorkspace,
 ): { schema?: HyperPbiSchema; errors: string[] } {
   const errors: string[] = [];
   const config = parseConfig(configuration);
@@ -177,6 +181,7 @@ function validateStructure(
     ? prepareSpecification(parsed.value, data, {
         repair: false,
         aliasOverrides: config.config?.fields?.aliases,
+        sourceData: dataWorkspace ? workspaceSourceData(dataWorkspace) : {},
       })
     : undefined;
   if (prepared && !prepared.schema)
@@ -188,6 +193,7 @@ function validateStructure(
 export function HyperPbiStudio({
   instanceId,
   data,
+  dataWorkspace,
   settings,
   initialSpecification,
   initialConfiguration,
@@ -220,6 +226,7 @@ export function HyperPbiStudio({
 }: {
   instanceId: string;
   data: NormalizedData;
+  dataWorkspace?: DataWorkspace;
   settings: RuntimeSettings;
   initialSpecification: string;
   initialConfiguration: string;
@@ -308,17 +315,17 @@ export function HyperPbiStudio({
     specification !== initialSpecification ||
     configuration !== initialConfiguration;
   const structure = useMemo(
-    () => validateStructure(specification, configuration, data),
-    [specification, configuration, data],
+    () => validateStructure(specification, configuration, data, dataWorkspace),
+    [specification, configuration, data, dataWorkspace],
   );
   const preparedAuthoring = useMemo<PreparedAuthoringData>(
-    () => prepareAuthoringData(specification, configuration, data),
-    [specification, configuration, data],
+    () => prepareAuthoringData(specification, configuration, data, dataWorkspace),
+    [specification, configuration, data, dataWorkspace],
   );
   const validateCandidate = useCallback(
     (candidateSpecificationJson: string) =>
-      prepareAuthoringData(candidateSpecificationJson, configuration, data),
-    [configuration, data],
+      prepareAuthoringData(candidateSpecificationJson, configuration, data, dataWorkspace),
+    [configuration, data, dataWorkspace],
   );
   const issuesAreCurrent =
     issueSource?.specification === specification &&
@@ -472,7 +479,7 @@ export function HyperPbiStudio({
   ) => updateInteraction(indices, details, { sent: false, reason });
   const validate = () => {
     try {
-      const result = validateDraft(specification, configuration, data);
+      const result = validateDraft(specification, configuration, data, dataWorkspace);
       setErrors(result.errors);
       setWarnings(result.warnings);
       setIssueSource({ specification, configuration });
@@ -504,7 +511,7 @@ export function HyperPbiStudio({
     candidateConfig = configuration,
   ): boolean => {
     try {
-      const result = validateDraft(candidate, candidateConfig, data);
+      const result = validateDraft(candidate, candidateConfig, data, dataWorkspace);
       setErrors(result.errors);
       setWarnings(result.warnings);
       setIssueSource({

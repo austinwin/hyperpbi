@@ -1,5 +1,5 @@
 import { HyperPbiTheme } from "../schema/hyperpbiSchema";
-import { RuntimeSettings } from "../settings";
+import { RuntimeSettings } from "../runtime/runtimeSettings";
 
 function color(value: string | undefined, fallback: string): string { return value && /^(#[0-9a-f]{3,8}|rgba?\([\d\s,.%]+\)|hsla?\([\d\s,.%]+\))$/i.test(value.trim()) ? value.trim() : fallback; }
 function size(value: number | undefined, fallback: number, max = 64): number { return Number.isFinite(value) ? Math.max(0, Math.min(max, Number(value))) : fallback; }

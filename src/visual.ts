@@ -24,11 +24,12 @@ import { prepareRuntimeData } from "./editor/prepareAuthoringData";
 import { defaultStudioLayout } from "./editor/studioLayout";
 import { prepareSpecification } from "./schema/prepareSpecification";
 import { createInteractionDiagnostics, ExternalSelectionFailureReason, ExternalSelectionResult, InteractionDetails, InteractionDiagnostics } from "./powerbi/interactionDiagnostics";
-import { applyExternalFilter as applyPowerBiFilter, clearExternalFilter as clearPowerBiFilter, ExternalFilterResult } from "./powerbi/externalFilters";
+import { ExternalFilterResult } from "./powerbi/externalFilters";
 import { FilterOperator } from "./schema/hyperpbiSchema";
 import type { ProviderAccessState } from "./providers/providerTypes";
 import { providerServiceOrigin } from "./providers/providerPolicy";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
+import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -55,6 +56,7 @@ export class Visual implements IVisual {
     private readonly target: HTMLElement;
     private readonly host: powerbi.extensibility.visual.IVisualHost;
     private readonly selectionManager: powerbi.extensibility.ISelectionManager;
+    private readonly hostBridge: PowerBiHostBridge;
     private readonly instanceId = createInstanceId();
     private readonly formattingSettingsService = new FormattingSettingsService();
     private formattingSettings = new VisualFormattingSettingsModel();
@@ -78,6 +80,7 @@ export class Visual implements IVisual {
     constructor(options?: VisualConstructorOptions) {
         if (!options) throw new Error("HyperPBI requires Power BI visual constructor options.");
         this.target = options.element; this.host = options.host; this.selectionManager = this.host.createSelectionManager();
+        this.hostBridge = new PowerBiHostBridge({ host: this.host, selectionManager: this.selectionManager, selectionIds: () => this.selectionIds, fields: () => this.data.fields, interactionsEnabled: () => toRuntimeSettings(this.formattingSettings).enableInteractions });
         this.target.classList.add("hyperpbi-visual-host");
         void this.checkProviderAccess();
     }
@@ -217,37 +220,20 @@ export class Visual implements IVisual {
     };
 
     private selectRows = (rowIndices: number[], multiSelect = false, details: InteractionDetails = {}): ExternalSelectionResult => {
-        const enabled = toRuntimeSettings(this.formattingSettings).enableInteractions;
-        let result: ExternalSelectionResult;
-        if (!enabled) result = { sent: false, reason: "interactions disabled" };
-        else if (!this.host.hostCapabilities.allowInteractions) result = { sent: false, reason: "host disallowed" };
-        else if (!this.selectionIds.length) result = { sent: false, reason: "no selection identities" };
-        else {
-            const indices = Array.from(new Set(rowIndices)).filter(index => Number.isInteger(index) && index >= 0 && index < this.selectionIds.length);
-            if (!indices.length) { void this.selectionManager.clear(); result = { sent: false, reason: "no matching source rows" }; }
-            else {
-                const identities = indices
-                    .map(index => this.selectionIds[index])
-                    .filter(
-                        (identity): identity is powerbi.visuals.ISelectionId =>
-                            identity !== undefined
-                    );
-                if (!identities.length) { result = { sent: false, reason: "no selection identities" }; }
-                else { void this.selectionManager.select(identities, multiSelect); result = { sent: true }; rowIndices = indices; }
-            }
-        }
+        const indices = Array.from(new Set(rowIndices)).filter(index => Number.isInteger(index) && index >= 0 && index < this.selectionIds.length);
+        const result = this.hostBridge.requestSelectionSync({ rowIndices: indices, multiSelect, details });
+        rowIndices = result.sent ? indices : [];
         this.updateInteractionDiagnostics(rowIndices, details, result); return result;
     };
 
     private clearSelection = (details: InteractionDetails = {}): ExternalSelectionResult => {
-        const enabled = toRuntimeSettings(this.formattingSettings).enableInteractions;
-        const result: ExternalSelectionResult = !enabled ? { sent: false, reason: "interactions disabled" } : !this.host.hostCapabilities.allowInteractions ? { sent: false, reason: "host disallowed" } : !this.selectionIds.length ? { sent: false, reason: "no selection identities" } : { sent: true };
-        if (result.sent) void this.selectionManager.clear(); this.updateInteractionDiagnostics([], details, result); return result;
+        const result = this.hostBridge.requestSelectionSync({ rowIndices: [], clear: true, details });
+        this.updateInteractionDiagnostics([], details, result); return result;
     };
 
     private updateFilterDiagnostics=(details:InteractionDetails,result:ExternalFilterResult):void=>{this.interactionDiagnostics={...this.interactionDiagnostics,externalInteractionEnabled:toRuntimeSettings(this.formattingSettings).enableInteractions,hostAllowsInteractions:this.host.hostCapabilities.allowInteractions===true,selectionIdentityCount:this.selectionIds.length,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??0,lastSelectedSourceRowIndices:[],externalMode:"filter",filterSent:result.sent,selectionSent:false,externalSelectionSent:false,filterTargetTable:result.target?.table,filterTargetColumn:result.target?.column,reasonExternalSelectionNotSent:result.sent?undefined:result.reason};};
-    private applyFilter=(field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult=>{const enabled=toRuntimeSettings(this.formattingSettings).enableInteractions;const result:ExternalFilterResult=!enabled?{sent:false,reason:"interactions disabled"}:!this.host.hostCapabilities.allowInteractions?{sent:false,reason:"host disallowed"}:applyPowerBiFilter(this.host,this.data.fields,field,operator,value,details);this.updateFilterDiagnostics({...details,field},result);return result;};
-    private clearFilter=(details:InteractionDetails={}):ExternalFilterResult=>{const enabled=toRuntimeSettings(this.formattingSettings).enableInteractions;const result:ExternalFilterResult=!enabled?{sent:false,reason:"interactions disabled"}:!this.host.hostCapabilities.allowInteractions?{sent:false,reason:"host disallowed"}:clearPowerBiFilter(this.host,details);this.updateFilterDiagnostics(details,result);return result;};
+    private applyFilter=(field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult=>{const result=this.hostBridge.requestExternalFilterSync({field,operator,value,details});this.updateFilterDiagnostics({...details,field},result);return result;};
+    private clearFilter=(details:InteractionDetails={}):ExternalFilterResult=>{const result=this.hostBridge.requestExternalFilterSync({clear:true,details});this.updateFilterDiagnostics(details,result);return result;};
 
     private reportInteraction = (details: InteractionDetails, reason: ExternalSelectionFailureReason = "component did not call selectExternal", rowIndices: number[] = []): void => this.updateInteractionDiagnostics(rowIndices, details, { sent: false, reason });
 

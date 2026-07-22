@@ -8,6 +8,7 @@ export type ExternalSelectionFailureReason =
     | "unsupported external filter operator"
     | "host filter failed"
     | "unsupported interaction action"
+    | "unsupported by web host"
     | "component did not call selectExternal"
     | "external interaction disabled"
     | "interaction payload unavailable";

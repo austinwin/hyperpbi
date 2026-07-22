@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@hyperpbi/*": ["../../src/*"] },
+    "types": ["vite/client", "node"],
+    "noEmit": true
+  },
+  "files": [],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../../src/**/*.ts", "../../src/**/*.tsx", "vite.config.mts"]
+}

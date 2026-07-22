@@ -3,9 +3,10 @@ import { calculateAggregates } from "../data/aggregations";
 import { normalizeMapBindings } from "../data/normalizeMapBindings";
 import { filterRows } from "../data/filtering";
 import { NormalizedData } from "../data/normalizeData";
+import type { DataWorkspace } from "../data/dataWorkspace";
 import { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { sanitizeCss } from "../security/sanitizeCss";
-import { RuntimeSettings } from "../settings";
+import { RuntimeSettings } from "../runtime/runtimeSettings";
 import { HyperPbiConfig, defaultConfig } from "../config/hyperpbiConfig";
 import { themeVariables } from "../styles/tokens";
 import { FieldDictionaryPanel } from "../components/system/FieldDictionaryPanel";
@@ -47,6 +48,7 @@ export function HyperPbiRoot({
   instanceId,
   schema,
   data,
+  dataWorkspace,
   settings,
   renderMs,
   referenceWarnings = [],
@@ -65,6 +67,7 @@ export function HyperPbiRoot({
   instanceId: string;
   schema: HyperPbiSchema;
   data: NormalizedData;
+  dataWorkspace?: DataWorkspace;
   settings: RuntimeSettings;
   renderMs: number;
   referenceWarnings?: string[];
@@ -163,8 +166,8 @@ export function HyperPbiRoot({
         (key) => sourceIndexByKey.get(key) ?? -1,
       ),
       sourceRowKeys: data.rowKeys,
-    });
-  }, [filteredData, schema, filteredRowKeys, data.rowKeys]);
+    }, dataWorkspace);
+  }, [filteredData, schema, filteredRowKeys, data.rowKeys, dataWorkspace]);
   const runtimeWarnings = useMemo(
     () =>
       Array.from(
@@ -209,7 +212,7 @@ export function HyperPbiRoot({
             {
               state,
               datasetLineage: result.lineage,
-              powerBiSourceRowKeys: data.rowKeys,
+              powerBiSourceRowKeys: result.rootRowKeys ?? data.rowKeys,
             },
           )
         : datasetRows;
@@ -232,7 +235,7 @@ export function HyperPbiRoot({
         ]),
         sourceRowKeys: rowIndices.map((index) =>
           (result.lineage[index] ?? []).map(
-            (sourceIndex) => data.rowKeys[sourceIndex] ?? String(sourceIndex),
+            (sourceIndex) => (result.rootRowKeys ?? data.rowKeys)[sourceIndex] ?? String(sourceIndex),
           ),
         ),
         totalRows: datasetRows.length,
