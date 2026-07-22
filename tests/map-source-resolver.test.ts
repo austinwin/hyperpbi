@@ -13,7 +13,6 @@ function makeContext(rows: any[], fieldKeys: string[]): MapSourceContext {
         rowIndices: rows.map((_, i) => i),
         rowKeys: rows.map((_, i) => `source-key-${i}`),
         fields,
-        runtimeBindings: {},
         geocodeCache: {},
     };
 }

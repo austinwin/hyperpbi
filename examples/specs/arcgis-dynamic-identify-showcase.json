@@ -22,7 +22,10 @@
       "aspectRatio": 1.8,
       "minHeight": 360,
       "view": {
-        "center": [37.8, -96],
+        "center": [
+          37.8,
+          -96
+        ],
         "zoom": 4,
         "minZoom": 3,
         "maxZoom": 12,
@@ -47,7 +50,10 @@
           "source": {
             "type": "arcgisDynamic",
             "url": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer",
-            "layerIds": [2, 3],
+            "layerIds": [
+              2,
+              3
+            ],
             "format": "png32",
             "transparent": true,
             "debounceMs": 250,
@@ -107,9 +113,8 @@
         "zoomToSelection": false,
         "bookmarks": false
       },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": false
+      "legend": {
+        "defaultOpen": false
       }
     }
   ]

@@ -3733,12 +3733,6 @@ function PerformanceEditor({
   const defaultMaximum = arcGisFeature
     ? DEFAULT_ARCGIS_FEATURE_MAX_FEATURES
     : DEFAULT_POWER_BI_MAP_MAX_FEATURES;
-  const hasDeprecatedOptions = Boolean(
-    performance.generalizeByZoom !== undefined ||
-      performance.minimumGeneralization !== undefined ||
-      performance.maximumGeneralization !== undefined ||
-      performance.progressiveRendering !== undefined,
-  );
   return (
     <div class="hp-map-form-grid">
       <label>
@@ -3807,12 +3801,6 @@ function PerformanceEditor({
           />{" "}
           Query the current viewport
         </label>
-      )}
-      {hasDeprecatedOptions && (
-        <p class="hp-map-form-help">
-          Legacy generalization and progressive-rendering settings are retained
-          in JSON for compatibility but are not executed or editable.
-        </p>
       )}
     </div>
   );

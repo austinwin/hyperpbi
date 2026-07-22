@@ -16,7 +16,7 @@ export function OverlayHost() {
 
     useEffect(() => {
         overlays.forEach(component => {
-            if (!component.id || !["offcanvas", "drawer", "filterDrawer"].includes(component.type)) return;
+            if (!component.id || component.type !== "offcanvas") return;
             const panel = component as OffcanvasComponent;
             const condition = panel.openWhen === "always" || panel.openWhen === "selectedRow" && context.state.selectedRows.length > 0 || panel.openWhen === "state" && Boolean(panel.stateKey && context.state.values[panel.stateKey]);
             const previous = conditions.current.get(component.id);

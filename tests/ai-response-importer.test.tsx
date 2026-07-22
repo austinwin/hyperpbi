@@ -10,6 +10,17 @@ const data: NormalizedData = { fields: {}, rows: [], rowKeys: [], aggregates: ca
 const current = JSON.stringify({ version: "2.0", components: [{ type: "text", id: "one", text: "A" }, { type: "text", id: "two", text: "B" }] });
 
 describe("AI response importer", () => {
+    it("rejects a complete schema 1.0 response with a schema 2.0-only message", () => {
+        const onPreview = vi.fn(() => true);
+        const host = document.createElement("div");
+        act(() => render(<AiResponseImporter data={data} currentSpecification={current} onPreview={onPreview} />, host));
+        const textarea = host.querySelector("textarea")!;
+        act(() => { textarea.value = JSON.stringify({ version: "1.0", components: [{ type: "text", id: "old", text: "Old" }] }); textarea.dispatchEvent(new Event("input", { bubbles: true })); });
+        const validateButton = Array.from(host.querySelectorAll<HTMLButtonElement>("button")).find(button => button.textContent?.includes("Validate response & preview"));
+        act(() => validateButton!.click());
+        expect(onPreview).not.toHaveBeenCalled();
+        expect(host.textContent).toContain("supports schema version “2.0” only");
+    });
     it("promotes the complete validated result through the preview transaction", () => {
         const onPreview = vi.fn(() => true);
         const host = document.createElement("div");

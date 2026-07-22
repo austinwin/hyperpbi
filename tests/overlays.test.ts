@@ -19,13 +19,13 @@ describe("overlay architecture",()=>{
         expect(dashboardReducer(open,{type:"closeOverlay",id:"menu"}).overlayAnchors.menu).toBeUndefined();
     });
     it("requires overlay IDs and detects duplicates throughout nested containers",()=>{
-        const missing=validateSchema({version:"1.0",components:[{type:"dropdown",items:[{id:"x",label:"X"}]}]});
-        expect(missing.errors.join(" ")).toMatch(/\/components\/0\/id is required/);
-        const duplicate=validateSchema({version:"1.0",components:[{type:"card",id:"card",children:[{type:"text",id:"same",text:"A"}],footer:[{type:"popover",id:"same",trigger:{label:"More"},children:[{type:"text",id:"inside",text:"B"}]}]}]});
-        expect(duplicate.errors.join(" ")).toMatch(/footer\/0\/id duplicates component ID/);
+        const missing=validateSchema({version:"2.0",components:[{type:"dropdown",items:[{id:"x",label:"X"}]}]});
+        expect(missing.errors.join(" ")).toContain("Every version 2.0 component requires a stable ID");
+        const duplicate=validateSchema({version:"2.0",components:[{type:"card",id:"card",children:[{type:"text",id:"same",text:"A"}],footer:[{type:"popover",id:"same",trigger:{label:"More"},children:[{type:"text",id:"inside",text:"B"}]}]}]});
+        expect(duplicate.diagnostics).toContainEqual(expect.objectContaining({code:"DUPLICATE_COMPONENT_ID",path:"/components/0/footer/0/id"}));
     });
-    it("reports precise semantic component validation paths",()=>{
-        const result=validateSchema({version:"1.0",components:[{type:"comboChart",id:"combo",category:"Category",series:[{field:"A",chartType:"pie"}]},{type:"radarChart",id:"radar",indicators:[{field:"A",max:0}]}]});
-        expect(result.errors).toEqual(expect.arrayContaining([expect.stringContaining("/components/0/series must contain at least two"),expect.stringContaining("/components/1/indicators must contain at least three")]));
+    it("reports precise strict property paths",()=>{
+        const result=validateSchema({version:"2.0",components:[{type:"comboChart",id:"combo",category:"Category",series:[{field:"A",chartType:"line"}],legacyOption:true}]});
+        expect(result.diagnostics).toContainEqual(expect.objectContaining({code:"UNKNOWN_PROPERTY",path:"/components/0/legacyOption"}));
     });
 });

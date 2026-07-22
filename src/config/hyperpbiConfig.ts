@@ -50,7 +50,5 @@ export function parseConfig(text: string): { config?: HyperPbiConfig; errors: st
 
 export function resolveConfiguredField(fields: Record<string, NormalizedField>, reference: string | undefined): string | undefined {
     if (!reference) return undefined;
-    if (fields[reference]) return reference;
-    const normalized = reference.trim().toLowerCase();
-    return Object.values(fields).find(field => field.displayName.trim().toLowerCase() === normalized || field.queryName?.trim().toLowerCase() === normalized)?.key;
+    return fields[reference] ? reference : undefined;
 }

@@ -8,10 +8,10 @@ HyperPBI does not call an AI service. Edit Mode builds a prompt from the current
 
 ## Current status and schema versions
 
-- HyperPBI **2.0** is the default contract for new authoring: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
-- HyperPBI **1.0** remains supported for existing dashboards. Normalized runtime keys and legacy component forms are compatibility inputs, not the recommended 2.0 authoring style.
+- HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
+- Dashboard schema 1.0 and missing versions are rejected by visual loading, Edit Mode, AI import, preview, save, and rendering. Legacy JSON can be converted explicitly with the development-only `npm run schema:migrate-v1 -- input.json output.json` utility; runtime migration is intentionally unsupported.
 <!-- component-summary:start -->
-- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+- The canonical implementation defines **81 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
 - Power BI visual package version `1.0.0.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
@@ -44,7 +44,7 @@ Allowed root properties are `version`, `title`, `theme`, `layout`, `state`, `app
 
 Every component needs a globally unique stable `id` that starts with a letter and contains only letters, digits, `_`, or `-` (maximum 100 characters). IDs connect inspector edits, UI-action targets, overlay state, interaction state, and pattern expansion, so improvements should preserve them whenever the same component remains.
 
-Preparation follows the implementation pipeline: safe unambiguous import repairs; 1.0 compatibility migrations; optional ID assignment; definition expansion; pattern expansion; design-system validation; dataset field resolution and static dataset schemas; component dataset validation; field-alias resolution; design-system expansion; strict schema validation; then calculation/reference checks before render.
+Preparation follows the implementation pipeline: safe unambiguous authoring repairs; optional ID assignment; definition expansion; pattern expansion; design-system validation; dataset field resolution and static dataset schemas; component dataset validation; field-alias resolution; design-system expansion; strict schema 2.0 validation; then calculation/reference checks before render. Missing or non-2.0 versions are rejected before rendering.
 
 ## Field aliases and Power BI metadata
 
@@ -79,9 +79,9 @@ Logical datasets do not execute SQL, join arbitrary sources, call the network, o
 
 ## Components and application patterns
 
-The generated catalog derives type, label, category, status, intended use, level, capabilities, required/allowed properties, interaction/UI-action support, accessibility guidance, compatibility notes, related types, and valid examples from canonical TypeScript metadata.
+The generated catalog derives type, label, category, status, intended use, level, capabilities, required/allowed properties, interaction/UI-action support, accessibility guidance, related types, and valid examples from canonical TypeScript metadata.
 
-Categories are Layout, Controls, Navigation, Display, Primitives, Feedback, Forms, Charts, Tables, Maps, Custom components, and Advanced components. The inventory includes `svg`, `svgMarkup`, `advancedChart`, custom-content components, and compatibility-only forms.
+Categories are Layout, Controls, Navigation, Display, Primitives, Feedback, Forms, Charts, Tables, Maps, Custom components, and Advanced components. The inventory includes `svg`, `svgMarkup`, `advancedChart`, and custom-content components.
 
 Four 2.0 application patterns compile to existing runtime components with deterministic child IDs:
 
@@ -102,7 +102,7 @@ Every component supports mobile-first `responsive` rules at `xs` (0), `sm` (480)
 
 Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, gauge, heatmap, combo, waterfall, sankey, treemap, funnel, radar, and small multiples. Their ECharts `options` can alter safe presentation but cannot replace generated datasets, axes, series types/counts, links, nodes, encodings, or transforms. Declarative `events.zoom`, `events.rangeSelect`, and `events.brush` persist view state and can link filtered/highlighted source rows to named components. `drill.levels` navigates preloaded logical datasets with dataset-aware fields, parent-key filtering, source lineage, and breadcrumbs. `advancedChart` is the sanitized JSON-only escape hatch for implemented ECharts configurations that a semantic chart cannot express.
 
-`table` is the supported native detail table. It measures its scroll viewport and virtualizes configured large datasets with bounded overscan; CSV/XLSX export can use filtered rows, selected rows, or selected rows with filtered fallback, and excludes hidden columns. `matrix` renders every declared value metric across optional column groups, with per-metric formatting, totals, heatmaps, accessible headers, source-row interactions, deterministic row limits, and a visible cell-budget warning. Its shared aggregation policy requires numeric fields for numeric operations while `count` may omit a field. Tabulator is not bundled; `engine: "tabulator"` is normalized only for compatibility.
+`table` is the supported native detail table. It measures its scroll viewport and virtualizes configured large datasets with bounded overscan; CSV/XLSX export can use filtered rows, selected rows, or selected rows with filtered fallback, and excludes hidden columns. `matrix` renders every declared value metric across optional column groups, with per-metric formatting, totals, heatmaps, accessible headers, source-row interactions, deterministic row limits, and a visible cell-budget warning. Its shared aggregation policy requires numeric fields for numeric operations while `count` may omit a field. `table.engine` is not part of schema 2.0.
 
 `map` uses the same single **Values** field well as every other HyperPBI component for Power BI-backed fields; ArcGIS reference-only maps require no Values fields. New 2.0 maps declare explicit layers, optional per-layer logical datasets, and per-layer `source.bindings`; explicit layers never inherit global Runtime Config coordinates. Optional rectangle and lasso tools select visible resolved points, lines, and polygons, update canonical map selection, drive linked HyperPBI components, and synchronize eligible Power BI identities. Map Studio and the mounted preview share calculated fields, Runtime Config transformations/aliases, logical datasets, lineage, and validation through one prepared-data pipeline. Map Studio provides source-aware fields, spatial-tool authoring, explicit ArcGIS metadata fetch and bounded join preview actions, layer interaction editing, transaction-based text edits, and live-preview bookmark capture. Basemap and authored view edits update the mounted map, and `view.fitPadding` is a ratio from `0` through `0.5` (default `0.08`). Public ArcGIS feature, tile, and dynamic sources require a Maps package and an approved HTTPS host. See [map services](docs/map-services.md).
 
@@ -144,7 +144,7 @@ Prompt jobs are Create dashboard, Improve current dashboard, Add section, Redesi
 
 Prompt composition includes only relevant component modules, Field Manifest data under the chosen privacy mode, recommended patterns, applicable datasets/maps/tables/charts/SVG guidance, current JSON for improvement, selected ID for redesign, and structured diagnostics for repair.
 
-The importer accepts one JSON object directly or inside one Markdown fence and can extract one unambiguous object from surrounding text. Multiple candidate objects, comments, smart quotes, or truncated JSON produce diagnostics rather than speculative repair. Automatic preparation repairs only known property typos, unambiguous numeric strings, an unmistakably missing 2.0 version, and missing 2.0 import IDs. It never substitutes fields, changes aggregations, deletes components, removes interactions, or rewrites business logic.
+The importer accepts one JSON object directly or inside one Markdown fence and can extract one unambiguous object from surrounding text. Multiple candidate objects, comments, smart quotes, or truncated JSON produce diagnostics rather than speculative repair. AI import is strict: the response must declare version 2.0, every component must already have a stable ID, and unknown properties are rejected. It never substitutes fields, changes aggregations, deletes components, removes interactions, or rewrites business logic.
 
 ## Security
 
@@ -169,7 +169,7 @@ npm run package:maps
 - **Maps broad** is the default Maps packaging mode and uses `https://*` WebAccess (`HYPERPBI_ALLOW_ALL_MAP_HOSTS` not set to `false`).
 - **Maps restricted** uses built-in approved hosts plus comma-separated `HYPERPBI_MAP_HOSTS` when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
 
-The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`; it also writes the compatibility alias `*-maps.pbiviz` for a Maps package. Exact base names derive from the PBIVIZ packager, so documentation should not invent a fixed artifact filename.
+The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`; it also writes the convenience package filename `*-maps.pbiviz` for a Maps package. Exact base names derive from the PBIVIZ packager, so documentation should not invent a fixed artifact filename.
 
 ## Development commands
 
@@ -217,20 +217,20 @@ Do not hand-edit the fully generated reference outputs or the marked regions. Th
 | [SVG visuals](docs/svg-visuals.md) | Structured SVG, markup fallback, limits, motion |
 | [Map services](docs/map-services.md) | Power BI geometry, ArcGIS, providers, packaging |
 | [Repair workflow](docs/repair-workflow.md) | Extraction, diagnostics, and bounded repairs |
-| [Migration/versioning](docs/migration-versioning.md) | Intentional 1.0 compatibility and migration |
+| [Migration/versioning](docs/migration-versioning.md) | Schema 2.0 boundary and standalone legacy converter |
 | [Security](docs/security.md) | Sanitizers, URL/provider policy, privacy boundaries |
 
 ## Documentation maintenance
 
-Canonical component inventory lives in `src/catalog/componentDescriptors.ts`. Each explicit descriptor owns maturity, authoring complexity, schema properties, field traversal handlers, Inspector controls, documentation, renderer mode, child containers, and a valid example. Compatibility catalogs, strict validator maps, prompts, and generated documentation derive from that registry. Update the descriptor and renderer together, then run `npm run docs:generate`; do not hand-edit generated catalogs.
+Canonical component inventory lives in `src/catalog/componentDescriptors.ts`. Each explicit descriptor owns maturity, authoring complexity, schema properties, field traversal handlers, Inspector controls, documentation, renderer mode, child containers, and a valid example. Strict validator maps, prompts, and generated documentation derive from that registry. Update the descriptor and renderer together, then run `npm run docs:generate`; do not hand-edit generated catalogs.
 
-HyperPBI 2.0 authoring should use Field Manifest aliases, including documented nested table, detail, template, SVG, interaction, dataset, and Power BI-backed map positions. Runtime keys remain compatibility inputs. ArcGIS service fields and joined aliases are separate namespaces and are never treated as Power BI aliases.
+HyperPBI 2.0 authoring uses Field Manifest aliases or canonical resolved field keys, including documented nested table, detail, template, SVG, interaction, dataset, and Power BI-backed map positions. Display names are not accepted as aliases. ArcGIS service fields and joined aliases are separate namespaces and are never treated as Power BI aliases.
 
 Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.ts`; SVG constants from `src/components/svg/svgTypes.ts`; AI contract composition from `src/ai/promptComposer.ts`; and the canonical embedded/check-in skill from `HYPERPBI_SKILL_MARKDOWN` in `src/docs/hyperpbiHelp.ts`.
 
-## Compatibility and known limitations
+## Known limitations
 
-- Version 1.0 remains intentionally lenient and supports legacy normalized keys and migrations documented in [migration/versioning](docs/migration-versioning.md).
+- Dashboard schema 2.0 is the only runtime contract. See [migration/versioning](docs/migration-versioning.md) for the isolated development converter and the removed aliases.
 - Logical datasets are in-memory transformations of the current Power BI data view: no joins, SQL, arbitrary JavaScript, or network sources.
 - Power BI supplies one flattened visual data view. Logical datasets can create different layer views over it, but cannot independently query arbitrary semantic-model tables; visual-query grain and relationships still control received rows.
 - Root calculated-field metadata is added before logical-dataset schema propagation, so calculated fields can drive components and dataset stages even with zero rows. Root scalar metrics remain a separate namespace consumed through metric-grid metric references/templates.
@@ -239,4 +239,4 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 - Core has no external provider access. Maps access depends on WebAccess approval and host policy.
 - ArcGIS support is public-service, 2D, REST-oriented scope; secured services, editing, relationships, tracing, and non-4326 output are not implemented.
 - SVG is governed and bounded; it is not a browser SVG/JavaScript sandbox.
-- Example JSON files that still declare `version: "1.0"` are retained as compatibility examples unless their accompanying text explicitly promotes 2.0 authoring.
+- Every maintained dashboard example declares and validates as schema 2.0. The only schema 1.0 fixture is isolated under migration-specific tests.

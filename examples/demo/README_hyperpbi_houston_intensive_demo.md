@@ -1,12 +1,12 @@
 # HyperPBI Houston Intensive Web-App Demo
 
-> Compatibility example: the included dashboard JSON files intentionally use HyperPBI 1.0 normalized runtime keys. They demonstrate the preserved 1.0 path, not the recommended contract for new AI authoring. New dashboards should use version 2.0 and aliases from the current Field Manifest.
+> Both included dashboards use the strict HyperPBI dashboard schema 2.0 contract with stable IDs and canonical component properties. The separate Runtime Config file uses Runtime Config protocol 1.0; that is not the dashboard schema version.
 
 ## Included files
 
 - `hyperpbi_houston_demo_data.csv` — 240 synthetic Houston operations records.
-- `hyperpbi_houston_intensive_dashboard_EXPECTED_KEYS.json` — 1.0 compatibility dashboard using normalized keys expected when the CSV table remains named `hyperpbi_houston_demo_data` and numeric values use Power BI's default Sum summarization.
-- `hyperpbi_houston_intensive_dashboard_LOGICAL.json` — field-readable 1.0 compatibility source dashboard.
+- `hyperpbi_houston_intensive_dashboard_EXPECTED_KEYS.json` — schema 2.0 dashboard using canonical resolved keys expected when the CSV table remains named `hyperpbi_houston_demo_data` and numeric values use Power BI's default Sum summarization.
+- `hyperpbi_houston_intensive_dashboard_LOGICAL.json` — field-readable schema 2.0 source dashboard for the developer key adapter.
 - `hyperpbi_houston_intensive_runtime_config.json` — Maps runtime configuration.
 - `adapt_hyperpbi_dashboard_fields.py` — adapts the logical dashboard to the exact field inventory returned by HyperPBI.
 - `hyperpbi_houston_intensive_component_coverage.json` — component and feature manifest.
@@ -27,9 +27,9 @@ The map uses explicit OSM tiles:
 
 The broad Maps PBIVIZ must contain `https://*` WebAccess.
 
-## Compatibility field-key fallback
+## Canonical field-key adapter
 
-This adapter exists because the demo intentionally preserves 1.0 normalized keys. Power BI can change those keys when the query name or summarization changes. If validation reports unavailable fields:
+The schema 2.0 contract accepts Field Manifest aliases or canonical resolved keys, never display-name fallback. Power BI can change canonical keys when a query name or summarization changes. If validation reports unavailable fields, use the adapter to generate a dashboard from the exact current field inventory:
 
 1. Copy/export HyperPBI's current field inventory as JSON.
 2. Run:

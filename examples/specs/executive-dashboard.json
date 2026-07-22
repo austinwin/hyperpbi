@@ -1,13 +1,95 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Executive Operations",
-  "theme": { "mode": "light", "density": "compact", "primaryColor": "#206bc4" },
-  "styles": { "globalCss": ".hp-card { border-color: var(--hp-border); box-shadow: 0 1px 2px rgb(24 36 51 / 6%); }", "components": { "*": { "style": { "minWidth": 0 } }, "kpi": { "css": ".hp-metric-value { font-size: 22px; }" } } },
-  "toolbar": [{ "type": "searchBox", "id": "search", "placeholder": "Search records..." }, { "type": "button", "id": "clear", "title": "Clear", "action": "clearFilters" }],
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#206bc4"
+  },
+  "styles": {
+    "globalCss": ".hp-card { border-color: var(--hp-border); box-shadow: 0 1px 2px rgb(24 36 51 / 6%); }",
+    "components": {
+      "*": {
+        "style": {
+          "minWidth": 0
+        }
+      },
+      "kpi": {
+        "css": ".hp-metric-value { font-size: 22px; }"
+      }
+    }
+  },
+  "toolbar": [
+    {
+      "type": "searchBox",
+      "id": "search",
+      "placeholder": "Search records..."
+    },
+    {
+      "type": "button",
+      "id": "clear",
+      "title": "Clear",
+      "uiAction": {
+        "type": "clearFilters"
+      }
+    }
+  ],
   "components": [
-    { "type": "metricGrid", "id": "metrics", "span": 12, "metrics": [{ "title": "Records", "aggregation": "count", "format": "integer" }, { "title": "Total Cost", "field": "cost", "aggregation": "sum", "format": "currency" }] },
-    { "type": "barChart", "id": "cost_by_region", "title": "Cost by Region", "category": "region", "measure": "cost", "aggregation": "sum", "span": 7 },
-    { "type": "donutChart", "id": "status_mix", "title": "Status", "category": "status", "measure": "cost", "aggregation": "count", "span": 5 },
-    { "type": "table", "id": "details", "title": "Operational Detail", "columns": ["asset_id", "region", "status", "cost"], "pagination": true, "search": true, "selectable": true, "span": 12 }
+    {
+      "type": "metricGrid",
+      "id": "metrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Records",
+          "aggregation": "count",
+          "format": "integer"
+        },
+        {
+          "title": "Total Cost",
+          "field": "cost",
+          "aggregation": "sum",
+          "format": "currency"
+        }
+      ]
+    },
+    {
+      "type": "barChart",
+      "id": "cost_by_region",
+      "title": "Cost by Region",
+      "category": "region",
+      "measure": "cost",
+      "aggregation": "sum",
+      "span": 7
+    },
+    {
+      "type": "donutChart",
+      "id": "status_mix",
+      "title": "Status",
+      "category": "status",
+      "measure": "cost",
+      "aggregation": "count",
+      "span": 5
+    },
+    {
+      "type": "table",
+      "id": "details",
+      "title": "Operational Detail",
+      "columns": [
+        "asset_id",
+        "region",
+        "status",
+        "cost"
+      ],
+      "pagination": true,
+      "search": true,
+      "span": 12,
+      "interaction": {
+        "enabled": true,
+        "internalMode": "filter",
+        "externalMode": "selection",
+        "showSelector": true
+      }
+    }
   ]
 }

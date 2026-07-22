@@ -11,7 +11,7 @@ export function resolveAppShell(
     const app = schema.app;
 
     if (!app?.enabled) {
-        // Legacy mode — return a shell that mimics the existing structure
+        // The app shell is optional in the canonical schema.
         return {
             enabled: false,
             layout: "vertical",

@@ -114,7 +114,7 @@ export function MapFeatureDetails({
     return () => observer.disconnect();
   }, [anchor?.containerX, anchor?.containerY, mode, resolved]);
 
-  if (!resolved || component.featureDetails?.mode === "legacyPopup") return null;
+  if (!resolved) return null;
   const { layer, feature, view } = resolved;
   const selectedCount = interaction?.selectedFeatureKeys.length ?? 0;
   const isIdentify = active?.kind === "identify";

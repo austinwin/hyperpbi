@@ -2,7 +2,7 @@
 // This demonstrates the root "app" property.
 
 const appShellExample = {
-    version: "1.0",
+    version: "2.0",
     title: "Operations Portal",
     theme: {
         mode: "light",

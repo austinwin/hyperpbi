@@ -59,7 +59,7 @@ export interface MapLegendDefinition {
 
 export interface MapFeatureDetailsDefinition {
     /** auto anchors on roomy maps and becomes a panel/sheet in small containers. */
-    mode?: "auto" | "anchored" | "panel" | "legacyPopup";
+    mode?: "auto" | "anchored" | "panel";
     clearSelectionOnBackgroundClick?: boolean;
     clearSelectionOnClose?: boolean;
 }
@@ -401,9 +401,5 @@ export interface MapPerformanceDefinition {
     maxFeatures?: number;
     cacheMinutes?: number;
     viewportQuery?: boolean;
-    generalizeByZoom?: boolean;
-    minimumGeneralization?: number;
-    maximumGeneralization?: number;
     requestBatchSize?: number;
-    progressiveRendering?: boolean;
 }

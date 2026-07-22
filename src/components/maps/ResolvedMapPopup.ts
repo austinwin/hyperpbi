@@ -46,7 +46,7 @@ export interface ResolvedMapPopupViewModel {
   actions: ResolvedMapPopupAction[];
 }
 
-/** Pure content resolution shared by Preact details and legacy Leaflet popups. */
+/** Pure content resolution for canonical map feature details. */
 export function resolveMapPopupViewModel(
   popup: ResolvedMapPopup,
   feature: ResolvedMapFeature,

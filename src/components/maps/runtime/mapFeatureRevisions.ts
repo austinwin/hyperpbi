@@ -80,10 +80,8 @@ export function resolveMapFeatureRevision(
 
 export function resolvedLayerStructuralRevision(
   layers: readonly ResolvedMapLayer[],
-  legacyCluster: boolean,
 ): string {
   return stableMapRevision({
-    legacyCluster,
     layers: layers.map((layer) => ({
       id: layer.id,
       sourceType: layer.sourceType,
@@ -100,7 +98,7 @@ export function resolvedLayerStructuralRevision(
       features: layer.features.map((feature) => ({
         key: feature.featureKey ?? feature.id,
         revision: resolveMapFeatureRevision(feature, layer, {
-          clusterParent: layer.renderer.type === "cluster" || legacyCluster,
+          clusterParent: layer.renderer.type === "cluster",
         }).structuralRevision,
       })),
     })),

@@ -16,7 +16,7 @@ A Power BI layer resolves bindings in this order:
 
 1. explicit `layer.source.bindings`
 2. Map Studio-generated bindings, which are the same canonical property
-3. legacy Runtime Config/component bindings only when a legacy map has no explicit layers
+3. conservative semantic-type and exact-name inference within an explicit Power BI layer when a binding is omitted
 4. semantic field type
 5. conservative exact-name inference
 6. unresolved with a structured diagnostic
@@ -152,7 +152,7 @@ Join numeric aggregation excludes null, undefined, empty/whitespace strings, boo
 - Per-layer `maxFeatures` and a deterministic 20,000-feature map-wide budget prevent unbounded drawing.
 - Labels, popup fields, unique classes, class breaks, join preview samples, diagnostics, ArcGIS result counts, and caches are bounded.
 - Point features render the stable `circle`, `square`, `diamond`, and `triangle` symbols through a controlled marker factory; non-circle SVG contains no author markup or external URL.
-- An explicit `cluster` renderer is authoritative for a 2.0 layer even when the legacy global cluster switch is off. `clusterLabel: "count"` shows the member count; `"sum"` sums the numeric `aggregateField` from its exact field source and honors the bounded numeric format.
+- An explicit `cluster` renderer is authoritative for a schema 2.0 layer. `clusterLabel: "count"` shows the member count; `"sum"` sums the numeric `aggregateField` from its exact field source and honors the bounded numeric format.
 - Source, renderer, request, join, and layer rendering timings are exposed in structured diagnostics where applicable.
 - Normal viewer diagnostics show a sanitized service origin, not the full raw URL.
 - ArcGIS tile and dynamic overlays have stable definition signatures. URL, attribution, zoom bounds, pane, source type, and every dynamic layer-ID/definition/format/transparency/debounce property replace the mounted instance; opacity and visibility update an unchanged instance in place. Access denial removes already-loaded content, restoration uses the newest definition, stale callbacks are ignored, and map center/zoom is preserved.
@@ -168,7 +168,6 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 | Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, rectangle/lasso geometry selection with Power BI lineage and linked targets, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, temporary Dynamic MapServer identify, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
 | Partial | map-layer interaction trigger (`click` only), `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
 | Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid |
-| Deprecated | generalization and progressive-rendering properties remain accepted for schema compatibility but are not executed or exposed by Map Studio |
 | Unsupported | scale/coordinate readout, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
 | Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |
 

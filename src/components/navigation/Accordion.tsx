@@ -45,36 +45,7 @@ export function Accordion({
         el?.focus();
     };
 
-    if (!component.items || component.items.length === 0) {
-        // Legacy accordion with only children — create one item
-        if (component.children && component.children.length > 0) {
-            const legacyItemId = `${accordionId}_item`;
-            const isOpen = openItems.includes(legacyItemId);
-
-            return (
-                <div class="hp-accordion">
-                    <div class={`hp-accordion-item ${isOpen ? "is-open" : ""}`}>
-                        <button
-                            type="button"
-                            class="hp-accordion-header"
-                            aria-expanded={isOpen}
-                            data-accordion-header={legacyItemId}
-                            onClick={() => toggleItem(legacyItemId)}
-                        >
-                            <span class="hp-accordion-title">{component.title ?? "Section"}</span>
-                            <Icon name={isOpen ? "chevron-up" : "chevron-down"} size="xs" decorative />
-                        </button>
-                        {isOpen && (
-                            <div class="hp-accordion-body" role="region" aria-labelledby={legacyItemId}>
-                                {renderChildren(component.children)}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    }
+    if (component.items.length === 0) return null;
 
     return (
         <div class="hp-accordion">

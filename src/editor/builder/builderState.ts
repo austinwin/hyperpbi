@@ -16,7 +16,7 @@ export const dashboardGoals = [
 export const builderAudiences = ["Executive", "Manager", "Analyst", "Field operations", "Public viewer"];
 export const layoutPatterns = [
     "KPI top row + charts + detail table",
-    "Collapsible left filter drawer + main tab content",
+    "Collapsible left filter panel + main tab content",
     "Map left + details right",
     "Full-width table with filters",
     "Executive summary with exception table",

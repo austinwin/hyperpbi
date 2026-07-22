@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Operations Portal",
   "theme": {
     "mode": "light",
@@ -116,11 +116,22 @@
       "title": "Executive Overview",
       "subtitle": "Current operational performance and exceptions",
       "breadcrumbs": [
-        { "id": "home_crumb", "label": "Home" },
-        { "id": "operations_crumb", "label": "Operations" }
+        {
+          "id": "home_crumb",
+          "label": "Home"
+        },
+        {
+          "id": "operations_crumb",
+          "label": "Operations"
+        }
       ],
       "meta": [
-        { "label": "Status", "value": "Current", "icon": "check", "intent": "success" }
+        {
+          "label": "Status",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
       ],
       "actions": [
         {
@@ -174,9 +185,18 @@
               "id": "executive_metrics",
               "span": 12,
               "metrics": [
-                { "title": "Records", "aggregation": "count", "format": "integer", "intent": "primary" }
+                {
+                  "title": "Records",
+                  "aggregation": "count",
+                  "format": "integer",
+                  "intent": "primary"
+                }
               ],
-              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
             },
             {
               "type": "card",
@@ -210,7 +230,11 @@
                   }
                 }
               ],
-              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
             },
             {
               "type": "card",
@@ -246,7 +270,11 @@
                   }
                 }
               ],
-              "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+              "interaction": {
+                "enabled": false,
+                "internalMode": "none",
+                "externalMode": "none"
+              }
             }
           ]
         },
@@ -259,10 +287,20 @@
               "id": "record_table",
               "title": "Record Details",
               "span": 12,
-              "columns": ["__record_field_key__", "__category_field_key__", "__status_field_key__", "__measure_field_key__"],
+              "columns": [
+                "__record_field_key__",
+                "__category_field_key__",
+                "__status_field_key__",
+                "__measure_field_key__"
+              ],
               "pagination": true,
               "pageSize": 25,
-              "pageSizeOptions": [10, 25, 50, 100],
+              "pageSizeOptions": [
+                10,
+                25,
+                50,
+                100
+              ],
               "search": true,
               "stickyHeader": true,
               "showRowCount": true,
@@ -293,7 +331,11 @@
           ]
         }
       ],
-      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
     },
     {
       "type": "offcanvas",
@@ -324,7 +366,11 @@
           }
         }
       ],
-      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
     },
     {
       "type": "offcanvas",
@@ -340,14 +386,34 @@
           "selectedRow": true,
           "columns": 2,
           "items": [
-            { "label": "Record", "field": "__record_field_key__", "copyable": true },
-            { "label": "Status", "field": "__status_field_key__", "badge": true },
-            { "label": "Value", "field": "__measure_field_key__", "format": "currency" }
+            {
+              "label": "Record",
+              "field": "__record_field_key__",
+              "copyable": true
+            },
+            {
+              "label": "Status",
+              "field": "__status_field_key__",
+              "badge": true
+            },
+            {
+              "label": "Value",
+              "field": "__measure_field_key__",
+              "format": "currency"
+            }
           ],
-          "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
         }
       ],
-      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
     },
     {
       "type": "modal",
@@ -360,11 +426,22 @@
           "id": "compact_mode_toggle",
           "label": "Compact presentation",
           "defaultValue": true,
-          "uiAction": { "type": "setState", "target": "compact_mode" },
-          "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+          "uiAction": {
+            "type": "setState",
+            "target": "compact_mode"
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
         }
       ],
-      "interaction": { "enabled": false, "internalMode": "none", "externalMode": "none" }
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
     }
   ]
 }

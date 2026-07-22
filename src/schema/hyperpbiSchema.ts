@@ -30,7 +30,7 @@ export interface ResponsiveComponentRule {
     order?: number;
     /** Prefer visible over hidden when authoring new specifications. */
     visible?: boolean;
-    /** Compatibility-friendly inverse of visible. */
+    /** Explicit inverse visibility rule. */
     hidden?: boolean;
     /** Layout direction for flex and split containers. */
     direction?: "row" | "column";
@@ -90,10 +90,6 @@ export interface ComponentBase {
     visibility?: Record<string, unknown>;
     interactions?: Record<string, SafeInteraction>;
     interaction?: ComponentInteractionDefinition;
-    /** @deprecated Use interaction.internalMode. */
-    internal?: boolean;
-    /** @deprecated Use interaction.externalMode. */
-    external?: boolean;
     // ── New shared properties ──
     ariaLabel?: string;
     icon?: IconName;
@@ -155,9 +151,7 @@ export interface ControlComponent extends ComponentBase {
     options?: Array<string | { label: string; value: unknown }>;
     targets?: string[];
     filter?: FilterDefinition;
-    action?: "clearFilters" | "setTab";
-    actionValue?: string;
-    buttons?: Array<{ id: string; label: string; value?: unknown; action?: string }>;
+    buttons?: Array<{ id: string; label: string; value?: unknown }>;
     // ── New form properties ──
     description?: string;
     helpText?: string;
@@ -377,7 +371,6 @@ export interface TableColumn {
 
 export interface TableComponent extends ComponentBase {
     type: "table";
-    engine?: "tabulator" | "native";
     columns?: Array<string | TableColumn>;
     pagination?: boolean;
     pageSize?: number;
@@ -385,10 +378,6 @@ export interface TableComponent extends ComponentBase {
     resizableColumns?: boolean;
     maxRows?: number;
     stickyHeader?: boolean;
-    /** @deprecated Use interaction.showSelector. */
-    selectable?: boolean;
-    /** @deprecated Use interaction.internalMode and interaction.internalScope. */
-    selectionMode?: "highlight" | "filter";
     // ── New table properties ──
     density?: "compact" | "normal";
     striped?: boolean;
@@ -414,7 +403,6 @@ export interface TableComponent extends ComponentBase {
         rowHeight?: number;
         overscan?: number;
     };
-    /** Tabulator is not bundled; this is normalized to native with a warning. */
 }
 
 export interface MatrixComponent extends ComponentBase {
@@ -468,35 +456,7 @@ export interface MapComponent extends ComponentBase {
         lassoSelection?: boolean | { enabled?: boolean; selectionMode?: SelectionMode; minimumPoints?: number };
     };
 
-    // ── Legacy properties (still supported for backward compatibility) ──
-    settings?: {
-        fitBounds?: boolean;
-        showLayerControl?: boolean;
-        showLegend?: boolean;
-        clusterPoints?: boolean;
-        basemap?: "none" | "tiles";
-        enableExternalTiles?: boolean;
-        tileUrl?: string;
-        coordinateSystem?: "EPSG:4326" | string;
-        enableExternalGeocoder?: boolean;
-        geocoderProvider?: string;
-    };
-    style?: {
-        defaultPointColor?: string;
-        colorMode?: "categorical" | "gradient";
-        gradientStart?: string;
-        gradientEnd?: string;
-        radius?: number;
-        minRadius?: number;
-        maxRadius?: number;
-        lineWeight?: number;
-        minLineWeight?: number;
-        maxLineWeight?: number;
-        fillOpacity?: number;
-        opacity?: number;
-    };
-    popup?: { html?: string };
-    /** Legacy fixed height. Used when heightMode is omitted or fixed. */
+    /** Fixed height used when heightMode is omitted or fixed. */
     height?: number;
     heightMode?: ComponentHeightMode;
     minHeight?: number;
@@ -512,19 +472,7 @@ export interface ContentComponent extends ComponentBase {
 
 export interface TabsComponent extends ComponentBase {
     type: "tabs";
-    tabs: Array<{ id: string; title: string; children?: DashboardComponent[]; components?: DashboardComponent[]; content?: DashboardComponent[] }>;
-}
-
-export interface DrawerComponent extends ComponentBase {
-    type: "drawer" | "filterDrawer";
-    id: string;
-    children?: DashboardComponent[];
-    position?: "left" | "right";
-    width?: number;
-    openWhen?: "always" | "selectedRow" | "state";
-    stateKey?: string;
-    defaultOpen?: boolean;
-    collapsible?: boolean;
+    tabs: Array<{ id: string; title: string; children?: DashboardComponent[] }>;
 }
 
 export interface TimelineComponent extends ComponentBase {
@@ -663,7 +611,6 @@ export interface AccordionComponent extends ComponentBase {
     type: "accordion";
     multiple?: boolean;
     defaultOpenItems?: string[];
-    children?: DashboardComponent[];
     items: Array<{
         id: string;
         title: string;
@@ -761,7 +708,6 @@ export type DashboardComponent =
     | MapComponent
     | ContentComponent
     | TabsComponent
-    | DrawerComponent
     | TimelineComponent
     // ── New primitives and overlays ──
     | CardComponent
@@ -786,7 +732,7 @@ export type DashboardComponent =
     | SvgMarkupComponent;
 
 export interface HyperPbiSchema {
-    version: "1.0" | "2.0";
+    version: "2.0";
     title?: string;
     theme?: HyperPbiTheme;
     layout?: {

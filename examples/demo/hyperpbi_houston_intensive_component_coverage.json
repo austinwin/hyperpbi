@@ -82,7 +82,7 @@
     "navigation": [
       "tabs",
       "accordion",
-      "drawer",
+      "offcanvas",
       "steps"
     ],
     "display": [

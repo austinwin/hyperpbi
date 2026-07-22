@@ -75,7 +75,7 @@ describe("Power BI map bindings", () => {
             latitude: field("latitude", "Latitude", "values", "measure"), longitude: field("longitude", "Longitude", "values", "measure"),
             group: field("group", "Business Layer", "values"), status: field("status", "Status", "values"), asset: field("asset", "Asset ID", "values")
         };
-        const map = normalizeMapBindings([{ latitude: 41.88, longitude: -87.63, group: "Assets", status: "Open", asset: "A-1" }], fields, { latitude: "latitude", longitude: "longitude", layer: "Business Layer", color: "status", tooltip: ["Asset ID"] });
+        const map = normalizeMapBindings([{ latitude: 41.88, longitude: -87.63, group: "Assets", status: "Open", asset: "A-1" }], fields, { latitude: "latitude", longitude: "longitude", layer: "group", color: "status", tooltip: ["asset"] });
         expect(map.mode).toBe("latLon"); expect(map.layers[0].name).toBe("Assets"); expect(map.bindings.tooltip).toEqual(["asset"]);
     });
 

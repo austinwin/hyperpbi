@@ -22,19 +22,26 @@
       "aspectRatio": 1.75,
       "minHeight": 380,
       "view": {
-        "center": [29.74, -95.4],
+        "center": [
+          29.74,
+          -95.4
+        ],
         "zoom": 10,
         "fitMode": "data",
         "fitPadding": 0.1,
         "preserveView": true
       },
-      "basemap": {"type": "osm"},
+      "basemap": {
+        "type": "osm"
+      },
       "featureDetails": {
         "mode": "auto",
         "clearSelectionOnBackgroundClick": true,
         "clearSelectionOnClose": false
       },
-      "search": {"enabled": false},
+      "search": {
+        "enabled": false
+      },
       "layers": [
         {
           "id": "joined-facilities",
@@ -44,7 +51,9 @@
             "type": "arcgisFeature",
             "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",
             "mode": "join",
-            "outFields": ["facilityid"],
+            "outFields": [
+              "facilityid"
+            ],
             "useServiceRenderer": false,
             "useServiceLabels": false,
             "refreshIntervalMinutes": 5
@@ -55,7 +64,10 @@
             "serviceField": "facilityid",
             "cardinality": "oneToOne",
             "keyType": "string",
-            "normalization": ["trim", "upper"],
+            "normalization": [
+              "trim",
+              "upper"
+            ],
             "powerBiDuplicatePolicy": "error",
             "serviceDuplicatePolicy": "error",
             "unmatchedPolicy": "diagnose",
@@ -66,16 +78,54 @@
             "field": "priority",
             "fieldSource": "powerbi",
             "values": [
-              {"value": "High", "label": "High Priority", "symbol": {"shape": "circle", "fillColor": "#b91c1c", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 9}},
-              {"value": "Medium", "label": "Medium Priority", "symbol": {"shape": "circle", "fillColor": "#d97706", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 8}},
-              {"value": "Routine", "label": "Routine", "symbol": {"shape": "circle", "fillColor": "#0f766e", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}}
+              {
+                "value": "High",
+                "label": "High Priority",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#b91c1c",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 9
+                }
+              },
+              {
+                "value": "Medium",
+                "label": "Medium Priority",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#d97706",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 8
+                }
+              },
+              {
+                "value": "Routine",
+                "label": "Routine",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#0f766e",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 7
+                }
+              }
             ]
           },
           "tooltip": {
             "enabled": true,
             "fields": [
-              {"field": "status", "fieldSource": "powerbi", "label": "Status"},
-              {"field": "priority", "fieldSource": "powerbi", "label": "Priority"}
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status"
+              },
+              {
+                "field": "priority",
+                "fieldSource": "powerbi",
+                "label": "Priority"
+              }
             ]
           },
           "popup": {
@@ -83,9 +133,23 @@
             "defaultFieldSource": "service",
             "title": "Facility {{facilityid}}",
             "fields": [
-              {"field": "status", "fieldSource": "powerbi", "label": "Status", "display": "badge"},
-              {"field": "work_count", "fieldSource": "powerbi", "label": "Open Work", "format": "integer"},
-              {"field": "priority", "fieldSource": "powerbi", "label": "Priority"}
+              {
+                "field": "status",
+                "fieldSource": "powerbi",
+                "label": "Status",
+                "display": "badge"
+              },
+              {
+                "field": "work_count",
+                "fieldSource": "powerbi",
+                "label": "Open Work",
+                "format": "integer"
+              },
+              {
+                "field": "priority",
+                "fieldSource": "powerbi",
+                "label": "Priority"
+              }
             ]
           },
           "interaction": {
@@ -96,7 +160,10 @@
             "multiSelect": true,
             "clearOnSecondClick": false
           },
-          "legend": {"visible": true, "title": "Joined Priority"},
+          "legend": {
+            "visible": true,
+            "title": "Joined Priority"
+          },
           "performance": {
             "maxFeatures": 12,
             "requestBatchSize": 12,
@@ -116,7 +183,9 @@
         "allowViewerOpacity": true,
         "allowViewerLabels": false
       },
-      "legend": {"defaultOpen": false},
+      "legend": {
+        "defaultOpen": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
@@ -126,8 +195,7 @@
         "clearSelection": true,
         "zoomToSelection": true,
         "bookmarks": false
-      },
-      "settings": {"showLayerControl": true, "showLegend": true}
+      }
     }
   ]
 }

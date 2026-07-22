@@ -393,16 +393,16 @@
               "action": {
                 "type": "setTab",
                 "target": "mainTabs",
-                "value": "drawer"
+                "value": "offcanvasDrawer"
               }
             },
             {
               "id": "nav_filterDrawer",
-              "label": "Filter drawer",
+              "label": "Offcanvas panel",
               "action": {
                 "type": "setTab",
                 "target": "mainTabs",
-                "value": "filterDrawer"
+                "value": "offcanvasPanel"
               }
             },
             {
@@ -416,11 +416,11 @@
             },
             {
               "id": "nav_stepper",
-              "label": "Stepper",
+              "label": "Collapsible sequence",
               "action": {
                 "type": "setTab",
                 "target": "mainTabs",
-                "value": "stepper"
+                "value": "collapsibleSequence"
               }
             }
           ]
@@ -4723,7 +4723,7 @@
           ]
         },
         {
-          "id": "drawer",
+          "id": "offcanvasDrawer",
           "title": "Drawer / slide-over",
           "children": [
             {
@@ -4739,7 +4739,7 @@
               }
             },
             {
-              "type": "drawer",
+              "type": "offcanvas",
               "id": "drawer_minimal",
               "title": "Minimal — Drawer / slide-over",
               "span": 12,
@@ -4768,7 +4768,7 @@
               ]
             },
             {
-              "type": "drawer",
+              "type": "offcanvas",
               "id": "drawer_practical",
               "title": "Practical — Drawer / slide-over",
               "span": 12,
@@ -4799,7 +4799,7 @@
               "ariaLabel": "Practical Drawer / slide-over demonstration"
             },
             {
-              "type": "drawer",
+              "type": "offcanvas",
               "id": "drawer_advanced",
               "title": "Advanced — Drawer / slide-over",
               "span": 12,
@@ -4841,13 +4841,13 @@
           ]
         },
         {
-          "id": "filterDrawer",
-          "title": "Filter drawer",
+          "id": "offcanvasPanel",
+          "title": "Offcanvas panel",
           "children": [
             {
               "type": "markdown",
               "id": "intro_filterDrawer",
-              "title": "Filter drawer examples",
+              "title": "Offcanvas panel examples",
               "span": 12,
               "text": "**Use when:** On-demand compact filters.\n\nThe page progresses from the smallest valid configuration to a practical and then advanced configuration.",
               "interaction": {
@@ -4857,9 +4857,9 @@
               }
             },
             {
-              "type": "filterDrawer",
+              "type": "offcanvas",
               "id": "filterDrawer_minimal",
-              "title": "Minimal — Filter drawer",
+              "title": "Minimal — Offcanvas panel",
               "span": 12,
               "position": "left",
               "width": 300,
@@ -4908,9 +4908,9 @@
               ]
             },
             {
-              "type": "filterDrawer",
+              "type": "offcanvas",
               "id": "filterDrawer_practical",
-              "title": "Practical — Filter drawer",
+              "title": "Practical — Offcanvas panel",
               "span": 12,
               "position": "left",
               "width": 300,
@@ -4958,12 +4958,12 @@
                 }
               ],
               "subtitle": "Practical production usage",
-              "ariaLabel": "Practical Filter drawer demonstration"
+              "ariaLabel": "Practical offcanvas panel demonstration"
             },
             {
-              "type": "filterDrawer",
+              "type": "offcanvas",
               "id": "filterDrawer_advanced",
-              "title": "Advanced — Filter drawer",
+              "title": "Advanced — Offcanvas panel",
               "span": 12,
               "position": "left",
               "width": 300,
@@ -5016,9 +5016,9 @@
                 "minWidth": 0
               },
               "css": ".hp-demo-filterDrawer_advanced { min-width: 0; }",
-              "ariaLabel": "Advanced Filter drawer demonstration",
+              "ariaLabel": "Advanced offcanvas panel demonstration",
               "tooltip": {
-                "content": "Advanced Filter drawer example",
+                "content": "Advanced offcanvas panel example",
                 "placement": "top"
               }
             }
@@ -5132,13 +5132,13 @@
           ]
         },
         {
-          "id": "stepper",
-          "title": "Stepper",
+          "id": "collapsibleSequence",
+          "title": "Collapsible sequence",
           "children": [
             {
               "type": "markdown",
               "id": "intro_stepper",
-              "title": "Stepper examples",
+              "title": "Collapsible sequence examples",
               "span": 12,
               "text": "**Use when:** Legacy sequential app-style flow.\n\nThe page progresses from the smallest valid configuration to a practical and then advanced configuration.",
               "interaction": {
@@ -5148,16 +5148,16 @@
               }
             },
             {
-              "type": "stepper",
+              "type": "collapsible",
               "id": "stepper_minimal",
-              "title": "Minimal — Stepper",
+              "title": "Minimal — Collapsible sequence",
               "span": 12,
               "defaultOpen": true,
               "children": [
                 {
                   "type": "infoCard",
                   "id": "stepper_minimal_info",
-                  "text": "Compatibility-oriented stepper content.",
+                  "text": "Canonical collapsible content.",
                   "intent": "primary"
                 },
                 {
@@ -5174,16 +5174,16 @@
               ]
             },
             {
-              "type": "stepper",
+              "type": "collapsible",
               "id": "stepper_practical",
-              "title": "Practical — Stepper",
+              "title": "Practical — Collapsible sequence",
               "span": 12,
               "defaultOpen": true,
               "children": [
                 {
                   "type": "infoCard",
                   "id": "stepper_practical_info",
-                  "text": "Compatibility-oriented stepper content.",
+                  "text": "Canonical collapsible content.",
                   "intent": "primary"
                 },
                 {
@@ -5199,19 +5199,19 @@
                 }
               ],
               "subtitle": "Practical production usage",
-              "ariaLabel": "Practical Stepper demonstration"
+              "ariaLabel": "Practical collapsible sequence demonstration"
             },
             {
-              "type": "stepper",
+              "type": "collapsible",
               "id": "stepper_advanced",
-              "title": "Advanced — Stepper",
+              "title": "Advanced — Collapsible sequence",
               "span": 12,
               "defaultOpen": true,
               "children": [
                 {
                   "type": "infoCard",
                   "id": "stepper_advanced_info",
-                  "text": "Compatibility-oriented stepper content.",
+                  "text": "Canonical collapsible content.",
                   "intent": "primary"
                 },
                 {
@@ -5232,9 +5232,9 @@
                 "minWidth": 0
               },
               "css": ".hp-demo-stepper_advanced { min-width: 0; }",
-              "ariaLabel": "Advanced Stepper demonstration",
+              "ariaLabel": "Advanced collapsible sequence demonstration",
               "tooltip": {
-                "content": "Advanced Stepper example",
+                "content": "Advanced collapsible sequence example",
                 "placement": "top"
               }
             }

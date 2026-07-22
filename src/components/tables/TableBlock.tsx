@@ -65,22 +65,6 @@ export function nextTableSelection(current: number[], index: number, multi: bool
         : selected ? [] : [index];
 }
 
-export function tableRowsForSelection<T>(
-    rows: T[],
-    sourceRows: T[],
-    selectedRows: number[],
-    mode: TableComponent["selectionMode"],
-    internal = true,
-): T[] {
-    if (!internal || mode === "highlight" || !selectedRows.length) return rows;
-    const indices = new Map(sourceRows.map((row, index) => [row, index] as const));
-    const selected = new Set(selectedRows);
-    return rows.filter(row => {
-        const index = indices.get(row);
-        return index !== undefined && selected.has(index);
-    });
-}
-
 function cellStyle(column: TableColumn, value: unknown): Record<string, string> | undefined {
     const rule = column.conditional?.find(item => {
         if (item.operator === "=") return value === item.value;

@@ -1,4 +1,4 @@
-Prompt job: Improve current dashboard (2.0 example; the actual job preserves a supplied 1.0 version unless migration is explicit)
+Prompt job: Improve current dashboard (schema 2.0 only; schema 1.0 and missing versions are rejected)
 
 Requested change: Add a compact overdue-work-orders section below the existing trend. Preserve all unrelated sections, calculations, interactions, datasets, and stable component IDs. Use only supplied field aliases. Return one complete updated HyperPBI JSON object at the current schema version. Do not return JSON Patch, Markdown fences, or explanation.
 

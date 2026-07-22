@@ -60,7 +60,7 @@ describe("application layout contracts", () => {
         const component = {
             type: "tabs",
             id: "tabs",
-            tabs: [{ id: "map", title: "Map", content: [{ type: "section", id: "section", children: [{ type: "map", id: "map", heightMode: "fill" }] }] }],
+            tabs: [{ id: "map", title: "Map", children: [{ type: "section", id: "section", children: [{ type: "map", id: "map", heightMode: "fill", layers: [] }] }] }],
         } as DashboardComponent;
         expect(componentSubtreeRequestsFill(component)).toBe(true);
         expect(componentSubtreeRequestsFill({ type: "text", id: "text", text: "Ready" })).toBe(false);

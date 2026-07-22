@@ -24,21 +24,10 @@ For the multiple-geometry demo, Power BI still supplies one flattened visual dat
 
 Power BI coordinate and geometry layers are interactive and can select native rows. ArcGIS Feature layers can query, select, show details, and join. ArcGIS Dynamic layers display server-rendered images and can expose temporary read-only identify details, but cannot join or persistently select features. ArcGIS Tile layers remain display-only and do not expose identify, popup, join, or selection controls.
 
-## Intentional 1.0 compatibility examples
+## Schema contract
 
-The following files are retained to verify and explain existing-dashboard compatibility. They use normalized runtime keys and may contain legacy component/property forms. Do not copy them as the primary contract for a new dashboard:
+Every maintained dashboard example declares `"version": "2.0"`, uses stable component IDs, and validates without legacy repair. Runtime Config examples under `config/` and `demo/*runtime_config.json` use the independent Runtime Config protocol version 1.0; that number is not a dashboard schema version.
 
-- root `hyperpbi-*.json` dashboards and `table-as-filter.json`
-- `specs/executive-dashboard.json`
-- `specs/custom-component-dashboard.json`
-- `specs/calculations-dashboard.json`
-- `specs/professional-operations-app.json`
-- `specs/map-dashboard.json`
-- `specs/guided-operations-dashboard.json`
-- `config/hyperpbi-map-config.json`
-- files under `components/` that declare `"version": "1.0"`
-- Houston intensive demo JSON documented by `demo/README_hyperpbi_houston_intensive_demo.md`
-
-These examples remain valid compatibility/history material. Normal improvement and repair should preserve their 1.0 version. Convert them to 2.0 only as an intentional migration using Field Manifest aliases, stable IDs, strict per-type properties, and full validation.
+The only dashboard schema 1.0 fixture is isolated under `tests/fixtures/schema-migration/` for the development-only converter test. Do not copy it into an authored dashboard.
 
 Binary `.pbix` and `.pbiviz` assets are not documentation sources and are not modified during documentation synchronization.

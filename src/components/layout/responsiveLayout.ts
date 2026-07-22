@@ -111,7 +111,7 @@ function childComponents(component: DashboardComponent): DashboardComponent[] {
     if ("children" in component && Array.isArray(component.children)) result.push(...component.children);
     if ("footer" in component && Array.isArray(component.footer)) result.push(...component.footer);
     if (component.type === "tabs" && "tabs" in component && Array.isArray(component.tabs)) {
-        for (const tab of component.tabs) result.push(...(tab.children ?? tab.components ?? tab.content ?? []));
+        for (const tab of component.tabs) result.push(...(tab.children ?? []));
     }
     if (component.type === "accordion" && "items" in component && Array.isArray(component.items)) {
         for (const item of component.items) if (item && typeof item === "object" && "children" in item && Array.isArray(item.children)) result.push(...item.children as DashboardComponent[]);

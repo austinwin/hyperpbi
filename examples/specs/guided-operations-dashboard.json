@@ -1,32 +1,200 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Operations Command Center",
-  "theme": { "mode": "light", "density": "compact", "primaryColor": "#1f4e79", "accentColor": "#0891b2", "radius": 6, "cardPadding": 10, "gap": 7 },
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#1f4e79",
+    "accentColor": "#0891b2",
+    "radius": 6,
+    "cardPadding": 10,
+    "gap": 7
+  },
   "styles": {
     "globalCss": ".hp-card{box-shadow:0 1px 3px rgb(15 23 42 / 8%)}",
-    "components": { "*": { "style": { "minWidth": 0 } }, "table": { "css": ".hp-table th{font-weight:700}" } }
+    "components": {
+      "*": {
+        "style": {
+          "minWidth": 0
+        }
+      },
+      "table": {
+        "css": ".hp-table th{font-weight:700}"
+      }
+    }
   },
   "toolbar": [
-    { "type": "searchBox", "id": "search", "placeholder": "Search operations..." },
-    { "type": "segmentedControl", "id": "priority_filter", "label": "Priority", "field": "priority", "internal": true, "external": true },
-    { "type": "filterChips", "id": "active_filters" }
+    {
+      "type": "searchBox",
+      "id": "search",
+      "placeholder": "Search operations..."
+    },
+    {
+      "type": "segmentedControl",
+      "id": "priority_filter",
+      "label": "Priority",
+      "field": "priority",
+      "interaction": {
+        "enabled": true,
+        "internalMode": "filter",
+        "externalMode": "selection"
+      }
+    },
+    {
+      "type": "filterChips",
+      "id": "active_filters"
+    }
   ],
   "components": [
-    { "type": "metricGrid", "id": "metrics", "span": 12, "metrics": [
-      { "title": "Initiatives", "aggregation": "count", "format": "integer" },
-      { "title": "Budget", "field": "budget_usd", "aggregation": "sum", "format": "currency" },
-      { "title": "Average progress", "field": "progress_pct", "aggregation": "avg", "format": "percent" }
-    ] },
-    { "type": "smallMultiples", "id": "regional_status", "title": "Status by region", "splitField": "region", "maxPanels": 6, "span": 7, "chart": { "type": "barChart", "category": "status", "aggregation": "count", "external": true } },
-    { "type": "timeline", "id": "due_timeline", "title": "Upcoming activity", "dateField": "due_date", "titleField": "initiative", "categoryField": "department", "statusField": "status", "descriptionField": "owner", "sortDirection": "asc", "limit": 12, "span": 5 },
-    { "type": "matrix", "id": "priority_matrix", "title": "Priority by department", "rows": ["department"], "columns": ["priority"], "values": [{ "field": "budget_usd", "title": "Budget", "aggregation": "sum", "format": "currency" }], "showTotals": true, "heatmap": true, "span": 5 },
-    { "type": "table", "id": "details", "title": "Operational detail", "columns": ["record_id", "initiative", "region", "owner", "status", "priority", "progress_pct", "risk_score"], "selectable": true, "selectionMode": "highlight", "internal": false, "external": true, "pagination": true, "pageSize": 15, "span": 7 },
-    { "type": "drawer", "id": "record_drawer", "title": "Selected initiative", "position": "right", "width": 360, "openWhen": "selectedRow", "span": 12, "children": [
-      { "type": "detailPanel", "id": "selected_detail", "selectedRow": true, "emptyText": "Select an initiative", "groups": [
-        { "title": "Ownership", "fields": [{ "field": "initiative", "copyable": true }, { "field": "owner", "copyable": true }, { "field": "department", "badge": true }] },
-        { "title": "Delivery", "fields": [{ "field": "status", "badge": true }, "due_date", "progress_pct", "risk_score"] }
-      ] }
-    ] }
+    {
+      "type": "metricGrid",
+      "id": "metrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Initiatives",
+          "aggregation": "count",
+          "format": "integer"
+        },
+        {
+          "title": "Budget",
+          "field": "budget_usd",
+          "aggregation": "sum",
+          "format": "currency"
+        },
+        {
+          "title": "Average progress",
+          "field": "progress_pct",
+          "aggregation": "avg",
+          "format": "percent"
+        }
+      ]
+    },
+    {
+      "type": "smallMultiples",
+      "id": "regional_status",
+      "title": "Status by region",
+      "splitField": "region",
+      "maxPanels": 6,
+      "span": 7,
+      "chart": {
+        "type": "barChart",
+        "category": "status",
+        "aggregation": "count",
+        "measure": "status",
+        "id": "barchart-1",
+        "interaction": {
+          "enabled": true,
+          "externalMode": "selection"
+        }
+      }
+    },
+    {
+      "type": "timeline",
+      "id": "due_timeline",
+      "title": "Upcoming activity",
+      "dateField": "due_date",
+      "titleField": "initiative",
+      "categoryField": "department",
+      "statusField": "status",
+      "descriptionField": "owner",
+      "sortDirection": "asc",
+      "limit": 12,
+      "span": 5
+    },
+    {
+      "type": "matrix",
+      "id": "priority_matrix",
+      "title": "Priority by department",
+      "rows": [
+        "department"
+      ],
+      "columns": [
+        "priority"
+      ],
+      "values": [
+        {
+          "field": "budget_usd",
+          "title": "Budget",
+          "aggregation": "sum",
+          "format": "currency"
+        }
+      ],
+      "showTotals": true,
+      "heatmap": true,
+      "span": 5
+    },
+    {
+      "type": "table",
+      "id": "details",
+      "title": "Operational detail",
+      "columns": [
+        "record_id",
+        "initiative",
+        "region",
+        "owner",
+        "status",
+        "priority",
+        "progress_pct",
+        "risk_score"
+      ],
+      "pagination": true,
+      "pageSize": 15,
+      "span": 7,
+      "interaction": {
+        "enabled": true,
+        "internalMode": "none",
+        "externalMode": "selection",
+        "showSelector": true
+      }
+    },
+    {
+      "type": "offcanvas",
+      "id": "record_drawer",
+      "title": "Selected initiative",
+      "position": "right",
+      "width": 360,
+      "openWhen": "selectedRow",
+      "span": 12,
+      "children": [
+        {
+          "type": "detailPanel",
+          "id": "selected_detail",
+          "selectedRow": true,
+          "emptyText": "Select an initiative",
+          "groups": [
+            {
+              "title": "Ownership",
+              "fields": [
+                {
+                  "field": "initiative",
+                  "copyable": true
+                },
+                {
+                  "field": "owner",
+                  "copyable": true
+                },
+                {
+                  "field": "department",
+                  "badge": true
+                }
+              ]
+            },
+            {
+              "title": "Delivery",
+              "fields": [
+                {
+                  "field": "status",
+                  "badge": true
+                },
+                "due_date",
+                "progress_pct",
+                "risk_score"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
-

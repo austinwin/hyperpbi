@@ -140,4 +140,4 @@ Map-level rectangle and lasso tools use the same engine. The spatial pass first 
 
 ## Compatibility
 
-Version 1.0 may use `internal`, `external`, table `selectable`, table `selectionMode`, and legacy custom interaction flags. Preparation/runtime policy still supports those inputs. Obsolete `selectionTarget` is ignored with one documented migration warning; it does not select nodes or edges. New 2.0 authoring uses `interaction`, and does not invent properties such as `externalSelection`, `selectionTarget`, `crossFilter`, or `powerBISelection` in dashboard JSON.
+Schema 2.0 uses `interaction` exclusively. Top-level `internal`, `external`, table `selectable`, and table `selectionMode` are rejected. Properties such as `externalSelection`, `selectionTarget`, `crossFilter`, and `powerBISelection` are not dashboard JSON contracts and are rejected by strict validation.

@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "title": "Legacy migration fixture",
+  "components": [
+    {
+      "type": "button",
+      "id": "clear",
+      "title": "Clear",
+      "action": "clearFilters"
+    },
+    {
+      "type": "tabs",
+      "id": "main-tabs",
+      "tabs": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "components": [
+            { "type": "text", "text": "Overview" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "drawer",
+      "id": "details",
+      "position": "right",
+      "children": [
+        { "type": "text", "id": "detail-text", "text": "Details" }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "records",
+      "columns": ["status"],
+      "engine": "native",
+      "selectable": true,
+      "selectionMode": "highlight"
+    }
+  ]
+}

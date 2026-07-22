@@ -5,13 +5,25 @@
     "datasets": {
       "facility_detail": {
         "source": "powerbi",
-        "select": ["region", "facility", "latitude", "longitude", "amount", "status"]
+        "select": [
+          "region",
+          "facility",
+          "latitude",
+          "longitude",
+          "amount",
+          "status"
+        ]
       },
       "region_summary": {
         "source": "powerbi",
-        "groupBy": ["region"],
+        "groupBy": [
+          "region"
+        ],
         "metrics": {
-          "total_amount": { "op": "sum", "field": "amount" }
+          "total_amount": {
+            "op": "sum",
+            "field": "amount"
+          }
         }
       }
     }
@@ -26,12 +38,25 @@
       "direction": "row",
       "resizable": true,
       "persist": "local",
-      "sizes": [58, 42],
-      "minSizes": [30, 25],
-      "maxSizes": [75, 70],
+      "sizes": [
+        58,
+        42
+      ],
+      "minSizes": [
+        30,
+        25
+      ],
+      "maxSizes": [
+        75,
+        70
+      ],
       "responsive": {
-        "xs": { "stack": true },
-        "md": { "stack": false }
+        "xs": {
+          "stack": true
+        },
+        "md": {
+          "stack": false
+        }
       },
       "children": [
         {
@@ -40,10 +65,19 @@
           "dataset": "facility_detail",
           "heightMode": "fill",
           "minHeight": 300,
-          "basemap": { "type": "none" },
+          "basemap": {
+            "type": "none"
+          },
           "tools": {
-            "rectangleSelection": { "enabled": true, "selectionMode": "replace" },
-            "lassoSelection": { "enabled": true, "selectionMode": "add", "minimumPoints": 4 }
+            "rectangleSelection": {
+              "enabled": true,
+              "selectionMode": "replace"
+            },
+            "lassoSelection": {
+              "enabled": true,
+              "selectionMode": "add",
+              "minimumPoints": 4
+            }
           },
           "toolbar": {
             "rectangleSelection": true,
@@ -56,7 +90,10 @@
             "internalMode": "filter",
             "internalScope": "others",
             "externalMode": "selection",
-            "targets": ["facility-table", "amount-trend"]
+            "targets": [
+              "facility-table",
+              "amount-trend"
+            ]
           },
           "layers": [
             {
@@ -70,7 +107,11 @@
                   "longitude": "longitude",
                   "color": "status",
                   "size": "amount",
-                  "tooltip": ["facility", "status", "amount"]
+                  "tooltip": [
+                    "facility",
+                    "status",
+                    "amount"
+                  ]
                 }
               },
               "renderer": {
@@ -92,7 +133,7 @@
             {
               "id": "trend-tab",
               "title": "Trend and drill",
-              "content": [
+              "children": [
                 {
                   "type": "barChart",
                   "id": "amount-trend",
@@ -101,10 +142,14 @@
                   "category": "region",
                   "measure": "total_amount",
                   "events": {
-                    "zoom": { "enabled": true },
+                    "zoom": {
+                      "enabled": true
+                    },
                     "rangeSelect": {
                       "enabled": true,
-                      "targets": ["facility-table"],
+                      "targets": [
+                        "facility-table"
+                      ],
                       "interaction": {
                         "internalMode": "filter",
                         "internalScope": "others",
@@ -113,7 +158,10 @@
                     },
                     "brush": {
                       "enabled": true,
-                      "targets": ["facility-table", "facility-map"],
+                      "targets": [
+                        "facility-table",
+                        "facility-map"
+                      ],
                       "interaction": {
                         "internalMode": "filter",
                         "internalScope": "others",
@@ -148,17 +196,29 @@
             {
               "id": "detail-tab",
               "title": "Filtered detail",
-              "content": [
+              "children": [
                 {
                   "type": "table",
                   "id": "facility-table",
                   "dataset": "facility_detail",
                   "heightMode": "fill",
                   "columns": [
-                    { "field": "facility", "title": "Facility" },
-                    { "field": "region", "title": "Region" },
-                    { "field": "status", "title": "Status" },
-                    { "field": "amount", "title": "Amount" }
+                    {
+                      "field": "facility",
+                      "title": "Facility"
+                    },
+                    {
+                      "field": "region",
+                      "title": "Region"
+                    },
+                    {
+                      "field": "status",
+                      "title": "Status"
+                    },
+                    {
+                      "field": "amount",
+                      "title": "Amount"
+                    }
                   ],
                   "pagination": false,
                   "search": true,
@@ -171,7 +231,10 @@
                   },
                   "export": {
                     "enabled": true,
-                    "formats": ["csv", "xlsx"],
+                    "formats": [
+                      "csv",
+                      "xlsx"
+                    ],
                     "scope": "selectedOrFiltered",
                     "fileName": "facility-detail"
                   },

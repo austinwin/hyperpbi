@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "title": "Houston Operations Intelligence Center \u2014 Current Raw Field Keys",
+  "version": "2.0",
+  "title": "Houston Operations Intelligence Center — Current Raw Field Keys",
   "theme": {
     "mode": "light",
     "density": "compact",
@@ -100,7 +100,7 @@
         },
         {
           "label": "Period",
-          "value": "Jan 2025\u2013Jun 2026",
+          "value": "Jan 2025–Jun 2026",
           "icon": "calendar",
           "intent": "neutral"
         },
@@ -115,7 +115,7 @@
     "footer": {
       "visible": true,
       "text": "HyperPBI intensive web-app demonstration",
-      "secondaryText": "Synthetic Houston operations data \u2022 Safe JSON runtime"
+      "secondaryText": "Synthetic Houston operations data • Safe JSON runtime"
     }
   },
   "calculations": {
@@ -293,7 +293,7 @@
       "span": 12,
       "field": "hyperpbi_houston_demo_data_description",
       "label": "Search cases",
-      "placeholder": "Search descriptions\u2026",
+      "placeholder": "Search descriptions…",
       "filter": {
         "operator": "contains",
         "value": ""
@@ -590,7 +590,6 @@
       "title": "Clear",
       "span": 12,
       "label": "Clear All Filters",
-      "action": "clearFilters",
       "variant": "outline",
       "icon": "filter-off",
       "interaction": {
@@ -603,6 +602,9 @@
         "multiSelect": false,
         "showSelector": false,
         "clearOnSecondClick": false
+      },
+      "uiAction": {
+        "type": "clearFilters"
       }
     },
     {
@@ -1810,7 +1812,7 @@
               "id": "advanced_note",
               "title": "Advanced ECharts",
               "span": 12,
-              "text": "## Advanced ECharts\nCombo, waterfall, radar, treemap, funnel, Sankey, calendar heatmap and box plot configurations are supplied as sanitized JSON\u2014no JavaScript callbacks.",
+              "text": "## Advanced ECharts\nCombo, waterfall, radar, treemap, funnel, Sankey, calendar heatmap and box plot configurations are supplied as sanitized JSON—no JavaScript callbacks.",
               "interaction": {
                 "enabled": false,
                 "internalMode": "none",
@@ -1828,7 +1830,7 @@
                 {
                   "type": "advancedChart",
                   "id": "advanced_combo",
-                  "title": "Monthly Operations \u2014 Cost, Volume and SLA",
+                  "title": "Monthly Operations — Cost, Volume and SLA",
                   "span": 12,
                   "height": 430,
                   "maxDataRows": 30000,
@@ -1878,7 +1880,7 @@
                           "Budget": 264477.44,
                           "ActualCost": 158356.03,
                           "AverageRisk": 54,
-                          "SLA": 50.0,
+                          "SLA": 50,
                           "Variance": -106121.41
                         },
                         {
@@ -1977,7 +1979,7 @@
                           "Budget": 236710.53,
                           "ActualCost": 176169.9,
                           "AverageRisk": 34.1,
-                          "SLA": 100.0,
+                          "SLA": 100,
                           "Variance": -60540.63
                         },
                         {
@@ -2343,7 +2345,7 @@
                             "value": [
                               55.3,
                               62.4,
-                              75.0,
+                              75,
                               63.7,
                               48.9
                             ]
@@ -2361,10 +2363,10 @@
                           {
                             "name": "Transportation",
                             "value": [
-                              70.0,
+                              70,
                               70.6,
                               79.2,
-                              76.0,
+                              76,
                               45.6
                             ]
                           },
@@ -2626,7 +2628,7 @@
                 {
                   "type": "advancedChart",
                   "id": "advanced_sankey",
-                  "title": "Channel \u2192 Department \u2192 Status Flow",
+                  "title": "Channel → Department → Status Flow",
                   "span": 12,
                   "height": 520,
                   "maxDataRows": 30000,
@@ -4022,7 +4024,7 @@
                           ],
                           [
                             2.1,
-                            14.0,
+                            14,
                             29.6,
                             63.6,
                             228.1
@@ -4037,7 +4039,7 @@
                           [
                             1.9,
                             17.1,
-                            34.0,
+                            34,
                             57.8,
                             170.6
                           ],
@@ -4046,14 +4048,14 @@
                             12.9,
                             31.3,
                             53.9,
-                            129.0
+                            129
                           ],
                           [
                             3.8,
                             17.6,
-                            31.0,
+                            31,
                             78.4,
-                            114.0
+                            114
                           ]
                         ]
                       }
@@ -4088,7 +4090,7 @@
             {
               "type": "map",
               "id": "houston_operations_map",
-              "title": "Houston Operations Map \u2014 Cluster, Priority, Risk and Selection",
+              "title": "Houston Operations Map — Cluster, Priority, Risk and Selection",
               "span": 12,
               "height": 620,
               "view": {
@@ -4106,7 +4108,7 @@
               "basemap": {
                 "type": "customTile",
                 "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "attribution": "\u00a9 OpenStreetMap contributors",
+                "attribution": "© OpenStreetMap contributors",
                 "maxZoom": 19
               },
               "layers": [
@@ -4118,9 +4120,11 @@
                     "bindings": {
                       "latitude": "hyperpbi_houston_demo_data_latitude",
                       "longitude": "hyperpbi_houston_demo_data_longitude",
-                      "category": "hyperpbi_houston_demo_data_priority",
                       "size": "hyperpbi_houston_demo_data_riskscore",
-                      "label": "hyperpbi_houston_demo_data_casenumber"
+                      "layer": "hyperpbi_houston_demo_data_priority",
+                      "tooltip": [
+                        "hyperpbi_houston_demo_data_casenumber"
+                      ]
                     }
                   },
                   "renderer": {
@@ -4159,7 +4163,7 @@
                   },
                   "popup": {
                     "enabled": true,
-                    "title": "{{hyperpbi_houston_demo_data_casenumber}} \u2014 {{hyperpbi_houston_demo_data_neighborhood}}",
+                    "title": "{{hyperpbi_houston_demo_data_casenumber}} — {{hyperpbi_houston_demo_data_neighborhood}}",
                     "fields": [
                       {
                         "field": "hyperpbi_houston_demo_data_department",
@@ -4237,7 +4241,7 @@
                   },
                   "interaction": {
                     "enabled": true,
-                    "trigger": "auto",
+                    "trigger": "click",
                     "internalMode": "highlight",
                     "internalScope": "self",
                     "externalMode": "selection",
@@ -4262,8 +4266,10 @@
                     "bindings": {
                       "latitude": "hyperpbi_houston_demo_data_latitude",
                       "longitude": "hyperpbi_houston_demo_data_longitude",
-                      "category": "hyperpbi_houston_demo_data_priority",
-                      "label": "hyperpbi_houston_demo_data_casenumber"
+                      "layer": "hyperpbi_houston_demo_data_priority",
+                      "tooltip": [
+                        "hyperpbi_houston_demo_data_casenumber"
+                      ]
                     }
                   },
                   "renderer": {
@@ -4346,7 +4352,7 @@
                   },
                   "tooltip": {
                     "enabled": true,
-                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{hyperpbi_houston_demo_data_priority}} \u2022 Risk {{hyperpbi_houston_demo_data_riskscore}}"
+                    "template": "{{hyperpbi_houston_demo_data_casenumber}} • {{hyperpbi_houston_demo_data_priority}} • Risk {{hyperpbi_houston_demo_data_riskscore}}"
                   },
                   "popup": {
                     "enabled": true,
@@ -4378,7 +4384,7 @@
                   },
                   "interaction": {
                     "enabled": true,
-                    "trigger": "auto",
+                    "trigger": "click",
                     "internalMode": "highlight",
                     "internalScope": "self",
                     "externalMode": "selection",
@@ -4404,7 +4410,9 @@
                       "latitude": "hyperpbi_houston_demo_data_latitude",
                       "longitude": "hyperpbi_houston_demo_data_longitude",
                       "size": "hyperpbi_houston_demo_data_riskscore",
-                      "label": "hyperpbi_houston_demo_data_recordid"
+                      "tooltip": [
+                        "hyperpbi_houston_demo_data_recordid"
+                      ]
                     }
                   },
                   "renderer": {
@@ -4439,7 +4447,7 @@
                   },
                   "interaction": {
                     "enabled": true,
-                    "trigger": "auto",
+                    "trigger": "click",
                     "internalMode": "highlight",
                     "internalScope": "self",
                     "externalMode": "selection",
@@ -4464,8 +4472,10 @@
                     "bindings": {
                       "latitude": "hyperpbi_houston_demo_data_latitude",
                       "longitude": "hyperpbi_houston_demo_data_longitude",
-                      "category": "hyperpbi_houston_demo_data_responsehours",
-                      "label": "hyperpbi_houston_demo_data_recordid"
+                      "layer": "hyperpbi_houston_demo_data_responsehours",
+                      "tooltip": [
+                        "hyperpbi_houston_demo_data_recordid"
+                      ]
                     }
                   },
                   "renderer": {
@@ -4478,11 +4488,11 @@
                   },
                   "tooltip": {
                     "enabled": true,
-                    "template": "{{hyperpbi_houston_demo_data_casenumber}} \u2022 {{hyperpbi_houston_demo_data_responsehours}} hours"
+                    "template": "{{hyperpbi_houston_demo_data_casenumber}} • {{hyperpbi_houston_demo_data_responsehours}} hours"
                   },
                   "interaction": {
                     "enabled": true,
-                    "trigger": "auto",
+                    "trigger": "click",
                     "internalMode": "highlight",
                     "internalScope": "self",
                     "externalMode": "selection",
@@ -4514,14 +4524,7 @@
                 "layers": true,
                 "legend": true,
                 "clearSelection": true,
-                "zoomToSelection": true,
-                "fullscreenWithinVisual": false
-              },
-              "settings": {
-                "showLayerControl": true,
-                "showLegend": true,
-                "clusterPoints": true,
-                "coordinateSystem": "EPSG:4326"
+                "zoomToSelection": true
               },
               "interaction": {
                 "enabled": true,
@@ -4546,7 +4549,6 @@
               "id": "operations_table",
               "title": "Operations Records",
               "span": 12,
-              "engine": "native",
               "columns": [
                 {
                   "field": "hyperpbi_houston_demo_data_casenumber",
@@ -4708,7 +4710,7 @@
             {
               "type": "matrix",
               "id": "department_status_matrix",
-              "title": "Department \u00d7 Status Matrix",
+              "title": "Department × Status Matrix",
               "span": 12,
               "rows": [
                 "hyperpbi_houston_demo_data_department",
@@ -4825,49 +4827,53 @@
                   "id": "component_accordion",
                   "title": "Accordion Example",
                   "span": 12,
-                  "collapsible": true,
-                  "defaultOpen": false,
-                  "children": [
+                  "items": [
                     {
-                      "type": "markdown",
-                      "id": "accordion_text",
-                      "span": 12,
-                      "text": "This accordion demonstrates compact secondary content.",
-                      "interaction": {
-                        "enabled": false,
-                        "internalMode": "none",
-                        "externalMode": "none"
-                      }
-                    },
-                    {
-                      "type": "dataGrid",
-                      "id": "accordion_grid",
-                      "title": "Selected Record Summary",
-                      "span": 12,
-                      "selectedRow": true,
-                      "columns": 3,
-                      "items": [
+                      "id": "component_accordion-item",
+                      "title": "Accordion Example",
+                      "children": [
                         {
-                          "label": "Case",
-                          "field": "hyperpbi_houston_demo_data_casenumber",
-                          "copyable": true
+                          "type": "markdown",
+                          "id": "accordion_text",
+                          "span": 12,
+                          "text": "This accordion demonstrates compact secondary content.",
+                          "interaction": {
+                            "enabled": false,
+                            "internalMode": "none",
+                            "externalMode": "none"
+                          }
                         },
                         {
-                          "label": "Department",
-                          "field": "hyperpbi_houston_demo_data_department",
-                          "badge": true
-                        },
-                        {
-                          "label": "Cost",
-                          "field": "hyperpbi_houston_demo_data_actualcost",
-                          "format": "currency"
+                          "type": "dataGrid",
+                          "id": "accordion_grid",
+                          "title": "Selected Record Summary",
+                          "span": 12,
+                          "selectedRow": true,
+                          "columns": 3,
+                          "items": [
+                            {
+                              "label": "Case",
+                              "field": "hyperpbi_houston_demo_data_casenumber",
+                              "copyable": true
+                            },
+                            {
+                              "label": "Department",
+                              "field": "hyperpbi_houston_demo_data_department",
+                              "badge": true
+                            },
+                            {
+                              "label": "Cost",
+                              "field": "hyperpbi_houston_demo_data_actualcost",
+                              "format": "currency"
+                            }
+                          ],
+                          "interaction": {
+                            "enabled": false,
+                            "internalMode": "none",
+                            "externalMode": "none"
+                          }
                         }
-                      ],
-                      "interaction": {
-                        "enabled": false,
-                        "internalMode": "none",
-                        "externalMode": "none"
-                      }
+                      ]
                     }
                   ]
                 },
@@ -4937,7 +4943,7 @@
                       "label": "Notes",
                       "rows": 4,
                       "maxLength": 500,
-                      "placeholder": "Enter notes\u2026",
+                      "placeholder": "Enter notes…",
                       "interaction": {
                         "enabled": false,
                         "internalMode": "none",
@@ -5134,7 +5140,7 @@
                       "id": "lab_spinner",
                       "title": "Spinner",
                       "span": 2,
-                      "label": "Loading sample\u2026",
+                      "label": "Loading sample…",
                       "inline": false,
                       "interaction": {
                         "enabled": false,
@@ -5263,7 +5269,7 @@
                         "source": "rows",
                         "as": "row",
                         "limit": 8,
-                        "template": "<article class=\"custom-case\"><strong>{{hyperpbi_houston_demo_data_casenumber}}</strong><span>{{hyperpbi_houston_demo_data_department}} \u00b7 {{hyperpbi_houston_demo_data_neighborhood}}</span><small>{{hyperpbi_houston_demo_data_priority}} \u00b7 Risk {{hyperpbi_houston_demo_data_riskscore}} \u00b7 {{hyperpbi_houston_demo_data_status}}</small></article>",
+                        "template": "<article class=\"custom-case\"><strong>{{hyperpbi_houston_demo_data_casenumber}}</strong><span>{{hyperpbi_houston_demo_data_department}} · {{hyperpbi_houston_demo_data_neighborhood}}</span><small>{{hyperpbi_houston_demo_data_priority}} · Risk {{hyperpbi_houston_demo_data_riskscore}} · {{hyperpbi_houston_demo_data_status}}</small></article>",
                         "distinctBy": "hyperpbi_houston_demo_data_recordid",
                         "sortBy": "hyperpbi_houston_demo_data_riskscore",
                         "sortDirection": "desc"
@@ -5308,7 +5314,7 @@
               ]
             },
             {
-              "type": "drawer",
+              "type": "offcanvas",
               "id": "selected_case_drawer",
               "title": "Selected Case Drawer",
               "span": 12,

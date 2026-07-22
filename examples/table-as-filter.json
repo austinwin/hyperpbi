@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "",
   "theme": {
     "mode": "light",
@@ -23,10 +23,8 @@
   "components": [
     {
       "type": "table",
-      "engine": "native",
       "id": "details",
       "search": false,
-      "showSelector": false,
       "columns": [
         "hyperpbi_general_enterprise_demo_dataset_category"
       ],

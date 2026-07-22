@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Adapt the logical Houston intensive dashboard to the actual normalized
+Adapt the logical schema 2.0 Houston intensive dashboard to the canonical
 HyperPBI field keys reported by the visual.
 
 Usage:
@@ -9,7 +9,7 @@ Usage:
       --inventory field_inventory.json \
       --out hyperpbi_houston_intensive_dashboard_CURRENT_FIELDS.json
 
-The inventory must be the JSON object whose keys are HyperPBI normalized field
+The inventory must be the JSON object whose keys are HyperPBI canonical field
 keys and whose values contain displayName/queryName/type metadata.
 """
 

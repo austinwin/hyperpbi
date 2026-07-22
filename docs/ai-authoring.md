@@ -14,7 +14,7 @@ The normal Edit Mode path stays in **Guided Builder**. Select **Advanced control
 | Redesign selected section | Selected stable ID and intent | One replacement component/section using the same ID |
 | Repair invalid JSON | Invalid JSON/fragment and structured diagnostics | One complete corrected specification; no JSON Patch |
 
-Create defaults to version 2.0. Improvement preserves the current schema version, including 1.0, unless intentional migration is requested. Normal improvement and repair jobs never ask for JSON Patch.
+Create, improvement, and repair jobs require dashboard schema version 2.0. A schema 1.0 or unversioned response is rejected and must not be normalized by AI import. Normal improvement and repair jobs never ask for JSON Patch.
 
 ## Prompt composition
 
@@ -118,14 +118,15 @@ The AI response passes preparation, dataset schemas, strict schema validation, c
 
 The last valid saved specification remains intact when import/preview fails.
 
-## Bounded automatic repairs
+## Strict AI import
 
-Preparation may:
+AI response import does not repair the returned dashboard. It requires:
 
-- add version 2.0 when an unversioned object clearly has a components array
-- generate missing 2.0 component IDs during import
-- correct `meausre`, `catgory`, `componets`, and `aggregration`
-- convert numeric strings for bounded numeric properties
+- an explicit `version: "2.0"`
+- globally unique stable component IDs
+- canonical component and property names
+- canonical Field Manifest aliases or resolved keys
+- values that already have the required JSON types
 
 It will not:
 
@@ -135,15 +136,15 @@ It will not:
 - invent/delete components
 - remove unknown content simply to make validation pass
 - weaken sanitizers or host policy
-- migrate 1.0 to 2.0 without intent
+- migrate schema 1.0 to 2.0
 
 ## Repair prompt
 
-The repair prompt includes structured diagnostics, warnings, a types-only Field Manifest, relevant affected IDs, registered patterns, the invalid JSON/fragment, and a version-preservation rule. The response must be one complete corrected object and must preserve valid unrelated content.
+The repair prompt includes structured diagnostics, warnings, a types-only Field Manifest, relevant affected IDs, registered patterns, and the invalid JSON/fragment. The response must be one complete schema 2.0 object and must preserve valid unrelated content and stable IDs.
 
 See [Repair workflow](repair-workflow.md), [ChatGPT guideline](chatgpt-guideline.md), and the generated [AI skill](hyperpbi-ai-skill.md).
 # Targeted change packages
 
-`redesign-section` requires a selected stable component ID and returns `operation: "replace"`. `add-section` selects before, after, or inside. Before/after use `insertBefore|insertAfter` with `targetId`; inside uses `appendChild` with a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/content`, or `items/0/children`. Root insertion uses `appendRoot` with exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`. Paths reject absolute, parent, empty-segment, and undeclared traversal.
+`redesign-section` requires a selected stable component ID and returns `operation: "replace"`. `add-section` selects before, after, or inside. Before/after use `insertBefore|insertAfter` with `targetId`; inside uses `appendChild` with a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/children`, or `items/0/children`. Root insertion uses `appendRoot` with exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`. Paths reject absolute, parent, empty-segment, and undeclared traversal.
 
 Packages use `kind: "hyperpbi-change"`; operation-specific validation rejects unknown or forbidden properties. Replacement IDs must match the target, sibling targets must belong to an ordered component array, and all inserted IDs are checked recursively for collisions. Studio mutates a clone, prepares and validates the complete resulting dashboard with current data and aliases, then presents the operation, target/path, mutation summary, and warnings. A successful **Validate resulting dashboard & Preview** promotes exactly that prepared result to both the working JSON and preview. The shell reports **Preview current** only while that preview still matches the working specification and Runtime settings; a subsequent edit reports **Preview out of date** and retains the last valid result for comparison. A failed preview preserves the current dashboard and supplies the package, target, operation, and resulting-dashboard diagnostics to a targeted repair prompt. **Save & return** revalidates the current candidate and persists it only when that validation succeeds.

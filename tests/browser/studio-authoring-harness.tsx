@@ -65,12 +65,9 @@ const emptyData: NormalizedData = {
 const initialSpecification = JSON.stringify({
   version: "2.0",
   components: [{
-    type: "map",
-    id: "municipal-map",
-    title: "Municipal Asset Status",
-    heightMode: "fixed",
-    height: 380,
-    style: { colorMode: "single", defaultPointColor: "#2563eb" },
+    type: "text",
+    id: "authoring-ready",
+    text: "Authoring harness ready",
   }],
 });
 
@@ -134,7 +131,6 @@ const candidate = JSON.stringify({
         legend: { visible: true, title: "Status" },
       }],
       layerPanel: { visible: true },
-      settings: { showLayerControl: true, showLegend: true },
       toolbar: { visible: true, layers: true, legend: true, search: false, rectangleSelection: true, lassoSelection: true },
     },
     {

@@ -110,12 +110,10 @@ Targets must name real stable component/overlay IDs.
 
 ## Improve and repair
 
-For improvement, return the complete updated specification. Preserve the current version, stable IDs, datasets, interactions, app shell, styling, and unrelated sections unless the request requires a change.
+For improvement, return the complete updated schema 2.0 specification. Preserve `version: "2.0"`, stable IDs, datasets, interactions, app shell, styling, and unrelated sections unless the request requires a change.
 
-For repair, follow structured diagnostics. Correct syntax/schema/reference issues without guessing business meaning. Do not delete a component merely because a field is ambiguous. Do not convert 1.0 to 2.0 unless migration is explicitly requested.
+For repair, follow structured diagnostics. Correct syntax/schema/reference issues without guessing business meaning. Do not delete a component merely because a field is ambiguous. Return an explicit `version: "2.0"`; schema 1.0 and missing versions are unsupported.
 
-## Version 1.0 compatibility
+## Schema version boundary
 
-An existing `{"version":"1.0", ...}` dashboard remains valid compatibility material. It may use normalized runtime keys, lenient properties, legacy accordion children, drawers/filter drawers, steppers, button `action`/`actionValue`, Tabulator engine input, legacy map settings, or deprecated interaction flags.
-
-When asked to improve an existing 1.0 specification, preserve version 1.0 and its working normalized keys unless the user explicitly requests a 2.0 migration. Never use 1.0 as the default for a new dashboard.
+Generate dashboard schema 2.0 only. Schema 1.0 and missing versions are rejected by AI import and the production runtime. Do not emit compatibility component or property aliases. A legacy file must be converted separately by a developer with the standalone migration utility before AI authoring.

@@ -5,8 +5,6 @@ import { NormalizedData } from "../data/normalizeData";
 import { GeocodeResult } from "../providers/providerTypes";
 import { HyperPbiRoot } from "../render/HyperPbiRoot";
 import { DashboardComponent, HyperPbiSchema } from "../schema/hyperpbiSchema";
-import { migrateSchema } from "../schema/schemaMigrations";
-import { migrateFieldReferences } from "../schema/migrateFieldReferences";
 import { validateReferences } from "../schema/validateReferences";
 import { validateSchema } from "../schema/validateSchema";
 import { RuntimeSettings } from "../settings";
@@ -125,7 +123,7 @@ function sanitizerWarnings(
       );
     if ("tabs" in component)
       component.tabs.forEach((tab, index) =>
-        (tab.children ?? tab.components ?? tab.content ?? []).forEach(
+        (tab.children ?? []).forEach(
           (child, childIndex) =>
             visit(child, `${path}/tabs/${index}/${childIndex}`),
         ),
@@ -1045,7 +1043,6 @@ export function HyperPbiStudio({
           )}{" "}
           {editorTab === "settings" && (
             <StudioSettings
-              data={data}
               configuration={configuration}
               onChange={setConfiguration}
             />

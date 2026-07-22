@@ -7,7 +7,10 @@
       "type": "map",
       "title": "Houston Wastewater Network",
       "view": {
-        "center": [29.75, -95.35],
+        "center": [
+          29.75,
+          -95.35
+        ],
         "zoom": 12,
         "minZoom": 8,
         "maxZoom": 18,
@@ -26,7 +29,13 @@
             "useServiceRenderer": true,
             "useServiceLabels": false,
             "mode": "reference",
-            "outFields": ["OBJECTID", "FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE"]
+            "outFields": [
+              "OBJECTID",
+              "FACILITYID",
+              "DIAMETER",
+              "MATERIAL",
+              "INSTALLDATE"
+            ]
           },
           "performance": {
             "maxFeatures": 2000,
@@ -38,17 +47,41 @@
             "enabled": true,
             "title": "Wastewater Pipe {{FACILITYID}}",
             "fields": [
-              { "field": "FACILITYID", "label": "Facility ID", "display": "text" },
-              { "field": "DIAMETER", "label": "Diameter (in)", "display": "number" },
-              { "field": "MATERIAL", "label": "Material", "display": "badge" },
-              { "field": "INSTALLDATE", "label": "Install Date", "display": "date" }
+              {
+                "field": "FACILITYID",
+                "label": "Facility ID",
+                "display": "text"
+              },
+              {
+                "field": "DIAMETER",
+                "label": "Diameter (in)",
+                "display": "number"
+              },
+              {
+                "field": "MATERIAL",
+                "label": "Material",
+                "display": "badge"
+              },
+              {
+                "field": "INSTALLDATE",
+                "label": "Install Date",
+                "display": "date"
+              }
             ]
           },
           "tooltip": {
             "enabled": true,
             "fields": [
-              { "field": "FACILITYID", "fieldSource": "service", "label": "Facility" },
-              { "field": "DIAMETER", "fieldSource": "service", "label": "Diameter" }
+              {
+                "field": "FACILITYID",
+                "fieldSource": "service",
+                "label": "Facility"
+              },
+              {
+                "field": "DIAMETER",
+                "fieldSource": "service",
+                "label": "Diameter"
+              }
             ]
           },
           "labels": {
@@ -77,7 +110,9 @@
         "zoom": 16,
         "showResultMarker": true
       },
-      "legend": { "defaultOpen": false },
+      "legend": {
+        "defaultOpen": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
@@ -86,11 +121,6 @@
         "search": true,
         "clearSelection": true,
         "zoomToSelection": true
-      },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": true,
-        "clusterPoints": false
       }
     }
   ]

@@ -1,12 +1,12 @@
-import type { DashboardComponent, DrawerComponent, DropdownComponent, ModalComponent, OffcanvasComponent, OverlayPlacement, PopoverComponent } from "../../schema/hyperpbiSchema";
+import type { DashboardComponent, DropdownComponent, ModalComponent, OffcanvasComponent, OverlayPlacement, PopoverComponent } from "../../schema/hyperpbiSchema";
 import type { HyperPbiSchema } from "../../schema/hyperpbiSchema";
 import type { OverlayAnchor } from "../../render/stateStore";
 
-export type OverlayComponent = DropdownComponent | ModalComponent | OffcanvasComponent | PopoverComponent | DrawerComponent;
+export type OverlayComponent = DropdownComponent | ModalComponent | OffcanvasComponent | PopoverComponent;
 export type AnchoredOverlayComponent = DropdownComponent | PopoverComponent;
 export type { OverlayPlacement };
 
-export const overlayComponentTypes = new Set(["modal", "dropdown", "popover", "offcanvas", "drawer", "filterDrawer"]);
+export const overlayComponentTypes = new Set(["modal", "dropdown", "popover", "offcanvas"]);
 
 export function getOverlayAnchor(event?: Event): OverlayAnchor | undefined {
     const element = event?.currentTarget;
@@ -15,14 +15,14 @@ export function getOverlayAnchor(event?: Event): OverlayAnchor | undefined {
     return { top: rect.top, left: rect.left, width: rect.width, height: rect.height, triggerId: element.id || undefined };
 }
 
-export function normalizeOffcanvas(component: DrawerComponent | OffcanvasComponent): OffcanvasComponent {
+export function normalizeOffcanvas(component: OffcanvasComponent): OffcanvasComponent {
     return {
         ...component,
         type: "offcanvas",
         position: component.position ?? "right",
         width: component.width ?? 360,
-        backdrop: "backdrop" in component ? component.backdrop : true,
-        backdropClose: "backdropClose" in component ? component.backdropClose : true,
+        backdrop: component.backdrop ?? true,
+        backdropClose: component.backdropClose ?? true,
     };
 }
 
@@ -34,7 +34,7 @@ function nestedComponents(component: DashboardComponent): DashboardComponent[][]
     }
     if (Array.isArray(value.tabs)) {
         for (const tab of value.tabs as Array<Record<string, unknown>>) {
-            for (const key of ["children", "components", "content"]) if (Array.isArray(tab[key])) groups.push(tab[key] as DashboardComponent[]);
+            if (Array.isArray(tab.children)) groups.push(tab.children as DashboardComponent[]);
         }
     }
     if (component.type === "accordion" && Array.isArray(value.items)) {
@@ -68,6 +68,5 @@ export function collectOverlayComponents(schema: HyperPbiSchema): Map<string, Ov
 
 export function overlayKind(component: OverlayComponent | undefined): "modal" | "dropdown" | "popover" | "offcanvas" | "unknown" {
     if (!component) return "unknown";
-    if (component.type === "drawer" || component.type === "filterDrawer") return "offcanvas";
     return component.type;
 }

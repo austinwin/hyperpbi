@@ -89,10 +89,6 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     dropdown: c => h(OverlayTrigger, { component: c as DropdownComponent }),
     offcanvas: () => null, // TODO: implement offcanvas renderer
     popover: c => h(OverlayTrigger, { component: c as PopoverComponent }),
-    // stepper normalized to steps via migration
-    stepper: (c, rc) => h(Collapsible, { component: c, renderChildren: rc }),
-    drawer: () => null,
-    filterDrawer: () => null,
     // navigation
     collapsible: (c, rc) => h(Collapsible, { component: c, renderChildren: rc }),
 };
@@ -107,7 +103,7 @@ for (const type of dataTypes) {
 for (const type of chartTypes) {
     componentRenderers[type] = c => h(ChartBlock, { component: c as ChartComponent });
 }
-// section and legacy panel containers
+// Section and root panel containers
 for (const type of ["section", "leftPanel", "rightPanel"]) {
     componentRenderers[type] = (c, rc) => {
         const comp = c as ContainerComponent;
@@ -119,7 +115,7 @@ export const renderedComponentTypes=Object.freeze(Object.keys(componentRenderers
 export function ComponentRegistry({ component, renderChildren, authoringOwnerId }: { component: DashboardComponent; renderChildren: RenderChildren; authoringOwnerId?: string }) {
     const renderer = componentRenderers[component.type];
     if (renderer) {
-        if (["modal", "offcanvas", "drawer", "filterDrawer"].includes(component.type)) return renderer(component, renderChildren);
+        if (["modal", "offcanvas"].includes(component.type)) return renderer(component, renderChildren);
         return h("div", { "data-hp-id":component.id,"data-hp-type":component.type,"data-hp-owner-id":authoringOwnerId }, renderer(component, renderChildren));
     }
     // Unsupported component fallback

@@ -13,7 +13,7 @@ describe("canonical per-layer map binding resolution", () => {
     it("uses only explicit layer bindings and never inherits Runtime Config bindings", () => {
         const fields = Object.fromEntries(["facilityLat", "facilityLon", "incidentLat", "incidentLon"].map(key => [key, field(key)]));
         const rows = [{ facilityLat: 10, facilityLon: 20, incidentLat: 30, incidentLon: 40 }];
-        const source = context(rows, fields, { runtimeBindings: { latitude: "incidentLat", longitude: "incidentLon" } });
+        const source = context(rows, fields);
         const facilities = resolvePowerBiLayer(layer("facilities", { latitude: "facilityLat", longitude: "facilityLon" }), source);
         const incidents = resolvePowerBiLayer(layer("incidents", { latitude: "incidentLat", longitude: "incidentLon" }), source);
         expect([facilities.features[0].lat, facilities.features[0].lon]).toEqual([10, 20]);

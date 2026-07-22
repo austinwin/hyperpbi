@@ -4,7 +4,6 @@ import { buildFieldDictionary, parseQueryName } from "../src/data/fieldDictionar
 import { createFieldAliasRegistry } from "../src/fields/fieldAliasRegistry";
 import { calculateAggregates } from "../src/data/aggregations";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
-import { migrateFieldReferences } from "../src/schema/migrateFieldReferences";
 
 const metadata = (displayName: string, queryName: string, options: { numeric?: boolean; isMeasure?: boolean } = {}): powerbi.DataViewMetadataColumn => ({ displayName, queryName, isMeasure: options.isMeasure, roles: { values: true }, type: options.numeric ? { numeric: true } : { text: true } } as powerbi.DataViewMetadataColumn);
 
@@ -43,12 +42,11 @@ describe("Power BI query-name parsing", () => {
         expect(dictionary.keys).toEqual(["sales_amount", "sales_amount_sum", "sales_amount_avg"]);
     });
 
-    it("exposes aggregation metadata through aliases and migrates malformed saved keys", () => {
+    it("exposes aggregation metadata through canonical aliases", () => {
         const dictionary = buildFieldDictionary([metadata("Actual", "Sum(Demo.Actual)", { numeric: true })]);
         const data = { fields: dictionary.fields, rows: [], rowKeys: [], aggregates: calculateAggregates([]), map: normalizeMapBindings([], dictionary.fields) };
         expect(createFieldAliasRegistry(data).entries[0]).toMatchObject({ alias: "actual", kind: "column", queryAggregation: "sum", isImplicitAggregation: true, defaultAggregation: "sum", supportsExternalFilter: true });
-        const saved = { version: "1.0", components: [{ type: "table", columns: ["sum_demo_actual"] }] };
-        expect(migrateFieldReferences(saved, dictionary.fields).components[0].columns).toEqual(["demo_actual"]);
+        expect(createFieldAliasRegistry(data).byAlias.get("actual")?.key).toBe("demo_actual");
     });
 
     it("regresses the capabilities-demo manifest without losing friendly aliases", () => {

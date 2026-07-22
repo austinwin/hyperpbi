@@ -17,7 +17,6 @@ import {
 } from "../../maps/renderers/mapFeatureSymbol";
 import {
   createResolvedTooltipElement,
-  renderResolvedPopup,
 } from "./ResolvedMapPopup";
 import {
   createResolvedMapLabels,
@@ -101,13 +100,7 @@ interface MountedFeatureLayer {
   feature: ResolvedMapFeature;
   layer: ResolvedMapLayer;
   revision: ResolvedMapFeatureRevision;
-  popupCleanup?: () => void;
   eventCleanup?: () => void;
-}
-
-interface OpenMapPopupState {
-  layerId: string;
-  featureKey: MapFeatureKey;
 }
 
 export function LeafletMap({
@@ -156,7 +149,6 @@ export function LeafletMap({
   const featureLayerRefs = useRef<
     Map<string, Map<string, MountedFeatureLayer>>
   >(new Map());
-  const openMapPopupStateRef = useRef<OpenMapPopupState | null>(null);
   const arcGisTileRefs = useRef<Map<string, MountedTileLayer>>(new Map());
   const dynamicLayerRefs = useRef<Map<string, MountedDynamicLayer>>(
     new Map(),
@@ -210,7 +202,6 @@ export function LeafletMap({
   const renderContextRef = useRef(context);
   const runtimeConfigRef = useRef(runtimeConfig);
 
-  const popupPaneName = `hp-${id}-popup`.replace(/[^a-zA-Z0-9_-]/g, "_");
   const tooltipPaneName = `hp-${id}-tooltip`.replace(
     /[^a-zA-Z0-9_-]/g,
     "_",
@@ -245,14 +236,11 @@ export function LeafletMap({
     [resolvedLayers],
   );
   const renderedLayers = useMemo(() => {
-    const legacyCluster = !component.layers?.length &&
-      (component.settings?.clusterPoints ?? settings.map.clusterPoints);
     return resolvedLayers.map(layer => {
       if (
         isExternalLeafletLayer(layer) ||
         layer.features.length <= LOCAL_MAP_FEATURE_CULL_THRESHOLD ||
-        layer.renderer.type === "cluster" ||
-        legacyCluster
+        layer.renderer.type === "cluster"
       ) return layer;
       const index = featureSpatialIndexes.get(layer.id);
       const features = index && renderViewport
@@ -264,9 +252,6 @@ export function LeafletMap({
     resolvedLayers,
     featureSpatialIndexes,
     renderViewport,
-    component.layers?.length,
-    component.settings?.clusterPoints,
-    settings.map.clusterPoints,
   ]);
 
   // ── Precompute renderer domains ──────────────────────────────────
@@ -336,9 +321,6 @@ export function LeafletMap({
     if (!map.getPane(tooltipPaneName)) map.createPane(tooltipPaneName);
     const tooltipPane = map.getPane(tooltipPaneName);
     if (tooltipPane) tooltipPane.style.zIndex = "850";
-    if (!map.getPane(popupPaneName)) map.createPane(popupPaneName);
-    const popupPane = map.getPane(popupPaneName);
-    if (popupPane) popupPane.style.zIndex = "1000";
 
     // ── Controller ──────────────────────────────────────────
     const controller: LeafletMapController = {
@@ -708,7 +690,6 @@ export function LeafletMap({
       featureLayerRefs.current.clear();
       clusterLayerRefs.current.clear();
       vectorGroupSignatureRefs.current.clear();
-      openMapPopupStateRef.current = null;
       if (identifyHighlightRef.current)
         map.removeLayer(identifyHighlightRef.current);
       identifyHighlightRef.current = null;
@@ -894,17 +875,8 @@ export function LeafletMap({
 
   const resolvedLayerStructuralSignature = useMemo(
     () =>
-      resolvedLayerStructuralRevision(
-        renderedLayers,
-        !component.layers?.length &&
-          (component.settings?.clusterPoints ?? settings.map.clusterPoints),
-      ),
-    [
-      renderedLayers,
-      component.layers?.length,
-      component.settings?.clusterPoints,
-      settings.map.clusterPoints,
-    ],
+      resolvedLayerStructuralRevision(renderedLayers),
+    [renderedLayers],
   );
 
   // ── Structural feature lifecycle ─────────────────────────────────
@@ -934,8 +906,6 @@ export function LeafletMap({
       clusterLayerRefs.current.delete(layerId);
       featureLayerRefs.current.delete(layerId);
       reportedRenderSignaturesRef.current.delete(layerId);
-      if (openMapPopupStateRef.current?.layerId === layerId)
-        openMapPopupStateRef.current = null;
     }
     for (const [layerId, runtime] of labelLayerRefs.current) {
       if (activeVectorLayerIds.has(layerId)) continue;
@@ -1011,10 +981,7 @@ export function LeafletMap({
       }
 
       const renderer = layer.renderer as ResolvedMapRenderer;
-      const useCluster =
-        renderer.type === "cluster" ||
-        (!component.layers?.length &&
-          (component.settings?.clusterPoints ?? settings.map.clusterPoints));
+      const useCluster = renderer.type === "cluster";
       const groupSignature = stableSerialize({
         useCluster,
         clusterRadius: renderer.clusterRadius,
@@ -1117,8 +1084,6 @@ export function LeafletMap({
         mounted.parentGroup.removeLayer(mounted.leafletLayer);
         disposeMountedFeature(mounted);
         registry.delete(featureKey);
-        if (popupStateMatches(openMapPopupStateRef.current, layer.id, featureKey))
-          openMapPopupStateRef.current = null;
       }
 
       const domain = rendererDomains.get(layer.id) ?? null;
@@ -1160,11 +1125,6 @@ export function LeafletMap({
           continue;
         }
 
-        const shouldReopen = popupStateMatches(
-          openMapPopupStateRef.current,
-          layer.id,
-          featureKey,
-        );
         if (existing) {
           existing.parentGroup.removeLayer(existing.leafletLayer);
           disposeMountedFeature(existing);
@@ -1245,59 +1205,6 @@ export function LeafletMap({
             { pane: tooltipPaneName },
           );
         }
-        const onPopupOpen = () => {
-          openMapPopupStateRef.current = {
-            layerId: mounted.layerId,
-            featureKey: mounted.featureKey,
-          };
-        };
-        const onPopupClose = () => {
-          cleanupMountedPopup(mounted);
-          if (
-            popupStateMatches(
-              openMapPopupStateRef.current,
-              mounted.layerId,
-              mounted.featureKey,
-            )
-          )
-            openMapPopupStateRef.current = null;
-        };
-        if (
-          componentRef.current.featureDetails?.mode === "legacyPopup" &&
-          layer.popup?.enabled
-        ) {
-          leafletLayer.bindPopup(
-            () => {
-              cleanupMountedPopup(mounted);
-              const popup = mounted.layer.popup;
-              if (!popup) return document.createElement("div");
-              const rendered = renderResolvedPopup(popup, mounted.feature, {
-                executeAction: (action) => {
-                  if (action.uiAction)
-                    renderContextRef.current.executeUiAction(action.uiAction);
-                },
-              });
-              mounted.popupCleanup = rendered.cleanup;
-              return rendered.element;
-            },
-            {
-              pane: popupPaneName,
-              autoPan: true,
-              keepInView: true,
-              closeButton: true,
-              autoClose: true,
-              closeOnEscapeKey: true,
-              minWidth: 220,
-              maxWidth: 420,
-              autoPanPaddingTopLeft: [16, 56],
-              autoPanPaddingBottomRight: [16, 16],
-              className: "hp-map-popup-shell",
-            },
-          );
-          leafletLayer.on("popupopen", onPopupOpen);
-          leafletLayer.on("popupclose", onPopupClose);
-        }
-
         const onClick = (event: L.LeafletMouseEvent) => {
           if (selectionToolRef.current) {
             event.originalEvent?.stopPropagation?.();
@@ -1416,17 +1323,7 @@ if (interactionResult.cleared) {
           leafletLayer.off("mouseover", onMouseOver);
           leafletLayer.off("mouseout", onMouseOut);
           leafletLayer.off("add", annotate);
-          leafletLayer.off("popupopen", onPopupOpen);
-          leafletLayer.off("popupclose", onPopupClose);
         };
-        if (
-          componentRef.current.featureDetails?.mode === "legacyPopup" &&
-          shouldReopen &&
-          isVisible &&
-          visibleAtZoom
-        ) {
-          leafletLayer.openPopup();
-        }
       }
 
       if (
@@ -1628,10 +1525,7 @@ if (interactionResult.cleared) {
         const locallySelected = selectedFeatureKeySet.has(featureKey);
         const revision = resolveMapFeatureRevision(feature, layer, {
           pane: paneNamesRef.current.get(layer.id),
-          clusterParent:
-            layer.renderer.type === "cluster" ||
-            (!component.layers?.length &&
-              (component.settings?.clusterPoints ?? settings.map.clusterPoints)),
+          clusterParent: layer.renderer.type === "cluster",
           selected: powerBiSelected || locallySelected,
           effectiveOpacity: opacity,
           visualStyle: style,
@@ -1820,22 +1714,7 @@ function isExternalLeafletLayer(layer: ResolvedMapLayer): boolean {
   return layer.sourceType === "arcgisTile" || layer.sourceType === "arcgisDynamic";
 }
 
-function popupStateMatches(
-  state: OpenMapPopupState | null,
-  layerId: string,
-  featureKey: MapFeatureKey,
-): boolean {
-  return state?.layerId === layerId && state.featureKey === featureKey;
-}
-
-function cleanupMountedPopup(mounted: MountedFeatureLayer): void {
-  const cleanup = mounted.popupCleanup;
-  mounted.popupCleanup = undefined;
-  cleanup?.();
-}
-
 function disposeMountedFeature(mounted: MountedFeatureLayer): void {
-  cleanupMountedPopup(mounted);
   mounted.eventCleanup?.();
   mounted.eventCleanup = undefined;
 }

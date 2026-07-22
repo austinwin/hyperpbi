@@ -17,7 +17,7 @@ describe("map schema/runtime capability parity", () => {
             expect(entry.studioSupport).not.toBe("");
             expect(entry.documentationSection).toContain("schema-runtime-capability-status");
             expect(existsSync(resolve(process.cwd(), entry.focusedTestFile))).toBe(true);
-            if (["partial", "experimental", "deprecated"].includes(entry.status)) expect(entry.limitation).toBeTruthy();
+            if (["partial", "experimental"].includes(entry.status)) expect(entry.limitation).toBeTruthy();
         }
         for (const required of ["map.layers[].dataset", "map.layers[].source.powerbi.bindings.latitude", "map.layers[].renderer.classBreaks.breaks[].symbol", "map.layers[].labels.backgroundColor", "map.layers[].popup.actions[].uiAction", "map.layers[].filter[].field", "map.bookmarks[].center"]) expect(mapCapabilityByPath.has(required)).toBe(true);
     });
@@ -30,18 +30,18 @@ describe("map schema/runtime capability parity", () => {
         expect(unsupported.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_ENUM_VALUE", path: "/components/0/layers/0/renderer/method" }));
     });
 
-    it("emits limitations for partial, experimental, and deprecated input and documents the same statuses", () => {
+    it("emits limitations for partial and experimental input while rejecting removed properties", () => {
         const result = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", view: { preserveView: true, fitMode: "firstLayer" }, layers: [] }] });
         expect(result.valid).toBe(true);
         expect(result.diagnostics.filter(item => item.code === "MAP_CAPABILITY_LIMITATION")).toHaveLength(2);
-        const deprecated = validateV2Schema(specification({ performance: { generalizeByZoom: true, progressiveRendering: true } }));
-        expect(deprecated.valid).toBe(true);
-        expect(deprecated.diagnostics.filter(item => item.code === "MAP_CAPABILITY_LIMITATION")).toEqual([
-            expect.objectContaining({ received: "deprecated", path: "/components/0/layers/0/performance/generalizeByZoom" }),
-            expect.objectContaining({ received: "deprecated", path: "/components/0/layers/0/performance/progressiveRendering" }),
-        ]);
+        const removed = validateV2Schema(specification({ performance: { generalizeByZoom: true, progressiveRendering: true } }));
+        expect(removed.valid).toBe(false);
+        expect(removed.diagnostics).toEqual(expect.arrayContaining([
+            expect.objectContaining({ code: "UNKNOWN_PROPERTY", path: "/components/0/layers/0/performance/generalizeByZoom" }),
+            expect.objectContaining({ code: "UNKNOWN_PROPERTY", path: "/components/0/layers/0/performance/progressiveRendering" }),
+        ]));
         const docs = readFileSync(resolve(process.cwd(), "docs/map-services.md"), "utf8");
-        for (const status of ["Implemented", "Partial", "Experimental", "Deprecated", "Rejected"]) expect(docs).toContain(`| ${status} |`);
+        for (const status of ["Implemented", "Partial", "Experimental", "Rejected"]) expect(docs).toContain(`| ${status} |`);
         expect(docs).toContain("basic `hideOverlaps`");
     });
 

@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "title": "Map Feature Showcase",
-"css": ".hp-shell { height: 100%; min-height: 0; } .hp-main { height: 100%; min-height: 0; display: flex; flex-direction: column; } .hp-main > .hp-grid { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); align-items: stretch; } [data-hp-id=\"asset-feature-showcase\"] { height: 100%; min-height: 0; } [data-hp-id=\"asset-feature-showcase\"] > .hp-card { height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); } [data-hp-id=\"asset-feature-showcase\"] > .hp-card > .hp-card-body { position: relative; min-height: 0; overflow: hidden; } [data-hp-id=\"asset-feature-showcase\"] .hp-map-frame[data-height-mode=\"fill\"] { position: absolute; inset: 0; width: 100%; height: auto !important; min-height: 0 !important; }",
+  "css": ".hp-shell { height: 100%; min-height: 0; } .hp-main { height: 100%; min-height: 0; display: flex; flex-direction: column; } .hp-main > .hp-grid { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); align-items: stretch; } [data-hp-id=\"asset-feature-showcase\"] { height: 100%; min-height: 0; } [data-hp-id=\"asset-feature-showcase\"] > .hp-card { height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); } [data-hp-id=\"asset-feature-showcase\"] > .hp-card > .hp-card-body { position: relative; min-height: 0; overflow: hidden; } [data-hp-id=\"asset-feature-showcase\"] .hp-map-frame[data-height-mode=\"fill\"] { position: absolute; inset: 0; width: 100%; height: auto !important; min-height: 0 !important; }",
   "theme": {
     "mode": "light",
     "gap": 12
@@ -146,7 +146,7 @@
         "allowViewerLabels": false
       },
       "legend": {
-        "defaultOpen": false
+        "defaultOpen": true
       },
       "toolbar": {
         "visible": true,
@@ -157,10 +157,6 @@
         "clearSelection": true,
         "zoomToSelection": true,
         "bookmarks": true
-      },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": true
       },
       "height": 100
     }

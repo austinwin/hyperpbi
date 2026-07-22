@@ -105,7 +105,7 @@ Responsive rules are container-relative at `xs`, `sm`, `md`, `lg`, and `xl`. A r
 
 Use the generated [component catalog](hyperpbi-component-catalog-reference.md) for canonical types and properties. Prefer semantic charts, native table/matrix, first-class cards/lists/detail/overlays, `map`, and declarative `svg` before advanced/custom fallbacks.
 
-Maturity is assigned explicitly in each canonical descriptor. **Stable** requires a renderer, strict schema, applicable field metadata, Inspector metadata, a valid example, responsive and empty-state behavior, accessibility guidance, and focused tests. **Beta** is implemented but is missing at least one stable requirement. **Experimental** is intentionally unstable and advanced. **Legacy** remains loadable for compatibility but is not recommended for new authoring. **Deprecated** is accepted only through documented migration or warning.
+Maturity is assigned explicitly in each canonical descriptor. **Stable** requires a renderer, strict schema, applicable field metadata, Inspector metadata, a valid example, responsive and empty-state behavior, accessibility guidance, and focused tests. **Beta** is implemented but is missing at least one stable requirement. **Experimental** is intentionally unstable and advanced. **Deprecated** is excluded from normal authoring guidance.
 
 AI prompts exclude legacy and deprecated components. They include experimental components only when explicitly requested, and beta components only for explicit or advanced authoring. Existing dashboards may continue loading non-stable components.
 
@@ -174,6 +174,8 @@ npm run package:verify
 
 Maps defaults to broad HTTPS. Set `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false` and `HYPERPBI_MAP_HOSTS` for restricted packaging. See [Map services](map-services.md) and [Security](security.md).
 
-## Version 1.0 dashboards
+## Dashboard schema versions
 
-Existing 1.0 dashboards remain supported. Improve/repair them without changing version unless an explicit migration is requested. Legacy normalized keys, accordion/drawer/stepper forms, Tabulator input, map settings, and deprecated interaction flags are compatibility behavior—not recommended new-authoring examples.
+Dashboard schema 2.0 is the only version accepted by HyperPBI authoring and rendering. A missing version or schema 1.0 produces a blocking diagnostic; the visual never migrates it during loading, Edit Mode, AI import, preview, save, or rendering.
+
+Developers can convert a supported legacy JSON file outside the visual with `npm run schema:migrate-v1 -- input.json output.json`. Review and validate the converted fields, interactions, and map bindings before use. The PBIVIZ package version and Runtime Config version are separate version numbers.

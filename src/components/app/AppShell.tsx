@@ -24,7 +24,7 @@ export function AppShell({
     children: ComponentChildren;
 }) {
     if (!app.enabled) {
-        // Legacy shell — children render directly
+        // Without an enabled app shell, render dashboard content directly.
         return <>{children}</>;
     }
 

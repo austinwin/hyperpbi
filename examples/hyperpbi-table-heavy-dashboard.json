@@ -1,16 +1,103 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Record Review Console",
-  "theme": { "density": "compact", "radius": 6, "cardPadding": 8, "gap": 6 },
-  "toolbar": [{ "type": "searchBox", "id": "global-search", "placeholder": "Search dataset..." }, { "type": "select", "id": "status", "label": "Status", "field": "status" }],
+  "theme": {
+    "density": "compact",
+    "radius": 6,
+    "cardPadding": 8,
+    "gap": 6
+  },
+  "toolbar": [
+    {
+      "type": "searchBox",
+      "id": "global-search",
+      "placeholder": "Search dataset..."
+    },
+    {
+      "type": "select",
+      "id": "status",
+      "label": "Status",
+      "field": "status"
+    }
+  ],
   "components": [
-    { "type": "metricGrid", "id": "review-metrics", "span": 12, "metrics": [{ "title": "Rows", "aggregation": "count", "format": "integer" }, { "title": "Total Cost", "field": "cost", "aggregation": "sum", "format": "currency" }] },
-    { "type": "table", "id": "main-table", "title": "Records", "engine": "native", "columns": [
-      { "field": "asset_id", "title": "Asset ID", "width": 120 },
-      { "field": "region", "title": "Region", "width": 120 },
-      { "field": "status", "title": "Status", "width": 100, "conditional": [{ "operator": "=", "value": "Open", "color": "#9a6700", "background": "#fff8c5" }, { "operator": "=", "value": "Critical", "color": "#b42318", "background": "#fee4e2" }] },
-      { "field": "cost", "title": "Cost", "format": "currency", "hozAlign": "right", "width": 130 },
-      { "field": "created_date", "title": "Created", "width": 130 }
-    ], "pagination": true, "pageSize": 50, "search": true, "resizableColumns": true, "selectable": true, "maxRows": 5000, "span": 12 }
+    {
+      "type": "metricGrid",
+      "id": "review-metrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Rows",
+          "aggregation": "count",
+          "format": "integer"
+        },
+        {
+          "title": "Total Cost",
+          "field": "cost",
+          "aggregation": "sum",
+          "format": "currency"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "main-table",
+      "title": "Records",
+      "columns": [
+        {
+          "field": "asset_id",
+          "title": "Asset ID",
+          "width": 120
+        },
+        {
+          "field": "region",
+          "title": "Region",
+          "width": 120
+        },
+        {
+          "field": "status",
+          "title": "Status",
+          "width": 100,
+          "conditional": [
+            {
+              "operator": "=",
+              "value": "Open",
+              "color": "#9a6700",
+              "background": "#fff8c5"
+            },
+            {
+              "operator": "=",
+              "value": "Critical",
+              "color": "#b42318",
+              "background": "#fee4e2"
+            }
+          ]
+        },
+        {
+          "field": "cost",
+          "title": "Cost",
+          "format": "currency",
+          "hozAlign": "right",
+          "width": 130
+        },
+        {
+          "field": "created_date",
+          "title": "Created",
+          "width": 130
+        }
+      ],
+      "pagination": true,
+      "pageSize": 50,
+      "search": true,
+      "resizableColumns": true,
+      "maxRows": 5000,
+      "span": 12,
+      "interaction": {
+        "enabled": true,
+        "internalMode": "filter",
+        "externalMode": "selection",
+        "showSelector": true
+      }
+    }
   ]
 }

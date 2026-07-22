@@ -26,13 +26,17 @@
         "fitPadding": 0.14,
         "preserveView": true
       },
-      "basemap": {"type": "osm"},
+      "basemap": {
+        "type": "osm"
+      },
       "featureDetails": {
         "mode": "auto",
         "clearSelectionOnBackgroundClick": true,
         "clearSelectionOnClose": false
       },
-      "search": {"enabled": false},
+      "search": {
+        "enabled": false
+      },
       "layers": [
         {
           "id": "response-sites",
@@ -50,16 +54,54 @@
             "field": "severity",
             "fieldSource": "powerbi",
             "values": [
-              {"value": "Low", "label": "Low", "symbol": {"shape": "circle", "fillColor": "#2f855a", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 7}},
-              {"value": "Medium", "label": "Medium", "symbol": {"shape": "circle", "fillColor": "#d97706", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 8}},
-              {"value": "High", "label": "High", "symbol": {"shape": "circle", "fillColor": "#b91c1c", "outlineColor": "#ffffff", "outlineWidth": 2, "radius": 9}}
+              {
+                "value": "Low",
+                "label": "Low",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#2f855a",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 7
+                }
+              },
+              {
+                "value": "Medium",
+                "label": "Medium",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#d97706",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 8
+                }
+              },
+              {
+                "value": "High",
+                "label": "High",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#b91c1c",
+                  "outlineColor": "#ffffff",
+                  "outlineWidth": 2,
+                  "radius": 9
+                }
+              }
             ]
           },
           "tooltip": {
             "enabled": true,
             "fields": [
-              {"field": "site_id", "fieldSource": "powerbi", "label": "Site"},
-              {"field": "severity", "fieldSource": "powerbi", "label": "Severity"}
+              {
+                "field": "site_id",
+                "fieldSource": "powerbi",
+                "label": "Site"
+              },
+              {
+                "field": "severity",
+                "fieldSource": "powerbi",
+                "label": "Severity"
+              }
             ]
           },
           "popup": {
@@ -67,8 +109,17 @@
             "defaultFieldSource": "powerbi",
             "title": "{{site_id}}",
             "fields": [
-              {"field": "category", "fieldSource": "powerbi", "label": "Category"},
-              {"field": "severity", "fieldSource": "powerbi", "label": "Severity", "display": "badge"}
+              {
+                "field": "category",
+                "fieldSource": "powerbi",
+                "label": "Category"
+              },
+              {
+                "field": "severity",
+                "fieldSource": "powerbi",
+                "label": "Severity",
+                "display": "badge"
+              }
             ]
           },
           "interaction": {
@@ -79,7 +130,10 @@
             "multiSelect": true,
             "clearOnSecondClick": false
           },
-          "legend": {"visible": true, "title": "Severity"},
+          "legend": {
+            "visible": true,
+            "title": "Severity"
+          },
           "visible": true,
           "opacity": 1,
           "order": 10
@@ -93,7 +147,9 @@
         "allowViewerOpacity": true,
         "allowViewerLabels": false
       },
-      "legend": {"defaultOpen": false},
+      "legend": {
+        "defaultOpen": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
@@ -103,8 +159,7 @@
         "clearSelection": true,
         "zoomToSelection": true,
         "bookmarks": false
-      },
-      "settings": {"showLayerControl": true, "showLegend": true}
+      }
     }
   ]
 }

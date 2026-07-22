@@ -18,6 +18,19 @@ const releasePackageLock = await acquirePackageProfileLock(
     join(root, ".tmp", "package-profile.lock"),
 );
 
+const retryableRestoreCodes = new Set(["EBUSY", "EPERM", "EACCES", "UNKNOWN"]);
+async function restoreFile(path, contents) {
+    for (let attempt = 0; ; attempt += 1) {
+        try {
+            await writeFile(path, contents);
+            return;
+        } catch (error) {
+            if (attempt >= 19 || !retryableRestoreCodes.has(error?.code)) throw error;
+            await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+        }
+    }
+}
+
 try {
     const originalCapabilities = await readFile(capabilitiesPath, "utf8");
     const originalBuild = await readFile(buildPath, "utf8");
@@ -113,11 +126,9 @@ try {
             await writeFile(profileManifestPath, JSON.stringify(profileManifest, null, 2) + "\n");
         }
     } finally {
-        await Promise.all([
-            writeFile(capabilitiesPath, originalCapabilities),
-            writeFile(buildPath, originalBuild),
-            originalHostPolicy ? writeFile(hostPolicyPath, originalHostPolicy) : Promise.resolve(),
-        ]);
+        await restoreFile(capabilitiesPath, originalCapabilities);
+        await restoreFile(buildPath, originalBuild);
+        if (originalHostPolicy) await restoreFile(hostPolicyPath, originalHostPolicy);
     }
 } finally {
     await releasePackageLock();

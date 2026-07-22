@@ -819,9 +819,13 @@
   .hp-errors-panel > header button { align-self: start; }
 }
 
-@container hp-studio (max-width: 360px) {
+@container hp-studio (max-width: 420px) {
   .hp-studio-action-label { display: none; }
   .hp-studio-compact-label { display: inline; }
+}
+
+@container hp-studio (max-width: 360px) {
+  .hp-studio-actions > .hp-studio-button { padding-inline: 7px; }
 }
 
 @media (pointer: coarse) {

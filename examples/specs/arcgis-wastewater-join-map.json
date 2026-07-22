@@ -1,14 +1,16 @@
 {
   "version": "2.0",
   "title": "Public ArcGIS join layer — bind FacilityID through Values",
-  "description": "Bind the Power BI FacilityID field through Values; the layer joins those rows to public ArcGIS pipe geometry.",
   "components": [
     {
       "id": "wastewater-join",
       "type": "map",
       "title": "Wastewater Join Map",
       "view": {
-        "center": [29.75, -95.35],
+        "center": [
+          29.75,
+          -95.35
+        ],
         "zoom": 12
       },
       "basemap": {
@@ -23,7 +25,12 @@
             "type": "arcgisFeature",
             "url": "https://geogimstest.houstontx.gov/arcgis/rest/services/HW/WastewaterUNPublic/MapServer/9",
             "mode": "join",
-            "outFields": ["FACILITYID", "DIAMETER", "MATERIAL", "INSTALLDATE"]
+            "outFields": [
+              "FACILITYID",
+              "DIAMETER",
+              "MATERIAL",
+              "INSTALLDATE"
+            ]
           },
           "join": {
             "enabled": true,
@@ -31,7 +38,10 @@
             "serviceField": "FACILITYID",
             "cardinality": "manyToOne",
             "keyType": "string",
-            "normalization": ["trim", "upper"],
+            "normalization": [
+              "trim",
+              "upper"
+            ],
             "powerBiDuplicatePolicy": "first",
             "serviceDuplicatePolicy": "first",
             "unmatchedPolicy": "diagnose",
@@ -42,11 +52,36 @@
             "field": "MATERIAL",
             "fieldSource": "service",
             "values": [
-              { "value": "CI", "symbol": { "color": "#2c3e50", "fillOpacity": 0.4, "weight": 2 } },
-              { "value": "PVC", "symbol": { "color": "#3498db", "fillOpacity": 0.4, "weight": 2 } },
-              { "value": "RCP", "symbol": { "color": "#95a5a6", "fillOpacity": 0.4, "weight": 2 } }
+              {
+                "value": "CI",
+                "symbol": {
+                  "color": "#2c3e50",
+                  "fillOpacity": 0.4,
+                  "weight": 2
+                }
+              },
+              {
+                "value": "PVC",
+                "symbol": {
+                  "color": "#3498db",
+                  "fillOpacity": 0.4,
+                  "weight": 2
+                }
+              },
+              {
+                "value": "RCP",
+                "symbol": {
+                  "color": "#95a5a6",
+                  "fillOpacity": 0.4,
+                  "weight": 2
+                }
+              }
             ],
-            "defaultSymbol": { "color": "#e74c3c", "fillOpacity": 0.3, "weight": 1 }
+            "defaultSymbol": {
+              "color": "#e74c3c",
+              "fillOpacity": 0.3,
+              "weight": 1
+            }
           },
           "performance": {
             "maxFeatures": 2000,
@@ -58,17 +93,41 @@
             "enabled": true,
             "title": "Work Order + Pipe {{FACILITYID}}",
             "fields": [
-              { "field": "FacilityID", "fieldSource": "powerbi", "label": "Work Order ID" },
-              { "field": "FACILITYID", "fieldSource": "service", "label": "Pipe ID" },
-              { "field": "MATERIAL", "fieldSource": "service", "label": "Material" },
-              { "field": "DIAMETER", "fieldSource": "service", "label": "Diameter" }
+              {
+                "field": "FacilityID",
+                "fieldSource": "powerbi",
+                "label": "Work Order ID"
+              },
+              {
+                "field": "FACILITYID",
+                "fieldSource": "service",
+                "label": "Pipe ID"
+              },
+              {
+                "field": "MATERIAL",
+                "fieldSource": "service",
+                "label": "Material"
+              },
+              {
+                "field": "DIAMETER",
+                "fieldSource": "service",
+                "label": "Diameter"
+              }
             ]
           },
           "tooltip": {
             "enabled": true,
             "fields": [
-              { "field": "FacilityID", "fieldSource": "powerbi", "label": "Power BI Facility" },
-              { "field": "FACILITYID", "fieldSource": "service", "label": "Service Facility" }
+              {
+                "field": "FacilityID",
+                "fieldSource": "powerbi",
+                "label": "Power BI Facility"
+              },
+              {
+                "field": "FACILITYID",
+                "fieldSource": "service",
+                "label": "Service Facility"
+              }
             ]
           },
           "labels": {
@@ -97,7 +156,9 @@
         "zoom": 16,
         "showResultMarker": true
       },
-      "legend": { "defaultOpen": false },
+      "legend": {
+        "defaultOpen": true
+      },
       "toolbar": {
         "visible": true,
         "home": true,
@@ -106,10 +167,6 @@
         "search": true,
         "clearSelection": true,
         "zoomToSelection": true
-      },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": true
       }
     }
   ]

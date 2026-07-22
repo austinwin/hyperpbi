@@ -1,7 +1,7 @@
 <!-- GENERATED FILE. Edit HYPERPBI_SKILL_MARKDOWN in src/docs/hyperpbiHelp.ts and run npm run docs:generate. -->
 # HyperPBI dashboard authoring skill
 
-Generate or repair declarative HyperPBI dashboard specifications for a Power BI custom visual. Version 2.0 is the default for every new specification. Preserve version 1.0 when improving an existing 1.0 dashboard unless the user explicitly requests migration.
+Generate or repair declarative HyperPBI dashboard specifications for a Power BI custom visual. Dashboard schema version 2.0 is the only supported authoring and rendering contract. Reject schema 1.0 and missing versions.
 
 ## Output contract
 
@@ -12,7 +12,7 @@ Return exactly the output requested by the job and nothing else. Use valid JSON 
 - Redesign-section jobs return one replacement component/section using the selected stable ID.
 - Repair jobs return one complete corrected specification object.
 
-For normal improvement and repair jobs, never return JSON Patch. Preserve stable component IDs, schema version, valid unrelated content, interactions, datasets, definitions, app state, and styling. Change only what the request or supplied diagnostics require.
+For normal improvement and repair jobs, never return JSON Patch. Return version `"2.0"` and preserve stable component IDs, valid unrelated content, interactions, datasets, definitions, app state, and styling. Change only what the request or supplied diagnostics require.
 
 ## Strict 2.0 root
 
@@ -57,11 +57,11 @@ Available patterns are `kpi-row`, `trend-and-breakdown`, `record-explorer`, and 
 
 ## Components
 
-Use the canonical component catalog included with the prompt. It contains 84 types in 12 categories, including first-class semantic charts, native `table` and `matrix`, `map`, declarative `svg`, sanitized `svgMarkup`, and `advancedChart`. Use only properties listed for that type.
+Use the canonical component catalog included with the prompt. It contains 81 types in 12 categories, including first-class semantic charts, native `table` and `matrix`, `map`, declarative `svg`, sanitized `svgMarkup`, and `advancedChart`. Use only properties listed for that type.
 
 Prefer first-class components over custom markup: `card` over a simulated card, `listGroup` over a hand-built list, `dataGrid`/`detailPanel` over manual detail HTML, semantic charts over `advancedChart`, and `svg` over `svgMarkup`.
 
-For new authoring, exclude legacy and deprecated types. Include experimental types only when explicitly requested and beta types only when explicitly requested or advanced authoring is selected. Existing dashboards may continue loading non-stable types. Stable requires renderer, strict schema, applicable field metadata, Inspector metadata, valid example, responsive/empty-state behavior, accessibility guidance, focused tests, and documentation evidence.
+Exclude deprecated types. Include experimental types only when explicitly requested and beta types only when explicitly requested or advanced authoring is selected. Stable requires renderer, strict schema, applicable field metadata, Inspector metadata, valid example, responsive/empty-state behavior, accessibility guidance, focused tests, and documentation evidence.
 
 Shared 2.0 properties include `type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, and `uiAction`. An interaction object is not required on every component.
 
@@ -79,7 +79,7 @@ A resizable `split` accepts one positive `sizes` value per child, optional align
 
 ## Targeted change packages
 
-Use `kind: "hyperpbi-change"` and only the properties permitted by the operation. `replace` requires a matching `targetId` and `component.id`; `insertBefore` and `insertAfter` target a component in an ordered array; `appendChild` requires a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/content`, or `items/0/children`; `appendRoot` uses exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`; `remove` carries only `targetId`. Never use absolute or parent paths. Validate the complete resulting dashboard; a successful result becomes the working JSON and preview together.
+Use `kind: "hyperpbi-change"` and only the properties permitted by the operation. Its envelope protocol version is `"1.0"`, which is distinct from the enclosed dashboard schema version. `replace` requires a matching `targetId` and `component.id`; `insertBefore` and `insertAfter` target a component in an ordered array; `appendChild` requires a descriptor-compatible relative `containerPath` such as `children`, `footer`, `tabs/1/children`, or `items/0/children`; `appendRoot` uses exactly `components`, `toolbar`, `leftPanel`, or `rightPanel`; `remove` carries only `targetId`. Never use absolute or parent paths. Validate the complete resulting dashboard; a successful result becomes the working JSON and preview together.
 
 ## Three interaction systems
 
@@ -107,9 +107,9 @@ Use `svgMarkup` only when structured SVG is insufficient. It is a sanitized sing
 
 ## Maps
 
-All Power BI fields arrive through the single `Values` role. Prefer explicit `layers[]`; select a logical `layer.dataset` when needed; and configure each Power BI layer's `source.bindings` for geometry, latitude/longitude, X/Y, address, grouping, color, size, tooltip, and details. Never depend on a map-specific Power BI field bucket. A layer omitting `dataset` inherits the map dataset, then `powerbi`. Explicit layers never inherit global Runtime Config coordinates; those bindings exist only for legacy one-layer compatibility. Semantic types and conservative exact names are fallback discovery, not a multilayer contract. Map center order is `[latitude, longitude]`.
+All Power BI fields arrive through the single `Values` role. Declare explicit `layers[]`; select a logical `layer.dataset` when needed; and configure each Power BI layer's `source.bindings` for geometry, latitude/longitude, X/Y, address, grouping, color, size, tooltip, and details. Never depend on a map-specific Power BI field bucket. A layer omitting `dataset` inherits the map dataset, then `powerbi`. Map center order is `[latitude, longitude]`.
 
-Power BI supplies one flattened visual data view. Fields may originate from related model tables, but row grain and combinations are determined by the visual query and semantic-model relationships. Logical datasets only transform that received data; they do not query model tables independently or create relationships. ArcGIS reference-only maps require no Values fields; never add unrelated model fields merely to activate an external layer. External sources are public HTTPS `arcgisFeature`, `arcgisTile`, or basic `arcgisDynamic` services subject to the installed Maps package and host allowlist. Geocoding defaults to none, is user-triggered, and is unchanged by layer authoring. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, feature editing, 3D, geoprocessing, relationships, tracing, or complete Esri builder parity. Treat heatmap, density grid, exact service-scale visibility, and mounted-view preservation according to their emitted experimental/partial diagnostics. Generalization and progressive-rendering properties are deprecated compatibility input and must not be authored.
+Power BI supplies one flattened visual data view. Fields may originate from related model tables, but row grain and combinations are determined by the visual query and semantic-model relationships. Logical datasets only transform that received data; they do not query model tables independently or create relationships. ArcGIS reference-only maps require no Values fields; never add unrelated model fields merely to activate an external layer. External sources are public HTTPS `arcgisFeature`, `arcgisTile`, or basic `arcgisDynamic` services subject to the installed Maps package and host allowlist. Geocoding defaults to none, is user-triggered, and is unchanged by layer authoring. Never invent a URL, layer ID, field, host, token, or credential. Do not promise secured services, feature editing, 3D, geoprocessing, relationships, tracing, or complete Esri builder parity. Treat heatmap, density grid, exact service-scale visibility, and mounted-view preservation according to their emitted experimental/partial diagnostics.
 
 Map Studio and the preview share prepared calculations/configuration/datasets/lineage. Map attributes use exact `powerbi|service|joined` sources, and service queries include only service fields. `view.fitPadding` is a ratio from 0 through 0.5, normally 0.08. Stable point symbols are circle, square, diamond, and triangle; explicit clusters support count and numeric sum labels. Rectangle and lasso tools perform client-side selection over resolved visible features and synchronize canonical feature keys plus eligible Power BI lineage. Metadata fetch, bounded join preview, interaction compatibility, and live-view bookmark capture are explicit Studio workflows rather than persisted service metadata. Do not promise unsupported analytical tools.
 
@@ -117,12 +117,12 @@ Map Studio validates every draft against the exact current Runtime Config suppli
 
 ## Repair behavior
 
-Use supplied structured diagnostics as the authority. HyperPBI's automatic preparation repairs only unambiguous cases: add version 2.0 when the shape is unmistakable, generate missing 2.0 component IDs on import, correct the known property typos `meausre`, `catgory`, `componets`, and `aggregration`, and convert numeric strings for bounded numeric properties. It does not repair comments, smart quotes, truncated JSON, unknown business fields, ambiguous aliases, unknown component types, unsafe content, or speculative intent.
+Use supplied structured diagnostics as the authority. The version must be present and exactly `"2.0"`; preparation never infers it. HyperPBI's optional authoring repair pass handles only unambiguous cases such as missing stable component IDs, the known property typos `meausre`, `catgory`, `componets`, and `aggregration`, and bounded numeric strings. AI response import uses strict validation and performs no repairs. It does not repair comments, smart quotes, truncated JSON, unknown business fields, ambiguous aliases, unknown component types, unsafe content, or speculative intent.
 
 ## Security
 
 Never emit user JavaScript, eval, functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, joins, or network datasets. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
 
-## HyperPBI 1.0 compatibility
+## Schema version boundary
 
-Existing 1.0 specifications and canonical normalized field keys remain supported. Legacy accordion children, drawer/filterDrawer, stepper, button `action`/`actionValue`, `table.engine: "tabulator"`, legacy map settings/style/popup, and deprecated `internal`, `external`, `selectable`, and table `selectionMode` are compatibility inputs. Do not use them as the primary 2.0 authoring contract. Do not silently migrate a 1.0 specification; preserve its version during normal improvements and migrate only on explicit request.
+Dashboard schema 2.0 is the only active contract. Dashboard schema 1.0 is never migrated during visual loading, Edit Mode, AI import, preview, save, or rendering. Developers may convert a legacy JSON file explicitly with `npm run schema:migrate-v1 -- input.json output.json`; the temporary converter is not part of the PBIVIZ runtime. The Power BI package version and Runtime Config version are independent version numbers.

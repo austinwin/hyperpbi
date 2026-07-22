@@ -1,11 +1,11 @@
 import type { HyperPbiConfig } from "../config/hyperpbiConfig";
-import type { ComponentBase, TableComponent } from "../schema/hyperpbiSchema";
+import type { ComponentBase } from "../schema/hyperpbiSchema";
 import type { ComponentKind, ExternalInteractionMode, InternalInteractionMode, ResolvedInteractionPolicy } from "./interactionTypes";
 
 const controls = new Set(["searchBox", "textInput", "numberInput", "slider", "select", "multiSelect", "segmentedControl", "toggle", "button", "buttonGroup", "filterChips", "dateRange"]);
 const dataPoints = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "smallMultiples", "advancedChart", "table", "matrix", "map", "timeline"]);
 const displays = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel", "gauge"]);
-const navigation = new Set(["tabs", "collapsible", "accordion", "drawer", "filterDrawer", "stepper"]);
+const navigation = new Set(["tabs", "collapsible", "accordion", "steps", "dropdown", "popover", "offcanvas", "modal"]);
 const layouts = new Set(["grid", "flex", "split", "section", "toolbar", "leftPanel", "rightPanel", "spacer", "divider"]);
 const content = new Set(["text", "markdown", "html"]);
 
@@ -19,49 +19,40 @@ export function componentKindForType(type: string): ComponentKind {
     return "custom";
 }
 
-function legacyEnabled(component: ComponentBase, kind: ComponentKind): boolean {
-    if (component.type === "table") return (component as TableComponent).selectable === true;
-    if (kind === "control") return !["button", "buttonGroup", "filterChips"].includes(component.type) || component.external === true || component.internal === true;
-    if (kind === "custom") return Boolean(component.interactions?.onClick) || component.external === true || component.internal === true;
-    if (kind === "dataPoint") return component.external !== false;
+function defaultEnabled(component: ComponentBase, kind: ComponentKind): boolean {
+    if (kind === "control") return !["button", "buttonGroup", "filterChips"].includes(component.type);
+    if (kind === "custom") return Boolean(component.interactions?.onClick);
+    if (kind === "dataPoint") return true;
     return false;
 }
 
-function legacyInternalMode(component: ComponentBase, kind: ComponentKind): InternalInteractionMode {
-    if (component.internal === false) return "none";
-    if (component.type === "table") {
-        const mode = (component as TableComponent).selectionMode;
-        if (mode === "highlight") return "highlight";
-        if (mode === "filter" || (component as TableComponent).selectable) return "filter";
-    }
+function defaultInternalMode(component: ComponentBase, kind: ComponentKind): InternalInteractionMode {
     if (kind === "control") return "filter";
     if (["map", "timeline"].includes(component.type)) return "highlight";
     return "none";
 }
 
-function externalFallback(component: ComponentBase, runtimeConfig: HyperPbiConfig, kind: ComponentKind): ExternalInteractionMode {
-    if (component.external === false) return "none";
+function externalFallback(runtimeConfig: HyperPbiConfig): ExternalInteractionMode {
     return runtimeConfig.interactions?.externalMode ?? "auto";
 }
 
 export function resolveInteractionPolicy(component: ComponentBase, runtimeConfig: HyperPbiConfig, componentKind: ComponentKind = componentKindForType(component.type)): ResolvedInteractionPolicy {
     const definition = component.interaction;
     const explicit = definition !== undefined;
-    const configuredExternal = definition?.externalMode ?? externalFallback(component, runtimeConfig, componentKind);
+    const configuredExternal = definition?.externalMode ?? externalFallback(runtimeConfig);
     const externalMode = configuredExternal === "auto" ? (componentKind === "control" ? "filter" : "selection") : configuredExternal;
-    const legacyScope = component.type === "table" && (component as TableComponent).selectionMode === "filter" ? "self" : "all";
     return {
-        enabled: definition?.enabled ?? (explicit ? true : legacyEnabled(component, componentKind)),
+        enabled: definition?.enabled ?? (explicit ? true : defaultEnabled(component, componentKind)),
         trigger: definition?.trigger && definition.trigger !== "auto" ? definition.trigger : componentKind === "control" ? "change" : "click",
-        internalMode: definition?.internalMode ?? legacyInternalMode(component, componentKind),
-        internalScope: definition?.internalScope ?? legacyScope,
+        internalMode: definition?.internalMode ?? defaultInternalMode(component, componentKind),
+        internalScope: definition?.internalScope ?? "all",
         externalMode,
         field: definition?.field,
         operator: definition?.operator,
         value: definition?.value,
         selectionMode: definition?.selectionMode ?? "replace",
         multiSelect: definition?.multiSelect ?? runtimeConfig.interactions?.multiSelect !== false,
-        showSelector: definition?.showSelector ?? (component.type === "table" && (component as TableComponent).selectable === true),
+        showSelector: definition?.showSelector ?? false,
         clearOnSecondClick: definition?.clearOnSecondClick ?? false,
         targets: definition?.targets?.length ? Array.from(new Set(definition.targets)) : definition?.target ? [definition.target] : undefined,
         componentKind,

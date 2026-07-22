@@ -18,6 +18,6 @@ export function LandingPage() {
             <section class="hp-feature-grid">{features.map(([title, description], index) => <article><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{description}</p></article>)}</section>
             <section class="hp-landing-builds"><div><strong>Core build</strong><p>Offline/certification-oriented package with neutral maps and no WebAccess.</p></div><div><strong>Maps build</strong><p>Optional OSM and Nominatim providers with attribution, privacy controls, caching, and tenant-approved WebAccess.</p></div></section>
         </main>
-        <footer><strong>HyperPBI 1.0</strong><span>Sanitized HTML/CSS · AI response validation · Persistent Power BI properties · No external AI service dependency</span></footer>
+        <footer><strong>HyperPBI · Schema 2.0</strong><span>Sanitized HTML/CSS · AI response validation · Persistent Power BI properties · No external AI service dependency</span></footer>
     </div>;
 }

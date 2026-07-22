@@ -73,8 +73,6 @@ export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
     ...entries("experimental", [
         "map.layers[].renderer.densityGrid.type", "map.layers[].renderer.densityGrid.statistic", "map.layers[].renderer.densityGrid.field", "map.layers[].renderer.densityGrid.fieldSource", "map.layers[].renderer.densityGrid.cellSizePixels", "map.layers[].renderer.densityGrid.classes", "map.layers[].renderer.densityGrid.colorRamp",
     ], "Density grid is a basic bounded preview and not advanced spatial analysis."),
-    ...entries("deprecated", ["map.layers[].performance.generalizeByZoom", "map.layers[].performance.minimumGeneralization", "map.layers[].performance.maximumGeneralization"], "Retained for schema compatibility only; the runtime does not generalize service or Power BI geometry and Map Studio does not expose these options."),
-    ...entries("deprecated", ["map.layers[].performance.progressiveRendering"], "Retained for schema compatibility only; resolved layers are committed atomically and Map Studio does not expose this option."),
     ...entries("unsupported", [
         "map.tools.scaleBar", "map.tools.coordinateDisplay",
         "map.tools.distanceMeasurement", "map.tools.areaMeasurement", "map.tools.timeSlider", "map.tools.swipe",

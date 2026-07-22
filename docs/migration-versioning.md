@@ -1,12 +1,18 @@
 # Migration and versioning
 
-HyperPBI supports two dashboard schema versions. Version 2.0 is the default for new authoring; version 1.0 remains a legitimate compatibility format.
+HyperPBI dashboard schema 2.0 is the only active authoring and rendering contract. Production code rejects dashboard schema 1.0 and missing versions; it never silently infers or migrates a dashboard version.
 
-## Version 2.0
+The dashboard schema version is separate from:
 
-Version 2.0 adds strict unknown-property handling, stable global component IDs, Field Manifest aliases, named logical datasets, reusable definitions, registered application patterns, component dataset scope, structured diagnostics, and a bounded repair workflow.
+- the PBIVIZ/package version in `pbiviz.json` and `package.json`
+- the Runtime Config protocol version used by the visual settings JSON
+- the `hyperpbi-change` envelope protocol version used for bounded AI edit operations
 
-New authoring starts with:
+Those independent protocols may have their own version numbers without changing the dashboard schema contract.
+
+## Canonical dashboard schema 2.0
+
+Every dashboard starts with an explicit root:
 
 ```json
 {
@@ -15,52 +21,58 @@ New authoring starts with:
 }
 ```
 
-## Version 1.0 compatibility
+Schema 2.0 requires globally unique stable component IDs, rejects unknown properties, resolves Field Manifest aliases or canonical field keys, and supports named datasets, definitions, application patterns, responsive rules, calculations, maps, tables, charts, SVG, interactions, UI actions, and security sanitization.
 
-Existing 1.0 dashboards can continue using canonical normalized runtime keys and lenient component properties. Compatibility migrations include:
+## Removed production compatibility paths
 
-- tabs using `components` or `content` instead of `children`
-- accordion components with children but no item array
-- drawer/filterDrawer behavior
-- stepper compatibility rendering
-- button/buttonGroup `action` and `actionValue`
-- `table.engine: "tabulator"` normalized to the supported native table
-- legacy map `settings`, `style`, and `popup`
-- deprecated component `internal`, `external`, `selectable`, and table `selectionMode`
+The visual, editor, preparation pipeline, renderer, AI importer, preview/save flow, and shared playground-facing runtime do not import or call a schema 1.0 migrator. The production field resolver does not translate display names or old normalized field keys.
 
-Legacy `selectionTarget` is not a 2.0 contract property and does not control runtime selection. A 1.0 dashboard containing it receives exactly: `Property selectionTarget is obsolete and ignored only for HyperPBI 1.0 compatibility.` Migrate the behavior to universal `interaction` and then remove the property.
+The following schema 1.0-only forms were removed from the active contract:
 
-These references should be labeled compatibility/history. They are not the primary 2.0 examples.
+- component type aliases `drawer` and `filterDrawer`; use `offcanvas`
+- component type alias `stepper`; use `steps` for workflow progress or `collapsible` for collapsible content
+- `tabs[].components` and `tabs[].content`; use `tabs[].children`
+- top-level accordion `children`; use `items[].children`
+- component flags `internal`, `external`, and table `selectable`; use `interaction`
+- table top-level `selectionMode`; use `interaction.internalMode`, `interaction.selectionMode`, and `interaction.internalScope`
+- button/button-group `action` and `actionValue`; use `uiAction`
+- table `engine`, including `"tabulator"`; the canonical table is native
+- implicit map `settings`, map-specific legacy `style`, top-level `popup`, and maps without explicit `layers`
+- map feature-details mode `legacyPopup`
+- map performance properties `generalizeByZoom`, `minimumGeneralization`, `maximumGeneralization`, and `progressiveRendering`
+- map binding compatibility fields `legacyCompatibility`, `runtimeBindings`, `__color__`, and `__size__`
+- obsolete interaction-looking inputs such as `selectionTarget`, `externalSelection`, `crossFilter`, and `powerBISelection` in dashboard JSON
+- display-name and legacy normalized-key field-reference migration
 
-### Recent fixed map bucket migration
+Canonical schema 2.0 components that also existed historically remain supported under their documented 2.0 properties.
 
-Fixed Map Latitude, Map Longitude, Map Geometry, and Map Address buckets were briefly introduced and are no longer part of the authoring contract. To update a report, remove those fields from the fixed buckets and add the same fields to **Values**. Keep the saved JSON layer `source.bindings`; those bindings remain valid. A custom visual cannot safely rewrite report field wells automatically.
+## Standalone development converter
 
-Legacy maps with no explicit `layers` may continue using component/Runtime Config map bindings after the fields move to Values. New 2.0 maps should use explicit layers and per-layer bindings. This compatibility path is not a new long-term global map-binding contract.
+Use the temporary converter only during development:
 
-## Preparation behavior
+```powershell
+npm run schema:migrate-v1 -- old-dashboard.json converted-dashboard.json
+```
 
-An object without a version is assigned 1.0 by the legacy migration layer, except the bounded import repair may first add 2.0 when a components-array shape is unambiguous. Existing declared versions are preserved.
+The converter:
 
-For 1.0, legacy field references are migrated against the current normalized data. For 2.0, aliases resolve during preparation and unknown properties/fields are errors.
+- requires an input and output JSON path
+- accepts a supported dashboard schema 1.0 file
+- creates stable IDs and converts known compatibility forms
+- validates the result with the strict schema 2.0 validator
+- exits nonzero with actionable diagnostics when conversion is ambiguous or invalid
+- refuses to overwrite the input unless `--overwrite-input` is explicitly passed to the underlying Node script
 
-Definitions and patterns expand before rendering; datasets are schema-resolved; fields are validated in dataset scope; and the prepared runtime schema still uses the existing renderer.
+The converter lives at `scripts/migrate-schema-v1-to-v2.mjs`. It is not imported by production source, included in the `src/visual.ts` dependency graph, or packaged in PBIVIZ archives.
 
-## Improvement versus migration
+Field mappings and business aggregations are never guessed merely to satisfy validation. Review converted interactions, fields, map bindings, and output before replacing a production dashboard.
 
-An Improve current dashboard prompt preserves the existing version. A repair prompt also preserves a detected/declared version. This avoids silently changing field semantics, IDs, or lenient legacy properties.
+## Package commands for maintainers
 
-An intentional 1.0 → 2.0 migration should:
+```powershell
+npm run package:core
+npm run package:maps
+npm run package:verify
+```
 
-1. capture the Field Manifest and replace legacy references with supplied aliases
-2. assign and review stable unique IDs
-3. replace deprecated interaction flags with `interaction`
-4. normalize tabs, accordion, table, drawer/stepper, and map compatibility forms where desired
-5. remove properties not allowed by the strict per-type validator
-6. introduce datasets/definitions/patterns only when they preserve behavior
-7. validate the complete migrated specification and manually compare interactions/output
-
-Never infer a field mapping or business aggregation merely to satisfy strict validation.
-# Version and maturity distinctions
-
-Dashboard schema version (`1.0` or `2.0`), PBIVIZ package version, and product naming are separate. Studio reports the authored schema and preview/save state independently. Component maturity is also separate from authoring complexity: stable meets the complete renderer/schema/fields/Inspector/example/responsive/empty/accessibility/test/documentation bar; beta is implemented but misses part of that bar; experimental is intentionally unstable; legacy is compatibility-only; deprecated is migration/warning-only.
+Maps defaults to broad HTTPS. Set `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false` and `HYPERPBI_MAP_HOSTS` for restricted packaging. See [Map services](map-services.md) and [Security](security.md).

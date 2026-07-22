@@ -1,6 +1,6 @@
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity, InspectorPropertyDescriptor } from "./componentTypes";
 
-export type ComponentRenderMode = "direct" | "overlay" | "legacy";
+export type ComponentRenderMode = "direct" | "overlay";
 export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
 export interface FieldReferenceDescriptor { property:string; requirement:"any"|"numeric"; handler:FieldTraversalHandler; }
 export interface ComponentContainerDescriptor { property:string; kind:"array"|"tabs"|"accordion"|"single"; allowedTypes?:string[]; }
@@ -16,7 +16,7 @@ export interface ComponentDescriptor {
     schema:{required:string[];allowed:string[];deprecated?:Record<string,{replacement?:string;behavior:"warn"|"reject"|"migrate"}>};
     fields:FieldReferenceDescriptor[];
     inspector:InspectorPropertyDescriptor[];
-    documentation:{summary:string;accessibility?:string[];compatibility?:string[];relatedTypes?:string[]};
+    documentation:{summary:string;accessibility?:string[];relatedTypes?:string[]};
     example:Record<string,unknown>;
     rendering:ComponentRenderMode;
     containers:ComponentContainerDescriptor[];
@@ -82,21 +82,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -400,21 +386,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -744,21 +716,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -1096,21 +1054,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -1395,21 +1339,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -1658,7 +1588,9 @@ export const componentDescriptors:ComponentDescriptor[] = [
             "externalMode": "none"
           },
           "label": "Reset filters",
-          "action": "clearFilters"
+          "uiAction": {
+            "type": "clearFilters"
+          }
         }
       ]
     },
@@ -1728,21 +1660,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -1921,9 +1839,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
     ],
     "documentation": {
       "summary": "Persistent filter rail",
-      "compatibility": [
-        "Legacy left-panel rail. Use app.sidebar or an offcanvas component for new dashboards."
-      ],
       "relatedTypes": [
         "rightPanel",
         "offcanvas"
@@ -2078,21 +1993,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -2271,9 +2172,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
     ],
     "documentation": {
       "summary": "Persistent details rail",
-      "compatibility": [
-        "Legacy right-panel rail."
-      ],
       "relatedTypes": [
         "leftPanel",
         "offcanvas"
@@ -2390,21 +2288,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "tooltip",
         "uiAction",
         "height"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -2616,21 +2500,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "disabled",
         "tooltip",
         "uiAction"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -2843,8 +2713,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -2857,21 +2725,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -3062,16 +2916,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -3238,8 +3082,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -3252,21 +3094,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -3457,16 +3285,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -3633,8 +3451,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -3647,21 +3463,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -3852,16 +3654,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -4031,8 +3823,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -4045,21 +3835,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -4250,16 +4026,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -4429,8 +4195,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -4443,21 +4207,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -4648,16 +4398,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -4837,8 +4577,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -4851,21 +4589,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -5056,16 +4780,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -5243,8 +4957,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -5257,21 +4969,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -5462,16 +5160,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -5655,8 +5343,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -5669,21 +5355,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -5874,16 +5546,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -6050,8 +5712,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -6064,21 +5724,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -6269,16 +5915,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -6346,10 +5982,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
       }
     ],
     "documentation": {
-      "summary": "Clear filters or open a view",
-      "compatibility": [
-        "Legacy action/actionValue normalized to uiAction internally. Prefer uiAction for new specs."
-      ]
+      "summary": "Clear filters or open a view"
     },
     "example": {
       "type": "button",
@@ -6374,8 +6007,9 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "clearOnSecondClick": false
       },
       "label": "Reset filters",
-      "action": "clearFilters",
-      "actionValue": ""
+      "uiAction": {
+        "type": "clearFilters"
+      }
     },
     "rendering": "direct",
     "containers": []
@@ -6441,8 +6075,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -6455,21 +6087,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -6660,16 +6278,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -6842,8 +6450,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -6856,21 +6462,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -7061,16 +6653,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -7229,8 +6811,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -7243,21 +6823,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -7448,16 +7014,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -7621,21 +7177,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "tooltip",
         "uiAction",
         "tabs"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -7846,14 +7388,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
       {
         "property": "tabs.children",
         "kind": "tabs"
-      },
-      {
-        "property": "tabs.components",
-        "kind": "tabs"
-      },
-      {
-        "property": "tabs.content",
-        "kind": "tabs"
       }
     ]
   },
@@ -7915,21 +7449,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "collapsible",
         "defaultCollapsed",
         "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -8209,21 +7729,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "multiple",
         "defaultOpenItems",
         "items"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -8376,9 +7882,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
       "accessibility": [
         "Supports arrow-key navigation between headers. Enter/Space toggles. Proper aria-expanded."
       ],
-      "compatibility": [
-        "Legacy accordion with only children wraps into one item automatically."
-      ],
       "relatedTypes": [
         "collapsible"
       ]
@@ -8422,725 +7925,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
       {
         "property": "items.children",
         "kind": "accordion"
-      }
-    ]
-  },
-  {
-    "type": "drawer",
-    "label": "Drawer / slide-over",
-    "category": "Navigation",
-    "maturity": "legacy",
-    "complexity": "recommended",
-    "useWhen": "Selected-record details without leaving context",
-    "capabilities": {
-      "fields": true,
-      "calculations": false,
-      "css": true,
-      "slots": true,
-      "interactions": true,
-      "externalSelection": false,
-      "customHtml": false
-    },
-    "interaction": {
-      "defaultEnabled": false,
-      "naturalTrigger": "click",
-      "autoExternalMode": "selection"
-    },
-    "schema": {
-      "required": [
-        "type",
-        "id"
-      ],
-      "allowed": [
-        "type",
-        "id",
-        "dataset",
-        "title",
-        "subtitle",
-        "span",
-        "className",
-        "hidden",
-        "props",
-        "style",
-        "css",
-        "slots",
-        "data",
-        "visibility",
-        "interactions",
-        "interaction",
-        "ariaLabel",
-        "icon",
-        "variant",
-        "size",
-        "disabled",
-        "tooltip",
-        "uiAction",
-        "children",
-        "direction",
-        "columns",
-        "gap",
-        "width",
-        "collapsible",
-        "defaultCollapsed",
-        "defaultOpen",
-        "position",
-        "openWhen",
-        "stateKey"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
-    },
-    "fields": [
-      {
-        "property": "interactions",
-        "requirement": "any",
-        "handler": "event-actions"
-      },
-      {
-        "property": "interaction",
-        "requirement": "any",
-        "handler": "interaction"
-      },
-      {
-        "property": "columns",
-        "requirement": "any",
-        "handler": "table-columns"
-      }
-    ],
-    "inspector": [
-      {
-        "property": "dataset",
-        "label": "Dataset",
-        "control": "dataset"
-      },
-      {
-        "property": "title",
-        "label": "title",
-        "control": "text"
-      },
-      {
-        "property": "subtitle",
-        "label": "subtitle",
-        "control": "multiline"
-      },
-      {
-        "property": "span",
-        "label": "span",
-        "control": "number"
-      },
-      {
-        "property": "className",
-        "label": "className",
-        "control": "text"
-      },
-      {
-        "property": "hidden",
-        "label": "hidden",
-        "control": "checkbox"
-      },
-      {
-        "property": "props",
-        "label": "props",
-        "control": "json"
-      },
-      {
-        "property": "style",
-        "label": "style",
-        "control": "json"
-      },
-      {
-        "property": "css",
-        "label": "css",
-        "control": "multiline"
-      },
-      {
-        "property": "slots",
-        "label": "slots",
-        "control": "json"
-      },
-      {
-        "property": "data",
-        "label": "data",
-        "control": "json"
-      },
-      {
-        "property": "visibility",
-        "label": "visibility",
-        "control": "json"
-      },
-      {
-        "property": "interactions",
-        "label": "interactions",
-        "control": "json"
-      },
-      {
-        "property": "interaction",
-        "label": "interaction",
-        "control": "json"
-      },
-      {
-        "property": "ariaLabel",
-        "label": "ariaLabel",
-        "control": "text"
-      },
-      {
-        "property": "icon",
-        "label": "icon",
-        "control": "text"
-      },
-      {
-        "property": "variant",
-        "label": "variant",
-        "control": "text"
-      },
-      {
-        "property": "size",
-        "label": "size",
-        "control": "enum",
-        "options": [
-          "xs",
-          "sm",
-          "md",
-          "lg",
-          "xl"
-        ]
-      },
-      {
-        "property": "disabled",
-        "label": "disabled",
-        "control": "checkbox"
-      },
-      {
-        "property": "tooltip",
-        "label": "tooltip",
-        "control": "text"
-      },
-      {
-        "property": "uiAction",
-        "label": "uiAction",
-        "control": "json"
-      },
-      {
-        "property": "children",
-        "label": "children",
-        "control": "json"
-      },
-      {
-        "property": "direction",
-        "label": "direction",
-        "control": "enum",
-        "options": [
-          "row",
-          "column"
-        ]
-      },
-      {
-        "property": "columns",
-        "label": "columns",
-        "control": "number"
-      },
-      {
-        "property": "gap",
-        "label": "gap",
-        "control": "number"
-      },
-      {
-        "property": "width",
-        "label": "width",
-        "control": "number"
-      },
-      {
-        "property": "collapsible",
-        "label": "collapsible",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultCollapsed",
-        "label": "defaultCollapsed",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultOpen",
-        "label": "defaultOpen",
-        "control": "checkbox"
-      },
-      {
-        "property": "position",
-        "label": "position",
-        "control": "enum",
-        "options": [
-          "left",
-          "right"
-        ]
-      },
-      {
-        "property": "openWhen",
-        "label": "openWhen",
-        "control": "text"
-      },
-      {
-        "property": "stateKey",
-        "label": "stateKey",
-        "control": "text"
-      }
-    ],
-    "documentation": {
-      "summary": "Selected-record details without leaving context",
-      "compatibility": [
-        "Legacy drawer. Normalized to offcanvas internally. Use offcanvas for new specs."
-      ],
-      "relatedTypes": [
-        "offcanvas",
-        "filterDrawer"
-      ]
-    },
-    "example": {
-      "type": "drawer",
-      "id": "drawer",
-      "title": "Selected record",
-      "span": 12,
-      "className": "hp-example-drawer",
-      "hidden": false,
-      "style": {
-        "minWidth": 0
-      },
-      "css": ".hp-example-drawer { min-width: 0; }",
-      "interaction": {
-        "enabled": false,
-        "internalMode": "none",
-        "externalMode": "none"
-      },
-      "position": "right",
-      "width": 360,
-      "openWhen": "selectedRow",
-      "stateKey": "detail_drawer_open",
-      "defaultOpen": true,
-      "collapsible": true,
-      "children": [
-        {
-          "type": "detailPanel",
-          "id": "detailPanel",
-          "title": "Record details",
-          "span": 12,
-          "className": "hp-example-detailPanel",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "css": ".hp-example-detailPanel { min-width: 0; }",
-          "interaction": {
-            "enabled": false,
-            "internalMode": "none",
-            "externalMode": "none"
-          },
-          "selectedRow": true,
-          "emptyText": "Select a row",
-          "groups": [
-            {
-              "title": "Overview",
-              "fields": [
-                {
-                  "field": "__field_key__",
-                  "label": "Record",
-                  "badge": true,
-                  "copyable": true,
-                  "format": ""
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "rendering": "overlay",
-    "containers": [
-      {
-        "property": "children",
-        "kind": "array"
-      }
-    ]
-  },
-  {
-    "type": "filterDrawer",
-    "label": "Filter drawer",
-    "category": "Navigation",
-    "maturity": "legacy",
-    "complexity": "recommended",
-    "useWhen": "On-demand compact filter controls",
-    "capabilities": {
-      "fields": true,
-      "calculations": false,
-      "css": true,
-      "slots": true,
-      "interactions": true,
-      "externalSelection": false,
-      "customHtml": false
-    },
-    "interaction": {
-      "defaultEnabled": false,
-      "naturalTrigger": "click",
-      "autoExternalMode": "selection"
-    },
-    "schema": {
-      "required": [
-        "type",
-        "id"
-      ],
-      "allowed": [
-        "type",
-        "id",
-        "dataset",
-        "title",
-        "subtitle",
-        "span",
-        "className",
-        "hidden",
-        "props",
-        "style",
-        "css",
-        "slots",
-        "data",
-        "visibility",
-        "interactions",
-        "interaction",
-        "ariaLabel",
-        "icon",
-        "variant",
-        "size",
-        "disabled",
-        "tooltip",
-        "uiAction",
-        "children",
-        "direction",
-        "columns",
-        "gap",
-        "width",
-        "collapsible",
-        "defaultCollapsed",
-        "defaultOpen",
-        "position",
-        "openWhen",
-        "stateKey"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
-    },
-    "fields": [
-      {
-        "property": "interactions",
-        "requirement": "any",
-        "handler": "event-actions"
-      },
-      {
-        "property": "interaction",
-        "requirement": "any",
-        "handler": "interaction"
-      },
-      {
-        "property": "columns",
-        "requirement": "any",
-        "handler": "table-columns"
-      }
-    ],
-    "inspector": [
-      {
-        "property": "dataset",
-        "label": "Dataset",
-        "control": "dataset"
-      },
-      {
-        "property": "title",
-        "label": "title",
-        "control": "text"
-      },
-      {
-        "property": "subtitle",
-        "label": "subtitle",
-        "control": "multiline"
-      },
-      {
-        "property": "span",
-        "label": "span",
-        "control": "number"
-      },
-      {
-        "property": "className",
-        "label": "className",
-        "control": "text"
-      },
-      {
-        "property": "hidden",
-        "label": "hidden",
-        "control": "checkbox"
-      },
-      {
-        "property": "props",
-        "label": "props",
-        "control": "json"
-      },
-      {
-        "property": "style",
-        "label": "style",
-        "control": "json"
-      },
-      {
-        "property": "css",
-        "label": "css",
-        "control": "multiline"
-      },
-      {
-        "property": "slots",
-        "label": "slots",
-        "control": "json"
-      },
-      {
-        "property": "data",
-        "label": "data",
-        "control": "json"
-      },
-      {
-        "property": "visibility",
-        "label": "visibility",
-        "control": "json"
-      },
-      {
-        "property": "interactions",
-        "label": "interactions",
-        "control": "json"
-      },
-      {
-        "property": "interaction",
-        "label": "interaction",
-        "control": "json"
-      },
-      {
-        "property": "ariaLabel",
-        "label": "ariaLabel",
-        "control": "text"
-      },
-      {
-        "property": "icon",
-        "label": "icon",
-        "control": "text"
-      },
-      {
-        "property": "variant",
-        "label": "variant",
-        "control": "text"
-      },
-      {
-        "property": "size",
-        "label": "size",
-        "control": "enum",
-        "options": [
-          "xs",
-          "sm",
-          "md",
-          "lg",
-          "xl"
-        ]
-      },
-      {
-        "property": "disabled",
-        "label": "disabled",
-        "control": "checkbox"
-      },
-      {
-        "property": "tooltip",
-        "label": "tooltip",
-        "control": "text"
-      },
-      {
-        "property": "uiAction",
-        "label": "uiAction",
-        "control": "json"
-      },
-      {
-        "property": "children",
-        "label": "children",
-        "control": "json"
-      },
-      {
-        "property": "direction",
-        "label": "direction",
-        "control": "enum",
-        "options": [
-          "row",
-          "column"
-        ]
-      },
-      {
-        "property": "columns",
-        "label": "columns",
-        "control": "number"
-      },
-      {
-        "property": "gap",
-        "label": "gap",
-        "control": "number"
-      },
-      {
-        "property": "width",
-        "label": "width",
-        "control": "number"
-      },
-      {
-        "property": "collapsible",
-        "label": "collapsible",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultCollapsed",
-        "label": "defaultCollapsed",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultOpen",
-        "label": "defaultOpen",
-        "control": "checkbox"
-      },
-      {
-        "property": "position",
-        "label": "position",
-        "control": "enum",
-        "options": [
-          "left",
-          "right"
-        ]
-      },
-      {
-        "property": "openWhen",
-        "label": "openWhen",
-        "control": "text"
-      },
-      {
-        "property": "stateKey",
-        "label": "stateKey",
-        "control": "text"
-      }
-    ],
-    "documentation": {
-      "summary": "On-demand compact filter controls",
-      "compatibility": [
-        "Legacy filter drawer. Use offcanvas for new specs."
-      ],
-      "relatedTypes": [
-        "drawer",
-        "offcanvas"
-      ]
-    },
-    "example": {
-      "type": "filterDrawer",
-      "id": "filterDrawer",
-      "title": "Filters",
-      "span": 12,
-      "className": "hp-example-filterDrawer",
-      "hidden": false,
-      "style": {
-        "minWidth": 0
-      },
-      "css": ".hp-example-filterDrawer { min-width: 0; }",
-      "interaction": {
-        "enabled": false,
-        "internalMode": "none",
-        "externalMode": "none"
-      },
-      "position": "left",
-      "width": 300,
-      "openWhen": "always",
-      "stateKey": "filter_drawer_open",
-      "defaultOpen": false,
-      "collapsible": true,
-      "children": [
-        {
-          "type": "select",
-          "id": "select",
-          "title": "Category",
-          "span": 4,
-          "className": "hp-example-select",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "css": ".hp-example-select { min-width: 0; }",
-          "interaction": {
-            "enabled": true,
-            "trigger": "auto",
-            "internalMode": "filter",
-            "internalScope": "all",
-            "externalMode": "auto",
-            "field": "__field_key__",
-            "operator": "=",
-            "selectionMode": "replace",
-            "multiSelect": true,
-            "showSelector": false,
-            "clearOnSecondClick": false
-          },
-          "field": "__field_key__",
-          "label": "Category",
-          "placeholder": "Choose category",
-          "defaultValue": ""
-        },
-        {
-          "type": "dateRange",
-          "id": "dateRange",
-          "title": "Date range",
-          "span": 4,
-          "className": "hp-example-dateRange",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "css": ".hp-example-dateRange { min-width: 0; }",
-          "interaction": {
-            "enabled": true,
-            "trigger": "auto",
-            "internalMode": "filter",
-            "internalScope": "all",
-            "externalMode": "auto",
-            "field": "__field_key__",
-            "operator": "between",
-            "selectionMode": "replace",
-            "multiSelect": true,
-            "showSelector": false,
-            "clearOnSecondClick": false
-          },
-          "field": "__field_key__",
-          "label": "Date range",
-          "placeholder": "Choose date range",
-          "defaultValue": ""
-        }
-      ]
-    },
-    "rendering": "overlay",
-    "containers": [
-      {
-        "property": "children",
-        "kind": "array"
       }
     ]
   },
@@ -9200,21 +7984,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "stateKey",
         "clickable",
         "items"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -9424,320 +8194,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
     "containers": []
   },
   {
-    "type": "stepper",
-    "label": "Stepper",
-    "category": "Navigation",
-    "maturity": "legacy",
-    "complexity": "advanced",
-    "useWhen": "Sequential app-style flows (legacy)",
-    "capabilities": {
-      "fields": false,
-      "calculations": false,
-      "css": true,
-      "slots": true,
-      "interactions": true,
-      "externalSelection": false,
-      "customHtml": false
-    },
-    "interaction": {
-      "defaultEnabled": false,
-      "naturalTrigger": "click",
-      "autoExternalMode": "selection"
-    },
-    "schema": {
-      "required": [
-        "type",
-        "id"
-      ],
-      "allowed": [
-        "type",
-        "id",
-        "dataset",
-        "title",
-        "subtitle",
-        "span",
-        "className",
-        "hidden",
-        "props",
-        "style",
-        "css",
-        "slots",
-        "data",
-        "visibility",
-        "interactions",
-        "interaction",
-        "ariaLabel",
-        "icon",
-        "variant",
-        "size",
-        "disabled",
-        "tooltip",
-        "uiAction",
-        "children",
-        "direction",
-        "columns",
-        "gap",
-        "width",
-        "collapsible",
-        "defaultCollapsed",
-        "defaultOpen"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
-    },
-    "fields": [
-      {
-        "property": "interactions",
-        "requirement": "any",
-        "handler": "event-actions"
-      },
-      {
-        "property": "interaction",
-        "requirement": "any",
-        "handler": "interaction"
-      },
-      {
-        "property": "columns",
-        "requirement": "any",
-        "handler": "table-columns"
-      }
-    ],
-    "inspector": [
-      {
-        "property": "dataset",
-        "label": "Dataset",
-        "control": "dataset"
-      },
-      {
-        "property": "title",
-        "label": "title",
-        "control": "text"
-      },
-      {
-        "property": "subtitle",
-        "label": "subtitle",
-        "control": "multiline"
-      },
-      {
-        "property": "span",
-        "label": "span",
-        "control": "number"
-      },
-      {
-        "property": "className",
-        "label": "className",
-        "control": "text"
-      },
-      {
-        "property": "hidden",
-        "label": "hidden",
-        "control": "checkbox"
-      },
-      {
-        "property": "props",
-        "label": "props",
-        "control": "json"
-      },
-      {
-        "property": "style",
-        "label": "style",
-        "control": "json"
-      },
-      {
-        "property": "css",
-        "label": "css",
-        "control": "multiline"
-      },
-      {
-        "property": "slots",
-        "label": "slots",
-        "control": "json"
-      },
-      {
-        "property": "data",
-        "label": "data",
-        "control": "json"
-      },
-      {
-        "property": "visibility",
-        "label": "visibility",
-        "control": "json"
-      },
-      {
-        "property": "interactions",
-        "label": "interactions",
-        "control": "json"
-      },
-      {
-        "property": "interaction",
-        "label": "interaction",
-        "control": "json"
-      },
-      {
-        "property": "ariaLabel",
-        "label": "ariaLabel",
-        "control": "text"
-      },
-      {
-        "property": "icon",
-        "label": "icon",
-        "control": "text"
-      },
-      {
-        "property": "variant",
-        "label": "variant",
-        "control": "text"
-      },
-      {
-        "property": "size",
-        "label": "size",
-        "control": "enum",
-        "options": [
-          "xs",
-          "sm",
-          "md",
-          "lg",
-          "xl"
-        ]
-      },
-      {
-        "property": "disabled",
-        "label": "disabled",
-        "control": "checkbox"
-      },
-      {
-        "property": "tooltip",
-        "label": "tooltip",
-        "control": "text"
-      },
-      {
-        "property": "uiAction",
-        "label": "uiAction",
-        "control": "json"
-      },
-      {
-        "property": "children",
-        "label": "children",
-        "control": "json"
-      },
-      {
-        "property": "direction",
-        "label": "direction",
-        "control": "enum",
-        "options": [
-          "row",
-          "column"
-        ]
-      },
-      {
-        "property": "columns",
-        "label": "columns",
-        "control": "number"
-      },
-      {
-        "property": "gap",
-        "label": "gap",
-        "control": "number"
-      },
-      {
-        "property": "width",
-        "label": "width",
-        "control": "number"
-      },
-      {
-        "property": "collapsible",
-        "label": "collapsible",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultCollapsed",
-        "label": "defaultCollapsed",
-        "control": "checkbox"
-      },
-      {
-        "property": "defaultOpen",
-        "label": "defaultOpen",
-        "control": "checkbox"
-      }
-    ],
-    "documentation": {
-      "summary": "Sequential app-style flows (legacy)",
-      "compatibility": [
-        "Legacy stepper rendered as collapsible section. Use steps for real workflow progression."
-      ],
-      "relatedTypes": [
-        "steps"
-      ]
-    },
-    "example": {
-      "type": "stepper",
-      "id": "stepper",
-      "title": "Workflow step",
-      "span": 12,
-      "className": "hp-example-stepper",
-      "hidden": false,
-      "style": {
-        "minWidth": 0
-      },
-      "css": ".hp-example-stepper { min-width: 0; }",
-      "interaction": {
-        "enabled": false,
-        "internalMode": "none",
-        "externalMode": "none"
-      },
-      "direction": "column",
-      "columns": 12,
-      "gap": 8,
-      "children": [
-        {
-          "type": "infoCard",
-          "id": "infoCard",
-          "title": "Step instructions",
-          "span": 12,
-          "className": "hp-example-infoCard",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "css": ".hp-example-infoCard { min-width: 0; }",
-          "interaction": {
-            "enabled": false,
-            "internalMode": "none",
-            "externalMode": "none"
-          },
-          "text": "Complete this step before continuing.",
-          "intent": "primary"
-        },
-        {
-          "type": "text",
-          "id": "step_content",
-          "span": 12,
-          "text": "Supporting content",
-          "interaction": {
-            "enabled": false,
-            "internalMode": "none",
-            "externalMode": "none"
-          }
-        }
-      ],
-      "defaultOpen": true
-    },
-    "rendering": "legacy",
-    "containers": []
-  },
-  {
     "type": "kpi",
     "label": "KPI card",
     "category": "Display",
@@ -9799,21 +8255,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -10119,21 +8561,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -10466,21 +8894,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -10788,21 +9202,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -11109,21 +9509,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -11431,21 +9817,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -11753,21 +10125,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -12086,21 +10444,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "selectedRow",
         "groups",
         "emptyText"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -12441,21 +10785,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "descriptionField",
         "sortDirection",
         "limit"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -12742,21 +11072,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "actions",
         "footer",
         "status"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -13088,21 +11404,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "disabled",
         "tooltip",
         "uiAction"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -13311,21 +11613,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "disabled",
         "tooltip",
         "uiAction"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -13543,21 +11831,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "label",
         "shape",
         "status"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -13786,21 +12060,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "avatars",
         "max"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -14062,21 +12322,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "valueField",
         "maxItems",
         "compact"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -14361,21 +12607,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "source",
         "columns",
         "selectedRow"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -14636,21 +12868,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "suffix",
         "duration",
         "format"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -14915,21 +13133,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "stageField",
         "orientation",
         "compact"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -15192,21 +13396,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "items",
         "placement",
         "closeOnSelect"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -15473,21 +13663,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "defaultOpen",
         "backdropClose",
         "footer"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -15828,21 +14004,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "stateKey",
         "backdrop",
         "backdropClose"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -16054,8 +14216,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "Uses dialog semantics, managed focus, Escape/backdrop close, an accessible close button, and internal scrolling."
       ],
       "relatedTypes": [
-        "drawer",
-        "filterDrawer",
         "modal"
       ]
     },
@@ -16184,21 +14344,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "closeOnOutsideClick",
         "closeOnEscape",
         "showArrow"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -16502,21 +14648,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "primaryAction",
         "secondaryAction",
         "compact"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -16745,21 +14877,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "lines",
         "placeholderVariant"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -16977,21 +15095,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "label",
         "inline"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -17218,8 +15322,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -17232,21 +15334,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -17437,16 +15525,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -17614,8 +15692,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -17628,21 +15704,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -17833,16 +15895,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -18004,8 +16056,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -18018,21 +16068,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -18223,16 +16259,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -18405,8 +16431,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -18419,21 +16443,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -18624,16 +16634,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "property": "filter",
         "label": "filter",
         "control": "json"
-      },
-      {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
       },
       {
         "property": "buttons",
@@ -18809,8 +16809,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "options",
         "targets",
         "filter",
-        "action",
-        "actionValue",
         "buttons",
         "description",
         "helpText",
@@ -18823,21 +16821,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "prefixIcon",
         "suffixText",
         "suffixIcon"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -19030,16 +17014,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
-        "property": "action",
-        "label": "action",
-        "control": "text"
-      },
-      {
-        "property": "actionValue",
-        "label": "actionValue",
-        "control": "text"
-      },
-      {
         "property": "buttons",
         "label": "buttons",
         "control": "json"
@@ -19202,21 +17176,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -19572,21 +17532,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -19943,21 +17889,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -20305,21 +18237,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -20670,21 +18588,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -21035,21 +18939,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -21400,21 +19290,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -21756,21 +19632,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -22106,21 +19968,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -22482,21 +20330,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "y",
         "pointSize",
         "series"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -22859,21 +20693,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "positiveIntent",
         "negativeIntent",
         "totalIntent"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -23221,21 +21041,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "valueField",
         "orientation",
         "nodeAlign"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -23602,21 +21408,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "valueField",
         "labelField",
         "maxDepth"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -23975,21 +21767,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "pointSize",
         "sort",
         "gap"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -24323,21 +22101,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "pointSize",
         "groupField",
         "indicators"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -24679,21 +22443,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "maxPanels",
         "sharedScale",
         "height"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -24994,7 +22744,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "disabled",
         "tooltip",
         "uiAction",
-        "engine",
         "columns",
         "pagination",
         "pageSize",
@@ -25009,21 +22758,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "pageSizeOptions",
         "rowActions",
         "emptyState"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -25156,11 +22891,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
-        "property": "engine",
-        "label": "engine",
-        "control": "text"
-      },
-      {
         "property": "columns",
         "label": "columns",
         "control": "number"
@@ -25240,9 +22970,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
       "accessibility": [
         "Row actions use safe UiAction. Column resizing prevents row selection while active."
       ],
-      "compatibility": [
-        "Tabulator engine is not bundled. engine:'tabulator' is normalized to native."
-      ],
       "relatedTypes": [
         "matrix"
       ]
@@ -25269,7 +22996,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "showSelector": true,
         "clearOnSecondClick": true
       },
-      "engine": "native",
       "columns": [
         {
           "field": "__field_key__",
@@ -25370,21 +23096,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "showTotals",
         "heatmap",
         "maxRows"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -25636,7 +23348,8 @@ export const componentDescriptors:ComponentDescriptor[] = [
     "schema": {
       "required": [
         "type",
-        "id"
+        "id",
+        "layers"
       ],
       "allowed": [
         "type",
@@ -25673,26 +23386,11 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "featureDetails",
         "layerPanel",
         "toolbar",
-        "settings",
         "height",
         "heightMode",
         "minHeight",
         "aspectRatio"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -25880,11 +23578,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
-        "property": "settings",
-        "label": "settings",
-        "control": "json"
-      },
-      {
         "property": "height",
         "label": "height",
         "control": "number"
@@ -25912,9 +23605,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
     ],
     "documentation": {
       "summary": "Layer-scoped Power BI logical datasets and public ArcGIS REST feature, tile, and dynamic layers with canonical Map Studio authoring",
-      "compatibility": [
-        "Legacy one-layer Runtime Config bindings remain supported. New 2.0 maps use explicit layer dataset and source.bindings properties."
-      ],
       "relatedTypes": [
         "offcanvas",
         "dataGrid"
@@ -25976,7 +23666,10 @@ export const componentDescriptors:ComponentDescriptor[] = [
         {
           "id": "home_view",
           "label": "Home view",
-          "center": [29.75, -95.35],
+          "center": [
+            29.75,
+            -95.35
+          ],
           "zoom": 10
         }
       ],
@@ -26049,10 +23742,6 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "clearSelection": true,
         "zoomToSelection": true,
         "bookmarks": true
-      },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": true
       }
     },
     "rendering": "direct",
@@ -26110,21 +23799,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "text",
         "repeat"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -26343,21 +24018,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "text",
         "repeat"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -26576,21 +24237,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "uiAction",
         "html",
         "repeat"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -26817,21 +24464,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "html",
         "text",
         "repeat"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -27111,21 +24744,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "dataContext",
         "motion",
         "performance"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -27488,21 +25107,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "dataContext",
         "motion",
         "performance"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -27775,21 +25380,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "x",
         "y",
         "pointSize"
-      ],
-      "deprecated": {
-        "internal": {
-          "replacement": "interaction.internalMode",
-          "behavior": "warn"
-        },
-        "external": {
-          "replacement": "interaction.externalMode",
-          "behavior": "warn"
-        },
-        "selectable": {
-          "replacement": "interaction.showSelector",
-          "behavior": "warn"
-        }
-      }
+      ]
     },
     "fields": [
       {
@@ -28226,7 +25817,7 @@ const stableMaturityTests:Record<string,string[]> = {
 const emptyStateNotApplicable=new Set(["grid","flex","section","toolbar","searchBox","select","multiSelect","button","tabs","collapsible","card","icon","iconButton","emptyState","placeholder","spinner","text","markdown"]);
 // Stable Inspector controls carry explicit authoring metadata. The property sets
 // are intentionally declarative; the Inspector's name-based grouping remains a
-// compatibility fallback only for legacy and third-party descriptors.
+// fallback only for non-stable and third-party descriptors.
 const stableInspectorGroups:Record<string,InspectorPropertyDescriptor["group"]> = {};
 const assignInspectorGroup=(group:NonNullable<InspectorPropertyDescriptor["group"]>, properties:string[])=>
   properties.forEach(property=>{stableInspectorGroups[property]=group;});
@@ -28234,8 +25825,8 @@ assignInspectorGroup("Identity",["dataset","dataContext","source","stateKey"]);
 assignInspectorGroup("Data",["field","measure","aggregation","filter","sort","sortDirection","category","categoryField","valueField","primaryField","secondaryField","sourceField","targetField","labelField","titleField","descriptionField","statusField","badgeField","dateField","groupField","splitField","stageField","pathFields","metrics","series","values","indicators","limit","maxDataRows","maxRows","pageSize","pageSizeOptions","pagination","showTotals","showRowCount"]);
 assignInspectorGroup("Layout",["span","order","responsive","heightMode","minHeight","aspectRatio","width","height","gap","padding","position","placement","direction","orientation","columns","rows","inline","compact","maxPanels","maxDepth","maxItems","resizableColumns","sizes","minSizes","maxSizes","stickyHeader","preserveAspectRatio","view","viewBox","x","y"]);
 assignInspectorGroup("Appearance",["className","style","css","color","theme","variant","intent","negativeIntent","positiveIntent","totalIntent","icon","prefixIcon","suffixIcon","density","format","heatmap","striped","shape","pointSize","motion","hover","backdrop"]);
-assignInspectorGroup("Interaction",["disabled","clickable","action","actions","actionValue","primaryAction","secondaryAction","interaction","interactions","uiAction","trigger","targets","rowActions","selectedRow","multiple","required","search","collapsible","defaultCollapsed","defaultOpen","defaultOpenItems","openWhen","closeOnEscape","closeOnOutsideClick","closeOnSelect","backdropClose","showArrow","showStart","showEnd"]);
-assignInspectorGroup("Content",["title","subtitle","description","text","html","svg","label","placeholder","helpText","emptyText","errorText","prefix","suffix","prefixText","suffixText","footer","header","toolbar","tooltip","items","items.children","children","slots","tabs","tabs.children","tabs.components","tabs.content","buttons","avatars","initials","lines","stages","groups","elements","layers","layerGroups","bookmarks","legend","options","value","defaultValue","activeStage","activeStep","step","emptyState","placeholderVariant"]);
+assignInspectorGroup("Interaction",["disabled","clickable","actions","primaryAction","secondaryAction","interaction","interactions","uiAction","trigger","targets","rowActions","selectedRow","multiple","required","search","collapsible","defaultCollapsed","defaultOpen","defaultOpenItems","openWhen","closeOnEscape","closeOnOutsideClick","closeOnSelect","backdropClose","showArrow","showStart","showEnd"]);
+assignInspectorGroup("Content",["title","subtitle","description","text","html","svg","label","placeholder","helpText","emptyText","errorText","prefix","suffix","prefixText","suffixText","footer","header","toolbar","tooltip","items","items.children","children","slots","tabs","tabs.children","buttons","avatars","initials","lines","stages","groups","elements","layers","layerGroups","bookmarks","legend","options","value","defaultValue","activeStage","activeStep","step","emptyState","placeholderVariant"]);
 assignInspectorGroup("Accessibility",["ariaLabel","role"]);
 const inspectorHelp:Record<string,string>={dataset:"Logical dataset used by this component.",ariaLabel:"Accessible name announced by assistive technology.",hidden:"Hide the component without deleting its configuration.",disabled:"Prevent user interaction while retaining the component."};
 for (const descriptor of componentDescriptors) {

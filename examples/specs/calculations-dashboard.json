@@ -1,9 +1,89 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Risk Calculations",
   "calculations": {
-    "fields": [{ "key": "risk_band", "label": "Risk Band", "type": "text", "expression": { "op": "case", "cases": [{ "when": { "op": ">=", "left": { "field": "risk_score" }, "right": { "value": 80 } }, "then": { "value": "High" } }, { "when": { "op": ">=", "left": { "field": "risk_score" }, "right": { "value": 50 } }, "then": { "value": "Medium" } }], "else": { "value": "Low" } } }],
-    "metrics": [{ "key": "high_risk_count", "aggregation": "countWhere", "where": { "op": "=", "left": { "field": "risk_band" }, "right": { "value": "High" } } }]
+    "fields": [
+      {
+        "key": "risk_band",
+        "label": "Risk Band",
+        "type": "text",
+        "expression": {
+          "op": "case",
+          "cases": [
+            {
+              "when": {
+                "op": ">=",
+                "left": {
+                  "field": "risk_score"
+                },
+                "right": {
+                  "value": 80
+                }
+              },
+              "then": {
+                "value": "High"
+              }
+            },
+            {
+              "when": {
+                "op": ">=",
+                "left": {
+                  "field": "risk_score"
+                },
+                "right": {
+                  "value": 50
+                }
+              },
+              "then": {
+                "value": "Medium"
+              }
+            }
+          ],
+          "else": {
+            "value": "Low"
+          }
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "key": "high_risk_count",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "=",
+          "left": {
+            "field": "risk_band"
+          },
+          "right": {
+            "value": "High"
+          }
+        }
+      }
+    ]
   },
-  "components": [{ "type": "metricGrid", "id": "risk_metrics", "metrics": [{ "title": "High Risk", "metric": "high_risk_count", "format": "integer", "intent": "danger" }] }, { "type": "table", "id": "risk_details", "columns": ["asset_id", "risk_score", "risk_band"], "pagination": true, "span": 12 }]
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "risk_metrics",
+      "metrics": [
+        {
+          "title": "High Risk",
+          "metric": "high_risk_count",
+          "format": "integer",
+          "intent": "danger"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "risk_details",
+      "columns": [
+        "asset_id",
+        "risk_score",
+        "risk_band"
+      ],
+      "pagination": true,
+      "span": 12
+    }
+  ]
 }

@@ -9,7 +9,7 @@ export function Tabs({ component, renderChildren }: { component: TabsComponent; 
     const id = component.id ?? "mainTabs";
     const active = state.activeTabs[id] ?? component.tabs[0]?.id;
     const tab = component.tabs.find(item => item.id === active) ?? component.tabs[0];
-    const children = tab?.children ?? tab?.components ?? tab?.content ?? [];
+    const children = tab?.children ?? [];
     return <div class="hp-tabs"><div class="nav nav-tabs" role="tablist">{component.tabs.map(item => <button type="button" role="tab" aria-selected={item.id === tab?.id} class={`nav-link ${item.id === tab?.id ? "active" : ""}`} onClick={event=>{dispatch({ type: "tab", id, value: item.id });executeComponentInteraction(policy,createInteractionPayload(component,{value:item.id}),context,{trigger:"click",event});}}>{item.title}</button>)}</div><div class="hp-tab-content">{tab && renderChildren(children)}</div></div>;
 }
 

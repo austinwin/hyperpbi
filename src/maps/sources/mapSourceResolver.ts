@@ -13,7 +13,6 @@ import type {
 } from "../model/resolvedMapTypes";
 import type {
   NormalizedMapFeature,
-  MapBindingKeys,
   DataRow,
   NormalizedField,
 } from "../../data/normalizeData";
@@ -40,9 +39,6 @@ export interface MapSourceContext {
   datasetFound?: boolean;
   totalRows?: number;
   geocodeCache?: Record<string, unknown>;
-  /** Retained on the context shape for callers; explicit layers never inherit it. */
-  runtimeBindings?: Partial<MapBindingKeys>;
-  legacyCompatibility?: boolean;
   layerPath?: string;
 }
 
@@ -579,10 +575,6 @@ function materializeFeature(
   const powerBiAttributes: Record<string, unknown> = {
     ...(feature.row as Record<string, unknown>),
   };
-  if (context.legacyCompatibility) {
-    powerBiAttributes.__color__ = feature.colorValue;
-    powerBiAttributes.__size__ = feature.sizeValue;
-  }
   return {
     id: feature.id,
     layerId: layer.id,

@@ -1,5 +1,5 @@
 export type ComponentCategory = "Layout" | "Controls" | "Navigation" | "Display" | "Charts" | "Tables" | "Maps" | "Custom components" | "Advanced components" | "Primitives" | "Forms" | "Feedback";
-export type ComponentMaturity = "stable" | "beta" | "experimental" | "legacy" | "deprecated";
+export type ComponentMaturity = "stable" | "beta" | "experimental" | "deprecated";
 export type ComponentComplexity = "recommended" | "standard" | "advanced";
 
 export interface ComponentCapability {

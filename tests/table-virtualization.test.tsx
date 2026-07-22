@@ -44,7 +44,7 @@ function largeContext(rowCount: number): RenderContextValue {
         sourceRowKeys: data.rowKeys,
         getRowsForComponent: () => rows,
         componentRows: () => [],
-        schema: { version: "1.0", components: [] },
+        schema: { version: "2.0", components: [] },
         settings,
         state: initialDashboardState(),
         dispatch: vi.fn(),

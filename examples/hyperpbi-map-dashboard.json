@@ -1,8 +1,40 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Asset Geography",
-  "layout": { "type": "split", "leftPanel": { "width": 250, "collapsible": true } },
-  "leftPanel": [{ "type": "section", "title": "Map Filters", "children": [{ "type": "multiSelect", "id": "map-status", "label": "Status", "field": "status" }, { "type": "slider", "id": "map-cost", "label": "Minimum cost", "field": "cost", "min": 0, "max": 1000000, "step": 25000, "filter": { "operator": ">=" } }] }],
+  "layout": {
+    "type": "split",
+    "leftPanel": {
+      "width": 250,
+      "collapsible": true
+    }
+  },
+  "leftPanel": [
+    {
+      "type": "section",
+      "title": "Map Filters",
+      "children": [
+        {
+          "type": "multiSelect",
+          "id": "map-status",
+          "label": "Status",
+          "field": "status"
+        },
+        {
+          "type": "slider",
+          "id": "map-cost",
+          "label": "Minimum cost",
+          "field": "cost",
+          "min": 0,
+          "max": 1000000,
+          "step": 25000,
+          "filter": {
+            "operator": ">="
+          }
+        }
+      ],
+      "id": "section-1"
+    }
+  ],
   "components": [
     {
       "type": "map",
@@ -10,33 +42,95 @@
       "title": "Asset Locations",
       "height": 420,
       "span": 8,
-      "search": { "enabled": true, "placeholder": "Search for a place or address", "zoom": 16, "showResultMarker": true },
-      "legend": { "defaultOpen": false },
-      "layerPanel": { "visible": true, "defaultOpen": false, "allowViewerReorder": true, "allowViewerOpacity": true, "allowViewerLabels": true },
-      "toolbar": { "visible": true, "home": true, "layers": true, "legend": true, "search": true, "zoomToSelection": true, "clearSelection": true },
-      "settings": {
-        "fitBounds": true,
-        "showLayerControl": true,
-        "showLegend": true,
-        "clusterPoints": true,
-        "basemap": "none",
-        "enableExternalTiles": false,
-        "coordinateSystem": "EPSG:4326",
-        "enableExternalGeocoder": false
+      "search": {
+        "enabled": true,
+        "placeholder": "Search for a place or address",
+        "zoom": 16,
+        "showResultMarker": true
       },
-      "style": {
-        "defaultPointColor": "#206bc4",
-        "colorMode": "categorical",
-        "radius": 6,
-        "minRadius": 4,
-        "maxRadius": 14,
-        "lineWeight": 3,
-        "fillOpacity": 0.35,
-        "opacity": 0.9
+      "legend": {
+        "defaultOpen": false
       },
-      "popup": { "html": "<div class='hp-popup'><b>{{Asset ID}}</b><br>{{Address}}<br>Status: {{Status}}</div>" }
+      "layerPanel": {
+        "visible": true,
+        "defaultOpen": false,
+        "allowViewerReorder": true,
+        "allowViewerOpacity": true,
+        "allowViewerLabels": true
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "search": true,
+        "zoomToSelection": true,
+        "clearSelection": true
+      },
+      "layers": [
+        {
+          "id": "asset-map-powerbi",
+          "name": "Asset Locations",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "shape": "circle",
+              "fillColor": "#206bc4",
+              "outlineColor": "#206bc4",
+              "size": 6,
+              "fillOpacity": 0.35,
+              "opacity": 0.9,
+              "weight": 3
+            }
+          }
+        }
+      ],
+      "view": {
+        "fitMode": "data"
+      },
+      "basemap": {
+        "type": "none"
+      },
+      "featureDetails": {
+        "mode": "auto"
+      }
     },
-    { "type": "statList", "id": "map-summary", "title": "Selection Summary", "span": 4, "items": [{ "label": "Visible assets", "value": "See map" }, { "label": "Selected asset", "field": "asset_id" }] },
-    { "type": "table", "id": "map-table", "title": "Mapped Assets", "columns": ["asset_id", "region", "status", "latitude", "longitude"], "pagination": true, "span": 12 }
+    {
+      "type": "statList",
+      "id": "map-summary",
+      "title": "Selection Summary",
+      "span": 4,
+      "items": [
+        {
+          "label": "Visible assets",
+          "value": "See map"
+        },
+        {
+          "label": "Selected asset",
+          "field": "asset_id"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "map-table",
+      "title": "Mapped Assets",
+      "columns": [
+        "asset_id",
+        "region",
+        "status",
+        "latitude",
+        "longitude"
+      ],
+      "pagination": true,
+      "span": 12
+    }
   ]
 }

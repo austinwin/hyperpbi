@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "title": "Atlas Operations",
   "theme": {
     "mode": "light",
@@ -55,13 +55,10 @@
         "css": ".app-accordion{border:0;background:transparent}.app-accordion .hp-collapse-button{padding:9px 4px}.app-accordion .hp-collapse-content{padding:2px 0 6px}"
       },
       "collapsible": {
-        "css": ".app-collapsible{border:0;background:transparent}.app-collapsible .hp-collapse-button{padding:9px 4px}.app-collapsible .hp-collapse-content{padding:2px 0 6px}"
+        "css": ".app-collapsible{border:0;background:transparent}.app-collapsible .hp-collapse-button{padding:9px 4px}.app-collapsible .hp-collapse-content{padding:2px 0 6px}.app-stepper{border:0;background:transparent;box-shadow:none}.app-stepper>.hp-collapsible{border:0;background:transparent}"
       },
-      "filterDrawer": {
-        "css": ".app-filter-drawer{margin-top:4px;border-color:#dbe4ee;background:#fff}"
-      },
-      "drawer": {
-        "css": ".app-record-drawer{margin-top:4px;border-color:#dbe4ee;background:#fff}"
+      "offcanvas": {
+        "css": ".app-filter-drawer,.app-record-drawer{margin-top:4px;border-color:#dbe4ee;background:#fff}"
       },
       "tabs": {
         "css": ".app-tabs{border:0;background:transparent;box-shadow:none}"
@@ -122,9 +119,6 @@
       },
       "table": {
         "css": ".domain-table{border-color:#dbe4ee;background:#fff}"
-      },
-      "stepper": {
-        "css": ".app-stepper{border:0;background:transparent;box-shadow:none}.app-stepper>.hp-collapsible{border:0;background:transparent}"
       }
     }
   },
@@ -189,8 +183,11 @@
         "clearOnSecondClick": false
       },
       "label": "Command Center",
-      "action": "setTab",
-      "actionValue": "overview"
+      "uiAction": {
+        "type": "setTab",
+        "target": "mainTabs",
+        "value": "overview"
+      }
     },
     {
       "type": "button",
@@ -214,8 +211,11 @@
         "clearOnSecondClick": false
       },
       "label": "Domain Registry",
-      "action": "setTab",
-      "actionValue": "directory"
+      "uiAction": {
+        "type": "setTab",
+        "target": "mainTabs",
+        "value": "directory"
+      }
     },
     {
       "type": "button",
@@ -239,8 +239,11 @@
         "clearOnSecondClick": false
       },
       "label": "Review Workflow",
-      "action": "setTab",
-      "actionValue": "review"
+      "uiAction": {
+        "type": "setTab",
+        "target": "mainTabs",
+        "value": "review"
+      }
     },
     {
       "type": "divider",
@@ -291,77 +294,81 @@
         "internalMode": "none",
         "externalMode": "none"
       },
-      "direction": "column",
-      "columns": 12,
-      "gap": 8,
-      "collapsible": true,
-      "defaultOpen": true,
-      "children": [
+      "items": [
         {
-          "type": "searchBox",
-          "id": "sidebar_search",
-          "title": "Search Portfolio",
-          "span": 12,
-          "className": "app-search",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "interaction": {
-            "enabled": true,
-            "trigger": "change",
-            "internalMode": "filter",
-            "internalScope": "all",
-            "externalMode": "filter",
-            "field": "hyperpbi_general_enterprise_demo_dataset_category",
-            "operator": "contains",
-            "selectionMode": "replace",
-            "multiSelect": false,
-            "showSelector": false,
-            "clearOnSecondClick": true
-          },
-          "field": "hyperpbi_general_enterprise_demo_dataset_category",
-          "label": "Search domains",
-          "placeholder": "Search by domain name...",
-          "defaultValue": "",
-          "targets": [
-            "domain_chart",
-            "domain_table"
-          ]
-        },
-        {
-          "type": "multiSelect",
-          "id": "sidebar_compare",
-          "title": "Domain Scope",
-          "span": 12,
-          "className": "app-multi",
-          "hidden": false,
-          "style": {
-            "minWidth": 0
-          },
-          "interaction": {
-            "enabled": true,
-            "trigger": "change",
-            "internalMode": "filter",
-            "internalScope": "all",
-            "externalMode": "filter",
-            "field": "hyperpbi_general_enterprise_demo_dataset_category",
-            "operator": "in",
-            "selectionMode": "replace",
-            "multiSelect": true,
-            "showSelector": false,
-            "clearOnSecondClick": true
-          },
-          "field": "hyperpbi_general_enterprise_demo_dataset_category",
-          "label": "Domain scope",
-          "placeholder": "Select business domains",
-          "defaultValue": [],
-          "multiple": true,
-          "targets": [
-            "domain_chart",
-            "domain_table"
+          "id": "sidebar_filters-item",
+          "title": "Filter portfolio",
+          "children": [
+            {
+              "type": "searchBox",
+              "id": "sidebar_search",
+              "title": "Search Portfolio",
+              "span": 12,
+              "className": "app-search",
+              "hidden": false,
+              "style": {
+                "minWidth": 0
+              },
+              "interaction": {
+                "enabled": true,
+                "trigger": "change",
+                "internalMode": "filter",
+                "internalScope": "all",
+                "externalMode": "filter",
+                "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                "operator": "contains",
+                "selectionMode": "replace",
+                "multiSelect": false,
+                "showSelector": false,
+                "clearOnSecondClick": true
+              },
+              "field": "hyperpbi_general_enterprise_demo_dataset_category",
+              "label": "Search domains",
+              "placeholder": "Search by domain name...",
+              "defaultValue": "",
+              "targets": [
+                "domain_chart",
+                "domain_table"
+              ]
+            },
+            {
+              "type": "multiSelect",
+              "id": "sidebar_compare",
+              "title": "Domain Scope",
+              "span": 12,
+              "className": "app-multi",
+              "hidden": false,
+              "style": {
+                "minWidth": 0
+              },
+              "interaction": {
+                "enabled": true,
+                "trigger": "change",
+                "internalMode": "filter",
+                "internalScope": "all",
+                "externalMode": "filter",
+                "field": "hyperpbi_general_enterprise_demo_dataset_category",
+                "operator": "in",
+                "selectionMode": "replace",
+                "multiSelect": true,
+                "showSelector": false,
+                "clearOnSecondClick": true
+              },
+              "field": "hyperpbi_general_enterprise_demo_dataset_category",
+              "label": "Domain scope",
+              "placeholder": "Select business domains",
+              "defaultValue": [],
+              "multiple": true,
+              "targets": [
+                "domain_chart",
+                "domain_table"
+              ]
+            }
           ]
         }
+      ],
+      "defaultOpenItems": [
+        "sidebar_filters-item"
       ]
     },
     {
@@ -405,7 +412,7 @@
       ]
     },
     {
-      "type": "filterDrawer",
+      "type": "offcanvas",
       "id": "sidebar_filter_drawer",
       "title": "Advanced filters",
       "span": 12,
@@ -659,7 +666,7 @@
       ]
     },
     {
-      "type": "drawer",
+      "type": "offcanvas",
       "id": "record_drawer",
       "title": "Expanded record view",
       "span": 12,
@@ -752,7 +759,7 @@
     },
     {
       "type": "tabs",
-      "id": "mainTabs",
+      "id": "maintabs",
       "title": "Workspace Views",
       "span": 12,
       "className": "app-tabs",
@@ -896,8 +903,9 @@
                         "clearOnSecondClick": false
                       },
                       "label": "Clear filters",
-                      "action": "clearFilters",
-                      "actionValue": ""
+                      "uiAction": {
+                        "type": "clearFilters"
+                      }
                     }
                   ]
                 },
@@ -1293,7 +1301,7 @@
           "title": "Review Workflow",
           "children": [
             {
-              "type": "stepper",
+              "type": "collapsible",
               "id": "review_stepper",
               "title": "Portfolio Review Workflow",
               "span": 12,
@@ -1307,9 +1315,6 @@
                 "internalMode": "none",
                 "externalMode": "none"
               },
-              "direction": "column",
-              "columns": 12,
-              "gap": 10,
               "defaultOpen": true,
               "children": [
                 {

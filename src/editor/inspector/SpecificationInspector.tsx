@@ -1153,8 +1153,7 @@ export function SpecificationInspector({
                       {componentDescriptors
                         .filter(
                           (entry) =>
-                            entry.maturity !== "deprecated" &&
-                            entry.maturity !== "legacy",
+                            entry.maturity !== "deprecated",
                         )
                         .map((entry) => (
                           <option value={entry.type}>

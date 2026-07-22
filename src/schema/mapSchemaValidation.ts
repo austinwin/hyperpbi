@@ -329,7 +329,7 @@ export function validateMapComponentSchema(
   if (object(component.featureDetails))
     validateEnum(
       component.featureDetails.mode,
-      ["auto", "anchored", "panel", "legacyPopup"],
+      ["auto", "anchored", "panel"],
       `${path}/featureDetails/mode`,
       componentId,
       diagnostics,
@@ -1165,30 +1165,12 @@ function validateLayer(
       "maxFeatures",
       "cacheMinutes",
       "viewportQuery",
-      "generalizeByZoom",
-      "minimumGeneralization",
-      "maximumGeneralization",
       "requestBatchSize",
-      "progressiveRendering",
     ),
     path,
     componentId,
     diagnostics,
   );
-  if (object(raw.performance))
-    for (const property of [
-      "generalizeByZoom",
-      "minimumGeneralization",
-      "maximumGeneralization",
-      "progressiveRendering",
-    ])
-      if (raw.performance[property] !== undefined)
-        limitation(
-          `map.layers[].performance.${property}`,
-          `${path}/performance/${property}`,
-          componentId,
-          diagnostics,
-        );
   validateSection(
     raw,
     "legend",

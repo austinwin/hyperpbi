@@ -17,6 +17,7 @@
     "package:verify": "node scripts/verify-package-capabilities.mjs",
     "docs:generate": "node scripts/generate-documentation.mjs",
     "docs:check": "node scripts/generate-documentation.mjs --check",
+    "schema:migrate-v1": "node scripts/migrate-schema-v1-to-v2.mjs",
     "build": "npm run typecheck",
     "certification:audit": "node scripts/package-profile.mjs core audit",
     "typecheck": "tsc --noEmit",

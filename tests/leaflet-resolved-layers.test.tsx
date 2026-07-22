@@ -163,7 +163,7 @@ function testContext() {
     const dispatchSpy = vi.fn();
     const selectExternal = vi.fn(() => ({ sent: true as const }));
     const executeUiAction = vi.fn(() => ({ success: true as const }));
-    const value = { data, rows, sourceRows: rows, sourceRowKeys: data.rowKeys, getRowsForComponent: () => rows, componentRows: () => [], schema: { version: "1.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: (action: Parameters<typeof dashboardReducer>[1]) => { dispatchSpy(action); value.state = dashboardReducer(value.state, action); }, warnings: [], selectExternal, clearExternal: vi.fn(() => ({ sent: true as const })), applyExternalFilter: vi.fn(() => ({ sent: true as const })), clearExternalFilter: vi.fn(() => ({ sent: true as const })), reportInteraction: vi.fn(), config: defaultConfig, webAccessAvailable: true, executeUiAction, isOverlayOpen: () => false } as unknown as RenderContextValue;
+    const value = { data, rows, sourceRows: rows, sourceRowKeys: data.rowKeys, getRowsForComponent: () => rows, componentRows: () => [], schema: { version: "2.0", components: [] }, settings: toRuntimeSettings(new VisualFormattingSettingsModel()), state: initialDashboardState(), dispatch: (action: Parameters<typeof dashboardReducer>[1]) => { dispatchSpy(action); value.state = dashboardReducer(value.state, action); }, warnings: [], selectExternal, clearExternal: vi.fn(() => ({ sent: true as const })), applyExternalFilter: vi.fn(() => ({ sent: true as const })), clearExternalFilter: vi.fn(() => ({ sent: true as const })), reportInteraction: vi.fn(), config: defaultConfig, webAccessAvailable: true, executeUiAction, isOverlayOpen: () => false } as unknown as RenderContextValue;
     return { value, dispatchSpy, selectExternal, executeUiAction };
 }
 
@@ -532,18 +532,6 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
         renderMap(host, test.value, component, [{ ...joined, interaction: { enabled: false } }]);
         mocks.circles.at(-1)!.fire("click", { originalEvent: { stopPropagation: vi.fn() } });
         expect(test.selectExternal).not.toHaveBeenCalled();
-    });
-
-    it("recreates popup action content after close and reopen", () => {
-        const host = document.createElement("div"); const test = testContext();
-        const popupLayer = layer("popup", { popup: { enabled: true, title: "{{NAME}}", fields: [], actions: [{ id: "open", label: "Open", uiAction: { action: "showToast", message: "Opened" } }] } });
-        renderMap(host, test.value, { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" }, featureDetails: { mode: "legacyPopup" } }, [popupLayer]);
-        const marker = mocks.circles.at(-1)!;
-        const contentFactory = marker.popup as () => HTMLElement;
-        contentFactory().querySelector("button")!.click();
-        marker.fire("popupclose");
-        contentFactory().querySelector("button")!.click();
-        expect(test.executeUiAction).toHaveBeenCalledTimes(2);
     });
 
     it("integrates and cleans the dedicated label runtime without duplicate vector groups", () => {

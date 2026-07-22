@@ -15,15 +15,12 @@ import {
   type LeafletMapClickEvent,
   type LeafletMapController,
 } from "./LeafletMap";
-import { MapEmptyState } from "./MapEmptyState";
 import { MapLegendPanel } from "./MapLegendPanel";
 import { MapToolbar } from "./MapToolbar";
 import { mapToolbarPopoverId } from "./MapToolbar";
 import { MapToolbarPopover } from "./MapToolbarPopover";
 import { MapSearchPanel } from "./MapSearchPanel";
 import { MapBookmarkPanel } from "./MapBookmarkPanel";
-import { normalizeMapBindings } from "../../data/normalizeMapBindings";
-import { resolveLegacyMapLayers } from "../../maps/model/legacyMapResolver";
 import {
   effectiveMapLayerDataset,
   geometryAnalysis,
@@ -194,7 +191,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
     context.componentPathById?.[authoredComponentId] ??
     "/components";
   const rows = context.getRowsForComponent(id);
-  const legacyCompatibility = !component.layers?.length;
   const serviceAccess = useCallback(
     (endpoint: string) =>
       externalServiceAccess(
@@ -219,32 +215,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     return rows.map((_row, i) => data.rowKeys[rowIndices[i]] ?? `row-${i}`);
   }, [rows, data.rowKeys, rowIndices]);
 
-  // ── Layer definitions (legacy conversion) ────────────────────────
-  const layerDefinitions: MapLayerDefinition[] = useMemo(() => {
-    return resolveLegacyMapLayers(component, config.bindings?.map);
-  }, [component, config.bindings?.map]);
-
-  // ── Legacy Power BI data normalization (for backward compat) ────
-  const map = useMemo(
-    () =>
-      normalizeMapBindings(
-        rows,
-        data.fields,
-        config.bindings?.map,
-        config.providers?.geocoder?.cacheEntries,
-      ),
-    [
-      rows,
-      data.fields,
-      config.bindings?.map,
-      config.providers?.geocoder?.cacheEntries,
-    ],
-  );
-
-  const hasExternalLayers = useMemo(
-    () => layerDefinitions.some((def) => def.source.type !== "powerbi"),
-    [layerDefinitions],
-  );
+  const layerDefinitions: MapLayerDefinition[] = component.layers ?? [];
 
   // ── One source context per effective layer dataset ───────────────
   const layerSourceContexts = useMemo(
@@ -271,7 +242,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 datasetFound: true,
                 totalRows: view.totalRows,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
-                legacyCompatibility,
                 layerPath: appendJsonPointer(componentPath, "layers", index),
               }
             : {
@@ -289,7 +259,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 datasetFound: fallbackAllowed,
                 totalRows: fallbackAllowed ? rows.length : 0,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
-                legacyCompatibility,
                 layerPath: appendJsonPointer(componentPath, "layers", index),
               };
           return [definition.id, sourceContext] as const;
@@ -301,7 +270,6 @@ export function MapBlock({ component }: { component: MapComponent }) {
       context.getDatasetView,
       id,
       config.providers?.geocoder?.cacheEntries,
-      legacyCompatibility,
       componentPath,
       rows,
       rowIndices,
@@ -379,10 +347,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
   // ── UI state from reducer (maps to mapUiState[id]) ───────────────
   const mapUiState = context.state.mapUiState[id] ?? {};
-  const layerPanelEnabled =
-    component.settings?.showLayerControl !== false &&
-    component.layerPanel?.visible !== false;
-  const legendEnabled = component.settings?.showLegend !== false;
+  const layerPanelEnabled = component.layerPanel?.visible !== false;
+  const legendEnabled = true;
   const configuredGeocoder = config.providers?.geocoder;
   const searchEnabled =
     component.search?.enabled === true ||
@@ -1133,47 +1099,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
 
   // ── Determine if we should show map or empty state ───────────────
   const mapRuntimeWarnings = layerRuntimeState.__basemap__?.warnings ?? [];
-  const displayedMapWarnings = legacyCompatibility ? map.warnings : [];
-
-  const coordinateSystem = component.settings?.coordinateSystem ?? "EPSG:4326";
-
   let content;
   if (!settings.map.enabled) {
     content = <EmptyState title="Maps are disabled in formatting settings" />;
-  } else if (legacyCompatibility && !hasExternalLayers && map.mode === "none") {
-    content = <MapEmptyState reason={map.warnings[0]} />;
-  } else if (
-    legacyCompatibility &&
-    !hasExternalLayers &&
-    map.mode === "address" &&
-    !map.layers.some((layer) =>
-      layer.features.some((feature) => feature.type === "point"),
-    )
-  ) {
-    content = <MapEmptyState reason={map.warnings[0]} />;
-  } else if (
-    legacyCompatibility &&
-    !hasExternalLayers &&
-    map.mode === "xy" &&
-    coordinateSystem.toUpperCase() !== "EPSG:4326"
-  ) {
-    content = (
-      <MapEmptyState
-        reason={`Coordinate system ${coordinateSystem} requires an approved projection adapter.`}
-      />
-    );
-  } else if (
-    legacyCompatibility &&
-    !hasExternalLayers &&
-    !map.layers.some((layer) => layer.features.length)
-  ) {
-    content = (
-      <MapEmptyState
-        reason={
-          map.warnings[0] ?? "Bound map fields contain no valid locations."
-        }
-      />
-    );
   } else {
     const sizing = resolveMapSizing(component, {
       studioPreview: context.instanceId?.includes("-preview") === true,
@@ -1389,9 +1317,9 @@ if (clearSelection) {
             )}
           </div>
         </div>
-        {[...displayedMapWarnings, ...mapRuntimeWarnings].length > 0 && (
+        {mapRuntimeWarnings.length > 0 && (
           <div class="hp-map-warning">
-            {[...displayedMapWarnings, ...mapRuntimeWarnings].join(" ")}
+            {mapRuntimeWarnings.join(" ")}
           </div>
         )}
       </>

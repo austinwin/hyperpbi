@@ -26,16 +26,11 @@ describe("ArcGIS request revisions", () => {
     );
   });
 
-  it("does not restart requests for deprecated no-op performance input", () => {
+  it("restarts requests when canonical query performance settings change", () => {
     const initial = layer();
-    const compatibility = layer();
-    compatibility.performance = {
-      generalizeByZoom: true,
-      minimumGeneralization: 1,
-      maximumGeneralization: 10,
-      progressiveRendering: true,
-    };
-    expect(arcGisLayerRequestRevision(compatibility, undefined)).toBe(
+    const bounded = layer();
+    bounded.performance = { maxFeatures: 250 };
+    expect(arcGisLayerRequestRevision(bounded, undefined)).not.toBe(
       arcGisLayerRequestRevision(initial, undefined),
     );
   });

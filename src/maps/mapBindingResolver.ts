@@ -3,14 +3,7 @@ import { resolveConfiguredField } from "../config/hyperpbiConfig";
 
 type SingleMapBinding = Exclude<keyof MapBindingKeys, "tooltip" | "details">;
 
-const legacyRoles: Partial<Record<SingleMapBinding, string>> = {
-    layer: "mapLayer", type: "mapType", x: "mapX", y: "mapY", city: "mapCity", state: "mapState", zip: "mapZip", color: "mapColor", size: "mapSize",
-};
-
 function inferredField(fields: Record<string, NormalizedField>, binding: SingleMapBinding): string | undefined {
-    const legacyRole = legacyRoles[binding];
-    const roleField = legacyRole ? Object.values(fields).find(field => field.roles.includes(legacyRole))?.key : undefined;
-    if (roleField) return roleField;
     const semantic = binding === "latitude" ? Object.values(fields).find(field => field.type === "latitude")?.key
         : binding === "longitude" ? Object.values(fields).find(field => field.type === "longitude")?.key
         : binding === "geometry" ? Object.values(fields).find(field => field.type === "geometry")?.key : undefined;

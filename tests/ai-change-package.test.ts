@@ -117,14 +117,12 @@ describe("AI change packages", () => {
   it("appends through descriptor-declared nested and root containers", () => {
     const nested = { version: "2.0" as const, components: [
       { type: "card" as const, id: "card", children: [], footer: [] },
-      { type: "tabs" as const, id: "tabs", tabs: [{ id: "one", title: "One", children: [], components: [], content: [] }] },
+      { type: "tabs" as const, id: "tabs", tabs: [{ id: "one", title: "One", children: [] }] },
       { type: "accordion" as const, id: "accordion", items: [{ id: "item", title: "Item", children: [] }] },
     ] };
     const append = (targetId: string, containerPath: string, id: string) => applyChangePackage(nested, pkg("appendChild", { targetId, containerPath, component: { type: "text", id, text: id } }) as AiChangePackage);
     expect((append("card", "footer", "footer-note").schema?.components[0] as any).footer[0].id).toBe("footer-note");
     expect((append("tabs", "tabs/0/children", "tab-child").schema?.components[1] as any).tabs[0].children[0].id).toBe("tab-child");
-    expect((append("tabs", "tabs/0/components", "tab-component").schema?.components[1] as any).tabs[0].components[0].id).toBe("tab-component");
-    expect((append("tabs", "tabs/0/content", "tab-content").schema?.components[1] as any).tabs[0].content[0].id).toBe("tab-content");
     expect((append("accordion", "items/0/children", "item-child").schema?.components[2] as any).items[0].children[0].id).toBe("item-child");
     for (const containerPath of ["components", "toolbar", "leftPanel", "rightPanel"] as const) {
       const result = applyChangePackage(nested, pkg("appendRoot", { containerPath, component: { type: "text", id: `root-${containerPath}`, text: containerPath } }) as AiChangePackage);

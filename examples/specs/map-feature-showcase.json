@@ -157,7 +157,7 @@
         "allowViewerLabels": false
       },
       "legend": {
-        "defaultOpen": false
+        "defaultOpen": true
       },
       "toolbar": {
         "visible": true,
@@ -168,10 +168,6 @@
         "clearSelection": true,
         "zoomToSelection": true,
         "bookmarks": false
-      },
-      "settings": {
-        "showLayerControl": true,
-        "showLegend": true
       }
     }
   ]

@@ -1,8 +1,8 @@
 # HyperPBI specification reference
 
-HyperPBI 2.0 uses Field Manifest aliases as its recommended authoring contract; canonical runtime keys are internal compatibility inputs. Alias resolution covers descriptor-declared nested structures, while ArcGIS service fields and joined map aliases remain unchanged. Component maturity (`stable`, `beta`, `experimental`, `legacy`, `deprecated`) describes implementation governance and is separate from authoring complexity (`recommended`, `standard`, `advanced`).
+HyperPBI 2.0 uses Field Manifest aliases or canonical resolved field keys. Display names are not accepted as aliases. Alias resolution covers descriptor-declared nested structures, while ArcGIS service fields and joined map aliases remain unchanged. Component maturity (`stable`, `beta`, `experimental`, `deprecated`) describes implementation governance and is separate from authoring complexity (`recommended`, `standard`, `advanced`).
 
-This reference describes the implemented HyperPBI 2.0 authoring contract and the intentionally preserved HyperPBI 1.0 compatibility path. Runtime implementation and validators are authoritative.
+This reference describes the implemented HyperPBI dashboard schema 2.0 contract, the only version accepted by the production runtime. Runtime implementation and validators are authoritative.
 
 ## Root object and version behavior
 
@@ -25,16 +25,16 @@ This reference describes the implemented HyperPBI 2.0 authoring contract and the
 | `title` | string | Optional dashboard title |
 | `theme` | object | Theme tokens below |
 | `layout` | object | Root grid/flex/split hints |
-| `state` | object | Initial `search`, `activeTab`, and `filters` compatibility state |
+| `state` | object | Initial `search`, `activeTab`, and `filters` state |
 | `app` | object | Root application shell; never `schema.app` |
-| `toolbar`, `leftPanel`, `rightPanel` | component arrays | Root regions; panels are also compatibility surfaces |
+| `toolbar`, `leftPanel`, `rightPanel` | component arrays | Canonical root regions |
 | `css` | string | Sanitized visual-wide CSS |
 | `styles` | object | Global and type/ID component styles |
 | `calculations` | object | Root calculated fields and metrics |
 | `data` | object | Only `datasets` is allowed |
 | `definitions` | named object | Reusable authoring fragments |
 
-Version 2.0 rejects unknown root properties and unknown properties on a component. Unknown dataset-definition properties are also errors. Version 1.0 uses the legacy validator and intentionally remains more lenient; compatibility diagnostics may warn without making a previously valid dashboard unusable.
+Version 2.0 rejects unknown root, component, dataset-definition, and nested map properties. Dashboard schema 1.0 and missing versions are blocking errors and are never migrated by the runtime.
 
 The package version in `pbiviz.json` is unrelated to this schema version.
 
@@ -255,7 +255,7 @@ ArcGIS tile/dynamic mounted instances are definition-reactive: URL, attribution,
 
 Map feature interactions accept `trigger: "click"` only; strict 2.0 authoring rejects map-layer `change` and `auto` without changing non-map interaction enums. Join cardinality is from Power BI rows to service features: `oneToOne` requires unique normalized keys on both sides, while `manyToOne` permits repeated Power BI keys for aggregation but diagnoses repeated service keys. `unmatchedPolicy` controls no warning, one bounded summary, or detailed bounded diagnostics. Blank/invalid numeric inputs are excluded, empty `sum|avg|min|max` returns `null`, and aggregation diagnostics contain counts rather than rows. Computed class breaks cap effective classes by request, ramp, and distinct finite values, collapse repeated quantiles, and include the maximum explicitly. Runtime diagnostics use canonical RFC 6901 paths; Map Studio scopes selected-layer diagnostics by exact pointer/prefix.
 
-Strict validation rejects unknown nested map properties and unimplemented `naturalBreaks`. Partial/experimental accepted properties emit capability limitations from the machine-readable registry. The complete contract, Map Studio behavior, capability table, performance bounds, and legacy one-layer compatibility are documented in [Map services](map-services.md). Legacy `settings`, `style`, and `popup` remain compatibility input.
+Strict validation rejects unknown nested map properties and unimplemented `naturalBreaks`. Partial/experimental accepted properties emit capability limitations from the machine-readable registry. Maps require explicit `layers`; legacy top-level `settings`, map-specific `style`, and top-level `popup` are rejected. The complete contract, Map Studio behavior, capability table, and performance bounds are documented in [Map services](map-services.md).
 
 ## SVG
 
@@ -271,26 +271,15 @@ Preparation returns authoring JSON, a renderable schema only when no errors rema
 
 Common diagnostic families include invalid/unknown properties, unsupported version/type/enum, missing required properties, duplicate/invalid IDs, unknown/ambiguous fields, unknown dataset/source, dataset/definition cycles, invalid dataset operations/collisions, nonnumeric fields, invalid interactions/targets, reference errors, and SVG dashboard limits.
 
-Automatic repairs are intentionally narrow:
+The optional non-runtime authoring repair helper is intentionally narrow:
 
-- add 2.0 when `components` makes the missing version unambiguous
-- generate missing 2.0 component IDs during import
 - correct `meausre→measure`, `catgory→category`, `componets→components`, `aggregration→aggregation`
 - convert numeric strings for `span`, `height`, `width`, `limit`, `pageSize`, `maxRows`, `columns`, and `gap`
 
-Comments, smart quotes, truncation, unknown types/fields, unsafe content, and ambiguous intent are not automatically repaired.
+Production loading, Edit Mode, AI import, preview, save, and renderer startup use strict preparation. They reject missing versions, missing IDs, comments, smart quotes, truncation, unknown types/fields, unsafe content, and ambiguous intent.
 
-## 1.0 compatibility and migrations
+## Schema 1.0 conversion
 
-HyperPBI 1.0 is valid compatibility/history material. The migration layer:
+Schema 1.0 is not active runtime material. Visual loading, Edit Mode, AI import, validation/preview, save, renderer startup, and shared runtime modules reject it with a schema 2.0-only diagnostic.
 
-- supplies version 1.0 when a legacy object omits a version
-- resolves legacy field references against current normalized data
-- normalizes tab `components`/`content` to `children`
-- wraps legacy accordion children into one item
-- preserves drawer/filterDrawer and stepper compatibility rendering
-- maps legacy button `action`/`actionValue` to `uiAction` while retaining the legacy properties
-- normalizes `table.engine: "tabulator"` to native
-- recursively migrates component regions and footer children
-
-Normal improvement jobs preserve the existing schema version. Migration to 2.0 must be intentional because strict properties, aliases, datasets, definitions, patterns, and stable-ID requirements can expose ambiguities that should not be guessed.
+Developers may explicitly convert a supported legacy file with `npm run schema:migrate-v1 -- input.json output.json`. The temporary converter is outside `src`, validates the converted schema 2.0 result, and is not part of PBIVIZ packages. See [migration/versioning](migration-versioning.md) for the removed aliases and converter limitations.
