@@ -6,7 +6,7 @@ import type { MapComponent } from "../src/schema/hyperpbiSchema";
 
 function mount(overrides: Partial<Parameters<typeof MapToolbar>[0]> = {}) {
     const callbacks = {
-        onHome: vi.fn(), onZoomToSelection: vi.fn(), onSetPopover: vi.fn(), onClearSelection: vi.fn(),
+        onHome: vi.fn(), onZoomIn: vi.fn(), onZoomOut: vi.fn(), onZoomToSelection: vi.fn(), onSetPopover: vi.fn(), onClearSelection: vi.fn(),
     };
     const props: Parameters<typeof MapToolbar>[0] = {
         mapId: "map",
@@ -26,14 +26,16 @@ describe("MapToolbar", () => {
             act(() => button.dispatchEvent(new MouseEvent("click", { bubbles: true })));
         }
         expect(callbacks.onHome).toHaveBeenCalledTimes(1);
-        expect(callbacks.onZoomToSelection).toHaveBeenCalledTimes(1);
-        expect(callbacks.onClearSelection).toHaveBeenCalledTimes(1);
-        expect(callbacks.onSetPopover).toHaveBeenCalledTimes(3);
+        expect(callbacks.onZoomIn).toHaveBeenCalledTimes(1);
+        expect(callbacks.onZoomOut).toHaveBeenCalledTimes(1);
+        expect(callbacks.onZoomToSelection).not.toHaveBeenCalled();
+        expect(callbacks.onClearSelection).not.toHaveBeenCalled();
+        expect(callbacks.onSetPopover).toHaveBeenCalledTimes(4);
     });
 
     it("hides disabled layer, legend, and configured toolbar controls", () => {
         const { host } = mount({
-            component: { type: "map", toolbar: { home: false, clearSelection: false, zoomToSelection: false } },
+            component: { type: "map", toolbar: { home: false, zoomIn: false, zoomOut: false, selection: false, clearSelection: false, zoomToSelection: false } },
             layerControlEnabled: false,
             legendEnabled: false,
             searchEnabled: false,

@@ -23383,9 +23383,11 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "bookmarks",
         "search",
         "legend",
+        "quickFilters",
         "featureDetails",
         "layerPanel",
         "toolbar",
+        "tools",
         "height",
         "heightMode",
         "minHeight",
@@ -23563,6 +23565,11 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "control": "json"
       },
       {
+        "property": "quickFilters",
+        "label": "quick filters",
+        "control": "json"
+      },
+      {
         "property": "featureDetails",
         "label": "feature details",
         "control": "json"
@@ -23575,6 +23582,11 @@ export const componentDescriptors:ComponentDescriptor[] = [
       {
         "property": "toolbar",
         "label": "toolbar",
+        "control": "json"
+      },
+      {
+        "property": "tools",
+        "label": "map tools",
         "control": "json"
       },
       {
@@ -23604,7 +23616,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
       }
     ],
     "documentation": {
-      "summary": "Layer-scoped Power BI logical datasets and public ArcGIS REST feature, tile, and dynamic layers with canonical Map Studio authoring",
+      "summary": "Declarative analytical maps with Power BI, GeoJSON, XYZ, ArcGIS, rich renderers, legends, filters, selection tools, and canonical Map Studio authoring",
       "relatedTypes": [
         "offcanvas",
         "dataGrid"

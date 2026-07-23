@@ -14,7 +14,7 @@ import {
 } from "../model/mapFeatureValue";
 
 export interface LeafletFeatureStyle {
-  shape: "circle" | "square" | "diamond" | "triangle" | "line" | "fill";
+  shape: "circle" | "square" | "diamond" | "triangle" | "icon" | "line" | "fill";
   color: string;
   fillColor: string;
   fillOpacity: number;
@@ -23,6 +23,20 @@ export interface LeafletFeatureStyle {
   radius: number;
   dashArray?: string;
   className?: string;
+  lineCap?: "butt" | "round" | "square";
+  lineJoin?: "miter" | "round" | "bevel";
+  fillPattern?: "none" | "diagonal" | "crosshatch" | "dots";
+  icon?: import("../../schema/mapSchema").MapIconDefinition;
+  rotation?: number;
+  markerText?: string;
+  badge?: string;
+  showValue?: boolean;
+  anchor?: [number, number];
+  offset?: [number, number];
+  selectedStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+  hoverStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+  externalHighlightStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+  dimmedOpacity?: number;
 }
 
 const DEFAULT_STYLE: LeafletFeatureStyle = {
@@ -41,7 +55,10 @@ export function featureStyle(
 ): LeafletFeatureStyle {
   switch (renderer.type) {
     case "simple":
-      return simpleStyle(renderer.symbol);
+    case "icon":
+    case "line":
+    case "polygon":
+      return simpleStyle(renderer.symbol, feature);
 
     case "uniqueValue":
       return uniqueValueStyle(feature, renderer);
@@ -71,17 +88,72 @@ export function featureStyle(
   }
 }
 
-function simpleStyle(symbol?: ResolvedMapSymbol): LeafletFeatureStyle {
+function simpleStyle(
+  symbol?: ResolvedMapSymbol,
+  feature?: ResolvedMapFeature,
+): LeafletFeatureStyle {
   if (!symbol) return DEFAULT_STYLE;
+  const value = (
+    field: string | undefined,
+    source: "powerbi" | "service" | "joined" | undefined,
+  ) => field && feature ? resolvedFeatureValue(feature, field, source ?? "joined") : undefined;
+  const sizeValue = Number(value(symbol.sizeField, symbol.sizeFieldSource));
+  const colorValue = value(symbol.colorField, symbol.colorFieldSource);
+  const mappedColor =
+    colorValue !== undefined && symbol.colorMap
+      ? symbol.colorMap[String(colorValue)]
+      : undefined;
+  const iconValue = value(symbol.iconField, symbol.iconFieldSource);
+  const icon =
+    iconValue !== undefined && symbol.iconMap
+      ? symbol.iconMap[String(iconValue)] ?? symbol.icon
+      : symbol.icon;
+  const rotationValue = Number(value(symbol.rotationField, symbol.rotationFieldSource));
+  const markerTextValue = value(
+    symbol.markerTextField,
+    symbol.markerTextFieldSource,
+  );
+  const badgeValue = value(symbol.badgeField, symbol.badgeFieldSource);
+  const radius = Number.isFinite(sizeValue)
+    ? Math.max(2, Math.min(96, sizeValue))
+    : symbol.radius ?? symbol.size ?? DEFAULT_STYLE.radius;
+  const fillColor =
+    mappedColor ?? symbol.fillColor ?? symbol.color ?? DEFAULT_STYLE.fillColor;
+  const dashArray =
+    symbol.dashArray ??
+    ({
+      solid: undefined,
+      dash: "8 5",
+      dot: "2 4",
+      dashDot: "8 4 2 4",
+    } as const)[symbol.dashStyle ?? "solid"];
   return {
     shape: symbol.shape ?? DEFAULT_STYLE.shape,
     color: symbol.outlineColor ?? symbol.color ?? DEFAULT_STYLE.color,
-    fillColor: symbol.fillColor ?? symbol.color ?? DEFAULT_STYLE.fillColor,
+    fillColor,
     fillOpacity: symbol.fillOpacity ?? DEFAULT_STYLE.fillOpacity,
     opacity: symbol.opacity ?? DEFAULT_STYLE.opacity,
     weight: symbol.weight ?? symbol.outlineWidth ?? DEFAULT_STYLE.weight,
-    radius: symbol.radius ?? symbol.size ?? DEFAULT_STYLE.radius,
-    dashArray: symbol.dashArray,
+    radius,
+    dashArray,
+    lineCap: symbol.lineCap,
+    lineJoin: symbol.lineJoin,
+    fillPattern: symbol.fillPattern,
+    icon,
+    rotation: Number.isFinite(rotationValue) ? rotationValue : symbol.rotation,
+    markerText:
+      markerTextValue === undefined
+        ? symbol.markerText
+        : String(markerTextValue).slice(0, 40),
+    badge:
+      badgeValue === undefined ? symbol.badge : String(badgeValue).slice(0, 16),
+    showValue: symbol.showValue,
+    anchor: symbol.anchor,
+    offset: symbol.offset,
+    selectedStyle: symbol.selectedStyle,
+    hoverStyle: symbol.hoverStyle,
+    externalHighlightStyle: symbol.externalHighlightStyle,
+    dimmedOpacity: symbol.dimmedOpacity,
   };
 }
 
@@ -90,7 +162,7 @@ function uniqueValueStyle(
   renderer: ResolvedMapRenderer,
 ): LeafletFeatureStyle {
   if (!renderer.field || !renderer.valueMap) {
-    return simpleStyle(renderer.defaultSymbol);
+    return simpleStyle(renderer.defaultSymbol, feature);
   }
 
   const value = resolvedFeatureValue(
@@ -102,10 +174,10 @@ function uniqueValueStyle(
 
   const matchedSymbol = renderer.valueMap.get(key);
   if (matchedSymbol) {
-    return simpleStyle(matchedSymbol);
+    return simpleStyle(matchedSymbol, feature);
   }
 
-  return simpleStyle(renderer.defaultSymbol);
+  return simpleStyle(renderer.defaultSymbol, feature);
 }
 
 function classBreaksStyle(
@@ -113,7 +185,7 @@ function classBreaksStyle(
   renderer: ResolvedMapRenderer,
 ): LeafletFeatureStyle {
   if (!renderer.field || !renderer.breaks || renderer.breaks.length === 0) {
-    return simpleStyle(renderer.defaultSymbol);
+    return simpleStyle(renderer.defaultSymbol, feature);
   }
 
   const rawValue = resolvedFeatureValue(
@@ -123,7 +195,7 @@ function classBreaksStyle(
   );
   const num = Number(rawValue);
   if (isNaN(num) || !isFinite(num)) {
-    return simpleStyle(renderer.defaultSymbol);
+    return simpleStyle(renderer.defaultSymbol, feature);
   }
 
   for (const brk of renderer.breaks) {
@@ -131,18 +203,18 @@ function classBreaksStyle(
       num >= brk.min &&
       (num < brk.max || (brk.maxInclusive !== false && num <= brk.max))
     ) {
-      return simpleStyle(brk.symbol);
+      return simpleStyle(brk.symbol, feature);
     }
   }
 
-  return simpleStyle(renderer.defaultSymbol);
+  return simpleStyle(renderer.defaultSymbol, feature);
 }
 
 function continuousColorStyle(
   feature: ResolvedMapFeature,
   renderer: ResolvedMapRenderer,
 ): LeafletFeatureStyle {
-  const base = simpleStyle(renderer.symbol);
+  const base = simpleStyle(renderer.symbol, feature);
   const field = renderer.field ?? renderer.weightField;
   if (!field) return base;
 
@@ -175,7 +247,7 @@ function proportionalSizeStyle(
   feature: ResolvedMapFeature,
   renderer: ResolvedMapRenderer,
 ): LeafletFeatureStyle {
-  const base = simpleStyle(renderer.symbol);
+  const base = simpleStyle(renderer.symbol, feature);
   base.color = renderer.baseColor ?? base.color;
   base.fillColor = renderer.baseColor ?? base.fillColor;
 
@@ -257,7 +329,7 @@ export function featureStyleWithDomain(
   renderer: ResolvedMapRenderer,
   domain: [number, number],
 ): LeafletFeatureStyle {
-  const base = simpleStyle(renderer.symbol);
+  const base = simpleStyle(renderer.symbol, feature);
 
   if (renderer.type === "continuousColor") {
     const field = renderer.field ?? renderer.weightField;

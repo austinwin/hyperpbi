@@ -29,6 +29,7 @@ const ICONS: Record<string, IconDefinition> = {
     "chevron-up":    { name: "chevron-up",    category: "navigation", path: "M18 15l-6-6-6 6" },
     close:      { name: "close",      category: "actions",    path: "M6 6l12 12M18 6L6 18" },
     plus:       { name: "plus",       category: "actions",    path: "M12 5v14m-7-7h14" },
+    minus:      { name: "minus",      category: "actions",    path: "M5 12h14" },
     check:      { name: "check",      category: "actions",    path: "M5 13l4 4L19 7" },
     alert:      { name: "alert",      category: "feedback",   path: "M12 9v4m0 4h.01M10.3 4.3L3.3 16.5a2 2 0 001.7 3h14a2 2 0 001.7-3L13.7 4.3a2 2 0 00-3.4 0z" },
     info:       { name: "info",       category: "feedback",   path: "M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" },

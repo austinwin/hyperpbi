@@ -63,6 +63,7 @@ export function HomePage({ storage }: { storage: ProjectStorage }) {
                 <button class="pg-button pg-button-primary pg-button-large" onClick={() => void create()}><span>＋</span> New Project</button>
                 <button class="pg-button pg-button-large" onClick={() => importInput.current?.click()}>Import Project</button>
                 <input ref={importInput} class="pg-visually-hidden" type="file" accept=".hyperpbi,application/json" onChange={event => void importBundle(event.currentTarget.files?.[0])} />
+                <button class="pg-button pg-button-large" onClick={() => navigate("/components/map")}>Explore map gallery</button>
             </div>
             <div class="pg-flow" aria-label="HyperPBI architecture">
                 <span>AI · Studio · JSON</span><b>→</b><span>2.0 Specification</span><b>→</b><span>Shared Runtime</span><b>→</b><span>Web · Power BI</span>

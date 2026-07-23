@@ -1,0 +1,128 @@
+{
+  "version": "2.0",
+  "title": "Advanced analytical map",
+  "components": [
+    {
+      "type": "map",
+      "id": "map_advanced",
+      "title": "Austin operations command map",
+      "height": 520,
+      "view": { "fitMode": "data", "fitPadding": 0.08 },
+      "legend": { "enabled": true, "defaultOpen": true, "search": true, "maxHeight": 300 },
+      "layerPanel": { "visible": true, "allowViewerOpacity": true, "allowViewerLabels": true },
+      "toolbar": {
+        "position": "topleft",
+        "home": true,
+        "zoomIn": true,
+        "zoomOut": true,
+        "layers": true,
+        "legend": true,
+        "selection": true,
+        "quickFilters": true,
+        "selectedCount": true
+      },
+      "tools": {
+        "rectangleSelection": { "enabled": true, "selectionMode": "replace" },
+        "lassoSelection": { "enabled": true, "selectionMode": "add" },
+        "circleSelection": { "enabled": true, "selectionMode": "toggle" },
+        "selection": { "maxSelectionCount": 500, "powerBiIdentityLimit": 250, "identityLimitBehavior": "localOnly" },
+        "scaleBar": { "enabled": true, "metric": true, "imperial": true },
+        "coordinateDisplay": { "enabled": true, "precision": 4 }
+      },
+      "quickFilters": [
+        { "id": "status", "label": "Status", "type": "categorical", "field": "category", "multiSelect": true },
+        { "id": "value", "label": "Minimum value", "type": "numericRange", "field": "value" },
+        { "id": "search", "label": "Find asset", "type": "text", "field": "name", "operator": "contains" }
+      ],
+      "interaction": {
+        "enabled": true,
+        "internalMode": "highlight",
+        "externalMode": "selection",
+        "selectionMode": "replace",
+        "internalScope": "all"
+      },
+      "layers": [
+        {
+          "id": "heat",
+          "name": "Intensity",
+          "visible": true,
+          "opacity": 0.55,
+          "source": {
+            "type": "powerbi",
+            "bindings": { "latitude": "latitude", "longitude": "longitude", "size": "value" }
+          },
+          "renderer": {
+            "type": "heatmap",
+            "weightField": "value",
+            "radius": 32,
+            "blur": 22,
+            "minOpacity": 0.08,
+            "maxIntensity": 100,
+            "normalization": "global",
+            "interactivePoints": false
+          },
+          "legend": { "type": "heatIntensity", "visible": true }
+        },
+        {
+          "id": "assets",
+          "name": "Assets",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "color": "category",
+              "tooltip": ["name", "heading", "icon"]
+            }
+          },
+          "renderer": {
+            "type": "icon",
+            "symbol": {
+              "shape": "icon",
+              "icon": { "type": "builtIn", "name": "location" },
+              "iconField": "icon",
+              "iconMap": {
+                "location": { "type": "builtIn", "name": "location" },
+                "database": { "type": "builtIn", "name": "database" },
+                "alert": { "type": "builtIn", "name": "alert" },
+                "activity": { "type": "builtIn", "name": "activity" },
+                "close": { "type": "builtIn", "name": "close" }
+              },
+              "rotationField": "heading",
+              "colorField": "category",
+              "colorMap": { "Active": "#16a34a", "Warning": "#f59e0b", "Offline": "#dc2626" },
+              "markerTextField": "name",
+              "badgeField": "category",
+              "selectedStyle": { "color": "#2563eb", "size": 36 },
+              "hoverStyle": { "color": "#06b6d4", "size": 34 },
+              "externalHighlightStyle": { "color": "#f97316" },
+              "dimmedOpacity": 0.15
+            }
+          },
+          "legend": {
+            "type": "combined",
+            "interactive": true,
+            "selectionMode": "multiple",
+            "clickAction": "select",
+            "hoverAction": "highlight",
+            "showCounts": true,
+            "showPercentages": true,
+            "valueField": "value",
+            "valueAggregation": "sum",
+            "externalInteraction": true,
+            "internalInteraction": true
+          },
+          "labels": { "enabled": true, "field": "name", "minZoom": 12, "collision": "hideOverlaps", "maxLabels": 100 },
+          "popup": {
+            "enabled": true,
+            "fields": [
+              { "field": "name", "label": "Asset" },
+              { "field": "category", "label": "Status", "display": "badge" },
+              { "field": "value", "label": "Value", "display": "number" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

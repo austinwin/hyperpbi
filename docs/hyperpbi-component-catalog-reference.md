@@ -4922,9 +4922,9 @@ _1 components_
 
 **Required properties:** `type`, `id`, `layers`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `featureDetails`, `layerPanel`, `toolbar`, `height`, `heightMode`, `minHeight`, `aspectRatio`, `order`, `responsive`, `tools`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `engine`, `view`, `basemap`, `layers`, `layerGroups`, `bookmarks`, `search`, `legend`, `quickFilters`, `featureDetails`, `layerPanel`, `toolbar`, `tools`, `height`, `heightMode`, `minHeight`, `aspectRatio`, `order`, `responsive`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `featureDetails`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `minHeight`, `order`, `props`, `responsive`, `search`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tools`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `basemap`, `bookmarks`, `className`, `css`, `data`, `dataset`, `disabled`, `engine`, `featureDetails`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `layerGroups`, `layerPanel`, `layers`, `legend`, `minHeight`, `order`, `props`, `quickFilters`, `responsive`, `search`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `toolbar`, `tools`, `tooltip`, `type`, `uiAction`, `variant`, `view`, `visibility`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 

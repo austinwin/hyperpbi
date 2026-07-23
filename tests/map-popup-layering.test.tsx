@@ -8,12 +8,16 @@ const detailsRuntime = readFileSync("src/components/maps/MapFeatureDetails.tsx",
 describe("canonical map feature-details layering", () => {
   it("keeps vectors, labels, tooltips, details, toolbar, and popovers in explicit order", () => {
     expect(leafletRuntime).toContain('tooltipPane.style.zIndex = "850"');
-    expect(leafletRuntime).toContain("400 + index");
+    expect(leafletRuntime).toContain("mapLayerPaneZIndex(layer, index)");
+    expect(leafletRuntime).toContain('layer.geometryType === "polygon"');
+    expect(leafletRuntime).toContain('layer.geometryType === "polyline"');
+    expect(leafletRuntime).toContain('addPattern("hp-map-pattern-crosshatch"');
     expect(leafletRuntime).toContain("600 + index");
     expect(leafletRuntime).not.toContain("popupPaneName");
     expect(mapCss).toContain("--hp-map-z-toolbar: 900");
     expect(mapCss).toContain("--hp-map-z-details: 1000");
     expect(mapCss).toContain("--hp-map-z-popover: 1100");
+    expect(mapCss).toContain('.hp-map-fill-pattern-dots { fill: url("#hp-map-pattern-dots"); }');
     expect(mapCss).toMatch(/\.hp-map-viewport-clip\s*\{[^}]*overflow:\s*hidden/);
     expect(mapCss).toMatch(/\.hp-map-overlay-root\s*\{[^}]*overflow:\s*visible/);
   });

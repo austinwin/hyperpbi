@@ -59,6 +59,9 @@ export type ResolvedMapRendererType =
     | "classBreaks"
     | "continuousColor"
     | "proportionalSize"
+    | "icon"
+    | "line"
+    | "polygon"
     | "heatmap"
     | "cluster"
     | "densityGrid";
@@ -100,7 +103,12 @@ export interface ResolvedMapRenderer {
     radius?: number;
     blur?: number;
     minOpacity?: number;
+    maxIntensity?: number;
     heatGradient?: Record<number, string>;
+    minZoom?: number;
+    maxZoom?: number;
+    normalization?: "global" | "viewport";
+    interactivePoints?: boolean;
 
     // Cluster
     clusterRadius?: number;
@@ -112,7 +120,7 @@ export interface ResolvedMapRenderer {
 }
 
 export interface ResolvedMapSymbol {
-    shape?: "circle" | "square" | "diamond" | "triangle" | "line" | "fill";
+    shape?: "circle" | "square" | "diamond" | "triangle" | "icon" | "line" | "fill";
     color?: string;
     fillColor?: string;
     size?: number;
@@ -124,6 +132,35 @@ export interface ResolvedMapSymbol {
     outlineColor?: string;
     outlineWidth?: number;
     dashArray?: string;
+    dashStyle?: "solid" | "dash" | "dot" | "dashDot";
+    lineCap?: "butt" | "round" | "square";
+    lineJoin?: "miter" | "round" | "bevel";
+    fillPattern?: "none" | "diagonal" | "crosshatch" | "dots";
+    icon?: import("../../schema/mapSchema").MapIconDefinition;
+    iconField?: string;
+    iconFieldSource?: "powerbi" | "service" | "joined";
+    iconMap?: Record<string, import("../../schema/mapSchema").MapIconDefinition>;
+    rotation?: number;
+    rotationField?: string;
+    rotationFieldSource?: "powerbi" | "service" | "joined";
+    sizeField?: string;
+    sizeFieldSource?: "powerbi" | "service" | "joined";
+    colorField?: string;
+    colorFieldSource?: "powerbi" | "service" | "joined";
+    colorMap?: Record<string, string>;
+    markerText?: string;
+    markerTextField?: string;
+    markerTextFieldSource?: "powerbi" | "service" | "joined";
+    badge?: string;
+    badgeField?: string;
+    badgeFieldSource?: "powerbi" | "service" | "joined";
+    showValue?: boolean;
+    anchor?: [number, number];
+    offset?: [number, number];
+    selectedStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+    hoverStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+    externalHighlightStyle?: import("../../schema/mapSchema").MapSymbolStateDefinition;
+    dimmedOpacity?: number;
 }
 
 export interface ResolvedClassBreak {
@@ -326,6 +363,7 @@ export interface ResolvedTileConfig {
     attribution?: string;
     minZoom?: number;
     maxZoom?: number;
+    subdomains?: string | string[];
 }
 
 // ── Resolved Dynamic Configuration ────────────────────────────────────
@@ -377,6 +415,22 @@ export interface ResolvedMapLayer {
         visible?: boolean;
         title?: string;
         collapsed?: boolean;
+        type?: import("../../schema/mapSchema").MapLayerDefinition["legend"] extends infer T ? T extends object ? T["type" & keyof T] : never : never;
+        interactive?: boolean;
+        selectionMode?: "single" | "multiple";
+        clickAction?: "filterLayer" | "filterMap" | "highlight" | "select";
+        hoverAction?: "none" | "highlight";
+        showCounts?: boolean;
+        showPercentages?: boolean;
+        valueField?: string;
+        valueFieldSource?: "powerbi" | "service" | "joined";
+        valueAggregation?: "sum" | "avg" | "min" | "max";
+        search?: boolean;
+        maxHeight?: number;
+        order?: unknown[];
+        labels?: Record<string, string>;
+        externalInteraction?: boolean;
+        internalInteraction?: boolean;
     };
     extent?: GeoJSON.BBox;
     diagnostics: MapLayerDiagnostics;

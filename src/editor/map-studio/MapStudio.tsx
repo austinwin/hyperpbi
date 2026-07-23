@@ -62,6 +62,7 @@ type PropertyTab =
   | "join"
   | "visibility"
   | "interaction"
+  | "legend"
   | "performance"
   | "diagnostics";
 type PropertyGroup = "Data" | "Appearance" | "Interaction" | "Advanced";
@@ -74,6 +75,7 @@ const propertyTabs: readonly { id: PropertyTab; label: string; group: PropertyGr
   { id: "popup", label: "Feature details", group: "Interaction" },
   { id: "visibility", label: "Visibility", group: "Interaction" },
   { id: "interaction", label: "Interactions", group: "Interaction" },
+  { id: "legend", label: "Legend", group: "Interaction" },
   { id: "performance", label: "Performance", group: "Advanced" },
   { id: "diagnostics", label: "Diagnostics", group: "Advanced" },
 ];
@@ -86,12 +88,13 @@ function propertyTabSupported(
   const capability = resolveMapLayerCapabilities(sourceType);
   if (tab === "join") return capability.join;
   if (tab === "renderer" || tab === "labels")
-    return sourceType === "powerbi" || sourceType === "arcgisFeature";
+    return sourceType === "powerbi" || sourceType === "arcgisFeature" || sourceType === "geoJson";
   if (tab === "popup") return capability.popup;
   if (tab === "tooltip") return capability.tooltip;
   if (tab === "interaction") return capability.selection;
+  if (tab === "legend") return sourceType !== "arcgisTile" && sourceType !== "arcgisDynamic" && sourceType !== "xyz";
   if (tab === "performance")
-    return sourceType === "powerbi" || sourceType === "arcgisFeature";
+    return sourceType === "powerbi" || sourceType === "arcgisFeature" || sourceType === "geoJson";
   return true;
 }
 const object = (value: unknown): value is Json =>
@@ -464,7 +467,11 @@ export function MapStudio({
           ? "arcgis-feature"
           : type === "arcgisTile"
             ? "arcgis-tile"
-            : "arcgis-dynamic",
+            : type === "arcgisDynamic"
+              ? "arcgis-dynamic"
+              : type === "geoJson"
+                ? "geojson"
+                : "xyz-tile",
     );
     const source =
       type === "powerbi" ? { type, bindings: {} } : { type, url: "" };
@@ -481,7 +488,11 @@ export function MapStudio({
                   ? "ArcGIS feature layer"
                   : type === "arcgisTile"
                     ? "ArcGIS tile layer"
-                    : "ArcGIS dynamic layer",
+                    : type === "arcgisDynamic"
+                      ? "ArcGIS dynamic layer"
+                      : type === "geoJson"
+                        ? "GeoJSON layer"
+                        : "XYZ tile layer",
             source,
           } as MapLayerDefinition,
         ];
@@ -843,6 +854,8 @@ export function MapStudio({
                   ["arcgisFeature", "ArcGIS feature layer"],
                   ["arcgisTile", "ArcGIS tile layer"],
                   ["arcgisDynamic", "ArcGIS dynamic layer"],
+                  ["geoJson", "GeoJSON layer"],
+                  ["xyz", "XYZ tile layer"],
                 ] as const).map(([type, label]) => (
                   <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
                 ))}
@@ -859,6 +872,7 @@ export function MapStudio({
               map={map}
               mutateMap={mutateMap}
               liveViewport={liveViewport}
+              fields={fields}
             />
           ) : layer ? (
             <>
@@ -990,6 +1004,13 @@ export function MapStudio({
                 )}
                 {propertyTab === "interaction" && (
                   <InteractionEditor
+                    layer={layer}
+                    fieldSets={fieldSets}
+                    mutate={mutateLayer}
+                  />
+                )}
+                {propertyTab === "legend" && (
+                  <LegendEditor
                     layer={layer}
                     fieldSets={fieldSets}
                     mutate={mutateLayer}
@@ -1140,6 +1161,8 @@ export function MapStudio({
       arcgisFeature: "ArcGIS Feature",
       arcgisDynamic: "ArcGIS Dynamic",
       arcgisTile: "ArcGIS Tile",
+      geoJson: "GeoJSON",
+      xyz: "XYZ Tile",
     };
     const authoredIndex = map?.layers?.findIndex(
       (candidate) => candidate.id === item.id,
@@ -1419,8 +1442,8 @@ function SourceEditor({
       ) : (
         <>
           <DraftInput
-            label="Public service URL"
-            ariaLabel="ArcGIS service URL"
+            label={layer.source.type === "geoJson" ? "Approved GeoJSON URL" : layer.source.type === "xyz" ? "XYZ URL template" : "Public service URL"}
+            ariaLabel={layer.source.type === "geoJson" ? "GeoJSON URL" : layer.source.type === "xyz" ? "XYZ tile URL" : "ArcGIS service URL"}
             value={String(source.url ?? "")}
             onCommit={(value) =>
               mutate((candidate) => {
@@ -1429,9 +1452,42 @@ function SourceEditor({
               })
             }
           />
-          <button onClick={() => inspect()} disabled={metadata.loading}>
-            {metadata.loading ? "Inspecting…" : "Fetch service metadata"}
-          </button>
+          {layer.source.type.startsWith("arcgis") && (
+            <button onClick={() => inspect()} disabled={metadata.loading}>
+              {metadata.loading ? "Inspecting…" : "Fetch service metadata"}
+            </button>
+          )}
+          {layer.source.type === "geoJson" && (
+            <>
+              <DraftInput
+                label="Feature ID field"
+                value={layer.source.idField ?? ""}
+                onCommit={(value) => mutate((candidate) => {
+                  if (candidate.source.type === "geoJson") candidate.source.idField = value || undefined;
+                })}
+              />
+              <label>
+                <span>Refresh interval (minutes)</span>
+                <input type="number" min="1" value={layer.source.refreshIntervalMinutes ?? ""} onChange={(event) => mutate((candidate) => {
+                  if (candidate.source.type === "geoJson") candidate.source.refreshIntervalMinutes = event.currentTarget.value ? Number(event.currentTarget.value) : undefined;
+                })} />
+              </label>
+              <small>Use Advanced JSON for small inline FeatureCollections. Remote requests remain subject to provider and host policy.</small>
+            </>
+          )}
+          {layer.source.type === "xyz" && (
+            <>
+              <DraftInput label="Attribution" value={layer.source.attribution ?? ""} onCommit={(value) => mutate((candidate) => {
+                if (candidate.source.type === "xyz") candidate.source.attribution = value || undefined;
+              })} />
+              <label><span>Minimum zoom</span><input type="number" value={layer.source.minZoom ?? ""} onChange={(event) => mutate((candidate) => {
+                if (candidate.source.type === "xyz") candidate.source.minZoom = event.currentTarget.value ? Number(event.currentTarget.value) : undefined;
+              })} /></label>
+              <label><span>Maximum zoom</span><input type="number" value={layer.source.maxZoom ?? ""} onChange={(event) => mutate((candidate) => {
+                if (candidate.source.type === "xyz") candidate.source.maxZoom = event.currentTarget.value ? Number(event.currentTarget.value) : undefined;
+              })} /></label>
+            </>
+          )}
           {metadata.result && (
             <output>
               {metadata.result.name ?? metadata.result.serviceType}:{" "}
@@ -1918,6 +1974,25 @@ function RendererEditor({
           radius: 6,
         },
       },
+      icon: {
+        type: "icon",
+        symbol: {
+          shape: "icon",
+          radius: 12,
+          icon: { type: "builtIn", name: "location" },
+          fillColor: "#2563eb",
+          selectedStyle: { outlineColor: "#f59e0b", outlineWidth: 4 },
+          hoverStyle: { outlineColor: "#06b6d4", outlineWidth: 3 },
+        },
+      },
+      line: {
+        type: "line",
+        symbol: { shape: "line", color: "#2563eb", weight: 4, lineCap: "round", lineJoin: "round" },
+      },
+      polygon: {
+        type: "polygon",
+        symbol: { shape: "fill", fillColor: "#60a5fa", outlineColor: "#1d4ed8", fillOpacity: 0.45, weight: 2 },
+      },
       uniqueValue: {
         type: "uniqueValue",
         field: any,
@@ -1975,6 +2050,7 @@ function RendererEditor({
     setRenderer(defaults[next]);
   };
   const r = renderer as unknown as Json;
+  const symbol = object(r.symbol) ? r.symbol : {};
   const fieldSource = String(
     r.fieldSource ?? defaultSource,
   ) as MapAttributeSource;
@@ -2046,6 +2122,9 @@ function RendererEditor({
           {[
             "service",
             "simple",
+            "icon",
+            "line",
+            "polygon",
             "uniqueValue",
             "classBreaks",
             "continuousColor",
@@ -2058,13 +2137,13 @@ function RendererEditor({
           ))}
         </select>
       </label>
-      {["heatmap", "densityGrid"].includes(type) && (
+      {type === "densityGrid" && (
         <p class="hp-map-experimental">
-          Experimental: bounded fallback preview; capability limitations remain
+          Experimental: bounded density-grid preview; capability limitations remain
           visible in diagnostics.
         </p>
       )}
-      {type === "simple" && (
+      {["simple", "icon", "line", "polygon"].includes(type) && (
         <>
           <label>
             <span>Point shape</span>
@@ -2087,6 +2166,9 @@ function RendererEditor({
               <option value="square">square</option>
               <option value="diamond">diamond</option>
               <option value="triangle">triangle</option>
+              <option value="icon">icon</option>
+              <option value="line">line</option>
+              <option value="fill">fill</option>
             </select>
           </label>
           <DraftInput
@@ -2125,6 +2207,61 @@ function RendererEditor({
             />
           </label>
         </>
+      )}
+      {type === "icon" && (
+        <fieldset>
+          <legend>Rich icon</legend>
+          <label>
+            <span>Built-in icon</span>
+            <select
+              aria-label="Built-in map icon"
+              value={object(symbol.icon) ? String(symbol.icon.name ?? "location") : "location"}
+              onChange={(event) => setRenderer({
+                ...r,
+                symbol: { ...symbol, shape: "icon", icon: { type: "builtIn", name: event.currentTarget.value } },
+              })}
+            >
+              {["location", "pin", "home", "user", "alert", "activity", "map", "database"].map((name) => <option value={name}>{name}</option>)}
+            </select>
+          </label>
+          <FieldSelect label="Icon mapping field" value={String(symbol.iconField ?? "")} fields={selectableFields} onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, iconField: value || undefined, iconFieldSource: fieldSource } })} />
+          <DraftInput
+            label="Icon mapping JSON"
+            value={object(symbol.iconMap) ? JSON.stringify(symbol.iconMap) : ""}
+            onCommit={(value) => {
+              let iconMap: Json | undefined;
+              try { iconMap = value ? JSON.parse(value) as Json : undefined; } catch { return; }
+              setRenderer({ ...r, symbol: { ...symbol, iconMap } });
+            }}
+          />
+          <FieldSelect label="Rotation field" value={String(symbol.rotationField ?? "")} fields={selectableFields} numeric onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, rotationField: value || undefined, rotationFieldSource: fieldSource } })} />
+          <FieldSelect label="Size field" value={String(symbol.sizeField ?? "")} fields={selectableFields} numeric onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, sizeField: value || undefined, sizeFieldSource: fieldSource } })} />
+          <FieldSelect label="Color field" value={String(symbol.colorField ?? "")} fields={selectableFields} onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, colorField: value || undefined, colorFieldSource: fieldSource } })} />
+          <DraftInput label="Marker text" value={String(symbol.markerText ?? "")} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, markerText: value || undefined } })} />
+          <DraftInput label="Marker badge" value={String(symbol.badge ?? "")} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, badge: value || undefined } })} />
+        </fieldset>
+      )}
+      {["line", "polygon"].includes(type) && (
+        <fieldset>
+          <legend>Stroke and fill</legend>
+          <label><span>Dash style</span><select value={String(symbol.dashStyle ?? "solid")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, dashStyle: event.currentTarget.value } })}>
+            <option value="solid">Solid</option><option value="dash">Dash</option><option value="dot">Dot</option><option value="dashDot">Dash-dot</option>
+          </select></label>
+          <label><span>Line cap</span><select value={String(symbol.lineCap ?? "round")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, lineCap: event.currentTarget.value } })}>
+            <option value="round">Round</option><option value="butt">Butt</option><option value="square">Square</option>
+          </select></label>
+          <label><span>Line join</span><select value={String(symbol.lineJoin ?? "round")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, lineJoin: event.currentTarget.value } })}>
+            <option value="round">Round</option><option value="miter">Miter</option><option value="bevel">Bevel</option>
+          </select></label>
+        </fieldset>
+      )}
+      {["simple", "icon", "line", "polygon"].includes(type) && (
+        <fieldset>
+          <legend>Interaction styles</legend>
+          <DraftInput label="Selected outline color" value={object(symbol.selectedStyle) ? String(symbol.selectedStyle.outlineColor ?? "") : ""} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, selectedStyle: { ...(object(symbol.selectedStyle) ? symbol.selectedStyle : {}), outlineColor: value || undefined } } })} />
+          <DraftInput label="Hover outline color" value={object(symbol.hoverStyle) ? String(symbol.hoverStyle.outlineColor ?? "") : ""} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, hoverStyle: { ...(object(symbol.hoverStyle) ? symbol.hoverStyle : {}), outlineColor: value || undefined } } })} />
+          <label><span>Dimmed opacity</span><input type="number" min="0" max="1" step="0.05" value={Number(symbol.dimmedOpacity ?? 0.2)} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, dimmedOpacity: Number(event.currentTarget.value) } })} /></label>
+        </fieldset>
       )}
       {!["service", "simple"].includes(type) &&
         (type !== "cluster" || r.clusterLabel === "sum") && (
@@ -2338,6 +2475,17 @@ function RendererEditor({
             />
           </label>
         </>
+      )}
+      {type === "heatmap" && (
+        <fieldset>
+          <legend>Heatmap canvas</legend>
+          <label><span>Radius</span><input type="number" min="4" max="120" value={Number(r.radius ?? 25)} onChange={(event) => setRenderer({ ...r, radius: Number(event.currentTarget.value) })} /></label>
+          <label><span>Blur</span><input type="number" min="0" max="80" value={Number(r.blur ?? 18)} onChange={(event) => setRenderer({ ...r, blur: Number(event.currentTarget.value) })} /></label>
+          <label><span>Minimum opacity</span><input type="number" min="0" max="1" step="0.05" value={Number(r.minOpacity ?? 0.05)} onChange={(event) => setRenderer({ ...r, minOpacity: Number(event.currentTarget.value) })} /></label>
+          <label><span>Maximum intensity</span><input type="number" min="0" value={r.maxIntensity === undefined ? "" : Number(r.maxIntensity)} onChange={(event) => setRenderer({ ...r, maxIntensity: event.currentTarget.value ? Number(event.currentTarget.value) : undefined })} /></label>
+          <label><span>Normalization</span><select value={String(r.normalization ?? "global")} onChange={(event) => setRenderer({ ...r, normalization: event.currentTarget.value })}><option value="global">Global</option><option value="viewport">Visible viewport</option></select></label>
+          <label><input type="checkbox" checked={r.interactivePoints !== false} onChange={(event) => setRenderer({ ...r, interactivePoints: event.currentTarget.checked })} /> Keep transparent selectable source points</label>
+        </fieldset>
       )}
       {type === "cluster" && (
         <>
@@ -3516,6 +3664,51 @@ function VisibilityEditor({
   );
 }
 
+function LegendEditor({
+  layer,
+  fieldSets,
+  mutate,
+}: {
+  layer: MapLayerDefinition;
+  fieldSets: Record<MapAttributeSource, NormalizedField[]>;
+  mutate: (fn: (layer: MapLayerDefinition) => void) => boolean;
+}) {
+  const legend = layer.legend ?? {};
+  const defaultSource: MapAttributeSource = layer.source.type === "powerbi"
+    ? "powerbi"
+    : layer.source.type === "arcgisFeature" && layer.source.mode === "join"
+      ? "joined"
+      : "service";
+  const source = legend.valueFieldSource ?? defaultSource;
+  const set = (patch: Json) => mutate((candidate) => {
+    candidate.legend = { ...(candidate.legend ?? {}), ...patch };
+  });
+  return (
+    <div class="hp-map-form-grid">
+      <label><input type="checkbox" checked={legend.visible !== false} onChange={(event) => set({ visible: event.currentTarget.checked })} /> Show legend</label>
+      <DraftInput label="Legend title" value={legend.title ?? ""} onCommit={(value) => set({ title: value || undefined })} />
+      <label><span>Legend type</span><select value={legend.type ?? "auto"} onChange={(event) => set({ type: event.currentTarget.value })}>
+        {["auto", "categorical", "classBreaks", "continuousColor", "proportionalSize", "icon", "line", "polygon", "heatIntensity", "combined"].map((value) => <option value={value}>{value}</option>)}
+      </select></label>
+      <label><input type="checkbox" checked={legend.interactive !== false} onChange={(event) => set({ interactive: event.currentTarget.checked })} /> Clickable entries</label>
+      <label><span>Entry selection</span><select value={legend.selectionMode ?? "multiple"} onChange={(event) => set({ selectionMode: event.currentTarget.value })}><option value="single">Single</option><option value="multiple">Multiple</option></select></label>
+      <label><span>Click action</span><select aria-label="Legend interaction mode" value={legend.clickAction ?? "filterLayer"} onChange={(event) => set({ clickAction: event.currentTarget.value })}>
+        <option value="filterLayer">Filter current layer</option><option value="filterMap">Filter full map</option><option value="highlight">Highlight</option><option value="select">Select features / interact</option>
+      </select></label>
+      <label><span>Hover action</span><select value={legend.hoverAction ?? "highlight"} onChange={(event) => set({ hoverAction: event.currentTarget.value })}><option value="highlight">Highlight matching features</option><option value="none">None</option></select></label>
+      <label><input type="checkbox" checked={legend.showCounts !== false} onChange={(event) => set({ showCounts: event.currentTarget.checked })} /> Feature counts</label>
+      <label><input type="checkbox" checked={legend.showPercentages === true} onChange={(event) => set({ showPercentages: event.currentTarget.checked })} /> Percentages</label>
+      <label><input type="checkbox" checked={legend.search !== false} onChange={(event) => set({ search: event.currentTarget.checked })} /> Search for long legends</label>
+      <label><span>Value field source</span><select value={source} onChange={(event) => set({ valueFieldSource: event.currentTarget.value, valueField: undefined })}><option value="powerbi">Power BI</option><option value="service">Service / GeoJSON</option><option value="joined">Joined</option></select></label>
+      <FieldSelect label="Aggregated value field" value={legend.valueField ?? ""} fields={fieldSets[source]} numeric onChange={(value) => set({ valueField: value || undefined })} />
+      <label><span>Value aggregation</span><select value={legend.valueAggregation ?? "sum"} onChange={(event) => set({ valueAggregation: event.currentTarget.value })}><option value="sum">Sum</option><option value="avg">Average</option><option value="min">Minimum</option><option value="max">Maximum</option></select></label>
+      <label><input type="checkbox" checked={legend.externalInteraction === true} onChange={(event) => set({ externalInteraction: event.currentTarget.checked })} /> Send eligible Power BI interaction</label>
+      <label><input type="checkbox" checked={legend.collapsed === true} onChange={(event) => set({ collapsed: event.currentTarget.checked })} /> Start collapsed</label>
+      <DraftInput label="Authored order (comma separated)" value={(legend.order ?? []).map(String).join(", ")} onCommit={(value) => set({ order: value.split(",").map((entry) => entry.trim()).filter(Boolean) })} />
+    </div>
+  );
+}
+
 function InteractionEditor({
   layer,
   fieldSets,
@@ -3810,16 +4003,19 @@ function BasemapViewEditor({
   map,
   mutateMap,
   liveViewport,
+  fields,
 }: {
   map: MapComponent;
   mutateMap: (fn: (map: MapComponent) => void) => boolean;
   liveViewport?: MapViewportState;
+  fields: NormalizedField[];
 }) {
   const basemap = map.basemap ?? { type: "none" as const };
   const view = map.view ?? {};
   const bookmarks = map.bookmarks ?? [];
   const rectangleSelection = map.tools?.rectangleSelection;
   const lassoSelection = map.tools?.lassoSelection;
+  const circleSelection = map.tools?.circleSelection;
   const toolEnabled = (value: typeof rectangleSelection) =>
     value === true || (typeof value === "object" && value?.enabled !== false);
   const toolMode = (value: typeof rectangleSelection) =>
@@ -3901,7 +4097,7 @@ function BasemapViewEditor({
                     ...(candidate.tools ?? {}),
                     rectangleSelection: {
                       enabled: true,
-                      selectionMode: event.currentTarget.value as "replace" | "toggle" | "add",
+                      selectionMode: event.currentTarget.value as "replace" | "toggle" | "add" | "remove",
                     },
                   };
                 })
@@ -3910,6 +4106,7 @@ function BasemapViewEditor({
               <option value="replace">Replace</option>
               <option value="toggle">Toggle</option>
               <option value="add">Add</option>
+              <option value="remove">Subtract</option>
             </select>
           </label>
         )}
@@ -3949,7 +4146,7 @@ function BasemapViewEditor({
                       lassoSelection: {
                         enabled: true,
                         minimumPoints: typeof previous === "object" ? previous.minimumPoints ?? 3 : 3,
-                        selectionMode: event.currentTarget.value as "replace" | "toggle" | "add",
+                        selectionMode: event.currentTarget.value as "replace" | "toggle" | "add" | "remove",
                       },
                     };
                   })
@@ -3958,6 +4155,7 @@ function BasemapViewEditor({
                 <option value="replace">Replace</option>
                 <option value="toggle">Toggle</option>
                 <option value="add">Add</option>
+                <option value="remove">Subtract</option>
               </select>
             </label>
             <label>
@@ -3985,6 +4183,78 @@ function BasemapViewEditor({
           </>
         )}
         <p>Selections use canonical map lineage, update linked components, and synchronize eligible Power BI identities.</p>
+        <label>
+          <input type="checkbox" checked={toolEnabled(circleSelection)} onChange={(event) => mutateMap((candidate) => {
+            candidate.tools = {
+              ...(candidate.tools ?? {}),
+              circleSelection: event.currentTarget.checked
+                ? { enabled: true, selectionMode: toolMode(circleSelection) }
+                : false,
+            };
+            candidate.toolbar = { ...(candidate.toolbar ?? {}), circleSelection: event.currentTarget.checked, selection: true };
+          })} /> Circle / radius selection
+        </label>
+        {toolEnabled(circleSelection) && (
+          <label><span>Circle selection mode</span><select value={toolMode(circleSelection)} onChange={(event) => mutateMap((candidate) => {
+            candidate.tools = { ...(candidate.tools ?? {}), circleSelection: { enabled: true, selectionMode: event.currentTarget.value as "replace" | "toggle" | "add" | "remove" } };
+          })}><option value="replace">Replace</option><option value="add">Add</option><option value="remove">Subtract</option><option value="toggle">Toggle</option></select></label>
+        )}
+        <label><span>Maximum selected features</span><input type="number" min="1" max="100000" value={map.tools?.selection?.maxSelectionCount ?? 10000} onChange={(event) => mutateMap((candidate) => {
+          candidate.tools = { ...(candidate.tools ?? {}), selection: { ...(candidate.tools?.selection ?? {}), maxSelectionCount: Number(event.currentTarget.value) } };
+        })} /></label>
+        <label><span>Power BI identity limit</span><input type="number" min="1" max="10000" value={map.tools?.selection?.powerBiIdentityLimit ?? 1000} onChange={(event) => mutateMap((candidate) => {
+          candidate.tools = { ...(candidate.tools ?? {}), selection: { ...(candidate.tools?.selection ?? {}), powerBiIdentityLimit: Number(event.currentTarget.value) } };
+        })} /></label>
+        <label><input type="checkbox" checked={map.tools?.scaleBar === true || typeof map.tools?.scaleBar === "object"} onChange={(event) => mutateMap((candidate) => {
+          candidate.tools = { ...(candidate.tools ?? {}), scaleBar: event.currentTarget.checked ? { enabled: true, metric: true } : false };
+        })} /> Scale bar</label>
+        <label><input type="checkbox" checked={map.tools?.coordinateDisplay === true || typeof map.tools?.coordinateDisplay === "object"} onChange={(event) => mutateMap((candidate) => {
+          candidate.tools = { ...(candidate.tools ?? {}), coordinateDisplay: event.currentTarget.checked ? { enabled: true, precision: 5 } : false };
+        })} /> Coordinate display</label>
+      </fieldset>
+      <fieldset>
+        <legend>Interactive legend</legend>
+        <label><input type="checkbox" checked={map.legend?.enabled !== false} onChange={(event) => mutateMap((candidate) => {
+          candidate.legend = { ...(candidate.legend ?? {}), enabled: event.currentTarget.checked };
+          candidate.toolbar = { ...(candidate.toolbar ?? {}), legend: event.currentTarget.checked };
+        })} /> Legend tool</label>
+        <label><input type="checkbox" checked={map.legend?.defaultOpen === true} onChange={(event) => mutateMap((candidate) => {
+          candidate.legend = { ...(candidate.legend ?? {}), defaultOpen: event.currentTarget.checked };
+        })} /> Open by default</label>
+        <label><span>Toolbar position</span><select value={map.toolbar?.position ?? "topright"} onChange={(event) => mutateMap((candidate) => {
+          candidate.toolbar = { ...(candidate.toolbar ?? {}), position: event.currentTarget.value as "topleft" };
+        })}><option value="topleft">Top left</option><option value="topright">Top right</option><option value="bottomleft">Bottom left</option><option value="bottomright">Bottom right</option></select></label>
+      </fieldset>
+      <fieldset>
+        <legend>Map quick filters</legend>
+        <button type="button" disabled={!fields.length} onClick={() => mutateMap((candidate) => {
+          const index = (candidate.quickFilters?.length ?? 0) + 1;
+          candidate.quickFilters = [...(candidate.quickFilters ?? []), {
+            id: `filter-${index}`,
+            label: fields[0]?.displayName ?? fields[0]?.key ?? `Filter ${index}`,
+            type: "categorical",
+            field: fields[0]?.key ?? "",
+            fieldSource: "powerbi",
+            multiSelect: true,
+          }];
+          candidate.toolbar = { ...(candidate.toolbar ?? {}), quickFilters: true };
+        })}>Add quick filter</button>
+        {(map.quickFilters ?? []).map((filter, index) => (
+          <div class="hp-map-class-edit">
+            <DraftInput ariaLabel={`Quick filter ${index + 1} label`} value={filter.label ?? ""} onCommit={(value) => mutateMap((candidate) => {
+              if (candidate.quickFilters?.[index]) candidate.quickFilters[index].label = value || undefined;
+            })} />
+            <select aria-label={`Quick filter ${index + 1} type`} value={filter.type} onChange={(event) => mutateMap((candidate) => {
+              if (candidate.quickFilters?.[index]) candidate.quickFilters[index].type = event.currentTarget.value as typeof filter.type;
+            })}>{["categorical", "numericRange", "dateRange", "text", "null", "topN"].map((value) => <option value={value}>{value}</option>)}</select>
+            <select aria-label={`Quick filter ${index + 1} field`} value={filter.field} onChange={(event) => mutateMap((candidate) => {
+              if (candidate.quickFilters?.[index]) candidate.quickFilters[index].field = event.currentTarget.value;
+            })}>{fields.map((field) => <option value={field.key}>{field.displayName}</option>)}</select>
+            <button type="button" aria-label={`Remove quick filter ${index + 1}`} onClick={() => mutateMap((candidate) => {
+              candidate.quickFilters = candidate.quickFilters?.filter((_item, itemIndex) => itemIndex !== index);
+            })}>Remove</button>
+          </div>
+        ))}
       </fieldset>
       <fieldset>
         <legend>Basemap gallery</legend>

@@ -1,13 +1,15 @@
 import type { ResolvedMapFeature, ResolvedMapLayer } from "../model/resolvedMapTypes";
 import { resolvedMapFeatureKey } from "../model/mapFeatureIdentity";
 import { buildMapFeatureSpatialIndex, queryMapFeatureSpatialIndex, type GeographicBounds } from "../performance/mapFeatureSpatialIndex";
+import { resolveAnalyticalSelection } from "./mapAnalyticalInteraction";
 
-export type MapSelectionTool = "rectangle" | "lasso";
+export type MapSelectionTool = "rectangle" | "lasso" | "circle";
 export type GeographicPoint = [latitude: number, longitude: number];
 export interface GeographicRectangle { west: number; south: number; east: number; north: number; }
 export type MapSelectionShape =
     | { type: "rectangle"; bounds: GeographicRectangle }
-    | { type: "lasso"; points: GeographicPoint[] };
+    | { type: "lasso"; points: GeographicPoint[] }
+    | { type: "circle"; center: GeographicPoint; radiusMeters: number };
 
 export interface MapSpatialSelectionResult {
     featureKeys: string[];
@@ -20,17 +22,9 @@ export interface MapSpatialSelectionResult {
 export function resolveMapFeatureSelection(
     current: readonly string[],
     incoming: readonly string[],
-    mode: "replace" | "add" | "toggle",
+    mode: "replace" | "add" | "remove" | "toggle" | "clear",
 ): string[] {
-    const uniqueIncoming = Array.from(new Set(incoming));
-    if (mode === "replace") return uniqueIncoming;
-    if (mode === "add") return Array.from(new Set([...current, ...uniqueIncoming]));
-    const selected = new Set(current);
-    for (const key of uniqueIncoming) {
-        if (selected.has(key)) selected.delete(key);
-        else selected.add(key);
-    }
-    return [...selected];
+    return resolveAnalyticalSelection(current, incoming, mode).featureKeys;
 }
 
 type LonLat = [longitude: number, latitude: number];
@@ -125,11 +119,15 @@ export function featureIntersectsSelection(feature: ResolvedMapFeature, shape: M
             [shape.bounds.east, shape.bounds.south],
             [shape.bounds.east, shape.bounds.north],
             [shape.bounds.west, shape.bounds.north],
-        ] : shape.points.map(([latitude, longitude]) => [longitude, latitude] as LonLat);
+        ] : shape.type === "circle"
+            ? circlePolygon(shape.center, shape.radiusMeters)
+            : shape.points.map(([latitude, longitude]) => [longitude, latitude] as LonLat);
     if (selection.length < 3) return false;
     const contains = shape.type === "rectangle"
         ? (point: LonLat) => pointInRectangle(point, shape.bounds)
-        : (point: LonLat) => pointInPolygon(point, selection);
+        : shape.type === "circle"
+            ? (point: LonLat) => distanceMeters(shape.center, [point[1], point[0]]) <= shape.radiusMeters
+            : (point: LonLat) => pointInPolygon(point, selection);
     if (geometryIntersectsSelection(feature.geometry, selection, contains)) return true;
     return feature.lat !== null && feature.lon !== null && Number.isFinite(feature.lat) && Number.isFinite(feature.lon)
         ? contains([feature.lon, feature.lat])
@@ -143,7 +141,9 @@ export function selectMapFeaturesByShape(
 ): MapSpatialSelectionResult {
     const shapePoints: LonLat[] = shape.type === "rectangle"
         ? [[shape.bounds.west, shape.bounds.south], [shape.bounds.east, shape.bounds.north]]
-        : shape.points.map(([latitude, longitude]) => [longitude, latitude]);
+        : shape.type === "circle"
+            ? circlePolygon(shape.center, shape.radiusMeters)
+            : shape.points.map(([latitude, longitude]) => [longitude, latitude]);
     if (shapePoints.length === 0) return { featureKeys: [], featureIds: [], sourceRowIndices: [], sourceRowKeys: [], matchedFeatureCount: 0 };
     const longitudes = shapePoints.map(point => point[0]);
     const latitudes = shapePoints.map(point => point[1]);
@@ -173,4 +173,34 @@ export function selectMapFeaturesByShape(
         sourceRowKeys: Array.from(sourceRowKeys),
         matchedFeatureCount: uniqueFeatureKeys.length,
     };
+}
+
+const EARTH_RADIUS_METERS = 6_371_008.8;
+
+function distanceMeters(left: GeographicPoint, right: GeographicPoint): number {
+    const radians = Math.PI / 180;
+    const latitudeDelta = (right[0] - left[0]) * radians;
+    const longitudeDelta = (right[1] - left[1]) * radians;
+    const a = Math.sin(latitudeDelta / 2) ** 2 +
+        Math.cos(left[0] * radians) * Math.cos(right[0] * radians) *
+        Math.sin(longitudeDelta / 2) ** 2;
+    return 2 * EARTH_RADIUS_METERS * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function circlePolygon(center: GeographicPoint, radiusMeters: number, vertices = 48): LonLat[] {
+    const angular = Math.max(0, radiusMeters) / EARTH_RADIUS_METERS;
+    const latitude = center[0] * Math.PI / 180;
+    const longitude = center[1] * Math.PI / 180;
+    return Array.from({ length: vertices }, (_value, index) => {
+        const bearing = index / vertices * Math.PI * 2;
+        const targetLatitude = Math.asin(
+            Math.sin(latitude) * Math.cos(angular) +
+            Math.cos(latitude) * Math.sin(angular) * Math.cos(bearing),
+        );
+        const targetLongitude = longitude + Math.atan2(
+            Math.sin(bearing) * Math.sin(angular) * Math.cos(latitude),
+            Math.cos(angular) - Math.sin(latitude) * Math.sin(targetLatitude),
+        );
+        return [targetLongitude * 180 / Math.PI, targetLatitude * 180 / Math.PI];
+    });
 }

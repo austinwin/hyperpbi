@@ -32,7 +32,7 @@ function pointImplementation(
     feature.geometry?.type === "Point";
   if (!isPoint) return "path";
   const shape = featureStyle(feature, renderer).shape;
-  return shape === "square" || shape === "diamond" || shape === "triangle"
+  return shape === "square" || shape === "diamond" || shape === "triangle" || shape === "icon"
     ? "icon"
     : "circle";
 }
@@ -93,6 +93,22 @@ export function resolvedLayerStructuralRevision(
               radius: layer.renderer.clusterRadius,
               disableAtZoom: layer.renderer.disableAtZoom,
               showCoverageOnHover: layer.renderer.showCoverageOnHover,
+            }
+          : undefined,
+      heatmap:
+        layer.renderer.type === "heatmap"
+          ? {
+              weightField: layer.renderer.weightField,
+              fieldSource: layer.renderer.fieldSource,
+              radius: layer.renderer.radius,
+              blur: layer.renderer.blur,
+              minOpacity: layer.renderer.minOpacity,
+              maxIntensity: layer.renderer.maxIntensity,
+              gradient: layer.renderer.heatGradient,
+              minZoom: layer.renderer.minZoom,
+              maxZoom: layer.renderer.maxZoom,
+              normalization: layer.renderer.normalization,
+              interactivePoints: layer.renderer.interactivePoints,
             }
           : undefined,
       features: layer.features.map((feature) => ({

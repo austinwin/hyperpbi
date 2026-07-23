@@ -1,9 +1,11 @@
 export type PlaygroundRoute =
     | { page: "home" }
+    | { page: "mapGallery" }
     | { page: "project"; projectId: string }
     | { page: "play"; projectId: string };
 
 export function currentRoute(pathname = globalThis.location?.pathname ?? "/"): PlaygroundRoute {
+    if (/^\/components\/map\/?$/.test(pathname)) return { page: "mapGallery" };
     const match = pathname.match(/^\/project\/([^/]+)(?:\/(play))?\/?$/);
     if (!match) return { page: "home" };
     return { page: match[2] ? "play" : "project", projectId: decodeURIComponent(match[1]) };

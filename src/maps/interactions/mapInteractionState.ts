@@ -1,4 +1,6 @@
 import type { MapFeatureKey } from "../model/mapFeatureIdentity";
+import type { MapSelectionOperation } from "../../schema/mapSchema";
+import { resolveAnalyticalSelection } from "./mapAnalyticalInteraction";
 
 export interface MapFeatureAnchor {
   lat: number;
@@ -33,6 +35,7 @@ export function activateMapFeature(
   state: MapInteractionState | undefined,
   feature: ActiveMapFeature,
   multiSelect: boolean,
+  operation?: MapSelectionOperation,
 ): MapInteractionState {
   const current = state ?? emptyMapInteractionState();
   const selectedFeaturesByKey: Partial<
@@ -44,29 +47,21 @@ export function activateMapFeature(
   )
     selectedFeaturesByKey[current.activeFeature.featureKey] =
       current.activeFeature;
-  let selectedFeatureKeys: MapFeatureKey[];
-  let activeFeature: ActiveMapFeature | undefined = feature;
-  if (!multiSelect) {
-    selectedFeatureKeys = [feature.featureKey];
-    for (const key of Object.keys(selectedFeaturesByKey))
-      if (key !== feature.featureKey) delete selectedFeaturesByKey[key];
-    selectedFeaturesByKey[feature.featureKey] = feature;
-  } else if (current.selectedFeatureKeys.includes(feature.featureKey)) {
-    selectedFeatureKeys = current.selectedFeatureKeys.filter(
-      (key) => key !== feature.featureKey,
-    );
-    delete selectedFeaturesByKey[feature.featureKey];
-    if (current.activeFeature?.featureKey === feature.featureKey) {
-      const nextActiveKey = selectedFeatureKeys.at(-1);
-      activeFeature = nextActiveKey
-        ? selectedFeaturesByKey[nextActiveKey]
-        : undefined;
-    } else {
-      activeFeature = current.activeFeature;
-    }
-  } else {
-    selectedFeatureKeys = [...current.selectedFeatureKeys, feature.featureKey];
-    selectedFeaturesByKey[feature.featureKey] = feature;
+  const effectiveOperation = operation ?? (multiSelect ? "toggle" : "replace");
+  const selectedFeatureKeys = resolveAnalyticalSelection(
+    current.selectedFeatureKeys,
+    [feature.featureKey],
+    effectiveOperation,
+  ).featureKeys as MapFeatureKey[];
+  const selectedSet = new Set(selectedFeatureKeys);
+  for (const key of Object.keys(selectedFeaturesByKey))
+    if (!selectedSet.has(key)) delete selectedFeaturesByKey[key];
+  if (selectedSet.has(feature.featureKey)) selectedFeaturesByKey[feature.featureKey] = feature;
+  let activeFeature: ActiveMapFeature | undefined =
+    selectedSet.has(feature.featureKey) ? feature : current.activeFeature;
+  if (activeFeature && !selectedSet.has(activeFeature.featureKey)) {
+    const nextActiveKey = selectedFeatureKeys.at(-1);
+    activeFeature = nextActiveKey ? selectedFeaturesByKey[nextActiveKey] : undefined;
   }
   return {
     ...current,

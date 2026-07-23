@@ -36,6 +36,10 @@ import {
   createLeafletPointLayer,
   updateLeafletPointLayerStyle,
 } from "./createLeafletPointLayer";
+import {
+  heatPointsFromFeatures,
+  LeafletHeatCanvasLayer,
+} from "./LeafletHeatCanvasLayer";
 import { featureAttribute } from "../../maps/attributes/mapFeatureAttributes";
 import { formatFeatureValue } from "../../maps/model/mapFeatureValue";
 import { normalizeFitPadding } from "../../maps/view/mapFitPadding";
@@ -68,11 +72,17 @@ import {
   type MapSpatialSelectionResult,
   type GeographicPoint,
 } from "../../maps/interactions/mapSpatialSelection";
+import {
+  resolveFeatureVisualState,
+  type MapFeatureVisualState,
+} from "../../maps/interactions/mapAnalyticalInteraction";
 
 const MAX_LASSO_DRAFT_POINTS = 2_000;
 
 export interface LeafletMapController {
   home(): void;
+  zoomIn(): void;
+  zoomOut(): void;
   zoomToSelection(): void;
   zoomToLayer(layerId: string): void;
   goToBookmark(bookmarkId: string): void;
@@ -136,7 +146,7 @@ export function LeafletMap({
   onMapClick?: (event: LeafletMapClickEvent) => boolean;
   identifyHighlight?: GeoJSON.GeoJsonObject | null;
   selectionTool?: MapSelectionTool | null;
-  onSpatialSelect?: (result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => void;
+  onSpatialSelect?: (result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean }) => void;
   onSpatialSelectionClear?: () => void;
   minimumLassoPoints?: number;
 }) {
@@ -146,6 +156,8 @@ export function LeafletMap({
   const vectorLayerRefs = useRef<Map<string, L.LayerGroup>>(new Map());
   const vectorGroupSignatureRefs = useRef<Map<string, string>>(new Map());
   const clusterLayerRefs = useRef<Map<string, L.MarkerClusterGroup>>(new Map());
+  const heatLayerRefs = useRef<Map<string, LeafletHeatCanvasLayer>>(new Map());
+  const heatLayerSignatureRefs = useRef<Map<string, string>>(new Map());
   const featureLayerRefs = useRef<
     Map<string, Map<string, MountedFeatureLayer>>
   >(new Map());
@@ -161,7 +173,7 @@ export function LeafletMap({
   const labelSignatureRefs = useRef<Map<string, string>>(new Map());
   const searchMarkerRef = useRef<L.CircleMarker | null>(null);
   const identifyHighlightRef = useRef<L.GeoJSON | null>(null);
-  const selectionShapeLayerRef = useRef<L.Rectangle | L.Polygon | null>(null);
+  const selectionShapeLayerRef = useRef<L.Rectangle | L.Polygon | L.Circle | null>(null);
   const selectionDraftRef = useRef<{ start: GeographicPoint; points: GeographicPoint[] } | null>(null);
   const selectionJustCompletedRef = useRef(false);
   const paneNamesRef = useRef<Map<string, string>>(new Map());
@@ -189,6 +201,8 @@ export function LeafletMap({
     new Set(context.state.mapInteractionState[id]?.selectedFeatureKeys ??
       context.state.mapSelectedFeatureIds[id] ?? []),
   );
+  const hoveredMapIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const externalRowKeysRef = useRef<ReadonlySet<string>>(new Set());
   const mapLayerStateRef = useRef(context.state.mapLayerState[id]);
   const onViewportChangeRef = useRef(onViewportChange);
   const onControllerReadyRef = useRef(onControllerReady);
@@ -215,6 +229,13 @@ export function LeafletMap({
       context.state.mapSelectedFeatureIds[id] ??
       [],
   );
+  hoveredMapIdsRef.current = new Set([
+    ...(context.state.mapInteractionState[id]?.hoveredFeatureKey
+      ? [context.state.mapInteractionState[id]!.hoveredFeatureKey!]
+      : []),
+    ...(context.state.mapUiState[id]?.legendHoveredFeatureKeys ?? []),
+  ]);
+  externalRowKeysRef.current = externalHighlightRowKeys(context.state, id, context.sourceRowKeys);
   mapLayerStateRef.current = context.state.mapLayerState[id];
   onViewportChangeRef.current = onViewportChange;
   onControllerReadyRef.current = onControllerReady;
@@ -284,7 +305,7 @@ export function LeafletMap({
     const mapCenter: [number, number] = view.center ?? settings.map.center;
     const mapZoom = view.zoom ?? settings.map.zoom;
     const map = L.map(ref.current, {
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
       // A canvas renderer fills its entire custom pane and intercepts clicks
       // intended for feature canvases in lower layer panes. SVG keeps pointer
@@ -295,6 +316,38 @@ export function LeafletMap({
     }).setView(mapCenter, mapZoom);
 
     mapRef.current = map;
+    const scaleDefinition = component.tools?.scaleBar;
+    const scaleEnabled = scaleDefinition === true ||
+      Boolean(scaleDefinition && typeof scaleDefinition === "object" && scaleDefinition.enabled !== false);
+    if (scaleEnabled) {
+      const settings = typeof scaleDefinition === "object" ? scaleDefinition : {};
+      L.control.scale({
+        position: settings.position ?? "bottomleft",
+        metric: settings.metric !== false,
+        imperial: settings.imperial === true,
+      }).addTo(map);
+    }
+    const coordinateDefinition = component.tools?.coordinateDisplay;
+    const coordinateEnabled = coordinateDefinition === true ||
+      Boolean(coordinateDefinition && typeof coordinateDefinition === "object" && coordinateDefinition.enabled !== false);
+    if (coordinateEnabled) {
+      const precision = typeof coordinateDefinition === "object"
+        ? Math.max(0, Math.min(8, coordinateDefinition.precision ?? 5))
+        : 5;
+      const CoordinateControl = L.Control.extend({
+        onAdd() {
+          const node = L.DomUtil.create("div", "hp-map-coordinate-display");
+          node.setAttribute("role", "status");
+          node.textContent = "—";
+          map.on("mousemove", (event: L.LeafletMouseEvent) => {
+            node.textContent = `${event.latlng.lat.toFixed(precision)}, ${event.latlng.lng.toFixed(precision)}`;
+          });
+          map.on("mouseout", () => { node.textContent = "—"; });
+          return node;
+        },
+      });
+      new CoordinateControl({ position: "bottomright" }).addTo(map);
+    }
     authoredViewSignatureRef.current = JSON.stringify([
       mapCenter[0],
       mapCenter[1],
@@ -332,6 +385,12 @@ export function LeafletMap({
         runProgrammaticMove(map, programmaticMoveCountRef, () => {
           map.setView(center, zoom, { animate: false });
         });
+      },
+      zoomIn() {
+        runProgrammaticMove(map, programmaticMoveCountRef, () => map.zoomIn());
+      },
+      zoomOut() {
+        runProgrammaticMove(map, programmaticMoveCountRef, () => map.zoomOut());
       },
       zoomToSelection() {
         const selBounds = L.latLngBounds([]);
@@ -621,7 +680,9 @@ export function LeafletMap({
       const style = { color: renderContextRef.current.settings.theme.primary, weight: 2, opacity: 0.9, fillOpacity: 0.12, interactive: false };
       selectionShapeLayerRef.current = tool === "rectangle"
         ? L.rectangle(L.latLngBounds([draft.start, point]), style)
-        : L.polygon([...draft.points, point], style);
+        : tool === "circle"
+          ? L.circle(draft.start, { ...style, radius: map.distance(draft.start, point) })
+          : L.polygon([...draft.points, point], style);
       selectionShapeLayerRef.current.addTo(map);
     };
     const onSelectionEnd = (event: L.LeafletMouseEvent) => {
@@ -640,7 +701,13 @@ export function LeafletMap({
               north: Math.max(draft.start[0], end[0]),
             },
           }
-        : { type: "lasso" as const, points: [...draft.points, end] };
+        : tool === "circle"
+          ? {
+              type: "circle" as const,
+              center: draft.start,
+              radiusMeters: map.distance(draft.start, end),
+            }
+          : { type: "lasso" as const, points: [...draft.points, end] };
       selectionDraftRef.current = null;
       removeSelectionShape();
       if (shape.type === "lasso" && shape.points.length < Math.max(3, minimumLassoPointsRef.current)) return;
@@ -651,6 +718,7 @@ export function LeafletMap({
         ctrlKey: Boolean(original?.ctrlKey),
         metaKey: Boolean(original?.metaKey),
         shiftKey: Boolean(original?.shiftKey),
+        altKey: Boolean(original?.altKey),
       });
     };
     map.on("mousedown", onSelectionStart);
@@ -689,6 +757,10 @@ export function LeafletMap({
       }
       featureLayerRefs.current.clear();
       clusterLayerRefs.current.clear();
+      for (const [, heatLayer] of heatLayerRefs.current)
+        if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+      heatLayerRefs.current.clear();
+      heatLayerSignatureRefs.current.clear();
       vectorGroupSignatureRefs.current.clear();
       if (identifyHighlightRef.current)
         map.removeLayer(identifyHighlightRef.current);
@@ -905,6 +977,10 @@ export function LeafletMap({
       vectorGroupSignatureRefs.current.delete(layerId);
       clusterLayerRefs.current.delete(layerId);
       featureLayerRefs.current.delete(layerId);
+      const heatLayer = heatLayerRefs.current.get(layerId);
+      if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+      heatLayerRefs.current.delete(layerId);
+      heatLayerSignatureRefs.current.delete(layerId);
       reportedRenderSignaturesRef.current.delete(layerId);
     }
     for (const [layerId, runtime] of labelLayerRefs.current) {
@@ -927,7 +1003,7 @@ export function LeafletMap({
     for (const [key, mounted] of arcGisTileRefs.current) {
       if (
         !resolvedLayers.some(
-          (layer) => layer.sourceType === "arcgisTile" && layer.id === key,
+          (layer) => (layer.sourceType === "arcgisTile" || layer.sourceType === "xyz") && layer.id === key,
         )
       ) {
         map.removeLayer(mounted.layer);
@@ -945,7 +1021,7 @@ export function LeafletMap({
         paneNamesRef.current.set(layer.id, paneName);
       }
       const pane = map.getPane(paneName);
-      if (pane) pane.style.zIndex = String(400 + index);
+      if (pane) pane.style.zIndex = String(mapLayerPaneZIndex(layer, index));
       const labelPaneName = `${paneName}-labels`;
       if (!map.getPane(labelPaneName)) map.createPane(labelPaneName);
       const labelPane = map.getPane(labelPaneName);
@@ -982,8 +1058,11 @@ export function LeafletMap({
 
       const renderer = layer.renderer as ResolvedMapRenderer;
       const useCluster = renderer.type === "cluster";
+      const useHeatmap = renderer.type === "heatmap";
       const groupSignature = stableSerialize({
         useCluster,
+        useHeatmap,
+        interactivePoints: renderer.interactivePoints,
         clusterRadius: renderer.clusterRadius,
         disableAtZoom: renderer.disableAtZoom,
         showCoverageOnHover: renderer.showCoverageOnHover,
@@ -1076,6 +1155,58 @@ export function LeafletMap({
         map.removeLayer(group);
       }
 
+      if (useHeatmap) {
+        const heatSignature = stableSerialize({
+          radius: renderer.radius,
+          blur: renderer.blur,
+          minOpacity: renderer.minOpacity,
+          maxIntensity: renderer.maxIntensity,
+          gradient: renderer.heatGradient,
+          normalization: renderer.normalization,
+          minZoom: renderer.minZoom,
+          maxZoom: renderer.maxZoom,
+        });
+        let heatLayer = heatLayerRefs.current.get(layer.id);
+        if (heatLayer && heatLayerSignatureRefs.current.get(layer.id) !== heatSignature) {
+          if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+          heatLayerRefs.current.delete(layer.id);
+          heatLayer = undefined;
+        }
+        if (!heatLayer) {
+          heatLayer = new LeafletHeatCanvasLayer(heatPointsFromFeatures(layer.features, renderer), {
+            pane: paneNamesRef.current.get(layer.id),
+            radius: renderer.radius ?? 25,
+            blur: renderer.blur ?? 18,
+            minOpacity: renderer.minOpacity ?? 0.05,
+            maxIntensity: renderer.maxIntensity,
+            gradient: renderer.heatGradient ?? {
+              0.15: "#2563eb",
+              0.35: "#06b6d4",
+              0.55: "#22c55e",
+              0.75: "#facc15",
+              1: "#dc2626",
+            },
+            normalization: renderer.normalization ?? "global",
+            minZoom: renderer.minZoom,
+            maxZoom: renderer.maxZoom,
+            opacity: layerOpacity,
+          });
+          heatLayerRefs.current.set(layer.id, heatLayer);
+          heatLayerSignatureRefs.current.set(layer.id, heatSignature);
+        } else {
+          heatLayer.setData(heatPointsFromFeatures(layer.features, renderer));
+          heatLayer.setOpacity(layerOpacity);
+        }
+        if (isVisible && visibleAtZoom) {
+          if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
+        } else if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+      } else {
+        const heatLayer = heatLayerRefs.current.get(layer.id);
+        if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+        heatLayerRefs.current.delete(layer.id);
+        heatLayerSignatureRefs.current.delete(layer.id);
+      }
+
       const activeFeatureKeys = new Set(
         layer.features.map((feature) => resolvedMapFeatureKey(id, layer, feature)),
       );
@@ -1088,6 +1219,12 @@ export function LeafletMap({
 
       const domain = rendererDomains.get(layer.id) ?? null;
       for (const feature of layer.features) {
+        if (useHeatmap && renderer.interactivePoints === false) {
+          const featureBounds = resolvedFeatureGeographicBounds(feature);
+          if (featureBounds) extendLeafletBounds(dataBounds, featureBounds);
+          hasAnyFeatures = true;
+          continue;
+        }
         const featureKey = resolvedMapFeatureKey(id, layer, feature);
         const selected =
           (selectedMapIdsRef.current.has(featureKey) ||
@@ -1101,9 +1238,16 @@ export function LeafletMap({
           domain,
           selectedRowKeysRef.current,
           selectedMapIdsRef.current,
+          externalRowKeysRef.current,
+          hoveredMapIdsRef.current,
           settings.theme.accent,
           featureKey,
         );
+        if (useHeatmap) {
+          style.opacity = 0.01;
+          style.fillOpacity = 0.01;
+          style.radius = Math.max(style.radius, 8);
+        }
         const featureRevision = resolveMapFeatureRevision(feature, layer, {
           pane: paneNamesRef.current.get(layer.id),
           clusterParent: useCluster,
@@ -1496,6 +1640,17 @@ if (interactionResult.cleared) {
       context.state.mapInteractionState[id]?.selectedFeatureKeys ??
         context.state.mapSelectedFeatureIds[id] ?? [],
     );
+    const hoveredFeatureKeySet = new Set([
+      ...(context.state.mapInteractionState[id]?.hoveredFeatureKey
+        ? [context.state.mapInteractionState[id]!.hoveredFeatureKey!]
+        : []),
+      ...(context.state.mapUiState[id]?.legendHoveredFeatureKeys ?? []),
+    ]);
+    const externalRowKeySet = externalHighlightRowKeys(
+      context.state,
+      id,
+      context.sourceRowKeys,
+    );
     for (const layer of renderedLayers) {
       const renderer = layer.renderer as ResolvedMapRenderer;
       const domain = rendererDomains.get(layer.id) ?? null;
@@ -1516,13 +1671,35 @@ if (interactionResult.cleared) {
           domain,
           selectedRowKeySet,
           selectedFeatureKeySet,
+          externalRowKeySet,
+          hoveredFeatureKeySet,
           settings.theme.accent,
           featureKey,
         );
+        if (layer.renderer.type === "heatmap") {
+          style.opacity = 0.01;
+          style.fillOpacity = 0.01;
+          style.radius = Math.max(style.radius ?? 0, 8);
+        }
         const powerBiSelected = feature.powerBiRowKeys.some((rowKey) =>
           selectedRowKeySet.has(rowKey),
         );
         const locallySelected = selectedFeatureKeySet.has(featureKey);
+        const visualState = resolveFeatureVisualState({
+          featureKey,
+          selectedFeatureKeys: selectedFeatureKeySet,
+          externalFeatureKeys: new Set(
+            feature.powerBiRowKeys.some((rowKey) => externalRowKeySet.has(rowKey))
+              ? [featureKey]
+              : [],
+          ),
+          hoveredFeatureKeys: hoveredFeatureKeySet,
+          hasEmphasis:
+            selectedFeatureKeySet.size > 0 ||
+            externalRowKeySet.size > 0 ||
+            hoveredFeatureKeySet.size > 0,
+        });
+        annotateLeafletFeatureState(mounted.leafletLayer, visualState);
         const revision = resolveMapFeatureRevision(feature, layer, {
           pane: paneNamesRef.current.get(layer.id),
           clusterParent: layer.renderer.type === "cluster",
@@ -1574,6 +1751,11 @@ if (interactionResult.cleared) {
     context.state.componentSelectedRowKeys[id],
     context.state.mapSelectedFeatureIds[id],
     context.state.mapInteractionState[id],
+    context.state.mapUiState[id]?.legendHoveredFeatureKeys,
+    context.state.componentSelectionScopes,
+    context.state.componentSelectionModes,
+    context.state.componentSelectionTargets,
+    context.state.componentSelectedRowKeys,
     context.state.mapLayerState[id]?.opacity,
     settings.theme.accent,
   ]);
@@ -1590,7 +1772,7 @@ if (interactionResult.cleared) {
       for (const [index, layer] of layers.entries()) {
         const paneName = paneNamesRef.current.get(layer.id);
         const pane = paneName ? map.getPane(paneName) : undefined;
-        if (pane) pane.style.zIndex = String(400 + index);
+        if (pane) pane.style.zIndex = String(mapLayerPaneZIndex(layer, index));
         const labelPane = paneName ? map.getPane(`${paneName}-labels`) : undefined;
         if (labelPane) labelPane.style.zIndex = String(600 + index);
         const show =
@@ -1710,8 +1892,25 @@ function effectiveLayerOrder(
   });
 }
 
+/**
+ * Keep broad filled geometry behind narrow geometry by default so overlapping
+ * polygons do not make lines and points impossible to target. Authored/viewer
+ * order remains authoritative within each analytical geometry band.
+ */
+function mapLayerPaneZIndex(layer: ResolvedMapLayer, orderIndex: number): number {
+  const relativeOrder = Math.min(Math.max(orderIndex, 0), 49);
+  if (isExternalLeafletLayer(layer)) return 300 + relativeOrder;
+  if (layer.renderer.type === "heatmap" || layer.renderer.type === "densityGrid")
+    return 350 + relativeOrder;
+  if (layer.geometryType === "polygon") return 400 + relativeOrder;
+  if (layer.geometryType === "polyline") return 500 + relativeOrder;
+  if (layer.geometryType === "point" || layer.geometryType === "multipoint")
+    return 550 + relativeOrder;
+  return 450 + relativeOrder;
+}
+
 function isExternalLeafletLayer(layer: ResolvedMapLayer): boolean {
-  return layer.sourceType === "arcgisTile" || layer.sourceType === "arcgisDynamic";
+  return layer.sourceType === "arcgisTile" || layer.sourceType === "xyz" || layer.sourceType === "arcgisDynamic";
 }
 
 function disposeMountedFeature(mounted: MountedFeatureLayer): void {
@@ -1744,6 +1943,11 @@ function pathStyle(
     opacity: clampOpacity(style.opacity * layerOpacity),
     weight: style.weight,
     dashArray: style.dashArray,
+    lineCap: style.lineCap,
+    lineJoin: style.lineJoin,
+    className: style.fillPattern && style.fillPattern !== "none"
+      ? `hp-map-fill-pattern-${style.fillPattern}`
+      : undefined,
   };
 }
 
@@ -1753,6 +1957,8 @@ function resolvedFeatureStyle(
   domain: [number, number] | null,
   selectedRowKeys: ReadonlySet<string>,
   selectedMapIds: ReadonlySet<string>,
+  externalRowKeys: ReadonlySet<string>,
+  hoveredMapIds: ReadonlySet<string>,
   accent: string,
   featureKey: MapFeatureKey,
 ): LeafletFeatureStyle {
@@ -1766,14 +1972,58 @@ function resolvedFeatureStyle(
     feature.powerBiRowKeys.some((rowKey) => selectedRowKeys.has(rowKey)) ||
     selectedMapIds.has(featureKey) ||
     selectedMapIds.has(feature.id);
-  if (selected)
+  const externallyHighlighted = feature.powerBiRowKeys.some((rowKey) =>
+    externalRowKeys.has(rowKey),
+  );
+  const hovered = hoveredMapIds.has(featureKey) || hoveredMapIds.has(feature.id);
+  const hasEmphasis =
+    selectedMapIds.size > 0 ||
+    selectedRowKeys.size > 0 ||
+    externalRowKeys.size > 0 ||
+    hoveredMapIds.size > 0;
+  if (hasEmphasis && !selected && !externallyHighlighted && !hovered) {
+    const dim = style.dimmedOpacity ?? 0.2;
     style = {
       ...style,
+      opacity: style.opacity * dim,
+      fillOpacity: style.fillOpacity * dim,
+    };
+  }
+  if (externallyHighlighted)
+    style = applySymbolState(style, style.externalHighlightStyle, {
+      color: "#f59e0b",
+      weight: Math.max(style.weight + 1, 3),
+      dashArray: style.dashArray ?? "5 3",
+      radius: style.radius + 1,
+    });
+  if (hovered)
+    style = applySymbolState(style, style.hoverStyle, {
+      color: "#06b6d4",
+      weight: Math.max(style.weight + 2, 4),
+      radius: style.radius + 2,
+    });
+  if (selected)
+    style = applySymbolState(style, style.selectedStyle, {
       color: accent,
       weight: Math.max(style.weight + 2, 4),
-      radius: (style.radius || 6) + 3,
-    };
+      radius: style.radius + 3,
+    });
   return style;
+}
+
+function applySymbolState(
+  style: LeafletFeatureStyle,
+  override: import("../../schema/mapSchema").MapSymbolStateDefinition | undefined,
+  fallback: Partial<LeafletFeatureStyle>,
+): LeafletFeatureStyle {
+  const patch = (override ?? fallback) as import("../../schema/mapSchema").MapSymbolStateDefinition & Partial<LeafletFeatureStyle>;
+  return {
+    ...style,
+    ...patch,
+    color: patch.outlineColor ?? patch.color ?? style.color,
+    weight: patch.outlineWidth ?? patch.weight ?? style.weight,
+    radius: patch.radius ?? patch.size ?? style.radius,
+  };
 }
 
 function applyMountedStyle(
@@ -1842,6 +2092,8 @@ function annotateLeafletFeature(
   };
   const element = candidate.getElement?.();
   if (element) {
+    if (element instanceof SVGElement && element.ownerSVGElement)
+      ensureLeafletFillPatterns(element.ownerSVGElement);
     element.setAttribute("data-hp-feature-key", featureKey);
     element.setAttribute("data-hp-layer-id", layerId);
     element.setAttribute("data-hp-feature-id", featureId);
@@ -1850,6 +2102,115 @@ function annotateLeafletFeature(
   candidate.eachLayer?.((child) =>
     annotateLeafletFeature(child, featureKey, layerId, featureId, label),
   );
+}
+
+function ensureLeafletFillPatterns(svg: SVGSVGElement): void {
+  if (svg.querySelector("defs[data-hp-map-patterns]")) return;
+  const namespace = "http://www.w3.org/2000/svg";
+  const defs = document.createElementNS(namespace, "defs");
+  defs.setAttribute("data-hp-map-patterns", "true");
+  const addPattern = (
+    id: string,
+    draw: (pattern: SVGPatternElement) => void,
+  ) => {
+    const pattern = document.createElementNS(namespace, "pattern");
+    pattern.id = id;
+    pattern.setAttribute("width", "8");
+    pattern.setAttribute("height", "8");
+    pattern.setAttribute("patternUnits", "userSpaceOnUse");
+    const background = document.createElementNS(namespace, "rect");
+    background.setAttribute("width", "8");
+    background.setAttribute("height", "8");
+    background.setAttribute("fill", "#ffffff");
+    background.setAttribute("fill-opacity", "0.3");
+    pattern.appendChild(background);
+    draw(pattern);
+    defs.appendChild(pattern);
+  };
+  const addPath = (pattern: SVGPatternElement, pathData: string) => {
+    const path = document.createElementNS(namespace, "path");
+    path.setAttribute("d", pathData);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "#475569");
+    path.setAttribute("stroke-opacity", "0.65");
+    path.setAttribute("stroke-width", "1.25");
+    pattern.appendChild(path);
+  };
+  addPattern("hp-map-pattern-diagonal", (pattern) =>
+    addPath(pattern, "M-2 2L2-2M0 8L8 0M6 10L10 6"),
+  );
+  addPattern("hp-map-pattern-crosshatch", (pattern) =>
+    addPath(pattern, "M0 0L8 8M8 0L0 8"),
+  );
+  addPattern("hp-map-pattern-dots", (pattern) => {
+    const dot = document.createElementNS(namespace, "circle");
+    dot.setAttribute("cx", "4");
+    dot.setAttribute("cy", "4");
+    dot.setAttribute("r", "1.4");
+    dot.setAttribute("fill", "#475569");
+    dot.setAttribute("fill-opacity", "0.7");
+    pattern.appendChild(dot);
+  });
+  svg.prepend(defs);
+}
+
+function annotateLeafletFeatureState(
+  layer: L.Layer,
+  state: MapFeatureVisualState,
+): void {
+  const candidate = layer as L.Layer & {
+    getElement?: () => HTMLElement | SVGElement | null;
+    eachLayer?: (visit: (child: L.Layer) => void) => void;
+  };
+  const element = candidate.getElement?.();
+  if (element) {
+    const name = state.filteredOut
+      ? "filtered-out"
+      : state.selected
+        ? "selected"
+        : state.hovered
+          ? "hovered"
+          : state.externallyHighlighted
+            ? "external-highlight"
+            : state.dimmed
+              ? "dimmed"
+              : "normal";
+    element.setAttribute("data-hp-state", name);
+  }
+  candidate.eachLayer?.((child) => annotateLeafletFeatureState(child, state));
+}
+
+function externalHighlightRowKeys(
+  state: import("../../render/stateStore").DashboardState,
+  componentId: string,
+  sourceRowKeys: readonly string[],
+): ReadonlySet<string> {
+  const keys = new Set<string>();
+  for (const [origin, selected] of Object.entries(state.componentSelectedRowKeys)) {
+    if (origin === componentId || state.componentSelectionModes[origin] !== "highlight") continue;
+    const scope = state.componentSelectionScopes[origin] ?? "self";
+    const targets = state.componentSelectionTargets[origin];
+    const applies = targets?.length
+      ? targets.includes(componentId)
+      : scope === "all" || scope === "others";
+    if (applies) selected.forEach((key) => keys.add(key));
+  }
+  if (!keys.size) {
+    for (const [origin, selected] of Object.entries(state.componentSelectedRows)) {
+      if (origin === componentId || state.componentSelectionModes[origin] !== "highlight") continue;
+      const scope = state.componentSelectionScopes[origin] ?? "self";
+      const targets = state.componentSelectionTargets[origin];
+      const applies = targets?.length
+        ? targets.includes(componentId)
+        : scope === "all" || scope === "others";
+      if (applies)
+        selected.forEach((index) => {
+          const key = sourceRowKeys[index];
+          if (key) keys.add(key);
+        });
+    }
+  }
+  return keys;
 }
 
 type RuntimeMetricName =

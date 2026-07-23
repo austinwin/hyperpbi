@@ -257,6 +257,33 @@ Map feature interactions accept `trigger: "click"` only; strict 2.0 authoring re
 
 Strict validation rejects unknown nested map properties and unimplemented `naturalBreaks`. Partial/experimental accepted properties emit capability limitations from the machine-readable registry. Maps require explicit `layers`; legacy top-level `settings`, map-specific `style`, and top-level `popup` are rejected. The complete contract, Map Studio behavior, capability table, and performance bounds are documented in [Map services](map-services.md).
 
+### Analytical map additions
+
+Map source discriminators are `powerbi`, `geoJson`, `xyz`, `arcgisFeature`, `arcgisTile`, and
+`arcgisDynamic`. Renderers include `service`, `simple`, `uniqueValue`, `classBreaks`,
+`continuousColor`, `proportionalSize`, `cluster`, `heatmap`, `densityGrid`, `icon`, `line`, and
+`polygon`.
+
+`tools.rectangleSelection`, `tools.lassoSelection`, and `tools.circleSelection` accept Boolean or
+structured definitions with `enabled` and `selectionMode:
+"replace"|"add"|"remove"|"toggle"`. `tools.selection` bounds selected features and submitted Power
+BI identities. Scale-bar and coordinate-display definitions are accepted operational tools.
+
+Safe icon definitions are `builtIn|svg|image`; SVG is sanitized and image URLs are HTTPS/relative.
+Symbols support data-driven icon, rotation, size, color, marker text/badge, anchor/offset, line
+cap/join/dashes, selected/hover/external-highlight overrides, and dimmed opacity. Heatmaps use a real
+retained canvas renderer. Pixels are never selectable; `interactivePoints` can retain a transparent
+source hit layer.
+
+Layer legends support categorical, class-break, continuous, size, icon, line, polygon, heat, and
+combined presentations; click filtering/highlight/selection; hover highlight; counts; percentages;
+aggregate values; labels; ordering; search; isolate/select-all/clear; and independent
+internal/external interaction gates. Quick filters support categorical, numeric/date ranges, text,
+null/not-null, top N, layer scope, filter-to-selected, and clear.
+
+The exact schema, security constraints, and copyable JSON are in [Analytical maps](maps.md). Provider
+and service behavior remains in [Map services](map-services.md).
+
 ## SVG
 
 `svg` requires `viewBox` and `elements`; `svgMarkup` requires `svg`. Both accept size/aspect/role/description/dataContext/motion/performance. Structured SVG elements, binding forms, animation enums, repeat behavior, sanitizer rules, and exact limits are documented in [SVG visuals](svg-visuals.md).

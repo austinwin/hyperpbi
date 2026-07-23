@@ -1,0 +1,14 @@
+[
+  { "id": "A-01", "name": "Congress Hub", "latitude": 30.2672, "longitude": -97.7431, "category": "Active", "region": "Central", "value": 92, "size": 22, "heading": 20, "event_date": "2026-07-01", "nullable": "ready", "icon": "location" },
+  { "id": "A-02", "name": "East Depot", "latitude": 30.2641, "longitude": -97.7208, "category": "Active", "region": "East", "value": 74, "size": 18, "heading": 65, "event_date": "2026-07-03", "nullable": "ready", "icon": "database" },
+  { "id": "A-03", "name": "North Station", "latitude": 30.3072, "longitude": -97.7404, "category": "Warning", "region": "North", "value": 58, "size": 15, "heading": 110, "event_date": "2026-07-05", "nullable": null, "icon": "alert" },
+  { "id": "A-04", "name": "Lakeside Sensor", "latitude": 30.2835, "longitude": -97.7708, "category": "Active", "region": "West", "value": 84, "size": 20, "heading": 155, "event_date": "2026-07-07", "nullable": "ready", "icon": "activity" },
+  { "id": "A-05", "name": "South Yard", "latitude": 30.2298, "longitude": -97.7571, "category": "Offline", "region": "South", "value": 21, "size": 9, "heading": 200, "event_date": "2026-07-09", "nullable": null, "icon": "close" },
+  { "id": "A-06", "name": "Mueller Node", "latitude": 30.2988, "longitude": -97.7069, "category": "Warning", "region": "East", "value": 47, "size": 13, "heading": 245, "event_date": "2026-07-11", "nullable": "review", "icon": "alert" },
+  { "id": "A-07", "name": "Zilker Gateway", "latitude": 30.2670, "longitude": -97.7729, "category": "Active", "region": "West", "value": 88, "size": 21, "heading": 290, "event_date": "2026-07-13", "nullable": "ready", "icon": "location" },
+  { "id": "A-08", "name": "Airport Relay", "latitude": 30.2021, "longitude": -97.6668, "category": "Offline", "region": "Southeast", "value": 16, "size": 8, "heading": 335, "event_date": "2026-07-15", "nullable": null, "icon": "close" },
+  { "id": "A-09", "name": "Highland Monitor", "latitude": 30.3287, "longitude": -97.7162, "category": "Active", "region": "North", "value": 69, "size": 17, "heading": 40, "event_date": "2026-07-17", "nullable": "ready", "icon": "activity" },
+  { "id": "A-10", "name": "Barton Meter", "latitude": 30.2592, "longitude": -97.7637, "category": "Warning", "region": "Central", "value": 39, "size": 12, "heading": 85, "event_date": "2026-07-19", "nullable": "review", "icon": "alert" },
+  { "id": "A-11", "name": "Domain Terminal", "latitude": 30.4014, "longitude": -97.7251, "category": "Active", "region": "North", "value": 96, "size": 24, "heading": 130, "event_date": "2026-07-21", "nullable": "ready", "icon": "database" },
+  { "id": "A-12", "name": "Riverside Pump", "latitude": 30.2364, "longitude": -97.7186, "category": "Warning", "region": "Southeast", "value": 52, "size": 14, "heading": 175, "event_date": "2026-07-22", "nullable": "review", "icon": "activity" }
+]

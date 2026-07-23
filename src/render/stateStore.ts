@@ -27,7 +27,7 @@ export interface OverlayAnchor {
     triggerId?: string;
 }
 
-export type MapToolbarPopover = "layers" | "legend" | "search" | "bookmarks" | null;
+export type MapToolbarPopover = "layers" | "legend" | "search" | "bookmarks" | "selection" | "quickFilters" | null;
 
 export interface ChartViewState {
     zoom?: { start?: number; end?: number; startValue?: unknown; endValue?: unknown };
@@ -96,6 +96,10 @@ export interface DashboardState {
     // Map UI state. undefined means component defaults apply; null is explicitly closed.
     mapUiState: Record<string, {
         toolbarPopover?: MapToolbarPopover;
+        legendSelections?: Record<string, string[]>;
+        legendHoveredFeatureKeys?: string[];
+        quickFilterValues?: Record<string, unknown>;
+        filterToSelected?: boolean;
     }>;
 }
 
@@ -119,9 +123,9 @@ export type DashboardAction =
     | { type: "resetInteractions" }
     | { type: "reconcileRowKeys"; rowKeys: string[] }
     | { type: "selectMap"; index?: number }
-    | { type: "selectMapFeatures"; mapId: string; featureIds: string[]; selectionMode?: "replace" | "add" | "toggle" }
+    | { type: "selectMapFeatures"; mapId: string; featureIds: string[]; selectionMode?: "replace" | "add" | "remove" | "toggle" | "clear" }
     | { type: "clearMapFeatures"; mapId: string }
-    | { type: "activateMapFeature"; mapId: string; feature: ActiveMapFeature; multiSelect?: boolean }
+    | { type: "activateMapFeature"; mapId: string; feature: ActiveMapFeature; multiSelect?: boolean; selectionMode?: "replace" | "add" | "remove" | "toggle" | "clear" }
     | { type: "showMapIdentifiedFeature"; mapId: string; feature: ActiveMapFeature }
     | { type: "setMapHoveredFeature"; mapId: string; featureKey?: MapFeatureKey }
     | { type: "closeMapFeatureDetails"; mapId: string; clearSelection?: boolean }
@@ -154,7 +158,12 @@ export type DashboardAction =
     | { type: "mapLayerLabels"; mapId: string; layerId: string; visible: boolean }
     | { type: "resetMapLayers"; mapId: string }
     // Map toolbar popover state
-    | { type: "setMapToolbarPopover"; mapId: string; popover: MapToolbarPopover };
+    | { type: "setMapToolbarPopover"; mapId: string; popover: MapToolbarPopover }
+    | { type: "setMapLegendSelection"; mapId: string; layerId: string; keys: string[] }
+    | { type: "setMapLegendHover"; mapId: string; featureKeys: string[] }
+    | { type: "setMapQuickFilter"; mapId: string; filterId: string; value?: unknown }
+    | { type: "clearMapQuickFilters"; mapId: string }
+    | { type: "setMapFilterToSelected"; mapId: string; value: boolean };
 
 export function initialDashboardState(search = "", activeTab = ""): DashboardState {
     return {
@@ -270,6 +279,7 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
             state.mapInteractionState[action.mapId],
             action.feature,
             action.multiSelect === true,
+            action.selectionMode,
         );
         return {
             ...state,
@@ -466,6 +476,65 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
                     ...current,
                     toolbarPopover: action.popover,
                 },
+            },
+        };
+    }
+    if (action.type === "setMapLegendSelection") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        const legendSelections = { ...(current.legendSelections ?? {}) };
+        if (action.keys.length) legendSelections[action.layerId] = Array.from(new Set(action.keys));
+        else delete legendSelections[action.layerId];
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: { ...current, legendSelections },
+            },
+        };
+    }
+    if (action.type === "setMapLegendHover") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: {
+                    ...current,
+                    legendHoveredFeatureKeys: Array.from(new Set(action.featureKeys)),
+                },
+            },
+        };
+    }
+    if (action.type === "setMapQuickFilter") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        const quickFilterValues = { ...(current.quickFilterValues ?? {}) };
+        if (action.value === undefined || action.value === "") delete quickFilterValues[action.filterId];
+        else quickFilterValues[action.filterId] = action.value;
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: { ...current, quickFilterValues },
+            },
+        };
+    }
+    if (action.type === "clearMapQuickFilters") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: { ...current, quickFilterValues: {}, filterToSelected: false },
+            },
+        };
+    }
+    if (action.type === "setMapFilterToSelected") {
+        const current = state.mapUiState[action.mapId] ?? {};
+        return {
+            ...state,
+            mapUiState: {
+                ...state.mapUiState,
+                [action.mapId]: { ...current, filterToSelected: action.value },
             },
         };
     }

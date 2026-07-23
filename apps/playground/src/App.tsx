@@ -4,6 +4,7 @@ import { currentRoute, type PlaygroundRoute } from "./router";
 import { HomePage } from "./components/HomePage";
 import { ProjectPage } from "./components/ProjectPage";
 import { PlayPage } from "./components/PlayPage";
+import { MapGalleryPage } from "./components/MapGalleryPage";
 
 export function App() {
     const [route, setRoute] = useState<PlaygroundRoute>(() => currentRoute());
@@ -16,6 +17,7 @@ export function App() {
     }, []);
 
     if (route.page === "home") return <HomePage storage={storage} />;
+    if (route.page === "mapGallery") return <MapGalleryPage />;
     if (route.page === "play") return <PlayPage projectId={route.projectId} storage={storage} />;
     return <ProjectPage projectId={route.projectId} storage={storage} />;
 }

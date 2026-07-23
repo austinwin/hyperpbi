@@ -1,6 +1,6 @@
 import { h, render } from "preact";
 import { act } from "preact/test-utils";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MapLegendPanel } from "../src/components/maps/MapLegendPanel";
 import { RenderContext, type RenderContextValue } from "../src/render/RenderContext";
 import { initialDashboardState } from "../src/render/stateStore";
@@ -33,7 +33,7 @@ describe("MapLegendPanel", () => {
         expect(host.querySelectorAll(".hp-map-legend-group")).toHaveLength(6);
         expect(host.textContent).toContain("Open facilities");
         expect(host.textContent).toContain("0 – 10");
-        expect(host.textContent).toContain("Clustered points");
+        expect(host.textContent).toContain("Cluster count");
         expect(host.textContent).toContain("10");
         expect(host.textContent).toContain("20");
         expect(host.textContent).toContain("30");
@@ -53,7 +53,7 @@ describe("MapLegendPanel", () => {
         expect(host.querySelector("summary")?.textContent).toBe("Assets");
     });
 
-    it("omits hidden, legend-disabled, heatmap, and density-grid layers", () => {
+    it("omits hidden and legend-disabled layers while rendering heat and density legends", () => {
         const host = mount([
             layer("Hidden", { type: "simple", symbol: {} }),
             layer("Disabled", { type: "simple", symbol: {} }, { legend: { visible: false } }),
@@ -61,12 +61,53 @@ describe("MapLegendPanel", () => {
             layer("Density", { type: "densityGrid" }),
             layer("Shown", { type: "simple", symbol: { fillColor: "#123" } }),
         ], ["Hidden"]);
-        expect(host.querySelectorAll(".hp-map-legend-group")).toHaveLength(1);
+        expect(host.querySelectorAll(".hp-map-legend-group")).toHaveLength(3);
+        expect(host.querySelectorAll(".hp-map-legend-gradient")).toHaveLength(2);
         expect(host.textContent).toContain("Shown");
     });
 
     it("shows an explicit empty state when no visible layer has legend entries", () => {
         const host = mount([layer("Hidden", { type: "simple", symbol: {} })], ["Hidden"]);
         expect(host.textContent).toContain("No legend entries are available for the currently visible layers.");
+    });
+
+    it("uses one click/hover pipeline for select, Ctrl/Cmd multi-select, and external interaction", () => {
+        const dispatch = vi.fn();
+        const select = vi.fn();
+        const state = initialDashboardState();
+        const context = { state, dispatch } as unknown as RenderContextValue;
+        const features = ["Active", "Warning"].map((category, index) => ({
+            id: `f${index}`,
+            featureKey: `feature-${index}`,
+            layerId: "Status",
+            geometryType: "point" as const,
+            geometry: null,
+            lat: 30 + index,
+            lon: -97,
+            powerBiAttributes: { category },
+            serviceAttributes: {},
+            joinedAttributes: {},
+            powerBiRowIndices: [index],
+            powerBiRowKeys: [`row-${index}`],
+            selected: false,
+        }));
+        const interactive = layer("Status", {
+            type: "uniqueValue",
+            field: "category",
+            fieldSource: "powerbi",
+            valueMap: new Map([["Active", { fillColor: "#0f0" }], ["Warning", { fillColor: "#f90" }]]),
+        }, {
+            features,
+            legend: { interactive: true, clickAction: "select", selectionMode: "multiple", hoverAction: "highlight", externalInteraction: true },
+        });
+        const host = document.createElement("div");
+        act(() => render(h(RenderContext.Provider, { value: context }, h(MapLegendPanel, { mapId: "map", layers: [interactive], onSelectFeatures: select })), host));
+        const entries = host.querySelectorAll<HTMLButtonElement>(".hp-map-legend-entry-main");
+        act(() => entries[0].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true })));
+        expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: "setMapLegendHover", featureKeys: ["feature-0"] }));
+        act(() => entries[0].dispatchEvent(new MouseEvent("click", { bubbles: true })));
+        act(() => entries[1].dispatchEvent(new MouseEvent("click", { bubbles: true, ctrlKey: true })));
+        expect(select).toHaveBeenNthCalledWith(1, interactive, ["feature-0"], "toggle");
+        expect(select).toHaveBeenNthCalledWith(2, interactive, ["feature-1"], "toggle");
     });
 });

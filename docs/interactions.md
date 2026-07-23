@@ -136,7 +136,19 @@ Map Studio's layer **Interaction** tab edits the existing universal interaction 
 
 Map feature events have one stable trigger contract: `map.layers[].interaction.trigger` must be `"click"`. Leaflet runs the interaction from the feature click handler, Map Studio exposes a fixed click value, and strict 2.0 validation emits `MAP_INTERACTION_TRIGGER_UNSUPPORTED` for map-layer `change` or `auto`. This restriction does not remove those trigger values from non-map components.
 
-Map-level rectangle and lasso tools use the same engine. The spatial pass first updates canonical `mapId/layer/source/feature` keys, then submits the union of matching `powerBiRowIndices` and row keys. Authored `selectionMode` is used unless Ctrl/Cmd requests toggle or Shift requests add. Linked tables/charts receive the map component's `targets`; eligible source identities are sent to Power BI selection. ArcGIS reference-only features can still be selected locally and never manufacture an external identity.
+Map feature click, interactive legend click/hover, rectangle, lasso, circle/radius, Select visible,
+Invert, quick-filter reconciliation, external Power BI selection/filtering, and linked HyperPBI
+component state use one analytical controller. Operations are `replace`, `add`, `remove`, `toggle`,
+and `clear`. The spatial pass updates canonical feature keys, then submits the exact union of
+matching Power BI row indices and keys. Authored selection mode is used unless Ctrl/Cmd toggles,
+Shift adds, or Alt subtracts. Reference-only features remain locally selectable and never
+manufacture an external identity.
+
+Map visual state distinguishes normal, hovered, selected, externally highlighted, dimmed, and
+filtered-out features. Legends, details, selected feature count, and contributing-row count derive
+from the same keys. Heatmap pixels and raster tiles are not interaction targets; an authored
+heatmap can retain a transparent point hit layer. Selection and Power BI identity limits are
+deterministic and reported rather than silently dropping state. See [Analytical maps](maps.md).
 
 ## Compatibility
 

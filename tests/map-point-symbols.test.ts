@@ -18,4 +18,26 @@ describe("safe Leaflet point symbols", () => {
     it("escapes unsafe author color text", () => {
         expect(safePointSvg("square", { ...base, fillColor: `red" onload="alert(1)` }, 1)).not.toContain('onload="alert');
     });
+    it("renders rich built-in and sanitized SVG icons without executable marker content", () => {
+        const builtIn = createLeafletPointLayer([1, 2], {
+            ...base,
+            shape: "icon",
+            icon: { type: "builtIn", name: "location" },
+            rotation: 45,
+            markerText: `<img src=x onerror="alert(1)">`,
+            badge: `<script>alert(1)</script>`,
+        }, "points", 1) as L.Marker;
+        const builtInHtml = String((builtIn.getIcon() as L.DivIcon).options.html);
+        const parsed = new DOMParser().parseFromString(builtInHtml, "text/html");
+        expect(builtInHtml).toContain("rotate(45deg)");
+        expect(parsed.querySelector("script, img, [onerror]")).toBeNull();
+        expect(builtInHtml).toContain("&lt;img");
+
+        const svg = createLeafletPointLayer([1, 2], {
+            ...base,
+            shape: "icon",
+            icon: { type: "svg", svg: `<svg><path d="M0 0L2 2"/><script>alert(1)</script></svg>` },
+        }, "points", 1) as L.Marker;
+        expect(String((svg.getIcon() as L.DivIcon).options.html)).not.toMatch(/<script|alert\(1\)/i);
+    });
 });

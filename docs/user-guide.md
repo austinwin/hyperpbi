@@ -141,6 +141,18 @@ Put fields used by Power BI-backed layers and joins in Values. ArcGIS reference-
 
 Public ArcGIS feature/tile/basic dynamic services must be HTTPS and allowed by the installed package. Do not store tokens in the dashboard.
 
+The current Map Studio also exposes inline/remote GeoJSON and generic XYZ sources; rich safe icon,
+line, polygon, and true heatmap renderers; interactive legend behavior; selected/hover symbol
+states; rectangle/lasso/circle selection and limits; quick filters; external interaction;
+scale/coordinate tools; and compact toolbar placement. Advanced JSON remains available without
+overloading the default layer form.
+
+Feature click, legend click/hover, spatial tools, Select visible, Invert, quick filters, Power BI
+state, and linked HyperPBI state remain synchronized. Shift adds, Ctrl/Cmd toggles, and Alt
+subtracts. The selected indicator reports feature and contributing-row counts. The Playground route
+`/components/map` loads focused examples from `examples/map/manifest.json`, runs each one, shows the
+exact JSON, and provides **Copy spec**. See [Analytical maps](maps.md).
+
 ## Troubleshooting
 
 | Symptom | Check |

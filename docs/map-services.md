@@ -106,17 +106,17 @@ Use **Split** to edit a layer beside the dashboard, **Editor** when a long prope
 
 Map Studio provides:
 
-- layer tree creation for Power BI, ArcGIS feature, ArcGIS tile, and ArcGIS dynamic layers
+- layer tree creation for Power BI, inline/remote GeoJSON, generic XYZ, ArcGIS feature, ArcGIS tile, and ArcGIS dynamic layers
 - unique IDs, rename, duplicate, two-step delete, drag/keyboard reorder, grouping, group visibility/opacity/collapse
 - effective dataset selection and dataset-aware field controls
 - geometry, coordinate, address, grouping, color, size, tooltip, and detail bindings
 - provider-specific URLs and explicit, cancellable public service metadata inspection; one root request returns bounded spatial-layer, group-layer, and table summaries, and selecting one spatial item makes one lazy metadata request for its fields
-- service/simple/unique/class-break/continuous/proportional/heatmap/cluster/density renderers
+- service/simple/unique/class-break/continuous/proportional/icon/line/polygon/real heatmap/cluster/density renderers
 - bounded unique-value/domain previews and editable manual breaks
 - labels, safe popups/tooltips, UI actions, a first-class layer interaction editor, source-aware structured filters, joins, visibility, and performance limits
 - an explicit, cancellable **Run join preview** action bounded to 500 service features, using the runtime query, normalization, duplicate/unmatched policies, and join engine
 - basemap choices, reactive authored view, layer groups, live-preview view bookmarks, and static/runtime diagnostics
-- rectangle and lasso selection controls with authored selection mode and minimum lasso-point validation
+- interactive legends, rich safe icon mappings, quick filters, rectangle/lasso/circle selection, selection limits, compact tools, scale, and coordinate controls
 
 Map Studio never creates a second hidden configuration model. Provider URLs must be supplied explicitly; it does not invent endpoints or credentials.
 
@@ -130,6 +130,8 @@ Stable map feature interactions execute from Leaflet feature clicks, so `map.lay
 | `arcgisFeature` | Public FeatureServer/MapServer metadata/query, feature click/details/tooltip/selection, service renderer/labels, and reference or Power BI join mode |
 | `arcgisTile` | Display-only public HTTPS raster tile overlay with attribution and zoom bounds; no feature identify, popup, join, or selection |
 | `arcgisDynamic` | Public dynamic map images plus user-driven `/identify`; results are temporary read-only details with optional returned-geometry highlight, never joins or persistent selection |
+| `geoJson` | Inline or provider-approved remote Feature/FeatureCollection/geometry JSON with normal renderers, details, filtering, and local selection |
+| `xyz` | Generic provider-approved URL-template tiles with attribution and zoom bounds; display-only |
 
 ArcGIS feature queries request output spatial reference 4326. Viewport mode sends an envelope geometry with `inSR`, `outSR`, and intersects spatial relation; it supports request debounce, abort signals, stale-result rejection, pagination/object-ID fallback, service record limits, bounded request batches, and local extent/query caching. Every completed map navigation publishes the new viewport, including Home, bookmarks, authored-view changes, fit-to-data, layer/selection zoom, and search results. Invisible and out-of-range viewport layers do not request data; an in-flight request is cancelled, retained results remain available, and entering the visible zoom range requests the current extent. Results and warnings are bounded. Query `outFields` contain only fields whose effective `fieldSource` is `service`, plus required service join keys; Power BI keys and joined aliases are never sent as ArcGIS field names.
 
@@ -165,17 +167,17 @@ The machine-readable registry is `src/maps/mapCapabilityRegistry.ts`. Strict map
 
 | Status | Capabilities |
 |---|---|
-| Implemented | per-layer datasets/bindings, groups, live-view bookmarks, source-aware filters/visibility/interactions, rectangle/lasso geometry selection with Power BI lineage and linked targets, reactive supported basemaps/views and ArcGIS tile/dynamic definitions, temporary Dynamic MapServer identify, ratio fit padding, enforced join cardinality/unmatched/aggregation semantics, lazy classified ArcGIS metadata authoring, canonical/scoped diagnostics, circle/square/diamond/triangle points, robust simple/unique/class-break/continuous/proportional/cluster renderers with count/sum labels, labels, safe popup/tooltip, layer/toolbar controls, feature limits |
-| Partial | map-layer interaction trigger (`click` only), `fitMode` nuances, join `keyType`, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
-| Experimental | mounted-instance `preserveView`, heatmap fallback, basic density grid |
-| Unsupported | scale/coordinate readout, measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are registered future P1 work and are not accepted schema |
+| Implemented | per-layer datasets/bindings, Power BI/GeoJSON/XYZ/ArcGIS sources, groups, bookmarks, source-aware filters/visibility/interactions, unified click/legend/rectangle/lasso/circle selection, Power BI lineage and identity limits, interactive multi-layer legends, quick filters, retained selected/hovered/external/dimmed styles, true weighted canvas heatmap, rich safe icons, simple/unique/class-break/continuous/proportional/cluster/line/polygon renderers, labels, safe popup/tooltip, compact toolbar, scale/coordinate display, feature limits |
+| Partial | map-layer interaction trigger (`click` only for persistent features), `fitMode` nuances, join `keyType`, polygon fill patterns, basic `hideOverlaps`, zoom-based approximation for service-scale visibility |
+| Experimental | mounted-instance `preserveView`, basic density grid |
+| Unsupported | measurement, time slider, swipe/side-by-side comparison, export/print, and viewer-to-Studio launch; these are not accepted schema |
 | Rejected | unknown properties, unsupported renderer types, and `naturalBreaks` (use manual, equal interval, or quantile) |
 
 Partial, experimental, and deprecated properties emit `MAP_CAPABILITY_LIMITATION`. Deprecated no-op input remains accepted only to preserve existing schemas and is not exposed as an authoring option. Accepted stable input is not silently ignored.
 
 ## Viewer controls
 
-The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The toolbar supports Home, layers, legend, search, clear selection, zoom to selection, bookmarks, rectangle selection, and lasso selection. Enabling a spatial tool temporarily owns pointer drag, draws a bounded preview, then intersects the authored geometry against visible selectable features. Replace/add/toggle semantics update canonical feature keys and contributing Power BI row lineage; reference-only features remain local. Basemap visibility/type/URL/attribution/max zoom and authored center/zoom/min/max synchronize to the mounted map without remounting or removing operational overlays. Unrelated layer changes do not reset a user's live navigation. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use `view.fitPadding`, a Leaflet bounds-padding ratio from `0` through `0.5` with default `0.08` (8%).
+The layer panel supports group hierarchy, collapse/expand, visibility, source/dataset tooltip, selected layer, drag and keyboard reorder, opacity, labels, feature/loading/diagnostic status, layer zoom, and reset. The compact toolbar supports Home, Zoom in/out, layers, interactive legends, search, quick filters, bookmarks, one selection menu, selected feature/row counts, scale, and coordinate display. The selection menu contains rectangle, lasso, circle/radius, Select visible, Invert, Zoom to selection, and Clear. Spatial tools temporarily own pointer drag, draw a bounded preview, then intersect the authored geometry against visible selectable features. Replace/add/remove/toggle semantics update canonical feature keys and contributing Power BI row lineage; reference-only features remain local. Basemap visibility/type/URL/attribution/max zoom and authored center/zoom/min/max synchronize to the mounted map without remounting or removing operational overlays. Unrelated layer changes do not reset a user's live navigation. `firstLayer` fit uses the first visible feature layer; one point receives a bounded point zoom and multiple points use `view.fitPadding`, a Leaflet bounds-padding ratio from `0` through `0.5` with default `0.08` (8%).
 
 Map Studio's **Add current view** reads the selected map's latest live preview center and zoom. It falls back to the authored view only when no live viewport is available, and a pan/zoom never changes canonical JSON until the author explicitly creates the bookmark.
 
@@ -200,7 +202,11 @@ Run `npm run package:core`, `npm run package:maps`, and `npm run package:verify`
 - natural breaks classification
 - streamed feature-by-feature progressive rendering
 - exact ArcGIS service-scale denominator parity
-- scale/coordinate readout and distance/area measurement
+- distance/area measurement
 - time slider, swipe/side-by-side comparison, selected-feature export, print-layout, and opening Map Studio from the viewer
 
 Use pre-geocoded coordinates and organizationally approved public services for predictable enterprise deployment.
+
+For renderer, legend, selection, quick-filter, tool, performance, and security examples, see the
+[complete analytical map guide](maps.md) and the manifest-driven
+[`examples/map`](../examples/map/README.md) gallery.

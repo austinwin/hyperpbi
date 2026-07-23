@@ -23,6 +23,13 @@ export function resolveRenderer(
                 type: "simple",
                 symbol: resolveSymbol(definition.symbol),
             };
+        case "icon":
+        case "line":
+        case "polygon":
+            return {
+                type: definition.type,
+                symbol: resolveSymbol(definition.symbol),
+            };
 
         case "uniqueValue": {
             const valueMap = new Map<string, ResolvedMapSymbol>();
@@ -102,7 +109,12 @@ export function resolveRenderer(
                 radius: definition.radius,
                 blur: definition.blur,
                 minOpacity: definition.minOpacity,
+                maxIntensity: definition.maxIntensity,
                 heatGradient: definition.gradient,
+                minZoom: definition.minZoom,
+                maxZoom: definition.maxZoom,
+                normalization: definition.normalization ?? "global",
+                interactivePoints: definition.interactivePoints ?? true,
             };
 
         case "cluster":
@@ -174,5 +186,34 @@ function resolveSymbol(symbol: MapSymbolDefinition): ResolvedMapSymbol {
         outlineColor: symbol.outlineColor,
         outlineWidth: symbol.outlineWidth,
         dashArray: symbol.dashArray,
+        dashStyle: symbol.dashStyle,
+        lineCap: symbol.lineCap,
+        lineJoin: symbol.lineJoin,
+        fillPattern: symbol.fillPattern,
+        icon: symbol.icon,
+        iconField: symbol.iconField,
+        iconFieldSource: symbol.iconFieldSource,
+        iconMap: symbol.iconMap,
+        rotation: symbol.rotation,
+        rotationField: symbol.rotationField,
+        rotationFieldSource: symbol.rotationFieldSource,
+        sizeField: symbol.sizeField,
+        sizeFieldSource: symbol.sizeFieldSource,
+        colorField: symbol.colorField,
+        colorFieldSource: symbol.colorFieldSource,
+        colorMap: symbol.colorMap,
+        markerText: symbol.markerText,
+        markerTextField: symbol.markerTextField,
+        markerTextFieldSource: symbol.markerTextFieldSource,
+        badge: symbol.badge,
+        badgeField: symbol.badgeField,
+        badgeFieldSource: symbol.badgeFieldSource,
+        showValue: symbol.showValue,
+        anchor: symbol.anchor,
+        offset: symbol.offset,
+        selectedStyle: symbol.selectedStyle,
+        hoverStyle: symbol.hoverStyle,
+        externalHighlightStyle: symbol.externalHighlightStyle,
+        dimmedOpacity: symbol.dimmedOpacity,
     };
 }

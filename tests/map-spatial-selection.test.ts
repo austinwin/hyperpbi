@@ -15,11 +15,18 @@ function feature(id: string, geometry: unknown, rows: number[] = []): ResolvedMa
 }
 const rectangle = { type: "rectangle" as const, bounds: { west: -1, south: -1, east: 1, north: 1 } };
 
-describe("map rectangle and lasso selection", () => {
-    it("resolves replace, add, and toggle feature unions deterministically", () => {
+describe("map rectangle, lasso, and circle selection", () => {
+    it("resolves replace, add, remove, toggle, and clear feature unions deterministically", () => {
         expect(resolveMapFeatureSelection(["a"], ["b", "b"], "replace")).toEqual(["b"]);
         expect(resolveMapFeatureSelection(["a"], ["b", "a"], "add")).toEqual(["a", "b"]);
         expect(resolveMapFeatureSelection(["a", "shared"], ["a", "b"], "toggle")).toEqual(["shared", "b"]);
+        expect(resolveMapFeatureSelection(["a", "b"], ["a"], "remove")).toEqual(["b"]);
+        expect(resolveMapFeatureSelection(["a", "b"], [], "clear")).toEqual([]);
+    });
+    it("uses geodesic circle/radius containment", () => {
+        const circle = { type: "circle" as const, center: [30, -97] as [number, number], radiusMeters: 2_000 };
+        expect(featureIntersectsSelection({ ...feature("near", null), lat: 30.01, lon: -97 } as ResolvedMapFeature, circle)).toBe(true);
+        expect(featureIntersectsSelection({ ...feature("far", null), lat: 31, lon: -97 } as ResolvedMapFeature, circle)).toBe(false);
     });
     it("selects points, crossing lines, and containing polygons without bbox false positives", () => {
         expect(featureIntersectsSelection(feature("point", { type: "Point", coordinates: [0, 0] }), rectangle)).toBe(true);

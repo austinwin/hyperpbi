@@ -24,11 +24,16 @@ interface MapToolbarProps {
     searchEnabled: boolean;
     popoverContent?: ComponentChildren;
     onHome: () => void;
+    onZoomIn?: () => void;
+    onZoomOut?: () => void;
     onZoomToSelection: () => void;
     onSetPopover: (popover: MapToolbarPopoverState) => void;
     onClearSelection: () => void;
     activeSelectionTool?: MapSelectionTool | null;
     onSetSelectionTool?: (tool: MapSelectionTool | null) => void;
+    quickFiltersEnabled?: boolean;
+    selectedFeatureCount?: number;
+    selectedRowCount?: number;
 }
 
 export function MapToolbar({
@@ -40,11 +45,16 @@ export function MapToolbar({
     searchEnabled,
     popoverContent,
     onHome,
+    onZoomIn = () => undefined,
+    onZoomOut = () => undefined,
     onZoomToSelection,
     onSetPopover,
     onClearSelection,
     activeSelectionTool,
     onSetSelectionTool = () => undefined,
+    quickFiltersEnabled = false,
+    selectedFeatureCount = 0,
+    selectedRowCount = 0,
 }: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
     const actions: Array<{
@@ -57,20 +67,20 @@ export function MapToolbar({
         active?: boolean;
     }> = [
         { id: "home", icon: "home", label: "Reset view", show: toolbar.home !== false, action: onHome },
+        { id: "zoomIn", icon: "plus", label: "Zoom in", show: toolbar.zoomIn !== false, action: onZoomIn },
+        { id: "zoomOut", icon: "minus", label: "Zoom out", show: toolbar.zoomOut !== false, action: onZoomOut },
         { id: "layers", icon: "layers", label: "Layers", show: layerControlEnabled && toolbar.layers !== false, popover: "layers", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "layers")) },
         { id: "legend", icon: "list", label: "Legend", show: legendEnabled && toolbar.legend !== false, popover: "legend", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "legend")) },
         { id: "search", icon: "search", label: "Location search", show: searchEnabled && toolbar.search !== false, popover: "search", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "search")) },
+        { id: "quickFilters", icon: "filter", label: "Map quick filters", show: quickFiltersEnabled && toolbar.quickFilters !== false, popover: "quickFilters", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "quickFilters")) },
         { id: "bookmarks", icon: "bookmark", label: "View bookmarks", show: toolbar.bookmarks !== false && Boolean(component.bookmarks?.length), popover: "bookmarks", action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "bookmarks")) },
-        { id: "rectangleSelection", icon: "select-rectangle", label: "Select features by rectangle", show: toolbar.rectangleSelection !== false && mapToolEnabled(component.tools?.rectangleSelection), active: activeSelectionTool === "rectangle", action: () => onSetSelectionTool(activeSelectionTool === "rectangle" ? null : "rectangle") },
-        { id: "lassoSelection", icon: "lasso", label: "Select features by lasso", show: toolbar.lassoSelection !== false && mapToolEnabled(component.tools?.lassoSelection), active: activeSelectionTool === "lasso", action: () => onSetSelectionTool(activeSelectionTool === "lasso" ? null : "lasso") },
-        { id: "zoomToSelection", icon: "target", label: "Zoom to selected features", show: toolbar.zoomToSelection !== false, action: onZoomToSelection },
-        { id: "clearSelection", icon: "close", label: "Clear selection", show: toolbar.clearSelection !== false, action: onClearSelection },
+        { id: "selection", icon: activeSelectionTool === "lasso" ? "lasso" : "select-rectangle", label: "Selection tools", show: toolbar.selection !== false && selectionToolsEnabled(component), popover: "selection", active: Boolean(activeSelectionTool), action: () => onSetPopover(toggleMapToolbarPopover(activePopover, "selection")) },
     ];
     const visibleActions = actions.filter(action => action.show);
     if (visibleActions.length === 0) return null;
 
     return (
-        <div class="hp-map-toolbar" role="toolbar" aria-label="Map tools">
+        <div class={`hp-map-toolbar hp-map-toolbar-${toolbar.position ?? "topleft"}`} role="toolbar" aria-label="Map tools">
             {visibleActions.map(action => {
                 const active = action.active === true || Boolean(action.popover && activePopover === action.popover);
                 const controls = action.popover ? mapToolbarPopoverId(mapId, action.popover) : undefined;
@@ -93,8 +103,26 @@ export function MapToolbar({
                     </div>
                 );
             })}
+            {toolbar.selectedCount !== false && selectedFeatureCount > 0 && (
+                <output class="hp-map-selected-count" aria-label={`${selectedFeatureCount} selected map features`}>
+                    {selectedFeatureCount.toLocaleString()}
+                    {selectedRowCount > 0 && <small>{selectedRowCount.toLocaleString()} rows</small>}
+                </output>
+            )}
         </div>
     );
+}
+
+function selectionToolsEnabled(component: MapComponent): boolean {
+    return [
+        component.tools?.rectangleSelection,
+        component.tools?.lassoSelection,
+        component.tools?.circleSelection,
+    ].some(mapToolEnabled) ||
+        component.toolbar?.rectangleSelection === true ||
+        component.toolbar?.lassoSelection === true ||
+        component.toolbar?.zoomToSelection !== false ||
+        component.toolbar?.clearSelection !== false;
 }
 
 function mapToolEnabled(value: boolean | { enabled?: boolean } | undefined): boolean {

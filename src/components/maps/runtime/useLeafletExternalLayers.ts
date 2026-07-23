@@ -58,7 +58,7 @@ export function synchronizeLeafletExternalLayer({
     warning?: string;
   }) => void;
 }): boolean {
-  if (layer.sourceType === "arcgisTile" && layer.tile) {
+  if ((layer.sourceType === "arcgisTile" || layer.sourceType === "xyz") && layer.tile) {
     const signature = arcGisTileDefinitionSignature(layer, pane);
     try {
       const access = externalServiceAccess(
@@ -70,7 +70,7 @@ export function synchronizeLeafletExternalLayer({
         const mounted = runtime.tileLayers.get(layer.id);
         runtime.tileLayers.delete(layer.id);
         if (mounted) map.removeLayer(mounted.layer);
-        throw new Error(access.reason ?? "ArcGIS tile service access is unavailable.");
+        throw new Error(access.reason ?? "Tile service access is unavailable.");
       }
       const policy = checkHostPolicy(layer.tile.url);
       if (!policy.allowed) {
@@ -86,12 +86,13 @@ export function synchronizeLeafletExternalLayer({
         mounted = undefined;
       }
       if (!mounted) {
-        const tile = L.tileLayer(buildArcGisTileUrl(layer.tile.url), {
+        const tile = L.tileLayer(layer.sourceType === "xyz" ? layer.tile.url : buildArcGisTileUrl(layer.tile.url), {
           maxZoom: layer.tile.maxZoom ?? 19,
           minZoom: layer.tile.minZoom,
           opacity,
           attribution: layer.tile.attribution ?? "",
           pane,
+          subdomains: layer.tile.subdomains,
         });
         mounted = { signature, layer: tile };
         runtime.tileLayers.set(layer.id, mounted);

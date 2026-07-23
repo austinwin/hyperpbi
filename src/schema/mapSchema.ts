@@ -12,7 +12,9 @@ export type MapLayerSourceType =
     | "powerbi"
     | "arcgisFeature"
     | "arcgisTile"
-    | "arcgisDynamic";
+    | "arcgisDynamic"
+    | "geoJson"
+    | "xyz";
 
 export type MapGeometryType =
     | "point"
@@ -55,6 +57,58 @@ export interface MapSearchDefinition {
 
 export interface MapLegendDefinition {
     defaultOpen?: boolean;
+    enabled?: boolean;
+    maxHeight?: number;
+    search?: boolean;
+}
+
+export type MapSelectionOperation = "replace" | "add" | "remove" | "toggle" | "clear";
+
+export interface MapSelectionToolDefinition {
+    enabled?: boolean;
+    selectionMode?: Exclude<MapSelectionOperation, "clear">;
+}
+
+export interface MapLassoSelectionToolDefinition extends MapSelectionToolDefinition {
+    minimumPoints?: number;
+}
+
+export interface MapCircleSelectionToolDefinition extends MapSelectionToolDefinition {
+    radiusMeters?: number;
+}
+
+export interface MapSelectionSettingsDefinition {
+    maxSelectionCount?: number;
+    powerBiIdentityLimit?: number;
+    identityLimitBehavior?: "localOnly" | "truncate";
+}
+
+export interface MapScaleBarDefinition {
+    enabled?: boolean;
+    metric?: boolean;
+    imperial?: boolean;
+    position?: "bottomleft" | "bottomright";
+}
+
+export interface MapCoordinateDisplayDefinition {
+    enabled?: boolean;
+    precision?: number;
+}
+
+export interface MapQuickFilterDefinition {
+    id: string;
+    label?: string;
+    type: "categorical" | "numericRange" | "dateRange" | "text" | "null" | "topN";
+    field: string;
+    fieldSource?: "powerbi" | "service" | "joined";
+    layerId?: string;
+    multiSelect?: boolean;
+    includeNull?: boolean;
+    defaultValue?: unknown;
+    operator?: "contains" | "startsWith" | "equals";
+    count?: number;
+    valueField?: string;
+    valueFieldSource?: "powerbi" | "service" | "joined";
 }
 
 export interface MapFeatureDetailsDefinition {
@@ -112,6 +166,22 @@ export interface MapLayerDefinition {
         visible?: boolean;
         title?: string;
         collapsed?: boolean;
+        type?: "auto" | "categorical" | "classBreaks" | "continuousColor" | "proportionalSize" | "icon" | "line" | "polygon" | "heatIntensity" | "combined";
+        interactive?: boolean;
+        selectionMode?: "single" | "multiple";
+        clickAction?: "filterLayer" | "filterMap" | "highlight" | "select";
+        hoverAction?: "none" | "highlight";
+        showCounts?: boolean;
+        showPercentages?: boolean;
+        valueField?: string;
+        valueFieldSource?: "powerbi" | "service" | "joined";
+        valueAggregation?: "sum" | "avg" | "min" | "max";
+        search?: boolean;
+        maxHeight?: number;
+        order?: unknown[];
+        labels?: Record<string, string>;
+        externalInteraction?: boolean;
+        internalInteraction?: boolean;
     };
 }
 
@@ -128,7 +198,9 @@ export type MapLayerSourceDefinition =
     | PowerBiMapLayerSource
     | ArcGisFeatureLayerSource
     | ArcGisTileLayerSource
-    | ArcGisDynamicLayerSource;
+    | ArcGisDynamicLayerSource
+    | GeoJsonMapLayerSource
+    | XyzMapLayerSource;
 
 export interface PowerBiMapLayerSource {
     type: "powerbi";
@@ -178,6 +250,23 @@ export interface ArcGisDynamicIdentifyDefinition {
     maxResults?: number;
 }
 
+export interface GeoJsonMapLayerSource {
+    type: "geoJson";
+    data?: GeoJSON.GeoJsonObject;
+    url?: string;
+    idField?: string;
+    refreshIntervalMinutes?: number;
+}
+
+export interface XyzMapLayerSource {
+    type: "xyz";
+    url: string;
+    attribution?: string;
+    minZoom?: number;
+    maxZoom?: number;
+    subdomains?: string | string[];
+}
+
 // ── Join ──────────────────────────────────────────────────────────────
 
 export type MapJoinNormalization =
@@ -216,6 +305,9 @@ export type MapRendererDefinition =
     | ClassBreaksMapRenderer
     | ContinuousColorMapRenderer
     | ProportionalSizeMapRenderer
+    | RichIconMapRenderer
+    | LineMapRenderer
+    | PolygonMapRenderer
     | HeatmapMapRenderer
     | ClusterMapRenderer
     | DensityGridMapRenderer;
@@ -275,6 +367,21 @@ export interface ProportionalSizeMapRenderer {
     color?: string;
 }
 
+export interface RichIconMapRenderer {
+    type: "icon";
+    symbol: MapSymbolDefinition;
+}
+
+export interface LineMapRenderer {
+    type: "line";
+    symbol: MapSymbolDefinition;
+}
+
+export interface PolygonMapRenderer {
+    type: "polygon";
+    symbol: MapSymbolDefinition;
+}
+
 export interface HeatmapMapRenderer {
     type: "heatmap";
     weightField?: string;
@@ -282,7 +389,12 @@ export interface HeatmapMapRenderer {
     radius?: number;
     blur?: number;
     minOpacity?: number;
+    maxIntensity?: number;
     gradient?: Record<number, string>;
+    minZoom?: number;
+    maxZoom?: number;
+    normalization?: "global" | "viewport";
+    interactivePoints?: boolean;
 }
 
 export interface ClusterMapRenderer {
@@ -309,7 +421,7 @@ export interface DensityGridMapRenderer {
 // ── Symbol ────────────────────────────────────────────────────────────
 
 export interface MapSymbolDefinition {
-    shape?: "circle" | "square" | "diamond" | "triangle" | "line" | "fill";
+    shape?: "circle" | "square" | "diamond" | "triangle" | "icon" | "line" | "fill";
     color?: string;
     fillColor?: string;
     size?: number;
@@ -321,6 +433,57 @@ export interface MapSymbolDefinition {
     outlineColor?: string;
     outlineWidth?: number;
     dashArray?: string;
+    dashStyle?: "solid" | "dash" | "dot" | "dashDot";
+    lineCap?: "butt" | "round" | "square";
+    lineJoin?: "miter" | "round" | "bevel";
+    fillPattern?: "none" | "diagonal" | "crosshatch" | "dots";
+    icon?: MapIconDefinition;
+    iconField?: string;
+    iconFieldSource?: "powerbi" | "service" | "joined";
+    iconMap?: Record<string, MapIconDefinition>;
+    rotation?: number;
+    rotationField?: string;
+    rotationFieldSource?: "powerbi" | "service" | "joined";
+    sizeField?: string;
+    sizeFieldSource?: "powerbi" | "service" | "joined";
+    colorField?: string;
+    colorFieldSource?: "powerbi" | "service" | "joined";
+    colorMap?: Record<string, string>;
+    markerText?: string;
+    markerTextField?: string;
+    markerTextFieldSource?: "powerbi" | "service" | "joined";
+    badge?: string;
+    badgeField?: string;
+    badgeFieldSource?: "powerbi" | "service" | "joined";
+    showValue?: boolean;
+    anchor?: [number, number];
+    offset?: [number, number];
+    selectedStyle?: MapSymbolStateDefinition;
+    hoverStyle?: MapSymbolStateDefinition;
+    externalHighlightStyle?: MapSymbolStateDefinition;
+    dimmedOpacity?: number;
+}
+
+export interface MapIconDefinition {
+    type: "builtIn" | "svg" | "image";
+    name?: string;
+    svg?: string;
+    url?: string;
+    size?: [number, number];
+    anchor?: [number, number];
+    offset?: [number, number];
+}
+
+export interface MapSymbolStateDefinition {
+    color?: string;
+    fillColor?: string;
+    size?: number;
+    radius?: number;
+    weight?: number;
+    opacity?: number;
+    fillOpacity?: number;
+    outlineColor?: string;
+    outlineWidth?: number;
 }
 
 // ── Labels ────────────────────────────────────────────────────────────

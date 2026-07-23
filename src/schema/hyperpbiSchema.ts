@@ -427,6 +427,7 @@ export interface MapComponent extends ComponentBase {
     bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;
     legend?: MapLegendDefinition;
+    quickFilters?: import("./mapSchema").MapQuickFilterDefinition[];
     featureDetails?: import("./mapSchema").MapFeatureDetailsDefinition;
 
     layerPanel?: {
@@ -449,11 +450,22 @@ export interface MapComponent extends ComponentBase {
         bookmarks?: boolean;
         rectangleSelection?: boolean;
         lassoSelection?: boolean;
+        circleSelection?: boolean;
+        selection?: boolean;
+        quickFilters?: boolean;
+        zoomIn?: boolean;
+        zoomOut?: boolean;
+        selectedCount?: boolean;
+        position?: "topleft" | "topright" | "bottomleft" | "bottomright";
     };
 
     tools?: {
-        rectangleSelection?: boolean | { enabled?: boolean; selectionMode?: SelectionMode };
-        lassoSelection?: boolean | { enabled?: boolean; selectionMode?: SelectionMode; minimumPoints?: number };
+        rectangleSelection?: boolean | import("./mapSchema").MapSelectionToolDefinition;
+        lassoSelection?: boolean | import("./mapSchema").MapLassoSelectionToolDefinition;
+        circleSelection?: boolean | import("./mapSchema").MapCircleSelectionToolDefinition;
+        selection?: import("./mapSchema").MapSelectionSettingsDefinition;
+        scaleBar?: boolean | import("./mapSchema").MapScaleBarDefinition;
+        coordinateDisplay?: boolean | import("./mapSchema").MapCoordinateDisplayDefinition;
     };
 
     /** Fixed height used when heightMode is omitted or fixed. */

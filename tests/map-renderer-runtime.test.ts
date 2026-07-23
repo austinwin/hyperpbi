@@ -195,4 +195,56 @@ describe("Feature Style Renderer", () => {
             expect(style.color).toBeDefined();
         });
     });
+
+    describe("rich icons and line/polygon symbols", () => {
+        it("maps icon, rotation, size, color, text, badge, and visual overrides declaratively", () => {
+            const renderer: ResolvedMapRenderer = {
+                type: "icon",
+                symbol: {
+                    shape: "icon",
+                    icon: { type: "builtIn", name: "location" },
+                    iconField: "icon",
+                    iconFieldSource: "powerbi",
+                    iconMap: { alert: { type: "builtIn", name: "alert" } },
+                    rotationField: "heading",
+                    rotationFieldSource: "powerbi",
+                    sizeField: "size",
+                    sizeFieldSource: "powerbi",
+                    colorField: "status",
+                    colorFieldSource: "powerbi",
+                    colorMap: { Warning: "#f59e0b" },
+                    markerTextField: "name",
+                    markerTextFieldSource: "powerbi",
+                    badgeField: "status",
+                    badgeFieldSource: "powerbi",
+                    selectedStyle: { fillColor: "#2563eb" },
+                    hoverStyle: { fillColor: "#06b6d4" },
+                    externalHighlightStyle: { outlineColor: "#f97316" },
+                    dimmedOpacity: 0.2,
+                },
+            };
+            const style = featureStyle(makeFeature({ powerBiAttributes: { icon: "alert", heading: 45, size: 24, status: "Warning", name: "Pump 1" } }), renderer);
+            expect(style).toMatchObject({
+                shape: "icon",
+                icon: { type: "builtIn", name: "alert" },
+                rotation: 45,
+                radius: 24,
+                fillColor: "#f59e0b",
+                markerText: "Pump 1",
+                badge: "Warning",
+                dimmedOpacity: 0.2,
+            });
+            expect(style.selectedStyle?.fillColor).toBe("#2563eb");
+            expect(style.hoverStyle?.fillColor).toBe("#06b6d4");
+            expect(style.externalHighlightStyle?.outlineColor).toBe("#f97316");
+        });
+
+        it("maps authored dash styles, caps, and joins", () => {
+            const style = featureStyle(makeFeature(), {
+                type: "line",
+                symbol: { shape: "line", color: "#334155", dashStyle: "dashDot", lineCap: "round", lineJoin: "bevel" },
+            });
+            expect(style).toMatchObject({ shape: "line", dashArray: "8 4 2 4", lineCap: "round", lineJoin: "bevel" });
+        });
+    });
 });

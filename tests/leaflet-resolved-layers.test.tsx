@@ -117,6 +117,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("leaflet", () => ({
+    Layer: mocks.Layer,
     map: mocks.map, tileLayer: mocks.tileLayer, circleMarker: mocks.circleMarker, geoJSON: mocks.geoJSON,
     featureGroup: mocks.featureGroup, layerGroup: mocks.layerGroup, markerClusterGroup: mocks.markerClusterGroup,
     marker: mocks.marker, divIcon: mocks.divIcon, latLngBounds: mocks.latLngBounds,

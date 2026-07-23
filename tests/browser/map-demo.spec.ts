@@ -54,11 +54,15 @@ test("multiple geometry layers remain independently clickable and canonically is
   await expect(page.locator(".hp-map-feature-details")).toContainText("Facility A-01");
   const pointKey = await page.locator(".hp-map-feature-details").getAttribute("data-feature-key");
 
-  const lineBox = await line.boundingBox();
-  expect(lineBox).not.toBeNull();
-  await line.click({
-    position: { x: lineBox!.width / 2, y: Math.max(1, lineBox!.height - 2) },
+  const linePoint = await line.evaluate((node) => {
+    const path = node as SVGPathElement;
+    const point = path.getPointAtLength(path.getTotalLength() * 0.85);
+    const screenPoint = new DOMPoint(point.x, point.y).matrixTransform(
+      path.getScreenCTM()!,
+    );
+    return { x: screenPoint.x, y: screenPoint.y };
   });
+  await page.mouse.click(linePoint.x, linePoint.y);
   await expect(page.locator(".hp-map-feature-details")).toContainText("Segment A-01");
   const lineKey = await page.locator(".hp-map-feature-details").getAttribute("data-feature-key");
   expect(lineKey).not.toBe(pointKey);

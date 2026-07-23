@@ -21,6 +21,7 @@ import { mapToolbarPopoverId } from "./MapToolbar";
 import { MapToolbarPopover } from "./MapToolbarPopover";
 import { MapSearchPanel } from "./MapSearchPanel";
 import { MapBookmarkPanel } from "./MapBookmarkPanel";
+import { MapQuickFilterPanel } from "./MapQuickFilterPanel";
 import {
   effectiveMapLayerDataset,
   geometryAnalysis,
@@ -48,6 +49,7 @@ import type {
   ArcGisFeatureLayerSource,
   ArcGisTileLayerSource,
   ArcGisDynamicLayerSource,
+  XyzMapLayerSource,
 } from "../../schema/mapSchema";
 import type { MapToolbarPopover as MapToolbarPopoverState } from "../../render/stateStore";
 import { externalServiceAccess } from "../../providers/providerPolicy";
@@ -82,7 +84,12 @@ import {
 import { executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
-import { resolveMapFeatureSelection, type MapSelectionTool, type MapSpatialSelectionResult } from "../../maps/interactions/mapSpatialSelection";
+import { type MapSelectionTool, type MapSpatialSelectionResult } from "../../maps/interactions/mapSpatialSelection";
+import {
+  applyAnalyticalFilters,
+  resolveAnalyticalSelection,
+} from "../../maps/interactions/mapAnalyticalInteraction";
+import { resolveGeoJsonLayer } from "../../maps/sources/mapGeoJsonSource";
 
 export interface MapViewportState {
   bounds: [number, number, number, number];
@@ -308,19 +315,30 @@ export function MapBlock({ component }: { component: MapComponent }) {
     mapControllerRef.current = ctrl;
   }, []);
 
-  const handleSpatialSelect = useCallback((result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => {
-    const configured = selectionTool === "rectangle" ? component.tools?.rectangleSelection : component.tools?.lassoSelection;
-    const authoredMode = configured && typeof configured === "object" ? configured.selectionMode : undefined;
-    const selectionMode = modifiers.ctrlKey || modifiers.metaKey ? "toggle" : modifiers.shiftKey ? "add" : authoredMode ?? "replace";
+  const commitAnalyticalSelection = useCallback((
+    featureKeys: string[],
+    selectionMode: "replace" | "add" | "remove" | "toggle",
+    interactionLayer?: ResolvedMapLayer,
+  ) => {
     const currentFeatureKeys = context.state.mapInteractionState[id]?.selectedFeatureKeys ?? context.state.mapSelectedFeatureIds[id] ?? [];
-    const nextFeatureKeys = resolveMapFeatureSelection(currentFeatureKeys, result.featureKeys, selectionMode);
+    const maximum = component.tools?.selection?.maxSelectionCount ?? 10_000;
+    const resolution = resolveAnalyticalSelection(currentFeatureKeys, featureKeys, selectionMode, maximum);
+    const nextFeatureKeys = resolution.featureKeys;
     const nextFeatureKeySet = new Set(nextFeatureKeys);
     const selectedFeatures = runtimeLayersRef.current.flatMap(layer => layer.features.filter(feature => feature.featureKey && nextFeatureKeySet.has(feature.featureKey)));
     const synchronizedRowIndices = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowIndices))).sort((left, right) => left - right);
     const synchronizedRowKeys = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowKeys)));
-    context.dispatch({ type: "selectMapFeatures", mapId: id, featureIds: result.featureKeys, selectionMode });
+    context.dispatch({ type: "selectMapFeatures", mapId: id, featureIds: nextFeatureKeys, selectionMode: "replace" });
     const sourceRows = context.powerBiSourceRows ?? context.sourceRows;
     const sourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+    const identityLimit = component.tools?.selection?.powerBiIdentityLimit ?? 1_000;
+    const exceedsIdentityLimit = synchronizedRowIndices.length > identityLimit;
+    const externalRows = exceedsIdentityLimit && component.tools?.selection?.identityLimitBehavior === "truncate"
+      ? synchronizedRowIndices.slice(0, identityLimit)
+      : exceedsIdentityLimit
+        ? []
+        : synchronizedRowIndices;
+    const externalKeys = new Set(externalRows.map((index) => sourceRowKeys[index]).filter(Boolean));
     const interactionContext = {
       ...context,
       sourceRows,
@@ -331,24 +349,47 @@ export function MapBlock({ component }: { component: MapComponent }) {
       selectExternal: context.selectSourceRows ?? context.selectExternal,
     };
     const policy = {
-      ...resolveInteractionPolicy(component, config, "dataPoint"),
+      ...resolveInteractionPolicy({
+        ...component,
+        interaction: interactionLayer?.interaction ?? component.interaction,
+      }, config, "dataPoint"),
       // Submit the exact next union. This keeps linked rows and Power BI in sync
       // when multiple selected features share the same source identity.
       selectionMode: "replace" as const,
     };
-    executeComponentInteraction(policy, createInteractionPayload(component, {
-      rowIndices: synchronizedRowIndices,
-      rowKeys: synchronizedRowKeys,
+    executeComponentInteraction({
+      ...policy,
+      externalMode: exceedsIdentityLimit && component.tools?.selection?.identityLimitBehavior !== "truncate"
+        ? "none"
+        : policy.externalMode,
+    }, createInteractionPayload(component, {
+      rowIndices: externalRows,
+      rowKeys: exceedsIdentityLimit ? synchronizedRowKeys.filter((key) => externalKeys.has(key)) : synchronizedRowKeys,
       sourceRowKeys,
       field: policy.field,
     }), interactionContext, { trigger: "click" });
-    setSelectionStatus(`${nextFeatureKeys.length.toLocaleString()} feature${nextFeatureKeys.length === 1 ? "" : "s"} selected${synchronizedRowIndices.length ? ` across ${synchronizedRowIndices.length.toLocaleString()} Power BI row${synchronizedRowIndices.length === 1 ? "" : "s"}` : ""}.`);
-  }, [selectionTool, component, context, id, config]);
+    const warnings = [
+      resolution.overflowCount ? `${resolution.overflowCount.toLocaleString()} feature(s) exceeded the configured selection maximum.` : "",
+      exceedsIdentityLimit ? `${(synchronizedRowIndices.length - externalRows.length).toLocaleString()} Power BI identities remained local because the identity limit is ${identityLimit.toLocaleString()}.` : "",
+    ].filter(Boolean);
+    setSelectionStatus(`${nextFeatureKeys.length.toLocaleString()} feature${nextFeatureKeys.length === 1 ? "" : "s"} selected${synchronizedRowIndices.length ? ` across ${synchronizedRowIndices.length.toLocaleString()} Power BI row${synchronizedRowIndices.length === 1 ? "" : "s"}` : ""}.${warnings.length ? ` ${warnings.join(" ")}` : ""}`);
+  }, [component, context, id, config]);
+
+  const handleSpatialSelect = useCallback((result: MapSpatialSelectionResult, modifiers: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey?: boolean }) => {
+    const configured = selectionTool === "rectangle"
+      ? component.tools?.rectangleSelection
+      : selectionTool === "circle"
+        ? component.tools?.circleSelection
+        : component.tools?.lassoSelection;
+    const authoredMode = configured && typeof configured === "object" ? configured.selectionMode : undefined;
+    const selectionMode = modifiers.altKey ? "remove" : modifiers.ctrlKey || modifiers.metaKey ? "toggle" : modifiers.shiftKey ? "add" : authoredMode ?? "replace";
+    commitAnalyticalSelection(result.featureKeys, selectionMode);
+  }, [selectionTool, component.tools, commitAnalyticalSelection]);
 
   // ── UI state from reducer (maps to mapUiState[id]) ───────────────
   const mapUiState = context.state.mapUiState[id] ?? {};
   const layerPanelEnabled = component.layerPanel?.visible !== false;
-  const legendEnabled = true;
+  const legendEnabled = component.legend?.enabled !== false;
   const configuredGeocoder = config.providers?.geocoder;
   const searchEnabled =
     component.search?.enabled === true ||
@@ -358,8 +399,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ));
   const activeToolbarPopover = resolveMapToolbarPopover(
     mapUiState.toolbarPopover,
-    component.layerPanel?.defaultOpen,
-    component.legend?.defaultOpen,
+    layerPanelEnabled ? component.layerPanel?.defaultOpen : false,
+    legendEnabled ? component.legend?.defaultOpen : false,
   );
 
   // ── Per-layer abort controllers and refresh timers ───────────────
@@ -374,6 +415,11 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const [arcGisFeatureState, setArcGisFeatureState] = useState<
     Record<string, ArcGisFeatureRuntimeEntry>
   >({});
+  const [remoteGeoJsonState, setRemoteGeoJsonState] = useState<
+    Record<string, { data?: GeoJSON.GeoJsonObject; loading: boolean; error?: string }>
+  >({});
+  const geoJsonControllersRef = useRef(new Map<string, AbortController>());
+  const geoJsonRefreshTimersRef = useRef(new Map<string, ReturnType<typeof setInterval>>());
   const dynamicIdentifyControllerRef = useRef<AbortController | null>(null);
   const dynamicIdentifyVersionRef = useRef(0);
   const [dynamicIdentifyState, setDynamicIdentifyState] =
@@ -466,12 +512,15 @@ export function MapBlock({ component }: { component: MapComponent }) {
         .filter(
           (definition) =>
             definition.source.type === "arcgisTile" ||
-            definition.source.type === "arcgisDynamic",
+            definition.source.type === "arcgisDynamic" ||
+            definition.source.type === "xyz",
         )
         .map((definition) =>
           definition.source.type === "arcgisTile"
             ? createArcGisTileShell(definition)
-            : createArcGisDynamicShell(definition),
+            : definition.source.type === "arcgisDynamic"
+              ? createArcGisDynamicShell(definition)
+              : createXyzShell(definition),
         ),
     [layerDefinitions],
   );
@@ -724,9 +773,78 @@ export function MapBlock({ component }: { component: MapComponent }) {
       layerAbortControllersRef.current.clear();
       requestVersionsRef.current.clear();
       layerRefreshTimersRef.current.clear();
+      for (const controller of geoJsonControllersRef.current.values()) controller.abort();
+      for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
+      geoJsonControllersRef.current.clear();
+      geoJsonRefreshTimersRef.current.clear();
     },
     [],
   );
+
+  const remoteGeoJsonRevision = useMemo(
+    () => stableMapRevision(layerDefinitions.flatMap((definition) =>
+      definition.source.type === "geoJson" && definition.source.url
+        ? [{ id: definition.id, url: definition.source.url, refresh: definition.source.refreshIntervalMinutes }]
+        : [],
+    )),
+    [layerDefinitions],
+  );
+  useEffect(() => {
+    for (const controller of geoJsonControllersRef.current.values()) controller.abort();
+    for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
+    geoJsonControllersRef.current.clear();
+    geoJsonRefreshTimersRef.current.clear();
+    const definitions = layerDefinitions.filter((definition) =>
+      definition.source.type === "geoJson" && Boolean(definition.source.url),
+    );
+    const load = async (definition: MapLayerDefinition) => {
+      if (definition.source.type !== "geoJson" || !definition.source.url) return;
+      const access = serviceAccess(definition.source.url);
+      if (!access.allowed) {
+        setRemoteGeoJsonState((previous) => ({
+          ...previous,
+          [definition.id]: { loading: false, error: access.reason ?? "Remote GeoJSON access is unavailable." },
+        }));
+        return;
+      }
+      geoJsonControllersRef.current.get(definition.id)?.abort();
+      const controller = new AbortController();
+      geoJsonControllersRef.current.set(definition.id, controller);
+      setRemoteGeoJsonState((previous) => ({
+        ...previous,
+        [definition.id]: { ...previous[definition.id], loading: true, error: undefined },
+      }));
+      try {
+        const response = await fetch(definition.source.url, { signal: controller.signal, credentials: "omit" });
+        if (!response.ok) throw new Error(`GeoJSON request failed (${response.status}).`);
+        const value = await response.json() as GeoJSON.GeoJsonObject;
+        if (!value || typeof value !== "object" || typeof value.type !== "string")
+          throw new Error("Remote response is not valid GeoJSON.");
+        if (!controller.signal.aborted)
+          setRemoteGeoJsonState((previous) => ({
+            ...previous,
+            [definition.id]: { data: value, loading: false },
+          }));
+      } catch (error) {
+        if (!controller.signal.aborted)
+          setRemoteGeoJsonState((previous) => ({
+            ...previous,
+            [definition.id]: { loading: false, error: error instanceof Error ? error.message : String(error) },
+          }));
+      }
+    };
+    for (const definition of definitions) {
+      void load(definition);
+      if (definition.source.type === "geoJson" && (definition.source.refreshIntervalMinutes ?? 0) >= 1)
+        geoJsonRefreshTimersRef.current.set(definition.id, setInterval(() => void load(definition), definition.source.refreshIntervalMinutes! * 60_000));
+    }
+    return () => {
+      for (const controller of geoJsonControllersRef.current.values()) controller.abort();
+      for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
+      geoJsonControllersRef.current.clear();
+      geoJsonRefreshTimersRef.current.clear();
+    };
+  }, [remoteGeoJsonRevision, serviceAccess]);
 
   const handleLayerRuntimeStateChange = useCallback(
     (
@@ -794,6 +912,27 @@ export function MapBlock({ component }: { component: MapComponent }) {
         .filter((layer): layer is ResolvedMapLayer => Boolean(layer)),
     [arcGisFeatureState],
   );
+  const resolvedGeoJsonLayers = useMemo(
+    () => layerDefinitions.flatMap((definition) => {
+      if (definition.source.type !== "geoJson") return [];
+      const data = definition.source.data ?? remoteGeoJsonState[definition.id]?.data;
+      if (!data) return [];
+      const layer = resolveGeoJsonLayer(definition, data);
+      const remote = remoteGeoJsonState[definition.id];
+      return [{
+        ...layer,
+        loading: remote?.loading ?? false,
+        error: remote?.error,
+        diagnostics: {
+          ...layer.diagnostics,
+          loading: remote?.loading ?? false,
+          error: remote?.error,
+          warnings: remote?.error ? [...layer.diagnostics.warnings, remote.error] : layer.diagnostics.warnings,
+        },
+      }];
+    }),
+    [layerDefinitions, remoteGeoJsonState],
+  );
 
   const allResolvedLayers: ResolvedMapLayer[] = useMemo(() => {
     const definitionById = new Map(
@@ -802,6 +941,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const ordered = [
       ...syncedLayers,
       ...resolvedArcGisFeatureLayers,
+      ...resolvedGeoJsonLayers,
       ...staticExternalLayers,
     ]
       .map((layer) => {
@@ -859,6 +999,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
   }, [
     syncedLayers,
     resolvedArcGisFeatureLayers,
+    resolvedGeoJsonLayers,
     staticExternalLayers,
     layerRuntimeState,
     layerDefinitions,
@@ -880,6 +1021,41 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ),
     });
   }, [id, runtimeLayers]);
+  const selectedFeatureKeys = context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+    context.state.mapSelectedFeatureIds[id] ??
+    [];
+  const selectedFeatureKeySet = useMemo(
+    () => new Set(selectedFeatureKeys),
+    [selectedFeatureKeys],
+  );
+  const analyticalLayers = useMemo(
+    () => applyAnalyticalFilters(
+      runtimeLayers,
+      mapUiState.legendSelections ?? {},
+      component.quickFilters ?? [],
+      mapUiState.quickFilterValues ?? {},
+      selectedFeatureKeySet,
+      mapUiState.filterToSelected === true,
+      id,
+    ),
+    [
+      runtimeLayers,
+      mapUiState.legendSelections,
+      component.quickFilters,
+      mapUiState.quickFilterValues,
+      mapUiState.filterToSelected,
+      selectedFeatureKeySet,
+      id,
+    ],
+  );
+  const selectedRowCount = useMemo(
+    () => new Set(runtimeLayers.flatMap((layer) =>
+      layer.features
+        .filter((feature) => feature.featureKey && selectedFeatureKeySet.has(feature.featureKey))
+        .flatMap((feature) => feature.powerBiRowKeys),
+    )).size,
+    [runtimeLayers, selectedFeatureKeySet],
+  );
 
   const handleMapClick = useCallback(
     (event: LeafletMapClickEvent): boolean => {
@@ -1060,6 +1236,22 @@ export function MapBlock({ component }: { component: MapComponent }) {
     () => [...runtimeLayers, ...dynamicIdentifyState.layers],
     [runtimeLayers, dynamicIdentifyState.layers],
   );
+  const clearMapSelection = useCallback(() => {
+    context.dispatch({ type: "clearMapFeatures", mapId: id });
+    context.dispatch({ type: "selectComponentRows", id, rows: [] });
+    context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
+    context.dispatch({ type: "componentSelectionScope", id });
+    context.dispatch({ type: "componentSelectionMode", id });
+    context.dispatch({ type: "componentSelectionTargets", id });
+    context.dispatch({ type: "selectRows", rows: [] });
+    context.dispatch({ type: "selectRowKeys", keys: [] });
+    context.dispatch({ type: "clearInteractionFilter", id });
+    context.dispatch({ type: "interactionSignature", id });
+    context.clearExternal({ componentId: id, componentType: "map" });
+    context.clearExternalFilter({ componentId: id, componentType: "map" });
+    context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
+    setSelectionStatus(undefined);
+  }, [context, id]);
 
   useEffect(() => {
     const active = context.state.mapInteractionState[id]?.activeFeature;
@@ -1138,7 +1330,79 @@ export function MapBlock({ component }: { component: MapComponent }) {
           subtitle="Visible layers"
           onClose={closePopover}
         >
-          <MapLegendPanel mapId={id} layers={runtimeLayers} />
+          <MapLegendPanel
+            mapId={id}
+            layers={runtimeLayers}
+            definition={component.legend}
+            onSelectFeatures={(layer, featureKeys, operation) => {
+              const legendInteraction = layer.legend;
+              commitAnalyticalSelection(featureKeys, operation, {
+                ...layer,
+                interaction: {
+                  ...layer.interaction,
+                  ...(legendInteraction?.internalInteraction === false
+                    ? { internalMode: "none" as const }
+                    : {}),
+                  ...(legendInteraction?.externalInteraction === false
+                    ? { externalMode: "none" as const }
+                    : {}),
+                },
+              });
+            }}
+          />
+        </MapToolbarPopover>
+      ) : activeToolbarPopover === "selection" ? (
+        <MapToolbarPopover
+          id={mapToolbarPopoverId(id, "selection")}
+          title="Selection tools"
+          subtitle={`${selectedFeatureKeys.length.toLocaleString()} selected`}
+          onClose={closePopover}
+        >
+          <div class="hp-map-selection-tools">
+            {(mapToolEnabled(component.tools?.rectangleSelection) || component.toolbar?.rectangleSelection === true) && (
+              <button type="button" aria-pressed={selectionTool === "rectangle"} onClick={() => setSelectionTool(selectionTool === "rectangle" ? null : "rectangle")}>Rectangle</button>
+            )}
+            {(mapToolEnabled(component.tools?.lassoSelection) || component.toolbar?.lassoSelection === true) && (
+              <button type="button" aria-pressed={selectionTool === "lasso"} onClick={() => setSelectionTool(selectionTool === "lasso" ? null : "lasso")}>Lasso</button>
+            )}
+            {mapToolEnabled(component.tools?.circleSelection) && (
+              <button type="button" aria-pressed={selectionTool === "circle"} onClick={() => setSelectionTool(selectionTool === "circle" ? null : "circle")}>Circle / radius</button>
+            )}
+            <button type="button" onClick={() => {
+              const visible = context.state.mapLayerState[id]?.visibility ?? {};
+              const keys = analyticalLayers.flatMap((layer) =>
+                (visible[layer.id] ?? layer.visible ?? true)
+                  ? layer.features.flatMap((feature) => feature.featureKey ? [feature.featureKey] : [])
+                  : [],
+              );
+              commitAnalyticalSelection(keys, "replace");
+            }}>Select visible features</button>
+            <button type="button" onClick={() => {
+              const current = new Set(selectedFeatureKeys);
+              const inverted = analyticalLayers.flatMap((layer) =>
+                layer.features.flatMap((feature) =>
+                  feature.featureKey && !current.has(feature.featureKey) ? [feature.featureKey] : [],
+                ),
+              );
+              commitAnalyticalSelection(inverted, "replace");
+            }}>Invert selection</button>
+            <button type="button" disabled={!selectedFeatureKeys.length} onClick={() => mapControllerRef.current?.zoomToSelection()}>Zoom to selection</button>
+            <button type="button" disabled={!selectedFeatureKeys.length} onClick={clearMapSelection}>Clear selection</button>
+            <p>Shift adds, Ctrl/Cmd toggles, and Alt subtracts while drawing.</p>
+          </div>
+        </MapToolbarPopover>
+      ) : activeToolbarPopover === "quickFilters" ? (
+        <MapToolbarPopover
+          id={mapToolbarPopoverId(id, "quickFilters")}
+          title="Map quick filters"
+          subtitle="Lightweight in-map analysis"
+          onClose={closePopover}
+        >
+          <MapQuickFilterPanel
+            mapId={id}
+            definitions={component.quickFilters ?? []}
+            layers={runtimeLayers}
+          />
         </MapToolbarPopover>
       ) : activeToolbarPopover === "search" ? (
         <MapToolbarPopover
@@ -1184,7 +1448,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
           <div class="hp-map-viewport-clip">
             <LeafletMap
               component={component}
-              resolvedLayers={runtimeLayers}
+              resolvedLayers={analyticalLayers}
               onViewportChange={handleViewportChange}
               onControllerReady={handleControllerReady}
               onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
@@ -1269,6 +1533,8 @@ if (clearSelection) {
               searchEnabled={searchEnabled}
               popoverContent={popoverContent}
               onHome={() => mapControllerRef.current?.home()}
+              onZoomIn={() => mapControllerRef.current?.zoomIn()}
+              onZoomOut={() => mapControllerRef.current?.zoomOut()}
               onZoomToSelection={() =>
                 mapControllerRef.current?.zoomToSelection()
               }
@@ -1279,40 +1545,16 @@ if (clearSelection) {
                   popover,
                 })
               }
-              onClearSelection={() => {
-  context.dispatch({ type: "clearMapFeatures", mapId: id });
-  context.dispatch({ type: "selectComponentRows", id, rows: [] });
-  context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
-  context.dispatch({ type: "componentSelectionScope", id });
-  context.dispatch({ type: "componentSelectionMode", id });
-  context.dispatch({ type: "componentSelectionTargets", id });
-  context.dispatch({ type: "selectRows", rows: [] });
-  context.dispatch({ type: "selectRowKeys", keys: [] });
-  context.dispatch({ type: "clearInteractionFilter", id });
-  context.dispatch({ type: "interactionSignature", id });
-
-  context.clearExternal({
-    componentId: id,
-    componentType: "map",
-  });
-
-  context.clearExternalFilter({
-    componentId: id,
-    componentType: "map",
-  });
-
-  context.dispatch({
-    type: "closeMapFeatureDetails",
-    mapId: id,
-  });
-  setSelectionStatus(undefined);
-}}
+              onClearSelection={clearMapSelection}
               activeSelectionTool={selectionTool}
               onSetSelectionTool={(tool) => {
                 setSelectionTool(tool);
-                setSelectionStatus(tool ? `${tool === "rectangle" ? "Rectangle" : "Lasso"} selection active. Drag on the map to select features.` : undefined);
+                setSelectionStatus(tool ? `${tool === "rectangle" ? "Rectangle" : tool === "circle" ? "Circle" : "Lasso"} selection active. Drag on the map to select features.` : undefined);
                 context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
               }}
+              quickFiltersEnabled={Boolean(component.quickFilters?.length)}
+              selectedFeatureCount={selectedFeatureKeys.length}
+              selectedRowCount={selectedRowCount}
               />
             )}
           </div>
@@ -2067,6 +2309,10 @@ export async function resolveArcGisFeatureLayer(
 // ── ArcGIS Query Field Collection ─────────────────────────────────────
 export { collectArcGisQueryFields };
 
+function mapToolEnabled(value: boolean | { enabled?: boolean } | undefined): boolean {
+  return value === true || Boolean(value && typeof value === "object" && value.enabled !== false);
+}
+
 // ── External Layer Shells ─────────────────────────────────────────────
 
 export function createArcGisFeatureShell(
@@ -2133,6 +2379,42 @@ export function createArcGisTileShell(
       attribution: source.attribution,
       minZoom: source.minZoom,
       maxZoom: source.maxZoom,
+    },
+  };
+}
+
+export function createXyzShell(def: MapLayerDefinition): ResolvedMapLayer {
+  const source = def.source as XyzMapLayerSource;
+  return {
+    id: def.id,
+    name: def.name,
+    sourceType: "xyz",
+    geometryType: "unknown",
+    visible: def.visible ?? true,
+    opacity: def.opacity ?? 1,
+    order: def.order ?? 5,
+    groupId: def.groupId,
+    datasetName: def.dataset,
+    features: [],
+    renderer: { type: "simple", symbol: {} },
+    diagnostics: {
+      featureCount: 0,
+      requestCount: 0,
+      loading: false,
+      sourceType: "xyz",
+      sourceUrl: source.url,
+      geometryType: "unknown",
+      usedServiceSymbology: false,
+      usedServiceLabels: false,
+      warnings: [],
+    },
+    loading: false,
+    tile: {
+      url: source.url,
+      attribution: source.attribution,
+      minZoom: source.minZoom,
+      maxZoom: source.maxZoom,
+      subdomains: source.subdomains,
     },
   };
 }

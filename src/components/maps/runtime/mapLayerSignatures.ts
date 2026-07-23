@@ -20,6 +20,7 @@ export function arcGisTileDefinitionSignature(
     attribution: layer.tile?.attribution ?? "",
     minZoom: layer.tile?.minZoom,
     maxZoom: layer.tile?.maxZoom ?? 19,
+    subdomains: layer.tile?.subdomains,
     pane,
   });
 }

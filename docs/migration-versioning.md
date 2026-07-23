@@ -67,6 +67,18 @@ The converter lives at `scripts/migrate-schema-v1-to-v2.mjs`. It is not imported
 
 Field mappings and business aggregations are never guessed merely to satisfy validation. Review converted interactions, fields, map bindings, and output before replacing a production dashboard.
 
+## Map compatibility after the analytical expansion
+
+Existing 2.0 Power BI and ArcGIS map layers, popup/tooltip/label definitions, joins, clusters,
+rectangle/lasso tools, and interaction policies remain supported. Legacy
+`toolbar.rectangleSelection`/`toolbar.lassoSelection` still enable the corresponding tool; new
+specifications should author structured `tools` definitions.
+
+Existing `renderer.type: "heatmap"` specifications now render real weighted canvas intensity
+instead of bounded point-symbol fallback. Set `interactivePoints: true` when selection of heat source
+records is required. Heat pixels themselves are not selectable. New fields and runtime behavior are
+listed in the [July 2026 map release note](releases/2026-07-analytical-maps.md).
+
 ## Package commands for maintainers
 
 ```powershell
