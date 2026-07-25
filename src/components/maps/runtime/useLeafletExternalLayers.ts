@@ -93,6 +93,7 @@ export function synchronizeLeafletExternalLayer({
           attribution: layer.tile.attribution ?? "",
           pane,
           subdomains: layer.tile.subdomains,
+          detectRetina: true,
         });
         mounted = { signature, layer: tile };
         runtime.tileLayers.set(layer.id, mounted);

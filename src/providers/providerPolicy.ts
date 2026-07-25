@@ -14,7 +14,7 @@ export interface ProviderPolicy {
 
 export function providerServiceOrigin(endpoint: string): string | undefined {
     try {
-        const url = new URL(endpoint);
+        const url = new URL(endpoint.replace(/\{s\}/gi, "a").replace(/\{[^}]+\}/g, "0"));
         if (url.protocol !== "https:" || url.username || url.password) return undefined;
         return url.origin.toLowerCase();
     } catch {

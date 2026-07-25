@@ -1,4 +1,4 @@
-import { copyFile, readFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, unlink, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import {
@@ -41,28 +41,31 @@ try {
         // A build without the ArcGIS host policy has nothing to restore here.
     }
 
-    // Read broad-host setting while holding the profile lock because all
-    // profiles temporarily mutate the same fixed workspace files.
-    const allowAllHosts = process.env.HYPERPBI_ALLOW_ALL_MAP_HOSTS !== "false";
+    // Retain the historical artifact labels, but never emit the unsupported
+    // https://* WebAccess sentinel. Power BI only supports wildcards on a
+    // concrete parent host (for example, https://*.arcgis.com).
+    const broadProfileLabel = process.env.HYPERPBI_ALLOW_ALL_MAP_HOSTS !== "false";
 
     try {
         const extraHosts = parseMapHostPatterns(process.env.HYPERPBI_MAP_HOSTS ?? "");
         const webAccessParams = buildWebAccessParameters({
             profile,
-            allowAllHosts,
             configuredHosts: extraHosts,
         });
         if (profile === "maps") {
-            console.log(allowAllHosts
-                ? "Maps package: using broad wildcard https://* for all HTTPS hosts."
-                : `Maps package: using restricted host list (${webAccessParams.length} hosts).`);
+            console.log(
+                `Maps package: using ${webAccessParams.length} Power BI-compatible HTTPS host declaration(s).` +
+                (extraHosts.length
+                    ? ""
+                    : " Set HYPERPBI_MAP_HOSTS for custom basemap or geocoder hosts."),
+            );
         }
 
         const capabilities = JSON.parse(originalCapabilities);
         capabilities.privileges = profile === "maps"
             ? [{
                 name: "WebAccess",
-                essential: false,
+                essential: true,
                 parameters: webAccessParams,
             }]
             : [];
@@ -74,9 +77,7 @@ try {
         ].join("\n") + "\n");
 
         if (originalHostPolicy && profile === "maps") {
-            const injectedHosts = allowAllHosts
-                ? ["https://*"]
-                : [...DEFAULT_MAP_HOSTS, ...extraHosts];
+            const injectedHosts = [...DEFAULT_MAP_HOSTS, ...extraHosts];
             const injected = originalHostPolicy.replace(
                 /const DEFAULT_PUBLIC_HOSTS = \[[\s\S]*?\];/,
                 `const DEFAULT_PUBLIC_HOSTS = ${JSON.stringify(injectedHosts)};`,
@@ -102,17 +103,30 @@ try {
             const dist = join(root, "dist");
             const files = await readdir(dist);
             const packageLabel = profile === "maps"
-                ? allowAllHosts ? "maps-broad" : "maps-restricted"
+                ? broadProfileLabel ? "maps-broad" : "maps-restricted"
                 : "core";
+            const pbiviz = JSON.parse(await readFile(join(root, "pbiviz.json"), "utf8"));
+            const packageBase = `${pbiviz.visual.guid}.${pbiviz.visual.version}`;
+            const sourceName = `${packageBase}.pbiviz`;
+            const source = join(dist, sourceName);
+            const escapedGuid = String(pbiviz.visual.guid).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const staleProfilePattern = new RegExp(
+                `^${escapedGuid}\\..+-${packageLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.pbiviz$`,
+            );
+            const staleBasePattern = new RegExp(`^${escapedGuid}\\.[0-9.]+\\.pbiviz$`);
+
             for (const file of files) {
-                if (file.endsWith(".pbiviz") && !/-(?:core|maps)(?:-|\.pbiviz$)/.test(file)) {
-                    const source = join(dist, file);
-                    const target = join(dist, file.replace(".pbiviz", `-${packageLabel}.pbiviz`));
-                    await copyFile(source, target);
-                    if (profile === "maps") {
-                        await copyFile(source, join(dist, file.replace(".pbiviz", "-maps.pbiviz")));
-                    }
+                if (
+                    staleProfilePattern.test(file) ||
+                    (staleBasePattern.test(file) && file !== sourceName) ||
+                    (profile === "maps" && broadProfileLabel && new RegExp(`^${escapedGuid}\\..+-maps\\.pbiviz$`).test(file))
+                ) {
+                    await unlink(join(dist, file));
                 }
+            }
+            await copyFile(source, join(dist, `${packageBase}-${packageLabel}.pbiviz`));
+            if (profile === "maps" && broadProfileLabel) {
+                await copyFile(source, join(dist, `${packageBase}-maps.pbiviz`));
             }
 
             const profileManifestPath = join(dist, "package-capability-profiles.json");

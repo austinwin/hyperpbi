@@ -40,7 +40,7 @@ See [architecture](docs/architecture.md) for host contracts, persistence, portab
 <!-- component-summary:start -->
 - The canonical implementation defines **81 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
-- Power BI visual package version `1.0.0.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
+- Power BI visual package version `1.0.1.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
 ## Power BI workflow
 
@@ -193,8 +193,9 @@ npm run package:maps
 ```
 
 - **Core** removes WebAccess privileges. Bound Power BI geometry remains available; external tiles, ArcGIS services, and geocoders are unavailable.
-- **Maps broad** is the default Maps packaging mode and uses `https://*` WebAccess (`HYPERPBI_ALLOW_ALL_MAP_HOSTS` not set to `false`).
-- **Maps restricted** uses built-in approved hosts plus comma-separated `HYPERPBI_MAP_HOSTS` when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
+- **Maps broad** is the default Maps artifact label. It declares the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
+- **Maps restricted** uses the same safe built-ins and the restricted artifact label when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
+- Add comma-separated exact hosts or real-domain subdomain wildcards through `HYPERPBI_MAP_HOSTS` when packaging custom basemap or geocoder endpoints. Power BI doesn't support an all-host `https://*` WebAccess declaration, so custom hosts must be known when the PBIVIZ is built.
 
 The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`; it also writes the convenience package filename `*-maps.pbiviz` for a Maps package. Exact base names derive from the PBIVIZ packager, so documentation should not invent a fixed artifact filename.
 

@@ -26,8 +26,15 @@ for (const profile of profiles) {
     if (profile === "core" && actual !== null) {
         throw new Error("Core package must not contain a WebAccess privilege.");
     }
-    if (profile === "maps-broad" && JSON.stringify(actual) !== JSON.stringify(["https://*"])) {
-        throw new Error(`Broad Maps WebAccess mismatch: ${JSON.stringify(actual)}.`);
+    if (profile === "maps-broad") {
+        if (!Array.isArray(actual) || actual.includes("https://*")) {
+            throw new Error(`Broad Maps WebAccess contains an unsupported all-host wildcard: ${JSON.stringify(actual)}.`);
+        }
+        for (const required of ["https://tile.openstreetmap.org", "https://nominatim.openstreetmap.org"]) {
+            if (!actual.includes(required)) {
+                throw new Error(`Broad Maps WebAccess is missing ${required}.`);
+            }
+        }
     }
     if (profile === "maps-restricted") {
         if (!Array.isArray(actual) || actual.includes("https://*")) {

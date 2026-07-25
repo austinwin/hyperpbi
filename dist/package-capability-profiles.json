@@ -4,7 +4,11 @@
   },
   "maps-broad": {
     "webAccessParameters": [
-      "https://*"
+      "https://tile.openstreetmap.org",
+      "https://nominatim.openstreetmap.org",
+      "https://geocode-api.arcgis.com",
+      "https://*.arcgis.com",
+      "https://*.arcgisonline.com"
     ]
   },
   "maps-restricted": {

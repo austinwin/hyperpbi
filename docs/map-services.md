@@ -188,8 +188,9 @@ This architecture change does not alter geocoding. The default geocoder remains 
 ## Packaging profiles
 
 - **Core:** the single Values role and no WebAccess privilege; bound Power BI geometry remains available.
-- **Maps broad:** the same Values role and intended `https://*` map access.
-- **Maps restricted:** the same Values role and configured HTTPS host allowlist.
+- **Maps broad:** the same Values role and Power BI-compatible declarations for the built-in OpenStreetMap, Nominatim, and ArcGIS hosts.
+- **Maps restricted:** the same Values role and the restricted artifact label.
+- Custom basemap and geocoder domains must be included at package time through `HYPERPBI_MAP_HOSTS` as exact HTTPS hosts or subdomain wildcards on a real parent domain. Power BI doesn't support an all-host `https://*` WebAccess declaration.
 
 Run `npm run package:core`, `npm run package:maps`, and `npm run package:verify`. Never store tokens, credentials, or private service secrets in dashboard JSON.
 

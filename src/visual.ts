@@ -28,29 +28,13 @@ import { ExternalFilterResult } from "./powerbi/externalFilters";
 import { FilterOperator } from "./schema/hyperpbiSchema";
 import type { ProviderAccessState } from "./providers/providerTypes";
 import { providerServiceOrigin } from "./providers/providerPolicy";
+import { configuredMapEndpoints } from "./providers/configuredMapEndpoints";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
-
-function configuredArcGisOrigins(specification: string): string[] {
-    const parsed = parseJson(specification).value;
-    const origins = new Set<string>();
-    const visit = (value: unknown): void => {
-        if (Array.isArray(value)) { value.forEach(visit); return; }
-        if (!value || typeof value !== "object") return;
-        const entry = value as Record<string, unknown>;
-        if (["arcgisFeature", "arcgisTile", "arcgisDynamic"].includes(String(entry.type)) && typeof entry.url === "string") {
-            const origin = providerServiceOrigin(entry.url);
-            if (origin) origins.add(origin);
-        }
-        Object.values(entry).forEach(visit);
-    };
-    visit(parsed);
-    return [...origins].sort();
-}
 
 export class Visual implements IVisual {
     private readonly target: HTMLElement;
@@ -141,7 +125,6 @@ export class Visual implements IVisual {
         }
         this.data = { ...this.data, loadStatus: { loadedRowCount: this.data.rows.length, moreRowsAvailable: this.moreRowsAvailable, fetchInProgress: false } }; this.editMode = nextEditMode;void this.checkProviderAccess();
         this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length };
-        this.target.style.width = `${Math.max(0, options.viewport.width)}px`; this.target.style.height = `${Math.max(0, options.viewport.height)}px`;
         this.renderMs = performance.now() - started; this.renderCurrent(); this.host.eventService?.renderingFinished(options); this.requestMoreDataIfNeeded();
     }
 
@@ -169,8 +152,8 @@ export class Visual implements IVisual {
         const providers=parseConfig(activeConfiguration||defaultConfigJson).config?.providers;
         const tile=providers?.basemap?.enabled?providers.basemap.tileUrl:undefined;
         const geocoder=providers?.geocoder?.enabled&&providers.geocoder.provider!=="none"?providers.geocoder.endpoint:undefined;
-        const serviceOrigins=configuredArcGisOrigins(activeSpecification);
-        const signature=JSON.stringify([tile,geocoder,serviceOrigins]);
+        const serviceEndpoints=configuredMapEndpoints(activeSpecification);
+        const signature=JSON.stringify([tile,geocoder,serviceEndpoints]);
         if(signature===this.providerAccessSignature)return;
         this.providerAccessSignature=signature;
         const sequence=++this.providerAccessSequence;
@@ -191,9 +174,12 @@ export class Visual implements IVisual {
                 return{allowed:status===powerbi.PrivilegeStatus.Allowed,endpoint:sanitized,reason:status===powerbi.PrivilegeStatus.Allowed?undefined:`Power BI denied WebAccess to the configured ${label} endpoint.`};
             }catch{return{allowed:false,endpoint:sanitized,reason:`Power BI could not verify WebAccess for the configured ${label} endpoint.`};}
         };
-        const [tiles,result,...serviceResults]=await Promise.all([check(tile,"tile"),check(geocoder,"geocoder"),...serviceOrigins.map(origin=>check(origin,"ArcGIS service"))]);
+        const [tiles,result,...serviceResults]=await Promise.all([check(tile,"tile"),check(geocoder,"geocoder"),...serviceEndpoints.map(endpoint=>check(endpoint,"map service"))]);
         if(sequence!==this.providerAccessSequence)return;
-        const services=Object.fromEntries(serviceOrigins.map((origin,index)=>[origin,serviceResults[index]]));
+        const services=Object.fromEntries(serviceEndpoints.flatMap((endpoint,index)=>{
+            const origin=providerServiceOrigin(endpoint);
+            return origin?[[origin,serviceResults[index]]]:[];
+        }));
         this.providerAccess={tiles,geocoder:result,services};
         this.webAccessAvailable=tiles.allowed||result.allowed||serviceResults.some(access=>access.allowed);
         this.renderCurrent();

@@ -59,9 +59,9 @@ HTML, ECharts, SVG, map services, and providers apply stricter context-specific 
 
 ## ArcGIS/provider policy
 
-ArcGIS URLs must be HTTPS, contain no embedded username/password, and match the package's host patterns. Broad Maps mode may grant `https://*`, but runtime still enforces HTTPS/no credentials. Restricted patterns can be exact hosts or one leading subdomain wildcard and may not contain a path/query/hash.
+ArcGIS URLs must be HTTPS, contain no embedded username/password, and match the package's host patterns. Power BI WebAccess declarations use exact hosts or one leading subdomain wildcard on a real parent domain; an all-host `https://*` declaration is not supported. Runtime still enforces HTTPS/no credentials, and configured patterns may not contain a path/query/hash.
 
-Core has no WebAccess. Maps packages add optional WebAccess for broad or restricted hosts. Power BI host denial still disables external providers.
+Core has no WebAccess. Maps packages declare essential WebAccess for their explicit host list. Power BI host or tenant-admin denial still disables external providers.
 
 Basemap tiles, geocoding, and ArcGIS feature/tile/dynamic services use independent effective access decisions. ArcGIS services are authorized by sanitized HTTPS origin and never inherit the configured basemap provider's tile permission. Credential-bearing URLs are rejected, and provider diagnostics do not echo tokens or query strings.
 

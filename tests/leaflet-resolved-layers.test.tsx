@@ -313,7 +313,7 @@ describe("LeafletMap external layer lifecycle", () => {
         renderMap(host, test.value, component, [{ ...second, tile: { ...second.tile!, attribution: "B" } }]);
         renderMap(host, test.value, component, [{ ...second, tile: { ...second.tile!, attribution: "B", minZoom: 4, maxZoom: 12 } }]);
         expect(mocks.tiles).toHaveLength(4);
-        expect(mocks.tiles.at(-1)?.options).toMatchObject({ attribution: "B", minZoom: 4, maxZoom: 12 });
+        expect(mocks.tiles.at(-1)?.options).toMatchObject({ attribution: "B", minZoom: 4, maxZoom: 12, detectRetina: true });
         expect(runtime.center).toEqual([30, 40]); expect(runtime.zoom).toBe(9);
         expect([...runtime.layers].filter(item => item instanceof mocks.Tile)).toHaveLength(1);
     });
@@ -362,6 +362,7 @@ describe("LeafletMap external layer lifecycle", () => {
         const base = { type: "map", id: "map", view: { fitMode: "none" as const }, layers: [{ id: "features", name: "Features", source: { type: "powerbi" as const, bindings: {} } }] };
         renderMap(host, test.value, { ...base, basemap: { type: "osm" } }, [layer("features")]);
         expect(mocks.maps).toHaveLength(1); expect(mocks.tiles).toHaveLength(1);
+        expect(mocks.tiles[0]).toMatchObject({ url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", options: { detectRetina: true } });
         renderMap(host, test.value, { ...base, basemap: { type: "none" } }, [layer("features")]);
         expect(mocks.maps).toHaveLength(1); expect(mocks.tiles[0].removed).toBe(true);
         renderMap(host, test.value, { ...base, basemap: { type: "customTile", url: "https://tiles.arcgis.com/a/{z}/{x}/{y}.png", attribution: "A" } }, [layer("features")]);

@@ -30,7 +30,14 @@ describe("packaged PBIVIZ capabilities", () => {
     it("opens the real Maps PBIVIZ ZIP and reads configured WebAccess from the archive", async () => {
         const capabilities = await readPackagedCapabilities(await archive("-maps.pbiviz"));
         expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
-        expect(webAccessParameters(capabilities)).toEqual(["https://*"]);
+        expect(webAccessParameters(capabilities)).toEqual(expect.arrayContaining([
+            "https://tile.openstreetmap.org",
+            "https://nominatim.openstreetmap.org",
+            "https://geocode-api.arcgis.com",
+            "https://*.arcgis.com",
+            "https://*.arcgisonline.com",
+        ]));
+        expect(webAccessParameters(capabilities)).not.toContain("https://*");
     });
 });
 
@@ -96,10 +103,13 @@ describe("package profile host helpers", () => {
         for (const pattern of invalid) expect(() => normalizeMapHostPattern(pattern)).toThrow();
     });
 
-    it("builds Core, broad Maps, and restricted Maps privilege parameters", () => {
-        expect(buildWebAccessParameters({ profile: "core", allowAllHosts: false })).toEqual([]);
-        expect(buildWebAccessParameters({ profile: "maps", allowAllHosts: true })).toEqual(["https://*"]);
-        const restricted = buildWebAccessParameters({ profile: "maps", allowAllHosts: false, configuredHosts: ["https://example.com"] });
+    it("builds Core and Maps privilege parameters without unsupported all-host wildcards", () => {
+        expect(buildWebAccessParameters({ profile: "core" })).toEqual([]);
+        const broad = buildWebAccessParameters({ profile: "maps" });
+        expect(broad).toContain("https://tile.openstreetmap.org");
+        expect(broad).toContain("https://*.arcgis.com");
+        expect(broad).not.toContain("https://*");
+        const restricted = buildWebAccessParameters({ profile: "maps", configuredHosts: ["https://example.com"] });
         expect(restricted).toContain("https://tile.openstreetmap.org");
         expect(restricted).toContain("https://*.arcgis.com");
         expect(restricted).toContain("https://example.com");

@@ -4,7 +4,8 @@ import {
   ProviderRequestError,
   providerFetch,
 } from "../src/providers/providerRequest";
-import { externalServiceAccess, resolveProviderPolicy } from "../src/providers/providerPolicy";
+import { configuredMapEndpoints } from "../src/providers/configuredMapEndpoints";
+import { externalServiceAccess, providerServiceOrigin, resolveProviderPolicy } from "../src/providers/providerPolicy";
 const config = {
   mode: "maps" as const,
   basemap: {
@@ -67,6 +68,28 @@ describe("provider architecture", () => {
     expect(externalServiceAccess(access, "https://denied.example/arcgis/rest/services/Assets/FeatureServer")).toMatchObject({ allowed: false, reason: "ArcGIS denied" });
     expect(externalServiceAccess(access, "https://unrelated.example/service").allowed).toBe(false);
     expect(resolveProviderPolicy(config, { ...access, tiles: { allowed: true } }, true).tilesAllowed).toBe(true);
+  });
+  it("normalizes templated tile hosts and discovers every schema-owned external map endpoint", () => {
+    expect(providerServiceOrigin("https://{s}.tiles.example.com/{z}/{x}/{y}.png"))
+      .toBe("https://a.tiles.example.com");
+    expect(configuredMapEndpoints(JSON.stringify({
+      version: "2.0",
+      components: [{
+        type: "map",
+        id: "map",
+        basemap: { type: "customTile", url: "https://tiles.example.com/{z}/{x}/{y}.png" },
+        layers: [
+          { id: "geojson", source: { type: "geoJson", url: "https://data.example.com/assets.geojson" } },
+          { id: "xyz", source: { type: "xyz", url: "https://{s}.overlay.example.com/{z}/{x}/{y}.png" } },
+          { id: "arcgis", source: { type: "arcgisFeature", url: "https://services.arcgis.com/a/FeatureServer/0" } },
+        ],
+      }],
+    }))).toEqual([
+      "https://tiles.example.com/{z}/{x}/{y}.png",
+      "https://data.example.com/assets.geojson",
+      "https://{s}.overlay.example.com/{z}/{x}/{y}.png",
+      "https://services.arcgis.com/a/FeatureServer/0",
+    ]);
   });
   it.each([
     [401, "AUTHENTICATION_FAILED"],

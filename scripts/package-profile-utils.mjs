@@ -3,14 +3,11 @@ import { dirname } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
 export const DEFAULT_MAP_HOSTS = [
-    "https://*.arcgis.com",
-    "https://*.arcgisonline.com",
-];
-
-export const RESTRICTED_BUILT_IN_HOSTS = [
     "https://tile.openstreetmap.org",
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
+    "https://*.arcgis.com",
+    "https://*.arcgisonline.com",
 ];
 
 /**
@@ -91,14 +88,15 @@ async function packageLockOwnerIsRunning(lockPath) {
     }
 }
 
-export function normalizeMapHostPattern(value, { allowBroad = false } = {}) {
+export function normalizeMapHostPattern(value) {
     if (typeof value !== "string" || value.trim().length === 0) {
         throw new Error("Map host patterns must be nonblank strings.");
     }
     const pattern = value.trim();
     if (pattern === "https://*") {
-        if (!allowBroad) throw new Error("https://* is allowed only in broad Maps mode.");
-        return pattern;
+        throw new Error(
+            "Power BI WebAccess supports wildcards only for subdomains of a real host; https://* is not valid.",
+        );
     }
     if (!pattern.toLowerCase().startsWith("https://")) {
         throw new Error(`Map host patterns must use HTTPS: ${pattern}`);
@@ -128,20 +126,18 @@ export function normalizeMapHostPattern(value, { allowBroad = false } = {}) {
     return `https://${hostname}${parsed.port ? `:${parsed.port}` : ""}`;
 }
 
-export function parseMapHostPatterns(value, options = {}) {
+export function parseMapHostPatterns(value) {
     const entries = Array.isArray(value) ? value : String(value ?? "").split(",");
     const normalized = entries
         .map(entry => typeof entry === "string" ? entry.trim() : entry)
         .filter(entry => entry !== "")
-        .map(entry => normalizeMapHostPattern(entry, options));
+        .map(entry => normalizeMapHostPattern(entry));
     return [...new Set(normalized)];
 }
 
-export function buildWebAccessParameters({ profile, allowAllHosts, configuredHosts = [] }) {
+export function buildWebAccessParameters({ profile, configuredHosts = [] }) {
     if (profile === "core") return [];
-    if (allowAllHosts) return [normalizeMapHostPattern("https://*", { allowBroad: true })];
     return [...new Set([
-        ...RESTRICTED_BUILT_IN_HOSTS,
         ...DEFAULT_MAP_HOSTS,
         ...parseMapHostPatterns(configuredHosts),
     ])];

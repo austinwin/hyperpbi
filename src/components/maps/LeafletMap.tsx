@@ -870,7 +870,9 @@ export function LeafletMap({
     let url = "";
     let attribution = basemap.attribution ?? "";
     if (basemapType === "osm") {
-      url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+      // Use the declared host directly. The Power BI Service enforces exact
+      // WebAccess hosts, so Leaflet's legacy {s} subdomains would be denied.
+      url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
       attribution ||=
         '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
     } else {
@@ -901,6 +903,7 @@ export function LeafletMap({
     const tile = L.tileLayer(url, {
       maxZoom: basemap.maxZoom ?? 19,
       attribution,
+      detectRetina: true,
     });
     tile.addTo(map);
     basemapRef.current = tile;

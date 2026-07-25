@@ -1,7 +1,7 @@
 {
   "name": "hyperpbi",
   "description": "AI-native analytics runtime and portable dashboard specification for Power BI and the web",
-  "version": "1.0.0.0",
+  "version": "1.0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/austinwin/hyperpbi.git"
