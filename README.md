@@ -18,7 +18,7 @@ AI / Visual Editor / JSON / Templates
 
 ## Unified website and Playground
 
-The Next.js application in `apps/web` is the single HyperPBI website. Shared navigation connects the product introduction at `/`, the Component Explorer at `/components`, the local-first Playground at `/playground`, complete dashboards at `/examples`, and the documentation library at `/docs`.
+The Next.js application in `apps/web` is the single HyperPBI website and include the playground. Shared navigation connects the product introduction at `/`, the Component Explorer at `/components`, the local-first Playground at `/playground`, complete dashboards at `/examples`, and the documentation library at `/docs`.
 
 The Playground is embedded as a Preact runtime island inside that application. It reuses `HyperPbiStudio`, `HyperPbiRoot`, schema preparation, runtime configuration, sanitizers, calculations, logical datasets, field handling, and component rendering from `src`; there is no web-only dashboard format or duplicate renderer.
 
