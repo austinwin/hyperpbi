@@ -1,7 +1,6 @@
 import {
   access,
   cp,
-  mkdir,
   readFile,
   readdir,
   rm,
@@ -26,7 +25,8 @@ const runtimeIsland = path.join(
   "hyperpbi-island.js",
 );
 const distRoot = path.join(projectRoot, "dist");
-const compatibilityWorker = path.join(distRoot, "server", "index.js");
+const compatibilityServer = path.join(distRoot, "server");
+const compatibilityWorker = path.join(compatibilityServer, "index.js");
 const compatibilityAssets = path.join(distRoot, "client");
 const stagedOpenNext = path.join(distRoot, ".open-next");
 const packageManifest = path.join(projectRoot, "package.json");
@@ -79,21 +79,22 @@ if (
 }
 
 await rm(distRoot, { recursive: true, force: true });
-await mkdir(path.dirname(compatibilityWorker), { recursive: true });
 
 await cp(openNextRoot, stagedOpenNext, { recursive: true });
+await cp(openNextRoot, compatibilityServer, { recursive: true });
 await cp(nativeAssets, compatibilityAssets, { recursive: true });
 await writeFile(
   compatibilityWorker,
   [
-    'export { default } from "../.open-next/worker.js";',
-    'export * from "../.open-next/worker.js";',
+    'export { default } from "./worker.js";',
+    'export * from "./worker.js";',
     "",
   ].join("\n"),
   "utf8",
 );
 
 await requireFile(compatibilityWorker);
+await requireFile(path.join(compatibilityServer, "worker.js"));
 await requireFile(path.join(stagedOpenNext, "worker.js"));
 await requireFile(
   path.join(compatibilityAssets, "runtime", "hyperpbi-island.js"),
