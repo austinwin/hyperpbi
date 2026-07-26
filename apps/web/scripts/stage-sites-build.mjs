@@ -1,6 +1,7 @@
 import {
   access,
   cp,
+  mkdir,
   readFile,
   readdir,
   rm,
@@ -30,6 +31,12 @@ const compatibilityWorker = path.join(compatibilityServer, "index.js");
 const compatibilityAssets = path.join(distRoot, "client");
 const stagedOpenNext = path.join(distRoot, ".open-next");
 const packageManifest = path.join(projectRoot, "package.json");
+const compatibilityModuleDirectories = [
+  ".build",
+  "cloudflare",
+  "middleware",
+  "server-functions",
+];
 
 async function requireFile(file) {
   await access(file);
@@ -81,7 +88,15 @@ if (
 await rm(distRoot, { recursive: true, force: true });
 
 await cp(openNextRoot, stagedOpenNext, { recursive: true });
-await cp(openNextRoot, compatibilityServer, { recursive: true });
+await mkdir(compatibilityServer, { recursive: true });
+await cp(nativeWorker, path.join(compatibilityServer, "worker.js"));
+for (const directory of compatibilityModuleDirectories) {
+  await cp(
+    path.join(openNextRoot, directory),
+    path.join(compatibilityServer, directory),
+    { recursive: true },
+  );
+}
 await cp(nativeAssets, compatibilityAssets, { recursive: true });
 await writeFile(
   compatibilityWorker,
@@ -104,8 +119,9 @@ await requireDirectory(
 );
 
 const nativeFileCount = await countFiles(stagedOpenNext);
+const compatibilityModuleCount = await countFiles(compatibilityServer);
 const compatibilityAssetCount = await countFiles(compatibilityAssets);
 
 console.log(
-  `Sites staging complete: ${nativeFileCount} OpenNext files and ${compatibilityAssetCount} compatibility assets.`,
+  `Sites staging complete: ${nativeFileCount} OpenNext files, ${compatibilityModuleCount} compatibility modules, and ${compatibilityAssetCount} compatibility assets.`,
 );
