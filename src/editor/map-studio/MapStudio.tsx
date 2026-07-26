@@ -864,7 +864,7 @@ export function MapStudio({
             )}
           </div>
         </aside>
-        <main
+        <div
           class={`hp-map-studio-properties ${mobilePane === "layers" ? "is-mobile-hidden" : ""}`}
         >
           {selectedLayerId === "__basemap__" ? (
@@ -1036,7 +1036,7 @@ export function MapStudio({
           ) : (
             <div>Select a layer.</div>
           )}
-        </main>
+        </div>
       </div>
     </div>
   );

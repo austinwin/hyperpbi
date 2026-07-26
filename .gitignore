@@ -13,3 +13,9 @@ Thumbs.db
 npm-debug.log*
 test-results/
 playwright-report/
+apps/web/.next/
+apps/web/.open-next/
+apps/web/.wrangler/
+apps/web/out/
+apps/web/public/runtime/
+*.tsbuildinfo

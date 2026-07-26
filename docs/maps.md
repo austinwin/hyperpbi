@@ -267,8 +267,8 @@ and advanced JSON controls.
 
 ## Examples and authoring
 
-The [map example manifest](../examples/map/manifest.json) drives the Playground map gallery at
-`/components/map`. It contains 29 focused groups, deterministic data, expected behavior, limitations,
+The [map example manifest](../examples/map/manifest.json) drives the unified website's map gallery at
+`/examples/maps`. It contains 29 focused groups, deterministic data, expected behavior, limitations,
 and Power BI notes. Use **Copy spec** to copy the exact JSON shown beside the running preview.
 
 Map Studio configures the major source, renderer, icon, legend, heatmap, interaction, selection,

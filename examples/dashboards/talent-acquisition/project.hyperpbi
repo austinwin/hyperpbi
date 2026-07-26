@@ -1,0 +1,2956 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_1t9vwix",
+    "sources": {
+      "src_data_1t9vwix": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "applicationcount": 1,
+              "hourorder": 10.947916666666666,
+              "score": 77.75,
+              "weekdayorder": 3.9479166666666665
+            },
+            "count": 96,
+            "distinctCount": {
+              "applicationcount": 1,
+              "applicationdate": 7,
+              "applicationid": 96,
+              "candidate": 96,
+              "city": 5,
+              "department": 5,
+              "gender": 3,
+              "hourbucket": 7,
+              "hourorder": 7,
+              "period": 2,
+              "roleid": 5,
+              "roletitle": 5,
+              "score": 38,
+              "source": 4,
+              "stage": 5,
+              "weekday": 7,
+              "weekdayorder": 7
+            },
+            "first": {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0001",
+              "candidate": "Candidate 001",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 74,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            "max": {
+              "applicationcount": 1,
+              "hourorder": 14,
+              "score": 98,
+              "weekdayorder": 7
+            },
+            "min": {
+              "applicationcount": 1,
+              "hourorder": 8,
+              "score": 55,
+              "weekdayorder": 1
+            },
+            "sum": {
+              "applicationcount": 96,
+              "hourorder": 1051,
+              "score": 7464,
+              "weekdayorder": 379
+            }
+          },
+          "fields": {
+            "applicationcount": {
+              "dataType": "number",
+              "displayName": "applicationcount",
+              "key": "applicationcount",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "applicationdate": {
+              "dataType": "date",
+              "displayName": "applicationdate",
+              "key": "applicationdate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            },
+            "applicationid": {
+              "dataType": "text",
+              "displayName": "applicationid",
+              "key": "applicationid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "candidate": {
+              "dataType": "text",
+              "displayName": "candidate",
+              "key": "candidate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "city": {
+              "dataType": "text",
+              "displayName": "city",
+              "key": "city",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "department": {
+              "dataType": "text",
+              "displayName": "department",
+              "key": "department",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "gender": {
+              "dataType": "text",
+              "displayName": "gender",
+              "key": "gender",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "hourbucket": {
+              "dataType": "text",
+              "displayName": "hourbucket",
+              "key": "hourbucket",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "hourorder": {
+              "dataType": "number",
+              "displayName": "hourorder",
+              "key": "hourorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "period": {
+              "dataType": "text",
+              "displayName": "period",
+              "key": "period",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "roleid": {
+              "dataType": "text",
+              "displayName": "roleid",
+              "key": "roleid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "roletitle": {
+              "dataType": "text",
+              "displayName": "roletitle",
+              "key": "roletitle",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "score": {
+              "dataType": "number",
+              "displayName": "score",
+              "key": "score",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "source": {
+              "dataType": "text",
+              "displayName": "source",
+              "key": "source",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "stage": {
+              "dataType": "text",
+              "displayName": "stage",
+              "key": "stage",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "weekday": {
+              "dataType": "text",
+              "displayName": "weekday",
+              "key": "weekday",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "weekdayorder": {
+              "dataType": "number",
+              "displayName": "weekdayorder",
+              "key": "weekdayorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 96,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 96,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 96,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 96,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "96 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_12o50r0",
+            "row_1dpvnzi",
+            "row_wxh143",
+            "row_1f41099",
+            "row_8ma5u6",
+            "row_bmx9c3",
+            "row_zazb7k",
+            "row_kha78r",
+            "row_27vrmn",
+            "row_10kzqej",
+            "row_3yui5g",
+            "row_zrcv1d",
+            "row_1j3olp4",
+            "row_1cnv5cr",
+            "row_blhu5s",
+            "row_d3254l",
+            "row_2yx68o",
+            "row_b3wm04",
+            "row_7yvh96",
+            "row_i3n9il",
+            "row_1m85ot0",
+            "row_gmbyjc",
+            "row_b1j648",
+            "row_d8eiui",
+            "row_19mee2m",
+            "row_npaw2c",
+            "row_1vem4uu",
+            "row_145vb3y",
+            "row_cqffgw",
+            "row_18lvhah",
+            "row_1g8gc42",
+            "row_1yaqqiu",
+            "row_19pvh9",
+            "row_1l4phgd",
+            "row_jks22k",
+            "row_tqjpvm",
+            "row_oajnah",
+            "row_1rfchl8",
+            "row_wh1qsx",
+            "row_tb1fsf",
+            "row_12dd8i8",
+            "row_1ul20qo",
+            "row_u40f37",
+            "row_wurca6",
+            "row_10n1hqe",
+            "row_1a95d76",
+            "row_1e43sgy",
+            "row_1ydnqh6",
+            "row_80p0mc",
+            "row_1vnn08d",
+            "row_ah4lge",
+            "row_18m4oby",
+            "row_noeh4z",
+            "row_13fm1hg",
+            "row_19t7tbc",
+            "row_60gybd",
+            "row_19zdvs0",
+            "row_pjj19t",
+            "row_11g7n22",
+            "row_o05cba",
+            "row_14llrwc",
+            "row_11qukyc",
+            "row_1ieiv94",
+            "row_1bi6fz1",
+            "row_77yod1",
+            "row_4uebuk",
+            "row_1dqdhkx",
+            "row_16ed6fn",
+            "row_15js1wl",
+            "row_1hh7nqq",
+            "row_1m21u8v",
+            "row_1p8ctw1",
+            "row_1v7dvxy",
+            "row_uq8l52",
+            "row_1jimxg6",
+            "row_gxvf8x",
+            "row_yskzin",
+            "row_17g55ko",
+            "row_1u7nk63",
+            "row_n0pvn5",
+            "row_tiv8lq",
+            "row_gu9ty4",
+            "row_3sqagg",
+            "row_4r9kv8",
+            "row_eqgva2",
+            "row_133sd5y",
+            "row_vyaeq3",
+            "row_1pjgsg",
+            "row_s4uxdj",
+            "row_urcfk0",
+            "row_1u3zi48",
+            "row_fq1ux0",
+            "row_165fk7u",
+            "row_1pp612z",
+            "row_10qq3cn",
+            "row_1u7fng6"
+          ],
+          "rows": [
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0001",
+              "candidate": "Candidate 001",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 74,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0002",
+              "candidate": "Candidate 002",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 73,
+              "source": "Referral",
+              "stage": "Finalised",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0003",
+              "candidate": "Candidate 003",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 61,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0004",
+              "candidate": "Candidate 004",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 62,
+              "source": "Agency",
+              "stage": "On Hold",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0005",
+              "candidate": "Candidate 005",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 72,
+              "source": "LinkedIn",
+              "stage": "On Hold",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0006",
+              "candidate": "Candidate 006",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 95,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0007",
+              "candidate": "Candidate 007",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 55,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0008",
+              "candidate": "Candidate 008",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 81,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0009",
+              "candidate": "Candidate 009",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 93,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0010",
+              "candidate": "Candidate 010",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 64,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0011",
+              "candidate": "Candidate 011",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 72,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0012",
+              "candidate": "Candidate 012",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 77,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0013",
+              "candidate": "Candidate 013",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 94,
+              "source": "LinkedIn",
+              "stage": "On Hold",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0014",
+              "candidate": "Candidate 014",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 58,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0015",
+              "candidate": "Candidate 015",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 76,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0016",
+              "candidate": "Candidate 016",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 86,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0017",
+              "candidate": "Candidate 017",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 83,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0018",
+              "candidate": "Candidate 018",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 92,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0019",
+              "candidate": "Candidate 019",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 63,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0020",
+              "candidate": "Candidate 020",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 71,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0021",
+              "candidate": "Candidate 021",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 97,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0022",
+              "candidate": "Candidate 022",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 56,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0023",
+              "candidate": "Candidate 023",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 58,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0024",
+              "candidate": "Candidate 024",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 71,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0025",
+              "candidate": "Candidate 025",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 67,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0026",
+              "candidate": "Candidate 026",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 55,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0027",
+              "candidate": "Candidate 027",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 72,
+              "source": "Careers site",
+              "stage": "Finalised",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0028",
+              "candidate": "Candidate 028",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 61,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0029",
+              "candidate": "Candidate 029",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 77,
+              "source": "LinkedIn",
+              "stage": "On Hold",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0030",
+              "candidate": "Candidate 030",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 84,
+              "source": "Referral",
+              "stage": "On Hold",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0031",
+              "candidate": "Candidate 031",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 67,
+              "source": "Careers site",
+              "stage": "Shortlisted",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0032",
+              "candidate": "Candidate 032",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 61,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0033",
+              "candidate": "Candidate 033",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 89,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0034",
+              "candidate": "Candidate 034",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 98,
+              "source": "Referral",
+              "stage": "Rejected",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0035",
+              "candidate": "Candidate 035",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 94,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0036",
+              "candidate": "Candidate 036",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 95,
+              "source": "Agency",
+              "stage": "On Hold",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0037",
+              "candidate": "Candidate 037",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 77,
+              "source": "LinkedIn",
+              "stage": "On Hold",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0038",
+              "candidate": "Candidate 038",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 59,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0039",
+              "candidate": "Candidate 039",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 85,
+              "source": "Careers site",
+              "stage": "Finalised",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0040",
+              "candidate": "Candidate 040",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 79,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0041",
+              "candidate": "Candidate 041",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 76,
+              "source": "LinkedIn",
+              "stage": "On Hold",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0042",
+              "candidate": "Candidate 042",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 97,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0043",
+              "candidate": "Candidate 043",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 85,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0044",
+              "candidate": "Candidate 044",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 55,
+              "source": "Agency",
+              "stage": "Finalised",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0045",
+              "candidate": "Candidate 045",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 94,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0046",
+              "candidate": "Candidate 046",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 70,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0047",
+              "candidate": "Candidate 047",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 98,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0048",
+              "candidate": "Candidate 048",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 85,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0049",
+              "candidate": "Candidate 049",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 73,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0050",
+              "candidate": "Candidate 050",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 90,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0051",
+              "candidate": "Candidate 051",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 55,
+              "source": "Careers site",
+              "stage": "Shortlisted",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0052",
+              "candidate": "Candidate 052",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 85,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0053",
+              "candidate": "Candidate 053",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 83,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0054",
+              "candidate": "Candidate 054",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 87,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0055",
+              "candidate": "Candidate 055",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 62,
+              "source": "Careers site",
+              "stage": "Shortlisted",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0056",
+              "candidate": "Candidate 056",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 88,
+              "source": "Agency",
+              "stage": "Shortlisted",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0057",
+              "candidate": "Candidate 057",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 61,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0058",
+              "candidate": "Candidate 058",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 75,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0059",
+              "candidate": "Candidate 059",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 69,
+              "source": "Careers site",
+              "stage": "Shortlisted",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0060",
+              "candidate": "Candidate 060",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 79,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0061",
+              "candidate": "Candidate 061",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 97,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0062",
+              "candidate": "Candidate 062",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 77,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0063",
+              "candidate": "Candidate 063",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 75,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0064",
+              "candidate": "Candidate 064",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 86,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0065",
+              "candidate": "Candidate 065",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 95,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0066",
+              "candidate": "Candidate 066",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 83,
+              "source": "Referral",
+              "stage": "Finalised",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0067",
+              "candidate": "Candidate 067",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 72,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0068",
+              "candidate": "Candidate 068",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 65,
+              "source": "Agency",
+              "stage": "On Hold",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0069",
+              "candidate": "Candidate 069",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 62,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0070",
+              "candidate": "Candidate 070",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 74,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0071",
+              "candidate": "Candidate 071",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 74,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0072",
+              "candidate": "Candidate 072",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 87,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0073",
+              "candidate": "Candidate 073",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 86,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0074",
+              "candidate": "Candidate 074",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 68,
+              "source": "Referral",
+              "stage": "Rejected",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0075",
+              "candidate": "Candidate 075",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 71,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0076",
+              "candidate": "Candidate 076",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Current",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 94,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0077",
+              "candidate": "Candidate 077",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Current",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 97,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0078",
+              "candidate": "Candidate 078",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Current",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 68,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0079",
+              "candidate": "Candidate 079",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Current",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 59,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0080",
+              "candidate": "Candidate 080",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Current",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 91,
+              "source": "Agency",
+              "stage": "Rejected",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0081",
+              "candidate": "Candidate 081",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Previous",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 70,
+              "source": "LinkedIn",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0082",
+              "candidate": "Candidate 082",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Female",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Previous",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 66,
+              "source": "Referral",
+              "stage": "Shortlisted",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0083",
+              "candidate": "Candidate 083",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Male",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Previous",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 92,
+              "source": "Careers site",
+              "stage": "Shortlisted",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0084",
+              "candidate": "Candidate 084",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Non-binary",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Previous",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 88,
+              "source": "Agency",
+              "stage": "Shortlisted",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0085",
+              "candidate": "Candidate 085",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Female",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Previous",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 64,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0086",
+              "candidate": "Candidate 086",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Male",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Previous",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 81,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0087",
+              "candidate": "Candidate 087",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Non-binary",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Previous",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 95,
+              "source": "Careers site",
+              "stage": "Applied",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0088",
+              "candidate": "Candidate 088",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Female",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Previous",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 71,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0089",
+              "candidate": "Candidate 089",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Male",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Previous",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 74,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-06",
+              "applicationid": "APP-0090",
+              "candidate": "Candidate 090",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Non-binary",
+              "hourbucket": "13:00",
+              "hourorder": 13,
+              "period": "Previous",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 86,
+              "source": "Referral",
+              "stage": "Applied",
+              "weekday": "Sat",
+              "weekdayorder": 6
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-07",
+              "applicationid": "APP-0091",
+              "candidate": "Candidate 091",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Female",
+              "hourbucket": "14:00",
+              "hourorder": 14,
+              "period": "Previous",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 95,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Sun",
+              "weekdayorder": 7
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-01",
+              "applicationid": "APP-0092",
+              "candidate": "Candidate 092",
+              "city": "Chicago",
+              "department": "Design",
+              "gender": "Male",
+              "hourbucket": "8:00",
+              "hourorder": 8,
+              "period": "Previous",
+              "roleid": "DSN-104",
+              "roletitle": "UX/UI Designer",
+              "score": 88,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Mon",
+              "weekdayorder": 1
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-02",
+              "applicationid": "APP-0093",
+              "candidate": "Candidate 093",
+              "city": "Austin",
+              "department": "People",
+              "gender": "Non-binary",
+              "hourbucket": "9:00",
+              "hourorder": 9,
+              "period": "Previous",
+              "roleid": "OPS-310",
+              "roletitle": "Recruiting Operations Lead",
+              "score": 69,
+              "source": "LinkedIn",
+              "stage": "Shortlisted",
+              "weekday": "Tue",
+              "weekdayorder": 2
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-03",
+              "applicationid": "APP-0094",
+              "candidate": "Candidate 094",
+              "city": "Seattle",
+              "department": "Data",
+              "gender": "Female",
+              "hourbucket": "10:00",
+              "hourorder": 10,
+              "period": "Previous",
+              "roleid": "DAT-412",
+              "roletitle": "Analytics Engineer",
+              "score": 94,
+              "source": "Referral",
+              "stage": "On Hold",
+              "weekday": "Wed",
+              "weekdayorder": 3
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-04",
+              "applicationid": "APP-0095",
+              "candidate": "Candidate 095",
+              "city": "Denver",
+              "department": "Product",
+              "gender": "Male",
+              "hourbucket": "11:00",
+              "hourorder": 11,
+              "period": "Previous",
+              "roleid": "PM-225",
+              "roletitle": "Product Manager",
+              "score": 91,
+              "source": "Careers site",
+              "stage": "Rejected",
+              "weekday": "Thu",
+              "weekdayorder": 4
+            },
+            {
+              "applicationcount": 1,
+              "applicationdate": "2026-07-05",
+              "applicationid": "APP-0096",
+              "candidate": "Candidate 096",
+              "city": "New York",
+              "department": "Engineering",
+              "gender": "Non-binary",
+              "hourbucket": "12:00",
+              "hourorder": 12,
+              "period": "Previous",
+              "roleid": "ENG-201",
+              "roletitle": "Senior Android Developer",
+              "score": 88,
+              "source": "Agency",
+              "stage": "Applied",
+              "weekday": "Fri",
+              "weekdayorder": 5
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_1t9vwix",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-talent-acquisition",
+    "name": "Talent Acquisition Command Center",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 12,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "app": {
+      "brand": {
+        "icon": "dashboard",
+        "shortTitle": "AP",
+        "subtitle": "Talent intelligence",
+        "title": "Applify"
+      },
+      "container": "fluid",
+      "contentPadding": "compact",
+      "density": "compact",
+      "enabled": true,
+      "footer": {
+        "secondaryText": "One portable dataset · Web and Power BI",
+        "text": "Applify · HyperPBI",
+        "visible": true
+      },
+      "layout": "vertical",
+      "navbar": {
+        "actions": [
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "primary",
+              "message": "The current dataset is displayed.",
+              "title": "Applify",
+              "type": "showToast"
+            },
+            "ariaLabel": "Refresh dashboard",
+            "icon": "refresh",
+            "id": "refresh"
+          },
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "warning",
+              "message": "Three items need attention.",
+              "title": "Notifications",
+              "type": "showToast"
+            },
+            "ariaLabel": "Notifications",
+            "badge": 3,
+            "icon": "bell",
+            "id": "notifications"
+          }
+        ],
+        "searchPlaceholder": "Search this dashboard",
+        "showSearch": true,
+        "showSidebarToggle": true,
+        "user": {
+          "initials": "DO",
+          "name": "Dashboard Owner",
+          "status": "online",
+          "subtitle": "Workspace admin"
+        },
+        "visible": true
+      },
+      "pageHeader": {
+        "meta": [
+          {
+            "icon": "check",
+            "intent": "success",
+            "label": "Data",
+            "value": "Current"
+          }
+        ],
+        "subtitle": "Application flow, candidate mix, and open-role demand",
+        "title": "Recruiting Dashboard",
+        "visible": true
+      },
+      "sidebar": {
+        "collapsedWidth": 62,
+        "collapsible": true,
+        "defaultCollapsed": false,
+        "footer": {
+          "subtitle": "Portable HyperPBI example",
+          "title": "Applify"
+        },
+        "mobileBreakpoint": 760,
+        "navigation": [
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "Overview is already open.",
+              "title": "Dashboard",
+              "type": "showToast"
+            },
+            "icon": "dashboard",
+            "id": "dashboard",
+            "label": "Dashboard"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Jobs",
+              "type": "showToast"
+            },
+            "icon": "briefcase",
+            "id": "jobs",
+            "label": "Jobs"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Schedule",
+              "type": "showToast"
+            },
+            "icon": "calendar",
+            "id": "schedule",
+            "label": "Schedule"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Candidates",
+              "type": "showToast"
+            },
+            "icon": "users",
+            "id": "candidates",
+            "label": "Candidates"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Messages",
+              "type": "showToast"
+            },
+            "icon": "message",
+            "id": "messages",
+            "label": "Messages"
+          }
+        ],
+        "visible": true,
+        "width": 216
+      },
+      "stickyHeader": true
+    },
+    "calculations": {
+      "metrics": [
+        {
+          "aggregation": "countWhere",
+          "key": "totalapplications",
+          "where": {
+            "left": {
+              "field": "period"
+            },
+            "op": "=",
+            "right": {
+              "value": "Current"
+            }
+          }
+        },
+        {
+          "aggregation": "countWhere",
+          "key": "shortlisted",
+          "where": {
+            "args": [
+              {
+                "left": {
+                  "field": "period"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Current"
+                }
+              },
+              {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Shortlisted"
+                }
+              }
+            ],
+            "op": "and"
+          }
+        },
+        {
+          "aggregation": "countWhere",
+          "key": "rejected",
+          "where": {
+            "args": [
+              {
+                "left": {
+                  "field": "period"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Current"
+                }
+              },
+              {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Rejected"
+                }
+              }
+            ],
+            "op": "and"
+          }
+        },
+        {
+          "aggregation": "countWhere",
+          "key": "finalised",
+          "where": {
+            "args": [
+              {
+                "left": {
+                  "field": "period"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Current"
+                }
+              },
+              {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Finalised"
+                }
+              }
+            ],
+            "op": "and"
+          }
+        }
+      ]
+    },
+    "components": [
+      {
+        "id": "talentmetrics",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "metrics": [
+          {
+            "format": "integer",
+            "intent": "primary",
+            "metric": "totalapplications",
+            "title": "Total Applications"
+          },
+          {
+            "format": "integer",
+            "intent": "warning",
+            "metric": "shortlisted",
+            "title": "Shortlisted Candidates"
+          },
+          {
+            "format": "integer",
+            "intent": "danger",
+            "metric": "rejected",
+            "title": "Rejected Candidates"
+          },
+          {
+            "format": "integer",
+            "intent": "success",
+            "metric": "finalised",
+            "title": "Finalised"
+          }
+        ],
+        "span": 12,
+        "type": "metricGrid"
+      },
+      {
+        "category": "weekday",
+        "dataset": "stagebyday",
+        "height": 286,
+        "id": "stageflow",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "weekday",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "options": {
+          "color": [
+            "#6d20ff",
+            "#ffb703",
+            "#ff7048",
+            "#9b8cf5"
+          ],
+          "series": [
+            {
+              "barWidth": 10,
+              "itemStyle": {
+                "borderRadius": [
+                  6,
+                  6,
+                  0,
+                  0
+                ]
+              },
+              "stack": "stages"
+            },
+            {
+              "barWidth": 10,
+              "stack": "stages"
+            },
+            {
+              "barWidth": 10,
+              "stack": "stages"
+            },
+            {
+              "barWidth": 10,
+              "stack": "stages"
+            }
+          ]
+        },
+        "series": [
+          {
+            "aggregation": "first",
+            "chartType": "bar",
+            "field": "applications",
+            "label": "Applications"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "bar",
+            "field": "shortlistedtotal",
+            "label": "Shortlisted"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "bar",
+            "field": "rejectedtotal",
+            "label": "Rejected"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "bar",
+            "field": "holdtotal",
+            "label": "On Hold"
+          }
+        ],
+        "span": 8,
+        "title": "Statistics of Active Applications",
+        "type": "comboChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "gender",
+        "dataset": "genderbreakdown",
+        "height": 286,
+        "id": "genderdonut",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "gender",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "applications",
+        "options": {
+          "color": [
+            "#6d20ff",
+            "#ff7048",
+            "#ffb703"
+          ],
+          "series": [
+            {
+              "label": {
+                "formatter": "{b}",
+                "show": true
+              },
+              "radius": [
+                "56%",
+                "78%"
+              ]
+            }
+          ]
+        },
+        "span": 4,
+        "title": "Candidates by Gender",
+        "type": "donutChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "hourbucket",
+        "dataset": "hourly",
+        "height": 260,
+        "id": "hourlytrend",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "hourbucket",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "applications",
+        "options": {
+          "color": [
+            "#ff7048"
+          ],
+          "series": [
+            {
+              "areaStyle": {
+                "opacity": 0.18
+              },
+              "lineStyle": {
+                "width": 3
+              },
+              "symbolSize": 7
+            }
+          ]
+        },
+        "span": 8,
+        "title": "Applications Received Time",
+        "type": "areaChart"
+      },
+      {
+        "compact": false,
+        "dataset": "rolesummary",
+        "id": "openroles",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "roleid",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxItems": 5,
+        "primaryField": "roletitle",
+        "secondaryField": "roleid",
+        "source": "rows",
+        "span": 4,
+        "title": "Jobs Posted",
+        "type": "listGroup",
+        "valueField": "applications"
+      },
+      {
+        "columns": [
+          {
+            "field": "candidate",
+            "title": "Candidate"
+          },
+          {
+            "field": "roletitle",
+            "title": "Role"
+          },
+          {
+            "cellType": "badge",
+            "field": "stage",
+            "intentMap": {
+              "Applied": "primary",
+              "Finalised": "success",
+              "Rejected": "danger",
+              "Shortlisted": "warning"
+            },
+            "title": "Stage"
+          },
+          {
+            "field": "score",
+            "hozAlign": "right",
+            "title": "Score"
+          },
+          {
+            "field": "city",
+            "title": "Location"
+          }
+        ],
+        "dataset": "recent",
+        "hover": true,
+        "id": "recentapplications",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "applicationid",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxRows": 12,
+        "pagination": false,
+        "span": 12,
+        "striped": false,
+        "title": "Recent Candidates",
+        "type": "table"
+      }
+    ],
+    "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-component-metricGrid .hp-metric:nth-child(1){--hp-primary:#6d20ff}.hp-component-metricGrid .hp-metric:nth-child(2){--hp-primary:#ffb703}.hp-component-metricGrid .hp-metric:nth-child(3){--hp-primary:#ff7048}.hp-component-metricGrid .hp-metric:nth-child(4){--hp-primary:#2ec99d}\n.hp-component-metricGrid .hp-metric{position:relative;overflow:hidden;padding:16px 18px}.hp-component-metricGrid .hp-metric::after{content:\"\";position:absolute;right:-12px;top:-18px;width:64px;height:64px;border:10px solid color-mix(in srgb,var(--hp-primary) 18%,transparent);border-radius:50%}\n.hp-list-item{border-radius:9px;margin-bottom:7px;background:#f8f7ff}.hp-list-item-value{padding:4px 9px;border-radius:8px;background:#6d20ff;color:#fff}\n",
+    "data": {
+      "datasets": {
+        "currentapplications": {
+          "filter": {
+            "field": "period",
+            "operator": "=",
+            "value": "Current"
+          },
+          "source": "powerbi"
+        },
+        "genderbreakdown": {
+          "groupBy": [
+            "gender"
+          ],
+          "metrics": {
+            "applications": {
+              "field": "applicationid",
+              "op": "count"
+            }
+          },
+          "source": "currentapplications"
+        },
+        "hourly": {
+          "groupBy": [
+            "hourbucket",
+            "hourorder"
+          ],
+          "metrics": {
+            "applications": {
+              "field": "applicationid",
+              "op": "count"
+            }
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "hourorder"
+            }
+          ],
+          "source": "currentapplications"
+        },
+        "recent": {
+          "limit": 12,
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "applicationdate"
+            }
+          ],
+          "source": "currentapplications"
+        },
+        "rolesummary": {
+          "groupBy": [
+            "roleid",
+            "roletitle"
+          ],
+          "limit": 5,
+          "metrics": {
+            "applications": {
+              "field": "applicationid",
+              "op": "count"
+            }
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "applications"
+            }
+          ],
+          "source": "currentapplications"
+        },
+        "stagebyday": {
+          "derive": {
+            "holdflag": {
+              "condition": {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "On Hold"
+                }
+              },
+              "else": {
+                "value": 0
+              },
+              "op": "if",
+              "then": {
+                "value": 1
+              }
+            },
+            "rejectedflag": {
+              "condition": {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Rejected"
+                }
+              },
+              "else": {
+                "value": 0
+              },
+              "op": "if",
+              "then": {
+                "value": 1
+              }
+            },
+            "shortlistedflag": {
+              "condition": {
+                "left": {
+                  "field": "stage"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Shortlisted"
+                }
+              },
+              "else": {
+                "value": 0
+              },
+              "op": "if",
+              "then": {
+                "value": 1
+              }
+            }
+          },
+          "groupBy": [
+            "weekday",
+            "weekdayorder"
+          ],
+          "metrics": {
+            "applications": {
+              "field": "applicationid",
+              "op": "count"
+            },
+            "holdtotal": {
+              "field": "holdflag",
+              "op": "sum"
+            },
+            "rejectedtotal": {
+              "field": "rejectedflag",
+              "op": "sum"
+            },
+            "shortlistedtotal": {
+              "field": "shortlistedflag",
+              "op": "sum"
+            }
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "weekdayorder"
+            }
+          ],
+          "source": "currentapplications"
+        }
+      }
+    },
+    "theme": {
+      "accentColor": "#ffb703",
+      "borderColor": "#e4e5f0",
+      "cardPadding": 14,
+      "dangerColor": "#ff7048",
+      "density": "compact",
+      "gap": 12,
+      "mode": "light",
+      "primaryColor": "#6d20ff",
+      "radius": 12,
+      "successColor": "#2ec99d",
+      "surfaceColor": "#ffffff",
+      "textColor": "#252336",
+      "warningColor": "#ffb703"
+    },
+    "title": "Talent Acquisition Command Center",
+    "version": "2.0"
+  }
+}

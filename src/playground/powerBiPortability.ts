@@ -81,7 +81,9 @@ export function analyzePowerBiPortability(
         const root = rootSource(name, definitions);
         if (!root) continue;
         roots.add(root);
-        if (root === workspace.defaultSourceId) requiresRewrite = true;
+        if (workspace.defaultSourceId !== "powerbi" && root === workspace.defaultSourceId) {
+            requiresRewrite = true;
+        }
         if (root !== "powerbi" && root !== workspace.defaultSourceId) {
             issues.push({
                 code: "INDEPENDENT_UPLOADED_SOURCE",
@@ -89,7 +91,10 @@ export function analyzePowerBiPortability(
                 message: `Dataset “${name}” depends on uploaded source “${root}”, not the selected default source.`,
                 action: "Rebuild this dataset from the selected default source, or keep it as a Playground-only project."
             });
-        } else if (definition.source === workspace.defaultSourceId) {
+        } else if (
+            workspace.defaultSourceId !== "powerbi" &&
+            definition.source === workspace.defaultSourceId
+        ) {
             issues.push({
                 code: "DEFAULT_SOURCE_REWRITE_AVAILABLE",
                 severity: "warning",

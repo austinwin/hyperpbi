@@ -1,0 +1,491 @@
+{
+  "version": "2.0",
+  "title": "Patient Care Operations",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#2eb7ee",
+    "accentColor": "#48d9b0",
+    "surfaceColor": "#ffffff",
+    "textColor": "#253040",
+    "borderColor": "#e0e8ef",
+    "successColor": "#48d9b0",
+    "warningColor": "#ffb84d",
+    "dangerColor": "#7b57ef",
+    "radius": 14,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "CareFlow",
+      "shortTitle": "CA",
+      "subtitle": "Patient operations",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search this dashboard",
+      "actions": [
+        {
+          "id": "refresh",
+          "ariaLabel": "Refresh dashboard",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "CareFlow",
+            "message": "The current dataset is displayed.",
+            "intent": "primary",
+            "durationMs": 2200
+          }
+        },
+        {
+          "id": "notifications",
+          "ariaLabel": "Notifications",
+          "icon": "bell",
+          "badge": 3,
+          "action": {
+            "type": "showToast",
+            "title": "Notifications",
+            "message": "Three items need attention.",
+            "intent": "warning",
+            "durationMs": 2200
+          }
+        }
+      ],
+      "user": {
+        "name": "Dashboard Owner",
+        "subtitle": "Workspace admin",
+        "initials": "DO",
+        "status": "online"
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 216,
+      "collapsedWidth": 62,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "mobileBreakpoint": 760,
+      "navigation": [
+        {
+          "id": "activity",
+          "label": "Activity",
+          "icon": "activity",
+          "action": {
+            "type": "showToast",
+            "title": "Activity",
+            "message": "Overview is already open.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "patients",
+          "label": "Patients",
+          "icon": "users",
+          "action": {
+            "type": "showToast",
+            "title": "Patients",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "reviews",
+          "label": "Reviews",
+          "icon": "message",
+          "action": {
+            "type": "showToast",
+            "title": "Reviews",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "calendar",
+          "label": "Calendar",
+          "icon": "calendar",
+          "action": {
+            "type": "showToast",
+            "title": "Calendar",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        }
+      ],
+      "footer": {
+        "title": "CareFlow",
+        "subtitle": "Portable HyperPBI example"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Patient Activity",
+      "subtitle": "Alerts, patient flow, and service response across the care network",
+      "meta": [
+        {
+          "label": "Data",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "CareFlow · HyperPBI",
+      "secondaryText": "One portable dataset · Web and Power BI"
+    }
+  },
+  "calculations": {
+    "metrics": [
+      {
+        "key": "encounters",
+        "aggregation": "count"
+      },
+      {
+        "key": "patients",
+        "aggregation": "distinctCount",
+        "field": "patientid"
+      },
+      {
+        "key": "openalerts",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "!=",
+          "left": {
+            "field": "status"
+          },
+          "right": {
+            "value": "Resolved"
+          }
+        }
+      },
+      {
+        "key": "averageresponse",
+        "aggregation": "avg",
+        "field": "responseminutes"
+      }
+    ]
+  },
+  "data": {
+    "datasets": {
+      "daily": {
+        "source": "powerbi",
+        "groupBy": [
+          "encounterdate"
+        ],
+        "metrics": {
+          "encounters": {
+            "op": "count",
+            "field": "encounterid"
+          },
+          "response": {
+            "op": "avg",
+            "field": "responseminutes"
+          }
+        },
+        "sort": [
+          {
+            "field": "encounterdate",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "departments": {
+        "source": "powerbi",
+        "groupBy": [
+          "department"
+        ],
+        "metrics": {
+          "encounters": {
+            "op": "count",
+            "field": "encounterid"
+          }
+        },
+        "sort": [
+          {
+            "field": "encounters",
+            "direction": "descending"
+          }
+        ]
+      },
+      "reviews": {
+        "source": "powerbi",
+        "groupBy": [
+          "reviewtype"
+        ],
+        "metrics": {
+          "reviews": {
+            "op": "count",
+            "field": "encounterid"
+          }
+        }
+      },
+      "activepatients": {
+        "source": "powerbi",
+        "filter": {
+          "field": "status",
+          "operator": "!=",
+          "value": "Resolved"
+        },
+        "sort": [
+          {
+            "field": "responseminutes",
+            "direction": "descending"
+          }
+        ],
+        "limit": 10
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "caremetrics",
+      "span": 5,
+      "metrics": [
+        {
+          "title": "Active Encounters",
+          "metric": "encounters",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Patients Served",
+          "metric": "patients",
+          "format": "integer",
+          "intent": "success"
+        },
+        {
+          "title": "Open Alerts",
+          "metric": "openalerts",
+          "format": "integer",
+          "intent": "danger"
+        },
+        {
+          "title": "Avg Response",
+          "metric": "averageresponse",
+          "format": "integer",
+          "suffix": " min",
+          "intent": "warning"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "areaChart",
+      "id": "patientstatistics",
+      "dataset": "daily",
+      "title": "Patient Statistics",
+      "span": 7,
+      "height": 250,
+      "category": "encounterdate",
+      "measure": "encounters",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#2eb7ee"
+        ],
+        "series": [
+          {
+            "smooth": true,
+            "areaStyle": {
+              "opacity": 0.22
+            },
+            "lineStyle": {
+              "width": 3
+            },
+            "symbolSize": 6
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "encounterdate",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "reviewmix",
+      "dataset": "reviews",
+      "title": "Patient Reviews",
+      "span": 4,
+      "height": 245,
+      "category": "reviewtype",
+      "measure": "reviews",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#2eb7ee",
+          "#48d9b0",
+          "#7b57ef"
+        ],
+        "series": [
+          {
+            "radius": [
+              "52%",
+              "76%"
+            ]
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "reviewtype",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "barChart",
+      "id": "departmentload",
+      "dataset": "departments",
+      "title": "Department Load",
+      "span": 4,
+      "height": 245,
+      "category": "department",
+      "measure": "encounters",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#48d9b0"
+        ],
+        "series": [
+          {
+            "barWidth": 16,
+            "itemStyle": {
+              "borderRadius": [
+                8,
+                8,
+                2,
+                2
+              ]
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "department",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "custom",
+      "id": "carecalendar",
+      "span": 4,
+      "html": "<section class='care-calendar'><header><strong>Care Calendar</strong><span>July 2026</span></header><div class='week'><b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b><i>20</i><i>21</i><i>22</i><i>23</i><i>24</i><i>25</i><i class='active'>26</i></div><p>72 encounters are included in this portable sample.</p></section>",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "table",
+      "id": "patientapplications",
+      "dataset": "activepatients",
+      "title": "Patient Applications",
+      "span": 12,
+      "columns": [
+        {
+          "field": "patientname",
+          "title": "Patient"
+        },
+        {
+          "field": "gender",
+          "title": "Gender"
+        },
+        {
+          "field": "age",
+          "title": "Age",
+          "hozAlign": "right"
+        },
+        {
+          "field": "department",
+          "title": "Department"
+        },
+        {
+          "field": "severity",
+          "title": "Severity",
+          "cellType": "badge",
+          "intentMap": {
+            "Low": "success",
+            "Moderate": "warning",
+            "High": "danger"
+          }
+        },
+        {
+          "field": "responseminutes",
+          "title": "Response",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "status",
+          "title": "Status",
+          "cellType": "badge",
+          "intentMap": {
+            "Open": "danger",
+            "In Review": "primary",
+            "Resolved": "success"
+          }
+        }
+      ],
+      "pagination": false,
+      "maxRows": 10,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "encounterid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-app-main{background:#f3f7f8}.hp-component-metricGrid .hp-metric{color:#fff;background:linear-gradient(135deg,#36c4ef,#579df3)}.hp-component-metricGrid .hp-metric:nth-child(2){background:linear-gradient(135deg,#37d7af,#58cfa3)}.hp-component-metricGrid .hp-metric:nth-child(3){background:linear-gradient(135deg,#7257ec,#8e67f5)}.hp-component-metricGrid .hp-metric:nth-child(4){background:linear-gradient(135deg,#49a4f2,#6b7cf0)}.hp-component-metricGrid .hp-metric-label,.hp-component-metricGrid .hp-metric-value{color:#fff}\n.care-calendar{padding:16px;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgb(29 42 68 / 7%)}.care-calendar header{display:flex;justify-content:space-between}.care-calendar header span{color:#8391a3}.care-calendar .week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:18px 0}.care-calendar b,.care-calendar i{display:grid;place-items:center;height:28px;font-size:10px;font-style:normal}.care-calendar b{color:#98a4b4}.care-calendar i{border-radius:8px;background:#f4f7fa}.care-calendar i.active{background:#2eb7ee;color:#fff}.care-calendar p{margin:0;color:#718094;font-size:10px}\n"
+}

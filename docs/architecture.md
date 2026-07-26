@@ -1,6 +1,6 @@
-# HyperPBI architecture and Playground
+# HyperPBI architecture and unified website
 
-HyperPBI is one declarative analytics system with multiple hosts. HyperPBI 2.0 is the only dashboard schema; the web Playground does not introduce a second format.
+HyperPBI is one declarative analytics system with multiple hosts. HyperPBI 2.0 is the only dashboard schema; neither the unified website nor its embedded Playground introduces a second format.
 
 ```text
 AI / Visual Editor / JSON / Templates
@@ -14,7 +14,7 @@ AI / Visual Editor / JSON / Templates
 
 ## Shared runtime boundary
 
-Shared TypeScript under `src` owns schema preparation, canonical field resolution, calculated fields, logical datasets, reference validation, sanitization, Studio, rendering, component state, interactions, maps, tables, charts, and SVG. `apps/playground` supplies only the web shell, routing, file parsing worker, local project workflow, and web-host controls.
+Shared TypeScript under `src` owns schema preparation, canonical field resolution, calculated fields, logical datasets, reference validation, sanitization, Studio, rendering, component state, interactions, maps, tables, charts, and SVG. `apps/playground` supplies reusable Preact project, authoring, play-mode, file-import, and browser-host surfaces. `apps/web` owns the Next.js application shell, shared navigation, content routes, server-side manifest loading, and the runtime-island boundary that mounts those Playground surfaces without duplicating the renderer.
 
 Runtime settings moved to `src/runtime/runtimeSettings.ts`, so Studio and rendering do not need Power BI formatting APIs. Host behavior is expressed by `HyperPbiHostBridge`:
 
@@ -22,6 +22,20 @@ Runtime settings moved to `src/runtime/runtimeSettings.ts`, so Studio and render
 - `BrowserHostBridge` allows the shared internal interaction engine to keep working but returns an explicit unsupported result for Power BI-only selection and external filtering.
 
 No bridge evaluates specification strings, runs arbitrary JavaScript, or bypasses the existing URL, HTML, CSS, SVG, JSON, map-provider, or chart-option policies.
+
+## Unified web host
+
+The public site is one Next.js application:
+
+| Route | Purpose |
+|---|---|
+| `/` | Product introduction and primary workflows |
+| `/components` | Searchable Component Explorer generated from canonical component metadata |
+| `/playground` | Local project creation/import and links to project authoring and Play Mode |
+| `/examples` | Manifest-driven complete dashboards plus the analytical map gallery |
+| `/docs` | Repository Markdown documentation with shared site navigation |
+
+The Next.js pages own navigation and content composition. Interactive HyperPBI surfaces are compiled into a browser runtime island and mounted only where a page needs the shared Preact renderer or Playground workflow. IndexedDB remains browser-local; server-rendered pages do not receive uploaded project data.
 
 ## DataWorkspace
 
@@ -61,16 +75,22 @@ The rewrite changes only dataset inputs equal to the selected default source ID.
 
 The Playground is an authoring and reference runtime for governed analytics specifications. It is not a general HTML application builder. Custom presentation remains bounded by sanitized HTML/CSS, governed SVG, implemented components, declarative actions, safe expressions, and deterministic logical datasets. Scripts, callbacks, `eval`, arbitrary browser APIs, unsafe URLs, and executable workbook content remain prohibited.
 
-## Vercel deployment
+## Local development and deployment
 
 From the repository root:
 
 ```powershell
 npm ci
-npm run playground:build
+npm run dev
+npm run build
+npm run web:sites:build
 ```
 
-Root `vercel.json` builds `apps/playground/dist` and rewrites application routes to `index.html`. Configure the Vercel project root as the repository root so the Playground can import the shared runtime under `src`. The built output is checked in for the requested reference artifact; normal Vercel deployments should still rebuild from source.
+`npm run dev` builds the browser runtime island and starts Next.js on `http://localhost:4178`. `npm run build` performs the root and web type checks, rebuilds the island, and creates the production Next.js output.
+
+`npm run web:sites:build` produces the supported OpenNext worker and static assets, materializes the prerender cache, and stages both the native OpenNext layout and the compatibility entrypoint under `apps/web/dist` for Sites packaging. Configuration lives in `apps/web/open-next.config.ts` and `apps/web/wrangler.jsonc`; the staged output is generated and is not checked in. See the official [OpenNext Cloudflare guide](https://opennext.js.org/cloudflare/get-started) for the adapter contract.
+
+Root `vercel.json` remains available for Vercel and runs `npm run web:build`; configure that project from the repository root so both `apps/web` and the shared code under `src` are available.
 
 ## Future services
 

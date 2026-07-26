@@ -1,0 +1,701 @@
+{
+  "version": "2.0",
+  "title": "Talent Acquisition Command Center",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#6d20ff",
+    "accentColor": "#ffb703",
+    "surfaceColor": "#ffffff",
+    "textColor": "#252336",
+    "borderColor": "#e4e5f0",
+    "successColor": "#2ec99d",
+    "warningColor": "#ffb703",
+    "dangerColor": "#ff7048",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "Applify",
+      "shortTitle": "AP",
+      "subtitle": "Talent intelligence",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search this dashboard",
+      "actions": [
+        {
+          "id": "refresh",
+          "ariaLabel": "Refresh dashboard",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "Applify",
+            "message": "The current dataset is displayed.",
+            "intent": "primary",
+            "durationMs": 2200
+          }
+        },
+        {
+          "id": "notifications",
+          "ariaLabel": "Notifications",
+          "icon": "bell",
+          "badge": 3,
+          "action": {
+            "type": "showToast",
+            "title": "Notifications",
+            "message": "Three items need attention.",
+            "intent": "warning",
+            "durationMs": 2200
+          }
+        }
+      ],
+      "user": {
+        "name": "Dashboard Owner",
+        "subtitle": "Workspace admin",
+        "initials": "DO",
+        "status": "online"
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 216,
+      "collapsedWidth": 62,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "mobileBreakpoint": 760,
+      "navigation": [
+        {
+          "id": "dashboard",
+          "label": "Dashboard",
+          "icon": "dashboard",
+          "action": {
+            "type": "showToast",
+            "title": "Dashboard",
+            "message": "Overview is already open.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "jobs",
+          "label": "Jobs",
+          "icon": "briefcase",
+          "action": {
+            "type": "showToast",
+            "title": "Jobs",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "schedule",
+          "label": "Schedule",
+          "icon": "calendar",
+          "action": {
+            "type": "showToast",
+            "title": "Schedule",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "candidates",
+          "label": "Candidates",
+          "icon": "users",
+          "action": {
+            "type": "showToast",
+            "title": "Candidates",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "messages",
+          "label": "Messages",
+          "icon": "message",
+          "action": {
+            "type": "showToast",
+            "title": "Messages",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        }
+      ],
+      "footer": {
+        "title": "Applify",
+        "subtitle": "Portable HyperPBI example"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Recruiting Dashboard",
+      "subtitle": "Application flow, candidate mix, and open-role demand",
+      "meta": [
+        {
+          "label": "Data",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "Applify · HyperPBI",
+      "secondaryText": "One portable dataset · Web and Power BI"
+    }
+  },
+  "calculations": {
+    "metrics": [
+      {
+        "key": "totalapplications",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "=",
+          "left": {
+            "field": "period"
+          },
+          "right": {
+            "value": "Current"
+          }
+        }
+      },
+      {
+        "key": "shortlisted",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "and",
+          "args": [
+            {
+              "op": "=",
+              "left": {
+                "field": "period"
+              },
+              "right": {
+                "value": "Current"
+              }
+            },
+            {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "Shortlisted"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "rejected",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "and",
+          "args": [
+            {
+              "op": "=",
+              "left": {
+                "field": "period"
+              },
+              "right": {
+                "value": "Current"
+              }
+            },
+            {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "Rejected"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "finalised",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "and",
+          "args": [
+            {
+              "op": "=",
+              "left": {
+                "field": "period"
+              },
+              "right": {
+                "value": "Current"
+              }
+            },
+            {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "Finalised"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "data": {
+    "datasets": {
+      "currentapplications": {
+        "source": "powerbi",
+        "filter": {
+          "field": "period",
+          "operator": "=",
+          "value": "Current"
+        }
+      },
+      "stagebyday": {
+        "source": "currentapplications",
+        "derive": {
+          "shortlistedflag": {
+            "op": "if",
+            "condition": {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "Shortlisted"
+              }
+            },
+            "then": {
+              "value": 1
+            },
+            "else": {
+              "value": 0
+            }
+          },
+          "rejectedflag": {
+            "op": "if",
+            "condition": {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "Rejected"
+              }
+            },
+            "then": {
+              "value": 1
+            },
+            "else": {
+              "value": 0
+            }
+          },
+          "holdflag": {
+            "op": "if",
+            "condition": {
+              "op": "=",
+              "left": {
+                "field": "stage"
+              },
+              "right": {
+                "value": "On Hold"
+              }
+            },
+            "then": {
+              "value": 1
+            },
+            "else": {
+              "value": 0
+            }
+          }
+        },
+        "groupBy": [
+          "weekday",
+          "weekdayorder"
+        ],
+        "metrics": {
+          "applications": {
+            "op": "count",
+            "field": "applicationid"
+          },
+          "shortlistedtotal": {
+            "op": "sum",
+            "field": "shortlistedflag"
+          },
+          "rejectedtotal": {
+            "op": "sum",
+            "field": "rejectedflag"
+          },
+          "holdtotal": {
+            "op": "sum",
+            "field": "holdflag"
+          }
+        },
+        "sort": [
+          {
+            "field": "weekdayorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "hourly": {
+        "source": "currentapplications",
+        "groupBy": [
+          "hourbucket",
+          "hourorder"
+        ],
+        "metrics": {
+          "applications": {
+            "op": "count",
+            "field": "applicationid"
+          }
+        },
+        "sort": [
+          {
+            "field": "hourorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "genderbreakdown": {
+        "source": "currentapplications",
+        "groupBy": [
+          "gender"
+        ],
+        "metrics": {
+          "applications": {
+            "op": "count",
+            "field": "applicationid"
+          }
+        }
+      },
+      "rolesummary": {
+        "source": "currentapplications",
+        "groupBy": [
+          "roleid",
+          "roletitle"
+        ],
+        "metrics": {
+          "applications": {
+            "op": "count",
+            "field": "applicationid"
+          }
+        },
+        "sort": [
+          {
+            "field": "applications",
+            "direction": "descending"
+          }
+        ],
+        "limit": 5
+      },
+      "recent": {
+        "source": "currentapplications",
+        "sort": [
+          {
+            "field": "applicationdate",
+            "direction": "descending"
+          }
+        ],
+        "limit": 12
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "talentmetrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Total Applications",
+          "metric": "totalapplications",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Shortlisted Candidates",
+          "metric": "shortlisted",
+          "format": "integer",
+          "intent": "warning"
+        },
+        {
+          "title": "Rejected Candidates",
+          "metric": "rejected",
+          "format": "integer",
+          "intent": "danger"
+        },
+        {
+          "title": "Finalised",
+          "metric": "finalised",
+          "format": "integer",
+          "intent": "success"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "comboChart",
+      "id": "stageflow",
+      "dataset": "stagebyday",
+      "title": "Statistics of Active Applications",
+      "span": 8,
+      "height": 286,
+      "category": "weekday",
+      "series": [
+        {
+          "field": "applications",
+          "label": "Applications",
+          "chartType": "bar",
+          "aggregation": "first"
+        },
+        {
+          "field": "shortlistedtotal",
+          "label": "Shortlisted",
+          "chartType": "bar",
+          "aggregation": "first"
+        },
+        {
+          "field": "rejectedtotal",
+          "label": "Rejected",
+          "chartType": "bar",
+          "aggregation": "first"
+        },
+        {
+          "field": "holdtotal",
+          "label": "On Hold",
+          "chartType": "bar",
+          "aggregation": "first"
+        }
+      ],
+      "options": {
+        "color": [
+          "#6d20ff",
+          "#ffb703",
+          "#ff7048",
+          "#9b8cf5"
+        ],
+        "series": [
+          {
+            "stack": "stages",
+            "barWidth": 10,
+            "itemStyle": {
+              "borderRadius": [
+                6,
+                6,
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "stack": "stages",
+            "barWidth": 10
+          },
+          {
+            "stack": "stages",
+            "barWidth": 10
+          },
+          {
+            "stack": "stages",
+            "barWidth": 10
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "weekday",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "genderdonut",
+      "dataset": "genderbreakdown",
+      "title": "Candidates by Gender",
+      "span": 4,
+      "height": 286,
+      "category": "gender",
+      "measure": "applications",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#6d20ff",
+          "#ff7048",
+          "#ffb703"
+        ],
+        "series": [
+          {
+            "radius": [
+              "56%",
+              "78%"
+            ],
+            "label": {
+              "show": true,
+              "formatter": "{b}"
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "gender",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "areaChart",
+      "id": "hourlytrend",
+      "dataset": "hourly",
+      "title": "Applications Received Time",
+      "span": 8,
+      "height": 260,
+      "category": "hourbucket",
+      "measure": "applications",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#ff7048"
+        ],
+        "series": [
+          {
+            "lineStyle": {
+              "width": 3
+            },
+            "areaStyle": {
+              "opacity": 0.18
+            },
+            "symbolSize": 7
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "hourbucket",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "listGroup",
+      "id": "openroles",
+      "dataset": "rolesummary",
+      "title": "Jobs Posted",
+      "span": 4,
+      "source": "rows",
+      "primaryField": "roletitle",
+      "secondaryField": "roleid",
+      "valueField": "applications",
+      "maxItems": 5,
+      "compact": false,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "roleid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "recentapplications",
+      "dataset": "recent",
+      "title": "Recent Candidates",
+      "span": 12,
+      "columns": [
+        {
+          "field": "candidate",
+          "title": "Candidate"
+        },
+        {
+          "field": "roletitle",
+          "title": "Role"
+        },
+        {
+          "field": "stage",
+          "title": "Stage",
+          "cellType": "badge",
+          "intentMap": {
+            "Shortlisted": "warning",
+            "Rejected": "danger",
+            "Finalised": "success",
+            "Applied": "primary"
+          }
+        },
+        {
+          "field": "score",
+          "title": "Score",
+          "hozAlign": "right"
+        },
+        {
+          "field": "city",
+          "title": "Location"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 12,
+      "hover": true,
+      "striped": false,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "applicationid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-component-metricGrid .hp-metric:nth-child(1){--hp-primary:#6d20ff}.hp-component-metricGrid .hp-metric:nth-child(2){--hp-primary:#ffb703}.hp-component-metricGrid .hp-metric:nth-child(3){--hp-primary:#ff7048}.hp-component-metricGrid .hp-metric:nth-child(4){--hp-primary:#2ec99d}\n.hp-component-metricGrid .hp-metric{position:relative;overflow:hidden;padding:16px 18px}.hp-component-metricGrid .hp-metric::after{content:\"\";position:absolute;right:-12px;top:-18px;width:64px;height:64px;border:10px solid color-mix(in srgb,var(--hp-primary) 18%,transparent);border-radius:50%}\n.hp-list-item{border-radius:9px;margin-bottom:7px;background:#f8f7ff}.hp-list-item-value{padding:4px 9px;border-radius:8px;background:#6d20ff;color:#fff}\n"
+}

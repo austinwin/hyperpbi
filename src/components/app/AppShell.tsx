@@ -1,4 +1,5 @@
 import { h, ComponentChildren } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { HyperPbiSchema } from "../../schema/hyperpbiSchema";
 import { RuntimeSettings } from "../../runtime/runtimeSettings";
 import { DashboardState, DashboardAction } from "../../render/stateStore";
@@ -23,11 +24,6 @@ export function AppShell({
     dispatch: (action: DashboardAction) => void;
     children: ComponentChildren;
 }) {
-    if (!app.enabled) {
-        // Without an enabled app shell, render dashboard content directly.
-        return <>{children}</>;
-    }
-
     const sidebarCollapsed = state.sidebarCollapsed;
     const mobileSidebarOpen = state.mobileSidebarOpen;
     const sidebarVisible = app.sidebar?.visible !== false;
@@ -39,15 +35,52 @@ export function AppShell({
     const containerClass = app.container === "boxed" ? "hp-app-boxed" : "hp-app-fluid";
     const densityClass = `hp-app-density-${app.density ?? "normal"}`;
     const paddingClass = `hp-app-padding-${app.contentPadding ?? "normal"}`;
+    const shellRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState<number>();
+    const mobileBreakpoint = app.sidebar?.mobileBreakpoint ?? 800;
+    const isMobile = containerWidth !== undefined && containerWidth < mobileBreakpoint;
+
+    useEffect(() => {
+        const element = shellRef.current;
+        if (!element) return;
+        const updateWidth = (width: number) => {
+            if (Number.isFinite(width) && width > 0) {
+                setContainerWidth(previous => previous === width ? previous : width);
+            }
+        };
+        updateWidth(element.getBoundingClientRect().width);
+        if (typeof ResizeObserver === "undefined") return;
+        const observer = new ResizeObserver(entries => {
+            const entry = entries.find(candidate => candidate.target === element) ?? entries[0];
+            if (entry) updateWidth(entry.contentRect.width);
+        });
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [app.enabled]);
+
+    useEffect(() => {
+        if (!isMobile && containerWidth !== undefined && mobileSidebarOpen) {
+            dispatch({ type: "mobileSidebar", value: false });
+        }
+    }, [containerWidth, dispatch, isMobile, mobileSidebarOpen]);
+
+    if (!app.enabled) {
+        // Without an enabled app shell, render dashboard content directly.
+        return <>{children}</>;
+    }
 
     return (
-        <div class={`hp-app-shell hp-app-${app.layout} ${containerClass} ${densityClass} ${paddingClass} ${app.stickyHeader ? "hp-sticky-header" : ""}`}>
+        <div
+            ref={shellRef}
+            class={`hp-app-shell hp-app-${app.layout} ${containerClass} ${densityClass} ${paddingClass} ${isMobile ? "hp-app-mobile" : ""} ${app.stickyHeader ? "hp-sticky-header" : ""}`}
+        >
             {navbarVisible && app.navbar && (
                 <AppNavbar
                     config={app.navbar}
                     brand={app.brand}
                     sidebarVisible={sidebarVisible}
                     sidebarCollapsed={sidebarCollapsed}
+                    mobile={isMobile}
                     state={state}
                     dispatch={dispatch}
                 />
@@ -58,6 +91,7 @@ export function AppShell({
                         config={app.sidebar}
                         collapsed={sidebarCollapsed}
                         mobileOpen={mobileSidebarOpen}
+                        mobile={isMobile}
                         state={state}
                         dispatch={dispatch}
                     />
@@ -66,9 +100,9 @@ export function AppShell({
                     {pageHeaderVisible && app.pageHeader && (
                         <AppPageHeader config={app.pageHeader} />
                     )}
-                    <main class="hp-app-main">
+                    <div class="hp-app-main">
                         {children}
-                    </main>
+                    </div>
                     {footerVisible && app.footer && (
                         <AppFooter config={app.footer} />
                     )}

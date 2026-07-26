@@ -1,0 +1,2486 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_1pn1wf",
+    "sources": {
+      "src_data_1pn1wf": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "amount": 2302.1388888888887,
+              "balance": 10250,
+              "cardlast4": 8075,
+              "credit": 4200,
+              "debit": 3500,
+              "monthorder": 5
+            },
+            "count": 73,
+            "distinctCount": {
+              "accountname": 1,
+              "amount": 72,
+              "balance": 1,
+              "cardholder": 1,
+              "cardlast4": 1,
+              "category": 4,
+              "channel": 3,
+              "credit": 1,
+              "date": 28,
+              "debit": 1,
+              "expiry": 1,
+              "merchant": 6,
+              "month": 9,
+              "monthorder": 9,
+              "recordid": 73,
+              "recordtype": 2,
+              "status": 2,
+              "transactiontype": 2
+            },
+            "first": {
+              "accountname": "Everyday Account",
+              "amount": 2381,
+              "balance": 10250,
+              "cardholder": "Marvin McKinney",
+              "cardlast4": 8075,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": 4200,
+              "date": "2026-07-01",
+              "debit": 3500,
+              "expiry": "12/2028",
+              "merchant": "Figma Pro Plan",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "ACC-001",
+              "recordtype": "Account",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            "max": {
+              "amount": 4843,
+              "balance": 10250,
+              "cardlast4": 8075,
+              "credit": 4200,
+              "debit": 3500,
+              "monthorder": 9
+            },
+            "min": {
+              "amount": 64,
+              "balance": 10250,
+              "cardlast4": 8075,
+              "credit": 4200,
+              "debit": 3500,
+              "monthorder": 1
+            },
+            "sum": {
+              "amount": 165754,
+              "balance": 10250,
+              "cardlast4": 8075,
+              "credit": 4200,
+              "debit": 3500,
+              "monthorder": 360
+            }
+          },
+          "fields": {
+            "accountname": {
+              "dataType": "text",
+              "displayName": "accountname",
+              "key": "accountname",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "amount": {
+              "dataType": "number",
+              "displayName": "amount",
+              "key": "amount",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "balance": {
+              "dataType": "number",
+              "displayName": "balance",
+              "key": "balance",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "cardholder": {
+              "dataType": "text",
+              "displayName": "cardholder",
+              "key": "cardholder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "cardlast4": {
+              "dataType": "number",
+              "displayName": "cardlast4",
+              "key": "cardlast4",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "category": {
+              "dataType": "text",
+              "displayName": "category",
+              "key": "category",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "channel": {
+              "dataType": "text",
+              "displayName": "channel",
+              "key": "channel",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "credit": {
+              "dataType": "number",
+              "displayName": "credit",
+              "key": "credit",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "date": {
+              "dataType": "date",
+              "displayName": "date",
+              "key": "date",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            },
+            "debit": {
+              "dataType": "number",
+              "displayName": "debit",
+              "key": "debit",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "expiry": {
+              "dataType": "text",
+              "displayName": "expiry",
+              "key": "expiry",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "merchant": {
+              "dataType": "text",
+              "displayName": "merchant",
+              "key": "merchant",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "month": {
+              "dataType": "text",
+              "displayName": "month",
+              "key": "month",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "monthorder": {
+              "dataType": "number",
+              "displayName": "monthorder",
+              "key": "monthorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "recordid": {
+              "dataType": "text",
+              "displayName": "recordid",
+              "key": "recordid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "recordtype": {
+              "dataType": "text",
+              "displayName": "recordtype",
+              "key": "recordtype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "status": {
+              "dataType": "text",
+              "displayName": "status",
+              "key": "status",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "transactiontype": {
+              "dataType": "text",
+              "displayName": "transactiontype",
+              "key": "transactiontype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 73,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 73,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 73,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 73,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "73 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_16jlo17",
+            "row_1sqndfp",
+            "row_wmftjy",
+            "row_1eakew1",
+            "row_uwv5ss",
+            "row_te5lwr",
+            "row_16ecltr",
+            "row_16s99mg",
+            "row_ms6jkx",
+            "row_zwl59z",
+            "row_1cpqsuz",
+            "row_1ssdgl4",
+            "row_jtg8mm",
+            "row_bylwfi",
+            "row_1gq3qzt",
+            "row_x59e0k",
+            "row_cpfa4t",
+            "row_hbmhg5",
+            "row_7iqnff",
+            "row_72yj9c",
+            "row_1r49cht",
+            "row_1lalteu",
+            "row_13bw9xf",
+            "row_1vn6v7k",
+            "row_zmcfxm",
+            "row_1qg8ac0",
+            "row_1c53sqo",
+            "row_1ush2sb",
+            "row_1wswwzz",
+            "row_tc6osq",
+            "row_1pdyno6",
+            "row_1qi94rx",
+            "row_whhen0",
+            "row_wz7gnq",
+            "row_sc2588",
+            "row_m636sr",
+            "row_rzhee6",
+            "row_12vnjlw",
+            "row_ljn1n3",
+            "row_1mlqmo1",
+            "row_1gpghsu",
+            "row_1xddvmt",
+            "row_1a7suo5",
+            "row_plggsx",
+            "row_l6j7nq",
+            "row_1y519wz",
+            "row_b92s17",
+            "row_iwug4p",
+            "row_135qn52",
+            "row_1vcz6h4",
+            "row_1cyxr3t",
+            "row_1o77hun",
+            "row_ojfg5d",
+            "row_s6ajhc",
+            "row_1lfygfh",
+            "row_d9sfyj",
+            "row_k0bjt",
+            "row_1imdpao",
+            "row_1gep3r0",
+            "row_12ixt6m",
+            "row_t2uhwb",
+            "row_s9swm4",
+            "row_1lmigfy",
+            "row_eoyhng",
+            "row_jppb2m",
+            "row_1nv8ufx",
+            "row_j0qcor",
+            "row_1ad13zz",
+            "row_100m4e4",
+            "row_ecwkja",
+            "row_1hr3fbm",
+            "row_hnmxf8",
+            "row_13tpnp8"
+          ],
+          "rows": [
+            {
+              "accountname": "Everyday Account",
+              "amount": null,
+              "balance": 10250,
+              "cardholder": "Marvin McKinney",
+              "cardlast4": 8075,
+              "category": null,
+              "channel": null,
+              "credit": 4200,
+              "date": null,
+              "debit": 3500,
+              "expiry": "12/2028",
+              "merchant": null,
+              "month": null,
+              "monthorder": null,
+              "recordid": "ACC-001",
+              "recordtype": "Account",
+              "status": null,
+              "transactiontype": null
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2381,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-01",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0001",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1262,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-02",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0002",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3776,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-03",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0003",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 543,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-04",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0004",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1350,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-05",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0005",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3686,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-06",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0006",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2783,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-07",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0007",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4152,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-08",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0008",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3956,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-09",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0009",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2008,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-10",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0010",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3784,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-11",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0011",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3682,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-12",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0012",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2979,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-13",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0013",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3448,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-14",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0014",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1894,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-15",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0015",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4843,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-16",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0016",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2619,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-17",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0017",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2639,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-18",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0018",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1663,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-19",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0019",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 217,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-20",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0020",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1651,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-21",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0021",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3099,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-22",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0022",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2828,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-23",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0023",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3530,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-24",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0024",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 819,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-25",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0025",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 64,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-26",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0026",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 919,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-27",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0027",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2325,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-28",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0028",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1158,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-01",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0029",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1162,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-02",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0030",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2183,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-03",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0031",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 180,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-04",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0032",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 733,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-05",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0033",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4260,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-06",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0034",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4009,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-07",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0035",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4065,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-08",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0036",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3482,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-09",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0037",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1560,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-10",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0038",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2205,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-11",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0039",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1804,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-12",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0040",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 649,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-13",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0041",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1040,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-14",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0042",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3533,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-15",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0043",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 527,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-16",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0044",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 372,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-17",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0045",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3140,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-18",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0046",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3370,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-19",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0047",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 306,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-20",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0048",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4016,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-21",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0049",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 518,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-22",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0050",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3437,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-23",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0051",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1109,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-24",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0052",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2361,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-25",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0053",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 650,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-26",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0054",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2231,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-27",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0055",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3856,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-28",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0056",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1596,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-01",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0057",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2973,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-02",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0058",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 926,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-03",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0059",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2264,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-04",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0060",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 1264,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-05",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0061",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2117,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-06",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0062",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4417,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-07",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0063",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 2982,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-08",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jan",
+              "monthorder": 1,
+              "recordid": "TX-0064",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 934,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-09",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Feb",
+              "monthorder": 2,
+              "recordid": "TX-0065",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 909,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-10",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Mar",
+              "monthorder": 3,
+              "recordid": "TX-0066",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3330,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-11",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Figma Pro Plan",
+              "month": "Apr",
+              "monthorder": 4,
+              "recordid": "TX-0067",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3866,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-12",
+              "debit": null,
+              "expiry": null,
+              "merchant": "YouTube Premium",
+              "month": "May",
+              "monthorder": 5,
+              "recordid": "TX-0068",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 4757,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Shopping",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-13",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Fresh Market",
+              "month": "Jun",
+              "monthorder": 6,
+              "recordid": "TX-0069",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3211,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Food",
+              "channel": "Card",
+              "credit": null,
+              "date": "2026-07-14",
+              "debit": null,
+              "expiry": null,
+              "merchant": "City Rail",
+              "month": "Jul",
+              "monthorder": 7,
+              "recordid": "TX-0070",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 3302,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Travel",
+              "channel": "Mobile",
+              "credit": null,
+              "date": "2026-07-15",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Health Studio",
+              "month": "Aug",
+              "monthorder": 8,
+              "recordid": "TX-0071",
+              "recordtype": "Transaction",
+              "status": "Pending",
+              "transactiontype": "Credit"
+            },
+            {
+              "accountname": "Everyday Account",
+              "amount": 90,
+              "balance": null,
+              "cardholder": null,
+              "cardlast4": null,
+              "category": "Health",
+              "channel": "Transfer",
+              "credit": null,
+              "date": "2026-07-16",
+              "debit": null,
+              "expiry": null,
+              "merchant": "Cloud Hosting",
+              "month": "Sep",
+              "monthorder": 9,
+              "recordid": "TX-0072",
+              "recordtype": "Transaction",
+              "status": "Success",
+              "transactiontype": "Debit"
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_1pn1wf",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-digital-banking-overview",
+    "name": "Digital Banking Overview",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 8,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "app": {
+      "brand": {
+        "icon": "dashboard",
+        "shortTitle": "PA",
+        "subtitle": "Personal finance",
+        "title": "Paycent"
+      },
+      "container": "fluid",
+      "contentPadding": "compact",
+      "density": "compact",
+      "enabled": true,
+      "footer": {
+        "secondaryText": "One portable dataset · Web and Power BI",
+        "text": "Paycent · HyperPBI",
+        "visible": true
+      },
+      "layout": "vertical",
+      "navbar": {
+        "actions": [
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "primary",
+              "message": "The current dataset is displayed.",
+              "title": "Paycent",
+              "type": "showToast"
+            },
+            "ariaLabel": "Refresh dashboard",
+            "icon": "refresh",
+            "id": "refresh"
+          },
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "warning",
+              "message": "Three items need attention.",
+              "title": "Notifications",
+              "type": "showToast"
+            },
+            "ariaLabel": "Notifications",
+            "badge": 3,
+            "icon": "bell",
+            "id": "notifications"
+          }
+        ],
+        "searchPlaceholder": "Search this dashboard",
+        "showSearch": true,
+        "showSidebarToggle": true,
+        "user": {
+          "initials": "DO",
+          "name": "Dashboard Owner",
+          "status": "online",
+          "subtitle": "Workspace admin"
+        },
+        "visible": true
+      },
+      "pageHeader": {
+        "meta": [
+          {
+            "icon": "check",
+            "intent": "success",
+            "label": "Data",
+            "value": "Current"
+          }
+        ],
+        "subtitle": "Balances, transactions, and spending health",
+        "title": "Home",
+        "visible": true
+      },
+      "sidebar": {
+        "collapsedWidth": 62,
+        "collapsible": true,
+        "defaultCollapsed": false,
+        "footer": {
+          "subtitle": "Portable HyperPBI example",
+          "title": "Paycent"
+        },
+        "mobileBreakpoint": 760,
+        "navigation": [
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "Overview is already open.",
+              "title": "Home",
+              "type": "showToast"
+            },
+            "icon": "home",
+            "id": "home",
+            "label": "Home"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Accounts",
+              "type": "showToast"
+            },
+            "icon": "wallet",
+            "id": "accounts",
+            "label": "Accounts"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Transactions",
+              "type": "showToast"
+            },
+            "icon": "repeat",
+            "id": "transactions",
+            "label": "Transactions"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Reports",
+              "type": "showToast"
+            },
+            "icon": "chart",
+            "id": "reports",
+            "label": "Reports"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Expenses",
+              "type": "showToast"
+            },
+            "icon": "receipt",
+            "id": "expenses",
+            "label": "Expenses"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Settings",
+              "type": "showToast"
+            },
+            "icon": "settings",
+            "id": "settings",
+            "label": "Settings"
+          }
+        ],
+        "visible": true,
+        "width": 216
+      },
+      "stickyHeader": true
+    },
+    "components": [
+      {
+        "dataset": "account",
+        "id": "bankmetrics",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "metrics": [
+          {
+            "aggregation": "first",
+            "field": "balance",
+            "format": "currency",
+            "intent": "primary",
+            "title": "Total Balance"
+          },
+          {
+            "aggregation": "first",
+            "field": "debit",
+            "format": "currency",
+            "intent": "danger",
+            "title": "Debit"
+          },
+          {
+            "aggregation": "first",
+            "field": "credit",
+            "format": "currency",
+            "intent": "success",
+            "title": "Credit"
+          }
+        ],
+        "responsive": {
+          "lg": {
+            "span": 8
+          },
+          "xs": {
+            "span": 12
+          }
+        },
+        "span": 8,
+        "type": "metricGrid"
+      },
+      {
+        "dataset": "account",
+        "id": "paymentcard",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "repeat": {
+          "limit": 1,
+          "source": "rows",
+          "template": "<article class='payment-card'><header><strong>Paycent</strong><span>contactless</span></header><b>6219&nbsp;&nbsp;8610&nbsp;&nbsp;2888&nbsp;&nbsp;{{row.cardlast4}}</b><footer><span>{{row.cardholder}}</span><span>{{row.expiry}}</span></footer></article>"
+        },
+        "responsive": {
+          "lg": {
+            "span": 4
+          },
+          "xs": {
+            "span": 12
+          }
+        },
+        "span": 4,
+        "type": "custom"
+      },
+      {
+        "category": "month",
+        "dataset": "monthly",
+        "height": 290,
+        "id": "transactionreport",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "month",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "options": {
+          "color": [
+            "#2596ff",
+            "#24d2ed"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "barWidth": 24,
+              "itemStyle": {
+                "borderRadius": [
+                  8,
+                  8,
+                  2,
+                  2
+                ]
+              }
+            },
+            {
+              "lineStyle": {
+                "width": 3
+              },
+              "smooth": true,
+              "symbolSize": 7
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "responsive": {
+          "lg": {
+            "span": 8
+          },
+          "xs": {
+            "span": 12
+          }
+        },
+        "series": [
+          {
+            "aggregation": "first",
+            "chartType": "bar",
+            "field": "debits",
+            "label": "Debit"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "line",
+            "field": "credits",
+            "label": "Credit"
+          }
+        ],
+        "span": 8,
+        "title": "Transaction Reports",
+        "type": "comboChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "category",
+        "dataset": "expenses",
+        "height": 290,
+        "id": "expensesdonut",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "category",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "spend",
+        "options": {
+          "color": [
+            "#2596ff",
+            "#24d2ed",
+            "#d81b71",
+            "#965cf8"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "label": {
+                "show": false
+              },
+              "radius": [
+                "52%",
+                "76%"
+              ]
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "responsive": {
+          "lg": {
+            "span": 4
+          },
+          "xs": {
+            "span": 12
+          }
+        },
+        "span": 4,
+        "title": "Expenses",
+        "type": "donutChart"
+      },
+      {
+        "columns": [
+          {
+            "field": "merchant",
+            "title": "Account"
+          },
+          {
+            "field": "category",
+            "title": "Category"
+          },
+          {
+            "field": "amount",
+            "format": "currency",
+            "hozAlign": "right",
+            "title": "Amount"
+          },
+          {
+            "field": "date",
+            "title": "Date"
+          },
+          {
+            "cellType": "badge",
+            "field": "status",
+            "intentMap": {
+              "Pending": "warning",
+              "Success": "success"
+            },
+            "title": "Status"
+          },
+          {
+            "field": "channel",
+            "title": "Channel"
+          }
+        ],
+        "dataset": "recent",
+        "hover": true,
+        "id": "recenttransactions",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "recordid",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxRows": 10,
+        "pagination": false,
+        "span": 12,
+        "title": "Recent Transactions",
+        "type": "table"
+      }
+    ],
+    "css": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n\n.hp-app-shell{color-scheme:dark}.hp-navbar-search input{background:#091321;border-color:#26364d;color:#edf5ff}.hp-sidebar-app .hp-nav-active{background:linear-gradient(90deg,#258dff,#0764cd);color:#fff}.hp-component-metricGrid .hp-metric{background:linear-gradient(145deg,#101c2d,#0b1422)}.hp-component-metricGrid .hp-metric:first-child{border-color:#2596ff}\n.payment-card{min-height:154px;display:flex;flex-direction:column;justify-content:space-between;padding:20px;border-radius:18px;color:#fff;background:radial-gradient(circle at 85% 110%,#ff59d1,transparent 38%),radial-gradient(circle at 5% -10%,#29d3ff,transparent 42%),linear-gradient(135deg,#11104a,#17082e);box-shadow:0 18px 35px rgb(0 0 0 / 28%)}.payment-card header,.payment-card footer{display:flex;justify-content:space-between;align-items:center}.payment-card header span{font-size:9px;color:#bcd1e7}.payment-card b{font-size:17px;letter-spacing:.12em}.payment-card footer{font-size:10px;color:#dbe7fa}\n",
+    "data": {
+      "datasets": {
+        "account": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Account"
+          },
+          "source": "powerbi"
+        },
+        "expenses": {
+          "filter": {
+            "field": "transactiontype",
+            "operator": "=",
+            "value": "Debit"
+          },
+          "groupBy": [
+            "category"
+          ],
+          "metrics": {
+            "spend": {
+              "field": "amount",
+              "op": "sum"
+            }
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "spend"
+            }
+          ],
+          "source": "transactions"
+        },
+        "monthly": {
+          "derive": {
+            "creditamount": {
+              "condition": {
+                "left": {
+                  "field": "transactiontype"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Credit"
+                }
+              },
+              "else": {
+                "value": 0
+              },
+              "op": "if",
+              "then": {
+                "field": "amount"
+              }
+            },
+            "debitamount": {
+              "condition": {
+                "left": {
+                  "field": "transactiontype"
+                },
+                "op": "=",
+                "right": {
+                  "value": "Debit"
+                }
+              },
+              "else": {
+                "value": 0
+              },
+              "op": "if",
+              "then": {
+                "field": "amount"
+              }
+            }
+          },
+          "groupBy": [
+            "month",
+            "monthorder"
+          ],
+          "metrics": {
+            "credits": {
+              "field": "creditamount",
+              "op": "sum"
+            },
+            "debits": {
+              "field": "debitamount",
+              "op": "sum"
+            }
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "monthorder"
+            }
+          ],
+          "source": "transactions"
+        },
+        "recent": {
+          "limit": 10,
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "date"
+            }
+          ],
+          "source": "transactions"
+        },
+        "transactions": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Transaction"
+          },
+          "source": "powerbi"
+        }
+      }
+    },
+    "theme": {
+      "accentColor": "#24d2ed",
+      "borderColor": "#203047",
+      "cardPadding": 14,
+      "dangerColor": "#d81b71",
+      "density": "compact",
+      "gap": 12,
+      "mode": "dark",
+      "primaryColor": "#2596ff",
+      "radius": 12,
+      "successColor": "#15bc88",
+      "surfaceColor": "#0e1929",
+      "textColor": "#eef5ff",
+      "warningColor": "#ff9c35"
+    },
+    "title": "Digital Banking Overview",
+    "version": "2.0"
+  }
+}

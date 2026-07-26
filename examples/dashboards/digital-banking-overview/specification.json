@@ -1,0 +1,599 @@
+{
+  "version": "2.0",
+  "title": "Digital Banking Overview",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#2596ff",
+    "accentColor": "#24d2ed",
+    "surfaceColor": "#0e1929",
+    "textColor": "#eef5ff",
+    "borderColor": "#203047",
+    "successColor": "#15bc88",
+    "warningColor": "#ff9c35",
+    "dangerColor": "#d81b71",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "Paycent",
+      "shortTitle": "PA",
+      "subtitle": "Personal finance",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search this dashboard",
+      "actions": [
+        {
+          "id": "refresh",
+          "ariaLabel": "Refresh dashboard",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "Paycent",
+            "message": "The current dataset is displayed.",
+            "intent": "primary",
+            "durationMs": 2200
+          }
+        },
+        {
+          "id": "notifications",
+          "ariaLabel": "Notifications",
+          "icon": "bell",
+          "badge": 3,
+          "action": {
+            "type": "showToast",
+            "title": "Notifications",
+            "message": "Three items need attention.",
+            "intent": "warning",
+            "durationMs": 2200
+          }
+        }
+      ],
+      "user": {
+        "name": "Dashboard Owner",
+        "subtitle": "Workspace admin",
+        "initials": "DO",
+        "status": "online"
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 216,
+      "collapsedWidth": 62,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "mobileBreakpoint": 760,
+      "navigation": [
+        {
+          "id": "home",
+          "label": "Home",
+          "icon": "home",
+          "action": {
+            "type": "showToast",
+            "title": "Home",
+            "message": "Overview is already open.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "accounts",
+          "label": "Accounts",
+          "icon": "wallet",
+          "action": {
+            "type": "showToast",
+            "title": "Accounts",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "transactions",
+          "label": "Transactions",
+          "icon": "repeat",
+          "action": {
+            "type": "showToast",
+            "title": "Transactions",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "reports",
+          "label": "Reports",
+          "icon": "chart",
+          "action": {
+            "type": "showToast",
+            "title": "Reports",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "expenses",
+          "label": "Expenses",
+          "icon": "receipt",
+          "action": {
+            "type": "showToast",
+            "title": "Expenses",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "settings",
+          "label": "Settings",
+          "icon": "settings",
+          "action": {
+            "type": "showToast",
+            "title": "Settings",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        }
+      ],
+      "footer": {
+        "title": "Paycent",
+        "subtitle": "Portable HyperPBI example"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Home",
+      "subtitle": "Balances, transactions, and spending health",
+      "meta": [
+        {
+          "label": "Data",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "Paycent · HyperPBI",
+      "secondaryText": "One portable dataset · Web and Power BI"
+    }
+  },
+  "data": {
+    "datasets": {
+      "account": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Account"
+        }
+      },
+      "transactions": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Transaction"
+        }
+      },
+      "monthly": {
+        "source": "transactions",
+        "derive": {
+          "debitamount": {
+            "op": "if",
+            "condition": {
+              "op": "=",
+              "left": {
+                "field": "transactiontype"
+              },
+              "right": {
+                "value": "Debit"
+              }
+            },
+            "then": {
+              "field": "amount"
+            },
+            "else": {
+              "value": 0
+            }
+          },
+          "creditamount": {
+            "op": "if",
+            "condition": {
+              "op": "=",
+              "left": {
+                "field": "transactiontype"
+              },
+              "right": {
+                "value": "Credit"
+              }
+            },
+            "then": {
+              "field": "amount"
+            },
+            "else": {
+              "value": 0
+            }
+          }
+        },
+        "groupBy": [
+          "month",
+          "monthorder"
+        ],
+        "metrics": {
+          "debits": {
+            "op": "sum",
+            "field": "debitamount"
+          },
+          "credits": {
+            "op": "sum",
+            "field": "creditamount"
+          }
+        },
+        "sort": [
+          {
+            "field": "monthorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "expenses": {
+        "source": "transactions",
+        "filter": {
+          "field": "transactiontype",
+          "operator": "=",
+          "value": "Debit"
+        },
+        "groupBy": [
+          "category"
+        ],
+        "metrics": {
+          "spend": {
+            "op": "sum",
+            "field": "amount"
+          }
+        },
+        "sort": [
+          {
+            "field": "spend",
+            "direction": "descending"
+          }
+        ]
+      },
+      "recent": {
+        "source": "transactions",
+        "sort": [
+          {
+            "field": "date",
+            "direction": "descending"
+          }
+        ],
+        "limit": 10
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "bankmetrics",
+      "dataset": "account",
+      "span": 8,
+      "responsive": {
+        "xs": {
+          "span": 12
+        },
+        "lg": {
+          "span": 8
+        }
+      },
+      "metrics": [
+        {
+          "title": "Total Balance",
+          "field": "balance",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "primary"
+        },
+        {
+          "title": "Debit",
+          "field": "debit",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "danger"
+        },
+        {
+          "title": "Credit",
+          "field": "credit",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "success"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "custom",
+      "id": "paymentcard",
+      "dataset": "account",
+      "span": 4,
+      "responsive": {
+        "xs": {
+          "span": 12
+        },
+        "lg": {
+          "span": 4
+        }
+      },
+      "repeat": {
+        "source": "rows",
+        "limit": 1,
+        "template": "<article class='payment-card'><header><strong>Paycent</strong><span>contactless</span></header><b>6219&nbsp;&nbsp;8610&nbsp;&nbsp;2888&nbsp;&nbsp;{{row.cardlast4}}</b><footer><span>{{row.cardholder}}</span><span>{{row.expiry}}</span></footer></article>"
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "comboChart",
+      "id": "transactionreport",
+      "dataset": "monthly",
+      "title": "Transaction Reports",
+      "span": 8,
+      "responsive": {
+        "xs": {
+          "span": 12
+        },
+        "lg": {
+          "span": 8
+        }
+      },
+      "height": 290,
+      "category": "month",
+      "series": [
+        {
+          "field": "debits",
+          "label": "Debit",
+          "chartType": "bar",
+          "aggregation": "first"
+        },
+        {
+          "field": "credits",
+          "label": "Credit",
+          "chartType": "line",
+          "aggregation": "first"
+        }
+      ],
+      "options": {
+        "color": [
+          "#2596ff",
+          "#24d2ed"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "barWidth": 24,
+            "itemStyle": {
+              "borderRadius": [
+                8,
+                8,
+                2,
+                2
+              ]
+            }
+          },
+          {
+            "smooth": true,
+            "symbolSize": 7,
+            "lineStyle": {
+              "width": 3
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "month",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "expensesdonut",
+      "dataset": "expenses",
+      "title": "Expenses",
+      "span": 4,
+      "responsive": {
+        "xs": {
+          "span": 12
+        },
+        "lg": {
+          "span": 4
+        }
+      },
+      "height": 290,
+      "category": "category",
+      "measure": "spend",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#2596ff",
+          "#24d2ed",
+          "#d81b71",
+          "#965cf8"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "radius": [
+              "52%",
+              "76%"
+            ],
+            "label": {
+              "show": false
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "category",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "recenttransactions",
+      "dataset": "recent",
+      "title": "Recent Transactions",
+      "span": 12,
+      "columns": [
+        {
+          "field": "merchant",
+          "title": "Account"
+        },
+        {
+          "field": "category",
+          "title": "Category"
+        },
+        {
+          "field": "amount",
+          "title": "Amount",
+          "format": "currency",
+          "hozAlign": "right"
+        },
+        {
+          "field": "date",
+          "title": "Date"
+        },
+        {
+          "field": "status",
+          "title": "Status",
+          "cellType": "badge",
+          "intentMap": {
+            "Success": "success",
+            "Pending": "warning"
+          }
+        },
+        {
+          "field": "channel",
+          "title": "Channel"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 10,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "recordid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n\n.hp-app-shell{color-scheme:dark}.hp-navbar-search input{background:#091321;border-color:#26364d;color:#edf5ff}.hp-sidebar-app .hp-nav-active{background:linear-gradient(90deg,#258dff,#0764cd);color:#fff}.hp-component-metricGrid .hp-metric{background:linear-gradient(145deg,#101c2d,#0b1422)}.hp-component-metricGrid .hp-metric:first-child{border-color:#2596ff}\n.payment-card{min-height:154px;display:flex;flex-direction:column;justify-content:space-between;padding:20px;border-radius:18px;color:#fff;background:radial-gradient(circle at 85% 110%,#ff59d1,transparent 38%),radial-gradient(circle at 5% -10%,#29d3ff,transparent 42%),linear-gradient(135deg,#11104a,#17082e);box-shadow:0 18px 35px rgb(0 0 0 / 28%)}.payment-card header,.payment-card footer{display:flex;justify-content:space-between;align-items:center}.payment-card header span{font-size:9px;color:#bcd1e7}.payment-card b{font-size:17px;letter-spacing:.12em}.payment-card footer{font-size:10px;color:#dbe7fa}\n"
+}

@@ -3,7 +3,7 @@
 // Generated files must never be edited by hand.
 
 import { createRequire } from "node:module";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -81,7 +81,6 @@ function assertCanonicalCoverage() {
 const mdEscape = value => String(value).replace(/\|/g, "\\|").replace(/\n/g, " ");
 const codeList = values => values?.length ? values.map(value => `\`${value}\``).join(", ") : "—";
 const yesNo = value => value ? "Yes" : "No";
-const htmlEscape = value => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
 const json = value => JSON.stringify(value, null, 2);
 const allowedFor = type => [...new Set([...commonProperties, ...(propertiesByType[type] ?? [])])].sort();
 const requiredFor = type => [...new Set(["type", "id", ...(requiredByType[type] ?? [])])];
@@ -163,47 +162,13 @@ function markdownCatalog() {
     return `${lines.join("\n").trimEnd()}\n`;
 }
 
-function componentCard(item) {
-    const meta = docs[item.type];
-    const search = [item.type, item.label, item.category, item.useWhen, meta.status, meta.statusNote, meta.doNotUseWhen, ...(meta.related ?? [])].filter(Boolean).join(" ").toLowerCase();
-    return `<article class="component-card" data-category="${htmlEscape(item.category)}" data-search="${htmlEscape(search)}">
-<details><summary><span><code>${htmlEscape(item.type)}</code> — ${htmlEscape(item.label)}</span><span class="badge badge-${htmlEscape(meta.status)}">${htmlEscape(meta.status)}</span></summary>
-<div class="card-body">
-<p>${htmlEscape(item.useWhen)}</p>
-${meta.statusNote ? `<p><strong>Status note:</strong> ${htmlEscape(meta.statusNote)}</p>` : ""}
-<dl><div><dt>Level</dt><dd>${htmlEscape(item.level)}</dd></div><div><dt>Required</dt><dd>${requiredFor(item.type).map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</dd></div><div><dt>Key properties</dt><dd>${meta.keyProperties.length ? meta.keyProperties.map(value => `<code>${htmlEscape(value)}</code>`).join(", ") : "—"}</dd></div><div><dt>Data interaction</dt><dd>${yesNo(meta.supportsDataInteraction)}</dd></div><div><dt>UI action</dt><dd>${yesNo(meta.supportsUiAction)}</dd></div></dl>
-<p><strong>Allowed:</strong> ${allowedFor(item.type).map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p>
-${meta.doNotUseWhen ? `<p><strong>Do not use when:</strong> ${htmlEscape(meta.doNotUseWhen)}</p>` : ""}
-${meta.accessibility ? `<p><strong>Accessibility:</strong> ${htmlEscape(meta.accessibility)}</p>` : ""}
-${meta.related?.length ? `<p><strong>Related:</strong> ${meta.related.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p>` : ""}
-<div class="code-head"><strong>Valid 2.0 component example</strong><button type="button" class="copy">Copy</button></div><pre><code>${htmlEscape(json(examples[item.type]))}</code></pre>
-</div></details></article>`;
-}
-
-function htmlCatalog() {
-    const cards = definitions.map(componentCard).join("\n");
-    const patternCards = Object.values(patterns).map(pattern => `<article class="pattern-card"><h3>${htmlEscape(pattern.id)}</h3><p><strong>Required:</strong> ${pattern.required.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p><pre><code>${htmlEscape(json(pattern.example))}</code></pre></article>`).join("\n");
-    return `<!doctype html>
-<!-- GENERATED FILE. Edit canonical metadata and run npm run docs:generate. -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Generated HyperPBI 2.0 component catalog"><link rel="canonical" href="${projectWebsite}/hyperpbi-component-catalog-reference.html"><title>HyperPBI component catalog</title>
-<style>
-:root{color-scheme:light dark;--bg:#f4f7fb;--panel:#fff;--text:#182433;--muted:#5f6b7a;--line:#d8e0ea;--brand:#206bc4;--soft:#edf4fc;--radius:12px;font:15px/1.55 Inter,"Segoe UI",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}a{color:var(--brand)}header{background:#142033;color:#fff;padding:2rem max(1rem,calc((100% - 1180px)/2));}header h1{margin:0 0 .4rem;font-size:clamp(1.6rem,4vw,2.5rem)}header p{max-width:760px;margin:.35rem 0;color:#d5dfec}.toolbar{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:1fr minmax(180px,280px) auto;gap:.75rem;padding:.8rem max(1rem,calc((100% - 1180px)/2));background:color-mix(in srgb,var(--panel) 94%,transparent);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}input,select{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}.count{align-self:center;color:var(--muted);white-space:nowrap}main{max-width:1180px;margin:auto;padding:1rem}section{scroll-margin-top:5rem}h2{margin:2rem 0 .7rem}.intro,.reference,.pattern-card,.component-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}.intro,.reference{padding:1rem 1.2rem}.pattern-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}.pattern-card{padding:.9rem}.pattern-card h3{margin-top:0}.component-card{margin:.65rem 0;overflow:hidden}.component-card[hidden]{display:none}summary{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.9rem 1rem;cursor:pointer;background:var(--soft);font-weight:650}.card-body{padding:1rem}.badge{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:.18rem .5rem;border-radius:999px;background:#dfe7f0}.badge-stable{background:#dff3e8;color:#146c43}.badge-beta{background:#fff0cf;color:#835a00}.badge-experimental{background:#dcecff;color:#174f8a}.badge-deprecated{background:#fde1e1;color:#9d2929}dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.7rem}dl div{border-left:3px solid var(--line);padding-left:.7rem}dt{font-weight:700}dd{margin:0;color:var(--muted)}code{font-family:"Cascadia Code",Consolas,monospace;font-size:.9em}pre{max-height:28rem;overflow:auto;background:#111927;color:#e8eef7;border-radius:8px;padding:1rem}.code-head{display:flex;justify-content:space-between;align-items:center;margin-top:1rem}.copy{border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);padding:.4rem .7rem;cursor:pointer}.empty{padding:2rem;text-align:center;color:var(--muted)}footer{max-width:1180px;margin:2rem auto;padding:1rem;color:var(--muted)}@media(max-width:700px){.toolbar{grid-template-columns:1fr}.count{justify-self:start}summary{align-items:flex-start}.card-body{padding:.8rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1622;--panel:#152131;--text:#e6edf5;--muted:#aeb9c8;--line:#304156;--soft:#1b2b40;--brand:#73b7ff}.badge-stable{color:#9ae6bd}.badge-beta{color:#ffd77d}.badge-experimental{color:#a9d3ff}.badge-deprecated{color:#ffaaaa}}
-</style></head><body>
-<header><h1>HyperPBI component catalog</h1><p>${definitions.length} canonical component types across ${categories.length} categories. Generated directly from implementation metadata for the strict HyperPBI 2.0 authoring contract.</p><p><a href="${projectWebsite}">HyperPBI website</a> · <a href="${projectSource}">Source code</a> · <a href="index.html">Product overview</a> · <a href="docs/hyperpbi-spec-reference.md">Specification</a> · <a href="docs/data-model.md">Data model</a> · <a href="docs/svg-visuals.md">SVG</a></p></header>
-<div class="toolbar"><input id="search" type="search" placeholder="Search type, label, use, or status" aria-label="Search component catalog"><select id="category" aria-label="Filter by category"><option value="">All categories</option>${categories.map(category => `<option>${htmlEscape(category)}</option>`).join("")}</select><span class="count" id="count" aria-live="polite">${definitions.length} components</span></div>
-<main><section class="intro"><h2>HyperPBI 2.0 contract</h2><p>Dashboard schema 2.0 is the only active contract. Every component requires a globally unique stable <code>id</code>. Field Manifest aliases are resolved during preparation. Omit <code>dataset</code> to use <code>powerbi</code>, or select a named logical dataset.</p><p><code>uiAction</code>, universal <code>interaction</code>, and safe event-specific <code>interactions</code> are separate and optional. External filters require a true model-column target; identity selection can follow source-row lineage.</p><h3>Maturity governance</h3><p>Maturity is explicit per canonical descriptor and independent of complexity. Stable records renderer, strict schema, applicable fields, Inspector metadata, valid example, responsive/empty/accessibility behavior, focused tests, and documentation evidence. Beta is implemented with an evidence gap; experimental is intentionally unstable. AI gates beta/experimental authoring.</p></section>
-<section><h2>Application patterns</h2><div class="pattern-grid">${patternCards}</div></section>
-<section class="reference"><h2>Shared references</h2><p><strong>Shared properties:</strong> ${commonProperties.map(value => `<code>${htmlEscape(value)}</code>`).join(", ")}</p><p><strong>UI actions:</strong> clearFilters, setTab, setState, toggleState, toggleSidebar, openOverlay, closeOverlay, toggleOverlay, setStep, nextStep, previousStep, showToast, dismissToast, scrollTo, refresh.</p></section>
-<section><h2>Components</h2><div id="cards">${cards}</div><p id="empty" class="empty" hidden>No components match the current filters.</p></section></main>
-<footer>Generated from canonical TypeScript metadata. Do not edit this file manually. <a href="${projectWebsite}">hyperpbi.com</a> · <a href="${projectSource}">austinwin/hyperpbi</a>. Dashboard schema 2.0 is the only runtime contract; legacy files require the standalone developer converter.</footer>
-<script>
-const search=document.querySelector('#search'),category=document.querySelector('#category'),cards=[...document.querySelectorAll('.component-card')],count=document.querySelector('#count'),empty=document.querySelector('#empty');function filter(){const q=search.value.trim().toLowerCase(),cat=category.value;let visible=0;for(const card of cards){const show=(!q||card.dataset.search.includes(q))&&(!cat||card.dataset.category===cat);card.hidden=!show;if(show)visible++}count.textContent=visible+' component'+(visible===1?'':'s');empty.hidden=visible!==0}search.addEventListener('input',filter);category.addEventListener('change',filter);document.addEventListener('click',event=>{const button=event.target.closest('.copy');if(!button)return;const code=button.parentElement.nextElementSibling.textContent;navigator.clipboard?.writeText(code).then(()=>{button.textContent='Copied';setTimeout(()=>button.textContent='Copy',1200)})});
-</script></body></html>\n`;
-}
-
 async function writeOrCheck(path, content) {
-    if (!checkMode) { await writeFile(path, content); console.log(`Generated: ${path}`); return true; }
+    if (!checkMode) {
+        await mkdir(dirname(path), { recursive: true });
+        await writeFile(path, content);
+        console.log(`Generated: ${path}`);
+        return true;
+    }
     const existing = await readFile(path, "utf8").catch(() => "");
     if (existing === content) return true;
     console.error(`Out of date: ${path}`);
@@ -220,23 +185,46 @@ function replaceMarker(source, marker, content) {
 
 async function synchronizedInventoryFiles() {
     const readmePath = join(root, "README.md");
-    const indexPath = join(root, "index.html");
     let readme = await readFile(readmePath, "utf8");
-    let index = await readFile(indexPath, "utf8");
     readme = replaceMarker(readme, "component-summary", `\n- The canonical implementation defines **${definitions.length} component types in ${categories.length} categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).\n`);
-    index = replaceMarker(index, "hero-component-count", `<a class="btn btn-secondary" href="hyperpbi-component-catalog-reference.html">Browse ${definitions.length} components</a>`);
-    index = replaceMarker(index, "inventory-stats", `<div class="stat"><b>${definitions.length}</b><span>canonical component types</span></div>\n    <div class="stat"><b>${categories.length}</b><span>implementation categories</span></div>`);
-    index = replaceMarker(index, "catalog-heading", `<h2>${definitions.length} component types across ${categories.length} generated categories.</h2>`);
-    return [{ path: readmePath, content: readme }, { path: indexPath, content: index }];
+    return [{ path: readmePath, content: readme }];
 }
 
 async function main() {
     assertCanonicalCoverage();
     const generatedSkill = `<!-- GENERATED FILE. Edit HYPERPBI_SKILL_MARKDOWN in src/docs/hyperpbiHelp.ts and run npm run docs:generate. -->\n${helpModule.HYPERPBI_SKILL_MARKDOWN.trim()}\n`;
     const inventories = await synchronizedInventoryFiles();
+    const webCatalog = {
+        generated: true,
+        version: 1,
+        componentCount: descriptors.length,
+        categories,
+        patterns: Object.values(patterns).map(pattern => ({
+            id: pattern.id,
+            required: pattern.required,
+            optional: pattern.optional,
+            example: pattern.example,
+        })),
+        components: descriptors.map(item => ({
+            type: item.type,
+            label: item.label,
+            category: item.category,
+            maturity: item.maturity,
+            complexity: item.complexity,
+            useWhen: item.useWhen,
+            summary: item.documentation.summary,
+            accessibility: item.documentation.accessibility ?? [],
+            relatedTypes: item.documentation.relatedTypes ?? [],
+            capabilities: item.capabilities,
+            interaction: item.interaction,
+            required: requiredFor(item.type),
+            allowed: allowedFor(item.type),
+            example: item.example,
+        })),
+    };
     const results = await Promise.all([
         writeOrCheck(join(root, "docs/hyperpbi-component-catalog-reference.md"), markdownCatalog()),
-        writeOrCheck(join(root, "hyperpbi-component-catalog-reference.html"), htmlCatalog()),
+        writeOrCheck(join(root, "apps/web/generated/component-catalog.json"), `${JSON.stringify(webCatalog, null, 2)}\n`),
         writeOrCheck(join(root, "docs/hyperpbi-ai-skill.md"), generatedSkill),
         ...inventories.map(item => writeOrCheck(item.path, item.content)),
     ]);

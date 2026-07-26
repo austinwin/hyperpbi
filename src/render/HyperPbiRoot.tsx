@@ -8,7 +8,7 @@ import { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import { sanitizeCss } from "../security/sanitizeCss";
 import { RuntimeSettings } from "../runtime/runtimeSettings";
 import { HyperPbiConfig, defaultConfig } from "../config/hyperpbiConfig";
-import { themeVariables } from "../styles/tokens";
+import { resolveSchemaRuntimeSettings, themeVariables } from "../styles/tokens";
 import { FieldDictionaryPanel } from "../components/system/FieldDictionaryPanel";
 import { DashboardRenderer } from "./DashboardRenderer";
 import { RenderContext, RenderContextValue } from "./RenderContext";
@@ -96,6 +96,10 @@ export function HyperPbiRoot({
   componentPathById?: Readonly<Record<string, string>>;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
 }) {
+  const effectiveSettings = useMemo(
+    () => resolveSchemaRuntimeSettings(schema.theme, settings),
+    [schema.theme, settings],
+  );
   const effectiveProviderAccess = providerAccess ?? {
     tiles: { allowed: webAccessAvailable },
     geocoder: { allowed: webAccessAvailable },
@@ -264,7 +268,7 @@ export function HyperPbiRoot({
         getDatasetView,
         componentRows,
         schema,
-        settings,
+        settings: effectiveSettings,
         state,
         dispatch,
         warnings: sanitizedCss.warnings,
@@ -296,7 +300,7 @@ export function HyperPbiRoot({
       getDatasetView,
       componentRows,
       schema,
-      settings,
+      effectiveSettings,
       state,
       dispatch,
       sanitizedCss.warnings,
@@ -328,7 +332,7 @@ export function HyperPbiRoot({
       getDatasetView,
       componentRows,
       schema,
-      settings,
+      settings: effectiveSettings,
       state,
       dispatch,
       warnings: sanitizedCss.warnings,
@@ -358,7 +362,7 @@ export function HyperPbiRoot({
       getDatasetView,
       componentRows,
       schema,
-      settings,
+      effectiveSettings,
       state,
       sanitizedCss.warnings,
       selectExternal,
@@ -376,10 +380,10 @@ export function HyperPbiRoot({
       datasetEvaluation.datasets,
     ],
   );
-  const style = themeVariables(schema.theme, settings);
+  const style = themeVariables(schema.theme, effectiveSettings);
   const hasSidePanel = Boolean(schema.leftPanel?.length);
   const panelWidth =
-    schema.layout?.leftPanel?.width ?? settings.layout.leftPanelWidth;
+    schema.layout?.leftPanel?.width ?? effectiveSettings.layout.leftPanelWidth;
   const sideCollapsible = schema.layout?.leftPanel?.collapsible === true;
   const collapsedState = state.collapsed.__leftPanel;
   const sideCollapsed =
@@ -388,15 +392,17 @@ export function HyperPbiRoot({
       ? schema.layout?.leftPanel?.defaultCollapsed === true
       : collapsedState);
   const resolvedApp = useMemo(
-    () => resolveAppShell(schema, settings, state),
-    [schema, settings, state],
+    () => resolveAppShell(schema, effectiveSettings, state),
+    [schema, effectiveSettings, state],
   );
   const rootComponentsFill = componentListRequestsFill(schema.components);
+  const hasRightPanel = Boolean(schema.rightPanel?.length);
+  const rightPanelFill = componentListRequestsFill(schema.rightPanel ?? []);
 
   return (
     <div
       id={instanceId}
-      class={`hyperpbi-root hp-density-${schema.theme?.density ?? settings.layout.density} hp-theme-${schema.theme?.mode ?? settings.theme.mode} ${settings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`}
+      class={`hyperpbi-root hp-density-${effectiveSettings.layout.density} hp-theme-${effectiveSettings.theme.mode} ${effectiveSettings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`}
       style={style}
     >
       <style>{sanitizedCss.css}</style>
@@ -406,7 +412,7 @@ export function HyperPbiRoot({
             <AppShell
               app={resolvedApp}
               schema={schema}
-              settings={settings}
+              settings={effectiveSettings}
               state={state}
               dispatch={dispatch}
             >
@@ -417,14 +423,16 @@ export function HyperPbiRoot({
                   <DashboardRenderer components={schema.toolbar} />
                 </div>
               ) : null}
-              <div class={`hp-grid ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
-                <DashboardRenderer components={schema.components} />
+              <div class={`hp-dashboard-layout ${hasRightPanel ? "hp-with-right-panel" : ""} ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
+                <div class={`hp-grid hp-dashboard-primary ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
+                  <DashboardRenderer components={schema.components} />
+                </div>
+                {hasRightPanel ? (
+                  <aside class={`hp-right-panel ${rightPanelFill ? "hp-layout-fill" : ""}`} aria-label="Dashboard details">
+                    <DashboardRenderer components={schema.rightPanel ?? []} />
+                  </aside>
+                ) : null}
               </div>
-              {schema.rightPanel?.length ? (
-                <aside class="hp-right-panel">
-                  <DashboardRenderer components={schema.rightPanel} />
-                </aside>
-              ) : null}
             </AppShell>
           </>
         ) : (
@@ -473,16 +481,18 @@ export function HyperPbiRoot({
                   <DashboardRenderer components={schema.leftPanel ?? []} />
                 </aside>
               )}
-              <main class="hp-main">
-                <div class={`hp-grid ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
-                  <DashboardRenderer components={schema.components} />
+              <div class="hp-main">
+                <div class={`hp-dashboard-layout ${hasRightPanel ? "hp-with-right-panel" : ""} ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
+                  <div class={`hp-grid hp-dashboard-primary ${rootComponentsFill ? "hp-layout-fill" : ""}`}>
+                    <DashboardRenderer components={schema.components} />
+                  </div>
+                  {hasRightPanel ? (
+                    <aside class={`hp-right-panel ${rightPanelFill ? "hp-layout-fill" : ""}`} aria-label="Dashboard details">
+                      <DashboardRenderer components={schema.rightPanel ?? []} />
+                    </aside>
+                  ) : null}
                 </div>
-                {schema.rightPanel?.length ? (
-                  <aside class="hp-right-panel">
-                    <DashboardRenderer components={schema.rightPanel} />
-                  </aside>
-                ) : null}
-              </main>
+              </div>
             </div>
           </>
         )}

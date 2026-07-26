@@ -15,3 +15,43 @@ export function themeVariables(schema: HyperPbiTheme | undefined, settings: Runt
         "--hp-header-height": `${size(settings.layout.headerHeight, 44, 120)}px`
     };
 }
+
+/**
+ * Resolve dashboard-authored theme values into the runtime settings contract.
+ * Canvas renderers such as ECharts and Leaflet cannot read CSS variables, so
+ * they consume these effective values through RenderContext instead.
+ */
+export function resolveSchemaRuntimeSettings(
+    schema: HyperPbiTheme | undefined,
+    settings: RuntimeSettings,
+): RuntimeSettings {
+    if (!schema) return settings;
+    const modeDefaults = schema.mode === "dark"
+        ? { surface: "#182433", text: "#f1f5f9", border: "#334155" }
+        : schema.mode === "light"
+            ? { surface: "#ffffff", text: "#182433", border: "#dce1e7" }
+            : settings.theme;
+    return {
+        ...settings,
+        theme: {
+            ...settings.theme,
+            mode: schema.mode ?? settings.theme.mode,
+            primary: color(schema.primaryColor, settings.theme.primary),
+            accent: color(schema.accentColor, settings.theme.accent),
+            surface: color(schema.surfaceColor, modeDefaults.surface),
+            text: color(schema.textColor, modeDefaults.text),
+            border: color(schema.borderColor, modeDefaults.border),
+            danger: color(schema.dangerColor, settings.theme.danger),
+            warning: color(schema.warningColor, settings.theme.warning),
+            success: color(schema.successColor, settings.theme.success),
+            fontFamily: font(schema.fontFamily, settings.theme.fontFamily),
+            radius: size(schema.radius, settings.theme.radius, 24),
+        },
+        layout: {
+            ...settings.layout,
+            density: schema.density ?? settings.layout.density,
+            cardPadding: size(schema.cardPadding, settings.layout.cardPadding, 32),
+            gap: size(schema.gap, settings.layout.gap, 32),
+        },
+    };
+}

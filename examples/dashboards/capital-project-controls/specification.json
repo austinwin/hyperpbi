@@ -1,0 +1,423 @@
+{
+  "version": "2.0",
+  "title": "Capital Project Controls",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#1769aa",
+    "accentColor": "#58d542",
+    "surfaceColor": "#ffffff",
+    "textColor": "#20252b",
+    "borderColor": "#e5e7eb",
+    "successColor": "#58d542",
+    "warningColor": "#ffcc27",
+    "dangerColor": "#df4b4b",
+    "radius": 8,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "data": {
+    "datasets": {
+      "summary": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Summary"
+        }
+      },
+      "monthly": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Month"
+        },
+        "sort": [
+          {
+            "field": "monthorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "costs": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Cost"
+        },
+        "sort": [
+          {
+            "field": "costvalue",
+            "direction": "descending"
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "custom",
+      "id": "projectidentity",
+      "dataset": "summary",
+      "span": 4,
+      "repeat": {
+        "source": "rows",
+        "limit": 1,
+        "template": "<section class='project-identity'><span>PROJECT DETAILS</span><h2>{{row.projectname}}</h2><dl><div><dt>Client</dt><dd>{{row.client}}</dd></div><div><dt>Contract value</dt><dd>€4,956,477</dd></div><div><dt>Type</dt><dd>{{row.projecttype}}</dd></div><div><dt>Status</dt><dd>{{row.projectstatus}}</dd></div><div><dt>Manager</dt><dd>{{row.manager}}</dd></div><div><dt>Delivery</dt><dd>{{row.enddate}}</dd></div></dl></section>"
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "metricGrid",
+      "id": "projectmetrics",
+      "dataset": "summary",
+      "span": 5,
+      "metrics": [
+        {
+          "title": "Budget",
+          "field": "budget",
+          "aggregation": "first",
+          "format": "currency"
+        },
+        {
+          "title": "Actual Costs",
+          "field": "actualcost",
+          "aggregation": "first",
+          "format": "currency"
+        },
+        {
+          "title": "Work Performed",
+          "field": "performedcost",
+          "aggregation": "first",
+          "format": "currency"
+        },
+        {
+          "title": "Margin",
+          "field": "margin",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "success"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "grid",
+      "id": "progressgauges",
+      "span": 3,
+      "columns": 3,
+      "gap": 8,
+      "children": [
+        {
+          "type": "gauge",
+          "id": "completiongauge",
+          "dataset": "summary",
+          "title": "Completion",
+          "span": 1,
+          "height": 150,
+          "measure": "completionpct",
+          "aggregation": "first",
+          "options": {
+            "series": [
+              {
+                "min": 0,
+                "max": 100,
+                "startAngle": 90,
+                "endAngle": -270,
+                "axisLine": {
+                  "lineStyle": {
+                    "width": 10,
+                    "color": [
+                      [
+                        1,
+                        "#edf0f2"
+                      ]
+                    ]
+                  }
+                },
+                "progress": {
+                  "width": 10,
+                  "itemStyle": {
+                    "color": "#1769aa"
+                  }
+                },
+                "pointer": {
+                  "show": false
+                },
+                "axisTick": {
+                  "show": false
+                },
+                "splitLine": {
+                  "show": false
+                },
+                "axisLabel": {
+                  "show": false
+                },
+                "detail": {
+                  "formatter": "{value}%"
+                },
+                "title": {
+                  "show": false
+                }
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "type": "gauge",
+          "id": "spigauge",
+          "dataset": "summary",
+          "title": "SPI",
+          "span": 1,
+          "height": 150,
+          "measure": "spi",
+          "aggregation": "first",
+          "options": {
+            "series": [
+              {
+                "min": 0,
+                "max": 1.5,
+                "startAngle": 90,
+                "endAngle": -270,
+                "axisLine": {
+                  "lineStyle": {
+                    "width": 10,
+                    "color": [
+                      [
+                        1,
+                        "#edf0f2"
+                      ]
+                    ]
+                  }
+                },
+                "progress": {
+                  "width": 10,
+                  "itemStyle": {
+                    "color": "#58d542"
+                  }
+                },
+                "pointer": {
+                  "show": false
+                },
+                "axisTick": {
+                  "show": false
+                },
+                "splitLine": {
+                  "show": false
+                },
+                "axisLabel": {
+                  "show": false
+                },
+                "title": {
+                  "show": false
+                }
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "type": "gauge",
+          "id": "cpigauge",
+          "dataset": "summary",
+          "title": "CPI",
+          "span": 1,
+          "height": 150,
+          "measure": "cpi",
+          "aggregation": "first",
+          "options": {
+            "series": [
+              {
+                "min": 0,
+                "max": 1.5,
+                "startAngle": 90,
+                "endAngle": -270,
+                "axisLine": {
+                  "lineStyle": {
+                    "width": 10,
+                    "color": [
+                      [
+                        1,
+                        "#edf0f2"
+                      ]
+                    ]
+                  }
+                },
+                "progress": {
+                  "width": 10,
+                  "itemStyle": {
+                    "color": "#58d542"
+                  }
+                },
+                "pointer": {
+                  "show": false
+                },
+                "axisTick": {
+                  "show": false
+                },
+                "splitLine": {
+                  "show": false
+                },
+                "axisLabel": {
+                  "show": false
+                },
+                "title": {
+                  "show": false
+                }
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "comboChart",
+      "id": "projectdevelopment",
+      "dataset": "monthly",
+      "title": "Project Work & Budget Development",
+      "span": 7,
+      "height": 330,
+      "category": "month",
+      "series": [
+        {
+          "field": "scheduledcost",
+          "label": "Work scheduled",
+          "chartType": "line",
+          "aggregation": "first"
+        },
+        {
+          "field": "performedcost",
+          "label": "Work performed",
+          "chartType": "line",
+          "aggregation": "first"
+        },
+        {
+          "field": "actualcost",
+          "label": "Actual costs",
+          "chartType": "line",
+          "aggregation": "first"
+        }
+      ],
+      "options": {
+        "color": [
+          "#df4b4b",
+          "#ffcc27",
+          "#9da3a8"
+        ],
+        "series": [
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            }
+          },
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            }
+          },
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "month",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "costbreakdown",
+      "dataset": "costs",
+      "title": "Cost Breakdown",
+      "span": 5,
+      "height": 330,
+      "category": "costcategory",
+      "measure": "costvalue",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#58d542",
+          "#10a7e5",
+          "#df4b4b",
+          "#a9adaf",
+          "#ffcc27"
+        ],
+        "legend": {
+          "orient": "vertical",
+          "right": 8,
+          "top": "center"
+        },
+        "series": [
+          {
+            "center": [
+              "36%",
+              "50%"
+            ],
+            "radius": [
+              "46%",
+              "72%"
+            ],
+            "label": {
+              "show": true,
+              "formatter": "{d}%"
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "costcategory",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-grid{background:#fafafa}.project-identity{height:100%;padding:16px;border-radius:8px;background:#fff;box-shadow:0 8px 24px rgb(30 45 62 / 6%)}.project-identity>span{font-size:10px;font-weight:800;color:#1769aa;letter-spacing:.08em}.project-identity h2{margin:8px 0 14px;font-size:18px}.project-identity dl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0}.project-identity dl div:first-child{grid-column:1/-1}.project-identity dt{font-size:9px;color:#747b83}.project-identity dd{margin:2px 0 0;font-size:11px;font-weight:700}\n.hp-component-metricGrid .hp-metric{padding:13px}.hp-component-metricGrid .hp-metric-value{font-size:19px}.hp-component-grid .hp-card-body{padding:7px}\n"
+}

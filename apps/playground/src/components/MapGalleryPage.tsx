@@ -50,7 +50,7 @@ export function MapGalleryPage() {
     };
 
     return (
-        <main class="pg-map-gallery">
+        <div class="pg-map-gallery">
             <header class="pg-map-gallery-header">
                 <button type="button" onClick={() => navigate("/")}>← Playground</button>
                 <div><span class="pg-eyebrow">Component gallery</span><h1>Analytical maps</h1></div>
@@ -104,7 +104,7 @@ export function MapGalleryPage() {
                 <article><h3>Security</h3><p>Remote services pass provider and host policy. Image URLs are HTTPS or relative, SVG is sanitized, marker text is escaped, and specifications cannot execute JavaScript or unrestricted HTML markers.</p></article>
                 <article><h3>Power BI behavior</h3><p>Selection identities have configurable safety limits. Spatial and legend selections can continue locally when the host identity limit is exceeded, while external filtering requires a direct model-column target.</p></article>
             </section>
-        </main>
+        </div>
     );
 }
 

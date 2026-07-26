@@ -13,8 +13,8 @@ export function PlayPage({ projectId, storage }: { projectId: string; storage: P
         return () => document.removeEventListener("keydown", escape);
     }, [projectId]);
     if (!project) return <div class="pg-loading-screen">Loading Play Mode…</div>;
-    return <main class="pg-play-page">
+    return <div class="pg-play-page">
         <button class="pg-exit-play" onClick={() => navigate(`/project/${encodeURIComponent(projectId)}`)}><span>←</span> Exit Play Mode <kbd>Esc</kbd></button>
         <PlaygroundRenderer project={project} />
-    </main>;
+    </div>;
 }

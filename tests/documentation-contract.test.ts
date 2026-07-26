@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
-const documentation = ["README.md", "index.html", "docs/user-guide.md", "docs/map-services.md", "docs/hyperpbi-spec-reference.md", "docs/ai-authoring.md", "docs/interactions.md", "docs/security.md", "docs/data-model.md", "docs/hyperpbi-ai-skill.md"].map(read).join("\n");
+const documentation = ["README.md", "docs/user-guide.md", "docs/map-services.md", "docs/hyperpbi-spec-reference.md", "docs/ai-authoring.md", "docs/interactions.md", "docs/security.md", "docs/data-model.md", "docs/hyperpbi-ai-skill.md"].map(read).join("\n");
 
 describe("map documentation contract", () => {
     it("documents Values-only, per-layer datasets, flattened data, and Map Studio", () => {
@@ -19,6 +19,12 @@ describe("map documentation contract", () => {
 
     it("retains generated documentation markers", () => {
         expect(read("README.md")).toContain("<!-- component-summary:start -->");
-        for (const marker of ["hero-component-count", "inventory-stats", "catalog-heading"]) expect(read("index.html")).toContain(`<!-- ${marker}:start -->`);
+        expect(read("docs/hyperpbi-component-catalog-reference.md")).toContain("<!-- GENERATED FILE.");
+        const webCatalog = JSON.parse(read("apps/web/generated/component-catalog.json")) as {
+            generated?: boolean;
+            componentCount?: number;
+        };
+        expect(webCatalog.generated).toBe(true);
+        expect(webCatalog.componentCount).toBeGreaterThan(0);
     });
 });

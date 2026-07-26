@@ -1,0 +1,97 @@
+applicationid,applicationdate,weekday,weekdayorder,hourbucket,hourorder,candidate,gender,city,roleid,roletitle,department,stage,source,score,period,applicationcount
+APP-0001,2026-07-01,Mon,1,8:00,8,Candidate 001,Female,New York,ENG-201,Senior Android Developer,Engineering,Applied,LinkedIn,74,Current,1
+APP-0002,2026-07-02,Tue,2,9:00,9,Candidate 002,Male,Chicago,DSN-104,UX/UI Designer,Design,Finalised,Referral,73,Current,1
+APP-0003,2026-07-03,Wed,3,10:00,10,Candidate 003,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Rejected,Careers site,61,Current,1
+APP-0004,2026-07-04,Thu,4,11:00,11,Candidate 004,Female,Seattle,DAT-412,Analytics Engineer,Data,On Hold,Agency,62,Current,1
+APP-0005,2026-07-05,Fri,5,12:00,12,Candidate 005,Male,Denver,PM-225,Product Manager,Product,On Hold,LinkedIn,72,Current,1
+APP-0006,2026-07-06,Sat,6,13:00,13,Candidate 006,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Shortlisted,Referral,95,Current,1
+APP-0007,2026-07-07,Sun,7,14:00,14,Candidate 007,Female,Chicago,DSN-104,UX/UI Designer,Design,Applied,Careers site,55,Current,1
+APP-0008,2026-07-01,Mon,1,8:00,8,Candidate 008,Male,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Agency,81,Current,1
+APP-0009,2026-07-02,Tue,2,9:00,9,Candidate 009,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Applied,LinkedIn,93,Current,1
+APP-0010,2026-07-03,Wed,3,10:00,10,Candidate 010,Female,Denver,PM-225,Product Manager,Product,Shortlisted,Referral,64,Current,1
+APP-0011,2026-07-04,Thu,4,11:00,11,Candidate 011,Male,New York,ENG-201,Senior Android Developer,Engineering,Applied,Careers site,72,Current,1
+APP-0012,2026-07-05,Fri,5,12:00,12,Candidate 012,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Applied,Agency,77,Current,1
+APP-0013,2026-07-06,Sat,6,13:00,13,Candidate 013,Female,Austin,OPS-310,Recruiting Operations Lead,People,On Hold,LinkedIn,94,Current,1
+APP-0014,2026-07-07,Sun,7,14:00,14,Candidate 014,Male,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,Referral,58,Current,1
+APP-0015,2026-07-01,Mon,1,8:00,8,Candidate 015,Non-binary,Denver,PM-225,Product Manager,Product,Applied,Careers site,76,Current,1
+APP-0016,2026-07-02,Tue,2,9:00,9,Candidate 016,Female,New York,ENG-201,Senior Android Developer,Engineering,Rejected,Agency,86,Current,1
+APP-0017,2026-07-03,Wed,3,10:00,10,Candidate 017,Male,Chicago,DSN-104,UX/UI Designer,Design,Shortlisted,LinkedIn,83,Current,1
+APP-0018,2026-07-04,Thu,4,11:00,11,Candidate 018,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Referral,92,Current,1
+APP-0019,2026-07-05,Fri,5,12:00,12,Candidate 019,Female,Seattle,DAT-412,Analytics Engineer,Data,Applied,Careers site,63,Current,1
+APP-0020,2026-07-06,Sat,6,13:00,13,Candidate 020,Male,Denver,PM-225,Product Manager,Product,Rejected,Agency,71,Current,1
+APP-0021,2026-07-07,Sun,7,14:00,14,Candidate 021,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Applied,LinkedIn,97,Current,1
+APP-0022,2026-07-01,Mon,1,8:00,8,Candidate 022,Female,Chicago,DSN-104,UX/UI Designer,Design,Applied,Referral,56,Current,1
+APP-0023,2026-07-02,Tue,2,9:00,9,Candidate 023,Male,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Careers site,58,Current,1
+APP-0024,2026-07-03,Wed,3,10:00,10,Candidate 024,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Applied,Agency,71,Current,1
+APP-0025,2026-07-04,Thu,4,11:00,11,Candidate 025,Female,Denver,PM-225,Product Manager,Product,Applied,LinkedIn,67,Current,1
+APP-0026,2026-07-05,Fri,5,12:00,12,Candidate 026,Male,New York,ENG-201,Senior Android Developer,Engineering,Shortlisted,Referral,55,Current,1
+APP-0027,2026-07-06,Sat,6,13:00,13,Candidate 027,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Finalised,Careers site,72,Current,1
+APP-0028,2026-07-07,Sun,7,14:00,14,Candidate 028,Female,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Agency,61,Current,1
+APP-0029,2026-07-01,Mon,1,8:00,8,Candidate 029,Male,Seattle,DAT-412,Analytics Engineer,Data,On Hold,LinkedIn,77,Current,1
+APP-0030,2026-07-02,Tue,2,9:00,9,Candidate 030,Non-binary,Denver,PM-225,Product Manager,Product,On Hold,Referral,84,Current,1
+APP-0031,2026-07-03,Wed,3,10:00,10,Candidate 031,Female,New York,ENG-201,Senior Android Developer,Engineering,Shortlisted,Careers site,67,Current,1
+APP-0032,2026-07-04,Thu,4,11:00,11,Candidate 032,Male,Chicago,DSN-104,UX/UI Designer,Design,Applied,Agency,61,Current,1
+APP-0033,2026-07-05,Fri,5,12:00,12,Candidate 033,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Applied,LinkedIn,89,Current,1
+APP-0034,2026-07-06,Sat,6,13:00,13,Candidate 034,Female,Seattle,DAT-412,Analytics Engineer,Data,Rejected,Referral,98,Current,1
+APP-0035,2026-07-07,Sun,7,14:00,14,Candidate 035,Male,Denver,PM-225,Product Manager,Product,Applied,Careers site,94,Current,1
+APP-0036,2026-07-01,Mon,1,8:00,8,Candidate 036,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,On Hold,Agency,95,Current,1
+APP-0037,2026-07-02,Tue,2,9:00,9,Candidate 037,Female,Chicago,DSN-104,UX/UI Designer,Design,On Hold,LinkedIn,77,Current,1
+APP-0038,2026-07-03,Wed,3,10:00,10,Candidate 038,Male,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Referral,59,Current,1
+APP-0039,2026-07-04,Thu,4,11:00,11,Candidate 039,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Finalised,Careers site,85,Current,1
+APP-0040,2026-07-05,Fri,5,12:00,12,Candidate 040,Female,Denver,PM-225,Product Manager,Product,Rejected,Agency,79,Current,1
+APP-0041,2026-07-06,Sat,6,13:00,13,Candidate 041,Male,New York,ENG-201,Senior Android Developer,Engineering,On Hold,LinkedIn,76,Current,1
+APP-0042,2026-07-07,Sun,7,14:00,14,Candidate 042,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Applied,Referral,97,Current,1
+APP-0043,2026-07-01,Mon,1,8:00,8,Candidate 043,Female,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Careers site,85,Current,1
+APP-0044,2026-07-02,Tue,2,9:00,9,Candidate 044,Male,Seattle,DAT-412,Analytics Engineer,Data,Finalised,Agency,55,Current,1
+APP-0045,2026-07-03,Wed,3,10:00,10,Candidate 045,Non-binary,Denver,PM-225,Product Manager,Product,Shortlisted,LinkedIn,94,Current,1
+APP-0046,2026-07-04,Thu,4,11:00,11,Candidate 046,Female,New York,ENG-201,Senior Android Developer,Engineering,Applied,Referral,70,Current,1
+APP-0047,2026-07-05,Fri,5,12:00,12,Candidate 047,Male,Chicago,DSN-104,UX/UI Designer,Design,Rejected,Careers site,98,Current,1
+APP-0048,2026-07-06,Sat,6,13:00,13,Candidate 048,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Rejected,Agency,85,Current,1
+APP-0049,2026-07-07,Sun,7,14:00,14,Candidate 049,Female,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,LinkedIn,73,Current,1
+APP-0050,2026-07-01,Mon,1,8:00,8,Candidate 050,Male,Denver,PM-225,Product Manager,Product,Applied,Referral,90,Current,1
+APP-0051,2026-07-02,Tue,2,9:00,9,Candidate 051,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Shortlisted,Careers site,55,Current,1
+APP-0052,2026-07-03,Wed,3,10:00,10,Candidate 052,Female,Chicago,DSN-104,UX/UI Designer,Design,Applied,Agency,85,Current,1
+APP-0053,2026-07-04,Thu,4,11:00,11,Candidate 053,Male,Austin,OPS-310,Recruiting Operations Lead,People,Applied,LinkedIn,83,Current,1
+APP-0054,2026-07-05,Fri,5,12:00,12,Candidate 054,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,Referral,87,Current,1
+APP-0055,2026-07-06,Sat,6,13:00,13,Candidate 055,Female,Denver,PM-225,Product Manager,Product,Shortlisted,Careers site,62,Current,1
+APP-0056,2026-07-07,Sun,7,14:00,14,Candidate 056,Male,New York,ENG-201,Senior Android Developer,Engineering,Shortlisted,Agency,88,Current,1
+APP-0057,2026-07-01,Mon,1,8:00,8,Candidate 057,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Applied,LinkedIn,61,Current,1
+APP-0058,2026-07-02,Tue,2,9:00,9,Candidate 058,Female,Austin,OPS-310,Recruiting Operations Lead,People,Shortlisted,Referral,75,Current,1
+APP-0059,2026-07-03,Wed,3,10:00,10,Candidate 059,Male,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,Careers site,69,Current,1
+APP-0060,2026-07-04,Thu,4,11:00,11,Candidate 060,Non-binary,Denver,PM-225,Product Manager,Product,Rejected,Agency,79,Current,1
+APP-0061,2026-07-05,Fri,5,12:00,12,Candidate 061,Female,New York,ENG-201,Senior Android Developer,Engineering,Applied,LinkedIn,97,Current,1
+APP-0062,2026-07-06,Sat,6,13:00,13,Candidate 062,Male,Chicago,DSN-104,UX/UI Designer,Design,Applied,Referral,77,Current,1
+APP-0063,2026-07-07,Sun,7,14:00,14,Candidate 063,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Rejected,Careers site,75,Current,1
+APP-0064,2026-07-01,Mon,1,8:00,8,Candidate 064,Female,Seattle,DAT-412,Analytics Engineer,Data,Applied,Agency,86,Current,1
+APP-0065,2026-07-02,Tue,2,9:00,9,Candidate 065,Male,Denver,PM-225,Product Manager,Product,Applied,LinkedIn,95,Current,1
+APP-0066,2026-07-03,Wed,3,10:00,10,Candidate 066,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Finalised,Referral,83,Current,1
+APP-0067,2026-07-04,Thu,4,11:00,11,Candidate 067,Female,Chicago,DSN-104,UX/UI Designer,Design,Rejected,Careers site,72,Current,1
+APP-0068,2026-07-05,Fri,5,12:00,12,Candidate 068,Male,Austin,OPS-310,Recruiting Operations Lead,People,On Hold,Agency,65,Current,1
+APP-0069,2026-07-06,Sat,6,13:00,13,Candidate 069,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Applied,LinkedIn,62,Current,1
+APP-0070,2026-07-07,Sun,7,14:00,14,Candidate 070,Female,Denver,PM-225,Product Manager,Product,Applied,Referral,74,Current,1
+APP-0071,2026-07-01,Mon,1,8:00,8,Candidate 071,Male,New York,ENG-201,Senior Android Developer,Engineering,Applied,Careers site,74,Current,1
+APP-0072,2026-07-02,Tue,2,9:00,9,Candidate 072,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Applied,Agency,87,Current,1
+APP-0073,2026-07-03,Wed,3,10:00,10,Candidate 073,Female,Austin,OPS-310,Recruiting Operations Lead,People,Applied,LinkedIn,86,Current,1
+APP-0074,2026-07-04,Thu,4,11:00,11,Candidate 074,Male,Seattle,DAT-412,Analytics Engineer,Data,Rejected,Referral,68,Current,1
+APP-0075,2026-07-05,Fri,5,12:00,12,Candidate 075,Non-binary,Denver,PM-225,Product Manager,Product,Applied,Careers site,71,Current,1
+APP-0076,2026-07-06,Sat,6,13:00,13,Candidate 076,Female,New York,ENG-201,Senior Android Developer,Engineering,Applied,Agency,94,Current,1
+APP-0077,2026-07-07,Sun,7,14:00,14,Candidate 077,Male,Chicago,DSN-104,UX/UI Designer,Design,Shortlisted,LinkedIn,97,Current,1
+APP-0078,2026-07-01,Mon,1,8:00,8,Candidate 078,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Shortlisted,Referral,68,Current,1
+APP-0079,2026-07-02,Tue,2,9:00,9,Candidate 079,Female,Seattle,DAT-412,Analytics Engineer,Data,Rejected,Careers site,59,Current,1
+APP-0080,2026-07-03,Wed,3,10:00,10,Candidate 080,Male,Denver,PM-225,Product Manager,Product,Rejected,Agency,91,Current,1
+APP-0081,2026-07-04,Thu,4,11:00,11,Candidate 081,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Applied,LinkedIn,70,Previous,1
+APP-0082,2026-07-05,Fri,5,12:00,12,Candidate 082,Female,Chicago,DSN-104,UX/UI Designer,Design,Shortlisted,Referral,66,Previous,1
+APP-0083,2026-07-06,Sat,6,13:00,13,Candidate 083,Male,Austin,OPS-310,Recruiting Operations Lead,People,Shortlisted,Careers site,92,Previous,1
+APP-0084,2026-07-07,Sun,7,14:00,14,Candidate 084,Non-binary,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,Agency,88,Previous,1
+APP-0085,2026-07-01,Mon,1,8:00,8,Candidate 085,Female,Denver,PM-225,Product Manager,Product,Shortlisted,LinkedIn,64,Previous,1
+APP-0086,2026-07-02,Tue,2,9:00,9,Candidate 086,Male,New York,ENG-201,Senior Android Developer,Engineering,Applied,Referral,81,Previous,1
+APP-0087,2026-07-03,Wed,3,10:00,10,Candidate 087,Non-binary,Chicago,DSN-104,UX/UI Designer,Design,Applied,Careers site,95,Previous,1
+APP-0088,2026-07-04,Thu,4,11:00,11,Candidate 088,Female,Austin,OPS-310,Recruiting Operations Lead,People,Applied,Agency,71,Previous,1
+APP-0089,2026-07-05,Fri,5,12:00,12,Candidate 089,Male,Seattle,DAT-412,Analytics Engineer,Data,Shortlisted,LinkedIn,74,Previous,1
+APP-0090,2026-07-06,Sat,6,13:00,13,Candidate 090,Non-binary,Denver,PM-225,Product Manager,Product,Applied,Referral,86,Previous,1
+APP-0091,2026-07-07,Sun,7,14:00,14,Candidate 091,Female,New York,ENG-201,Senior Android Developer,Engineering,Rejected,Careers site,95,Previous,1
+APP-0092,2026-07-01,Mon,1,8:00,8,Candidate 092,Male,Chicago,DSN-104,UX/UI Designer,Design,Applied,Agency,88,Previous,1
+APP-0093,2026-07-02,Tue,2,9:00,9,Candidate 093,Non-binary,Austin,OPS-310,Recruiting Operations Lead,People,Shortlisted,LinkedIn,69,Previous,1
+APP-0094,2026-07-03,Wed,3,10:00,10,Candidate 094,Female,Seattle,DAT-412,Analytics Engineer,Data,On Hold,Referral,94,Previous,1
+APP-0095,2026-07-04,Thu,4,11:00,11,Candidate 095,Male,Denver,PM-225,Product Manager,Product,Rejected,Careers site,91,Previous,1
+APP-0096,2026-07-05,Fri,5,12:00,12,Candidate 096,Non-binary,New York,ENG-201,Senior Android Developer,Engineering,Applied,Agency,88,Previous,1

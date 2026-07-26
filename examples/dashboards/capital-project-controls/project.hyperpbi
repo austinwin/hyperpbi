@@ -1,0 +1,1291 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_1cfq2lf",
+    "sources": {
+      "src_data_1cfq2lf": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "actualcost": 1624594.6153846155,
+              "budget": 4895600,
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costvalue": 469173,
+              "cpi": 1.2,
+              "margin": 65544,
+              "monthorder": 6.5,
+              "performedcost": 1915042.3846153845,
+              "scheduledcost": 2911682,
+              "spi": 1.1
+            },
+            "count": 18,
+            "distinctCount": {
+              "actualcost": 12,
+              "budget": 1,
+              "client": 1,
+              "completionpct": 1,
+              "contractvalue": 1,
+              "costcategory": 5,
+              "costvalue": 5,
+              "cpi": 1,
+              "enddate": 1,
+              "manager": 1,
+              "margin": 1,
+              "month": 12,
+              "monthorder": 12,
+              "performedcost": 10,
+              "projectid": 1,
+              "projectname": 1,
+              "projectstatus": 1,
+              "projecttype": 1,
+              "recordtype": 3,
+              "scheduledcost": 12,
+              "spi": 1,
+              "startdate": 1
+            },
+            "first": {
+              "actualcost": 2345865,
+              "budget": 4895600,
+              "client": "Partner LLC",
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costcategory": "Material",
+              "costvalue": 985263,
+              "cpi": 1.2,
+              "enddate": "2027-12-31",
+              "manager": "Robert Sattler",
+              "margin": 65544,
+              "month": "Jan",
+              "monthorder": 1,
+              "performedcost": 2730551,
+              "projectid": "PRJ-2048",
+              "projectname": "Munich Innovation Campus",
+              "projectstatus": "In Execution",
+              "projecttype": "Design & Build",
+              "recordtype": "Summary",
+              "scheduledcost": 4890933,
+              "spi": 1.1,
+              "startdate": "2025-06-01"
+            },
+            "max": {
+              "actualcost": 2345865,
+              "budget": 4895600,
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costvalue": 985263,
+              "cpi": 1.2,
+              "margin": 65544,
+              "monthorder": 12,
+              "performedcost": 2770000,
+              "scheduledcost": 4890933,
+              "spi": 1.1
+            },
+            "min": {
+              "actualcost": 70000,
+              "budget": 4895600,
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costvalue": 46917,
+              "cpi": 1.2,
+              "margin": 65544,
+              "monthorder": 1,
+              "performedcost": 90000,
+              "scheduledcost": 120000,
+              "spi": 1.1
+            },
+            "sum": {
+              "actualcost": 21119730,
+              "budget": 4895600,
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costvalue": 2345865,
+              "cpi": 1.2,
+              "margin": 65544,
+              "monthorder": 78,
+              "performedcost": 24895551,
+              "scheduledcost": 37851866,
+              "spi": 1.1
+            }
+          },
+          "fields": {
+            "actualcost": {
+              "dataType": "number",
+              "displayName": "actualcost",
+              "key": "actualcost",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "budget": {
+              "dataType": "number",
+              "displayName": "budget",
+              "key": "budget",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "client": {
+              "dataType": "text",
+              "displayName": "client",
+              "key": "client",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "completionpct": {
+              "dataType": "number",
+              "displayName": "completionpct",
+              "key": "completionpct",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "contractvalue": {
+              "dataType": "number",
+              "displayName": "contractvalue",
+              "key": "contractvalue",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "costcategory": {
+              "dataType": "text",
+              "displayName": "costcategory",
+              "key": "costcategory",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "costvalue": {
+              "dataType": "number",
+              "displayName": "costvalue",
+              "key": "costvalue",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "cpi": {
+              "dataType": "number",
+              "displayName": "cpi",
+              "key": "cpi",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "enddate": {
+              "dataType": "date",
+              "displayName": "enddate",
+              "key": "enddate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            },
+            "manager": {
+              "dataType": "text",
+              "displayName": "manager",
+              "key": "manager",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "margin": {
+              "dataType": "number",
+              "displayName": "margin",
+              "key": "margin",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "month": {
+              "dataType": "text",
+              "displayName": "month",
+              "key": "month",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "monthorder": {
+              "dataType": "number",
+              "displayName": "monthorder",
+              "key": "monthorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "performedcost": {
+              "dataType": "number",
+              "displayName": "performedcost",
+              "key": "performedcost",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "projectid": {
+              "dataType": "text",
+              "displayName": "projectid",
+              "key": "projectid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "projectname": {
+              "dataType": "text",
+              "displayName": "projectname",
+              "key": "projectname",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "projectstatus": {
+              "dataType": "text",
+              "displayName": "projectstatus",
+              "key": "projectstatus",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "projecttype": {
+              "dataType": "text",
+              "displayName": "projecttype",
+              "key": "projecttype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "recordtype": {
+              "dataType": "text",
+              "displayName": "recordtype",
+              "key": "recordtype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "scheduledcost": {
+              "dataType": "number",
+              "displayName": "scheduledcost",
+              "key": "scheduledcost",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "spi": {
+              "dataType": "number",
+              "displayName": "spi",
+              "key": "spi",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "startdate": {
+              "dataType": "date",
+              "displayName": "startdate",
+              "key": "startdate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 18,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 18,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 18,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 18,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "18 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_10a8769",
+            "row_179uoto",
+            "row_x2qgn1",
+            "row_l9qdjy",
+            "row_2ougg1",
+            "row_1lrp6l4",
+            "row_vfdv3x",
+            "row_4kp3gr",
+            "row_5vv9s6",
+            "row_144fcv8",
+            "row_19yr6z3",
+            "row_12u7rmo",
+            "row_atxkyr",
+            "row_1nxy207",
+            "row_1p244ab",
+            "row_1qgczm1",
+            "row_1d8f5xi",
+            "row_i1zxep"
+          ],
+          "rows": [
+            {
+              "actualcost": 2345865,
+              "budget": 4895600,
+              "client": "Partner LLC",
+              "completionpct": 56,
+              "contractvalue": 4956477,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": 1.2,
+              "enddate": "2027-12-31",
+              "manager": "Robert Sattler",
+              "margin": 65544,
+              "month": null,
+              "monthorder": null,
+              "performedcost": 2730551,
+              "projectid": "PRJ-2048",
+              "projectname": "Munich Innovation Campus",
+              "projectstatus": "In Execution",
+              "projecttype": "Design & Build",
+              "recordtype": "Summary",
+              "scheduledcost": 4890933,
+              "spi": 1.1,
+              "startdate": "2025-06-01"
+            },
+            {
+              "actualcost": 70000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Jan",
+              "monthorder": 1,
+              "performedcost": 90000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 120000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 210000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Feb",
+              "monthorder": 2,
+              "performedcost": 330000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 370000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 290000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Mar",
+              "monthorder": 3,
+              "performedcost": 410000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 510000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 560000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Apr",
+              "monthorder": 4,
+              "performedcost": 680000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 820000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 1320000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "May",
+              "monthorder": 5,
+              "performedcost": 1300000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 1400000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2300000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Jun",
+              "monthorder": 6,
+              "performedcost": 2750000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 2550000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2320000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Jul",
+              "monthorder": 7,
+              "performedcost": 2760000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4200000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2330000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Aug",
+              "monthorder": 8,
+              "performedcost": 2765000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4280000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2340000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Sep",
+              "monthorder": 9,
+              "performedcost": 2770000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4320000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2343000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Oct",
+              "monthorder": 10,
+              "performedcost": 2770000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4700000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2345000,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Nov",
+              "monthorder": 11,
+              "performedcost": 2770000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4800000,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": 2345865,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": null,
+              "costvalue": null,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": "Dec",
+              "monthorder": 12,
+              "performedcost": 2770000,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Month",
+              "scheduledcost": 4890933,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": null,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": "Material",
+              "costvalue": 985263,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": null,
+              "monthorder": null,
+              "performedcost": null,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Cost",
+              "scheduledcost": null,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": null,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": "Labour",
+              "costvalue": 821053,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": null,
+              "monthorder": null,
+              "performedcost": null,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Cost",
+              "scheduledcost": null,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": null,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": "Equipment",
+              "costvalue": 328421,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": null,
+              "monthorder": null,
+              "performedcost": null,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Cost",
+              "scheduledcost": null,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": null,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": "Subcontractors",
+              "costvalue": 164211,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": null,
+              "monthorder": null,
+              "performedcost": null,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Cost",
+              "scheduledcost": null,
+              "spi": null,
+              "startdate": null
+            },
+            {
+              "actualcost": null,
+              "budget": null,
+              "client": null,
+              "completionpct": null,
+              "contractvalue": null,
+              "costcategory": "Foreign Labour",
+              "costvalue": 46917,
+              "cpi": null,
+              "enddate": null,
+              "manager": null,
+              "margin": null,
+              "month": null,
+              "monthorder": null,
+              "performedcost": null,
+              "projectid": "PRJ-2048",
+              "projectname": null,
+              "projectstatus": null,
+              "projecttype": null,
+              "recordtype": "Cost",
+              "scheduledcost": null,
+              "spi": null,
+              "startdate": null
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_1cfq2lf",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-capital-project-controls",
+    "name": "Capital Project Controls",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 12,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "components": [
+      {
+        "dataset": "summary",
+        "id": "projectidentity",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "repeat": {
+          "limit": 1,
+          "source": "rows",
+          "template": "<section class='project-identity'><span>PROJECT DETAILS</span><h2>{{row.projectname}}</h2><dl><div><dt>Client</dt><dd>{{row.client}}</dd></div><div><dt>Contract value</dt><dd>€4,956,477</dd></div><div><dt>Type</dt><dd>{{row.projecttype}}</dd></div><div><dt>Status</dt><dd>{{row.projectstatus}}</dd></div><div><dt>Manager</dt><dd>{{row.manager}}</dd></div><div><dt>Delivery</dt><dd>{{row.enddate}}</dd></div></dl></section>"
+        },
+        "span": 4,
+        "type": "custom"
+      },
+      {
+        "dataset": "summary",
+        "id": "projectmetrics",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "metrics": [
+          {
+            "aggregation": "first",
+            "field": "budget",
+            "format": "currency",
+            "title": "Budget"
+          },
+          {
+            "aggregation": "first",
+            "field": "actualcost",
+            "format": "currency",
+            "title": "Actual Costs"
+          },
+          {
+            "aggregation": "first",
+            "field": "performedcost",
+            "format": "currency",
+            "title": "Work Performed"
+          },
+          {
+            "aggregation": "first",
+            "field": "margin",
+            "format": "currency",
+            "intent": "success",
+            "title": "Margin"
+          }
+        ],
+        "span": 5,
+        "type": "metricGrid"
+      },
+      {
+        "children": [
+          {
+            "aggregation": "first",
+            "dataset": "summary",
+            "height": 150,
+            "id": "completiongauge",
+            "interaction": {
+              "enabled": false,
+              "externalMode": "none",
+              "internalMode": "none"
+            },
+            "measure": "completionpct",
+            "options": {
+              "series": [
+                {
+                  "axisLabel": {
+                    "show": false
+                  },
+                  "axisLine": {
+                    "lineStyle": {
+                      "color": [
+                        [
+                          1,
+                          "#edf0f2"
+                        ]
+                      ],
+                      "width": 10
+                    }
+                  },
+                  "axisTick": {
+                    "show": false
+                  },
+                  "detail": {
+                    "formatter": "{value}%"
+                  },
+                  "endAngle": -270,
+                  "max": 100,
+                  "min": 0,
+                  "pointer": {
+                    "show": false
+                  },
+                  "progress": {
+                    "itemStyle": {
+                      "color": "#1769aa"
+                    },
+                    "width": 10
+                  },
+                  "splitLine": {
+                    "show": false
+                  },
+                  "startAngle": 90,
+                  "title": {
+                    "show": false
+                  }
+                }
+              ]
+            },
+            "span": 1,
+            "title": "Completion",
+            "type": "gauge"
+          },
+          {
+            "aggregation": "first",
+            "dataset": "summary",
+            "height": 150,
+            "id": "spigauge",
+            "interaction": {
+              "enabled": false,
+              "externalMode": "none",
+              "internalMode": "none"
+            },
+            "measure": "spi",
+            "options": {
+              "series": [
+                {
+                  "axisLabel": {
+                    "show": false
+                  },
+                  "axisLine": {
+                    "lineStyle": {
+                      "color": [
+                        [
+                          1,
+                          "#edf0f2"
+                        ]
+                      ],
+                      "width": 10
+                    }
+                  },
+                  "axisTick": {
+                    "show": false
+                  },
+                  "endAngle": -270,
+                  "max": 1.5,
+                  "min": 0,
+                  "pointer": {
+                    "show": false
+                  },
+                  "progress": {
+                    "itemStyle": {
+                      "color": "#58d542"
+                    },
+                    "width": 10
+                  },
+                  "splitLine": {
+                    "show": false
+                  },
+                  "startAngle": 90,
+                  "title": {
+                    "show": false
+                  }
+                }
+              ]
+            },
+            "span": 1,
+            "title": "SPI",
+            "type": "gauge"
+          },
+          {
+            "aggregation": "first",
+            "dataset": "summary",
+            "height": 150,
+            "id": "cpigauge",
+            "interaction": {
+              "enabled": false,
+              "externalMode": "none",
+              "internalMode": "none"
+            },
+            "measure": "cpi",
+            "options": {
+              "series": [
+                {
+                  "axisLabel": {
+                    "show": false
+                  },
+                  "axisLine": {
+                    "lineStyle": {
+                      "color": [
+                        [
+                          1,
+                          "#edf0f2"
+                        ]
+                      ],
+                      "width": 10
+                    }
+                  },
+                  "axisTick": {
+                    "show": false
+                  },
+                  "endAngle": -270,
+                  "max": 1.5,
+                  "min": 0,
+                  "pointer": {
+                    "show": false
+                  },
+                  "progress": {
+                    "itemStyle": {
+                      "color": "#58d542"
+                    },
+                    "width": 10
+                  },
+                  "splitLine": {
+                    "show": false
+                  },
+                  "startAngle": 90,
+                  "title": {
+                    "show": false
+                  }
+                }
+              ]
+            },
+            "span": 1,
+            "title": "CPI",
+            "type": "gauge"
+          }
+        ],
+        "columns": 3,
+        "gap": 8,
+        "id": "progressgauges",
+        "span": 3,
+        "type": "grid"
+      },
+      {
+        "category": "month",
+        "dataset": "monthly",
+        "height": 330,
+        "id": "projectdevelopment",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "month",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "options": {
+          "color": [
+            "#df4b4b",
+            "#ffcc27",
+            "#9da3a8"
+          ],
+          "series": [
+            {
+              "lineStyle": {
+                "width": 2
+              },
+              "smooth": true,
+              "symbol": "none"
+            },
+            {
+              "lineStyle": {
+                "width": 2
+              },
+              "smooth": true,
+              "symbol": "none"
+            },
+            {
+              "lineStyle": {
+                "width": 2
+              },
+              "smooth": true,
+              "symbol": "none"
+            }
+          ]
+        },
+        "series": [
+          {
+            "aggregation": "first",
+            "chartType": "line",
+            "field": "scheduledcost",
+            "label": "Work scheduled"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "line",
+            "field": "performedcost",
+            "label": "Work performed"
+          },
+          {
+            "aggregation": "first",
+            "chartType": "line",
+            "field": "actualcost",
+            "label": "Actual costs"
+          }
+        ],
+        "span": 7,
+        "title": "Project Work & Budget Development",
+        "type": "comboChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "costcategory",
+        "dataset": "costs",
+        "height": 330,
+        "id": "costbreakdown",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "costcategory",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "costvalue",
+        "options": {
+          "color": [
+            "#58d542",
+            "#10a7e5",
+            "#df4b4b",
+            "#a9adaf",
+            "#ffcc27"
+          ],
+          "legend": {
+            "orient": "vertical",
+            "right": 8,
+            "top": "center"
+          },
+          "series": [
+            {
+              "center": [
+                "36%",
+                "50%"
+              ],
+              "label": {
+                "formatter": "{d}%",
+                "show": true
+              },
+              "radius": [
+                "46%",
+                "72%"
+              ]
+            }
+          ]
+        },
+        "span": 5,
+        "title": "Cost Breakdown",
+        "type": "donutChart"
+      }
+    ],
+    "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-grid{background:#fafafa}.project-identity{height:100%;padding:16px;border-radius:8px;background:#fff;box-shadow:0 8px 24px rgb(30 45 62 / 6%)}.project-identity>span{font-size:10px;font-weight:800;color:#1769aa;letter-spacing:.08em}.project-identity h2{margin:8px 0 14px;font-size:18px}.project-identity dl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0}.project-identity dl div:first-child{grid-column:1/-1}.project-identity dt{font-size:9px;color:#747b83}.project-identity dd{margin:2px 0 0;font-size:11px;font-weight:700}\n.hp-component-metricGrid .hp-metric{padding:13px}.hp-component-metricGrid .hp-metric-value{font-size:19px}.hp-component-grid .hp-card-body{padding:7px}\n",
+    "data": {
+      "datasets": {
+        "costs": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Cost"
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "costvalue"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "monthly": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Month"
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "monthorder"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "summary": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Summary"
+          },
+          "source": "powerbi"
+        }
+      }
+    },
+    "theme": {
+      "accentColor": "#58d542",
+      "borderColor": "#e5e7eb",
+      "cardPadding": 14,
+      "dangerColor": "#df4b4b",
+      "density": "compact",
+      "gap": 12,
+      "mode": "light",
+      "primaryColor": "#1769aa",
+      "radius": 8,
+      "successColor": "#58d542",
+      "surfaceColor": "#ffffff",
+      "textColor": "#20252b",
+      "warningColor": "#ffcc27"
+    },
+    "title": "Capital Project Controls",
+    "version": "2.0"
+  }
+}

@@ -1,0 +1,2183 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_zsj10o",
+    "sources": {
+      "src_data_zsj10o": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "age": 49.888888888888886,
+              "responseminutes": 46.708333333333336,
+              "satisfactionscore": 4.113888888888889,
+              "visits": 2.4722222222222223
+            },
+            "count": 72,
+            "distinctCount": {
+              "age": 43,
+              "alerttype": 4,
+              "department": 4,
+              "encounterdate": 14,
+              "encounterid": 72,
+              "gender": 3,
+              "patientid": 34,
+              "patientname": 6,
+              "resolved": 2,
+              "responseminutes": 53,
+              "reviewtype": 3,
+              "satisfactionscore": 19,
+              "severity": 3,
+              "status": 3,
+              "visits": 4,
+              "weekday": 7
+            },
+            "first": {
+              "age": 40,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0001",
+              "gender": "Male",
+              "patientid": "PAT-1000",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 56,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.4,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Mon"
+            },
+            "max": {
+              "age": 81,
+              "responseminutes": 89,
+              "satisfactionscore": 5,
+              "visits": 4
+            },
+            "min": {
+              "age": 9,
+              "responseminutes": 8,
+              "satisfactionscore": 3.2,
+              "visits": 1
+            },
+            "sum": {
+              "age": 3592,
+              "responseminutes": 3363,
+              "satisfactionscore": 296.2,
+              "visits": 178
+            }
+          },
+          "fields": {
+            "age": {
+              "dataType": "number",
+              "displayName": "age",
+              "key": "age",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "alerttype": {
+              "dataType": "text",
+              "displayName": "alerttype",
+              "key": "alerttype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "department": {
+              "dataType": "text",
+              "displayName": "department",
+              "key": "department",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "encounterdate": {
+              "dataType": "date",
+              "displayName": "encounterdate",
+              "key": "encounterdate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            },
+            "encounterid": {
+              "dataType": "text",
+              "displayName": "encounterid",
+              "key": "encounterid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "gender": {
+              "dataType": "text",
+              "displayName": "gender",
+              "key": "gender",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "patientid": {
+              "dataType": "text",
+              "displayName": "patientid",
+              "key": "patientid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "patientname": {
+              "dataType": "text",
+              "displayName": "patientname",
+              "key": "patientname",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "resolved": {
+              "dataType": "boolean",
+              "displayName": "resolved",
+              "key": "resolved",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "responseminutes": {
+              "dataType": "number",
+              "displayName": "responseminutes",
+              "key": "responseminutes",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "reviewtype": {
+              "dataType": "text",
+              "displayName": "reviewtype",
+              "key": "reviewtype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "satisfactionscore": {
+              "dataType": "number",
+              "displayName": "satisfactionscore",
+              "key": "satisfactionscore",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "severity": {
+              "dataType": "text",
+              "displayName": "severity",
+              "key": "severity",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "status": {
+              "dataType": "text",
+              "displayName": "status",
+              "key": "status",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "visits": {
+              "dataType": "number",
+              "displayName": "visits",
+              "key": "visits",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "weekday": {
+              "dataType": "text",
+              "displayName": "weekday",
+              "key": "weekday",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 72,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 72,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 72,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 72,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "72 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_11kxpea",
+            "row_1vujpi8",
+            "row_r46892",
+            "row_1het3qb",
+            "row_37eq1r",
+            "row_1m70msn",
+            "row_1szvgag",
+            "row_1hqa3vz",
+            "row_1azbfo6",
+            "row_1gb6no5",
+            "row_1rfh6fi",
+            "row_925miu",
+            "row_6d6cin",
+            "row_1hb7owi",
+            "row_1lggm7l",
+            "row_1oedg08",
+            "row_1f2a4mk",
+            "row_1q93pyk",
+            "row_1q6a8dk",
+            "row_rmsmqk",
+            "row_1nalhvu",
+            "row_1jzjuj1",
+            "row_qyiuy5",
+            "row_k817jy",
+            "row_1c2z34e",
+            "row_1pu0ar9",
+            "row_1ciyaln",
+            "row_3rpcuf",
+            "row_gdh8wk",
+            "row_ocltgu",
+            "row_1nvizf8",
+            "row_1sxg99d",
+            "row_1sv1ghr",
+            "row_1ce800a",
+            "row_1a9ekjm",
+            "row_1yqj9ui",
+            "row_95r4j7",
+            "row_t6z762",
+            "row_1hctm94",
+            "row_wry84i",
+            "row_xotn2c",
+            "row_1xyc6uu",
+            "row_1eqnj8l",
+            "row_104gr7v",
+            "row_1xcou30",
+            "row_1u764rr",
+            "row_gmariw",
+            "row_1ynf4fq",
+            "row_1r0njy2",
+            "row_15aauvw",
+            "row_3z01as",
+            "row_ezvf9n",
+            "row_wa627v",
+            "row_oyzkmy",
+            "row_r1naxq",
+            "row_1enj7jn",
+            "row_1a9ics7",
+            "row_6dagq1",
+            "row_7k2sp1",
+            "row_4tm2lo",
+            "row_rm1kdm",
+            "row_1r93fmg",
+            "row_g6bl7h",
+            "row_1ykbak5",
+            "row_o0oavk",
+            "row_15egaex",
+            "row_l9hlk9",
+            "row_7fxq49",
+            "row_bgm07c",
+            "row_170eenm",
+            "row_drjsen",
+            "row_1xn7cgw"
+          ],
+          "rows": [
+            {
+              "age": 40,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0001",
+              "gender": "Male",
+              "patientid": "PAT-1000",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 56,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.4,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Mon"
+            },
+            {
+              "age": 80,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0002",
+              "gender": "Female",
+              "patientid": "PAT-1001",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 9,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.6,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Tue"
+            },
+            {
+              "age": 39,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-03",
+              "encounterid": "ENC-0003",
+              "gender": "Female",
+              "patientid": "PAT-1002",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 84,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.3,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Wed"
+            },
+            {
+              "age": 78,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-04",
+              "encounterid": "ENC-0004",
+              "gender": "Non-binary",
+              "patientid": "PAT-1003",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 33,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.2,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 11,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-05",
+              "encounterid": "ENC-0005",
+              "gender": "Male",
+              "patientid": "PAT-1004",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 21,
+              "reviewtype": "Negative",
+              "satisfactionscore": 5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Fri"
+            },
+            {
+              "age": 47,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-06",
+              "encounterid": "ENC-0006",
+              "gender": "Female",
+              "patientid": "PAT-1005",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 79,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.6,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Sat"
+            },
+            {
+              "age": 30,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-07",
+              "encounterid": "ENC-0007",
+              "gender": "Female",
+              "patientid": "PAT-1006",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 60,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Sun"
+            },
+            {
+              "age": 40,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-08",
+              "encounterid": "ENC-0008",
+              "gender": "Non-binary",
+              "patientid": "PAT-1007",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 14,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.8,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Mon"
+            },
+            {
+              "age": 72,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-09",
+              "encounterid": "ENC-0009",
+              "gender": "Male",
+              "patientid": "PAT-1008",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 62,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.3,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Tue"
+            },
+            {
+              "age": 21,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-10",
+              "encounterid": "ENC-0010",
+              "gender": "Female",
+              "patientid": "PAT-1009",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 64,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.7,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 3,
+              "weekday": "Wed"
+            },
+            {
+              "age": 18,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-11",
+              "encounterid": "ENC-0011",
+              "gender": "Female",
+              "patientid": "PAT-1010",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 23,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.8,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 13,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-12",
+              "encounterid": "ENC-0012",
+              "gender": "Non-binary",
+              "patientid": "PAT-1011",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 55,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.5,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Fri"
+            },
+            {
+              "age": 62,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-13",
+              "encounterid": "ENC-0013",
+              "gender": "Male",
+              "patientid": "PAT-1012",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 29,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.8,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Sat"
+            },
+            {
+              "age": 36,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-14",
+              "encounterid": "ENC-0014",
+              "gender": "Female",
+              "patientid": "PAT-1013",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 38,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 71,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0015",
+              "gender": "Female",
+              "patientid": "PAT-1014",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 34,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.2,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Mon"
+            },
+            {
+              "age": 76,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0016",
+              "gender": "Non-binary",
+              "patientid": "PAT-1015",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 83,
+              "reviewtype": "Positive",
+              "satisfactionscore": 5,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Tue"
+            },
+            {
+              "age": 37,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-03",
+              "encounterid": "ENC-0017",
+              "gender": "Male",
+              "patientid": "PAT-1016",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 29,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 3,
+              "weekday": "Wed"
+            },
+            {
+              "age": 71,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-04",
+              "encounterid": "ENC-0018",
+              "gender": "Female",
+              "patientid": "PAT-1017",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 49,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.8,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 26,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-05",
+              "encounterid": "ENC-0019",
+              "gender": "Female",
+              "patientid": "PAT-1018",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 37,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.7,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Fri"
+            },
+            {
+              "age": 76,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-06",
+              "encounterid": "ENC-0020",
+              "gender": "Non-binary",
+              "patientid": "PAT-1019",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 81,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Sat"
+            },
+            {
+              "age": 63,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-07",
+              "encounterid": "ENC-0021",
+              "gender": "Male",
+              "patientid": "PAT-1020",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 85,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.9,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 73,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-08",
+              "encounterid": "ENC-0022",
+              "gender": "Female",
+              "patientid": "PAT-1021",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 26,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 3,
+              "weekday": "Mon"
+            },
+            {
+              "age": 49,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-09",
+              "encounterid": "ENC-0023",
+              "gender": "Female",
+              "patientid": "PAT-1022",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 87,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.9,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Tue"
+            },
+            {
+              "age": 29,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-10",
+              "encounterid": "ENC-0024",
+              "gender": "Non-binary",
+              "patientid": "PAT-1023",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 64,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.8,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Wed"
+            },
+            {
+              "age": 9,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-11",
+              "encounterid": "ENC-0025",
+              "gender": "Male",
+              "patientid": "PAT-1024",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 34,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 59,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-12",
+              "encounterid": "ENC-0026",
+              "gender": "Female",
+              "patientid": "PAT-1025",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 8,
+              "reviewtype": "Negative",
+              "satisfactionscore": 5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 4,
+              "weekday": "Fri"
+            },
+            {
+              "age": 46,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-13",
+              "encounterid": "ENC-0027",
+              "gender": "Female",
+              "patientid": "PAT-1026",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 89,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.7,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Sat"
+            },
+            {
+              "age": 71,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-14",
+              "encounterid": "ENC-0028",
+              "gender": "Non-binary",
+              "patientid": "PAT-1027",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 68,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.7,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 31,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0029",
+              "gender": "Male",
+              "patientid": "PAT-1028",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 8,
+              "reviewtype": "Negative",
+              "satisfactionscore": 5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Mon"
+            },
+            {
+              "age": 59,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0030",
+              "gender": "Female",
+              "patientid": "PAT-1029",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 44,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.8,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Tue"
+            },
+            {
+              "age": 66,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-03",
+              "encounterid": "ENC-0031",
+              "gender": "Female",
+              "patientid": "PAT-1030",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 27,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Wed"
+            },
+            {
+              "age": 21,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-04",
+              "encounterid": "ENC-0032",
+              "gender": "Non-binary",
+              "patientid": "PAT-1031",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 53,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.9,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 3,
+              "weekday": "Thu"
+            },
+            {
+              "age": 62,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-05",
+              "encounterid": "ENC-0033",
+              "gender": "Male",
+              "patientid": "PAT-1032",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 87,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.6,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Fri"
+            },
+            {
+              "age": 68,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-06",
+              "encounterid": "ENC-0034",
+              "gender": "Female",
+              "patientid": "PAT-1033",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 20,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.6,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 3,
+              "weekday": "Sat"
+            },
+            {
+              "age": 26,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-07",
+              "encounterid": "ENC-0035",
+              "gender": "Female",
+              "patientid": "PAT-1000",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 34,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Sun"
+            },
+            {
+              "age": 17,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-08",
+              "encounterid": "ENC-0036",
+              "gender": "Non-binary",
+              "patientid": "PAT-1001",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 49,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.3,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 4,
+              "weekday": "Mon"
+            },
+            {
+              "age": 64,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-09",
+              "encounterid": "ENC-0037",
+              "gender": "Male",
+              "patientid": "PAT-1002",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 42,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 3,
+              "weekday": "Tue"
+            },
+            {
+              "age": 70,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-10",
+              "encounterid": "ENC-0038",
+              "gender": "Female",
+              "patientid": "PAT-1003",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 47,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Wed"
+            },
+            {
+              "age": 34,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-11",
+              "encounterid": "ENC-0039",
+              "gender": "Female",
+              "patientid": "PAT-1004",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 45,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.7,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Thu"
+            },
+            {
+              "age": 81,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-12",
+              "encounterid": "ENC-0040",
+              "gender": "Non-binary",
+              "patientid": "PAT-1005",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 61,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.9,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 3,
+              "weekday": "Fri"
+            },
+            {
+              "age": 52,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-13",
+              "encounterid": "ENC-0041",
+              "gender": "Male",
+              "patientid": "PAT-1006",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 52,
+              "reviewtype": "Negative",
+              "satisfactionscore": 5,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 4,
+              "weekday": "Sat"
+            },
+            {
+              "age": 57,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-14",
+              "encounterid": "ENC-0042",
+              "gender": "Female",
+              "patientid": "PAT-1007",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 39,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.5,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 4,
+              "weekday": "Sun"
+            },
+            {
+              "age": 37,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0043",
+              "gender": "Female",
+              "patientid": "PAT-1008",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 32,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.2,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 1,
+              "weekday": "Mon"
+            },
+            {
+              "age": 71,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0044",
+              "gender": "Non-binary",
+              "patientid": "PAT-1009",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 53,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 3,
+              "weekday": "Tue"
+            },
+            {
+              "age": 40,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-03",
+              "encounterid": "ENC-0045",
+              "gender": "Male",
+              "patientid": "PAT-1010",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 38,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.4,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Wed"
+            },
+            {
+              "age": 57,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-04",
+              "encounterid": "ENC-0046",
+              "gender": "Female",
+              "patientid": "PAT-1011",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 27,
+              "reviewtype": "Positive",
+              "satisfactionscore": 5,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 67,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-05",
+              "encounterid": "ENC-0047",
+              "gender": "Female",
+              "patientid": "PAT-1012",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 64,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.2,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Fri"
+            },
+            {
+              "age": 77,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-06",
+              "encounterid": "ENC-0048",
+              "gender": "Non-binary",
+              "patientid": "PAT-1013",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 14,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.7,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 4,
+              "weekday": "Sat"
+            },
+            {
+              "age": 68,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-07",
+              "encounterid": "ENC-0049",
+              "gender": "Male",
+              "patientid": "PAT-1014",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 54,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.3,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Sun"
+            },
+            {
+              "age": 81,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-08",
+              "encounterid": "ENC-0050",
+              "gender": "Female",
+              "patientid": "PAT-1015",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 57,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Mon"
+            },
+            {
+              "age": 41,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-09",
+              "encounterid": "ENC-0051",
+              "gender": "Female",
+              "patientid": "PAT-1016",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 53,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.4,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Tue"
+            },
+            {
+              "age": 72,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-10",
+              "encounterid": "ENC-0052",
+              "gender": "Non-binary",
+              "patientid": "PAT-1017",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 25,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.2,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Wed"
+            },
+            {
+              "age": 70,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-11",
+              "encounterid": "ENC-0053",
+              "gender": "Male",
+              "patientid": "PAT-1018",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 27,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.8,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 4,
+              "weekday": "Thu"
+            },
+            {
+              "age": 70,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-12",
+              "encounterid": "ENC-0054",
+              "gender": "Female",
+              "patientid": "PAT-1019",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 15,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.5,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Fri"
+            },
+            {
+              "age": 13,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-13",
+              "encounterid": "ENC-0055",
+              "gender": "Female",
+              "patientid": "PAT-1020",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 63,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.4,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Sat"
+            },
+            {
+              "age": 11,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-14",
+              "encounterid": "ENC-0056",
+              "gender": "Non-binary",
+              "patientid": "PAT-1021",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 79,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.8,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 52,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0057",
+              "gender": "Male",
+              "patientid": "PAT-1022",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 71,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.4,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 3,
+              "weekday": "Mon"
+            },
+            {
+              "age": 71,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0058",
+              "gender": "Female",
+              "patientid": "PAT-1023",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 19,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.1,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Tue"
+            },
+            {
+              "age": 44,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-03",
+              "encounterid": "ENC-0059",
+              "gender": "Female",
+              "patientid": "PAT-1024",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 46,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.9,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 3,
+              "weekday": "Wed"
+            },
+            {
+              "age": 78,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-04",
+              "encounterid": "ENC-0060",
+              "gender": "Non-binary",
+              "patientid": "PAT-1025",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 67,
+              "reviewtype": "Pending",
+              "satisfactionscore": 3.6,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Thu"
+            },
+            {
+              "age": 41,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-05",
+              "encounterid": "ENC-0061",
+              "gender": "Male",
+              "patientid": "PAT-1026",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 58,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.1,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Fri"
+            },
+            {
+              "age": 33,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-06",
+              "encounterid": "ENC-0062",
+              "gender": "Female",
+              "patientid": "PAT-1027",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 77,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Sat"
+            },
+            {
+              "age": 72,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-07",
+              "encounterid": "ENC-0063",
+              "gender": "Female",
+              "patientid": "PAT-1028",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 78,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 29,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-08",
+              "encounterid": "ENC-0064",
+              "gender": "Non-binary",
+              "patientid": "PAT-1029",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 9,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.4,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 4,
+              "weekday": "Mon"
+            },
+            {
+              "age": 29,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-09",
+              "encounterid": "ENC-0065",
+              "gender": "Male",
+              "patientid": "PAT-1030",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 17,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.8,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 1,
+              "weekday": "Tue"
+            },
+            {
+              "age": 58,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-10",
+              "encounterid": "ENC-0066",
+              "gender": "Female",
+              "patientid": "PAT-1031",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 72,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.2,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Wed"
+            },
+            {
+              "age": 19,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-11",
+              "encounterid": "ENC-0067",
+              "gender": "Female",
+              "patientid": "PAT-1032",
+              "patientname": "John Adams",
+              "resolved": false,
+              "responseminutes": 13,
+              "reviewtype": "Positive",
+              "satisfactionscore": 4.7,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 2,
+              "weekday": "Thu"
+            },
+            {
+              "age": 53,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-12",
+              "encounterid": "ENC-0068",
+              "gender": "Non-binary",
+              "patientid": "PAT-1033",
+              "patientname": "Mary Adams",
+              "resolved": false,
+              "responseminutes": 35,
+              "reviewtype": "Negative",
+              "satisfactionscore": 3.4,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 3,
+              "weekday": "Fri"
+            },
+            {
+              "age": 76,
+              "alerttype": "Clinical review",
+              "department": "Emergency",
+              "encounterdate": "2026-07-13",
+              "encounterid": "ENC-0069",
+              "gender": "Male",
+              "patientid": "PAT-1000",
+              "patientname": "Rhonda Rousey",
+              "resolved": true,
+              "responseminutes": 33,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.1,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 2,
+              "weekday": "Sat"
+            },
+            {
+              "age": 46,
+              "alerttype": "Follow-up",
+              "department": "Cardiology",
+              "encounterdate": "2026-07-14",
+              "encounterid": "ENC-0070",
+              "gender": "Female",
+              "patientid": "PAT-1001",
+              "patientname": "Alex Morgan",
+              "resolved": false,
+              "responseminutes": 72,
+              "reviewtype": "Positive",
+              "satisfactionscore": 3.4,
+              "severity": "Low",
+              "status": "Open",
+              "visits": 1,
+              "weekday": "Sun"
+            },
+            {
+              "age": 32,
+              "alerttype": "Medication",
+              "department": "Primary Care",
+              "encounterdate": "2026-07-01",
+              "encounterid": "ENC-0071",
+              "gender": "Female",
+              "patientid": "PAT-1002",
+              "patientname": "Taylor Reed",
+              "resolved": false,
+              "responseminutes": 41,
+              "reviewtype": "Negative",
+              "satisfactionscore": 4.1,
+              "severity": "Moderate",
+              "status": "In Review",
+              "visits": 2,
+              "weekday": "Mon"
+            },
+            {
+              "age": 33,
+              "alerttype": "Emergency",
+              "department": "Pediatrics",
+              "encounterdate": "2026-07-02",
+              "encounterid": "ENC-0072",
+              "gender": "Non-binary",
+              "patientid": "PAT-1003",
+              "patientname": "Jamie Chen",
+              "resolved": true,
+              "responseminutes": 45,
+              "reviewtype": "Pending",
+              "satisfactionscore": 4.9,
+              "severity": "High",
+              "status": "Resolved",
+              "visits": 1,
+              "weekday": "Tue"
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_zsj10o",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-patient-care-operations",
+    "name": "Patient Care Operations",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 12,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "app": {
+      "brand": {
+        "icon": "dashboard",
+        "shortTitle": "CA",
+        "subtitle": "Patient operations",
+        "title": "CareFlow"
+      },
+      "container": "fluid",
+      "contentPadding": "compact",
+      "density": "compact",
+      "enabled": true,
+      "footer": {
+        "secondaryText": "One portable dataset · Web and Power BI",
+        "text": "CareFlow · HyperPBI",
+        "visible": true
+      },
+      "layout": "vertical",
+      "navbar": {
+        "actions": [
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "primary",
+              "message": "The current dataset is displayed.",
+              "title": "CareFlow",
+              "type": "showToast"
+            },
+            "ariaLabel": "Refresh dashboard",
+            "icon": "refresh",
+            "id": "refresh"
+          },
+          {
+            "action": {
+              "durationMs": 2200,
+              "intent": "warning",
+              "message": "Three items need attention.",
+              "title": "Notifications",
+              "type": "showToast"
+            },
+            "ariaLabel": "Notifications",
+            "badge": 3,
+            "icon": "bell",
+            "id": "notifications"
+          }
+        ],
+        "searchPlaceholder": "Search this dashboard",
+        "showSearch": true,
+        "showSidebarToggle": true,
+        "user": {
+          "initials": "DO",
+          "name": "Dashboard Owner",
+          "status": "online",
+          "subtitle": "Workspace admin"
+        },
+        "visible": true
+      },
+      "pageHeader": {
+        "meta": [
+          {
+            "icon": "check",
+            "intent": "success",
+            "label": "Data",
+            "value": "Current"
+          }
+        ],
+        "subtitle": "Alerts, patient flow, and service response across the care network",
+        "title": "Patient Activity",
+        "visible": true
+      },
+      "sidebar": {
+        "collapsedWidth": 62,
+        "collapsible": true,
+        "defaultCollapsed": false,
+        "footer": {
+          "subtitle": "Portable HyperPBI example",
+          "title": "CareFlow"
+        },
+        "mobileBreakpoint": 760,
+        "navigation": [
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "Overview is already open.",
+              "title": "Activity",
+              "type": "showToast"
+            },
+            "icon": "activity",
+            "id": "activity",
+            "label": "Activity"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Patients",
+              "type": "showToast"
+            },
+            "icon": "users",
+            "id": "patients",
+            "label": "Patients"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Reviews",
+              "type": "showToast"
+            },
+            "icon": "message",
+            "id": "reviews",
+            "label": "Reviews"
+          },
+          {
+            "action": {
+              "durationMs": 1600,
+              "intent": "primary",
+              "message": "This example focuses on the overview.",
+              "title": "Calendar",
+              "type": "showToast"
+            },
+            "icon": "calendar",
+            "id": "calendar",
+            "label": "Calendar"
+          }
+        ],
+        "visible": true,
+        "width": 216
+      },
+      "stickyHeader": true
+    },
+    "calculations": {
+      "metrics": [
+        {
+          "aggregation": "count",
+          "key": "encounters"
+        },
+        {
+          "aggregation": "distinctCount",
+          "field": "patientid",
+          "key": "patients"
+        },
+        {
+          "aggregation": "countWhere",
+          "key": "openalerts",
+          "where": {
+            "left": {
+              "field": "status"
+            },
+            "op": "!=",
+            "right": {
+              "value": "Resolved"
+            }
+          }
+        },
+        {
+          "aggregation": "avg",
+          "field": "responseminutes",
+          "key": "averageresponse"
+        }
+      ]
+    },
+    "components": [
+      {
+        "id": "caremetrics",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "metrics": [
+          {
+            "format": "integer",
+            "intent": "primary",
+            "metric": "encounters",
+            "title": "Active Encounters"
+          },
+          {
+            "format": "integer",
+            "intent": "success",
+            "metric": "patients",
+            "title": "Patients Served"
+          },
+          {
+            "format": "integer",
+            "intent": "danger",
+            "metric": "openalerts",
+            "title": "Open Alerts"
+          },
+          {
+            "format": "integer",
+            "intent": "warning",
+            "metric": "averageresponse",
+            "suffix": " min",
+            "title": "Avg Response"
+          }
+        ],
+        "span": 5,
+        "type": "metricGrid"
+      },
+      {
+        "aggregation": "first",
+        "category": "encounterdate",
+        "dataset": "daily",
+        "height": 250,
+        "id": "patientstatistics",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "encounterdate",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "encounters",
+        "options": {
+          "color": [
+            "#2eb7ee"
+          ],
+          "series": [
+            {
+              "areaStyle": {
+                "opacity": 0.22
+              },
+              "lineStyle": {
+                "width": 3
+              },
+              "smooth": true,
+              "symbolSize": 6
+            }
+          ]
+        },
+        "span": 7,
+        "title": "Patient Statistics",
+        "type": "areaChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "reviewtype",
+        "dataset": "reviews",
+        "height": 245,
+        "id": "reviewmix",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "reviewtype",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "reviews",
+        "options": {
+          "color": [
+            "#2eb7ee",
+            "#48d9b0",
+            "#7b57ef"
+          ],
+          "series": [
+            {
+              "radius": [
+                "52%",
+                "76%"
+              ]
+            }
+          ]
+        },
+        "span": 4,
+        "title": "Patient Reviews",
+        "type": "donutChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "department",
+        "dataset": "departments",
+        "height": 245,
+        "id": "departmentload",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "department",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "encounters",
+        "options": {
+          "color": [
+            "#48d9b0"
+          ],
+          "series": [
+            {
+              "barWidth": 16,
+              "itemStyle": {
+                "borderRadius": [
+                  8,
+                  8,
+                  2,
+                  2
+                ]
+              }
+            }
+          ]
+        },
+        "span": 4,
+        "title": "Department Load",
+        "type": "barChart"
+      },
+      {
+        "html": "<section class='care-calendar'><header><strong>Care Calendar</strong><span>July 2026</span></header><div class='week'><b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b><i>20</i><i>21</i><i>22</i><i>23</i><i>24</i><i>25</i><i class='active'>26</i></div><p>72 encounters are included in this portable sample.</p></section>",
+        "id": "carecalendar",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "span": 4,
+        "type": "custom"
+      },
+      {
+        "columns": [
+          {
+            "field": "patientname",
+            "title": "Patient"
+          },
+          {
+            "field": "gender",
+            "title": "Gender"
+          },
+          {
+            "field": "age",
+            "hozAlign": "right",
+            "title": "Age"
+          },
+          {
+            "field": "department",
+            "title": "Department"
+          },
+          {
+            "cellType": "badge",
+            "field": "severity",
+            "intentMap": {
+              "High": "danger",
+              "Low": "success",
+              "Moderate": "warning"
+            },
+            "title": "Severity"
+          },
+          {
+            "field": "responseminutes",
+            "format": "integer",
+            "hozAlign": "right",
+            "title": "Response"
+          },
+          {
+            "cellType": "badge",
+            "field": "status",
+            "intentMap": {
+              "In Review": "primary",
+              "Open": "danger",
+              "Resolved": "success"
+            },
+            "title": "Status"
+          }
+        ],
+        "dataset": "activepatients",
+        "hover": true,
+        "id": "patientapplications",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "encounterid",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxRows": 10,
+        "pagination": false,
+        "span": 12,
+        "title": "Patient Applications",
+        "type": "table"
+      }
+    ],
+    "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-app-main{background:#f3f7f8}.hp-component-metricGrid .hp-metric{color:#fff;background:linear-gradient(135deg,#36c4ef,#579df3)}.hp-component-metricGrid .hp-metric:nth-child(2){background:linear-gradient(135deg,#37d7af,#58cfa3)}.hp-component-metricGrid .hp-metric:nth-child(3){background:linear-gradient(135deg,#7257ec,#8e67f5)}.hp-component-metricGrid .hp-metric:nth-child(4){background:linear-gradient(135deg,#49a4f2,#6b7cf0)}.hp-component-metricGrid .hp-metric-label,.hp-component-metricGrid .hp-metric-value{color:#fff}\n.care-calendar{padding:16px;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgb(29 42 68 / 7%)}.care-calendar header{display:flex;justify-content:space-between}.care-calendar header span{color:#8391a3}.care-calendar .week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:18px 0}.care-calendar b,.care-calendar i{display:grid;place-items:center;height:28px;font-size:10px;font-style:normal}.care-calendar b{color:#98a4b4}.care-calendar i{border-radius:8px;background:#f4f7fa}.care-calendar i.active{background:#2eb7ee;color:#fff}.care-calendar p{margin:0;color:#718094;font-size:10px}\n",
+    "data": {
+      "datasets": {
+        "activepatients": {
+          "filter": {
+            "field": "status",
+            "operator": "!=",
+            "value": "Resolved"
+          },
+          "limit": 10,
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "responseminutes"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "daily": {
+          "groupBy": [
+            "encounterdate"
+          ],
+          "metrics": {
+            "encounters": {
+              "field": "encounterid",
+              "op": "count"
+            },
+            "response": {
+              "field": "responseminutes",
+              "op": "avg"
+            }
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "encounterdate"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "departments": {
+          "groupBy": [
+            "department"
+          ],
+          "metrics": {
+            "encounters": {
+              "field": "encounterid",
+              "op": "count"
+            }
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "encounters"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "reviews": {
+          "groupBy": [
+            "reviewtype"
+          ],
+          "metrics": {
+            "reviews": {
+              "field": "encounterid",
+              "op": "count"
+            }
+          },
+          "source": "powerbi"
+        }
+      }
+    },
+    "theme": {
+      "accentColor": "#48d9b0",
+      "borderColor": "#e0e8ef",
+      "cardPadding": 14,
+      "dangerColor": "#7b57ef",
+      "density": "compact",
+      "gap": 12,
+      "mode": "light",
+      "primaryColor": "#2eb7ee",
+      "radius": 14,
+      "successColor": "#48d9b0",
+      "surfaceColor": "#ffffff",
+      "textColor": "#253040",
+      "warningColor": "#ffb84d"
+    },
+    "title": "Patient Care Operations",
+    "version": "2.0"
+  }
+}

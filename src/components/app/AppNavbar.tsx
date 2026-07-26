@@ -11,6 +11,7 @@ export function AppNavbar({
     brand,
     sidebarVisible,
     sidebarCollapsed,
+    mobile = false,
     state,
     dispatch,
 }: {
@@ -18,13 +19,14 @@ export function AppNavbar({
     brand?: AppBrandConfig;
     sidebarVisible: boolean;
     sidebarCollapsed: boolean;
+    mobile?: boolean;
     state: DashboardState;
     dispatch: (action: DashboardAction) => void;
 }) {
     const context = useRenderContext();
 
     const toggleSidebar = () => {
-        if (typeof window !== "undefined" && window.innerWidth < 800) {
+        if (mobile) {
             dispatch({ type: "mobileSidebar", value: !state.mobileSidebarOpen });
         } else {
             dispatch({ type: "sidebarCollapsed", value: !sidebarCollapsed });
@@ -38,7 +40,9 @@ export function AppNavbar({
                     <button
                         type="button"
                         class="hp-navbar-toggle"
-                        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        aria-label={mobile
+                            ? state.mobileSidebarOpen ? "Close navigation" : "Open navigation"
+                            : sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                         onClick={toggleSidebar}
                     >
                         <Icon name="menu" size="sm" decorative />

@@ -1,6 +1,6 @@
 # HyperPBI
 
-HyperPBI is an AI-native analytics runtime and portable dashboard specification. Declarative HyperPBI 2.0 JSON is prepared by one validation and dataset pipeline, then rendered by the same Studio and runtime in either the Power BI custom visual or the standalone web Playground. HyperPBI renders only implemented components and safe behaviors; it is not a general-purpose HTML or JavaScript application platform.
+HyperPBI is an AI-native analytics runtime and portable dashboard specification. Declarative HyperPBI 2.0 JSON is prepared by one validation and dataset pipeline, then rendered by the same Studio and runtime in either the Power BI custom visual or the Playground embedded in the unified Next.js website. HyperPBI renders only implemented components and safe behaviors; it is not a general-purpose HTML or JavaScript application platform.
 
 **Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
 
@@ -16,9 +16,13 @@ AI / Visual Editor / JSON / Templates
        Power BI Host | Web Host
 ```
 
-## HyperPBI Playground
+## Unified website and Playground
 
-The Vite/Preact application in `apps/playground` is the reference web host for HyperPBI 2.0. It reuses `HyperPbiStudio`, `HyperPbiRoot`, schema preparation, runtime configuration, sanitizers, calculations, logical datasets, field handling, and component rendering from `src`; there is no web-only dashboard format or duplicate renderer.
+The Next.js application in `apps/web` is the single HyperPBI website. Shared navigation connects the product introduction at `/`, the Component Explorer at `/components`, the local-first Playground at `/playground`, complete dashboards at `/examples`, and the documentation library at `/docs`.
+
+The Playground is embedded as a Preact runtime island inside that application. It reuses `HyperPbiStudio`, `HyperPbiRoot`, schema preparation, runtime configuration, sanitizers, calculations, logical datasets, field handling, and component rendering from `src`; there is no web-only dashboard format or duplicate renderer.
+
+From the repository root, run `npm install` and `npm run dev`, then open `http://localhost:4178`. Use `npm run build` for the complete production build, including root and web type checks, the shared runtime island, and the Next.js application.
 
 The local workflow is:
 
@@ -31,7 +35,26 @@ The local workflow is:
 
 A `.hyperpbi` project is a Playground backup containing local normalized data and editor state. A portable Power BI specification contains the declarative dashboard only; Power BI must provide the required data to the visual. Before Power BI export, the Playground reports whether the project is compatible, safely compatible after rewriting the selected default source ID to `powerbi`, or not fully portable. It never collapses genuinely separate uploaded sources into one.
 
-See [architecture](docs/architecture.md) for host contracts, persistence, portability, Vercel deployment, and future service boundaries.
+See [architecture](docs/architecture.md) for host contracts, persistence, portability, Next.js deployment, and future service boundaries.
+
+## Dashboard examples
+
+The `/examples` gallery loads eight complete, deterministic dashboards from [`examples/dashboards`](examples/dashboards). Every folder contains `specification.json`, `runtime.json`, `data.csv`, a complete `project.hyperpbi` Playground bundle, and host-specific instructions in `README.md`.
+
+| Dashboard | Folder | Power BI package |
+|---|---|---|
+| Talent Acquisition Command Center | [`talent-acquisition`](examples/dashboards/talent-acquisition) | Core |
+| Capital Project Controls | [`capital-project-controls`](examples/dashboards/capital-project-controls) | Core |
+| Retail Sales Operations | [`retail-sales-operations`](examples/dashboards/retail-sales-operations) | Core |
+| Urban Mobility Command Center | [`urban-mobility-command-center`](examples/dashboards/urban-mobility-command-center) | Maps |
+| Patient Care Operations | [`patient-care-operations`](examples/dashboards/patient-care-operations) | Core |
+| Digital Banking Overview | [`digital-banking-overview`](examples/dashboards/digital-banking-overview) | Core |
+| Media & Web Performance | [`media-web-performance`](examples/dashboards/media-web-performance) | Core |
+| Industrial Network Telemetry | [`industrial-network-telemetry`](examples/dashboards/industrial-network-telemetry) | Core |
+
+Open an example detail page to preview the real project, inspect its JSON, or load a copy into `/playground`. For Power BI, import `data.csv` as one table, add every CSV column to HyperPBI's single **Values** field well without renaming the lowercase headers, paste `runtime.json` into Runtime Configuration, and paste `specification.json` into Advanced JSON. Use the Core PBIVIZ for seven offline examples and the Maps PBIVIZ for Urban Mobility, whose OpenStreetMap tiles require the declared WebAccess profile and network access. The `.hyperpbi` file is for Playground import, not Power BI.
+
+See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, package-profile, and portability details.
 
 ## Current status and schema versions
 
@@ -204,15 +227,15 @@ The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `
 ```powershell
 npm install
 npm run dev
-npm run playground:typecheck
-npm run playground:test
-npm run playground:build
-npm run playground:preview
-npm run start
+npm run build
+npm run web:start
+npm run web:sites:build
 npm run typecheck
 npm test
 npm run test:browser
 npm run lint
+npm run examples:generate
+npm run examples:check
 npm run docs:generate
 npm run docs:check
 npm run package:core
@@ -220,24 +243,28 @@ npm run package:maps
 npm run package:verify
 ```
 
+`npm run dev` builds the shared browser runtime and starts the unified Next.js site at `http://localhost:4178`. `npm run build` runs the complete production type-check and build pipeline. The lower-level `playground:*` and `web:*` commands remain available to maintainers who need to isolate one workspace; they are not separate public websites.
+
+`npm run examples:generate` deterministically regenerates the eight dashboard folders and manifest. `npm run examples:check` validates strict schema preparation, Power BI portability, data limits, documentation, and checked-in project bundles.
+
 `npm run docs:generate` is documentation-only. It executes canonical TypeScript metadata without building the visual. It fully regenerates:
 
 - `docs/hyperpbi-component-catalog-reference.md`
-- `hyperpbi-component-catalog-reference.html`
+- `apps/web/generated/component-catalog.json`
 - `docs/hyperpbi-ai-skill.md`
 
-It also refreshes only the marked generated inventory regions in:
+It also refreshes the marked generated inventory region in:
 
 - `README.md` (`component-summary`)
-- `index.html` (`hero-component-count`, `inventory-stats`, and `catalog-heading`)
 
-Do not hand-edit the fully generated reference outputs or the marked regions. The rest of `README.md` and `index.html` remains hand-maintained.
+Do not hand-edit the fully generated reference outputs or the marked region. The rest of `README.md` remains hand-maintained. The Next.js `/components` route consumes the generated JSON inventory, while `/docs` renders the Markdown references.
 
 ## Documentation index
 
 | Document | Purpose |
 |---|---|
-| [Architecture and Playground](docs/architecture.md) | Shared runtime, host bridges, projects, portability, Vercel, future services |
+| [Architecture and unified website](docs/architecture.md) | Next.js shell, shared runtime islands, host bridges, projects, portability, deployment |
+| [Dashboard examples](docs/dashboard-examples.md) | Eight complete dashboards, Playground loading, Power BI import, package profiles |
 | [User guide](docs/user-guide.md) | Power BI and Edit Mode workflow |
 | [2.0 specification](docs/hyperpbi-spec-reference.md) | Root, components, app, styles, behavior, diagnostics |
 | [Generated component catalog](docs/hyperpbi-component-catalog-reference.md) | Canonical component inventory and examples |

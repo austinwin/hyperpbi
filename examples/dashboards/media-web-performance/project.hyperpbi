@@ -1,0 +1,1943 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_14uanfo",
+    "sources": {
+      "src_data_14uanfo": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "bouncerate": 82.5,
+              "conversionrate": 0.016211764705882356,
+              "conversions": 71.41176470588235,
+              "dayorder": 14.5,
+              "engagementseconds": 59,
+              "latitude": 33.128075,
+              "longitude": -26.58925,
+              "mentions": 2689.785714285714,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "sessions": 4701.0526315789475,
+              "sessionsperuser": 1.14
+            },
+            "count": 38,
+            "distinctCount": {
+              "bouncerate": 1,
+              "channel": 4,
+              "conversionrate": 32,
+              "conversions": 26,
+              "date": 28,
+              "dayorder": 28,
+              "engagementseconds": 1,
+              "latitude": 4,
+              "location": 4,
+              "longitude": 4,
+              "medium": 5,
+              "mentions": 28,
+              "newuserspct": 1,
+              "pagespersession": 1,
+              "recordid": 38,
+              "recordtype": 4,
+              "sessions": 38,
+              "sessionsperuser": 1
+            },
+            "first": {
+              "bouncerate": 82.5,
+              "channel": "Radio",
+              "conversionrate": 0.009,
+              "conversions": 229,
+              "date": "2026-11-10",
+              "dayorder": 1,
+              "engagementseconds": 59,
+              "latitude": 41.8781,
+              "location": "Chicago",
+              "longitude": -87.6298,
+              "medium": "organic",
+              "mentions": 4656,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "recordid": "SUMMARY",
+              "recordtype": "Summary",
+              "sessions": 26900,
+              "sessionsperuser": 1.14
+            },
+            "max": {
+              "bouncerate": 82.5,
+              "conversionrate": 0.06,
+              "conversions": 229,
+              "dayorder": 28,
+              "engagementseconds": 59,
+              "latitude": 51.5072,
+              "longitude": 103.8198,
+              "mentions": 5346,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "sessions": 26900,
+              "sessionsperuser": 1.14
+            },
+            "min": {
+              "bouncerate": 82.5,
+              "conversionrate": 0.0046,
+              "conversions": 3,
+              "dayorder": 1,
+              "engagementseconds": 59,
+              "latitude": 1.3521,
+              "longitude": -122.4194,
+              "mentions": 840,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "sessions": 87,
+              "sessionsperuser": 1.14
+            },
+            "sum": {
+              "bouncerate": 82.5,
+              "conversionrate": 0.5512000000000001,
+              "conversions": 2428,
+              "dayorder": 406,
+              "engagementseconds": 59,
+              "latitude": 132.5123,
+              "longitude": -106.357,
+              "mentions": 75314,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "sessions": 178640,
+              "sessionsperuser": 1.14
+            }
+          },
+          "fields": {
+            "bouncerate": {
+              "dataType": "number",
+              "displayName": "bouncerate",
+              "key": "bouncerate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "channel": {
+              "dataType": "text",
+              "displayName": "channel",
+              "key": "channel",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "conversionrate": {
+              "dataType": "number",
+              "displayName": "conversionrate",
+              "key": "conversionrate",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "conversions": {
+              "dataType": "number",
+              "displayName": "conversions",
+              "key": "conversions",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "date": {
+              "dataType": "date",
+              "displayName": "date",
+              "key": "date",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "date"
+            },
+            "dayorder": {
+              "dataType": "number",
+              "displayName": "dayorder",
+              "key": "dayorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "engagementseconds": {
+              "dataType": "number",
+              "displayName": "engagementseconds",
+              "key": "engagementseconds",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "latitude": {
+              "dataType": "number",
+              "displayName": "latitude",
+              "key": "latitude",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [
+                "latitude"
+              ],
+              "type": "latitude"
+            },
+            "location": {
+              "dataType": "text",
+              "displayName": "location",
+              "key": "location",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "longitude": {
+              "dataType": "number",
+              "displayName": "longitude",
+              "key": "longitude",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [
+                "longitude"
+              ],
+              "type": "longitude"
+            },
+            "medium": {
+              "dataType": "text",
+              "displayName": "medium",
+              "key": "medium",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "mentions": {
+              "dataType": "number",
+              "displayName": "mentions",
+              "key": "mentions",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "newuserspct": {
+              "dataType": "number",
+              "displayName": "newuserspct",
+              "key": "newuserspct",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "pagespersession": {
+              "dataType": "number",
+              "displayName": "pagespersession",
+              "key": "pagespersession",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "recordid": {
+              "dataType": "text",
+              "displayName": "recordid",
+              "key": "recordid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "recordtype": {
+              "dataType": "text",
+              "displayName": "recordtype",
+              "key": "recordtype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "sessions": {
+              "dataType": "number",
+              "displayName": "sessions",
+              "key": "sessions",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "sessionsperuser": {
+              "dataType": "number",
+              "displayName": "sessionsperuser",
+              "key": "sessionsperuser",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 38,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 38,
+              "incompletePairCount": 34,
+              "invalidPairCount": 34,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 4
+            },
+            "diagnostics": [
+              {
+                "code": "MAP_COORDINATE_PAIR_INCOMPLETE",
+                "message": "34 current data-view row(s) have an incomplete latitude/longitude pair.",
+                "severity": "warning"
+              },
+              {
+                "code": "MAP_COORDINATE_ROWS_DROPPED",
+                "message": "34 of 38 current data-view row(s) were excluded; 4 valid coordinate pair(s) remain.",
+                "severity": "warning"
+              },
+              {
+                "code": "MAP_COORDINATE_BINDING_VALID",
+                "message": "4 valid coordinate pair(s) were loaded from 38 current data-view row(s).",
+                "severity": "info"
+              }
+            ],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": true,
+            "hasXY": false,
+            "invalidFeatureCount": 34,
+            "layers": [
+              {
+                "features": [
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_b2chtx",
+                    "lat": 41.8781,
+                    "lon": -87.6298,
+                    "properties": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 41.8781,
+                      "location": "Chicago",
+                      "longitude": -87.6298,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-1",
+                      "recordtype": "Location",
+                      "sessions": 6800,
+                      "sessionsperuser": null
+                    },
+                    "row": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 41.8781,
+                      "location": "Chicago",
+                      "longitude": -87.6298,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-1",
+                      "recordtype": "Location",
+                      "sessions": 6800,
+                      "sessionsperuser": null
+                    },
+                    "rowIndex": 34,
+                    "rowKey": "row_b2chtx",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  },
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_1twbiae",
+                    "lat": 51.5072,
+                    "lon": -0.1276,
+                    "properties": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 51.5072,
+                      "location": "London",
+                      "longitude": -0.1276,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-2",
+                      "recordtype": "Location",
+                      "sessions": 4900,
+                      "sessionsperuser": null
+                    },
+                    "row": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 51.5072,
+                      "location": "London",
+                      "longitude": -0.1276,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-2",
+                      "recordtype": "Location",
+                      "sessions": 4900,
+                      "sessionsperuser": null
+                    },
+                    "rowIndex": 35,
+                    "rowKey": "row_1twbiae",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  },
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_1ks7mwn",
+                    "lat": 1.3521,
+                    "lon": 103.8198,
+                    "properties": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 1.3521,
+                      "location": "Singapore",
+                      "longitude": 103.8198,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-3",
+                      "recordtype": "Location",
+                      "sessions": 3300,
+                      "sessionsperuser": null
+                    },
+                    "row": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 1.3521,
+                      "location": "Singapore",
+                      "longitude": 103.8198,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-3",
+                      "recordtype": "Location",
+                      "sessions": 3300,
+                      "sessionsperuser": null
+                    },
+                    "rowIndex": 36,
+                    "rowKey": "row_1ks7mwn",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  },
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_e5jqzi",
+                    "lat": 37.7749,
+                    "lon": -122.4194,
+                    "properties": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 37.7749,
+                      "location": "San Francisco",
+                      "longitude": -122.4194,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-4",
+                      "recordtype": "Location",
+                      "sessions": 5200,
+                      "sessionsperuser": null
+                    },
+                    "row": {
+                      "bouncerate": null,
+                      "channel": null,
+                      "conversionrate": null,
+                      "conversions": null,
+                      "date": null,
+                      "dayorder": null,
+                      "engagementseconds": null,
+                      "latitude": 37.7749,
+                      "location": "San Francisco",
+                      "longitude": -122.4194,
+                      "medium": null,
+                      "mentions": null,
+                      "newuserspct": null,
+                      "pagespersession": null,
+                      "recordid": "LOC-4",
+                      "recordtype": "Location",
+                      "sessions": 5200,
+                      "sessionsperuser": null
+                    },
+                    "rowIndex": 37,
+                    "rowKey": "row_e5jqzi",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  }
+                ],
+                "name": "Map data"
+              }
+            ],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 34,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 38,
+              "validFeatureCount": 4
+            },
+            "mode": "latLon",
+            "warnings": [
+              "34 current data-view row(s) have an incomplete latitude/longitude pair.",
+              "34 of 38 current data-view row(s) were excluded; 4 valid coordinate pair(s) remain."
+            ]
+          },
+          "rowKeys": [
+            "row_1syx8jj",
+            "row_15sp494",
+            "row_1pg8fq6",
+            "row_qmutwe",
+            "row_nfuold",
+            "row_lk8a61",
+            "row_15eusds",
+            "row_rh1jfr",
+            "row_vbn860",
+            "row_1x7m951",
+            "row_1q0t5wl",
+            "row_sfnavi",
+            "row_1x20lmv",
+            "row_1lihw17",
+            "row_19qxwvd",
+            "row_8g5sxg",
+            "row_1tz0pwd",
+            "row_1prrduz",
+            "row_oh3hrl",
+            "row_19mfc6o",
+            "row_1q8kb7t",
+            "row_hobz92",
+            "row_d2h8cz",
+            "row_b5d8lr",
+            "row_jhvv5x",
+            "row_wcynql",
+            "row_tctel6",
+            "row_1ba1h1o",
+            "row_1h9y8ot",
+            "row_1p3wcef",
+            "row_g1b5nv",
+            "row_523b08",
+            "row_p2un78",
+            "row_vly6sz",
+            "row_b2chtx",
+            "row_1twbiae",
+            "row_1ks7mwn",
+            "row_e5jqzi"
+          ],
+          "rows": [
+            {
+              "bouncerate": 82.5,
+              "channel": null,
+              "conversionrate": 0.009,
+              "conversions": 229,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": 59,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": null,
+              "newuserspct": 0.803,
+              "pagespersession": 1.47,
+              "recordid": "SUMMARY",
+              "recordtype": "Summary",
+              "sessions": 26900,
+              "sessionsperuser": 1.14
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0129,
+              "conversions": 75,
+              "date": "2026-11-10",
+              "dayorder": 1,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 4656,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-1",
+              "recordtype": "Daily",
+              "sessions": 5069,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0096,
+              "conversions": 81,
+              "date": "2026-11-11",
+              "dayorder": 2,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2456,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-2",
+              "recordtype": "Daily",
+              "sessions": 2112,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0084,
+              "conversions": 48,
+              "date": "2026-11-12",
+              "dayorder": 3,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 4938,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-3",
+              "recordtype": "Daily",
+              "sessions": 3890,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.022,
+              "conversions": 55,
+              "date": "2026-11-13",
+              "dayorder": 4,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1002,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-4",
+              "recordtype": "Daily",
+              "sessions": 3361,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0053,
+              "conversions": 114,
+              "date": "2026-11-14",
+              "dayorder": 5,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 3553,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-5",
+              "recordtype": "Daily",
+              "sessions": 3539,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0142,
+              "conversions": 44,
+              "date": "2026-11-15",
+              "dayorder": 6,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 5150,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-6",
+              "recordtype": "Daily",
+              "sessions": 2717,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0178,
+              "conversions": 36,
+              "date": "2026-11-16",
+              "dayorder": 7,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 5098,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-7",
+              "recordtype": "Daily",
+              "sessions": 4347,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0166,
+              "conversions": 36,
+              "date": "2026-11-17",
+              "dayorder": 8,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 3990,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-8",
+              "recordtype": "Daily",
+              "sessions": 4604,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0061,
+              "conversions": 69,
+              "date": "2026-11-18",
+              "dayorder": 9,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 840,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-9",
+              "recordtype": "Daily",
+              "sessions": 5164,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0112,
+              "conversions": 51,
+              "date": "2026-11-19",
+              "dayorder": 10,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1502,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-10",
+              "recordtype": "Daily",
+              "sessions": 2442,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0052,
+              "conversions": 43,
+              "date": "2026-11-20",
+              "dayorder": 11,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2225,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-11",
+              "recordtype": "Daily",
+              "sessions": 2598,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0158,
+              "conversions": 39,
+              "date": "2026-11-21",
+              "dayorder": 12,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 5346,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-12",
+              "recordtype": "Daily",
+              "sessions": 4560,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0229,
+              "conversions": 105,
+              "date": "2026-11-22",
+              "dayorder": 13,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1059,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-13",
+              "recordtype": "Daily",
+              "sessions": 2191,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0055,
+              "conversions": 79,
+              "date": "2026-11-23",
+              "dayorder": 14,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2155,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-14",
+              "recordtype": "Daily",
+              "sessions": 3627,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0174,
+              "conversions": 98,
+              "date": "2026-11-24",
+              "dayorder": 15,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 3595,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-15",
+              "recordtype": "Daily",
+              "sessions": 1919,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0226,
+              "conversions": 82,
+              "date": "2026-11-25",
+              "dayorder": 16,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2096,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-16",
+              "recordtype": "Daily",
+              "sessions": 4817,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0184,
+              "conversions": 112,
+              "date": "2026-11-26",
+              "dayorder": 17,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 5090,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-17",
+              "recordtype": "Daily",
+              "sessions": 2013,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0126,
+              "conversions": 40,
+              "date": "2026-11-27",
+              "dayorder": 18,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 938,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-18",
+              "recordtype": "Daily",
+              "sessions": 4691,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.019,
+              "conversions": 68,
+              "date": "2026-11-28",
+              "dayorder": 19,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1465,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-19",
+              "recordtype": "Daily",
+              "sessions": 5103,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0243,
+              "conversions": 105,
+              "date": "2026-11-29",
+              "dayorder": 20,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2194,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-20",
+              "recordtype": "Daily",
+              "sessions": 3607,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0117,
+              "conversions": 88,
+              "date": "2026-11-30",
+              "dayorder": 21,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1240,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-21",
+              "recordtype": "Daily",
+              "sessions": 3097,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0053,
+              "conversions": 82,
+              "date": "2026-12-01",
+              "dayorder": 22,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2754,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-22",
+              "recordtype": "Daily",
+              "sessions": 4857,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0148,
+              "conversions": 43,
+              "date": "2026-12-02",
+              "dayorder": 23,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 964,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-23",
+              "recordtype": "Daily",
+              "sessions": 4774,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0046,
+              "conversions": 39,
+              "date": "2026-12-03",
+              "dayorder": 24,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1811,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-24",
+              "recordtype": "Daily",
+              "sessions": 4128,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Radio",
+              "conversionrate": 0.0236,
+              "conversions": 51,
+              "date": "2026-12-04",
+              "dayorder": 25,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 2330,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-25",
+              "recordtype": "Daily",
+              "sessions": 3309,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "TV",
+              "conversionrate": 0.0142,
+              "conversions": 95,
+              "date": "2026-12-05",
+              "dayorder": 26,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 866,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-26",
+              "recordtype": "Daily",
+              "sessions": 5281,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Outdoor",
+              "conversionrate": 0.0176,
+              "conversions": 81,
+              "date": "2026-12-06",
+              "dayorder": 27,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 1977,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-27",
+              "recordtype": "Daily",
+              "sessions": 2520,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": "Web",
+              "conversionrate": 0.0216,
+              "conversions": 111,
+              "date": "2026-12-07",
+              "dayorder": 28,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": null,
+              "mentions": 4024,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "DAY-28",
+              "recordtype": "Daily",
+              "sessions": 4871,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": 0.006,
+              "conversions": 97,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": "organic",
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "MED-1",
+              "recordtype": "Medium",
+              "sessions": 17300,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": 0.06,
+              "conversions": 49,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": "cpc",
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "MED-2",
+              "recordtype": "Medium",
+              "sessions": 1333,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": 0.031,
+              "conversions": 31,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": "referral",
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "MED-3",
+              "recordtype": "Medium",
+              "sessions": 1009,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": 0.037,
+              "conversions": 3,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": "p_social",
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "MED-4",
+              "recordtype": "Medium",
+              "sessions": 87,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": 0.007,
+              "conversions": 49,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": null,
+              "location": null,
+              "longitude": null,
+              "medium": "(none)",
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "MED-5",
+              "recordtype": "Medium",
+              "sessions": 6603,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": null,
+              "conversions": null,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": 41.8781,
+              "location": "Chicago",
+              "longitude": -87.6298,
+              "medium": null,
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "LOC-1",
+              "recordtype": "Location",
+              "sessions": 6800,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": null,
+              "conversions": null,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": 51.5072,
+              "location": "London",
+              "longitude": -0.1276,
+              "medium": null,
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "LOC-2",
+              "recordtype": "Location",
+              "sessions": 4900,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": null,
+              "conversions": null,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": 1.3521,
+              "location": "Singapore",
+              "longitude": 103.8198,
+              "medium": null,
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "LOC-3",
+              "recordtype": "Location",
+              "sessions": 3300,
+              "sessionsperuser": null
+            },
+            {
+              "bouncerate": null,
+              "channel": null,
+              "conversionrate": null,
+              "conversions": null,
+              "date": null,
+              "dayorder": null,
+              "engagementseconds": null,
+              "latitude": 37.7749,
+              "location": "San Francisco",
+              "longitude": -122.4194,
+              "medium": null,
+              "mentions": null,
+              "newuserspct": null,
+              "pagespersession": null,
+              "recordid": "LOC-4",
+              "recordtype": "Location",
+              "sessions": 5200,
+              "sessionsperuser": null
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_14uanfo",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-media-web-performance",
+    "name": "Media & Web Performance",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 8,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "components": [
+      {
+        "html": "<header class='media-header'><div><span>NOISE MONITOR</span><h1>Monitoring</h1></div><nav><b>Radio 29,384</b><b>TV 11,697</b><b>Outdoor 1,818</b><b>Web 1,226</b></nav></header>",
+        "id": "mediaheader",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "span": 12,
+        "type": "custom"
+      },
+      {
+        "dataset": "summary",
+        "id": "webmetrics",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "metrics": [
+          {
+            "aggregation": "first",
+            "field": "conversions",
+            "format": "integer",
+            "intent": "primary",
+            "title": "Conversions · past 7 days"
+          },
+          {
+            "aggregation": "first",
+            "field": "conversionrate",
+            "format": "percent",
+            "intent": "danger",
+            "title": "Conversion rate"
+          },
+          {
+            "aggregation": "first",
+            "field": "sessions",
+            "format": "integer",
+            "intent": "primary",
+            "title": "Sessions · past 7 days"
+          },
+          {
+            "aggregation": "first",
+            "field": "newuserspct",
+            "format": "percent",
+            "intent": "success",
+            "title": "New users · 7 day"
+          },
+          {
+            "aggregation": "first",
+            "field": "engagementseconds",
+            "intent": "warning",
+            "suffix": "s",
+            "title": "Engagement"
+          }
+        ],
+        "span": 12,
+        "type": "metricGrid"
+      },
+      {
+        "aggregation": "first",
+        "category": "date",
+        "dataset": "daily",
+        "height": 220,
+        "id": "conversiontrend",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "date",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "conversions",
+        "options": {
+          "color": [
+            "#21d4fd"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "lineStyle": {
+                "width": 3
+              },
+              "smooth": false,
+              "symbol": "none"
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "span": 4,
+        "title": "Conversions",
+        "type": "lineChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "date",
+        "dataset": "daily",
+        "height": 220,
+        "id": "ratetrend",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "date",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "conversionrate",
+        "options": {
+          "color": [
+            "#ffe04a"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "lineStyle": {
+                "width": 3
+              },
+              "smooth": false,
+              "symbol": "none"
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "span": 4,
+        "title": "Conversion Rate",
+        "type": "lineChart"
+      },
+      {
+        "aggregation": "first",
+        "category": "date",
+        "dataset": "daily",
+        "height": 220,
+        "id": "sessiontrend",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "date",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "measure": "sessions",
+        "options": {
+          "color": [
+            "#21d4fd"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "lineStyle": {
+                "width": 3
+              },
+              "smooth": false,
+              "symbol": "none"
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "span": 4,
+        "title": "Sessions",
+        "type": "lineChart"
+      },
+      {
+        "columns": [
+          {
+            "field": "medium",
+            "title": "Medium"
+          },
+          {
+            "field": "conversions",
+            "format": "integer",
+            "hozAlign": "right",
+            "title": "Conversions"
+          },
+          {
+            "field": "conversionrate",
+            "format": "percent",
+            "hozAlign": "right",
+            "title": "Conversion rate"
+          },
+          {
+            "field": "sessions",
+            "format": "integer",
+            "hozAlign": "right",
+            "title": "Sessions"
+          }
+        ],
+        "dataset": "media",
+        "id": "mediumperformance",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "medium",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxRows": 8,
+        "pagination": false,
+        "span": 8,
+        "title": "Performance by Medium",
+        "type": "table"
+      },
+      {
+        "aggregation": "first",
+        "dataset": "summary",
+        "height": 210,
+        "id": "bouncegauge",
+        "interaction": {
+          "enabled": false,
+          "externalMode": "none",
+          "internalMode": "none"
+        },
+        "measure": "bouncerate",
+        "options": {
+          "color": [
+            "#21d4fd"
+          ],
+          "legend": {
+            "textStyle": {
+              "color": "#8fa3bc"
+            }
+          },
+          "series": [
+            {
+              "axisLabel": {
+                "show": false
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": [
+                    [
+                      1,
+                      "#444a76"
+                    ]
+                  ],
+                  "width": 13
+                }
+              },
+              "axisTick": {
+                "show": false
+              },
+              "center": [
+                "50%",
+                "68%"
+              ],
+              "detail": {
+                "color": "#f4f5ff",
+                "fontSize": 24,
+                "formatter": "{value}%"
+              },
+              "endAngle": 0,
+              "max": 100,
+              "min": 0,
+              "pointer": {
+                "itemStyle": {
+                  "color": "#f4f5ff"
+                },
+                "length": "58%",
+                "width": 5
+              },
+              "progress": {
+                "itemStyle": {
+                  "color": "#21d4fd"
+                },
+                "show": true,
+                "width": 13
+              },
+              "radius": "90%",
+              "splitLine": {
+                "show": false
+              },
+              "startAngle": 180,
+              "title": {
+                "show": false
+              }
+            }
+          ],
+          "textStyle": {
+            "color": "#dce8f8"
+          },
+          "xAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            }
+          },
+          "yAxis": {
+            "axisLabel": {
+              "color": "#758aa5"
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#263852"
+              }
+            },
+            "splitLine": {
+              "lineStyle": {
+                "color": "#1c2b40"
+              }
+            }
+          }
+        },
+        "span": 4,
+        "title": "Bounce rate · 7 day",
+        "type": "gauge"
+      },
+      {
+        "compact": true,
+        "dataset": "locations",
+        "id": "livelocations",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "location",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "trigger": "click"
+        },
+        "maxItems": 8,
+        "primaryField": "location",
+        "secondaryField": "recordid",
+        "source": "rows",
+        "span": 12,
+        "title": "User Locations · Live",
+        "type": "listGroup",
+        "valueField": "sessions"
+      }
+    ],
+    "css": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n\n.hp-grid{padding:16px;background:#17133d}.media-header{display:flex;align-items:flex-end;justify-content:space-between;padding:8px 4px 14px}.media-header span{font-size:9px;font-weight:800;letter-spacing:.12em;color:#21d4fd}.media-header h1{margin:4px 0 0;font-size:36px;font-weight:500}.media-header nav{display:flex;flex-wrap:wrap;gap:7px}.media-header nav b{padding:8px 13px;border:1px solid #4a4f77;border-radius:999px;font-size:9px;font-weight:500}\n.hp-component-metricGrid .hp-metric{min-height:112px;background:#292d59}.hp-component-metricGrid .hp-metric-value{font-size:34px}.hp-card,.hp-table-wrap{background:#292d59;border-color:#3b4073}.hp-table th{background:#252951}\n",
+    "data": {
+      "datasets": {
+        "daily": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Daily"
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "dayorder"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "locations": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Location"
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "sessions"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "media": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Medium"
+          },
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "sessions"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "summary": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Summary"
+          },
+          "source": "powerbi"
+        }
+      }
+    },
+    "theme": {
+      "accentColor": "#ffe04a",
+      "borderColor": "#3b4073",
+      "cardPadding": 14,
+      "dangerColor": "#ff5e72",
+      "density": "compact",
+      "gap": 10,
+      "mode": "dark",
+      "primaryColor": "#21d4fd",
+      "radius": 10,
+      "successColor": "#37db8d",
+      "surfaceColor": "#292d59",
+      "textColor": "#f4f5ff",
+      "warningColor": "#ffe04a"
+    },
+    "title": "Media & Web Performance",
+    "version": "2.0"
+  }
+}

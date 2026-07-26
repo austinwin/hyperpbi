@@ -1,0 +1,523 @@
+{
+  "version": "2.0",
+  "title": "Media & Web Performance",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#21d4fd",
+    "accentColor": "#ffe04a",
+    "surfaceColor": "#292d59",
+    "textColor": "#f4f5ff",
+    "borderColor": "#3b4073",
+    "successColor": "#37db8d",
+    "warningColor": "#ffe04a",
+    "dangerColor": "#ff5e72",
+    "radius": 10,
+    "cardPadding": 14,
+    "gap": 10
+  },
+  "data": {
+    "datasets": {
+      "summary": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Summary"
+        }
+      },
+      "daily": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Daily"
+        },
+        "sort": [
+          {
+            "field": "dayorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "media": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Medium"
+        },
+        "sort": [
+          {
+            "field": "sessions",
+            "direction": "descending"
+          }
+        ]
+      },
+      "locations": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Location"
+        },
+        "sort": [
+          {
+            "field": "sessions",
+            "direction": "descending"
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "custom",
+      "id": "mediaheader",
+      "span": 12,
+      "html": "<header class='media-header'><div><span>NOISE MONITOR</span><h1>Monitoring</h1></div><nav><b>Radio 29,384</b><b>TV 11,697</b><b>Outdoor 1,818</b><b>Web 1,226</b></nav></header>",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "metricGrid",
+      "id": "webmetrics",
+      "dataset": "summary",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Conversions · past 7 days",
+          "field": "conversions",
+          "aggregation": "first",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Conversion rate",
+          "field": "conversionrate",
+          "aggregation": "first",
+          "format": "percent",
+          "intent": "danger"
+        },
+        {
+          "title": "Sessions · past 7 days",
+          "field": "sessions",
+          "aggregation": "first",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "New users · 7 day",
+          "field": "newuserspct",
+          "aggregation": "first",
+          "format": "percent",
+          "intent": "success"
+        },
+        {
+          "title": "Engagement",
+          "field": "engagementseconds",
+          "aggregation": "first",
+          "suffix": "s",
+          "intent": "warning"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "lineChart",
+      "id": "conversiontrend",
+      "dataset": "daily",
+      "title": "Conversions",
+      "span": 4,
+      "height": 220,
+      "category": "date",
+      "measure": "conversions",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#21d4fd"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "smooth": false,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 3
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "date",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "lineChart",
+      "id": "ratetrend",
+      "dataset": "daily",
+      "title": "Conversion Rate",
+      "span": 4,
+      "height": 220,
+      "category": "date",
+      "measure": "conversionrate",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#ffe04a"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "smooth": false,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 3
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "date",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "lineChart",
+      "id": "sessiontrend",
+      "dataset": "daily",
+      "title": "Sessions",
+      "span": 4,
+      "height": 220,
+      "category": "date",
+      "measure": "sessions",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#21d4fd"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "smooth": false,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 3
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "date",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "mediumperformance",
+      "dataset": "media",
+      "title": "Performance by Medium",
+      "span": 8,
+      "columns": [
+        {
+          "field": "medium",
+          "title": "Medium"
+        },
+        {
+          "field": "conversions",
+          "title": "Conversions",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "conversionrate",
+          "title": "Conversion rate",
+          "format": "percent",
+          "hozAlign": "right"
+        },
+        {
+          "field": "sessions",
+          "title": "Sessions",
+          "format": "integer",
+          "hozAlign": "right"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 8,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "medium",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "gauge",
+      "id": "bouncegauge",
+      "dataset": "summary",
+      "title": "Bounce rate · 7 day",
+      "span": 4,
+      "height": 210,
+      "measure": "bouncerate",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#21d4fd"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "min": 0,
+            "max": 100,
+            "startAngle": 180,
+            "endAngle": 0,
+            "center": [
+              "50%",
+              "68%"
+            ],
+            "radius": "90%",
+            "progress": {
+              "show": true,
+              "width": 13,
+              "itemStyle": {
+                "color": "#21d4fd"
+              }
+            },
+            "axisLine": {
+              "lineStyle": {
+                "width": 13,
+                "color": [
+                  [
+                    1,
+                    "#444a76"
+                  ]
+                ]
+              }
+            },
+            "pointer": {
+              "length": "58%",
+              "width": 5,
+              "itemStyle": {
+                "color": "#f4f5ff"
+              }
+            },
+            "axisTick": {
+              "show": false
+            },
+            "splitLine": {
+              "show": false
+            },
+            "axisLabel": {
+              "show": false
+            },
+            "detail": {
+              "formatter": "{value}%",
+              "color": "#f4f5ff",
+              "fontSize": 24
+            },
+            "title": {
+              "show": false
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "listGroup",
+      "id": "livelocations",
+      "dataset": "locations",
+      "title": "User Locations · Live",
+      "span": 12,
+      "source": "rows",
+      "primaryField": "location",
+      "secondaryField": "recordid",
+      "valueField": "sessions",
+      "maxItems": 8,
+      "compact": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "location",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n\n.hp-grid{padding:16px;background:#17133d}.media-header{display:flex;align-items:flex-end;justify-content:space-between;padding:8px 4px 14px}.media-header span{font-size:9px;font-weight:800;letter-spacing:.12em;color:#21d4fd}.media-header h1{margin:4px 0 0;font-size:36px;font-weight:500}.media-header nav{display:flex;flex-wrap:wrap;gap:7px}.media-header nav b{padding:8px 13px;border:1px solid #4a4f77;border-radius:999px;font-size:9px;font-weight:500}\n.hp-component-metricGrid .hp-metric{min-height:112px;background:#292d59}.hp-component-metricGrid .hp-metric-value{font-size:34px}.hp-card,.hp-table-wrap{background:#292d59;border-color:#3b4073}.hp-table th{background:#252951}\n"
+}

@@ -1,0 +1,73 @@
+encounterid,patientid,patientname,gender,age,encounterdate,weekday,department,alerttype,severity,status,reviewtype,satisfactionscore,responseminutes,resolved,visits
+ENC-0001,PAT-1000,John Adams,Male,40,2026-07-01,Mon,Emergency,Clinical review,Low,Open,Positive,3.4,56,false,2
+ENC-0002,PAT-1001,Mary Adams,Female,80,2026-07-02,Tue,Cardiology,Follow-up,Moderate,In Review,Negative,3.6,9,false,2
+ENC-0003,PAT-1002,Rhonda Rousey,Female,39,2026-07-03,Wed,Primary Care,Medication,High,Resolved,Pending,4.3,84,true,3
+ENC-0004,PAT-1003,Alex Morgan,Non-binary,78,2026-07-04,Thu,Pediatrics,Emergency,Low,Open,Positive,4.2,33,false,4
+ENC-0005,PAT-1004,Taylor Reed,Male,11,2026-07-05,Fri,Emergency,Clinical review,Moderate,In Review,Negative,5,21,false,2
+ENC-0006,PAT-1005,Jamie Chen,Female,47,2026-07-06,Sat,Cardiology,Follow-up,High,Resolved,Pending,4.6,79,true,2
+ENC-0007,PAT-1006,John Adams,Female,30,2026-07-07,Sun,Primary Care,Medication,Low,Open,Positive,3.9,60,false,4
+ENC-0008,PAT-1007,Mary Adams,Non-binary,40,2026-07-08,Mon,Pediatrics,Emergency,Moderate,In Review,Negative,4.8,14,false,2
+ENC-0009,PAT-1008,Rhonda Rousey,Male,72,2026-07-09,Tue,Emergency,Clinical review,High,Resolved,Pending,4.3,62,true,3
+ENC-0010,PAT-1009,Alex Morgan,Female,21,2026-07-10,Wed,Cardiology,Follow-up,Low,Open,Positive,3.7,64,false,3
+ENC-0011,PAT-1010,Taylor Reed,Female,18,2026-07-11,Thu,Primary Care,Medication,Moderate,In Review,Negative,3.8,23,false,4
+ENC-0012,PAT-1011,Jamie Chen,Non-binary,13,2026-07-12,Fri,Pediatrics,Emergency,High,Resolved,Pending,4.5,55,true,1
+ENC-0013,PAT-1012,John Adams,Male,62,2026-07-13,Sat,Emergency,Clinical review,Low,Open,Positive,3.8,29,false,2
+ENC-0014,PAT-1013,Mary Adams,Female,36,2026-07-14,Sun,Cardiology,Follow-up,Moderate,In Review,Negative,3.5,38,false,1
+ENC-0015,PAT-1014,Rhonda Rousey,Female,71,2026-07-01,Mon,Primary Care,Medication,High,Resolved,Pending,4.2,34,true,2
+ENC-0016,PAT-1015,Alex Morgan,Non-binary,76,2026-07-02,Tue,Pediatrics,Emergency,Low,Open,Positive,5,83,false,4
+ENC-0017,PAT-1016,Taylor Reed,Male,37,2026-07-03,Wed,Emergency,Clinical review,Moderate,In Review,Negative,4.4,29,false,3
+ENC-0018,PAT-1017,Jamie Chen,Female,71,2026-07-04,Thu,Cardiology,Follow-up,High,Resolved,Pending,4.8,49,true,4
+ENC-0019,PAT-1018,John Adams,Female,26,2026-07-05,Fri,Primary Care,Medication,Low,Open,Positive,3.7,37,false,4
+ENC-0020,PAT-1019,Mary Adams,Non-binary,76,2026-07-06,Sat,Pediatrics,Emergency,Moderate,In Review,Negative,3.5,81,false,1
+ENC-0021,PAT-1020,Rhonda Rousey,Male,63,2026-07-07,Sun,Emergency,Clinical review,High,Resolved,Pending,3.9,85,true,1
+ENC-0022,PAT-1021,Alex Morgan,Female,73,2026-07-08,Mon,Cardiology,Follow-up,Low,Open,Positive,4.9,26,false,3
+ENC-0023,PAT-1022,Taylor Reed,Female,49,2026-07-09,Tue,Primary Care,Medication,Moderate,In Review,Negative,4.9,87,false,1
+ENC-0024,PAT-1023,Jamie Chen,Non-binary,29,2026-07-10,Wed,Pediatrics,Emergency,High,Resolved,Pending,3.8,64,true,1
+ENC-0025,PAT-1024,John Adams,Male,9,2026-07-11,Thu,Emergency,Clinical review,Low,Open,Positive,3.9,34,false,4
+ENC-0026,PAT-1025,Mary Adams,Female,59,2026-07-12,Fri,Cardiology,Follow-up,Moderate,In Review,Negative,5,8,false,4
+ENC-0027,PAT-1026,Rhonda Rousey,Female,46,2026-07-13,Sat,Primary Care,Medication,High,Resolved,Pending,3.7,89,true,3
+ENC-0028,PAT-1027,Alex Morgan,Non-binary,71,2026-07-14,Sun,Pediatrics,Emergency,Low,Open,Positive,3.7,68,false,1
+ENC-0029,PAT-1028,Taylor Reed,Male,31,2026-07-01,Mon,Emergency,Clinical review,Moderate,In Review,Negative,5,8,false,1
+ENC-0030,PAT-1029,Jamie Chen,Female,59,2026-07-02,Tue,Cardiology,Follow-up,High,Resolved,Pending,4.8,44,true,1
+ENC-0031,PAT-1030,John Adams,Female,66,2026-07-03,Wed,Primary Care,Medication,Low,Open,Positive,3.9,27,false,2
+ENC-0032,PAT-1031,Mary Adams,Non-binary,21,2026-07-04,Thu,Pediatrics,Emergency,Moderate,In Review,Negative,3.9,53,false,3
+ENC-0033,PAT-1032,Rhonda Rousey,Male,62,2026-07-05,Fri,Emergency,Clinical review,High,Resolved,Pending,4.6,87,true,2
+ENC-0034,PAT-1033,Alex Morgan,Female,68,2026-07-06,Sat,Cardiology,Follow-up,Low,Open,Positive,4.6,20,false,3
+ENC-0035,PAT-1000,Taylor Reed,Female,26,2026-07-07,Sun,Primary Care,Medication,Moderate,In Review,Negative,4.5,34,false,2
+ENC-0036,PAT-1001,Jamie Chen,Non-binary,17,2026-07-08,Mon,Pediatrics,Emergency,High,Resolved,Pending,3.3,49,true,4
+ENC-0037,PAT-1002,John Adams,Male,64,2026-07-09,Tue,Emergency,Clinical review,Low,Open,Positive,4.9,42,false,3
+ENC-0038,PAT-1003,Mary Adams,Female,70,2026-07-10,Wed,Cardiology,Follow-up,Moderate,In Review,Negative,3.4,47,false,1
+ENC-0039,PAT-1004,Rhonda Rousey,Female,34,2026-07-11,Thu,Primary Care,Medication,High,Resolved,Pending,3.7,45,true,3
+ENC-0040,PAT-1005,Alex Morgan,Non-binary,81,2026-07-12,Fri,Pediatrics,Emergency,Low,Open,Positive,3.9,61,false,3
+ENC-0041,PAT-1006,Taylor Reed,Male,52,2026-07-13,Sat,Emergency,Clinical review,Moderate,In Review,Negative,5,52,false,4
+ENC-0042,PAT-1007,Jamie Chen,Female,57,2026-07-14,Sun,Cardiology,Follow-up,High,Resolved,Pending,4.5,39,true,4
+ENC-0043,PAT-1008,John Adams,Female,37,2026-07-01,Mon,Primary Care,Medication,Low,Open,Positive,4.2,32,false,1
+ENC-0044,PAT-1009,Mary Adams,Non-binary,71,2026-07-02,Tue,Pediatrics,Emergency,Moderate,In Review,Negative,4,53,false,3
+ENC-0045,PAT-1010,Rhonda Rousey,Male,40,2026-07-03,Wed,Emergency,Clinical review,High,Resolved,Pending,3.4,38,true,2
+ENC-0046,PAT-1011,Alex Morgan,Female,57,2026-07-04,Thu,Cardiology,Follow-up,Low,Open,Positive,5,27,false,4
+ENC-0047,PAT-1012,Taylor Reed,Female,67,2026-07-05,Fri,Primary Care,Medication,Moderate,In Review,Negative,4.2,64,false,2
+ENC-0048,PAT-1013,Jamie Chen,Non-binary,77,2026-07-06,Sat,Pediatrics,Emergency,High,Resolved,Pending,3.7,14,true,4
+ENC-0049,PAT-1014,John Adams,Male,68,2026-07-07,Sun,Emergency,Clinical review,Low,Open,Positive,3.3,54,false,4
+ENC-0050,PAT-1015,Mary Adams,Female,81,2026-07-08,Mon,Cardiology,Follow-up,Moderate,In Review,Negative,4.4,57,false,1
+ENC-0051,PAT-1016,Rhonda Rousey,Female,41,2026-07-09,Tue,Primary Care,Medication,High,Resolved,Pending,3.4,53,true,2
+ENC-0052,PAT-1017,Alex Morgan,Non-binary,72,2026-07-10,Wed,Pediatrics,Emergency,Low,Open,Positive,3.2,25,false,4
+ENC-0053,PAT-1018,Taylor Reed,Male,70,2026-07-11,Thu,Emergency,Clinical review,Moderate,In Review,Negative,3.8,27,false,4
+ENC-0054,PAT-1019,Jamie Chen,Female,70,2026-07-12,Fri,Cardiology,Follow-up,High,Resolved,Pending,3.5,15,true,3
+ENC-0055,PAT-1020,John Adams,Female,13,2026-07-13,Sat,Primary Care,Medication,Low,Open,Positive,4.4,63,false,2
+ENC-0056,PAT-1021,Mary Adams,Non-binary,11,2026-07-14,Sun,Pediatrics,Emergency,Moderate,In Review,Negative,4.8,79,false,1
+ENC-0057,PAT-1022,Rhonda Rousey,Male,52,2026-07-01,Mon,Emergency,Clinical review,High,Resolved,Pending,3.4,71,true,3
+ENC-0058,PAT-1023,Alex Morgan,Female,71,2026-07-02,Tue,Cardiology,Follow-up,Low,Open,Positive,4.1,19,false,4
+ENC-0059,PAT-1024,Taylor Reed,Female,44,2026-07-03,Wed,Primary Care,Medication,Moderate,In Review,Negative,3.9,46,false,3
+ENC-0060,PAT-1025,Jamie Chen,Non-binary,78,2026-07-04,Thu,Pediatrics,Emergency,High,Resolved,Pending,3.6,67,true,2
+ENC-0061,PAT-1026,John Adams,Male,41,2026-07-05,Fri,Emergency,Clinical review,Low,Open,Positive,4.1,58,false,2
+ENC-0062,PAT-1027,Mary Adams,Female,33,2026-07-06,Sat,Cardiology,Follow-up,Moderate,In Review,Negative,4,77,false,2
+ENC-0063,PAT-1028,Rhonda Rousey,Female,72,2026-07-07,Sun,Primary Care,Medication,High,Resolved,Pending,4,78,true,1
+ENC-0064,PAT-1029,Alex Morgan,Non-binary,29,2026-07-08,Mon,Pediatrics,Emergency,Low,Open,Positive,4.4,9,false,4
+ENC-0065,PAT-1030,Taylor Reed,Male,29,2026-07-09,Tue,Emergency,Clinical review,Moderate,In Review,Negative,3.8,17,false,1
+ENC-0066,PAT-1031,Jamie Chen,Female,58,2026-07-10,Wed,Cardiology,Follow-up,High,Resolved,Pending,4.2,72,true,1
+ENC-0067,PAT-1032,John Adams,Female,19,2026-07-11,Thu,Primary Care,Medication,Low,Open,Positive,4.7,13,false,2
+ENC-0068,PAT-1033,Mary Adams,Non-binary,53,2026-07-12,Fri,Pediatrics,Emergency,Moderate,In Review,Negative,3.4,35,false,3
+ENC-0069,PAT-1000,Rhonda Rousey,Male,76,2026-07-13,Sat,Emergency,Clinical review,High,Resolved,Pending,4.1,33,true,2
+ENC-0070,PAT-1001,Alex Morgan,Female,46,2026-07-14,Sun,Cardiology,Follow-up,Low,Open,Positive,3.4,72,false,1
+ENC-0071,PAT-1002,Taylor Reed,Female,32,2026-07-01,Mon,Primary Care,Medication,Moderate,In Review,Negative,4.1,41,false,2
+ENC-0072,PAT-1003,Jamie Chen,Non-binary,33,2026-07-02,Tue,Pediatrics,Emergency,High,Resolved,Pending,4.9,45,true,1

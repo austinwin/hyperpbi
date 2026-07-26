@@ -9,19 +9,21 @@ export function AppSidebar({
     config,
     collapsed,
     mobileOpen,
+    mobile = false,
     state,
     dispatch,
 }: {
     config: AppSidebarConfig;
     collapsed: boolean;
     mobileOpen: boolean;
+    mobile?: boolean;
     state: DashboardState;
     dispatch: (action: DashboardAction) => void;
 }) {
     const context = useRenderContext();
     const width = config.width ?? 248;
     const collapsedWidth = config.collapsedWidth ?? 64;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < (config.mobileBreakpoint ?? 800);
+    const isMobile = mobile;
 
     const closeMobile = () => {
         dispatch({ type: "mobileSidebar", value: false });

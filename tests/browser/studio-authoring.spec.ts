@@ -148,10 +148,16 @@ test("rectangle selection synchronizes map, table, and Power BI lineage", async 
 
   const firstFeature = page.locator(".hp-map-frame path.leaflet-interactive").first();
   await expect(firstFeature).toBeVisible();
+  await page.getByRole("button", { name: "Selection tools" }).click();
+  const rectangleTool = page.getByRole("button", {
+    name: "Rectangle",
+    exact: true,
+  });
+  await rectangleTool.click();
+  await expect(rectangleTool).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Close Selection tools" }).click();
   const box = await firstFeature.boundingBox();
   expect(box).not.toBeNull();
-  await page.getByRole("button", { name: "Select features by rectangle" }).click();
-  await expect(page.getByRole("button", { name: "Select features by rectangle" })).toHaveAttribute("aria-pressed", "true");
 
   await page.mouse.move(box!.x - 12, box!.y - 12);
   await page.mouse.down();
@@ -161,6 +167,7 @@ test("rectangle selection synchronizes map, table, and Power BI lineage", async 
   await expect(page.locator(".hp-map-selection-status")).toContainText("1 feature selected across 1 Power BI row");
   await expect(page.locator("tr.hp-row-selected")).toHaveCount(1);
   await expect.poll(() => page.evaluate(() => window.hpStudioAuthoringHarness.externalSelections.at(-1))).toEqual([0]);
+  await page.getByRole("button", { name: "Selection tools" }).click();
   await page.getByRole("button", { name: "Clear selection" }).click();
   await expect(page.locator("tr.hp-row-selected")).toHaveCount(0);
   await expect(page.locator(".hp-map-selection-status")).toHaveCount(0);

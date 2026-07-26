@@ -1,0 +1,30 @@
+{
+  "name": "@hyperpbi/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 4178",
+    "build": "next build",
+    "cloudflare:build": "opennextjs-cloudflare build --config wrangler.jsonc && opennextjs-cloudflare populateCache local --config wrangler.jsonc",
+    "cloudflare:preview": "npm run cloudflare:build && opennextjs-cloudflare preview --config wrangler.jsonc",
+    "sites:build": "npm run cloudflare:build && npm run sites:stage",
+    "sites:stage": "node scripts/stage-sites-build.mjs",
+    "start": "next start --port 4178",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "1.27.0",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.5.4",
+    "wrangler": "4.114.0"
+  }
+}

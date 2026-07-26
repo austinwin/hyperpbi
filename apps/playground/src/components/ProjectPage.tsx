@@ -98,7 +98,7 @@ export function ProjectPage({ projectId, storage }: { projectId: string; storage
         }
     };
 
-    if (loadError) return <main class="pg-loading-screen"><div class="pg-alert pg-alert-error">{loadError}</div><button class="pg-button" onClick={() => navigate("/")}>Back to projects</button></main>;
+    if (loadError) return <div class="pg-loading-screen"><div class="pg-alert pg-alert-error">{loadError}</div><button class="pg-button" onClick={() => navigate("/")}>Back to projects</button></div>;
     if (!project) return <div class="pg-loading-screen">Opening project…</div>;
 
     const specification = project.editorState.draftSpecification ?? canonicalJson(project.specification);
@@ -146,7 +146,7 @@ export function ProjectPage({ projectId, storage }: { projectId: string; storage
         }));
     };
 
-    return <main class="pg-workspace">
+    return <div class="pg-workspace">
         <header class="pg-workspace-header">
             <button class="pg-back-button" aria-label="Back to projects" onClick={() => navigate("/")}>←</button>
             <a class="pg-brand pg-brand-compact" href="/" onClick={event => { event.preventDefault(); navigate("/"); }}><span class="pg-brand-mark">H</span><strong>HyperPBI</strong></a>
@@ -187,5 +187,5 @@ export function ProjectPage({ projectId, storage }: { projectId: string; storage
             </section>
         </div>
         {exportOpen && <ExportDialog project={project} onClose={() => setExportOpen(false)} />}
-    </main>;
+    </div>;
 }

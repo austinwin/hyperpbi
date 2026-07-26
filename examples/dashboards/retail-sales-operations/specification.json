@@ -1,0 +1,456 @@
+{
+  "version": "2.0",
+  "title": "Retail Sales Operations",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#ff704f",
+    "accentColor": "#23b39a",
+    "surfaceColor": "#ffffff",
+    "textColor": "#252944",
+    "borderColor": "#dfe5f2",
+    "successColor": "#23b39a",
+    "warningColor": "#ffb84d",
+    "dangerColor": "#ff704f",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 12
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "Productly",
+      "shortTitle": "PR",
+      "subtitle": "Retail intelligence",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search this dashboard",
+      "actions": [
+        {
+          "id": "refresh",
+          "ariaLabel": "Refresh dashboard",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "Productly",
+            "message": "The current dataset is displayed.",
+            "intent": "primary",
+            "durationMs": 2200
+          }
+        },
+        {
+          "id": "notifications",
+          "ariaLabel": "Notifications",
+          "icon": "bell",
+          "badge": 3,
+          "action": {
+            "type": "showToast",
+            "title": "Notifications",
+            "message": "Three items need attention.",
+            "intent": "warning",
+            "durationMs": 2200
+          }
+        }
+      ],
+      "user": {
+        "name": "Dashboard Owner",
+        "subtitle": "Workspace admin",
+        "initials": "DO",
+        "status": "online"
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 216,
+      "collapsedWidth": 62,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "mobileBreakpoint": 760,
+      "navigation": [
+        {
+          "id": "dashboard",
+          "label": "Dashboard",
+          "icon": "dashboard",
+          "action": {
+            "type": "showToast",
+            "title": "Dashboard",
+            "message": "Overview is already open.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "analytics",
+          "label": "Analytics",
+          "icon": "chart",
+          "action": {
+            "type": "showToast",
+            "title": "Analytics",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "products",
+          "label": "Products",
+          "icon": "package",
+          "action": {
+            "type": "showToast",
+            "title": "Products",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "customers",
+          "label": "Customers",
+          "icon": "users",
+          "action": {
+            "type": "showToast",
+            "title": "Customers",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "reports",
+          "label": "Reports",
+          "icon": "file",
+          "action": {
+            "type": "showToast",
+            "title": "Reports",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        }
+      ],
+      "footer": {
+        "title": "Productly",
+        "subtitle": "Portable HyperPBI example"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Sales Dashboard",
+      "subtitle": "Revenue, customer demand, and upcoming settlement activity",
+      "meta": [
+        {
+          "label": "Data",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "Productly · HyperPBI",
+      "secondaryText": "One portable dataset · Web and Power BI"
+    }
+  },
+  "data": {
+    "datasets": {
+      "summary": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Summary"
+        }
+      },
+      "orders": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Order"
+        }
+      },
+      "monthly": {
+        "source": "orders",
+        "groupBy": [
+          "month",
+          "monthorder"
+        ],
+        "metrics": {
+          "sales": {
+            "op": "sum",
+            "field": "revenue"
+          },
+          "costs": {
+            "op": "sum",
+            "field": "expense"
+          }
+        },
+        "sort": [
+          {
+            "field": "monthorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "categories": {
+        "source": "orders",
+        "groupBy": [
+          "category"
+        ],
+        "metrics": {
+          "sales": {
+            "op": "sum",
+            "field": "revenue"
+          }
+        },
+        "sort": [
+          {
+            "field": "sales",
+            "direction": "descending"
+          }
+        ]
+      },
+      "payments": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Payment"
+        },
+        "sort": [
+          {
+            "field": "duedate",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "recentorders": {
+        "source": "orders",
+        "sort": [
+          {
+            "field": "date",
+            "direction": "descending"
+          }
+        ],
+        "limit": 10
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "retailmetrics",
+      "dataset": "summary",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Total Sales",
+          "field": "revenue",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "danger"
+        },
+        {
+          "title": "Daily User",
+          "field": "dailyusers",
+          "aggregation": "first",
+          "format": "integer",
+          "intent": "success"
+        },
+        {
+          "title": "New Products",
+          "field": "newproducts",
+          "aggregation": "first",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Expenses",
+          "field": "expense",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "warning"
+        },
+        {
+          "title": "Active Balance",
+          "field": "balance",
+          "aggregation": "first",
+          "format": "currency",
+          "intent": "danger"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "areaChart",
+      "id": "summarysales",
+      "dataset": "monthly",
+      "title": "Summary Sales",
+      "span": 8,
+      "height": 285,
+      "category": "month",
+      "measure": "sales",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#ff704f"
+        ],
+        "series": [
+          {
+            "smooth": true,
+            "symbolSize": 7,
+            "lineStyle": {
+              "width": 3
+            },
+            "areaStyle": {
+              "opacity": 0.16
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "month",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "salesmix",
+      "dataset": "categories",
+      "title": "Sales Mix",
+      "span": 4,
+      "height": 285,
+      "category": "category",
+      "measure": "sales",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#ff704f",
+          "#23b39a",
+          "#3ca6e8",
+          "#ffb84d"
+        ],
+        "series": [
+          {
+            "radius": [
+              "52%",
+              "76%"
+            ]
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "category",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "lastorders",
+      "dataset": "recentorders",
+      "title": "Last Orders",
+      "span": 8,
+      "columns": [
+        {
+          "field": "customer",
+          "title": "Customer"
+        },
+        {
+          "field": "product",
+          "title": "Product"
+        },
+        {
+          "field": "date",
+          "title": "Date"
+        },
+        {
+          "field": "revenue",
+          "title": "Price",
+          "format": "currency",
+          "hozAlign": "right"
+        },
+        {
+          "field": "orderstatus",
+          "title": "Status",
+          "cellType": "badge",
+          "intentMap": {
+            "Complete": "success",
+            "Processing": "primary",
+            "Pending": "warning"
+          }
+        }
+      ],
+      "pagination": false,
+      "maxRows": 10,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "recordid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "listGroup",
+      "id": "upcomingpayments",
+      "dataset": "payments",
+      "title": "Upcoming Payments",
+      "span": 4,
+      "source": "rows",
+      "primaryField": "provider",
+      "secondaryField": "duedate",
+      "valueField": "dueamount",
+      "maxItems": 6,
+      "compact": false,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "provider",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-sidebar-app{background:#354b87;color:#f4f7ff;border:0}.hp-sidebar-app .hp-nav-item,.hp-sidebar-footer-title{color:#f4f7ff}.hp-sidebar-app .hp-sidebar-footer-subtitle{color:#b9c5e5}.hp-sidebar-app .hp-nav-item:hover{background:rgb(255 255 255 / 10%)}.hp-sidebar-app .hp-nav-active{background:rgb(255 255 255 / 14%);color:#fff}\n.hp-component-metricGrid .hp-metric{position:relative;padding-top:42px}.hp-component-metricGrid .hp-metric::before{content:\"\";position:absolute;left:16px;top:13px;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--hp-intent,var(--hp-primary)) 18%,transparent);box-shadow:inset 0 0 0 6px color-mix(in srgb,var(--hp-intent,var(--hp-primary)) 8%,transparent)}\n.hp-list-item{margin-bottom:7px;border:0;border-radius:8px;background:#f7f8fc}.hp-list-item-value{color:#ff704f}\n"
+}

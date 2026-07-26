@@ -1,0 +1,599 @@
+{
+  "version": "2.0",
+  "title": "Industrial Network Telemetry",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#04d9d2",
+    "accentColor": "#f43f9e",
+    "surfaceColor": "#142535",
+    "textColor": "#dffcff",
+    "borderColor": "#224556",
+    "successColor": "#04d9d2",
+    "warningColor": "#f8e84e",
+    "dangerColor": "#f43f5e",
+    "radius": 12,
+    "cardPadding": 12,
+    "gap": 10
+  },
+  "data": {
+    "datasets": {
+      "summary": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Summary"
+        }
+      },
+      "readings": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Reading"
+        },
+        "sort": [
+          {
+            "field": "timeorder",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "sites": {
+        "source": "readings",
+        "groupBy": [
+          "site",
+          "network",
+          "region"
+        ],
+        "metrics": {
+          "throughput": {
+            "op": "avg",
+            "field": "throughput"
+          },
+          "latency": {
+            "op": "avg",
+            "field": "latency"
+          },
+          "alerts": {
+            "op": "sum",
+            "field": "alertcount"
+          },
+          "uptime": {
+            "op": "avg",
+            "field": "uptime"
+          }
+        },
+        "sort": [
+          {
+            "field": "alerts",
+            "direction": "descending"
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "custom",
+      "id": "telemetryheader",
+      "span": 12,
+      "html": "<header class='telemetry-header'><div><span>INDUSTRIAL NETWORK</span><h1>Telemetry Control</h1></div><nav><b>Live</b><b>48 samples</b><b>8 nodes</b></nav></header>",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "metricGrid",
+      "id": "telemetrymetrics",
+      "dataset": "summary",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Throughput",
+          "field": "throughput",
+          "aggregation": "first",
+          "suffix": " Gbps",
+          "intent": "success"
+        },
+        {
+          "title": "Latency",
+          "field": "latency",
+          "aggregation": "first",
+          "suffix": " ms",
+          "intent": "warning"
+        },
+        {
+          "title": "Packet Loss",
+          "field": "packetloss",
+          "aggregation": "first",
+          "suffix": "%",
+          "intent": "danger"
+        },
+        {
+          "title": "Uptime",
+          "field": "uptime",
+          "aggregation": "first",
+          "suffix": "%",
+          "intent": "success"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "gauge",
+      "id": "pressuregauge",
+      "dataset": "summary",
+      "title": "Pressure",
+      "span": 2,
+      "height": 190,
+      "measure": "pressure",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#04d9d2"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "min": 0,
+            "max": 100,
+            "progress": {
+              "show": true,
+              "width": 12,
+              "itemStyle": {
+                "color": "#04d9d2"
+              }
+            },
+            "axisLine": {
+              "lineStyle": {
+                "width": 12,
+                "color": [
+                  [
+                    1,
+                    "#203f4e"
+                  ]
+                ]
+              }
+            },
+            "axisTick": {
+              "show": false
+            },
+            "splitLine": {
+              "show": false
+            },
+            "axisLabel": {
+              "show": false
+            },
+            "pointer": {
+              "show": false
+            },
+            "detail": {
+              "color": "#dffcff",
+              "fontSize": 24
+            },
+            "title": {
+              "show": false
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "gauge",
+      "id": "temperaturegauge",
+      "dataset": "summary",
+      "title": "Temperature",
+      "span": 2,
+      "height": 190,
+      "measure": "temperature",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#f43f9e"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "min": 0,
+            "max": 100,
+            "progress": {
+              "show": true,
+              "width": 12,
+              "itemStyle": {
+                "color": "#f43f9e"
+              }
+            },
+            "axisLine": {
+              "lineStyle": {
+                "width": 12,
+                "color": [
+                  [
+                    1,
+                    "#203f4e"
+                  ]
+                ]
+              }
+            },
+            "axisTick": {
+              "show": false
+            },
+            "splitLine": {
+              "show": false
+            },
+            "axisLabel": {
+              "show": false
+            },
+            "pointer": {
+              "show": false
+            },
+            "detail": {
+              "color": "#dffcff",
+              "fontSize": 24
+            },
+            "title": {
+              "show": false
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "gauge",
+      "id": "signalgauge",
+      "dataset": "summary",
+      "title": "Signal",
+      "span": 2,
+      "height": 190,
+      "measure": "signal",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#4db5ff"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "min": 0,
+            "max": 100,
+            "progress": {
+              "show": true,
+              "width": 12,
+              "itemStyle": {
+                "color": "#4db5ff"
+              }
+            },
+            "axisLine": {
+              "lineStyle": {
+                "width": 12,
+                "color": [
+                  [
+                    1,
+                    "#203f4e"
+                  ]
+                ]
+              }
+            },
+            "axisTick": {
+              "show": false
+            },
+            "splitLine": {
+              "show": false
+            },
+            "axisLabel": {
+              "show": false
+            },
+            "pointer": {
+              "show": false
+            },
+            "detail": {
+              "color": "#dffcff",
+              "fontSize": 24
+            },
+            "title": {
+              "show": false
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "svgMarkup",
+      "id": "networktopology",
+      "span": 6,
+      "heightMode": "fixed",
+      "height": 190,
+      "viewBox": "0 0 600 190",
+      "ariaLabel": "Industrial network topology",
+      "description": "Simplified industrial network topology",
+      "svg": "<svg viewBox='0 0 600 190' role='img' aria-label='Network topology'><defs><linearGradient id='link' x1='0' x2='1'><stop offset='0' stop-color='#04d9d2'/><stop offset='1' stop-color='#f43f9e'/></linearGradient></defs><rect width='600' height='190' rx='18' fill='#10212f'/><g stroke='url(#link)' stroke-width='2' fill='none' opacity='.8'><path d='M72 95 L190 48 L300 95 L414 45 L532 95'/><path d='M72 95 L190 145 L300 95 L414 145 L532 95'/></g><g fill='#142f3d' stroke='#04d9d2' stroke-width='3'><circle cx='72' cy='95' r='20'/><circle cx='190' cy='48' r='16'/><circle cx='190' cy='145' r='16'/><circle cx='300' cy='95' r='24'/><circle cx='414' cy='45' r='16'/><circle cx='414' cy='145' r='16'/><circle cx='532' cy='95' r='20'/></g><g fill='#dffcff' font-size='10' text-anchor='middle'><text x='72' y='99'>EDGE</text><text x='190' y='52'>N-02</text><text x='190' y='149'>N-03</text><text x='300' y='99'>CORE</text><text x='414' y='49'>N-06</text><text x='414' y='149'>N-07</text><text x='532' y='99'>WAN</text></g></svg>",
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "comboChart",
+      "id": "networkwaves",
+      "dataset": "readings",
+      "title": "Network Waveforms",
+      "span": 8,
+      "height": 310,
+      "category": "timestamp",
+      "series": [
+        {
+          "field": "throughput",
+          "label": "Throughput",
+          "chartType": "line",
+          "aggregation": "first"
+        },
+        {
+          "field": "latency",
+          "label": "Latency",
+          "chartType": "line",
+          "aggregation": "first"
+        },
+        {
+          "field": "signal",
+          "label": "Signal",
+          "chartType": "line",
+          "aggregation": "first"
+        }
+      ],
+      "options": {
+        "color": [
+          "#04d9d2",
+          "#f43f9e",
+          "#4db5ff"
+        ],
+        "textStyle": {
+          "color": "#dce8f8"
+        },
+        "legend": {
+          "textStyle": {
+            "color": "#8fa3bc"
+          }
+        },
+        "xAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "yAxis": {
+          "axisLabel": {
+            "color": "#758aa5"
+          },
+          "splitLine": {
+            "lineStyle": {
+              "color": "#1c2b40"
+            }
+          },
+          "axisLine": {
+            "lineStyle": {
+              "color": "#263852"
+            }
+          }
+        },
+        "series": [
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            },
+            "areaStyle": {
+              "opacity": 0.08
+            }
+          },
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            }
+          },
+          {
+            "smooth": true,
+            "symbol": "none",
+            "lineStyle": {
+              "width": 2
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "timestamp",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "nodestatus",
+      "dataset": "sites",
+      "title": "Node Health",
+      "span": 4,
+      "columns": [
+        {
+          "field": "site",
+          "title": "Node"
+        },
+        {
+          "field": "network",
+          "title": "Network"
+        },
+        {
+          "field": "throughput",
+          "title": "Gbps",
+          "format": "number",
+          "hozAlign": "right"
+        },
+        {
+          "field": "latency",
+          "title": "Latency",
+          "format": "number",
+          "hozAlign": "right"
+        },
+        {
+          "field": "alerts",
+          "title": "Alerts",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "uptime",
+          "title": "Uptime",
+          "format": "number",
+          "hozAlign": "right"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 10,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "site",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n\n.hp-grid{padding:18px;background:radial-gradient(circle at 50% 10%,#183949,#0b1a27 50%,#08131e)}.telemetry-header{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 10px}.telemetry-header span{color:#04d9d2;font-size:9px;font-weight:800;letter-spacing:.14em}.telemetry-header h1{margin:4px 0 0;font-size:30px;font-weight:500}.telemetry-header nav{display:flex;gap:7px}.telemetry-header nav b{padding:7px 11px;border:1px solid #27556a;border-radius:999px;color:#8ddde1;font-size:9px}\n.hp-card,.hp-metric,.hp-table-wrap{background:linear-gradient(145deg,#142735,#10202d);border-color:#244859;box-shadow:inset 0 1px 0 rgb(255 255 255 / 3%),0 16px 38px rgb(0 0 0 / 24%)}.hp-component-metricGrid .hp-metric{border-bottom:2px solid var(--hp-intent,#04d9d2)}.hp-component-svgMarkup{border:1px solid #244859;border-radius:12px;overflow:hidden}\n"
+}

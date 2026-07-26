@@ -1,0 +1,19 @@
+recordtype,projectid,projectname,client,projecttype,projectstatus,manager,startdate,enddate,month,monthorder,budget,contractvalue,scheduledcost,performedcost,actualcost,margin,completionpct,spi,cpi,costcategory,costvalue
+Summary,PRJ-2048,Munich Innovation Campus,Partner LLC,Design & Build,In Execution,Robert Sattler,2025-06-01,2027-12-31,,,4895600,4956477,4890933,2730551,2345865,65544,56,1.1,1.2,,
+Month,PRJ-2048,,,,,,,,Jan,1,,,120000,90000,70000,,,,,,
+Month,PRJ-2048,,,,,,,,Feb,2,,,370000,330000,210000,,,,,,
+Month,PRJ-2048,,,,,,,,Mar,3,,,510000,410000,290000,,,,,,
+Month,PRJ-2048,,,,,,,,Apr,4,,,820000,680000,560000,,,,,,
+Month,PRJ-2048,,,,,,,,May,5,,,1400000,1300000,1320000,,,,,,
+Month,PRJ-2048,,,,,,,,Jun,6,,,2550000,2750000,2300000,,,,,,
+Month,PRJ-2048,,,,,,,,Jul,7,,,4200000,2760000,2320000,,,,,,
+Month,PRJ-2048,,,,,,,,Aug,8,,,4280000,2765000,2330000,,,,,,
+Month,PRJ-2048,,,,,,,,Sep,9,,,4320000,2770000,2340000,,,,,,
+Month,PRJ-2048,,,,,,,,Oct,10,,,4700000,2770000,2343000,,,,,,
+Month,PRJ-2048,,,,,,,,Nov,11,,,4800000,2770000,2345000,,,,,,
+Month,PRJ-2048,,,,,,,,Dec,12,,,4890933,2770000,2345865,,,,,,
+Cost,PRJ-2048,,,,,,,,,,,,,,,,,,,Material,985263
+Cost,PRJ-2048,,,,,,,,,,,,,,,,,,,Labour,821053
+Cost,PRJ-2048,,,,,,,,,,,,,,,,,,,Equipment,328421
+Cost,PRJ-2048,,,,,,,,,,,,,,,,,,,Subcontractors,164211
+Cost,PRJ-2048,,,,,,,,,,,,,,,,,,,Foreign Labour,46917

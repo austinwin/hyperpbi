@@ -1,0 +1,541 @@
+{
+  "version": "2.0",
+  "title": "Urban Mobility Command Center",
+  "theme": {
+    "mode": "light",
+    "density": "compact",
+    "primaryColor": "#6857e5",
+    "accentColor": "#16c79a",
+    "surfaceColor": "#ffffff",
+    "textColor": "#25283d",
+    "borderColor": "#e1e5ee",
+    "successColor": "#16c79a",
+    "warningColor": "#ffb703",
+    "dangerColor": "#fa5c73",
+    "radius": 12,
+    "cardPadding": 12,
+    "gap": 10
+  },
+  "app": {
+    "enabled": true,
+    "layout": "vertical",
+    "container": "fluid",
+    "density": "compact",
+    "stickyHeader": true,
+    "contentPadding": "compact",
+    "brand": {
+      "title": "Move",
+      "shortTitle": "MO",
+      "subtitle": "Mobility operations",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true,
+      "showSidebarToggle": true,
+      "showSearch": true,
+      "searchPlaceholder": "Search this dashboard",
+      "actions": [
+        {
+          "id": "refresh",
+          "ariaLabel": "Refresh dashboard",
+          "icon": "refresh",
+          "action": {
+            "type": "showToast",
+            "title": "Move",
+            "message": "The current dataset is displayed.",
+            "intent": "primary",
+            "durationMs": 2200
+          }
+        },
+        {
+          "id": "notifications",
+          "ariaLabel": "Notifications",
+          "icon": "bell",
+          "badge": 3,
+          "action": {
+            "type": "showToast",
+            "title": "Notifications",
+            "message": "Three items need attention.",
+            "intent": "warning",
+            "durationMs": 2200
+          }
+        }
+      ],
+      "user": {
+        "name": "Dashboard Owner",
+        "subtitle": "Workspace admin",
+        "initials": "DO",
+        "status": "online"
+      }
+    },
+    "sidebar": {
+      "visible": true,
+      "width": 216,
+      "collapsedWidth": 62,
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "mobileBreakpoint": 760,
+      "navigation": [
+        {
+          "id": "dashboard",
+          "label": "Dashboard",
+          "icon": "dashboard",
+          "action": {
+            "type": "showToast",
+            "title": "Dashboard",
+            "message": "Overview is already open.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "vehicles",
+          "label": "Vehicles",
+          "icon": "truck",
+          "action": {
+            "type": "showToast",
+            "title": "Vehicles",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "routes",
+          "label": "Routes",
+          "icon": "map",
+          "action": {
+            "type": "showToast",
+            "title": "Routes",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "promotions",
+          "label": "Promotions",
+          "icon": "tag",
+          "action": {
+            "type": "showToast",
+            "title": "Promotions",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        },
+        {
+          "id": "settings",
+          "label": "Settings",
+          "icon": "settings",
+          "action": {
+            "type": "showToast",
+            "title": "Settings",
+            "message": "This example focuses on the overview.",
+            "intent": "primary",
+            "durationMs": 1600
+          }
+        }
+      ],
+      "footer": {
+        "title": "Move",
+        "subtitle": "Portable HyperPBI example"
+      }
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Urban Mobility Command Center",
+      "subtitle": "Live fleet distribution, demand pressure, and route performance",
+      "meta": [
+        {
+          "label": "Data",
+          "value": "Current",
+          "icon": "check",
+          "intent": "success"
+        }
+      ]
+    },
+    "footer": {
+      "visible": true,
+      "text": "Move · HyperPBI",
+      "secondaryText": "One portable dataset · Web and Power BI"
+    }
+  },
+  "calculations": {
+    "metrics": [
+      {
+        "key": "fleetcount",
+        "aggregation": "count"
+      },
+      {
+        "key": "activerides",
+        "aggregation": "countWhere",
+        "where": {
+          "op": "=",
+          "left": {
+            "field": "status"
+          },
+          "right": {
+            "value": "Active"
+          }
+        }
+      },
+      {
+        "key": "averagebattery",
+        "aggregation": "avg",
+        "field": "batterypct"
+      },
+      {
+        "key": "totalridership",
+        "aggregation": "sum",
+        "field": "ridership"
+      }
+    ]
+  },
+  "data": {
+    "datasets": {
+      "statusmix": {
+        "source": "powerbi",
+        "groupBy": [
+          "status"
+        ],
+        "metrics": {
+          "assets": {
+            "op": "count",
+            "field": "assetid"
+          }
+        }
+      },
+      "dailyusage": {
+        "source": "powerbi",
+        "groupBy": [
+          "tripdate"
+        ],
+        "metrics": {
+          "rides": {
+            "op": "sum",
+            "field": "ridership"
+          }
+        },
+        "sort": [
+          {
+            "field": "tripdate",
+            "direction": "ascending"
+          }
+        ]
+      },
+      "routesummary": {
+        "source": "powerbi",
+        "groupBy": [
+          "route",
+          "zone"
+        ],
+        "metrics": {
+          "rides": {
+            "op": "sum",
+            "field": "ridership"
+          },
+          "averagedemand": {
+            "op": "avg",
+            "field": "demandindex"
+          },
+          "averagebattery": {
+            "op": "avg",
+            "field": "batterypct"
+          }
+        },
+        "sort": [
+          {
+            "field": "rides",
+            "direction": "descending"
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "metricGrid",
+      "id": "mobilitymetrics",
+      "span": 12,
+      "metrics": [
+        {
+          "title": "Fleet Assets",
+          "metric": "fleetcount",
+          "format": "integer",
+          "intent": "primary"
+        },
+        {
+          "title": "Active Rides",
+          "metric": "activerides",
+          "format": "integer",
+          "intent": "success"
+        },
+        {
+          "title": "Average Battery",
+          "metric": "averagebattery",
+          "format": "integer",
+          "suffix": "%",
+          "intent": "warning"
+        },
+        {
+          "title": "Total Ridership",
+          "metric": "totalridership",
+          "format": "integer",
+          "intent": "primary"
+        }
+      ],
+      "interaction": {
+        "enabled": false,
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "map",
+      "id": "fleetmap",
+      "title": "Live Fleet Distribution",
+      "span": 8,
+      "height": 440,
+      "view": {
+        "fitMode": "data",
+        "fitPadding": 0.08
+      },
+      "basemap": {
+        "type": "osm"
+      },
+      "layers": [
+        {
+          "id": "assets",
+          "name": "Fleet status",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "color": "status",
+              "size": "demandindex",
+              "tooltip": [
+                "assetid",
+                "assettype",
+                "status",
+                "zone",
+                "batterypct"
+              ]
+            }
+          },
+          "renderer": {
+            "type": "uniqueValue",
+            "field": "status",
+            "fieldSource": "powerbi",
+            "values": [
+              {
+                "value": "Active",
+                "label": "Active",
+                "symbol": {
+                  "shape": "circle",
+                  "fillColor": "#16c79a",
+                  "outlineColor": "#ffffff",
+                  "size": 10
+                }
+              },
+              {
+                "value": "Charging",
+                "label": "Charging",
+                "symbol": {
+                  "shape": "diamond",
+                  "fillColor": "#ffb703",
+                  "outlineColor": "#ffffff",
+                  "size": 11
+                }
+              },
+              {
+                "value": "Maintenance",
+                "label": "Maintenance",
+                "symbol": {
+                  "shape": "square",
+                  "fillColor": "#fa5c73",
+                  "outlineColor": "#ffffff",
+                  "size": 10
+                }
+              }
+            ],
+            "defaultSymbol": {
+              "shape": "circle",
+              "fillColor": "#6857e5",
+              "size": 8
+            }
+          },
+          "legend": {
+            "interactive": true,
+            "selectionMode": "multiple",
+            "clickAction": "filterLayer",
+            "showCounts": true,
+            "showPercentages": true
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "internalScope": "others",
+            "externalMode": "selection",
+            "selectionMode": "replace",
+            "multiSelect": true,
+            "clearOnSecondClick": true
+          }
+        }
+      ],
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "layers": true,
+        "legend": true,
+        "clearSelection": true,
+        "zoomToSelection": true,
+        "selectedCount": true
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "assetid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "donutChart",
+      "id": "fleetstatus",
+      "dataset": "statusmix",
+      "title": "Fleet Status",
+      "span": 4,
+      "height": 210,
+      "category": "status",
+      "measure": "assets",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#16c79a",
+          "#ffb703",
+          "#fa5c73"
+        ],
+        "series": [
+          {
+            "radius": [
+              "50%",
+              "75%"
+            ]
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "status",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "areaChart",
+      "id": "usagewave",
+      "dataset": "dailyusage",
+      "title": "Use of the Fleet",
+      "span": 4,
+      "height": 210,
+      "category": "tripdate",
+      "measure": "rides",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#6857e5"
+        ],
+        "series": [
+          {
+            "smooth": true,
+            "symbol": "none",
+            "areaStyle": {
+              "opacity": 0.22
+            },
+            "lineStyle": {
+              "width": 3
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "tripdate",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "routeperformance",
+      "dataset": "routesummary",
+      "title": "Busy Routes",
+      "span": 12,
+      "columns": [
+        {
+          "field": "route",
+          "title": "Route"
+        },
+        {
+          "field": "zone",
+          "title": "Zone"
+        },
+        {
+          "field": "rides",
+          "title": "Ridership",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "averagedemand",
+          "title": "Demand",
+          "format": "integer",
+          "cellType": "progress"
+        },
+        {
+          "field": "averagebattery",
+          "title": "Battery",
+          "format": "integer",
+          "hozAlign": "right"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 10,
+      "striped": false,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "route",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true
+      }
+    }
+  ],
+  "css": "\n.hp-app-main { background:#f4f6fb; }\n.hp-page-header { border-bottom:0; background:#f4f6fb; }\n.hp-page-header-title { font-size:20px; letter-spacing:-.03em; }\n.hp-card { border:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric { border:0; border-left:0; box-shadow:0 8px 24px rgb(29 42 68 / 7%); }\n.hp-metric-label { text-transform:none; letter-spacing:0; font-size:11px; }\n.hp-metric-value { font-size:23px; }\n.hp-card-header { border-bottom:1px solid color-mix(in srgb,var(--hp-border) 55%,transparent); }\n.hp-table-wrap { border-radius:var(--hp-radius); }\n.hp-app-footer { background:#f4f6fb; border-top:0; }\n\n.hp-app-main{background:#f2f3f8}.hp-sidebar-app{width:72px!important}.hp-sidebar-app .hp-nav-label,.hp-sidebar-footer{display:none}.hp-sidebar-app .hp-nav-item{justify-content:center;padding:11px}.hp-navbar-brand-subtitle{display:none}\n.hp-component-metricGrid .hp-metric{background:linear-gradient(135deg,#fff,#f7f5ff)}.hp-map-container{border-radius:12px;overflow:hidden}.hp-component-table .hp-card{box-shadow:none;border:1px solid #e4e6ef}\n"
+}

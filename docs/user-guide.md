@@ -1,5 +1,19 @@
 # HyperPBI user guide
 
+## Use the unified website
+
+The HyperPBI website uses one shared navigation and five primary routes:
+
+- `/` introduces the product and shared Power BI/browser runtime.
+- `/components` searches canonical component types, properties, maturity, and copyable JSON.
+- `/playground` creates and imports local projects.
+- `/examples` previews complete dashboards and loads editable copies into the Playground.
+- `/docs` renders this guide and the remaining repository documentation.
+
+For local development, run `npm install` and `npm run dev` from the repository root, then open `http://localhost:4178`. Run `npm run build` before release to type-check and build the shared runtime island and the complete Next.js application.
+
+The eight dashboards in [`examples/dashboards`](../examples/dashboards) are the fastest starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. See the [dashboard example guide](dashboard-examples.md) for the folder list, package profiles, and exact import workflow.
+
 ## Install and bind data
 
 1. Choose a Core or Maps `.pbiviz` package.
@@ -149,9 +163,9 @@ overloading the default layer form.
 
 Feature click, legend click/hover, spatial tools, Select visible, Invert, quick filters, Power BI
 state, and linked HyperPBI state remain synchronized. Shift adds, Ctrl/Cmd toggles, and Alt
-subtracts. The selected indicator reports feature and contributing-row counts. The Playground route
-`/components/map` loads focused examples from `examples/map/manifest.json`, runs each one, shows the
-exact JSON, and provides **Copy spec**. See [Analytical maps](maps.md).
+subtracts. The selected indicator reports feature and contributing-row counts. The unified site's
+`/examples/maps` route loads focused examples from `examples/map/manifest.json`, runs each one,
+shows the exact JSON, and provides **Copy spec**. See [Analytical maps](maps.md).
 
 ## Troubleshooting
 

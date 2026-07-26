@@ -1,0 +1,217 @@
+{
+  "examples": [
+    {
+      "accent": "#6d20ff",
+      "data": "talent-acquisition/data.csv",
+      "description": "Inspired by the bright violet recruiting reference with a full application shell, compact KPI cards, stage-flow analysis, and a candidate work queue.",
+      "expected": "KPI totals, stage charts, gender mix, role demand, and candidate records render from one application-level dataset and cross-highlight by source row lineage.",
+      "folder": "talent-acquisition",
+      "id": "talent-acquisition",
+      "limitations": "Profile photography is replaced by safe initials and bundled icons so the example remains offline and Power BI portable.",
+      "powerBiPackage": "core",
+      "project": "talent-acquisition/project.hyperpbi",
+      "referenceImages": [
+        1,
+        3
+      ],
+      "runtime": "talent-acquisition/runtime.json",
+      "slug": "talent-acquisition",
+      "specification": "talent-acquisition/specification.json",
+      "summary": "A polished recruiting workspace with application flow, candidate mix, open roles, and recent applicants.",
+      "tags": [
+        "recruiting",
+        "workforce",
+        "app-shell"
+      ],
+      "theme": "light",
+      "title": "Talent Acquisition Command Center",
+      "useCase": "Recruiting and workforce analytics"
+    },
+    {
+      "accent": "#1769aa",
+      "data": "capital-project-controls/data.csv",
+      "description": "A clean project-controlling canvas modeled after the white-and-blue reference, with precise status cards and earned-value visuals.",
+      "expected": "Summary values use first-row semantics, monthly curves remain ordered, and cost composition traces back to cost-category rows.",
+      "folder": "capital-project-controls",
+      "id": "capital-project-controls",
+      "limitations": "The example represents one selected project; use a report slicer or external filter to select other projects in Power BI.",
+      "powerBiPackage": "core",
+      "project": "capital-project-controls/project.hyperpbi",
+      "referenceImages": [
+        2
+      ],
+      "runtime": "capital-project-controls/runtime.json",
+      "slug": "capital-project-controls",
+      "specification": "capital-project-controls/specification.json",
+      "summary": "Project identity, commercial KPIs, earned-value gauges, development curves, and cost composition.",
+      "tags": [
+        "projects",
+        "construction",
+        "finance"
+      ],
+      "theme": "light",
+      "title": "Capital Project Controls",
+      "useCase": "Construction and capital-program control"
+    },
+    {
+      "accent": "#ff704f",
+      "data": "retail-sales-operations/data.csv",
+      "description": "Combines the warm Productly visual language with portable semantic charts and a practical order work queue.",
+      "expected": "Monthly revenue, category share, recent orders, and upcoming payments all resolve from logical views over one sparse retail dataset.",
+      "folder": "retail-sales-operations",
+      "id": "retail-sales-operations",
+      "limitations": "The balance card is illustrative and does not initiate payments or connect to a financial institution.",
+      "powerBiPackage": "core",
+      "project": "retail-sales-operations/project.hyperpbi",
+      "referenceImages": [
+        4,
+        12
+      ],
+      "runtime": "retail-sales-operations/runtime.json",
+      "slug": "retail-sales-operations",
+      "specification": "retail-sales-operations/specification.json",
+      "summary": "A coral-and-navy retail dashboard with revenue trends, category mix, order detail, and settlement reminders.",
+      "tags": [
+        "retail",
+        "sales",
+        "ecommerce"
+      ],
+      "theme": "light",
+      "title": "Retail Sales Operations",
+      "useCase": "Retail, ecommerce, and cash-flow monitoring"
+    },
+    {
+      "accent": "#6857e5",
+      "data": "urban-mobility-command-center/data.csv",
+      "description": "Adapts the compact violet mobility reference into a responsive Power BI map dashboard with analytical selection.",
+      "expected": "Map points fit the dataset, status legend selection links to other components, and route summaries retain contributing Power BI row identities.",
+      "folder": "urban-mobility-command-center",
+      "id": "urban-mobility-command-center",
+      "limitations": "Street tiles require the Maps PBIVIZ profile, declared OpenStreetMap WebAccess, and network access in the host.",
+      "powerBiPackage": "maps",
+      "project": "urban-mobility-command-center/project.hyperpbi",
+      "referenceImages": [
+        5
+      ],
+      "runtime": "urban-mobility-command-center/runtime.json",
+      "slug": "urban-mobility-command-center",
+      "specification": "urban-mobility-command-center/specification.json",
+      "summary": "A map-first fleet workspace with live status, demand, battery health, usage trend, and busy-route detail.",
+      "tags": [
+        "mobility",
+        "map",
+        "fleet"
+      ],
+      "theme": "light",
+      "title": "Urban Mobility Command Center",
+      "useCase": "Fleet, micromobility, and route operations"
+    },
+    {
+      "accent": "#2eb7ee",
+      "data": "patient-care-operations/data.csv",
+      "description": "Translates the airy blue-and-mint healthcare reference into a safe, accessible operational workspace.",
+      "expected": "Patient-level data drives aggregate KPIs, daily and departmental charts, and a selectable active-patient work queue.",
+      "folder": "patient-care-operations",
+      "id": "patient-care-operations",
+      "limitations": "All people and clinical events are synthetic; the dashboard is not intended for diagnosis or real patient decisions.",
+      "powerBiPackage": "core",
+      "project": "patient-care-operations/project.hyperpbi",
+      "referenceImages": [
+        6
+      ],
+      "runtime": "patient-care-operations/runtime.json",
+      "slug": "patient-care-operations",
+      "specification": "patient-care-operations/specification.json",
+      "summary": "A calm clinical operations dashboard for alerts, patient demand, review mix, department load, and response queues.",
+      "tags": [
+        "healthcare",
+        "operations",
+        "patients"
+      ],
+      "theme": "light",
+      "title": "Patient Care Operations",
+      "useCase": "Healthcare capacity and patient-flow analytics"
+    },
+    {
+      "accent": "#2596ff",
+      "data": "digital-banking-overview/data.csv",
+      "description": "Captures the midnight Paycent reference with neon accents and a safe CSS-rendered card that works offline.",
+      "expected": "Account summary values, monthly debit/credit activity, category spending, and recent transactions render responsively from one source.",
+      "folder": "digital-banking-overview",
+      "id": "digital-banking-overview",
+      "limitations": "The payment card is a decorative dashboard element and never exposes or processes real card credentials.",
+      "powerBiPackage": "core",
+      "project": "digital-banking-overview/project.hyperpbi",
+      "referenceImages": [
+        8
+      ],
+      "runtime": "digital-banking-overview/runtime.json",
+      "slug": "digital-banking-overview",
+      "specification": "digital-banking-overview/specification.json",
+      "summary": "A responsive dark banking workspace with balance cards, transaction history, spending mix, and account detail.",
+      "tags": [
+        "banking",
+        "transactions",
+        "responsive"
+      ],
+      "theme": "dark",
+      "title": "Digital Banking Overview",
+      "useCase": "Personal banking and transaction analytics"
+    },
+    {
+      "accent": "#21d4fd",
+      "data": "media-web-performance/data.csv",
+      "description": "Blends the coral-framed monitoring reference and the dense website KPI wall into one practical growth dashboard.",
+      "expected": "Summary metrics, daily trends, medium performance, bounce gauge, and live-location list render from explicit logical record types.",
+      "folder": "media-web-performance",
+      "id": "media-web-performance",
+      "limitations": "Location data is shown as a portable ranked list; this Core-profile example intentionally avoids external map tiles.",
+      "powerBiPackage": "core",
+      "project": "media-web-performance/project.hyperpbi",
+      "referenceImages": [
+        7,
+        11
+      ],
+      "runtime": "media-web-performance/runtime.json",
+      "slug": "media-web-performance",
+      "specification": "media-web-performance/specification.json",
+      "summary": "A dark editorial command board combining media monitoring with website conversion, engagement, and audience KPIs.",
+      "tags": [
+        "marketing",
+        "media",
+        "web-analytics"
+      ],
+      "theme": "dark",
+      "title": "Media & Web Performance",
+      "useCase": "Marketing, audience, and media monitoring"
+    },
+    {
+      "accent": "#04d9d2",
+      "data": "industrial-network-telemetry/data.csv",
+      "description": "Represents the futuristic HUD references using safe ECharts options and sanitized inline SVG rather than external raster artwork.",
+      "expected": "Summary gauges, topology, ordered multiseries telemetry, and grouped node-health records render without network access.",
+      "folder": "industrial-network-telemetry",
+      "id": "industrial-network-telemetry",
+      "limitations": "The topology is a schematic network map; advanced 3D surfaces and geographic basemaps are intentionally omitted from the Core package.",
+      "powerBiPackage": "core",
+      "project": "industrial-network-telemetry/project.hyperpbi",
+      "referenceImages": [
+        9,
+        10
+      ],
+      "runtime": "industrial-network-telemetry/runtime.json",
+      "slug": "industrial-network-telemetry",
+      "specification": "industrial-network-telemetry/specification.json",
+      "summary": "A deep-teal telemetry wall with neon gauges, network topology, waveform analysis, and node health.",
+      "tags": [
+        "industrial",
+        "telemetry",
+        "network"
+      ],
+      "theme": "dark",
+      "title": "Industrial Network Telemetry",
+      "useCase": "Network, plant, and infrastructure telemetry"
+    }
+  ],
+  "version": "1.0"
+}
