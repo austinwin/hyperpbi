@@ -8,7 +8,7 @@
     "cloudflare:build": "opennextjs-cloudflare build --config wrangler.jsonc && opennextjs-cloudflare populateCache local --config wrangler.jsonc",
     "cloudflare:preview": "npm run cloudflare:build && opennextjs-cloudflare preview --config wrangler.jsonc",
     "sites:build": "npm run cloudflare:build && npm run sites:stage",
-    "sites:stage": "node scripts/stage-sites-build.mjs",
+    "sites:stage": "node scripts/stage-sites-build.mjs && wrangler deploy dist/server-source/index.js --dry-run --outdir dist/server --config wrangler.jsonc && node scripts/finalize-sites-build.mjs",
     "start": "next start --port 4178",
     "typecheck": "tsc --noEmit"
   },

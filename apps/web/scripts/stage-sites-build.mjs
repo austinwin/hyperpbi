@@ -26,8 +26,8 @@ const runtimeIsland = path.join(
   "hyperpbi-island.js",
 );
 const distRoot = path.join(projectRoot, "dist");
-const compatibilityServer = path.join(distRoot, "server");
-const compatibilityWorker = path.join(compatibilityServer, "index.js");
+const compatibilitySource = path.join(distRoot, "server-source");
+const compatibilityWorker = path.join(compatibilitySource, "index.js");
 const compatibilityAssets = path.join(distRoot, "client");
 const stagedOpenNext = path.join(distRoot, ".open-next");
 const packageManifest = path.join(projectRoot, "package.json");
@@ -88,12 +88,12 @@ if (
 await rm(distRoot, { recursive: true, force: true });
 
 await cp(openNextRoot, stagedOpenNext, { recursive: true });
-await mkdir(compatibilityServer, { recursive: true });
-await cp(nativeWorker, path.join(compatibilityServer, "worker.js"));
+await mkdir(compatibilitySource, { recursive: true });
+await cp(nativeWorker, path.join(compatibilitySource, "worker.js"));
 for (const directory of compatibilityModuleDirectories) {
   await cp(
     path.join(openNextRoot, directory),
-    path.join(compatibilityServer, directory),
+    path.join(compatibilitySource, directory),
     { recursive: true },
   );
 }
@@ -109,7 +109,7 @@ await writeFile(
 );
 
 await requireFile(compatibilityWorker);
-await requireFile(path.join(compatibilityServer, "worker.js"));
+await requireFile(path.join(compatibilitySource, "worker.js"));
 await requireFile(path.join(stagedOpenNext, "worker.js"));
 await requireFile(
   path.join(compatibilityAssets, "runtime", "hyperpbi-island.js"),
@@ -119,9 +119,9 @@ await requireDirectory(
 );
 
 const nativeFileCount = await countFiles(stagedOpenNext);
-const compatibilityModuleCount = await countFiles(compatibilityServer);
+const compatibilityModuleCount = await countFiles(compatibilitySource);
 const compatibilityAssetCount = await countFiles(compatibilityAssets);
 
 console.log(
-  `Sites staging complete: ${nativeFileCount} OpenNext files, ${compatibilityModuleCount} compatibility modules, and ${compatibilityAssetCount} compatibility assets.`,
+  `Sites source staging complete: ${nativeFileCount} OpenNext files, ${compatibilityModuleCount} compatibility modules, and ${compatibilityAssetCount} compatibility assets.`,
 );
