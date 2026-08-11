@@ -10,8 +10,8 @@ import { defaultConfigJson, parseConfig } from "./config/hyperpbiConfig";
 import { HyperPbiStudio } from "./editor/HyperPbiStudio";
 import { LandingPage } from "./editor/LandingPage";
 import { SetupExperience } from "./editor/SetupExperience";
-import { ErrorPanel } from "./components/system/ErrorPanel";
 import { HyperPbiRoot } from "./render/HyperPbiRoot";
+import { ViewerRenderStability } from "./render/ViewerRenderStability";
 import { createDefaultSchema } from "./schema/defaultSchema";
 import { HyperPbiSchema } from "./schema/hyperpbiSchema";
 import { validateReferences } from "./schema/validateReferences";
@@ -43,6 +43,7 @@ export class Visual implements IVisual {
     private readonly hostBridge: PowerBiHostBridge;
     private readonly instanceId = createInstanceId();
     private readonly formattingSettingsService = new FormattingSettingsService();
+    private readonly viewerRenderStability = new ViewerRenderStability(900);
     private formattingSettings = new VisualFormattingSettingsModel();
     private data: NormalizedData = parseDataView();
     private selectionIds: Array<powerbi.visuals.ISelectionId | undefined> = [];
@@ -130,20 +131,104 @@ export class Visual implements IVisual {
 
     private renderCurrent(): void {
         const settings = toRuntimeSettings(this.formattingSettings);
-        if (shouldRenderLandingPage(this.data, this.specification)) { render(h(LandingPage, {}), this.target); return; }
+        if (shouldRenderLandingPage(this.data, this.specification)) {
+            this.viewerRenderStability.reset();
+            render(h(LandingPage, {}), this.target);
+            return;
+        }
         if (this.editMode === powerbi.EditMode.Advanced) {
+            this.viewerRenderStability.reset();
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target); return;
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target);
+            return;
         }
-        if (!this.specification.trim()) { render(h(SetupExperience, { data: this.data }), this.target); return; }
-        const schemaResult = this.parseSpecification(this.specification); const configResult = parseConfig(this.configuration);
+        if (!this.specification.trim()) {
+            this.viewerRenderStability.reset();
+            render(h(SetupExperience, { data: this.data }), this.target);
+            return;
+        }
+
+        const schemaResult = this.parseSpecification(this.specification);
+        const configResult = parseConfig(this.configuration);
         if (!schemaResult.schema || !configResult.config) {
-            const errors = [...schemaResult.errors, ...configResult.errors];
-            render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "The saved dashboard needs attention", errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return;
+            this.renderViewerFailure([...schemaResult.errors, ...configResult.errors]);
+            return;
         }
+
         const runtimeData = prepareRuntimeData(this.data, schemaResult.schema, configResult.config);
-        if (!runtimeData.data) { render(h("div", { class: "hyperpbi-root hp-invalid-report" }, h(ErrorPanel, { title: "Calculation validation failed", errors: runtimeData.errors, fields: Object.keys(this.data.fields), showExample: false }), h("p", { class: "hp-native-edit-hint" }, "Open the visual menu (…) and select Edit to repair this dashboard.")), this.target); return; }
+        if (!runtimeData.data) {
+            this.renderViewerFailure(runtimeData.errors);
+            return;
+        }
+
+        this.viewerRenderStability.markSuccess();
         render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
+    }
+
+    private renderViewerFailure(errors: string[]): void {
+        const signature = JSON.stringify([
+            this.specification,
+            this.configuration,
+            Object.keys(this.data.fields).sort(),
+            errors
+        ]);
+
+        this.viewerRenderStability.fail(signature, {
+            showLoading: () => render(
+                h("div", {
+                    class: "hyperpbi-root",
+                    role: "status",
+                    "aria-live": "polite",
+                    style: {
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "16px",
+                        background: "var(--hp-surface, #ffffff)",
+                        color: "var(--hp-text, #182433)"
+                    }
+                }, h("div", {
+                    style: {
+                        fontSize: "12px",
+                        color: "color-mix(in srgb, var(--hp-text, #182433) 62%, transparent)"
+                    }
+                }, "Loading visual…")),
+                this.target
+            ),
+            showFailure: () => render(
+                h("div", {
+                    class: "hyperpbi-root",
+                    role: "alert",
+                    style: {
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "20px",
+                        background: "var(--hp-surface, #ffffff)",
+                        color: "var(--hp-text, #182433)"
+                    }
+                }, h("div", {
+                    style: {
+                        width: "min(420px, 100%)",
+                        padding: "14px 16px",
+                        border: "1px solid var(--hp-border, #dce1e7)",
+                        borderRadius: "8px",
+                        background: "var(--hp-surface, #ffffff)"
+                    }
+                },
+                    h("div", { style: { fontSize: "13px", fontWeight: 650 } }, "Unable to load this visual."),
+                    h("div", {
+                        style: {
+                            marginTop: "4px",
+                            fontSize: "11px",
+                            lineHeight: 1.45,
+                            color: "color-mix(in srgb, var(--hp-text, #182433) 62%, transparent)"
+                        }
+                    }, "Report authors can open Edit to review the visual configuration.")
+                )),
+                this.target
+            )
+        });
     }
 
     private async checkProviderAccess():Promise<void>{
@@ -202,7 +287,7 @@ export class Visual implements IVisual {
     private saveStudioLayout = (studioLayout: string): void => { this.studioLayout = studioLayout; persistVisualState(this.host, { specification: this.specification, configuration: this.configuration, studioLayout }); };
 
     private updateInteractionDiagnostics = (rowIndices: number[], details: InteractionDetails, result: ExternalSelectionResult): void => {
-        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount: details.matchedRowCount??rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalMode:details.externalMode??"selection",filterSent:false,selectionSent:result.sent, externalSelectionSent: result.sent, filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
+        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.selectionIds.length, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount:details.matchedRowCount??rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalMode:details.externalMode??"selection",filterSent:false,selectionSent:result.sent, externalSelectionSent: result.sent, filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
     };
 
     private selectRows = (rowIndices: number[], multiSelect = false, details: InteractionDetails = {}): ExternalSelectionResult => {
@@ -236,5 +321,5 @@ export class Visual implements IVisual {
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel { return this.formattingSettingsService.buildFormattingModel(this.formattingSettings); }
-    public destroy(): void { render(null, this.target); }
+    public destroy(): void { this.viewerRenderStability.dispose(); render(null, this.target); }
 }
