@@ -1,4 +1,4 @@
-import { componentDescriptors } from "./componentDescriptors";
+import { componentDescriptors } from "./componentDescriptorRegistry";
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity } from "./componentTypes";
 export type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity } from "./componentTypes";
 
@@ -14,7 +14,6 @@ export interface ComponentMetadata {
     interaction: { defaultEnabled: boolean; naturalTrigger: "click" | "change"; autoExternalMode: "filter" | "selection" };
 }
 
-// Derive component metadata from the centralized definitions catalog
 export const componentCatalog: ComponentMetadata[] = componentDescriptors.map(d => ({
     type: d.type,
     label: d.label,

@@ -1,4 +1,4 @@
-import {getComponentDescriptor,type ComponentContainerDescriptor} from "./componentDescriptors";
+import {getComponentDescriptor,type ComponentContainerDescriptor} from "./componentDescriptorRegistry";
 export type ComponentRecord=Record<string,unknown>;
 export interface ComponentVisit{component:ComponentRecord;path:string;depth:number;datasetName:string;parent:unknown[]|ComponentRecord;index:number|string;containerPath:string;container?:ComponentContainerDescriptor;}
 export const isComponentRecord=(value:unknown):value is ComponentRecord=>Boolean(value)&&typeof value==="object"&&!Array.isArray(value)&&typeof (value as ComponentRecord).type==="string";
