@@ -33,7 +33,7 @@ const clamp = (value: unknown, fallback: number, min: number, max: number): numb
 
 function hierarchicalPositions(nodes: GraphNode[], links: GraphLink[], orientation: "horizontal" | "vertical"): void {
     const adjacency = new Map<string, Set<string>>();
-    const indegree = new Map(nodes.map(node => [node.id, 0] as const));
+    const indegree = new Map<string, number>(nodes.map(node => [node.id, 0]));
     for (const link of links) {
         const targets = adjacency.get(link.source) ?? new Set<string>();
         if (!targets.has(link.target)) {
@@ -179,7 +179,11 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
         const graphLinks = links.map(link => ({
             source: link.source,
             target: link.target,
-            value: component.showEdgeLabels === true ? link.label ?? link.weight : link.weight,
+            value: link.weight,
+            label: component.showEdgeLabels === true ? {
+                show: true,
+                formatter: link.label ?? String(link.weight),
+            } : undefined,
             lineStyle: {
                 width: 1 + Math.sqrt(Math.max(0, link.weight) / maxWeight) * 3,
             },
@@ -206,8 +210,7 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
                 width: 150,
             },
             edgeLabel: {
-                show: component.showEdgeLabels === true,
-                formatter: "{c}",
+                show: false,
                 color: context.theme.text,
                 fontSize: 10,
             },
