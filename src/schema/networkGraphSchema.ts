@@ -17,7 +17,7 @@ export interface NetworkGraphComponent extends BaseChartComponent {
     targetCategoryField?: string;
     edgeLabelField?: string;
     edgeWeightField?: string;
-    layout?: "force" | "circular" | "hierarchical";
+    layout?: "force" | "circular" | "hierarchical" | "hybrid";
     orientation?: "horizontal" | "vertical";
     roam?: boolean;
     draggable?: boolean;
@@ -28,5 +28,11 @@ export interface NetworkGraphComponent extends BaseChartComponent {
     repulsion?: number;
     edgeLength?: number;
     gravity?: number;
+    levelGap?: number;
+    nodeGap?: number;
+    edgeWidth?: number;
+    edgeOpacity?: number;
+    edgeCurveness?: number;
+    arrowSize?: number;
     maxNodes?: number;
 }

@@ -1,7 +1,7 @@
 import type { Diagnostic } from "./diagnostics";
 import { visitSpecificationComponents } from "../catalog/componentTraversal";
 
-const layouts = new Set(["force", "circular", "hierarchical"]);
+const layouts = new Set(["force", "circular", "hierarchical", "hybrid"]);
 const orientations = new Set(["horizontal", "vertical"]);
 const booleanProperties = ["roam", "draggable", "directed", "showLabels", "showEdgeLabels"] as const;
 const fieldProperties = [
@@ -56,7 +56,7 @@ export function validateNetworkGraphComponents(specification: unknown): Diagnost
             severity: "error",
             path: `${visit.path}/layout`,
             componentId,
-            message: `networkGraph layout must be force, circular, or hierarchical.`,
+            message: `networkGraph layout must be force, circular, hierarchical, or hybrid.`,
             received: component.layout,
             suggestions: Array.from(layouts),
         });
@@ -85,6 +85,12 @@ export function validateNetworkGraphComponents(specification: unknown): Diagnost
         numeric(diagnostics, component, visit.path, "repulsion", 20, 5000);
         numeric(diagnostics, component, visit.path, "edgeLength", 20, 600);
         numeric(diagnostics, component, visit.path, "gravity", 0, 1);
+        numeric(diagnostics, component, visit.path, "levelGap", 80, 400);
+        numeric(diagnostics, component, visit.path, "nodeGap", 24, 180);
+        numeric(diagnostics, component, visit.path, "edgeWidth", 0.5, 6);
+        numeric(diagnostics, component, visit.path, "edgeOpacity", 0.1, 1);
+        numeric(diagnostics, component, visit.path, "edgeCurveness", 0, 0.5);
+        numeric(diagnostics, component, visit.path, "arrowSize", 2, 16);
         numeric(diagnostics, component, visit.path, "maxNodes", 2, 5000, true);
     });
     return diagnostics;

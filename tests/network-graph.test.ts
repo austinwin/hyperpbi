@@ -41,23 +41,42 @@ const component:NetworkGraphComponent={
 };
 
 describe("networkGraph adapter",()=>{
-    it("builds interactive graph nodes and exact node/edge lineage",()=>{
+    it("builds interactive force graph nodes with calmer defaults and exact lineage",()=>{
         const result=networkGraphAdapter.build({...component,layout:"force"},rows,context);
         const series=(result.option as any).series[0];
-        expect(series).toMatchObject({type:"graph",layout:"force",roam:true,draggable:true,edgeSymbol:["none","arrow"]});
-        expect(series.force).toMatchObject({repulsion:650,edgeLength:140,gravity:.08});
+        expect(series).toMatchObject({type:"graph",layout:"force",roam:true,draggable:true,edgeSymbol:["none","arrow"],edgeSymbolSize:[0,5]});
+        expect(series.force).toMatchObject({repulsion:260,edgeLength:120,gravity:.04,friction:.72});
         expect(result.bindings.find(binding=>binding.dataType==="node"&&binding.value==="SSO 1")?.sourceRowIndices).toEqual([0,1,4]);
         expect(result.bindings.find(binding=>binding.dataType==="edge"&&String(binding.value)==="Inspections,INSP 10")?.sourceRowIndices).toEqual([2]);
     });
 
-    it("lays a relationship tree into deterministic hierarchy columns",()=>{
-        const result=networkGraphAdapter.build({...component,layout:"hierarchical",orientation:"horizontal"},rows,context);
-        const data=(result.option as any).series[0].data as Array<{id:string;x:number;y:number}>;
+    it("uses settled hybrid layout by default and keeps hierarchy levels readable",()=>{
+        const result=networkGraphAdapter.build(component,rows,context);
+        const series=(result.option as any).series[0];
+        const data=series.data as Array<{id:string;x:number;y:number}>;
         const x=(id:string)=>data.find(node=>node.id===id)?.x??-1;
-        expect((result.option as any).series[0].layout).toBe("none");
+        expect(series.layout).toBe("none");
+        expect(series.draggable).toBe(false);
         expect(x("SR 100")).toBeLessThan(x("SSO 1"));
         expect(x("SSO 1")).toBeLessThan(x("Inspections"));
         expect(x("Inspections")).toBeLessThan(x("INSP 10"));
+        expect(series.lineStyle).toMatchObject({color:"#ddd",width:1.25,opacity:.62,curveness:0});
+    });
+
+    it("keeps unweighted edges thin instead of scaling every relationship to four pixels",()=>{
+        const result=networkGraphAdapter.build({...component,edgeWeightField:undefined,layout:"hybrid"},rows,context);
+        const series=(result.option as any).series[0];
+        expect(series.links.every((link:any)=>link.lineStyle.width===1.25)).toBe(true);
+        expect(series.edgeSymbolSize).toEqual([0,5]);
+    });
+
+    it("supports deterministic hierarchy spacing controls",()=>{
+        const result=networkGraphAdapter.build({...component,layout:"hierarchical",orientation:"horizontal",levelGap:160,nodeGap:50},rows,context);
+        const data=(result.option as any).series[0].data as Array<{id:string;x:number;y:number}>;
+        const x=(id:string)=>data.find(node=>node.id===id)?.x??-1;
+        expect((result.option as any).series[0].layout).toBe("none");
+        expect(x("SSO 1")-x("SR 100")).toBe(160);
+        expect(x("Inspections")-x("SSO 1")).toBe(160);
     });
 
     it("bounds node count and reports skipped relationships",()=>{
@@ -68,16 +87,18 @@ describe("networkGraph adapter",()=>{
 });
 
 describe("networkGraph catalog and schema",()=>{
-    it("registers a valid first-class component and exposes it to AI catalog prompts",()=>{
+    it("registers hybrid and elegant edge controls as valid first-class API",()=>{
         const example=JSON.parse(componentJsonExample("networkGraph"));
         expect(registeredChartTypes).toContain("networkGraph");
         expect(getChartAdapter({type:"networkGraph"} as any).type).toBe("networkGraph");
         expect(componentPromptReference()).toContain("networkGraph");
+        expect(example.layout).toBe("hybrid");
         expect(validateSchema({version:"2.0",components:[example]}).valid).toBe(true);
         expect(validateSchema({version:"2.0",components:[{...example,layout:"banana"}]}).valid).toBe(false);
+        expect(validateSchema({version:"2.0",components:[{...example,edgeWidth:20}]}).valid).toBe(false);
     });
 
-    it("includes networkGraph guidance for force and relationship intent",()=>{
+    it("includes networkGraph guidance for hybrid layout and normalized multi-table source models",()=>{
         const promptData:any={
             rows:[{From:"A",To:"B"}],
             rowKeys:["0"],
@@ -88,10 +109,12 @@ describe("networkGraph catalog and schema",()=>{
             aggregates:{},
             map:{},
         };
-        const result=composeAiPrompt(promptData,{...defaultAiPromptSettings,goal:"Build a force graph relationship explorer"});
+        const result=composeAiPrompt(promptData,{...defaultAiPromptSettings,goal:"Build an operational relationship explorer for service requests, incidents, inspections, and work orders"});
         expect(result.prompt).toContain("networkGraph");
         expect(result.prompt).toContain("sourceField");
         expect(result.prompt).toContain("targetField");
-        expect(result.prompt).toContain("prefer networkGraph over advancedChart");
+        expect(result.prompt).toContain("Prefer hybrid for operational/process trees");
+        expect(result.prompt).toContain("derived relationship/edge dataset");
+        expect(result.prompt).toContain("do not bind all child tables directly into one Power BI visual");
     });
 });
