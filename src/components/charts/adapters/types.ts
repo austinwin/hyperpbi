@@ -15,7 +15,7 @@ export interface ChartDatumBinding {
 export interface ChartBuildResult { option: EChartsCoreOption; bindings: ChartDatumBinding[]; warnings: string[]; }
 export interface ChartBuildContext { theme: RuntimeSettings["theme"]; sourceRows: DataRow[]; sourceRowKeys: string[]; sourceIndex: Map<DataRow, number>; sourceIndicesForRow?: (row: DataRow) => number[]; }
 
-export interface ChartAdapter<T extends ChartComponent = ChartComponent> {
+export interface ChartAdapter<T extends { type: string } = ChartComponent> {
     type: T["type"];
     fields(component: T): string[];
     build(component: T, rows: DataRow[], context: ChartBuildContext): ChartBuildResult;

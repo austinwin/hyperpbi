@@ -7,13 +7,19 @@ import { sankeyAdapter } from "./sankeyAdapter";
 import { treemapAdapter } from "./treemapAdapter";
 import { funnelAdapter } from "./funnelAdapter";
 import { radarAdapter } from "./radarAdapter";
+import { networkGraphAdapter } from "./networkGraphAdapter";
 
-const registry = new Map<ChartType, ChartAdapter>([
-    ...(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","heatmap"] as ChartType[]).map(type => [type, { ...categoryAdapter, type }] as [ChartType, ChartAdapter]),
-    ["scatterChart", scatterAdapter as ChartAdapter], ["gauge", gaugeAdapter as ChartAdapter], ["advancedChart", advancedAdapter as ChartAdapter],
-    ["comboChart", comboAdapter as ChartAdapter], ["waterfallChart", waterfallAdapter as ChartAdapter], ["sankeyChart", sankeyAdapter as ChartAdapter],
-    ["treemapChart", treemapAdapter as ChartAdapter], ["funnelChart", funnelAdapter as ChartAdapter], ["radarChart", radarAdapter as ChartAdapter],
+const registry = new Map<string, ChartAdapter<any>>([
+    ...(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","heatmap"] as ChartType[]).map(type => [type, { ...categoryAdapter, type }] as [string, ChartAdapter<any>]),
+    ["scatterChart", scatterAdapter], ["gauge", gaugeAdapter], ["advancedChart", advancedAdapter],
+    ["comboChart", comboAdapter], ["waterfallChart", waterfallAdapter], ["sankeyChart", sankeyAdapter],
+    ["treemapChart", treemapAdapter], ["funnelChart", funnelAdapter], ["radarChart", radarAdapter],
+    ["networkGraph", networkGraphAdapter],
 ]);
 
 export const registeredChartTypes = Array.from(registry.keys());
-export function getChartAdapter(component: ChartComponent): ChartAdapter { const adapter=registry.get(component.type);if(!adapter)throw new Error(`No chart adapter registered for ${component.type}.`);return adapter; }
+export function getChartAdapter(component: ChartComponent | { type: string }): ChartAdapter<any> {
+    const adapter = registry.get(component.type);
+    if (!adapter) throw new Error(`No chart adapter registered for ${component.type}.`);
+    return adapter;
+}

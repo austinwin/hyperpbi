@@ -47,7 +47,7 @@ type ComponentRenderer = (component: DashboardComponent, renderChildren: RenderC
 
 const controlTypes = new Set(["searchBox", "textInput", "numberInput", "slider", "select", "multiSelect", "segmentedControl", "toggle", "button", "buttonGroup", "filterChips", "dateRange", "textarea", "checkbox", "checkboxGroup", "radioGroup", "inputGroup"]);
 const dataTypes = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel"]);
-const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "advancedChart"]);
+const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "advancedChart", "networkGraph"]);
 
 const componentRenderers: Record<string, ComponentRenderer> = {
     table: c => h(TableBlock, { component: c as TableComponent }),
@@ -64,12 +64,10 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     svgMarkup: c => h(SvgMarkupBlock, { component: c as SvgMarkupComponent }),
     divider: () => h(Divider, {}),
     spacer: () => h(Spacer, {}),
-    // Layout containers
     grid: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(GridLayout, { columns: comp.columns, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
     flex: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(FlexLayout, { direction: comp.direction, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
     toolbar: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(FlexLayout, { direction: comp.direction, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },
     split: (c, rc) => h(SplitLayout,{component:c as ContainerComponent,renderChildren:rc}),
-    // New primitives
     card: (c, rc) => h(CardBlock, { component: c as CardComponent, renderChildren: rc }),
     accordion: (c, rc) => h(Accordion, { component: c as AccordionComponent, renderChildren: rc }),
     steps: c => h(Steps, { component: c as StepsComponent }),
@@ -84,16 +82,13 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     iconButton: c => h(IconButton, { component: c as IconButtonComponent }),
     avatar: c => h(Avatar, { component: c as AvatarComponent }),
     avatarGroup: c => h(AvatarGroup, { component: c as AvatarGroupComponent }),
-    // overlays - triggers render inline, body rendered by OverlayHost
-    modal: () => null, // rendered by OverlayHost
+    modal: () => null,
     dropdown: c => h(OverlayTrigger, { component: c as DropdownComponent }),
-    offcanvas: () => null, // TODO: implement offcanvas renderer
+    offcanvas: () => null,
     popover: c => h(OverlayTrigger, { component: c as PopoverComponent }),
-    // navigation
     collapsible: (c, rc) => h(Collapsible, { component: c, renderChildren: rc }),
 };
 
-// Populate renderers for sets
 for (const type of controlTypes) {
     componentRenderers[type] = c => h(ControlBlock, { component: c as ControlComponent });
 }
@@ -103,7 +98,6 @@ for (const type of dataTypes) {
 for (const type of chartTypes) {
     componentRenderers[type] = c => h(ChartBlock, { component: c as ChartComponent });
 }
-// Section and root panel containers
 for (const type of ["section", "leftPanel", "rightPanel"]) {
     componentRenderers[type] = (c, rc) => {
         const comp = c as ContainerComponent;
@@ -118,7 +112,5 @@ export function ComponentRegistry({ component, renderChildren, authoringOwnerId 
         if (["modal", "offcanvas"].includes(component.type)) return renderer(component, renderChildren);
         return h("div", { "data-hp-id":component.id,"data-hp-type":component.type,"data-hp-owner-id":authoringOwnerId }, renderer(component, renderChildren));
     }
-    // Unsupported component fallback
     return h(EmptyState, { title: `Unsupported component: ${component.type}` });
 }
-
