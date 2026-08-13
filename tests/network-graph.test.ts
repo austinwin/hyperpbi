@@ -11,14 +11,38 @@ import { composeAiPrompt } from "../src/ai/promptComposer";
 import { defaultAiPromptSettings } from "../src/ai/aiPromptSettings";
 
 const rows: DataRow[] = [
-    { From:"SR 100", To:"SSO 1", FromLabel:"Service Request 100", ToLabel:"SSO 1", FromType:"SR", ToType:"SSO", Weight:1 },
-    { From:"SSO 1", To:"Inspections", FromLabel:"SSO 1", ToLabel:"Inspections (2)", FromType:"SSO", ToType:"Group", Weight:1 },
-    { From:"Inspections", To:"INSP 10", FromLabel:"Inspections (2)", ToLabel:"Inspection 10", FromType:"Group", ToType:"Inspection", Weight:2 },
-    { From:"Inspections", To:"INSP 11", FromLabel:"Inspections (2)", ToLabel:"Inspection 11", FromType:"Group", ToType:"Inspection", Weight:3 },
-    { From:"SSO 1", To:"Work Orders", FromLabel:"SSO 1", ToLabel:"Work Orders (1)", FromType:"SSO", ToType:"Group", Weight:1 },
-    { From:"Work Orders", To:"WO 20", FromLabel:"Work Orders (1)", ToLabel:"Work Order 20", FromType:"Group", ToType:"Work Order", Weight:4 },
+    {
+        SrId:"SR 100", SrLabel:"Service Request 100",
+        IncidentId:"SSO 1", IncidentLabel:"SSO 1",
+        InspectionId:"INSP 10", InspectionLabel:"Inspection 10",
+        WorkOrderId:"WO 20", WorkOrderLabel:"Work Order 20",
+    },
+    {
+        SrId:"SR 100", SrLabel:"Service Request 100",
+        IncidentId:"SSO 1", IncidentLabel:"SSO 1",
+        InspectionId:"INSP 10", InspectionLabel:"Inspection 10",
+        WorkOrderId:"WO 21", WorkOrderLabel:"Work Order 21",
+    },
+    {
+        SrId:"SR 100", SrLabel:"Service Request 100",
+        IncidentId:"SSO 1", IncidentLabel:"SSO 1",
+        InspectionId:"INSP 11", InspectionLabel:"Inspection 11",
+        WorkOrderId:"WO 20", WorkOrderLabel:"Work Order 20",
+    },
+    {
+        SrId:"SR 100", SrLabel:"Service Request 100",
+        IncidentId:"SSO 1", IncidentLabel:"SSO 1",
+        InspectionId:"INSP 11", InspectionLabel:"Inspection 11",
+        WorkOrderId:"WO 21", WorkOrderLabel:"Work Order 21",
+    },
 ];
-const theme={mode:"light",primary:"#206bc4",accent:"#4299e1",surface:"#fff",text:"#111",border:"#ddd",danger:"#d00",warning:"#f90",success:"#0a0",fontFamily:"sans-serif",baseFontSize:12,radius:8,shadow:1};
+
+const theme={
+    mode:"light",primary:"#206bc4",accent:"#4299e1",surface:"#fff",text:"#111",
+    border:"#ddd",danger:"#d00",warning:"#f90",success:"#0a0",
+    fontFamily:"sans-serif",baseFontSize:12,radius:8,shadow:1,
+};
+
 const context:ChartBuildContext={
     theme,
     sourceRows:rows,
@@ -29,57 +53,108 @@ const context:ChartBuildContext={
 const component:NetworkGraphComponent={
     type:"networkGraph",
     id:"effort_tree",
-    sourceField:"From",
-    targetField:"To",
-    sourceLabelField:"FromLabel",
-    targetLabelField:"ToLabel",
-    sourceCategoryField:"FromType",
-    targetCategoryField:"ToType",
-    edgeWeightField:"Weight",
+    entities:[
+        {id:"sr",label:"Service Request",field:"SrId",labelField:"SrLabel"},
+        {id:"incident",label:"Incident",field:"IncidentId",labelField:"IncidentLabel"},
+        {id:"inspection",label:"Inspection",field:"InspectionId",labelField:"InspectionLabel"},
+        {id:"workOrder",label:"Work Order",field:"WorkOrderId",labelField:"WorkOrderLabel"},
+    ],
+    relationships:[
+        {source:"sr",target:"incident"},
+        {source:"incident",target:"inspection",branchLabel:"Inspections"},
+        {source:"incident",target:"workOrder",branchLabel:"Work Orders"},
+    ],
     directed:true,
     interaction:{enabled:true,internalMode:"highlight",externalMode:"selection"},
 };
 
 describe("networkGraph adapter",()=>{
-    it("builds interactive force graph nodes with calmer defaults and exact lineage",()=>{
-        const result=networkGraphAdapter.build({...component,layout:"force"},rows,context);
-        const series=(result.option as any).series[0];
-        expect(series).toMatchObject({type:"graph",layout:"force",roam:true,draggable:true,edgeSymbol:["none","arrow"],edgeSymbolSize:[0,5]});
-        expect(series.force).toMatchObject({repulsion:260,edgeLength:120,gravity:.04,friction:.72});
-        expect(result.bindings.find(binding=>binding.dataType==="node"&&binding.value==="SSO 1")?.sourceRowIndices).toEqual([0,1,4]);
-        expect(result.bindings.find(binding=>binding.dataType==="edge"&&String(binding.value)==="Inspections,INSP 10")?.sourceRowIndices).toEqual([2]);
-    });
-
-    it("uses settled hybrid layout by default and keeps hierarchy levels readable",()=>{
+    it("derives a deduplicated graph from flattened Power BI entity rows",()=>{
         const result=networkGraphAdapter.build(component,rows,context);
         const series=(result.option as any).series[0];
-        const data=series.data as Array<{id:string;x:number;y:number}>;
-        const x=(id:string)=>data.find(node=>node.id===id)?.x??-1;
+
         expect(series.layout).toBe("none");
         expect(series.draggable).toBe(false);
-        expect(x("SR 100")).toBeLessThan(x("SSO 1"));
-        expect(x("SSO 1")).toBeLessThan(x("Inspections"));
-        expect(x("Inspections")).toBeLessThan(x("INSP 10"));
+        expect(series.data).toHaveLength(8);
+        expect(series.links).toHaveLength(7);
+        expect(series.data.filter((node:any)=>node.name==="Inspections")).toHaveLength(1);
+        expect(series.data.filter((node:any)=>node.name==="Work Orders")).toHaveLength(1);
+        expect(series.data.filter((node:any)=>node.name==="Inspection 10")).toHaveLength(1);
+        expect(series.data.filter((node:any)=>node.name==="Work Order 20")).toHaveLength(1);
         expect(series.lineStyle).toMatchObject({color:"#ddd",width:1.25,opacity:.62,curveness:0});
-    });
-
-    it("keeps unweighted edges thin instead of scaling every relationship to four pixels",()=>{
-        const result=networkGraphAdapter.build({...component,edgeWeightField:undefined,layout:"hybrid"},rows,context);
-        const series=(result.option as any).series[0];
-        expect(series.links.every((link:any)=>link.lineStyle.width===1.25)).toBe(true);
         expect(series.edgeSymbolSize).toEqual([0,5]);
     });
 
-    it("supports deterministic hierarchy spacing controls",()=>{
-        const result=networkGraphAdapter.build({...component,layout:"hierarchical",orientation:"horizontal",levelGap:160,nodeGap:50},rows,context);
-        const data=(result.option as any).series[0].data as Array<{id:string;x:number;y:number}>;
-        const x=(id:string)=>data.find(node=>node.id===id)?.x??-1;
-        expect((result.option as any).series[0].layout).toBe("none");
-        expect(x("SSO 1")-x("SR 100")).toBe(160);
-        expect(x("Inspections")-x("SSO 1")).toBe(160);
+    it("preserves entity-specific fields and exact unique source-row lineage",()=>{
+        const result=networkGraphAdapter.build(component,rows,context);
+
+        const inspectionBinding=result.bindings.find(binding=>
+            binding.dataType==="node"&&binding.field==="InspectionId"&&binding.value==="INSP 10");
+        const workOrderBinding=result.bindings.find(binding=>
+            binding.dataType==="node"&&binding.field==="WorkOrderId"&&binding.value==="WO 20");
+        const branchBinding=result.bindings.find(binding=>
+            binding.dataType==="node"&&binding.field===undefined&&binding.value==="Inspections");
+
+        expect(inspectionBinding?.sourceRowIndices).toEqual([0,1]);
+        expect(workOrderBinding?.sourceRowIndices).toEqual([0,2]);
+        expect(branchBinding?.sourceRowIndices).toEqual([0,1,2,3]);
     });
 
-    it("bounds node count and reports skipped relationships",()=>{
+    it("keeps calm force behavior available without making it the operational default",()=>{
+        const result=networkGraphAdapter.build({...component,layout:"force"},rows,context);
+        const series=(result.option as any).series[0];
+
+        expect(series).toMatchObject({
+            type:"graph",
+            layout:"force",
+            roam:true,
+            draggable:true,
+            edgeSymbol:["none","arrow"],
+            edgeSymbolSize:[0,5],
+        });
+        expect(series.force).toMatchObject({repulsion:260,edgeLength:120,gravity:.04,friction:.72});
+    });
+
+    it("supports arbitrary relationship depth rather than a four-table hierarchy",()=>{
+        const deepRows:DataRow[]=[{A:"A1",B:"B1",C:"C1",D:"D1",E:"E1",F:"F1"}];
+        const deepContext:ChartBuildContext={
+            ...context,
+            sourceRows:deepRows,
+            sourceRowKeys:["0"],
+            sourceIndex:new Map([[deepRows[0],0]]),
+        };
+        const deepComponent:NetworkGraphComponent={
+            type:"networkGraph",
+            id:"deep_tree",
+            entities:["A","B","C","D","E","F"].map(field=>({
+                id:field.toLowerCase(),
+                label:field,
+                field,
+            })),
+            relationships:[
+                {source:"a",target:"b"},
+                {source:"b",target:"c"},
+                {source:"c",target:"d"},
+                {source:"d",target:"e"},
+                {source:"e",target:"f"},
+            ],
+            layout:"hierarchical",
+            levelGap:120,
+        };
+
+        const result=networkGraphAdapter.build(deepComponent,deepRows,deepContext);
+        const data=(result.option as any).series[0].data as Array<{name:string;x:number}>;
+
+        const x=(name:string)=>data.find(node=>node.name===name)?.x??-1;
+        expect(x("A1")).toBeLessThan(x("B1"));
+        expect(x("B1")).toBeLessThan(x("C1"));
+        expect(x("C1")).toBeLessThan(x("D1"));
+        expect(x("D1")).toBeLessThan(x("E1"));
+        expect(x("E1")).toBeLessThan(x("F1"));
+        expect(x("B1")-x("A1")).toBe(120);
+    });
+
+    it("bounds node count and reports skipped relationship occurrences",()=>{
         const result=networkGraphAdapter.build({...component,maxNodes:2},rows,context);
         expect((result.option as any).series[0].data).toHaveLength(2);
         expect(result.warnings.join(" ")).toMatch(/node limit/);
@@ -87,34 +162,72 @@ describe("networkGraph adapter",()=>{
 });
 
 describe("networkGraph catalog and schema",()=>{
-    it("registers hybrid and elegant edge controls as valid first-class API",()=>{
+    it("uses entities and relationships as the only graph data contract",()=>{
         const example=JSON.parse(componentJsonExample("networkGraph"));
+
         expect(registeredChartTypes).toContain("networkGraph");
         expect(getChartAdapter({type:"networkGraph"} as any).type).toBe("networkGraph");
         expect(componentPromptReference()).toContain("networkGraph");
         expect(example.layout).toBe("hybrid");
+        expect(example.entities).toHaveLength(2);
+        expect(example.relationships).toHaveLength(1);
+        expect(example.sourceField).toBeUndefined();
+        expect(example.targetField).toBeUndefined();
+
         expect(validateSchema({version:"2.0",components:[example]}).valid).toBe(true);
-        expect(validateSchema({version:"2.0",components:[{...example,layout:"banana"}]}).valid).toBe(false);
-        expect(validateSchema({version:"2.0",components:[{...example,edgeWidth:20}]}).valid).toBe(false);
+        expect(validateSchema({
+            version:"2.0",
+            components:[{...example,relationships:[{source:"missing",target:"child"}]}],
+        }).valid).toBe(false);
+        expect(validateSchema({
+            version:"2.0",
+            components:[{...example,sourceField:"legacy"}],
+        }).valid).toBe(false);
+        expect(validateSchema({
+            version:"2.0",
+            components:[{...example,edgeWidth:20}],
+        }).valid).toBe(false);
     });
 
-    it("includes networkGraph guidance for hybrid layout and normalized multi-table source models",()=>{
+    it("exposes every declared entity field through the adapter field contract",()=>{
+        expect(networkGraphAdapter.fields(component)).toEqual([
+            "SrId","SrLabel",
+            "IncidentId","IncidentLabel",
+            "InspectionId","InspectionLabel",
+            "WorkOrderId","WorkOrderLabel",
+        ]);
+    });
+
+    it("teaches AI to use Power BI model relationships without a separate edge table",()=>{
         const promptData:any={
-            rows:[{From:"A",To:"B"}],
+            rows:[{
+                SrId:"SR 100",
+                IncidentId:"SSO 1",
+                InspectionId:"INSP 10",
+                WorkOrderId:"WO 20",
+            }],
             rowKeys:["0"],
             fields:{
-                From:{key:"From",displayName:"From",queryName:"Edges[From]",sourceTable:"Edges",sourceColumn:"From",qualifiedName:"Edges.From",type:"dimension",roles:[],kind:"column",dataType:"text"},
-                To:{key:"To",displayName:"To",queryName:"Edges[To]",sourceTable:"Edges",sourceColumn:"To",qualifiedName:"Edges.To",type:"dimension",roles:[],kind:"column",dataType:"text"},
+                SrId:{key:"SrId",displayName:"SR ID",queryName:"SR[SrId]",sourceTable:"SR",sourceColumn:"SrId",qualifiedName:"SR.SrId",type:"dimension",roles:[],kind:"column",dataType:"text"},
+                IncidentId:{key:"IncidentId",displayName:"Incident ID",queryName:"Incident[IncidentId]",sourceTable:"Incident",sourceColumn:"IncidentId",qualifiedName:"Incident.IncidentId",type:"dimension",roles:[],kind:"column",dataType:"text"},
+                InspectionId:{key:"InspectionId",displayName:"Inspection ID",queryName:"Inspection[InspectionId]",sourceTable:"Inspection",sourceColumn:"InspectionId",qualifiedName:"Inspection.InspectionId",type:"dimension",roles:[],kind:"column",dataType:"text"},
+                WorkOrderId:{key:"WorkOrderId",displayName:"Work Order ID",queryName:"WorkOrder[WorkOrderId]",sourceTable:"WorkOrder",sourceColumn:"WorkOrderId",qualifiedName:"WorkOrder.WorkOrderId",type:"dimension",roles:[],kind:"column",dataType:"text"},
             },
             aggregates:{},
             map:{},
         };
-        const result=composeAiPrompt(promptData,{...defaultAiPromptSettings,goal:"Build an operational relationship explorer for service requests, incidents, inspections, and work orders"});
+
+        const result=composeAiPrompt(promptData,{
+            ...defaultAiPromptSettings,
+            goal:"Build an operational relationship explorer from service request to incident, branching to inspections and work orders",
+        });
+
         expect(result.prompt).toContain("networkGraph");
-        expect(result.prompt).toContain("sourceField");
-        expect(result.prompt).toContain("targetField");
-        expect(result.prompt).toContain("Prefer hybrid for operational/process trees");
-        expect(result.prompt).toContain("derived relationship/edge dataset");
-        expect(result.prompt).toContain("do not bind all child tables directly into one Power BI visual");
+        expect(result.prompt).toContain("entities + relationships");
+        expect(result.prompt).toContain("branchLabel");
+        expect(result.prompt).toContain("Power BI model relationships");
+        expect(result.prompt).toContain("do not create or require a separate edge table");
+        expect(result.prompt).toContain("Any number of entity definitions");
+        expect(result.prompt).not.toContain("sourceField and targetField");
     });
 });

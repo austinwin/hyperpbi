@@ -1,7 +1,11 @@
 import type { EChartsCoreOption } from "echarts/core";
 import type { GraphSeriesOption } from "echarts/charts";
 import type { DataRow } from "../../../data/normalizeData";
-import type { NetworkGraphComponent } from "../../../schema/networkGraphSchema";
+import type {
+    NetworkGraphComponent,
+    NetworkGraphEntity,
+    NetworkGraphRelationship,
+} from "../../../schema/networkGraphSchema";
 import { categoricalColor } from "../../../utils/colors";
 import type { ChartAdapter, ChartDatumBinding } from "./types";
 import { baseOption, semanticResult, sourceIndices } from "./shared";
@@ -10,7 +14,9 @@ interface GraphNode {
     id: string;
     name: string;
     category: string;
-    rows: DataRow[];
+    rows: Set<DataRow>;
+    field?: string;
+    key?: string;
     x?: number;
     y?: number;
 }
@@ -18,9 +24,7 @@ interface GraphNode {
 interface GraphLink {
     source: string;
     target: string;
-    rows: DataRow[];
-    label?: string;
-    weight: number;
+    rows: Set<DataRow>;
 }
 
 const text = (value: unknown): string => value == null ? "" : String(value).trim();
@@ -30,6 +34,10 @@ const number = (value: unknown, fallback: number): number => {
 };
 const clamp = (value: unknown, fallback: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, number(value, fallback)));
+
+const entityNodeId = (entityId: string, key: string): string => `${entityId}\u0000${key}`;
+const branchNodeId = (relationshipIndex: number, sourceNodeId: string): string =>
+    `__hyperpbi_branch__\u0000${relationshipIndex}\u0000${sourceNodeId}`;
 
 interface HierarchyModel {
     levels: Map<string, number>;
@@ -97,10 +105,18 @@ function positionHierarchy(
     for (const level of levels) {
         const group = model.grouped.get(level) ?? [];
         group.sort((left, right) => {
-            const leftParents = Array.from(model.incoming.get(left.id) ?? []).map(id => secondary.get(id)).filter((value): value is number => value !== undefined);
-            const rightParents = Array.from(model.incoming.get(right.id) ?? []).map(id => secondary.get(id)).filter((value): value is number => value !== undefined);
-            const leftBarycenter = leftParents.length ? leftParents.reduce((sum, value) => sum + value, 0) / leftParents.length : Number.POSITIVE_INFINITY;
-            const rightBarycenter = rightParents.length ? rightParents.reduce((sum, value) => sum + value, 0) / rightParents.length : Number.POSITIVE_INFINITY;
+            const leftParents = Array.from(model.incoming.get(left.id) ?? [])
+                .map(id => secondary.get(id))
+                .filter((value): value is number => value !== undefined);
+            const rightParents = Array.from(model.incoming.get(right.id) ?? [])
+                .map(id => secondary.get(id))
+                .filter((value): value is number => value !== undefined);
+            const leftBarycenter = leftParents.length
+                ? leftParents.reduce((sum, value) => sum + value, 0) / leftParents.length
+                : Number.POSITIVE_INFINITY;
+            const rightBarycenter = rightParents.length
+                ? rightParents.reduce((sum, value) => sum + value, 0) / rightParents.length
+                : Number.POSITIVE_INFINITY;
             if (leftBarycenter !== rightBarycenter) return leftBarycenter - rightBarycenter;
             return left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" });
         });
@@ -124,7 +140,9 @@ function positionHierarchy(
                             ? neighbors.reduce((sum, value) => sum + value, 0) / neighbors.length
                             : secondary.get(node.id) ?? 0,
                     };
-                }).sort((left, right) => left.value - right.value || left.node.name.localeCompare(right.node.name, undefined, { numeric: true, sensitivity: "base" }));
+                }).sort((left, right) =>
+                    left.value - right.value ||
+                    left.node.name.localeCompare(right.node.name, undefined, { numeric: true, sensitivity: "base" }));
 
                 const placed: number[] = [];
                 desired.forEach((entry, index) => {
@@ -149,79 +167,132 @@ function positionHierarchy(
 
 export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
     type: "networkGraph",
-    fields: component => [
-        component.sourceField,
-        component.targetField,
-        component.sourceLabelField,
-        component.targetLabelField,
-        component.sourceCategoryField,
-        component.targetCategoryField,
-        component.edgeLabelField,
-        component.edgeWeightField,
-    ].filter((field): field is string => Boolean(field)),
+
+    fields: component => Array.from(new Set(
+        (Array.isArray(component.entities) ? component.entities : [])
+            .flatMap(entity => [entity.field, entity.labelField])
+            .filter((field): field is string => Boolean(field)),
+    )),
 
     build(component, rows, context) {
         const maxNodes = Math.round(clamp(component.maxNodes, 1500, 2, 5000));
-        const nodeRows = new Map<string, DataRow[]>();
-        const nodeLabels = new Map<string, string>();
-        const nodeCategories = new Map<string, string>();
-        const linkRows = new Map<string, GraphLink>();
-        let skippedBlank = 0;
+        const entityById = new Map(component.entities.map(entity => [entity.id, entity] as const));
+        const nodesById = new Map<string, GraphNode>();
+        const linksByKey = new Map<string, GraphLink>();
         let skippedOverflow = 0;
 
-        const canAddNode = (id: string) => nodeRows.has(id) || nodeRows.size < maxNodes;
-        const addNode = (id: string, row: DataRow, labelField?: string, categoryField?: string): boolean => {
-            if (!canAddNode(id)) return false;
-            const entries = nodeRows.get(id) ?? [];
-            entries.push(row);
-            nodeRows.set(id, entries);
-            const label = labelField ? text(row[labelField]) : "";
-            const category = categoryField ? text(row[categoryField]) : "";
-            if (label && !nodeLabels.has(id)) nodeLabels.set(id, label);
-            if (category && !nodeCategories.has(id)) nodeCategories.set(id, category);
-            return true;
+        const existingEntityNodeId = (entity: NetworkGraphEntity, row: DataRow): string | undefined => {
+            const key = text(row[entity.field]);
+            return key ? entityNodeId(entity.id, key) : undefined;
+        };
+
+        const addEntityNode = (entity: NetworkGraphEntity, row: DataRow): string | undefined => {
+            const key = text(row[entity.field]);
+            if (!key) return undefined;
+            const id = entityNodeId(entity.id, key);
+            const current = nodesById.get(id);
+            const label = entity.labelField ? text(row[entity.labelField]) : "";
+            if (current) {
+                current.rows.add(row);
+                if (label && current.name === current.key) current.name = label;
+                return id;
+            }
+            if (nodesById.size >= maxNodes) return undefined;
+            nodesById.set(id, {
+                id,
+                name: label || key,
+                category: entity.label || entity.id,
+                rows: new Set([row]),
+                field: entity.field,
+                key,
+            });
+            return id;
+        };
+
+        const addBranchNode = (
+            relationshipIndex: number,
+            relationship: NetworkGraphRelationship,
+            sourceNodeId: string,
+            row: DataRow,
+        ): string | undefined => {
+            if (!relationship.branchLabel) return undefined;
+            const id = branchNodeId(relationshipIndex, sourceNodeId);
+            const current = nodesById.get(id);
+            if (current) {
+                current.rows.add(row);
+                return id;
+            }
+            if (nodesById.size >= maxNodes) return undefined;
+            nodesById.set(id, {
+                id,
+                name: relationship.branchLabel,
+                category: "Group",
+                rows: new Set([row]),
+            });
+            return id;
+        };
+
+        const addLink = (source: string, target: string, row: DataRow): void => {
+            const key = `${source}\u0000${target}`;
+            const current = linksByKey.get(key);
+            if (current) {
+                current.rows.add(row);
+                return;
+            }
+            linksByKey.set(key, { source, target, rows: new Set([row]) });
         };
 
         for (const row of rows) {
-            const source = text(row[component.sourceField]);
-            const target = text(row[component.targetField]);
-            if (!source || !target) {
-                skippedBlank += 1;
-                continue;
-            }
-            if (!canAddNode(source) || !canAddNode(target)) {
-                skippedOverflow += 1;
-                continue;
-            }
+            component.relationships.forEach((relationship, relationshipIndex) => {
+                const sourceEntity = entityById.get(relationship.source);
+                const targetEntity = entityById.get(relationship.target);
+                if (!sourceEntity || !targetEntity) return;
 
-            addNode(source, row, component.sourceLabelField, component.sourceCategoryField);
-            addNode(target, row, component.targetLabelField, component.targetCategoryField);
+                const sourceNodeId = addEntityNode(sourceEntity, row);
+                if (!sourceNodeId) {
+                    if (text(row[sourceEntity.field])) skippedOverflow += 1;
+                    return;
+                }
 
-            const key = `${source}\u0000${target}`;
-            const current = linkRows.get(key);
-            const weight = component.edgeWeightField ? number(row[component.edgeWeightField], 0) : 1;
-            if (current) {
-                current.rows.push(row);
-                current.weight += weight;
-                if (!current.label && component.edgeLabelField) current.label = text(row[component.edgeLabelField]) || undefined;
-            } else {
-                linkRows.set(key, {
-                    source,
-                    target,
-                    rows: [row],
-                    label: component.edgeLabelField ? text(row[component.edgeLabelField]) || undefined : undefined,
-                    weight,
-                });
-            }
+                const targetKey = text(row[targetEntity.field]);
+                if (!targetKey) return;
+
+                const targetNodeId = existingEntityNodeId(targetEntity, row);
+                const prospectiveTargetId = targetNodeId ?? entityNodeId(targetEntity.id, targetKey);
+                const prospectiveBranchId = relationship.branchLabel
+                    ? branchNodeId(relationshipIndex, sourceNodeId)
+                    : undefined;
+                const neededNodes =
+                    (nodesById.has(prospectiveTargetId) ? 0 : 1) +
+                    (prospectiveBranchId && !nodesById.has(prospectiveBranchId) ? 1 : 0);
+
+                if (nodesById.size + neededNodes > maxNodes) {
+                    skippedOverflow += 1;
+                    return;
+                }
+
+                const resolvedTargetNodeId = addEntityNode(targetEntity, row);
+                if (!resolvedTargetNodeId) {
+                    skippedOverflow += 1;
+                    return;
+                }
+
+                if (relationship.branchLabel) {
+                    const groupNodeId = addBranchNode(relationshipIndex, relationship, sourceNodeId, row);
+                    if (!groupNodeId) {
+                        skippedOverflow += 1;
+                        return;
+                    }
+                    addLink(sourceNodeId, groupNodeId, row);
+                    addLink(groupNodeId, resolvedTargetNodeId, row);
+                } else {
+                    addLink(sourceNodeId, resolvedTargetNodeId, row);
+                }
+            });
         }
 
-        const nodes: GraphNode[] = Array.from(nodeRows.entries()).map(([id, nodeData]) => ({
-            id,
-            name: nodeLabels.get(id) || id,
-            category: nodeCategories.get(id) || "Default",
-            rows: nodeData,
-        }));
-        const links = Array.from(linkRows.values());
+        const nodes = Array.from(nodesById.values());
+        const links = Array.from(linksByKey.values());
         const layout = component.layout ?? "hybrid";
         const orientation = component.orientation ?? "horizontal";
         const levelGap = clamp(component.levelGap, 185, 80, 400);
@@ -234,38 +305,25 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
         const categories = Array.from(new Set(nodes.map(node => node.category)));
         const categoryIndex = new Map(categories.map((category, index) => [category, index] as const));
         const nodeSize = clamp(component.nodeSize, 22, 8, 80);
-        const edgeWeights = links.map(link => Math.max(0, link.weight));
-        const maxWeight = Math.max(1, ...edgeWeights);
         const baseEdgeWidth = clamp(component.edgeWidth, 1.25, 0.5, 6);
         const edgeOpacity = clamp(component.edgeOpacity, 0.62, 0.1, 1);
-        const edgeCurveness = clamp(component.edgeCurveness, layout === "force" ? 0.025 : 0, 0, 0.5);
+        const edgeCurvature = clamp(component.edgeCurvature, layout === "force" ? 0.025 : 0, 0, 0.5);
         const arrowSize = clamp(component.arrowSize, 5, 2, 16);
+
         const graphData = nodes.map(node => ({
             id: node.id,
             name: node.name,
-            value: node.name,
+            value: node.category,
             category: categoryIndex.get(node.category) ?? 0,
             symbolSize: nodeSize,
             x: node.x,
             y: node.y,
         }));
-        const graphLinks = links.map(link => {
-            const weightRatio = component.edgeWeightField
-                ? Math.sqrt(Math.max(0, link.weight) / maxWeight)
-                : 0;
-            return {
-                source: link.source,
-                target: link.target,
-                value: link.weight,
-                label: component.showEdgeLabels === true ? {
-                    show: true,
-                    formatter: link.label ?? String(link.weight),
-                } : undefined,
-                lineStyle: {
-                    width: baseEdgeWidth + weightRatio * Math.min(1.25, baseEdgeWidth),
-                },
-            };
-        });
+        const graphLinks = links.map(link => ({
+            source: link.source,
+            target: link.target,
+            value: 1,
+        }));
 
         const draggable = component.draggable !== undefined ? component.draggable : layout === "force";
         const series: GraphSeriesOption = {
@@ -287,16 +345,11 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
                 overflow: "truncate",
                 width: 150,
             },
-            edgeLabel: {
-                show: false,
-                color: context.theme.text,
-                fontSize: 10,
-            },
             lineStyle: {
                 color: context.theme.border,
                 width: baseEdgeWidth,
                 opacity: edgeOpacity,
-                curveness: edgeCurveness,
+                curveness: edgeCurvature,
             },
             emphasis: {
                 focus: "adjacency",
@@ -305,6 +358,7 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
             edgeSymbol: component.directed === false ? ["none", "none"] : ["none", "arrow"],
             edgeSymbolSize: component.directed === false ? [0, 0] : [0, arrowSize],
         };
+
         if (layout === "force") {
             series.force = {
                 repulsion: clamp(component.repulsion, 260, 20, 5000),
@@ -321,20 +375,22 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
             seriesIndex: 0,
             dataIndex,
             dataType: "node",
-            sourceRowIndices: sourceIndices(node.rows, context),
-            value: node.id,
+            sourceRowIndices: sourceIndices(Array.from(node.rows), context),
+            field: node.field,
+            value: node.key ?? node.name,
         }));
         links.forEach((link, dataIndex) => bindings.push({
             seriesIndex: 0,
             dataIndex,
             dataType: "edge",
-            sourceRowIndices: sourceIndices(link.rows, context),
+            sourceRowIndices: sourceIndices(Array.from(link.rows), context),
             value: [link.source, link.target],
         }));
 
         const warnings: string[] = [];
-        if (skippedBlank) warnings.push(`${skippedBlank.toLocaleString()} relationship row(s) were skipped because source or target was blank.`);
-        if (skippedOverflow) warnings.push(`${skippedOverflow.toLocaleString()} relationship row(s) were skipped after the ${maxNodes.toLocaleString()}-node limit was reached.`);
+        if (skippedOverflow) {
+            warnings.push(`${skippedOverflow.toLocaleString()} relationship occurrence(s) were skipped after the ${maxNodes.toLocaleString()}-node limit was reached.`);
+        }
 
         const option: EChartsCoreOption = {
             ...baseOption(context),
