@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -8,8 +9,18 @@ const read = (path: string) => readFileSync(resolve(path), "utf8");
 
 describe("pinned GeoLibre upstream compatibility", () => {
   it("pins the pristine upstream revision and exact public embed client", () => {
+    const integrity = JSON.parse(read("src/components/geolibre/runtime/upstream-integrity.json")) as {
+      version: string;
+      revision: string;
+      sha256: Record<string, string>;
+    };
     expect(JSON.parse(read("vendor/geolibre/package.json")).version).toBe(GEOLIBRE_VERSION);
     expect(execFileSync("git", ["-C", "vendor/geolibre", "rev-parse", "HEAD"], { encoding: "utf8" }).trim()).toBe(GEOLIBRE_UPSTREAM_REVISION);
+    expect(integrity).toMatchObject({ version: GEOLIBRE_VERSION, revision: GEOLIBRE_UPSTREAM_REVISION });
+    for (const [relativePath, expectedHash] of Object.entries(integrity.sha256)) {
+      const contents = readFileSync(resolve("vendor/geolibre", relativePath));
+      expect(createHash("sha256").update(contents).digest("hex"), relativePath).toBe(expectedHash);
+    }
     expect(JSON.parse(read("package.json")).dependencies["@geolibre/embed"]).toBe(GEOLIBRE_VERSION);
     expect(read(".gitmodules")).toContain("https://github.com/opengeos/GeoLibre.git");
   });

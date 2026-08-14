@@ -1,0 +1,11 @@
+{
+  "version": "2.5.0",
+  "revision": "65073e7512703b0819062fe896fe44d27a3f6a28",
+  "sha256": {
+    "package.json": "103ca69f0fa5a6d1a2952922ceaf8c69da1f3b08d42e9a03e1c3bfcd5c6113fa",
+    "package-lock.json": "11b5cb9518aa7178fd85c7fcac4f349a7d5d913b61b79edce5c1ca849438e903",
+    "apps/geolibre-desktop/src/hooks/useEmbedBridge.ts": "8316b78f45b467dedeb462a59c6d1e149b07b221d11b869ef8b0613f0af1d6fa",
+    "apps/geolibre-desktop/src/hooks/embedHost.ts": "3891ff23bef00ef7c83ed9f19abf0cbb58049b4dcbc04ad40c7efb2dec6840ac",
+    "apps/geolibre-desktop/vite.config.ts": "d3024fc0b6e627538adcadec1a3209858e3c8c1d6422de24445d94945fe67dc1"
+  }
+}

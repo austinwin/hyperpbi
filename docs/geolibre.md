@@ -171,7 +171,7 @@ npm run geolibre:build
 npm run web:sites:build
 ```
 
-`geolibre:build` verifies both upstream version and commit, installs the submodule lockfile, runs GeoLibre’s lite browser build with `GEOLIBRE_APP_BASE=/geolibre/`, enables the upstream parent-window handshake required by Power BI Desktop’s non-enumerable sandbox origin, copies the locked profile, and writes a build manifest. GeoLibre still rejects messages not sent by the direct `window.parent`. `geolibre:build:cached` skips the submodule install for a validated local cache, while `geolibre:ensure` reuses a valid staged runtime or rebuilds it when missing. The Next.js package runs that ensure step before every production build so a deployment cannot silently publish the site without `/geolibre/index.html`.
+`geolibre:build` verifies the upstream version and commit (or, in metadata-free deployment archives, the pinned source fingerprints), installs the submodule lockfile, runs GeoLibre’s lite browser build with `GEOLIBRE_APP_BASE=/geolibre/`, enables the upstream parent-window handshake required by Power BI Desktop’s non-enumerable sandbox origin, copies the locked profile, and writes a build manifest. GeoLibre still rejects messages not sent by the direct `window.parent`. `geolibre:build:cached` skips the submodule install for a validated local cache, while `geolibre:ensure` reuses a valid staged runtime or rebuilds it when missing. The Next.js package runs that ensure step before every production build so a deployment cannot silently publish the site without `/geolibre/index.html`.
 
 ## Updating the pin
 
