@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 4178",
+    "prebuild": "npm --prefix ../.. run geolibre:ensure",
     "build": "next build",
     "cloudflare:build": "opennextjs-cloudflare build --config wrangler.jsonc && opennextjs-cloudflare populateCache local --config wrangler.jsonc",
     "cloudflare:preview": "npm run cloudflare:build && opennextjs-cloudflare preview --config wrangler.jsonc",

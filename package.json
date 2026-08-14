@@ -1,7 +1,7 @@
 {
   "name": "hyperpbi",
   "description": "AI-native analytics runtime and portable dashboard specification for Power BI and the web",
-  "version": "1.0.1.1",
+  "version": "1.0.1.2",
   "private": true,
   "engines": {
     "node": "^20.19.0 || >=22.13.0"
@@ -24,6 +24,7 @@
     "package:verify": "node scripts/verify-package-capabilities.mjs",
     "geolibre:build": "node scripts/build-geolibre-runtime.mjs",
     "geolibre:build:cached": "node scripts/build-geolibre-runtime.mjs --skip-install",
+    "geolibre:ensure": "node scripts/build-geolibre-runtime.mjs --if-valid",
     "docs:generate": "node scripts/generate-documentation.mjs",
     "docs:check": "node scripts/generate-documentation.mjs --check",
     "examples:generate": "node scripts/generate-dashboard-examples.mjs",

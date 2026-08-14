@@ -11,6 +11,8 @@ const vendor = path.join(root, "vendor", "geolibre");
 const output = path.join(root, "apps", "web", "public", "geolibre");
 const profile = path.join(root, "src", "components", "geolibre", "runtime", "admin-profile.json");
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const EMBED_API_ORIGINS = "*";
+const EMBED_API_ORIGIN_MODE = "parent-window";
 
 function run(command, args, cwd, env = process.env) {
   const result = spawnSync(command, args, { cwd, env, stdio: "inherit", shell: false });
@@ -43,6 +45,28 @@ if (revision !== EXPECTED_REVISION) {
   throw new Error(`Expected GeoLibre revision ${EXPECTED_REVISION}, found ${revision}.`);
 }
 
+async function stagedRuntimeIsValid() {
+  try {
+    const runtimeManifest = JSON.parse(
+      await readFile(path.join(output, "hyperpbi-geolibre-manifest.json"), "utf8"),
+    );
+    const entrypoint = await stat(path.join(output, "index.html"));
+    return entrypoint.isFile() &&
+      runtimeManifest.geolibreVersion === EXPECTED_VERSION &&
+      runtimeManifest.upstreamRevision === EXPECTED_REVISION &&
+      runtimeManifest.basePath === "/geolibre/" &&
+      runtimeManifest.profile === "powerbi-embedded" &&
+      runtimeManifest.embedApiOrigins === EMBED_API_ORIGIN_MODE;
+  } catch {
+    return false;
+  }
+}
+
+if (process.argv.includes("--if-valid") && await stagedRuntimeIsValid()) {
+  console.log(`GeoLibre ${EXPECTED_VERSION} runtime is already staged and valid.`);
+  process.exit(0);
+}
+
 if (!process.argv.includes("--skip-install")) {
   runNpm(["ci"], vendor);
 }
@@ -61,14 +85,10 @@ runNpm(
   {
     ...process.env,
     GEOLIBRE_APP_BASE: "/geolibre/",
-    VITE_GEOLIBRE_EMBED_ORIGINS: [
-      "https://hyperpbi.com",
-      "https://www.hyperpbi.com",
-      "https://app.powerbi.com",
-      "https://msit.powerbi.com",
-      "http://localhost:4178",
-      "http://localhost:5173"
-    ].join(","),
+    // Power BI Desktop uses a sandboxed parent whose origin is not stable or
+    // enumerable. GeoLibre still accepts messages only from window.parent;
+    // wildcarding the origin lets that exact parent complete the handshake.
+    VITE_GEOLIBRE_EMBED_ORIGINS: EMBED_API_ORIGINS,
   },
 );
 
@@ -102,7 +122,7 @@ const runtimeManifest = {
   projectFormatVersion: "0.2.0",
   basePath: "/geolibre/",
   profile: "powerbi-embedded",
-  embedApiOrigins: "explicit-allowlist",
+  embedApiOrigins: EMBED_API_ORIGIN_MODE,
   builtAt: new Date().toISOString(),
   ...summary,
 };

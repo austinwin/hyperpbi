@@ -30,14 +30,13 @@ describe("pinned GeoLibre upstream compatibility", () => {
     expect(read("vendor/geolibre/apps/geolibre-desktop/src/lib/admin-profile.ts")).toContain("import.meta.env.BASE_URL}admin-profile.json");
   });
 
-  it("keeps the managed build on a relative subpath with an explicit embed-origin allowlist", () => {
+  it("keeps the managed build on a relative subpath with a parent-window handshake", () => {
     const build = read("scripts/build-geolibre-runtime.mjs");
     expect(build).toContain('GEOLIBRE_APP_BASE: "/geolibre/"');
     expect(build).toContain("VITE_GEOLIBRE_EMBED_ORIGINS");
-    expect(build).toContain('"https://hyperpbi.com"');
-    expect(build).toContain('"https://www.hyperpbi.com"');
-    expect(build).toContain('"https://app.powerbi.com"');
-    expect(build).not.toContain('VITE_GEOLIBRE_EMBED_ORIGINS: "*"');
+    expect(build).toContain('const EMBED_API_ORIGINS = "*"');
+    expect(build).toContain('const EMBED_API_ORIGIN_MODE = "parent-window"');
+    expect(JSON.parse(read("apps/web/package.json")).scripts.prebuild).toContain("geolibre:ensure");
     expect(JSON.parse(read("vercel.json")).buildCommand).toContain("geolibre:build");
   });
 });
