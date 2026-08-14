@@ -106,6 +106,8 @@ describe("package profile host helpers", () => {
     it("builds Core and Maps privilege parameters without unsupported all-host wildcards", () => {
         expect(buildWebAccessParameters({ profile: "core" })).toEqual([]);
         const broad = buildWebAccessParameters({ profile: "maps" });
+        expect(broad).toContain("https://hyperpbi.com");
+        expect(broad).toContain("https://web.geolibre.app");
         expect(broad).toContain("https://tile.openstreetmap.org");
         expect(broad).toContain("https://*.arcgis.com");
         expect(broad).not.toContain("https://*");

@@ -1,0 +1,47 @@
+{
+  "enabled": true,
+  "level": "advanced",
+  "lock": true,
+  "hiddenDataSources": [
+    "postgres",
+    "video"
+  ],
+  "hiddenPlugins": [
+    "maplibre-gl-geoagent",
+    "maplibre-gl-huggingface",
+    "maplibre-gl-earth-engine",
+    "maplibre-gl-mapillary",
+    "maplibre-gl-streetview"
+  ],
+  "hiddenMenus": [
+    "plugins"
+  ],
+  "hiddenMenuItems": [
+    "project.openRecent",
+    "project.history",
+    "project.duplicate",
+    "project.saveAsTemplate",
+    "project.share",
+    "project.exportHtml",
+    "project.collaborate",
+    "project.offlineRegion",
+    "processing.assistant",
+    "processing.pythonConsole",
+    "processing.notebook",
+    "processing.segmentation",
+    "processing.objectDetection",
+    "processing.segmentEverything",
+    "processing.planetaryComputer",
+    "processing.earthEngine",
+    "controls.mapControl.geolocate",
+    "controls.fieldCollection",
+    "controls.gpsTracking",
+    "controls.recordTour",
+    "controls.recordVideo",
+    "settings.environment",
+    "settings.geocoding",
+    "settings.managePlugins",
+    "help.diagnostics",
+    "help.checkForUpdates"
+  ]
+}

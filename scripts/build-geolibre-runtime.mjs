@@ -1,0 +1,116 @@
+import { spawnSync } from "node:child_process";
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const EXPECTED_VERSION = "2.5.0";
+const EXPECTED_REVISION = "65073e7512703b0819062fe896fe44d27a3f6a28";
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDirectory, "..");
+const vendor = path.join(root, "vendor", "geolibre");
+const output = path.join(root, "apps", "web", "public", "geolibre");
+const profile = path.join(root, "src", "components", "geolibre", "runtime", "admin-profile.json");
+const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+
+function run(command, args, cwd, env = process.env) {
+  const result = spawnSync(command, args, { cwd, env, stdio: "inherit", shell: false });
+  if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
+function runNpm(args, cwd, env = process.env) {
+  // `npm run` exposes its CLI path. Reusing it through this process' Node keeps
+  // nested upstream builds on the exact CI/runtime Node version instead of a
+  // different globally installed npm shim (notably on Windows).
+  if (process.env.npm_execpath) {
+    run(process.execPath, [process.env.npm_execpath, ...args], cwd, env);
+  } else {
+    run(npm, args, cwd, env);
+  }
+}
+
+function capture(command, args, cwd) {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8", shell: false });
+  if (result.status !== 0) throw new Error(result.stderr || `${command} failed`);
+  return result.stdout.trim();
+}
+
+const manifest = JSON.parse(await readFile(path.join(vendor, "package.json"), "utf8"));
+if (manifest.version !== EXPECTED_VERSION) {
+  throw new Error(`Expected GeoLibre ${EXPECTED_VERSION}, found ${manifest.version}.`);
+}
+const revision = capture("git", ["rev-parse", "HEAD"], vendor);
+if (revision !== EXPECTED_REVISION) {
+  throw new Error(`Expected GeoLibre revision ${EXPECTED_REVISION}, found ${revision}.`);
+}
+
+if (!process.argv.includes("--skip-install")) {
+  runNpm(["ci"], vendor);
+}
+
+const resolvedOutput = path.resolve(output);
+const expectedOutput = path.join(path.resolve(root), "apps", "web", "public", "geolibre");
+if (resolvedOutput !== expectedOutput || path.dirname(resolvedOutput) !== path.join(path.resolve(root), "apps", "web", "public")) {
+  throw new Error(`Refusing to replace unexpected GeoLibre output: ${resolvedOutput}`);
+}
+await rm(resolvedOutput, { recursive: true, force: true });
+await mkdir(resolvedOutput, { recursive: true });
+
+runNpm(
+  ["run", "lite:build", "--", "--outDir", resolvedOutput],
+  vendor,
+  {
+    ...process.env,
+    GEOLIBRE_APP_BASE: "/geolibre/",
+    VITE_GEOLIBRE_EMBED_ORIGINS: [
+      "https://hyperpbi.com",
+      "https://www.hyperpbi.com",
+      "https://app.powerbi.com",
+      "https://msit.powerbi.com",
+      "http://localhost:4178",
+      "http://localhost:5173"
+    ].join(","),
+  },
+);
+
+await cp(profile, path.join(resolvedOutput, "admin-profile.json"));
+
+async function summarize(directory) {
+  let fileCount = 0;
+  let totalBytes = 0;
+  let largest = { path: "", bytes: 0 };
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      const nested = await summarize(file);
+      fileCount += nested.fileCount;
+      totalBytes += nested.totalBytes;
+      if (nested.largest.bytes > largest.bytes) largest = nested.largest;
+    } else if (entry.isFile()) {
+      const details = await stat(file);
+      fileCount += 1;
+      totalBytes += details.size;
+      if (details.size > largest.bytes) largest = { path: path.relative(resolvedOutput, file).replaceAll("\\", "/"), bytes: details.size };
+    }
+  }
+  return { fileCount, totalBytes, largest };
+}
+
+const summary = await summarize(resolvedOutput);
+const runtimeManifest = {
+  geolibreVersion: EXPECTED_VERSION,
+  upstreamRevision: EXPECTED_REVISION,
+  projectFormatVersion: "0.2.0",
+  basePath: "/geolibre/",
+  profile: "powerbi-embedded",
+  embedApiOrigins: "explicit-allowlist",
+  builtAt: new Date().toISOString(),
+  ...summary,
+};
+await writeFile(
+  path.join(resolvedOutput, "hyperpbi-geolibre-manifest.json"),
+  `${JSON.stringify(runtimeManifest, null, 2)}\n`,
+  "utf8",
+);
+console.log(
+  `GeoLibre ${EXPECTED_VERSION} (${EXPECTED_REVISION.slice(0, 12)}) staged: ${summary.fileCount} files, ${(summary.totalBytes / 1024 / 1024).toFixed(1)} MiB.`,
+);

@@ -17,6 +17,8 @@ import { MarkdownBlock } from "../components/content/MarkdownBlock";
 import { TextBlock } from "../components/content/TextBlock";
 import { Divider, FlexLayout, GridLayout, Section, Spacer } from "../components/layout/LayoutBlocks";
 import { MapBlock } from "../components/maps/MapBlock";
+import { GeoLibreBlock } from "../components/geolibre/GeoLibreBlock";
+import type { GeoLibreComponent } from "../components/geolibre/types";
 import { Collapsible, Tabs } from "../components/navigation/Navigation";
 import { TableBlock } from "../components/tables/TableBlock";
 import { EmptyState } from "../components/system/EmptyState";
@@ -53,6 +55,7 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     table: c => h(TableBlock, { component: c as TableComponent }),
     matrix: c => h(MatrixBlock, { component: c as MatrixComponent }),
     map: c => h(MapBlock, { component: c as MapComponent }),
+    geolibre: c => h(GeoLibreBlock, { component: c as GeoLibreComponent }),
     smallMultiples: c => h(SmallMultiples, { component: c as SmallMultiplesComponent }),
     timeline: c => h(Timeline, { component: c as TimelineComponent }),
     tabs: (c, rc) => h(Tabs, { component: c as TabsComponent, renderChildren: rc }),

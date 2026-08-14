@@ -41,7 +41,7 @@ import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { prepareSpecification } from "../schema/prepareSpecification";
 import { SpecificationInspector } from "./inspector/SpecificationInspector";
-import { componentTree } from "./inspector/specificationEditor";
+import { componentTree, updateComponent } from "./inspector/specificationEditor";
 import { SpecificationHistory } from "./inspector/specificationEditor";
 import { MapStudio } from "./map-studio/MapStudio";
 import type { ProviderAccessState } from "../providers/providerTypes";
@@ -272,6 +272,9 @@ export function HyperPbiStudio({
   const specificationHistory = useRef(
     new SpecificationHistory(initialSpecification),
   );
+  const specificationRef = useRef(specification);
+  specificationRef.current = specification;
+  const geoLibreHistorySession = useRef<{ componentId: string; specification: string }>();
   const [logs, setLogs] = useState<StudioLog[]>([
     {
       level: "info",
@@ -477,6 +480,36 @@ export function HyperPbiStudio({
     reason: ExternalSelectionFailureReason = "component did not call selectExternal",
     indices: number[] = [],
   ) => updateInteraction(indices, details, { sent: false, reason });
+  const updateGeoLibreProject = useCallback((componentId: string, project: import("../components/geolibre/types").PersistedGeoLibreProject) => {
+    try {
+      const currentSpecification = specificationRef.current;
+      const parsed = JSON.parse(currentSpecification) as unknown;
+      const next = JSON.stringify(updateComponent(parsed, componentId, { project }), null, 2);
+      if (next === currentSpecification) return;
+      const session = geoLibreHistorySession.current;
+      if (session?.componentId === componentId && session.specification === currentSpecification) {
+        // GeoLibre owns fine-grained GIS undo/redo. Keep one HyperPBI history
+        // transaction for the live session instead of one per upstream state
+        // snapshot (map movement, layer styling, and similar edits).
+        specificationHistory.current.replaceCurrent(next);
+      } else {
+        specificationHistory.current.commit(next);
+      }
+      geoLibreHistorySession.current = { componentId, specification: next };
+      specificationRef.current = next;
+      setSpecification(next);
+      setPreview(current => current ? {
+        ...current,
+        schema: updateComponent(current.schema, componentId, { project }) as HyperPbiSchema,
+        sourceSpecification: next,
+      } : current);
+    } catch (error) {
+      const message = `GeoLibre project could not update the authoring draft: ${error instanceof Error ? error.message : String(error)}`;
+      setErrors([message]);
+      appendLog(message, "error");
+      setBottomTab("errors");
+    }
+  }, []);
   const validate = () => {
     try {
       const result = validateDraft(specification, configuration, data, dataWorkspace);
@@ -1184,6 +1217,7 @@ export function HyperPbiStudio({
                         [id]: viewport,
                       }))
                     }
+                    onGeoLibreProjectChange={updateGeoLibreProject}
                   />
                 ) : (
                   <div class="hp-preview-empty" role="status">

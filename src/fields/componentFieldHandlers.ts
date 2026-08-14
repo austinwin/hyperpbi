@@ -137,6 +137,28 @@ function svgElements(context: ComponentFieldHandlerContext): void {
     visit(context.component[context.descriptorField.property], `${context.componentPath}/${context.descriptorField.property}`);
 }
 
+function geoLibrePowerBi(context: ComponentFieldHandlerContext): void {
+    const powerBi = context.component[context.descriptorField.property];
+    if (!object(powerBi) || !Array.isArray(powerBi.layers)) return;
+    powerBi.layers.forEach((raw, index) => {
+        if (!object(raw)) return;
+        const path = `${context.componentPath}/${context.descriptorField.property}/layers/${index}`;
+        const layerContext: ComponentFieldHandlerContext = {
+            ...context,
+            effectiveDataset: typeof raw.dataset === "string" && raw.dataset ? raw.dataset : context.effectiveDataset,
+        };
+        if (object(raw.geometry)) {
+            if (raw.geometry.type === "geojson") {
+                emitValue(layerContext, raw.geometry, "field", `${path}/geometry/field`);
+            } else {
+                emitValue(layerContext, raw.geometry, "latitudeField", `${path}/geometry/latitudeField`, "numeric");
+                emitValue(layerContext, raw.geometry, "longitudeField", `${path}/geometry/longitudeField`, "numeric");
+            }
+        }
+        emitArray(layerContext, raw, "fields", `${path}/fields`);
+    });
+}
+
 export const componentFieldHandlers: Record<FieldTraversalHandler, Handler> = {
     scalar(context) {
         let requirement = context.descriptorField.requirement;
@@ -189,6 +211,7 @@ export const componentFieldHandlers: Record<FieldTraversalHandler, Handler> = {
     "where-expression"(context) { expression(context, context.component[context.descriptorField.property], `${context.componentPath}/${context.descriptorField.property}`); },
     "value-from-row"(context) { emitValue(context, context.component, context.descriptorField.property, `${context.componentPath}/${context.descriptorField.property}`); },
     "map-layers": mapLayers,
+    "geolibre-powerbi": geoLibrePowerBi,
     "svg-elements": svgElements,
     "nested-chart"() { /* Traversed as a descriptor-declared single component container. */ },
     "chart-events"(context) {

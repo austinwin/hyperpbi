@@ -3,7 +3,7 @@ import type { ComponentBase } from "../schema/hyperpbiSchema";
 import type { ComponentKind, ExternalInteractionMode, InternalInteractionMode, ResolvedInteractionPolicy } from "./interactionTypes";
 
 const controls = new Set(["searchBox", "textInput", "numberInput", "slider", "select", "multiSelect", "segmentedControl", "toggle", "button", "buttonGroup", "filterChips", "dateRange"]);
-const dataPoints = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "smallMultiples", "advancedChart", "table", "matrix", "map", "timeline"]);
+const dataPoints = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "smallMultiples", "advancedChart", "table", "matrix", "map", "geolibre", "timeline"]);
 const displays = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel", "gauge"]);
 const navigation = new Set(["tabs", "collapsible", "accordion", "steps", "dropdown", "popover", "offcanvas", "modal"]);
 const layouts = new Set(["grid", "flex", "split", "section", "toolbar", "leftPanel", "rightPanel", "spacer", "divider"]);
@@ -28,7 +28,7 @@ function defaultEnabled(component: ComponentBase, kind: ComponentKind): boolean 
 
 function defaultInternalMode(component: ComponentBase, kind: ComponentKind): InternalInteractionMode {
     if (kind === "control") return "filter";
-    if (["map", "timeline"].includes(component.type)) return "highlight";
+    if (["map", "geolibre", "timeline"].includes(component.type)) return "highlight";
     return "none";
 }
 

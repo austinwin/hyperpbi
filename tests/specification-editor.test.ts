@@ -31,4 +31,13 @@ describe("canonical editor container coverage", () => {
         const invalidAppend = appendToContainer(spec(), "/components/0/not-a-container", { type: "text", id: "bad" });
         expect(invalidAppend).toEqual(spec());
     });
+
+    it("coalesces live authoring snapshots into one undoable transaction", () => {
+        const history = new SpecificationHistory("before");
+        history.commit("first live state");
+        history.replaceCurrent("latest live state");
+        expect(history.value).toBe("latest live state");
+        expect(history.undo()).toBe("before");
+        expect(history.redo()).toBe("latest live state");
+    });
 });

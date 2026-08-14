@@ -18,4 +18,5 @@ apps/web/.open-next/
 apps/web/.wrangler/
 apps/web/out/
 apps/web/public/runtime/
+apps/web/public/geolibre/
 *.tsbuildinfo

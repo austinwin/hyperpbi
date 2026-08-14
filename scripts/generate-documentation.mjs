@@ -49,19 +49,25 @@ function loadTypeScriptModule(file) {
 }
 
 const descriptorsModule = loadTypeScriptModule("src/catalog/componentDescriptors.ts");
+const geolibreModule = loadTypeScriptModule("src/catalog/geolibreDescriptor.ts");
 const examplesModule = loadTypeScriptModule("src/catalog/componentJsonExamples.ts");
 const patternsModule = loadTypeScriptModule("src/schema/patternRegistry.ts");
-const validationModule = loadTypeScriptModule("src/schema/validateV2Schema.ts");
 const helpModule = loadTypeScriptModule("src/docs/hyperpbiHelp.ts");
 
-const descriptors = descriptorsModule.componentDescriptors;
+// GeoLibre is a repository-pinned integration descriptor rather than part of
+// the generated legacy registry. It still belongs in the public Component
+// Explorer and generated schema reference.
+const descriptors = [...descriptorsModule.componentDescriptors, geolibreModule.geolibreDescriptor];
 const definitions = descriptors.map(item => ({...item,level:item.complexity}));
 const docs = Object.fromEntries(descriptors.map(item => [item.type,{status:item.maturity,keyProperties:item.schema.allowed.filter(property=>!["type","id"].includes(property)),accessibility:item.documentation.accessibility?.join(" "),related:item.documentation.relatedTypes,supportsUiAction:item.schema.allowed.includes("uiAction"),supportsDataInteraction:item.capabilities.interactions}]));
 const examples = Object.fromEntries(descriptors.map(item => [item.type,item.example]));
 const patterns = patternsModule.patternRegistry;
-const commonProperties = validationModule.v2CommonComponentProperties;
-const propertiesByType = validationModule.v2ComponentPropertiesByType;
-const requiredByType = validationModule.v2RequiredPropertiesByType;
+const commonProperties = descriptors
+    .map(descriptor => new Set(descriptor.schema.allowed))
+    .reduce((common, allowed) => common.filter(property => allowed.has(property)), [...descriptors[0].schema.allowed]);
+const commonPropertySet = new Set(commonProperties);
+const propertiesByType = Object.fromEntries(descriptors.map(descriptor => [descriptor.type, descriptor.schema.allowed.filter(property => !commonPropertySet.has(property))]));
+const requiredByType = Object.fromEntries(descriptors.map(descriptor => [descriptor.type, descriptor.schema.required.filter(property => property !== "type" && property !== "id")]));
 const categories = [...new Set(definitions.map(item => item.category))];
 
 function assertCanonicalCoverage() {
@@ -92,7 +98,7 @@ function markdownCatalog() {
         "",
         `**Project:** [hyperpbi.com](${projectWebsite}) · **Source:** [austinwin/hyperpbi](${projectSource})`,
         "",
-        `HyperPBI currently defines **${definitions.length} component types across ${categories.length} categories**. This file is generated from the canonical explicit \`componentDescriptors.ts\` registry and \`patternRegistry.ts\`; strict schema 2.0 validator maps are derived from those descriptors.`,
+        `HyperPBI currently defines **${definitions.length} component types across ${categories.length} categories**. This file is generated from canonical component descriptors and \`patternRegistry.ts\`; strict schema 2.0 validator maps are derived from those descriptors.`,
         "",
         "For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).",
         "",

@@ -11,6 +11,7 @@ import "../../../../src/styles/hyperpbi-inspector.css";
 import "../../../../src/styles/hyperpbi-shell.css";
 import "../../../../src/styles/hyperpbi-map.css";
 import "../../../../src/styles/hyperpbi-svg.css";
+import "../../../../src/styles/hyperpbi-geolibre.css";
 import "../../../playground/src/playground.css";
 import { IndexedDbProjectStorage } from "@hyperpbi/playground/projectStorage";
 import { importProjectBundle } from "@hyperpbi/playground/projectBundle";

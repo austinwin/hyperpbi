@@ -34,6 +34,7 @@ import { ToastHost } from "../components/overlays/ToastHost";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import { prepareLogicalDatasets } from "../editor/prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
+import type { PersistedGeoLibreProject } from "../components/geolibre/types";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 
 const notSent = (): ExternalSelectionResult => ({
@@ -63,6 +64,7 @@ export function HyperPbiRoot({
   ownerByRuntimeId,
   componentPathById,
   onMapViewportChange,
+  onGeoLibreProjectChange,
 }: {
   instanceId: string;
   schema: HyperPbiSchema;
@@ -95,6 +97,7 @@ export function HyperPbiRoot({
   ownerByRuntimeId?: Readonly<Record<string, string>>;
   componentPathById?: Readonly<Record<string, string>>;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
+  onGeoLibreProjectChange?: (componentId: string, project: PersistedGeoLibreProject) => void;
 }) {
   const effectiveSettings = useMemo(
     () => resolveSchemaRuntimeSettings(schema.theme, settings),
@@ -285,6 +288,7 @@ export function HyperPbiRoot({
         componentPathById,
         datasets: datasetEvaluation.datasets,
         onMapViewportChange,
+        onGeoLibreProjectChange,
         executeUiAction: null as any,
         isOverlayOpen: null as any,
       };
@@ -315,6 +319,8 @@ export function HyperPbiRoot({
       ownerByRuntimeId,
       componentPathById,
       datasetEvaluation.datasets,
+      onMapViewportChange,
+      onGeoLibreProjectChange,
     ],
   );
 
@@ -349,6 +355,7 @@ export function HyperPbiRoot({
       componentPathById,
       datasets: datasetEvaluation.datasets,
       onMapViewportChange,
+      onGeoLibreProjectChange,
       executeUiAction: execUiAction,
       isOverlayOpen,
     }),
@@ -378,6 +385,8 @@ export function HyperPbiRoot({
       execUiAction,
       isOverlayOpen,
       datasetEvaluation.datasets,
+      onMapViewportChange,
+      onGeoLibreProjectChange,
     ],
   );
   const style = themeVariables(schema.theme, effectiveSettings);
