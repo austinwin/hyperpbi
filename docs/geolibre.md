@@ -152,7 +152,7 @@ GeoLibre’s upstream project-plugin trust prompt still protects a project opene
 
 Power BI requires the **Maps** PBIVIZ profile because `geolibre` loads an external frame. The Maps profile declares exact access for `https://hyperpbi.com` and the official fallback `https://web.geolibre.app` in addition to existing map hosts. Core retains no WebAccess and existing Core behavior is unchanged.
 
-The production website build generates the managed runtime at `apps/web/public/geolibre` and serves it from `/geolibre/`. Generated assets are ignored; the pinned source is the reproducible artifact.
+The production website build generates the managed runtime at `apps/web/public/geolibre` and loads its explicit entrypoint at `/geolibre/index.html`. Using the concrete file avoids framework trailing-slash redirects while the runtime's asset base remains `/geolibre/`. Generated assets are ignored; the pinned source is the reproducible artifact.
 
 ### Measured bundle impact
 

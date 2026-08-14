@@ -11,7 +11,10 @@ import {
 } from "./types";
 
 export const GEOLIBRE_MANAGED_RUNTIME_ORIGIN = "https://hyperpbi.com";
-export const GEOLIBRE_MANAGED_RUNTIME_PATH = "/geolibre/";
+// Use the concrete static entrypoint. Next.js canonicalizes `/geolibre/` to
+// `/geolibre`, which is an application route and returns the HyperPBI 404 page
+// instead of resolving `public/geolibre/index.html`.
+export const GEOLIBRE_MANAGED_RUNTIME_PATH = "/geolibre/index.html";
 export const GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN = "https://web.geolibre.app";
 export const MAX_GEOLIBRE_PROJECT_BYTES = 12 * 1024 * 1024;
 export const MAX_GEOLIBRE_PROJECT_DEPTH = 64;

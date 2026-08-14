@@ -97,7 +97,7 @@ describe("provider architecture", () => {
       "https://data.example.com/assets.geojson",
       "https://{s}.overlay.example.com/{z}/{x}/{y}.png",
       "https://services.arcgis.com/a/FeatureServer/0",
-      "https://hyperpbi.com/geolibre/",
+      "https://hyperpbi.com/geolibre/index.html",
       "https://web.geolibre.app",
     ]);
   });

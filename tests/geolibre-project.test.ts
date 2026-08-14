@@ -132,7 +132,7 @@ describe("GeoLibre native project persistence", () => {
       { hostname: "app.powerbi.com", origin: "https://app.powerbi.com" } as Location,
     );
     expect(managed).toMatchObject({ origin: "https://hyperpbi.com", channel: "managed" });
-    expect(new URL(managed.url).pathname).toBe("/geolibre/");
+    expect(new URL(managed.url).pathname).toBe("/geolibre/index.html");
     expect(new URL(managed.url).searchParams.get("embed")).toBe("1");
     expect(new URL(managed.url).searchParams.get("theme")).toBe("dark");
     expect(new URL(managed.url).searchParams.get("panels")).toBe("collapsed");

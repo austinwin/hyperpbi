@@ -1,0 +1,17 @@
+siteid,sitename,latitude,longitude,status,facilitytype,district,openworkorders,inspectionscore,lastinspection
+ATX-001,Downtown Operations Hub,30.2672,-97.7431,Operational,Operations Hub,Central,3,96,2026-08-05
+ATX-002,North Austin Service Yard,30.3927,-97.7215,Watch,Service Yard,North,11,84,2026-07-28
+ATX-003,South Congress Response Point,30.2447,-97.7519,Operational,Response Point,South,4,93,2026-08-02
+ATX-004,East Austin Utility Depot,30.2638,-97.7080,Critical,Utility Depot,East,18,68,2026-07-19
+ATX-005,Mueller Field Office,30.2985,-97.7059,Operational,Field Office,East,2,98,2026-08-07
+ATX-006,Zilker Maintenance Base,30.2669,-97.7729,Watch,Maintenance Base,Central,9,81,2026-07-30
+ATX-007,Riverside Inspection Center,30.2310,-97.7280,Operational,Inspection Center,South,5,91,2026-08-01
+ATX-008,Domain Logistics Center,30.4014,-97.7250,Operational,Logistics Center,North,6,94,2026-08-06
+ATX-009,Oak Hill Service Annex,30.2350,-97.8630,Critical,Service Annex,West,15,71,2026-07-22
+ATX-010,Tech Ridge Dispatch,30.4300,-97.6700,Watch,Dispatch Center,North,10,79,2026-07-26
+ATX-011,Airport Operations Station,30.1975,-97.6664,Operational,Operations Station,Southeast,4,95,2026-08-04
+ATX-012,Westlake Field Unit,30.2920,-97.8160,Operational,Field Unit,West,1,99,2026-08-08
+ATX-013,Montopolis Response Site,30.2284,-97.7008,Watch,Response Site,Southeast,8,86,2026-07-31
+ATX-014,Crestview Support Center,30.3480,-97.7265,Operational,Support Center,North,3,97,2026-08-03
+ATX-015,Sunset Valley Works Yard,30.2269,-97.8230,Critical,Works Yard,Southwest,14,73,2026-07-24
+ATX-016,Wells Branch Service Point,30.4467,-97.6795,Operational,Service Point,North,5,92,2026-08-05

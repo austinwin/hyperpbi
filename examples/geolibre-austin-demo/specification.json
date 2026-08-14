@@ -1,0 +1,197 @@
+{
+  "version": "2.0",
+  "title": "Austin Field Operations — GeoLibre Demo",
+  "theme": {
+    "mode": "light",
+    "density": "comfortable",
+    "primaryColor": "#2563eb",
+    "accentColor": "#14b8a6",
+    "surfaceColor": "#ffffff",
+    "textColor": "#172033",
+    "borderColor": "#dbe3ee",
+    "successColor": "#16a34a",
+    "warningColor": "#d97706",
+    "dangerColor": "#dc2626",
+    "radius": 10,
+    "cardPadding": 12,
+    "gap": 12
+  },
+  "data": {
+    "datasets": {
+      "facilities": {
+        "source": "powerbi",
+        "select": [
+          "siteid",
+          "sitename",
+          "latitude",
+          "longitude",
+          "status",
+          "facilitytype",
+          "district",
+          "openworkorders",
+          "inspectionscore",
+          "lastinspection"
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "geolibre",
+      "id": "austin_gis",
+      "dataset": "facilities",
+      "title": "Austin Field Operations",
+      "subtitle": "Select a facility on the map or use GeoLibre's native layer and style panels.",
+      "ariaLabel": "Interactive GeoLibre map of Austin field operations facilities",
+      "span": 12,
+      "heightMode": "fixed",
+      "height": 640,
+      "capabilityProfile": "powerbi-embedded",
+      "runtime": {
+        "channel": "managed",
+        "panels": "open",
+        "theme": "light"
+      },
+      "project": {
+        "bridgeVersion": 1,
+        "formatVersion": "0.2.0",
+        "geolibreVersion": "2.5.0",
+        "upstreamRevision": "65073e7512703b0819062fe896fe44d27a3f6a28",
+        "document": {
+          "version": "0.2.0",
+          "name": "Austin Field Operations",
+          "mapView": {
+            "center": [
+              -97.7431,
+              30.2672
+            ],
+            "zoom": 10,
+            "bearing": 0,
+            "pitch": 0
+          },
+          "basemapStyleUrl": "https://tiles.openfreemap.org/styles/liberty",
+          "basemapVisible": true,
+          "basemapOpacity": 1,
+          "layers": [],
+          "layerGroups": [],
+          "styles": {},
+          "preferences": {},
+          "legend": {},
+          "comments": [],
+          "metadata": {
+            "description": "Synthetic Austin operations data for a local HyperPBI GeoLibre demo."
+          }
+        }
+      },
+      "powerBi": {
+        "layers": [
+          {
+            "id": "facilities",
+            "title": "Service facilities",
+            "dataset": "facilities",
+            "geometry": {
+              "type": "coordinates",
+              "latitudeField": "latitude",
+              "longitudeField": "longitude"
+            },
+            "fields": [
+              "siteid",
+              "sitename",
+              "status",
+              "facilitytype",
+              "district",
+              "openworkorders",
+              "inspectionscore",
+              "lastinspection"
+            ],
+            "initialStyle": {
+              "fillColor": "#2563eb",
+              "strokeColor": "#ffffff",
+              "fillOpacity": 0.9,
+              "strokeWidth": 1.5,
+              "circleRadius": 7
+            },
+            "visible": true,
+            "opacity": 1
+          }
+        ],
+        "selection": {
+          "enabled": true,
+          "externalHighlight": true,
+          "maxSelectionCount": 1000
+        }
+      },
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "all",
+        "externalMode": "selection",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "facility_details",
+      "dataset": "facilities",
+      "title": "Facility Details",
+      "subtitle": "Map selections are reflected here.",
+      "span": 12,
+      "columns": [
+        {
+          "field": "siteid",
+          "title": "Site ID"
+        },
+        {
+          "field": "sitename",
+          "title": "Facility"
+        },
+        {
+          "field": "status",
+          "title": "Status"
+        },
+        {
+          "field": "facilitytype",
+          "title": "Type"
+        },
+        {
+          "field": "district",
+          "title": "District"
+        },
+        {
+          "field": "openworkorders",
+          "title": "Open Work Orders",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "inspectionscore",
+          "title": "Inspection Score",
+          "format": "integer",
+          "hozAlign": "right"
+        },
+        {
+          "field": "lastinspection",
+          "title": "Last Inspection"
+        }
+      ],
+      "pagination": false,
+      "maxRows": 20,
+      "striped": true,
+      "hover": true,
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "all",
+        "externalMode": "selection",
+        "field": "siteid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "clearOnSecondClick": true
+      }
+    }
+  ]
+}
