@@ -265,9 +265,7 @@ export class GeoLibreAdapter {
       this.postProject();
       void this.flushHighlights();
     } catch (error) {
-      this.clearRuntimeHandshakeTimeout();
       this.runtimeVersionValidated = false;
-      this.runtimeUnavailable = true;
       this.callbacks.onStatus({
         state: "error",
         message: error instanceof Error ? error.message : String(error),
