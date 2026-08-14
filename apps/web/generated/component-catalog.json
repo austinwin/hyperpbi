@@ -1,7 +1,7 @@
 {
   "generated": true,
   "version": 1,
-  "componentCount": 81,
+  "componentCount": 82,
   "categories": [
     "Layout",
     "Controls",
@@ -9643,6 +9643,115 @@
               "showSymbol": false
             }
           ]
+        }
+      }
+    },
+    {
+      "type": "geolibre",
+      "label": "GeoLibre workspace",
+      "category": "Maps",
+      "maturity": "beta",
+      "complexity": "advanced",
+      "useWhen": "A report needs GeoLibre's authentic project-based GIS workspace, layer management, GIS styling, or advanced browser-safe geospatial formats",
+      "summary": "Isolated GeoLibre 2.5.0 GIS workspace with native project persistence and identity-safe Power BI-backed GeoJSON layers.",
+      "accessibility": [
+        "Give the workspace an ariaLabel and provide an adjacent table or summary for keyboard-first access to selected Power BI records."
+      ],
+      "relatedTypes": [
+        "map",
+        "table"
+      ],
+      "capabilities": {
+        "fields": true,
+        "calculations": false,
+        "css": true,
+        "slots": true,
+        "interactions": true,
+        "externalSelection": true,
+        "customHtml": false
+      },
+      "interaction": {
+        "defaultEnabled": true,
+        "naturalTrigger": "click",
+        "autoExternalMode": "selection"
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "allowed": [
+        "ariaLabel",
+        "aspectRatio",
+        "capabilityProfile",
+        "className",
+        "css",
+        "data",
+        "dataset",
+        "disabled",
+        "height",
+        "heightMode",
+        "hidden",
+        "icon",
+        "id",
+        "interaction",
+        "interactions",
+        "minHeight",
+        "order",
+        "powerBi",
+        "project",
+        "props",
+        "responsive",
+        "runtime",
+        "size",
+        "slots",
+        "span",
+        "style",
+        "subtitle",
+        "title",
+        "tooltip",
+        "type",
+        "uiAction",
+        "variant",
+        "visibility"
+      ],
+      "example": {
+        "type": "geolibre",
+        "id": "gis_workspace",
+        "title": "GIS workspace",
+        "span": 12,
+        "heightMode": "fixed",
+        "height": 520,
+        "capabilityProfile": "powerbi-embedded",
+        "runtime": {
+          "channel": "managed",
+          "panels": "open",
+          "theme": "system"
+        },
+        "powerBi": {
+          "layers": [
+            {
+              "id": "locations",
+              "title": "Power BI locations",
+              "geometry": {
+                "latitudeField": "__latitude_field__",
+                "longitudeField": "__longitude_field__"
+              }
+            }
+          ],
+          "selection": {
+            "enabled": true,
+            "externalHighlight": true,
+            "maxSelectionCount": 1000
+          }
+        },
+        "interaction": {
+          "enabled": true,
+          "trigger": "click",
+          "internalMode": "highlight",
+          "internalScope": "all",
+          "externalMode": "selection",
+          "selectionMode": "replace",
+          "multiSelect": true
         }
       }
     }

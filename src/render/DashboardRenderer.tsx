@@ -1,7 +1,4 @@
-import {
-  DashboardComponent,
-  MapComponent,
-} from "../schema/hyperpbiSchema";
+import { DashboardComponent } from "../schema/hyperpbiSchema";
 import { ComponentRegistry } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
@@ -12,10 +9,8 @@ import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
 import { componentOwnsResponsiveLayout, componentSubtreeRequestsFill, responsiveComponentStyle } from "../components/layout/responsiveLayout";
-function isMapComponent(
-  component: DashboardComponent,
-): component is MapComponent {
-  return component.type === "map";
+function isFixedCanvasMapComponent(component: DashboardComponent): boolean {
+  return component.type === "map" || component.type === "geolibre";
 }
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
     const context=useRenderContext();const { schema, config } = context;
@@ -88,7 +83,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const tooltipClass = component.tooltip ? "hp-has-tooltip" : "";
 
 const fillHeightClass = component.heightMode === "fill" ? "hp-height-fill" : "";
-const aspectHeightClass = component.heightMode === "aspectRatio" && !isMapComponent(component) ? "hp-height-aspect" : "";
+const aspectHeightClass = component.heightMode === "aspectRatio" && !isFixedCanvasMapComponent(component) ? "hp-height-aspect" : "";
 const fillChainClass = !fillHeightClass && !aspectHeightClass && componentSubtreeRequestsFill(component) ? "hp-fill-chain" : "";
 const responsiveContainerClass = componentOwnsResponsiveLayout(component) ? "hp-responsive-container" : "";
 
@@ -132,7 +127,7 @@ const componentClasses = [
                 }
             } : undefined}
             data-hp-height-mode={component.heightMode ?? "auto"}
-            style={{ ...safeStyle, ...responsiveComponentStyle(component), "--hp-span": Math.max(1, Math.min(12, component.span ?? 12)), ...(component.heightMode === "fixed" && "height" in component && typeof component.height === "number" ? { height: `${component.height}px` } : {}), ...(component.minHeight !== undefined ? { minHeight: `${component.minHeight}px` } : {}), ...(component.heightMode === "aspectRatio" && !isMapComponent(component) ? { aspectRatio: String(component.aspectRatio ?? 16 / 9) } : {}) }}
+            style={{ ...safeStyle, ...responsiveComponentStyle(component), "--hp-span": Math.max(1, Math.min(12, component.span ?? 12)), ...(component.heightMode === "fixed" && "height" in component && typeof component.height === "number" ? { height: `${component.height}px` } : {}), ...(component.minHeight !== undefined ? { minHeight: `${component.minHeight}px` } : {}), ...(component.heightMode === "aspectRatio" && !isFixedCanvasMapComponent(component) ? { aspectRatio: String(component.aspectRatio ?? 16 / 9) } : {}) }}
         >
             <style>{scoped.css}</style>
             <RenderContext.Provider value={componentContext}>

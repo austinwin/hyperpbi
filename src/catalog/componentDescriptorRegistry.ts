@@ -4,6 +4,7 @@ import {
     getComponentDescriptor,
 } from "./componentDescriptors";
 import { networkGraphDescriptor } from "./networkGraphDescriptor";
+import { geolibreDescriptor } from "./geolibreDescriptor";
 
 /**
  * componentDescriptors.ts is a generated legacy registry and is also the source
@@ -18,6 +19,10 @@ const generatingLegacyCatalog =
 if (!generatingLegacyCatalog && !componentDescriptorsByType.has(networkGraphDescriptor.type)) {
     componentDescriptors.push(networkGraphDescriptor);
     componentDescriptorsByType.set(networkGraphDescriptor.type, networkGraphDescriptor);
+}
+if (!generatingLegacyCatalog && !componentDescriptorsByType.has(geolibreDescriptor.type)) {
+    componentDescriptors.push(geolibreDescriptor);
+    componentDescriptorsByType.set(geolibreDescriptor.type, geolibreDescriptor);
 }
 
 export {

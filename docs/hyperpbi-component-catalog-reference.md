@@ -3,7 +3,7 @@
 
 **Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
 
-HyperPBI currently defines **81 component types across 12 categories**. This file is generated from the canonical explicit `componentDescriptors.ts` registry and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
+HyperPBI currently defines **82 component types across 12 categories**. This file is generated from canonical component descriptors and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
 
 For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
 
@@ -4910,7 +4910,7 @@ _2 components_
 
 ## Maps
 
-_1 components_
+_2 components_
 
 ### `map` — Map
 
@@ -5065,6 +5065,71 @@ _1 components_
     "clearSelection": true,
     "zoomToSelection": true,
     "bookmarks": true
+  }
+}
+```
+
+### `geolibre` — GeoLibre workspace
+
+**Status:** beta
+
+**Level:** advanced
+
+**Recommended use:** A report needs GeoLibre's authentic project-based GIS workspace, layer management, GIS styling, or advanced browser-safe geospatial formats
+
+**Required properties:** `type`, `id`
+
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `height`, `project`, `powerBi`, `runtime`, `capabilityProfile`
+
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `capabilityProfile`, `className`, `css`, `data`, `dataset`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `order`, `powerBi`, `project`, `props`, `responsive`, `runtime`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** Yes.
+
+**Accessibility:** Give the workspace an ariaLabel and provide an adjacent table or summary for keyboard-first access to selected Power BI records.
+
+**Related:** `map`, `table`
+
+```json
+{
+  "type": "geolibre",
+  "id": "gis_workspace",
+  "title": "GIS workspace",
+  "span": 12,
+  "heightMode": "fixed",
+  "height": 520,
+  "capabilityProfile": "powerbi-embedded",
+  "runtime": {
+    "channel": "managed",
+    "panels": "open",
+    "theme": "system"
+  },
+  "powerBi": {
+    "layers": [
+      {
+        "id": "locations",
+        "title": "Power BI locations",
+        "geometry": {
+          "latitudeField": "__latitude_field__",
+          "longitudeField": "__longitude_field__"
+        }
+      }
+    ],
+    "selection": {
+      "enabled": true,
+      "externalHighlight": true,
+      "maxSelectionCount": 1000
+    }
+  },
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "highlight",
+    "internalScope": "all",
+    "externalMode": "selection",
+    "selectionMode": "replace",
+    "multiSelect": true
   }
 }
 ```

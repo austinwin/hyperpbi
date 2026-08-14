@@ -1,7 +1,7 @@
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity, InspectorPropertyDescriptor } from "./componentTypes";
 
 export type ComponentRenderMode = "direct" | "overlay";
-export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
+export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "geolibre-powerbi" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
 export interface FieldReferenceDescriptor { property:string; requirement:"any"|"numeric"; handler:FieldTraversalHandler; }
 export interface ComponentContainerDescriptor { property:string; kind:"array"|"tabs"|"accordion"|"single"; allowedTypes?:string[]; }
 export interface ComponentMaturityEvidence {

@@ -11,6 +11,7 @@ import type {
     MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition,
 } from "./mapSchema";
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
+import type { GeoLibreComponent } from "../components/geolibre/types";
 
 // Re-export map types
 export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition };
@@ -718,6 +719,7 @@ export type DashboardComponent =
     | TableComponent
     | MatrixComponent
     | MapComponent
+    | GeoLibreComponent
     | ContentComponent
     | TabsComponent
     | TimelineComponent

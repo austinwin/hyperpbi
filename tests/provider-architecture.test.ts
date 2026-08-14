@@ -83,12 +83,22 @@ describe("provider architecture", () => {
           { id: "xyz", source: { type: "xyz", url: "https://{s}.overlay.example.com/{z}/{x}/{y}.png" } },
           { id: "arcgis", source: { type: "arcgisFeature", url: "https://services.arcgis.com/a/FeatureServer/0" } },
         ],
+      }, {
+        type: "geolibre",
+        id: "gis",
+        runtime: { channel: "managed" },
+      }, {
+        type: "geolibre",
+        id: "official-gis",
+        runtime: { channel: "official" },
       }],
     }))).toEqual([
       "https://tiles.example.com/{z}/{x}/{y}.png",
       "https://data.example.com/assets.geojson",
       "https://{s}.overlay.example.com/{z}/{x}/{y}.png",
       "https://services.arcgis.com/a/FeatureServer/0",
+      "https://hyperpbi.com/geolibre/",
+      "https://web.geolibre.app",
     ]);
   });
   it.each([

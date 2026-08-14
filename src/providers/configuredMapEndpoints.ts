@@ -1,5 +1,10 @@
 import { parseJson } from "../utils/safeJson";
 import { providerServiceOrigin } from "./providerPolicy";
+import {
+    GEOLIBRE_MANAGED_RUNTIME_ORIGIN,
+    GEOLIBRE_MANAGED_RUNTIME_PATH,
+    GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN,
+} from "../components/geolibre/securityPolicy";
 
 const EXTERNAL_SOURCE_TYPES = new Set([
     "arcgisFeature",
@@ -39,6 +44,14 @@ export function configuredMapEndpoints(specification: string): string[] {
         if (entry.type === "map" && entry.basemap && typeof entry.basemap === "object") {
             const basemap = entry.basemap as Record<string, unknown>;
             if (basemap.type !== "none" && basemap.type !== "osm") add(basemap.url);
+        }
+        if (entry.type === "geolibre") {
+            const runtime = entry.runtime && typeof entry.runtime === "object"
+                ? entry.runtime as Record<string, unknown>
+                : undefined;
+            add(runtime?.channel === "official"
+                ? GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN
+                : `${GEOLIBRE_MANAGED_RUNTIME_ORIGIN}${GEOLIBRE_MANAGED_RUNTIME_PATH}`);
         }
 
         Object.values(entry).forEach(visit);

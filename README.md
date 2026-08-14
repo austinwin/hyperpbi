@@ -61,7 +61,7 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 - HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
 - Dashboard schema 1.0 and missing versions are rejected by visual loading, Edit Mode, AI import, preview, save, and rendering. Legacy JSON can be converted explicitly with the development-only `npm run schema:migrate-v1 -- input.json output.json` utility; runtime migration is intentionally unsupported.
 <!-- component-summary:start -->
-- The canonical implementation defines **81 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+- The canonical implementation defines **82 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
 - Power BI visual package version `1.0.1.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
@@ -156,6 +156,8 @@ Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, ga
 
 `map` uses the same single **Values** field well as every other HyperPBI component for Power BI-backed fields; reference-only service and GeoJSON maps require no Values fields. HyperPBI 2.0 maps provide explicit Power BI, ArcGIS Feature/Tile/Dynamic, inline/remote GeoJSON, and generic XYZ layers; simple, unique, class-break, continuous, proportional, cluster, true canvas heatmap, density-grid, rich icon, line, and polygon renderers; interactive multi-layer legends; rectangle, lasso, and circle selection; quick filters; safe popups/labels; and compact operational tools. A shared controller synchronizes click, legend, spatial, external Power BI, and other HyperPBI component interactions across selected, hovered, externally highlighted, dimmed, and filtered states. Map Studio configures the major capabilities while retaining advanced JSON. See the [analytical map guide](docs/maps.md), [map services](docs/map-services.md), and the manifest-driven [map gallery](examples/map/README.md).
 
+`geolibre` is the separate full-GIS choice. It embeds the authentic pinned GeoLibre browser GUI—toolbar, map, layer panel, style panel, native project workflow, and browser-safe GIS tools—in an isolated frame. Power BI fields become ordinary native GeoJSON layers with private source-lineage mappings, while GeoLibre-authored view, layers, styles, and project state round-trip through the HyperPBI specification. Use `map` for ordinary analytical dashboards and `geolibre` only when the report explicitly needs a richer GIS workspace. See the [GeoLibre GIS workspace guide](docs/geolibre.md).
+
 ## Map demos
 
 Five version 2 examples under [`examples/specs`](examples/specs) demonstrate the stabilized map runtime; Power BI-backed examples use compact CSV data under [`examples/data`](examples/data):
@@ -204,6 +206,7 @@ The importer accepts one JSON object directly or inside one Markdown fence and c
 - ECharts options are recursively sanitized; functions, URL-bearing keys, executable strings, and unsafe semantic data overrides are removed.
 - SVG elements/attributes/references are allowlisted, IDs are namespaced, external resources are blocked, and exact element/path/depth/repeat/animation limits are enforced.
 - ArcGIS and provider URLs require HTTPS, no embedded credentials, an allowed host, and the appropriate package privilege.
+- GeoLibre project snapshots are version/revision pinned, size/depth bounded, and stripped of live Power BI rows; credentials, executable state, absolute paths, plugin manifests, and plugin activation/settings are rejected before persistence.
 - Prompt data stays local until the user copies it. HyperPBI has no AI API key and should never receive credentials in dashboard JSON.
 
 See the full [security model](docs/security.md).
@@ -216,7 +219,7 @@ npm run package:maps
 ```
 
 - **Core** removes WebAccess privileges. Bound Power BI geometry remains available; external tiles, ArcGIS services, and geocoders are unavailable.
-- **Maps broad** is the default Maps artifact label. It declares the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
+- **Maps broad** is the default Maps artifact label. It declares the managed/official GeoLibre origins plus the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
 - **Maps restricted** uses the same safe built-ins and the restricted artifact label when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
 - Add comma-separated exact hosts or real-domain subdomain wildcards through `HYPERPBI_MAP_HOSTS` when packaging custom basemap or geocoder endpoints. Power BI doesn't support an all-host `https://*` WebAccess declaration, so custom hosts must be known when the PBIVIZ is built.
 
@@ -230,6 +233,8 @@ npm run dev
 npm run build
 npm run web:start
 npm run web:sites:build
+npm run geolibre:build
+npm run geolibre:build:cached
 npm run typecheck
 npm test
 npm run test:browser
