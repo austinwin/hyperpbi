@@ -83,7 +83,10 @@ if (process.argv.includes("--if-valid") && await stagedRuntimeIsValid()) {
 }
 
 if (!process.argv.includes("--skip-install")) {
-  runNpm(["ci"], vendor);
+  // Vercel builds with NODE_ENV=production. GeoLibre's TypeScript compiler,
+  // ambient module declarations, and Vite virtual-module types are locked dev
+  // dependencies and are required to produce the browser runtime.
+  runNpm(["ci", "--include=dev"], vendor);
 }
 
 const resolvedOutput = path.resolve(output);

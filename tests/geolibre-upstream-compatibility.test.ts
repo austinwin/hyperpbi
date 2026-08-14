@@ -47,6 +47,7 @@ describe("pinned GeoLibre upstream compatibility", () => {
     expect(build).toContain("VITE_GEOLIBRE_EMBED_ORIGINS");
     expect(build).toContain('const EMBED_API_ORIGINS = "*"');
     expect(build).toContain('const EMBED_API_ORIGIN_MODE = "parent-window"');
+    expect(build).toContain('runNpm(["ci", "--include=dev"], vendor)');
     expect(JSON.parse(read("apps/web/package.json")).scripts.prebuild).toContain("geolibre:ensure");
     expect(JSON.parse(read("vercel.json")).buildCommand).toContain("geolibre:build");
   });
