@@ -35,7 +35,9 @@ describe("pinned GeoLibre upstream compatibility", () => {
     expect(build).toContain('GEOLIBRE_APP_BASE: "/geolibre/"');
     expect(build).toContain("VITE_GEOLIBRE_EMBED_ORIGINS");
     expect(build).toContain('"https://hyperpbi.com"');
+    expect(build).toContain('"https://www.hyperpbi.com"');
     expect(build).toContain('"https://app.powerbi.com"');
     expect(build).not.toContain('VITE_GEOLIBRE_EMBED_ORIGINS: "*"');
+    expect(JSON.parse(read("vercel.json")).buildCommand).toContain("geolibre:build");
   });
 });

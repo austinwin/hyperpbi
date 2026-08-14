@@ -13,7 +13,11 @@ vi.mock("../src/components/geolibre/GeoLibreAdapter", () => ({
     highlightFeatures = vi.fn();
     destroy = vi.fn();
     start = vi.fn();
-    constructor(_iframe: HTMLIFrameElement, _runtime: unknown, callbacks: { onStatus(status: unknown): void }) {
+    runtime: unknown;
+    callbacks: { onStatus(status: unknown): void; onUnavailable?(message: string): void };
+    constructor(_iframe: HTMLIFrameElement, runtime: unknown, callbacks: { onStatus(status: unknown): void; onUnavailable?(message: string): void }) {
+      this.runtime = runtime;
+      this.callbacks = callbacks;
       adapters.instances.push(this);
       queueMicrotask(() => callbacks.onStatus({ state: "clean", message: "Ready" }));
     }
@@ -87,6 +91,44 @@ describe("GeoLibre workspace host", () => {
     }), host);
     expect(host.querySelector(".hp-geolibre-authoring-bar")).toBeNull();
     expect((host.querySelector(".hp-geolibre-workspace") as HTMLElement).style.height).toBe("100%");
+  });
+
+  it("retries the official runtime when the managed deployment cannot handshake", async () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const project = createDefaultGeoLibreProject();
+    render(h(GeoLibreWorkspaceHost, {
+      component: { type: "geolibre", id: "fallback", runtime: { channel: "managed" } },
+      persistedProject: project,
+      document: project.document,
+      dataSignature: "",
+      highlightedFeatures: new Map(),
+      resetProject: project,
+      resetDocument: project.document,
+      warnings: [],
+      onSelection: vi.fn(),
+    }), host);
+    await vi.waitFor(() => expect(
+      adapters.instances.some(adapter => adapter.runtime?.channel === "managed"),
+    ).toBe(true));
+    const managedAdapters = adapters.instances.filter(adapter => adapter.runtime?.channel === "managed");
+    const managedAdapter = managedAdapters[managedAdapters.length - 1];
+    expect(managedAdapter.runtime).toMatchObject({
+      channel: "managed",
+      origin: window.location.origin,
+    });
+    managedAdapter.callbacks.onUnavailable?.("Managed runtime timed out.");
+
+    await vi.waitFor(() => expect(
+      adapters.instances.some(adapter => adapter.runtime?.channel === "official"),
+    ).toBe(true));
+    const officialAdapter = adapters.instances.find(adapter => adapter.runtime?.channel === "official");
+    expect(managedAdapter.destroy).toHaveBeenCalled();
+    expect(officialAdapter!.runtime).toMatchObject({
+      channel: "official",
+      origin: "https://web.geolibre.app",
+    });
+    expect(host.querySelector('[role="alert"]')).toBeNull();
   });
 
   it("fails closed with a useful message when Power BI denies runtime access", () => {

@@ -49,10 +49,22 @@ export function GeoLibreWorkspaceHost({
     state: "initializing",
     message: "Starting the GeoLibre workspace…",
   });
-  const runtime = useMemo(
+  const requestedRuntime = useMemo(
     () => resolveGeoLibreRuntime(component),
     [component.runtime, component.capabilityProfile],
   );
+  const officialRuntime = useMemo(
+    () => resolveGeoLibreRuntime({
+      capabilityProfile: component.capabilityProfile,
+      runtime: { ...component.runtime, channel: "official" },
+    }),
+    [component.runtime, component.capabilityProfile],
+  );
+  const requestedRuntimeKey = `${requestedRuntime.origin}\u0000${requestedRuntime.url}`;
+  const [fallbackForRuntime, setFallbackForRuntime] = useState<string>();
+  const runtime = fallbackForRuntime === requestedRuntimeKey
+    ? officialRuntime
+    : requestedRuntime;
   const authoring = Boolean(onProjectChange);
   const fixedHeight = Math.max(280, component.height ?? 520);
   const hostStyle =
@@ -74,6 +86,17 @@ export function GeoLibreWorkspaceHost({
         callbacksRef.current.onSelection(event);
       },
       onStatus: setStatus,
+      onUnavailable(message) {
+        if (runtime.channel === "managed") {
+          setStatus({
+            state: "initializing",
+            message: "The managed runtime is unavailable; trying the official GeoLibre fallback.",
+          });
+          setFallbackForRuntime(requestedRuntimeKey);
+        } else {
+          setStatus({ state: "error", message });
+        }
+      },
     });
     adapterRef.current = adapter;
     adapter.loadProject(document, dataSignature);
@@ -84,7 +107,7 @@ export function GeoLibreWorkspaceHost({
       adapter.destroy();
       if (adapterRef.current === adapter) adapterRef.current = undefined;
     };
-  }, [runtime.url, runtime.origin, availability?.state, availability?.message]);
+  }, [runtime.url, runtime.origin, requestedRuntimeKey, availability?.state, availability?.message]);
 
   useEffect(() => {
     adapterRef.current?.loadProject(document, dataSignature);
@@ -151,7 +174,10 @@ export function GeoLibreWorkspaceHost({
           />
         )}
         {!availability && status.state === "initializing" ? (
-          <div class="hp-geolibre-loading" role="status">Loading GeoLibre…</div>
+          <div class="hp-geolibre-loading" role="status">
+            <strong>Loading GeoLibre…</strong>
+            <span>{status.message}</span>
+          </div>
         ) : null}
         {!availability && status.state === "error" ? (
           <div class="hp-geolibre-error" role="alert">

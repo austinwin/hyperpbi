@@ -18,6 +18,7 @@ export interface GeoLibreAdapterCallbacks {
   onProject(project: PersistedGeoLibreProject): void;
   onSelection(event: GeoLibreSelectionEvent): void;
   onStatus(status: GeoLibreRuntimeStatus): void;
+  onUnavailable?(message: string): void;
 }
 
 const object = (value: unknown): value is Record<string, unknown> =>
@@ -27,6 +28,8 @@ export class GeoLibreAdapter {
   private destroyed = false;
   private frameLoaded = false;
   private runtimeVersionValidated = false;
+  private runtimeUnavailable = false;
+  private enhancedConnectionStarted = false;
   private projectSentForNavigation = false;
   private sequence = 0;
   private project?: GeoLibreProjectDocument;
@@ -47,12 +50,15 @@ export class GeoLibreAdapter {
   ) {
     window.addEventListener("message", this.onMessage);
     iframe.addEventListener("load", this.onLoad);
-    this.connectEnhancedApi();
   }
 
   start(): void {
     if (this.destroyed) return;
     this.iframe.src = this.runtime.url;
+    if (!this.enhancedConnectionStarted) {
+      this.enhancedConnectionStarted = true;
+      void this.connectEnhancedApi();
+    }
   }
 
   loadProject(
@@ -106,7 +112,7 @@ export class GeoLibreAdapter {
   private readonly onLoad = () => {
     if (this.destroyed) return;
     this.frameLoaded = true;
-    if (!this.runtimeVersionValidated) {
+    if (!this.runtimeVersionValidated && !this.runtimeUnavailable) {
       this.callbacks.onStatus({
         state: "initializing",
         message: "Waiting for the pinned GeoLibre runtime handshake.",
@@ -216,6 +222,7 @@ export class GeoLibreAdapter {
       // the parent. Receiving the exact-window message is sufficient proof that
       // this navigation can accept the project.
       this.frameLoaded = true;
+      this.runtimeUnavailable = false;
       this.runtimeVersionValidated = true;
       this.callbacks.onStatus({
         state: "initializing",
@@ -277,19 +284,25 @@ export class GeoLibreAdapter {
       // The versioned API is deployment-origin gated. The native project and
       // selection bridges remain the supported baseline when it is unavailable.
       if (!this.destroyed) {
-        this.callbacks.onStatus(
-          this.runtimeVersionValidated
-            ? {
-                state: "clean",
-                message: "GeoLibre project bridge connected.",
-                enhancedApiAvailable: false,
-              }
-            : {
-                state: "error",
-                message: "GeoLibre did not complete the pinned runtime-version handshake.",
-                enhancedApiAvailable: false,
-              },
-        );
+        if (this.runtimeVersionValidated) {
+          this.callbacks.onStatus({
+            state: "clean",
+            message: "GeoLibre project bridge connected.",
+            enhancedApiAvailable: false,
+          });
+        } else {
+          const message = "GeoLibre did not complete the pinned runtime-version handshake.";
+          this.runtimeUnavailable = true;
+          if (this.callbacks.onUnavailable) {
+            this.callbacks.onUnavailable(message);
+          } else {
+            this.callbacks.onStatus({
+              state: "error",
+              message,
+              enhancedApiAvailable: false,
+            });
+          }
+        }
       }
     }
   }

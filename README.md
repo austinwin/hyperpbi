@@ -63,7 +63,7 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 <!-- component-summary:start -->
 - The canonical implementation defines **82 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
-- Power BI visual package version `1.0.1.0` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
+- Power BI visual package version `1.0.1.1` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
 ## Power BI workflow
 

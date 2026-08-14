@@ -74,6 +74,7 @@ describe("GeoLibre iframe adapter", () => {
     const callbacks = { onProject: vi.fn(), onSelection: vi.fn(), onStatus: vi.fn() };
     const runtime = { url: "https://runtime.example/geolibre/?embed=1", origin: "https://runtime.example", channel: "managed" as const };
     const adapter = new GeoLibreAdapter(iframe, runtime, callbacks);
+    adapter.start();
     await vi.waitFor(() => expect(embed.connect).toHaveBeenCalled());
     iframe.dispatchEvent(new Event("load"));
     inbound(iframe, runtime.origin, { source: "geolibre", v: 2, type: "ready", payload: { version: GEOLIBRE_VERSION } });
@@ -91,5 +92,28 @@ describe("GeoLibre iframe adapter", () => {
     expect(embed.client.disconnect).toHaveBeenCalled();
     expect(embed.disconnectListener).toHaveBeenCalled();
     expect(iframe.hasAttribute("src")).toBe(false);
+  });
+
+  it("keeps a failed handshake terminal when a late iframe load event arrives", async () => {
+    embed.connect.mockRejectedValueOnce(new Error("Timed out waiting for GeoLibre"));
+    const iframe = document.createElement("iframe");
+    document.body.append(iframe);
+    const callbacks = { onProject: vi.fn(), onSelection: vi.fn(), onStatus: vi.fn() };
+    const runtime = { url: "https://runtime.example/geolibre/index.html?embed=1", origin: "https://runtime.example", channel: "managed" as const };
+    const adapter = new GeoLibreAdapter(iframe, runtime, callbacks);
+
+    adapter.start();
+    await vi.waitFor(() => expect(callbacks.onStatus).toHaveBeenLastCalledWith(
+      expect.objectContaining({ state: "error" }),
+    ));
+    iframe.dispatchEvent(new Event("load"));
+
+    expect(callbacks.onStatus).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        state: "error",
+        message: "GeoLibre did not complete the pinned runtime-version handshake.",
+      }),
+    );
+    adapter.destroy();
   });
 });

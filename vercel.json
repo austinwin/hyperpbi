@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npm run web:build",
+  "buildCommand": "npm run geolibre:build && npm run web:build",
   "outputDirectory": "apps/web/.next"
 }

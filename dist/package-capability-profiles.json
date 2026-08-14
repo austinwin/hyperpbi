@@ -5,6 +5,7 @@
   "maps-broad": {
     "webAccessParameters": [
       "https://hyperpbi.com",
+      "https://www.hyperpbi.com",
       "https://web.geolibre.app",
       "https://tile.openstreetmap.org",
       "https://nominatim.openstreetmap.org",

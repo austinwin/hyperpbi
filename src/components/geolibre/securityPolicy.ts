@@ -10,7 +10,9 @@ import {
   type PersistedGeoLibreProject,
 } from "./types";
 
-export const GEOLIBRE_MANAGED_RUNTIME_ORIGIN = "https://hyperpbi.com";
+// The production host canonically serves from www. Using the redirecting apex
+// origin breaks the exact-origin postMessage and Power BI WebAccess contracts.
+export const GEOLIBRE_MANAGED_RUNTIME_ORIGIN = "https://www.hyperpbi.com";
 // Use the concrete static entrypoint. Next.js canonicalizes `/geolibre/` to
 // `/geolibre`, which is an application route and returns the HyperPBI 404 page
 // instead of resolving `public/geolibre/index.html`.

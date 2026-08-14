@@ -34,7 +34,7 @@ Existing `map` JSON and rendering are unchanged. A report can use both component
 
 Omit `project` to start from HyperPBI’s validated native default. `heightMode` is `fixed` or `fill`; fixed `height` is bounded from 280 through 2,400 pixels. Fill mode requires a bounded fill-height parent. The host observes the actual frame shell and updates the iframe only when its rounded dimensions change.
 
-`runtime.channel` is `managed` by default. `official` explicitly uses `https://web.geolibre.app/` as a fallback. Both URLs enter GeoLibre’s native `?embed=1` mode. `capabilityProfile: "viewer"` requests GeoLibre’s viewer layout and hides HyperPBI authoring controls; `powerbi-embedded` retains the normal authoring GUI allowed by the locked managed profile.
+`runtime.channel` is `managed` by default. It uses the canonical `https://www.hyperpbi.com/geolibre/index.html` deployment and retries `https://web.geolibre.app/` once when the managed runtime cannot complete its bounded handshake. `official` selects that public fallback directly. Both URLs enter GeoLibre’s native `?embed=1` mode. `capabilityProfile: "viewer"` requests GeoLibre’s viewer layout and hides HyperPBI authoring controls; `powerbi-embedded` retains the normal authoring GUI allowed by the locked managed profile. A failed fallback remains a visible error; a late iframe load cannot return the component to an indefinite loading state.
 
 ## Power BI-backed layers
 
@@ -150,9 +150,9 @@ GeoLibre’s upstream project-plugin trust prompt still protects a project opene
 
 ## Package and deployment behavior
 
-Power BI requires the **Maps** PBIVIZ profile because `geolibre` loads an external frame. The Maps profile declares exact access for `https://hyperpbi.com` and the official fallback `https://web.geolibre.app` in addition to existing map hosts. Core retains no WebAccess and existing Core behavior is unchanged.
+Power BI requires the **Maps** PBIVIZ profile because `geolibre` loads an external frame. The Maps profile declares exact access for the apex and canonical `https://www.hyperpbi.com` hosts plus the official fallback `https://web.geolibre.app`, in addition to existing map hosts. Core retains no WebAccess and existing Core behavior is unchanged.
 
-The production website build generates the managed runtime at `apps/web/public/geolibre` and loads its explicit entrypoint at `/geolibre/index.html`. Using the concrete file avoids framework trailing-slash redirects while the runtime's asset base remains `/geolibre/`. Generated assets are ignored; the pinned source is the reproducible artifact.
+The Vercel and Sites production builds generate the managed runtime at `apps/web/public/geolibre` and load its explicit entrypoint at `/geolibre/index.html`. Using the canonical `www` origin and concrete file avoids cross-origin and framework trailing-slash redirects while the runtime's asset base remains `/geolibre/`. Generated assets are ignored; the pinned source is the reproducible artifact.
 
 ### Measured bundle impact
 

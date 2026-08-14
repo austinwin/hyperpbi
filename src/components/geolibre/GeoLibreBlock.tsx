@@ -5,7 +5,10 @@ import {
 } from "./projectBridge";
 import { hydratePowerBiLayers, featureIdsForSourceRows } from "./powerBiBridge";
 import { sanitizePersistedGeoLibreProject } from "./securityPolicy";
-import { resolveGeoLibreRuntime } from "./securityPolicy";
+import {
+  GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN,
+  resolveGeoLibreRuntime,
+} from "./securityPolicy";
 import { commitGeoLibreSelection } from "./selectionBridge";
 import type {
   GeoLibreComponent,
@@ -61,9 +64,13 @@ export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
     : undefined;
   const runtime = resolveGeoLibreRuntime(component);
   const runtimeAccess = context.providerAccess?.services?.[runtime.origin];
-  const availability = runtimeAccess && !runtimeAccess.allowed
+  const fallbackAccess = runtime.channel === "managed"
+    ? context.providerAccess?.services?.[GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN]
+    : undefined;
+  const runtimeDeniedWithoutFallback = runtimeAccess && !runtimeAccess.allowed && !fallbackAccess?.allowed;
+  const availability = runtimeDeniedWithoutFallback
     ? { state: "denied" as const, message: runtimeAccess.reason ?? "Power BI denied WebAccess to the GeoLibre runtime." }
-    : context.providerAccess && !context.webAccessAvailable && !runtimeAccess
+    : context.providerAccess && !context.webAccessAvailable && !runtimeAccess && !fallbackAccess
       ? { state: "checking" as const, message: "Waiting for the Power BI WebAccess capability check." }
       : undefined;
 
