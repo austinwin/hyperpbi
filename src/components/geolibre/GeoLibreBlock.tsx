@@ -1,9 +1,14 @@
 import { useCallback, useMemo } from "preact/hooks";
 import { useRenderContext } from "../../render/RenderContext";
+import { MapBlock } from "../maps/MapBlock";
 import {
   createDefaultGeoLibreProject,
 } from "./projectBridge";
 import { hydratePowerBiLayers, featureIdsForSourceRows } from "./powerBiBridge";
+import {
+  createGeoLibrePowerBiCompatMap,
+  isPowerBiVisualSandbox,
+} from "./powerBiCompat";
 import { sanitizePersistedGeoLibreProject } from "./securityPolicy";
 import {
   GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN,
@@ -34,6 +39,10 @@ export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
         context.getDatasetView,
       ),
     [component, persistedProject, context.getDatasetView],
+  );
+  const powerBiCompatMap = useMemo(
+    () => createGeoLibrePowerBiCompatMap(component, bridge.document),
+    [component, bridge.document],
   );
   const resetProject = useMemo(
     () => createDefaultGeoLibreProject(component.title ?? "HyperPBI GeoLibre workspace"),
@@ -73,6 +82,16 @@ export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
     : context.providerAccess && !context.webAccessAvailable && !runtimeAccess && !fallbackAccess
       ? { state: "checking" as const, message: "Waiting for the Power BI WebAccess capability check." }
       : undefined;
+
+  // A Power BI custom visual is already hosted in a low-privilege sandboxed
+  // iframe. A second remote iframe is blocked by the host's sandbox/CSP in
+  // Desktop and Service, so waiting for a GeoLibre postMessage handshake can
+  // never become a stable Power BI architecture. Use HyperPBI's bundled map
+  // runtime for Power BI while preserving the full native GeoLibre workspace in
+  // browser/Playground hosts.
+  if (isPowerBiVisualSandbox()) {
+    return <MapBlock component={powerBiCompatMap} />;
+  }
 
   return (
     <GeoLibreWorkspaceHost
