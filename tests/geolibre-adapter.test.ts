@@ -54,6 +54,7 @@ describe("GeoLibre iframe adapter", () => {
     inbound(iframe, runtime.origin, { source: "geolibre", v: 2, type: "ready", payload: { version: GEOLIBRE_VERSION } });
     expect(postMessage).toHaveBeenCalledTimes(1);
     inbound(iframe, "https://attacker.example", { type: "geolibre:state", project: { ...project.document, name: "Attack" } });
+    inbound(iframe, "null", { type: "geolibre:state", project: { ...project.document, name: "Opaque origin switch" } });
     expect(callbacks.onProject).not.toHaveBeenCalled();
 
     const changed = structuredClone(project.document);
@@ -69,6 +70,99 @@ describe("GeoLibre iframe adapter", () => {
     inbound(iframe, runtime.origin, { type: "geolibre:state", project: unsafe });
     expect(callbacks.onProject).toHaveBeenCalledTimes(1);
     expect(callbacks.onStatus).toHaveBeenLastCalledWith(expect.objectContaining({ state: "error" }));
+    adapter.destroy();
+  });
+
+  it("supports the opaque origin inherited by nested frames in Power BI Desktop", async () => {
+    embed.connect.mockRejectedValueOnce(new Error("Timed out waiting for GeoLibre"));
+    const iframe = document.createElement("iframe");
+    document.body.append(iframe);
+    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
+    const callbacks = { onProject: vi.fn(), onSelection: vi.fn(), onStatus: vi.fn(), onUnavailable: vi.fn() };
+    const runtime = { url: "https://runtime.example/geolibre/index.html?embed=1", origin: "https://runtime.example", channel: "managed" as const };
+    const adapter = new GeoLibreAdapter(iframe, runtime, callbacks);
+    const project = createDefaultGeoLibreProject();
+    adapter.loadProject(project.document, "data-v1");
+
+    adapter.start();
+    iframe.dispatchEvent(new Event("load"));
+    inbound(iframe, "null", { type: "geolibre:ready", version: GEOLIBRE_VERSION });
+
+    expect(callbacks.onUnavailable).not.toHaveBeenCalled();
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "geolibre:load-project", project: project.document }),
+      "*",
+    );
+    expect(callbacks.onStatus).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        state: "clean",
+        message: "GeoLibre workspace loaded through the Power BI sandbox bridge.",
+      }),
+    );
+
+    const changed = structuredClone(project.document);
+    changed.name = "Changed in Power BI sandbox";
+    inbound(iframe, runtime.origin, { type: "geolibre:state", project: { ...changed, name: "Wrong channel" } });
+    expect(callbacks.onProject).not.toHaveBeenCalled();
+    inbound(iframe, "null", { type: "geolibre:state", project: changed });
+    expect(callbacks.onProject).toHaveBeenCalledTimes(1);
+    expect(callbacks.onProject.mock.calls[0][0].document.name).toBe("Changed in Power BI sandbox");
+
+    inbound(iframe, "null", {
+      type: "geolibre:event",
+      event: "selection-change",
+      payload: { layerId: "layer", featureId: 42 },
+    });
+    inbound(iframe, "null", {
+      source: "geolibre",
+      v: 2,
+      type: "selectionChanged",
+      payload: { layerId: "layer", featureIds: ["42", 43] },
+    });
+    expect(callbacks.onSelection).toHaveBeenCalledTimes(2);
+    expect(callbacks.onSelection).toHaveBeenLastCalledWith({ layerId: "layer", featureIds: ["42", "43"] });
+
+    postMessage.mockClear();
+    adapter.highlightFeatures(new Map([["layer", ["42", "43"]]]));
+    await vi.waitFor(() => expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        v: 2,
+        type: "highlightFeature",
+        payload: { layerId: "layer", featureIds: ["42", "43"], fit: false },
+        requestId: expect.stringMatching(/^hyperpbi-opaque-/),
+      }),
+      "*",
+    ));
+    adapter.highlightFeatures(new Map());
+    await vi.waitFor(() => expect(postMessage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        v: 2,
+        type: "highlightFeature",
+        payload: { layerId: "layer", featureIds: [], fit: false },
+      }),
+      "*",
+    ));
+
+    adapter.destroy();
+  });
+
+  it("does not let an invalid null-origin version pin the sandbox channel", () => {
+    const iframe = document.createElement("iframe");
+    document.body.append(iframe);
+    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
+    const callbacks = { onProject: vi.fn(), onSelection: vi.fn(), onStatus: vi.fn() };
+    const runtime = { url: "https://runtime.example/geolibre/?embed=1", origin: "https://runtime.example", channel: "managed" as const };
+    const adapter = new GeoLibreAdapter(iframe, runtime, callbacks);
+    const project = createDefaultGeoLibreProject();
+    adapter.loadProject(project.document, "data-v1");
+
+    inbound(iframe, "null", { type: "geolibre:ready", version: "999.0.0" });
+    expect(postMessage).not.toHaveBeenCalled();
+    inbound(iframe, runtime.origin, { type: "geolibre:ready", version: GEOLIBRE_VERSION });
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "geolibre:load-project" }),
+      runtime.origin,
+    );
     adapter.destroy();
   });
 
