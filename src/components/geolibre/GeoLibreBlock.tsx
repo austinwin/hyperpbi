@@ -22,7 +22,33 @@ import type {
 } from "./types";
 import { GeoLibreWorkspaceHost } from "./GeoLibreWorkspaceHost";
 
+/**
+ * The environment split lives above the two hook-owning implementations so the
+ * Power BI path never builds the remote iframe bridge or duplicates a large
+ * Power BI dataset into an unused GeoJSON document.
+ */
 export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
+  return isPowerBiVisualSandbox()
+    ? <GeoLibrePowerBiBlock component={component} />
+    : <GeoLibreBrowserBlock component={component} />;
+}
+
+function GeoLibrePowerBiBlock({ component }: { component: GeoLibreComponent }) {
+  const persistedProject = useMemo<PersistedGeoLibreProject>(
+    () =>
+      component.project
+        ? sanitizePersistedGeoLibreProject(component.project)
+        : createDefaultGeoLibreProject(component.title ?? "HyperPBI GeoLibre workspace"),
+    [component.project, component.title],
+  );
+  const powerBiCompatMap = useMemo(
+    () => createGeoLibrePowerBiCompatMap(component, persistedProject.document),
+    [component, persistedProject],
+  );
+  return <MapBlock component={powerBiCompatMap} />;
+}
+
+function GeoLibreBrowserBlock({ component }: { component: GeoLibreComponent }) {
   const context = useRenderContext();
   const persistedProject = useMemo<PersistedGeoLibreProject>(
     () =>
@@ -39,10 +65,6 @@ export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
         context.getDatasetView,
       ),
     [component, persistedProject, context.getDatasetView],
-  );
-  const powerBiCompatMap = useMemo(
-    () => createGeoLibrePowerBiCompatMap(component, bridge.document),
-    [component, bridge.document],
   );
   const resetProject = useMemo(
     () => createDefaultGeoLibreProject(component.title ?? "HyperPBI GeoLibre workspace"),
@@ -82,16 +104,6 @@ export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
     : context.providerAccess && !context.webAccessAvailable && !runtimeAccess && !fallbackAccess
       ? { state: "checking" as const, message: "Waiting for the Power BI WebAccess capability check." }
       : undefined;
-
-  // A Power BI custom visual is already hosted in a low-privilege sandboxed
-  // iframe. A second remote iframe is blocked by the host's sandbox/CSP in
-  // Desktop and Service, so waiting for a GeoLibre postMessage handshake can
-  // never become a stable Power BI architecture. Use HyperPBI's bundled map
-  // runtime for Power BI while preserving the full native GeoLibre workspace in
-  // browser/Playground hosts.
-  if (isPowerBiVisualSandbox()) {
-    return <MapBlock component={powerBiCompatMap} />;
-  }
 
   return (
     <GeoLibreWorkspaceHost
