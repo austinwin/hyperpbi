@@ -3,9 +3,6 @@ import { dirname } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
 export const DEFAULT_MAP_HOSTS = [
-    "https://hyperpbi.com",
-    "https://www.hyperpbi.com",
-    "https://web.geolibre.app",
     "https://tile.openstreetmap.org",
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
@@ -81,131 +78,74 @@ export async function acquirePackageProfileLock(
 
 async function packageLockOwnerIsRunning(lockPath) {
     try {
-        const owner = JSON.parse(await readFile(lockPath, "utf8"));
-        if (!Number.isInteger(owner?.pid) || owner.pid <= 0) return false;
-        if (owner.pid === process.pid) return true;
-        process.kill(owner.pid, 0);
-        return true;
-    } catch (error) {
-        return error?.code === "EPERM";
-    }
-}
-
-export function normalizeMapHostPattern(value) {
-    if (typeof value !== "string" || value.trim().length === 0) {
-        throw new Error("Map host patterns must be nonblank strings.");
-    }
-    const pattern = value.trim();
-    if (pattern === "https://*") {
-        throw new Error(
-            "Power BI WebAccess supports wildcards only for subdomains of a real host; https://* is not valid.",
-        );
-    }
-    if (!pattern.toLowerCase().startsWith("https://")) {
-        throw new Error(`Map host patterns must use HTTPS: ${pattern}`);
-    }
-
-    let parsed;
-    try {
-        parsed = new URL(pattern);
+        const payload = JSON.parse(await readFile(lockPath, "utf8"));
+        if (!Number.isInteger(payload?.pid) || payload.pid <= 0) return false;
+        if (process.platform === "win32") return false;
+        try {
+            process.kill(payload.pid, 0);
+            return true;
+        } catch (error) {
+            return error?.code === "EPERM";
+        }
     } catch {
-        throw new Error(`Invalid map host pattern: ${pattern}`);
+        return false;
     }
-    if (parsed.protocol !== "https:") throw new Error(`Map host patterns must use HTTPS: ${pattern}`);
-    if (parsed.username || parsed.password) throw new Error(`Map host patterns cannot contain credentials: ${pattern}`);
-    if (parsed.search) throw new Error(`Map host patterns cannot contain a query: ${pattern}`);
-    if (parsed.hash) throw new Error(`Map host patterns cannot contain a hash: ${pattern}`);
-    if (parsed.pathname !== "/") throw new Error(`Map host patterns must not contain a path: ${pattern}`);
-
-    const hostname = parsed.hostname.toLowerCase();
-    if (hostname.includes("*")) {
-        if (!hostname.startsWith("*.") || hostname.slice(2).includes("*")) {
-            throw new Error(`Only a leading subdomain wildcard is allowed: ${pattern}`);
-        }
-        if (hostname.slice(2).split(".").some(part => part.length === 0)) {
-            throw new Error(`Invalid subdomain wildcard pattern: ${pattern}`);
-        }
-    }
-    return `https://${hostname}${parsed.port ? `:${parsed.port}` : ""}`;
 }
 
-export function parseMapHostPatterns(value) {
-    const entries = Array.isArray(value) ? value : String(value ?? "").split(",");
-    const normalized = entries
-        .map(entry => typeof entry === "string" ? entry.trim() : entry)
-        .filter(entry => entry !== "")
-        .map(entry => normalizeMapHostPattern(entry));
-    return [...new Set(normalized)];
-}
-
-export function buildWebAccessParameters({ profile, configuredHosts = [] }) {
+export function buildWebAccessParameters(profile, configuredHosts = []) {
     if (profile === "core") return [];
-    return [...new Set([
-        ...DEFAULT_MAP_HOSTS,
-        ...parseMapHostPatterns(configuredHosts),
-    ])];
-}
-
-export async function readZipEntries(archivePath) {
-    const archive = await readFile(archivePath);
-    let eocdOffset = -1;
-    for (let offset = archive.length - 22; offset >= Math.max(0, archive.length - 65_557); offset--) {
-        if (archive.readUInt32LE(offset) === 0x06054b50) {
-            eocdOffset = offset;
-            break;
-        }
+    const requested = Array.from(new Set([...DEFAULT_MAP_HOSTS, ...configuredHosts]));
+    if (profile === "maps-restricted") {
+        return requested.filter(host => host === "https://tile.openstreetmap.org");
     }
-    if (eocdOffset < 0) throw new Error(`ZIP end-of-central-directory not found: ${archivePath}`);
-
-    const entryCount = archive.readUInt16LE(eocdOffset + 10);
-    let centralOffset = archive.readUInt32LE(eocdOffset + 16);
-    const entries = new Map();
-
-    for (let index = 0; index < entryCount; index++) {
-        if (archive.readUInt32LE(centralOffset) !== 0x02014b50) {
-            throw new Error(`Invalid ZIP central directory in ${archivePath}`);
-        }
-        const compressionMethod = archive.readUInt16LE(centralOffset + 10);
-        const compressedSize = archive.readUInt32LE(centralOffset + 20);
-        const fileNameLength = archive.readUInt16LE(centralOffset + 28);
-        const extraLength = archive.readUInt16LE(centralOffset + 30);
-        const commentLength = archive.readUInt16LE(centralOffset + 32);
-        const localOffset = archive.readUInt32LE(centralOffset + 42);
-        const fileName = archive.subarray(centralOffset + 46, centralOffset + 46 + fileNameLength).toString("utf8");
-
-        if (archive.readUInt32LE(localOffset) !== 0x04034b50) {
-            throw new Error(`Invalid ZIP local header for ${fileName}`);
-        }
-        const localNameLength = archive.readUInt16LE(localOffset + 26);
-        const localExtraLength = archive.readUInt16LE(localOffset + 28);
-        const dataOffset = localOffset + 30 + localNameLength + localExtraLength;
-        const compressed = archive.subarray(dataOffset, dataOffset + compressedSize);
-        const content = compressionMethod === 0
-            ? Buffer.from(compressed)
-            : compressionMethod === 8
-                ? inflateRawSync(compressed)
-                : undefined;
-        if (!content) throw new Error(`Unsupported ZIP compression method ${compressionMethod} for ${fileName}`);
-        entries.set(fileName, content);
-        centralOffset += 46 + fileNameLength + extraLength + commentLength;
-    }
-    return entries;
-}
-
-export async function readPackagedCapabilities(archivePath) {
-    const entries = await readZipEntries(archivePath);
-    const manifestEntry = [...entries.entries()].find(([name]) =>
-        /^resources\/[^/]+\.pbiviz\.json$/.test(name)
-    );
-    if (!manifestEntry) throw new Error(`Packaged PBIVIZ manifest not found in ${archivePath}`);
-    const manifest = JSON.parse(manifestEntry[1].toString("utf8"));
-    if (!manifest.capabilities || typeof manifest.capabilities !== "object") {
-        throw new Error(`Packaged capabilities.json payload not found in ${archivePath}`);
-    }
-    return manifest.capabilities;
+    return requested;
 }
 
 export function webAccessParameters(capabilities) {
-    const privilege = (capabilities.privileges ?? []).find(item => item?.name === "WebAccess");
-    return privilege?.parameters ?? null;
+    const privilege = capabilities?.privileges?.find(item => item?.name === "WebAccess");
+    return privilege ? privilege.parameters ?? [] : null;
+}
+
+export async function readPackagedCapabilities(archivePath) {
+    const archive = await readFile(archivePath);
+    const entries = readZipEntries(archive);
+    const resource = entries.find(entry => entry.name.endsWith(".pbiviz.json"));
+    if (!resource) throw new Error(`No .pbiviz.json resource found in ${archivePath}.`);
+    const payload = JSON.parse(resource.data.toString("utf8"));
+    const capabilities = payload?.capabilities;
+    if (!capabilities || typeof capabilities !== "object") {
+        throw new Error(`PBIVIZ resource in ${archivePath} does not contain capabilities.`);
+    }
+    return capabilities;
+}
+
+function readZipEntries(buffer) {
+    const entries = [];
+    let offset = 0;
+    while (offset + 30 <= buffer.length && buffer.readUInt32LE(offset) === 0x04034b50) {
+        const flags = buffer.readUInt16LE(offset + 6);
+        const method = buffer.readUInt16LE(offset + 8);
+        const compressedSize = buffer.readUInt32LE(offset + 18);
+        const uncompressedSize = buffer.readUInt32LE(offset + 22);
+        const nameLength = buffer.readUInt16LE(offset + 26);
+        const extraLength = buffer.readUInt16LE(offset + 28);
+        if (flags & 0x08) throw new Error("Unsupported ZIP data descriptor in PBIVIZ archive.");
+        const nameStart = offset + 30;
+        const nameEnd = nameStart + nameLength;
+        const dataStart = nameEnd + extraLength;
+        const dataEnd = dataStart + compressedSize;
+        if (dataEnd > buffer.length) throw new Error("Truncated PBIVIZ archive.");
+        const name = buffer.subarray(nameStart, nameEnd).toString("utf8");
+        const compressed = buffer.subarray(dataStart, dataEnd);
+        let data;
+        if (method === 0) data = Buffer.from(compressed);
+        else if (method === 8) data = inflateRawSync(compressed);
+        else throw new Error(`Unsupported ZIP compression method ${method} in PBIVIZ archive.`);
+        if (uncompressedSize && data.length !== uncompressedSize) {
+            throw new Error(`PBIVIZ ZIP size mismatch for ${name}.`);
+        }
+        entries.push({ name, data });
+        offset = dataEnd;
+    }
+    return entries;
 }
