@@ -33,8 +33,13 @@ export function isPowerBiVisualSandbox(documentValue: Document | undefined =
 }
 
 function symbolFromGeoLibreStyle(style: JsonObject | undefined): MapSymbolDefinition {
-  const fillColor = stringValue(style?.fillColor) ?? stringValue(style?.color) ?? "#2563eb";
+  const fillColor =
+    stringValue(style?.circleColor) ??
+    stringValue(style?.fillColor) ??
+    stringValue(style?.color) ??
+    "#2563eb";
   const outlineColor =
+    stringValue(style?.circleStrokeColor) ??
     stringValue(style?.strokeColor) ??
     stringValue(style?.outlineColor) ??
     "#ffffff";
@@ -44,16 +49,19 @@ function symbolFromGeoLibreStyle(style: JsonObject | undefined): MapSymbolDefini
     finiteNumber(style?.size) ??
     7;
   const outlineWidth =
+    finiteNumber(style?.circleStrokeWidth) ??
     finiteNumber(style?.strokeWidth) ??
     finiteNumber(style?.outlineWidth) ??
     finiteNumber(style?.weight) ??
     1.5;
   return {
-    shape: "circle",
     color: fillColor,
     fillColor,
     radius,
-    fillOpacity: finiteNumber(style?.fillOpacity) ?? 0.9,
+    fillOpacity:
+      finiteNumber(style?.circleOpacity) ??
+      finiteNumber(style?.fillOpacity) ??
+      0.9,
     opacity: finiteNumber(style?.opacity) ?? 1,
     outlineColor,
     outlineWidth,
@@ -165,6 +173,8 @@ export function createGeoLibrePowerBiCompatMap(
     ...component,
     type: "map",
     engine: "leaflet",
+    subtitle:
+      "Power BI compatibility mode: map, layers, styling, and selection run inside HyperPBI's bundled renderer.",
     view: {
       center: [latitude, longitude],
       zoom: document.mapView.zoom,
