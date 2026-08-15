@@ -3,6 +3,9 @@ import { dirname } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
 export const DEFAULT_MAP_HOSTS = [
+    "https://hyperpbi.com",
+    "https://www.hyperpbi.com",
+    "https://web.geolibre.app",
     "https://tile.openstreetmap.org",
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
