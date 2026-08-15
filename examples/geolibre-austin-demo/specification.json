@@ -3,7 +3,7 @@
   "title": "Austin Field Operations — GeoLibre Demo",
   "theme": {
     "mode": "light",
-    "density": "comfortable",
+    "density": "normal",
     "primaryColor": "#2563eb",
     "accentColor": "#14b8a6",
     "surfaceColor": "#ffffff",
