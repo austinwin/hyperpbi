@@ -31,6 +31,10 @@ afterEach(() => {
   document.body.replaceChildren();
   embed.listeners.clear();
   vi.clearAllMocks();
+  // clearAllMocks intentionally preserves implementations. Reset connect as well
+  // so one-shot timeout behavior from a test cannot leak into the next test.
+  embed.connect.mockReset();
+  embed.connect.mockImplementation(async () => embed.client);
 });
 
 describe("GeoLibre iframe adapter", () => {
@@ -77,7 +81,6 @@ describe("GeoLibre iframe adapter", () => {
     embed.connect.mockRejectedValueOnce(new Error("Timed out waiting for GeoLibre"));
     const iframe = document.createElement("iframe");
     document.body.append(iframe);
-    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
     const callbacks = { onProject: vi.fn(), onSelection: vi.fn(), onStatus: vi.fn(), onUnavailable: vi.fn() };
     const runtime = { url: "https://runtime.example/geolibre/index.html?embed=1", origin: "https://runtime.example", channel: "managed" as const };
     const adapter = new GeoLibreAdapter(iframe, runtime, callbacks);
@@ -85,6 +88,10 @@ describe("GeoLibre iframe adapter", () => {
     adapter.loadProject(project.document, "data-v1");
 
     adapter.start();
+    // Setting iframe.src can replace the WindowProxy in DOM implementations.
+    // Observe the post-navigation child, which is also the identity the adapter
+    // authenticates through event.source.
+    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
     iframe.dispatchEvent(new Event("load"));
     inbound(iframe, "null", { type: "geolibre:ready", version: GEOLIBRE_VERSION });
 
@@ -196,7 +203,6 @@ describe("GeoLibre iframe adapter", () => {
     embed.connect.mockRejectedValueOnce(new Error("Timed out waiting for GeoLibre"));
     const iframe = document.createElement("iframe");
     document.body.append(iframe);
-    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
     const callbacks = {
       onProject: vi.fn(),
       onSelection: vi.fn(),
@@ -209,6 +215,7 @@ describe("GeoLibre iframe adapter", () => {
     adapter.loadProject(project.document, "data-v1");
 
     adapter.start();
+    const postMessage = vi.spyOn(iframe.contentWindow!, "postMessage");
     await vi.waitFor(() => expect(callbacks.onStatus).toHaveBeenLastCalledWith(
       expect.objectContaining({
         state: "initializing",
