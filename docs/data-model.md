@@ -1,6 +1,6 @@
 # HyperPBI data model
 
-HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI never queries SQL, joins arbitrary sources, downloads a network dataset, or executes user code.
+HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. A specification may also declare read-only MiniUp table or Function sources; their JSON responses are normalized into the same workspace before components consume them. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI still does not execute SQL, arbitrary network URLs, mutations, custom request headers, or user code.
 
 ## Base `powerbi` dataset
 
@@ -10,13 +10,65 @@ Normalized field metadata includes canonical key, display/query/qualified names,
 
 New 2.0 JSON uses Field Manifest aliases. Preparation resolves aliases in dataset definitions and component bindings to canonical keys before evaluation. A component without `dataset` uses `powerbi`.
 
+## MiniUp remote sources
+
+`data.sources` declares named read-only sources. A source name can be used directly by any component through `dataset`, or as the `source` of a logical dataset.
+
+### `miniup.table`
+
+```json
+{
+  "data": {
+    "sources": {
+      "orders": {
+        "type": "miniup.table",
+        "site": "demo",
+        "table": "orders",
+        "params": { "status": "Open" },
+        "maxRows": 1000
+      }
+    }
+  }
+}
+```
+
+Table reads use the fixed `https://<site>.miniup.app/api/data/<site>/<table>` surface and page in bounded requests. HyperPBI never accepts an arbitrary URL or request method for this source type.
+
+### `miniup.function`
+
+```json
+{
+  "data": {
+    "sources": {
+      "summary": {
+        "type": "miniup.function",
+        "function": "order-summary",
+        "path": "/query",
+        "params": {
+          "region": { "state": "region", "default": "all" }
+        },
+        "dataPath": "rows"
+      }
+    }
+  }
+}
+```
+
+Function calls use the fixed `https://functions.miniup.app` origin. A parameter binding `{ "state": "region" }` reads `state.values.region`; changing that state value changes the request signature and refreshes the source. Static scalar query parameters are also supported.
+
+Both source types enforce GET-only requests, omitted credentials, no referrer, JSON responses, a 5 MB per-request response limit, a configurable timeout from 1 to 15 seconds, a maximum of 10,000 normalized rows, in-flight request deduplication, and an optional TTL cache. Protected table keys or other secrets must stay server-side behind a MiniUp Function. They must not be embedded in HyperPBI JSON.
+
+Remote source lifecycle is exposed in render context as `loading`, `ready`, `empty`, or `error`. Before the first response arrives, static preparation treats the declared source as a dynamic schema rather than weakening validation for Power BI or local-file datasets.
+
+In Power BI, remote sources require the network-enabled package because external hosts must be declared through WebAccess. The Core package remains network-free. Remote rows do not receive Power BI selection identities, so they cannot accidentally select or externally filter unrelated semantic-model rows.
+
 ## Named dataset definition
 
 `data.datasets` maps a name to:
 
 | Property | Type | Contract |
 |---|---|---|
-| `source` | string | Required: `powerbi`, another named dataset, or a Playground uploaded-source ID |
+| `source` | string | Required: `powerbi`, a declared `data.sources` name, another named dataset, or a Playground uploaded-source ID |
 | `filter` | object or array | `{field, operator, value}`; all filters must pass |
 | `derive` | expression record | Adds/replaces row fields using the safe calculation DSL |
 | `rename` | record | Old field → nonblank new field |
@@ -213,7 +265,7 @@ The runtime filters the already-prepared child view by the breadcrumb path and m
 
 - SQL or DAX text execution
 - arbitrary joins/unions
-- network/file data sources
+- arbitrary network/file data sources outside declared MiniUp GET sources
 - user JavaScript/functions
 - mutation of the Power BI semantic model
 - treating a dataset metric as a model measure
