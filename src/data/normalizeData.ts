@@ -139,4 +139,6 @@ export interface NormalizedData {
     schemaFromField?: string;
     calculatedMetrics?: Record<string, Primitive>;
     loadStatus?: { loadedRowCount: number; moreRowsAvailable: boolean; fetchInProgress?: boolean };
+    /** True only for a declared remote source before its real response schema is available. */
+    dynamicSchema?: boolean;
 }

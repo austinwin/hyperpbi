@@ -20,6 +20,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const authoringOwnerId = context.ownerByRuntimeId?.[componentId] ?? componentId;
         const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
         const powerBiSourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+        const hasPowerBiLineage = datasetResult?.sourceId === "powerbi";
         const componentContext: RenderContextValue = datasetResult ? {
             ...context,
             data: datasetResult.data,
@@ -28,6 +29,9 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
             sourceRowKeys: datasetResult.data.rowKeys,
             datasetLineage: datasetResult.lineage,
             interactionIndexSpace: "component",
+            selectExternal: hasPowerBiLineage ? context.selectExternal : () => ({ sent: false, reason: "no selection identities" }),
+            selectSourceRows: hasPowerBiLineage ? context.selectSourceRows : () => ({ sent: false, reason: "no selection identities" }),
+            applyExternalFilter: hasPowerBiLineage ? context.applyExternalFilter : () => ({ sent: false, reason: "field has no Power BI filter target" }),
             getRowsForComponent: (id: string) => rowsForComponent(
                 datasetResult.data.rows,
                 datasetResult.data.rowKeys,

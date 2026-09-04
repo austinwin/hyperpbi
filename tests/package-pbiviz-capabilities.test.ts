@@ -36,6 +36,8 @@ describe("packaged PBIVIZ capabilities", () => {
             "https://tile.openstreetmap.org",
             "https://nominatim.openstreetmap.org",
             "https://geocode-api.arcgis.com",
+            "https://*.miniup.app",
+            "https://functions.miniup.app",
             "https://*.arcgis.com",
             "https://*.arcgisonline.com",
         ]));

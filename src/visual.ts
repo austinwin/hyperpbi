@@ -31,6 +31,7 @@ import { providerServiceOrigin } from "./providers/providerPolicy";
 import { configuredMapEndpoints } from "./providers/configuredMapEndpoints";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
+import { configuredRemoteDataEndpoints } from "./data/remoteDataSources";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -237,7 +238,8 @@ export class Visual implements IVisual {
         const providers=parseConfig(activeConfiguration||defaultConfigJson).config?.providers;
         const tile=providers?.basemap?.enabled?providers.basemap.tileUrl:undefined;
         const geocoder=providers?.geocoder?.enabled&&providers.geocoder.provider!=="none"?providers.geocoder.endpoint:undefined;
-        const serviceEndpoints=configuredMapEndpoints(activeSpecification);
+        const parsedSpecification=parseJson(activeSpecification).value;
+        const serviceEndpoints=[...new Set([...configuredMapEndpoints(activeSpecification),...configuredRemoteDataEndpoints(parsedSpecification)])];
         const signature=JSON.stringify([tile,geocoder,serviceEndpoints]);
         if(signature===this.providerAccessSignature)return;
         this.providerAccessSignature=signature;
@@ -259,7 +261,7 @@ export class Visual implements IVisual {
                 return{allowed:status===powerbi.PrivilegeStatus.Allowed,endpoint:sanitized,reason:status===powerbi.PrivilegeStatus.Allowed?undefined:`Power BI denied WebAccess to the configured ${label} endpoint.`};
             }catch{return{allowed:false,endpoint:sanitized,reason:`Power BI could not verify WebAccess for the configured ${label} endpoint.`};}
         };
-        const [tiles,result,...serviceResults]=await Promise.all([check(tile,"tile"),check(geocoder,"geocoder"),...serviceEndpoints.map(endpoint=>check(endpoint,"map service"))]);
+        const [tiles,result,...serviceResults]=await Promise.all([check(tile,"tile"),check(geocoder,"geocoder"),...serviceEndpoints.map(endpoint=>check(endpoint,"external service"))]);
         if(sequence!==this.providerAccessSequence)return;
         const services=Object.fromEntries(serviceEndpoints.flatMap((endpoint,index)=>{
             const origin=providerServiceOrigin(endpoint);

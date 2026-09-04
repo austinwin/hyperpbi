@@ -10,6 +10,7 @@ import type { DatasetSchemaEvaluation } from "../data/datasetSchema";
 import type { NormalizedData } from "../data/normalizeData";
 import type { DataWorkspace } from "../data/dataWorkspace";
 import { workspaceSourceData } from "../data/dataWorkspace";
+import { remoteSourcePlaceholderData } from "../data/remoteDataSources";
 import {
   prepareSpecification,
   type PreparedSpecification,
@@ -73,7 +74,7 @@ export function prepareLogicalDatasets(
     specification.data?.datasets ?? {},
     new Map(),
     lineageOptions,
-    workspace ? workspaceSourceData(workspace) : {},
+    { ...remoteSourcePlaceholderData(specification), ...(workspace ? workspaceSourceData(workspace) : {}) },
   );
 }
 
@@ -143,7 +144,7 @@ export function prepareAuthoringData(
     ...validateReferences(
       prepared.schema,
       runtime.data,
-      workspace ? workspaceSourceData(workspace) : {},
+      { ...remoteSourcePlaceholderData(prepared.schema), ...(workspace ? workspaceSourceData(workspace) : {}) },
     ),
   );
 

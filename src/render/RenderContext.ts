@@ -13,6 +13,7 @@ import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import type { MapViewportState } from "../components/maps/MapBlock";
 import type { PersistedGeoLibreProject } from "../components/geolibre/types";
+import type { RemoteDataSourceStatus } from "../data/remoteDataSources";
 
 export interface ResolvedDatasetView {
     name: string;
@@ -61,6 +62,7 @@ export interface RenderContextValue {
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;
     datasets?: Map<string,DatasetResult>;
+    remoteSources?: Readonly<Record<string, RemoteDataSourceStatus>>;
     datasetLineage?: number[][];
     /** Internal interaction payload row indices are local to this dataset unless marked as Power BI source indices. */
     interactionIndexSpace?: "component" | "powerbi";

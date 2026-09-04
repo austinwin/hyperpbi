@@ -122,6 +122,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
         }
         let key = occurrence.reference;
         let field = scope.fields[key];
+        if (!field && scope.dynamic) continue;
         if (!field) {
             const resolved = resolver.resolve(occurrence.reference);
             if (resolved.status === "resolved" && resolved.key && scope.fields[resolved.key]) {
