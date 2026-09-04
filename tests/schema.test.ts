@@ -85,6 +85,25 @@ describe("schema 2.0 validation", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("accepts bounded MiniUp data sources and keeps their schema dynamic until fetch", () => {
+    const candidate = {
+      version: "2.0",
+      data: {
+        sources: {
+          orders: { type: "miniup.table", site: "demo", table: "orders", maxRows: 500 },
+          summary: { type: "miniup.function", function: "order-summary", params: { region: { state: "region", default: "all" } } },
+        },
+      },
+      components: [{ type: "table", id: "orders-table", dataset: "orders", columns: ["status", "amount"] }],
+    };
+    expect(validateSchema(candidate).errors).toEqual([]);
+    expect(prepareSpecification(candidate, data, { repair: false }).errors).toEqual([]);
+
+    const unsafe = structuredClone(candidate) as any;
+    unsafe.data.sources.orders.url = "https://example.com/data";
+    expect(validateSchema(unsafe).errors.join(" ")).toContain("Source property “url” is not supported");
+  });
+
   it("keeps every maintained dashboard example on valid schema 2.0", () => {
     for (const file of dashboardFiles(resolve(process.cwd(), "examples"))) {
       if (file.includes(`${resolve(process.cwd(), "examples", "config")}`) || file.endsWith("runtime_config.json") || file.endsWith("coverage.json")) continue;
