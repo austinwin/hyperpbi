@@ -25,6 +25,21 @@ describe("Power BI portability", () => {
         expect(result.powerBiSpecification).toBeUndefined();
     });
 
+    it("keeps MiniUp sources portable while warning that Power BI needs WebAccess", () => {
+        const specification: HyperPbiSchema = {
+            version: "2.0",
+            data: {
+                sources: { live: { type: "miniup.table", site: "demo", table: "orders" } },
+                datasets: { liveOpen: { source: "live", filter: { field: "status", operator: "=", value: "Open" } } }
+            },
+            components: [{ type: "table", id: "live", dataset: "liveOpen", columns: ["status"] }]
+        };
+        const result = analyzePowerBiPortability(specification, defaultConfig, workspace);
+        expect(result.issues.map(issue => issue.code)).toContain("REMOTE_SOURCE_WEBACCESS_REQUIRED");
+        expect(result.issues.map(issue => issue.code)).not.toContain("INDEPENDENT_UPLOADED_SOURCE");
+        expect(result.powerBiSpecification).toBeDefined();
+    });
+
     it("reports invalid field bindings as actionable blockers", () => {
         const specification: HyperPbiSchema = { version: "2.0", components: [{ type: "table", id: "bad", columns: ["missing"] }] };
         const result = analyzePowerBiPortability(specification, defaultConfig, workspace);
