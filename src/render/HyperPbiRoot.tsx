@@ -66,6 +66,7 @@ export function HyperPbiRoot({
   componentPathById,
   onMapViewportChange,
   onGeoLibreProjectChange,
+  remoteSourceHost = "web",
 }: {
   instanceId: string;
   schema: HyperPbiSchema;
@@ -99,6 +100,7 @@ export function HyperPbiRoot({
   componentPathById?: Readonly<Record<string, string>>;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
   onGeoLibreProjectChange?: (componentId: string, project: PersistedGeoLibreProject) => void;
+  remoteSourceHost?: "web" | "powerbi";
 }) {
   const effectiveSettings = useMemo(
     () => resolveSchemaRuntimeSettings(schema.theme, settings),
@@ -112,7 +114,7 @@ export function HyperPbiRoot({
     dashboardReducer,
     initialDashboardState(schema.state?.search, schema.state?.activeTab),
   );
-  const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values);
+  const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost);
   const rowKeySignature = useMemo(
     () => JSON.stringify(data.rowKeys),
     [data.rowKeys],

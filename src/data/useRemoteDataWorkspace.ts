@@ -29,6 +29,7 @@ export function useRemoteDataWorkspace(
   baseWorkspace: DataWorkspace | undefined,
   baseData: NormalizedData,
   stateValues: Record<string, unknown>,
+  hostMode: "web" | "powerbi" = "web",
 ): RemoteDataWorkspaceResult {
   const definitions = schema.data?.sources ?? {};
   const signature = useMemo(
@@ -63,6 +64,19 @@ export function useRemoteDataWorkspace(
 
     for (const [id, definition] of entries) {
       const requestKey = requestKeys[id];
+      if (hostMode === "powerbi" && definition.type !== "miniup.function") {
+        setStatuses(previous => ({
+          ...previous,
+          [id]: {
+            status: "error",
+            rowCount: 0,
+            error: definition.type === "miniup.table"
+              ? "MiniUp table sources are web-only in HyperPBI. Use a public MiniUp Function gateway in Power BI."
+              : "rest.get sources are web-only in HyperPBI. Power BI remote data must use miniup.function.",
+          },
+        }));
+        continue;
+      }
       void fetchRemoteDataSource(id, definition, stateValues, controller.signal)
         .then(source => {
           if (current !== sequence.current) return;
@@ -90,7 +104,7 @@ export function useRemoteDataWorkspace(
         });
     }
     return () => controller.abort();
-  }, [signature]);
+  }, [signature, hostMode]);
 
   const workspace = useMemo(() => {
     const base = baseWorkspace ?? createPowerBiDataWorkspace(baseData);

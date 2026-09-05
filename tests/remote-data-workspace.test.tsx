@@ -47,6 +47,33 @@ afterEach(() => {
 });
 
 describe("remote data workspace lifecycle", () => {
+  it("rejects web-only sources in Power BI before any network request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const tableSchema: HyperPbiSchema = {
+      version: "2.0",
+      data: { sources: { remote: { type: "miniup.table", site: "demo", table: "rows" } } },
+      components: [],
+    };
+    function PowerBiProbe() {
+      const result = useRemoteDataWorkspace(tableSchema, undefined, base, {}, "powerbi");
+      return h("div", {
+        "data-status": result.statuses.remote?.status ?? "none",
+        "data-error": result.statuses.remote?.error ?? "",
+        "data-rows": JSON.stringify(result.workspace.sources.remote?.data.rows ?? []),
+      });
+    }
+    const host = document.createElement("div");
+    await act(async () => {
+      render(h(PowerBiProbe, {}), host);
+      await Promise.resolve();
+    });
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
+    expect(host.firstElementChild?.getAttribute("data-error")).toContain("web-only");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("invalidates old rows immediately when query state changes", async () => {
     let resolveSecond!: (value: Response) => void;
     const second = new Promise<Response>(resolve => { resolveSecond = resolve; });

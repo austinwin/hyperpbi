@@ -140,7 +140,7 @@ export class Visual implements IVisual {
         if (this.editMode === powerbi.EditMode.Advanced) {
             this.viewerRenderStability.reset();
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess }), this.target);
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.selectionIds.length, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi" }), this.target);
             return;
         }
         if (!this.specification.trim()) {
@@ -163,7 +163,7 @@ export class Visual implements IVisual {
         }
 
         this.viewerRenderStability.markSuccess();
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: validateReferences(schemaResult.schema, runtimeData.data), renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi",ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
     }
 
     private renderViewerFailure(errors: string[]): void {
