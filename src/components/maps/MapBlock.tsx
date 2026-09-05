@@ -246,6 +246,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 sourceRowKeys: view.sourceRowKeys,
                 fields: view.fields,
                 datasetName,
+                powerBiIdentityAvailable: view.sourceId === "powerbi",
                 datasetFound: true,
                 totalRows: view.totalRows,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
@@ -263,6 +264,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                   : [],
                 fields: fallbackAllowed ? data.fields : {},
                 datasetName,
+                powerBiIdentityAvailable: fallbackAllowed,
                 datasetFound: fallbackAllowed,
                 totalRows: fallbackAllowed ? rows.length : 0,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
@@ -326,8 +328,10 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const nextFeatureKeys = resolution.featureKeys;
     const nextFeatureKeySet = new Set(nextFeatureKeys);
     const selectedFeatures = runtimeLayersRef.current.flatMap(layer => layer.features.filter(feature => feature.featureKey && nextFeatureKeySet.has(feature.featureKey)));
-    const synchronizedRowIndices = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowIndices))).sort((left, right) => left - right);
-    const synchronizedRowKeys = Array.from(new Set(selectedFeatures.flatMap(feature => feature.powerBiRowKeys)));
+    const powerBiLayerIds = new Set(runtimeLayersRef.current.filter(layer => layer.powerBiIdentityAvailable === true).map(layer => layer.id));
+    const selectedPowerBiFeatures = selectedFeatures.filter(feature => powerBiLayerIds.has(feature.layerId));
+    const synchronizedRowIndices = Array.from(new Set(selectedPowerBiFeatures.flatMap(feature => feature.powerBiRowIndices))).sort((left, right) => left - right);
+    const synchronizedRowKeys = Array.from(new Set(selectedPowerBiFeatures.flatMap(feature => feature.powerBiRowKeys)));
     context.dispatch({ type: "selectMapFeatures", mapId: id, featureIds: nextFeatureKeys, selectionMode: "replace" });
     const sourceRows = context.powerBiSourceRows ?? context.sourceRows;
     const sourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
@@ -359,7 +363,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     };
     executeComponentInteraction({
       ...policy,
-      externalMode: exceedsIdentityLimit && component.tools?.selection?.identityLimitBehavior !== "truncate"
+      externalMode: selectedPowerBiFeatures.length === 0 || exceedsIdentityLimit && component.tools?.selection?.identityLimitBehavior !== "truncate"
         ? "none"
         : policy.externalMode,
     }, createInteractionPayload(component, {
@@ -1247,8 +1251,10 @@ export function MapBlock({ component }: { component: MapComponent }) {
     context.dispatch({ type: "selectRowKeys", keys: [] });
     context.dispatch({ type: "clearInteractionFilter", id });
     context.dispatch({ type: "interactionSignature", id });
-    context.clearExternal({ componentId: id, componentType: "map" });
-    context.clearExternalFilter({ componentId: id, componentType: "map" });
+    if (runtimeLayersRef.current.some(layer => layer.powerBiIdentityAvailable === true)) {
+      context.clearExternal({ componentId: id, componentType: "map" });
+      context.clearExternalFilter({ componentId: id, componentType: "map" });
+    }
     context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
     setSelectionStatus(undefined);
   }, [context, id]);
@@ -2058,8 +2064,8 @@ export async function resolveArcGisFeatureLayer(
       powerBiRows: context.rows,
       powerBiRowIndices: context.rowIndices,
       powerBiRowKeys: context.rowKeys,
-      powerBiSourceRowIndices: context.sourceRowIndices,
-      powerBiSourceRowKeys: context.sourceRowKeys,
+      powerBiSourceRowIndices: context.powerBiIdentityAvailable === false ? context.rows.map(() => []) : context.sourceRowIndices,
+      powerBiSourceRowKeys: context.powerBiIdentityAvailable === false ? context.rows.map(() => []) : context.sourceRowKeys,
       serviceFeatures: queryResult.features,
       definition: def.join,
       layerId: def.id,
@@ -2202,6 +2208,7 @@ export async function resolveArcGisFeatureLayer(
     order: def.order ?? 10,
     groupId: def.groupId,
     datasetName,
+    powerBiIdentityAvailable: source.mode === "join" && context.powerBiIdentityAvailable !== false,
     features,
     renderer: resolvedRenderer,
     labels: resolvedLabels,

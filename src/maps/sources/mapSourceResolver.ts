@@ -32,8 +32,10 @@ export interface MapSourceContext {
   rowKeys: string[];
   /** Original Power BI data-view rows contributing to each logical row. */
   sourceRowIndices?: number[][];
-  /** Original Power BI row keys/identities contributing to each logical row. */
+  /** Contributing root-source row keys for each logical row. */
   sourceRowKeys?: string[][];
+  /** Whether those root rows are real Power BI identities rather than web/remote rows. */
+  powerBiIdentityAvailable?: boolean;
   fields: Record<string, NormalizedField>;
   datasetName?: string;
   datasetFound?: boolean;
@@ -461,6 +463,7 @@ export function resolvePowerBiLayer(
     order: layer.order ?? 0,
     groupId: layer.groupId,
     datasetName,
+    powerBiIdentityAvailable: context.powerBiIdentityAvailable !== false,
     features,
     renderer: resolvedRenderer,
     labels: layer.labels
@@ -575,6 +578,7 @@ function materializeFeature(
   const powerBiAttributes: Record<string, unknown> = {
     ...(feature.row as Record<string, unknown>),
   };
+  const identityAvailable = context.powerBiIdentityAvailable !== false;
   return {
     id: feature.id,
     layerId: layer.id,
@@ -584,8 +588,8 @@ function materializeFeature(
     lon: feature.lon,
     serviceAttributes: {},
     powerBiAttributes,
-    powerBiRowIndices: [...new Set(sourceIndices)].sort((a, b) => a - b),
-    powerBiRowKeys: [...new Set(sourceKeys)],
+    powerBiRowIndices: identityAvailable ? [...new Set(sourceIndices)].sort((a, b) => a - b) : [],
+    powerBiRowKeys: identityAvailable ? [...new Set(sourceKeys)] : [],
     joinedAttributes: {},
     renderValue: feature.colorValue,
     sizeValue: feature.sizeValue ?? undefined,
@@ -647,6 +651,7 @@ function createEmptyLayer(
     order: layer.order ?? 0,
     groupId: layer.groupId,
     datasetName,
+    powerBiIdentityAvailable: false,
     features: [],
     renderer: { type: "simple", symbol: {} },
     interaction: layer.interaction,

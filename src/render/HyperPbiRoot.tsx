@@ -238,6 +238,7 @@ export function HyperPbiRoot({
         .filter((index) => index >= 0);
       return {
         name,
+        sourceId: result.sourceId,
         rows: rowIndices.map((index) => datasetRows[index]),
         fields: result.data.fields,
         rowIndices,

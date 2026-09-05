@@ -17,6 +17,8 @@ import type { RemoteDataSourceStatus } from "../data/remoteDataSources";
 
 export interface ResolvedDatasetView {
     name: string;
+    /** Root workspace source. Only "powerbi" carries report-model identity. */
+    sourceId: string;
     rows: DataRow[];
     fields: NormalizedData["fields"];
     /** Row positions in the evaluated logical dataset before component interaction filtering. */
