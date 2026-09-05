@@ -47,6 +47,7 @@ afterEach(() => {
 });
 
 describe("remote data workspace lifecycle", () => {
+  const settle = () => new Promise<void>(resolve => setTimeout(resolve, 20));
   it("rejects web-only sources in Power BI before any network request", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -66,7 +67,7 @@ describe("remote data workspace lifecycle", () => {
     const host = document.createElement("div");
     await act(async () => {
       render(h(PowerBiProbe, {}), host);
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
     expect(host.firstElementChild?.getAttribute("data-error")).toContain("web-only");
@@ -86,15 +87,14 @@ describe("remote data workspace lifecycle", () => {
     document.body.append(host);
     await act(async () => {
       render(h(Probe, { district: 8 }), host);
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
     expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":8');
 
     await act(async () => {
       render(h(Probe, { district: 9 }), host);
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("loading");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
@@ -102,8 +102,7 @@ describe("remote data workspace lifecycle", () => {
     await act(async () => {
       resolveSecond(new Response(JSON.stringify({ rows: [{ district: 9 }] }), { status: 200 }));
       await second;
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
     expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":9');
@@ -119,15 +118,13 @@ describe("remote data workspace lifecycle", () => {
 
     await act(async () => {
       render(h(Probe, { district: 8 }), host);
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
 
     await act(async () => {
       render(h(Probe, { district: 10 }), host);
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
