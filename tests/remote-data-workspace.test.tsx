@@ -47,7 +47,15 @@ afterEach(() => {
 });
 
 describe("remote data workspace lifecycle", () => {
-  const settle = () => new Promise<void>(resolve => setTimeout(resolve, 20));
+  const tick = () => new Promise<void>(resolve => setTimeout(resolve, 10));
+  const waitForStatus = async (host: HTMLElement, expected: string) => {
+    const deadline = Date.now() + 1000;
+    while (Date.now() < deadline) {
+      if (host.firstElementChild?.getAttribute("data-status") === expected) return;
+      await act(async () => { await tick(); });
+    }
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe(expected);
+  };
   it("rejects web-only sources in Power BI before any network request", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -65,10 +73,8 @@ describe("remote data workspace lifecycle", () => {
       });
     }
     const host = document.createElement("div");
-    await act(async () => {
-      render(h(PowerBiProbe, {}), host);
-      await settle();
-    });
+    act(() => render(h(PowerBiProbe, {}), host));
+    await waitForStatus(host, "error");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
     expect(host.firstElementChild?.getAttribute("data-error")).toContain("web-only");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
@@ -85,25 +91,21 @@ describe("remote data workspace lifecycle", () => {
 
     const host = document.createElement("div");
     document.body.append(host);
-    await act(async () => {
-      render(h(Probe, { district: 8 }), host);
-      await settle();
-    });
+    act(() => render(h(Probe, { district: 8 }), host));
+    await waitForStatus(host, "ready");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
     expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":8');
 
     await act(async () => {
       render(h(Probe, { district: 9 }), host);
-      await settle();
+      await Promise.resolve();
     });
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("loading");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
 
-    await act(async () => {
-      resolveSecond(new Response(JSON.stringify({ rows: [{ district: 9 }] }), { status: 200 }));
-      await second;
-      await settle();
-    });
+    resolveSecond(new Response(JSON.stringify({ rows: [{ district: 9 }] }), { status: 200 }));
+    await second;
+    await waitForStatus(host, "ready");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
     expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":9');
     expect(host.firstElementChild?.getAttribute("data-rows")).not.toContain('"district":8');
@@ -116,16 +118,12 @@ describe("remote data workspace lifecycle", () => {
     vi.stubGlobal("fetch", fetchMock);
     const host = document.createElement("div");
 
-    await act(async () => {
-      render(h(Probe, { district: 8 }), host);
-      await settle();
-    });
+    act(() => render(h(Probe, { district: 8 }), host));
+    await waitForStatus(host, "ready");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
 
-    await act(async () => {
-      render(h(Probe, { district: 10 }), host);
-      await settle();
-    });
+    act(() => render(h(Probe, { district: 10 }), host));
+    await waitForStatus(host, "error");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
   });
