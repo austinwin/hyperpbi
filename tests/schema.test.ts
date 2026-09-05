@@ -92,6 +92,7 @@ describe("schema 2.0 validation", () => {
         sources: {
           orders: { type: "miniup.table", site: "demo", table: "orders", maxRows: 500 },
           summary: { type: "miniup.function", function: "order-summary", params: { region: { state: "region", default: "all" } } },
+          webRows: { type: "rest.get", baseUrl: "https://demo.miniup.app", path: "/api/public/rows", dataPath: "rows" },
         },
       },
       components: [{ type: "table", id: "orders-table", dataset: "orders", columns: ["status", "amount"] }],
@@ -102,6 +103,19 @@ describe("schema 2.0 validation", () => {
     const unsafe = structuredClone(candidate) as any;
     unsafe.data.sources.orders.url = "https://example.com/data";
     expect(validateSchema(unsafe).errors.join(" ")).toContain("Source property “url” is not supported");
+
+    for (const badSource of [
+      { type: "miniup.function", function: "api" },
+      { type: "miniup.function", function: "Bad_Name" },
+      { type: "miniup.function", function: "safe-name", path: "/../api" },
+      { type: "miniup.function", function: "safe-name", path: "/%2e%2e/api" },
+      { type: "rest.get", baseUrl: "http://example.com", path: "/rows" },
+      { type: "rest.get", baseUrl: "https://example.com/path", path: "/rows" },
+      { type: "rest.get", baseUrl: "https://example.com", path: "../rows" },
+    ]) {
+      const invalid = { version: "2.0", data: { sources: { bad: badSource } }, components: [] };
+      expect(validateSchema(invalid).valid).toBe(false);
+    }
   });
 
   it("keeps every maintained dashboard example on valid schema 2.0", () => {
