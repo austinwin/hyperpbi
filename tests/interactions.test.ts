@@ -11,6 +11,8 @@ import { SimpleVirtualTable } from "../src/components/tables/TableBlock";
 import { InteractionsPanel } from "../src/editor/InteractionsPanel";
 import { defaultConfig } from "../src/config/hyperpbiConfig";
 import { RenderContext, RenderContextValue } from "../src/render/RenderContext";
+import { DashboardRenderer } from "../src/render/DashboardRenderer";
+import type { DatasetResult } from "../src/data/datasets";
 import { dashboardReducer, initialDashboardState } from "../src/render/stateStore";
 import { ContentComponent, HyperPbiSchema, TableComponent } from "../src/schema/hyperpbiSchema";
 import { validateReferences } from "../src/schema/validateReferences";
@@ -76,6 +78,30 @@ describe("built-in table and diagnostics", () => {
         host.querySelector("tbody tr")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         expect(test.selectExternal).toHaveBeenCalledWith([0], false, expect.objectContaining({ componentId: "details", componentType: "table" })); expect(host.querySelectorAll("tbody tr")).toHaveLength(3);
         expect(test.applyExternalFilter).not.toHaveBeenCalled();
+    });
+    it("never lets a remote dataset select, filter, or clear Power BI external state", () => {
+        const test = context();
+        const host = document.createElement("div");
+        const component: TableComponent = { type: "table", id: "remote_details", dataset: "remote", interaction: { enabled: true, internalMode: "none", externalMode: "selection", clearOnSecondClick: true }, columns: ["leadby"], search: false, pagination: false };
+        const remote: DatasetResult = {
+            name: "remote",
+            data,
+            lineage: rows.map((_, index) => [index]),
+            diagnostic: { name: "remote", inputRowCount: rows.length, outputRowCount: rows.length, evaluationMs: 0, cacheStatus: "miss", lineageCount: rows.length, warnings: [] },
+            signature: "remote",
+            rootRowKeys: data.rowKeys,
+            sourceId: "remote",
+        };
+        test.value.schema = { version: "2.0", components: [component] };
+        test.value.datasets = new Map([["remote", remote]]);
+        render(h(RenderContext.Provider, { value: test.value }, h(DashboardRenderer, { components: [component] })), host);
+        const row = host.querySelector("tbody tr") as HTMLTableRowElement;
+        row.click();
+        row.click();
+        expect(test.selectExternal).not.toHaveBeenCalled();
+        expect(test.clearExternal).not.toHaveBeenCalled();
+        expect(test.applyExternalFilter).not.toHaveBeenCalled();
+        expect(test.clearExternalFilter).not.toHaveBeenCalled();
     });
     it("shows complete interaction diagnostics and report configuration guidance", () => {
         const host = document.createElement("div"); render(h(InteractionsPanel, { diagnostics: { externalInteractionEnabled: true, hostAllowsInteractions: false, selectionIdentityCount: 3, lastClickedComponentId: "details", lastClickedComponentType: "table", lastClickedField: "leadby", lastClickedValue: "Pranav", lastResolvedSourceRowCount: 2, lastSelectedSourceRowIndices: [0, 2], externalSelectionSent: false,externalMode:"selection",filterSent:false,selectionSent:false, reasonExternalSelectionNotSent: "host disallowed" } }), host);

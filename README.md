@@ -24,6 +24,8 @@ The Playground is embedded as a Preact runtime island inside that application. I
 
 From the repository root, run `npm install` and `npm run dev`, then open `http://localhost:4178`. Use `npm run build` for the complete production build, including root and web type checks, the shared runtime island, and the Next.js application.
 
+For the web runtime, `rest.get` origins are frozen into the build trust policy. Set `HYPERPBI_WEB_REST_HOSTS` to comma-separated exact HTTPS origins or subdomain wildcard origins before `npm run web:build` / the full web build. If omitted, the default is `https://*.miniup.app`. The dashboard specification may choose only an origin allowed by that build; it cannot expand the trust list.
+
 The local workflow is:
 
 1. Create or import a project.
@@ -90,7 +92,7 @@ The minimal contract is:
 }
 ```
 
-Allowed root properties are `version`, `title`, `theme`, `layout`, `state`, `app`, `leftPanel`, `rightPanel`, `toolbar`, `components`, `css`, `styles`, `calculations`, `data`, and `definitions`. Under `data`, only `datasets` is accepted. Version 2.0 rejects unknown root and component properties.
+Allowed root properties are `version`, `title`, `theme`, `layout`, `state`, `app`, `leftPanel`, `rightPanel`, `toolbar`, `components`, `css`, `styles`, `calculations`, `data`, and `definitions`. Under `data`, only `sources` and `datasets` are accepted. Version 2.0 rejects unknown root and component properties.
 
 Every component needs a globally unique stable `id` that starts with a letter and contains only letters, digits, `_`, or `-` (maximum 100 characters). IDs connect inspector edits, UI-action targets, overlay state, interaction state, and pattern expansion, so improvements should preserve them whenever the same component remains.
 
@@ -119,7 +121,7 @@ Alias privacy modes range from sample-bearing profiles to masked, summary, field
 
 ## Logical datasets
 
-Named datasets live at `data.datasets`. Every definition has a `source` of `powerbi`, another named dataset, or—in the Playground—an uploaded source ID. After source resolution, both runtime evaluation and static schema propagation use this order:
+Read-only remote sources live at `data.sources`; named datasets live at `data.datasets`. A dataset source may be `powerbi`, a declared remote source, another named dataset, or—in the Playground—an uploaded source ID. After source resolution, both runtime evaluation and static schema propagation use this order:
 
 `filter → derive → rename → select → groupBy/metrics → distinct → sort → limit`
 
@@ -200,7 +202,7 @@ The importer accepts one JSON object directly or inside one Markdown fence and c
 
 ## Security
 
-- No user JavaScript, `eval`, `new Function`, callbacks, inline handlers, scripts, iframes, arbitrary SQL, or network datasets.
+- No user JavaScript, `eval`, `new Function`, callbacks, inline handlers, scripts, iframes, arbitrary SQL, credentials, custom request headers, or request mutations. Remote data must use declared read-only sources.
 - HTML is sanitized; forms and executable/embed elements are removed in normal mode.
 - CSS is parsed, property-allowlisted, scoped, and stripped of imports, external URLs, fixed positioning, abusive z-index, and unsafe animation forms.
 - ECharts options are recursively sanitized; functions, URL-bearing keys, executable strings, and unsafe semantic data overrides are removed.
@@ -297,8 +299,8 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 ## Known limitations
 
 - Dashboard schema 2.0 is the only runtime contract. See [migration/versioning](docs/migration-versioning.md) for the isolated development converter and the removed aliases.
-- Logical datasets are in-memory transformations of the current Power BI data view: no joins, SQL, arbitrary JavaScript, or network sources.
-- The Playground accepts local CSV and XLSX only. It has no joins, relationships, DAX, Power Query, databases, scheduled refresh, authentication, collaboration, or cloud publishing.
+- Logical datasets remain deterministic transformations of an already-resolved source: no joins, SQL, or arbitrary JavaScript. Read-only remote sources are explicit and policy-gated.
+- The Playground accepts local CSV/XLSX plus declared read-only remote sources. It still has no joins, relationships, DAX, Power Query, databases, scheduled refresh, authentication, collaboration, or cloud publishing.
 - One Power BI visual receives one flattened data view. A Playground project that depends on multiple independent uploaded sources is intentionally reported as not fully portable.
 - Browser-host selection and filtering stay inside HyperPBI unless they use an implemented declarative internal interaction. Power BI-only external selection/filter requests are reported as unsupported, never as successful.
 - Power BI supplies one flattened visual data view. Logical datasets can create different layer views over it, but cannot independently query arbitrary semantic-model tables; visual-query grain and relationships still control received rows.

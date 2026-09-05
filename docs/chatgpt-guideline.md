@@ -10,7 +10,7 @@ Return exactly the artifact requested by the prompt:
 - Add section: one section package with the requested insertion target
 - Redesign selected section: one replacement component/section using the selected stable ID
 
-Return valid JSON only: no Markdown fence, explanation, comments, trailing commas, alternate versions, or JSON Patch for normal improvement/repair jobs. Never emit JavaScript, functions, callbacks, inline handlers, scripts, iframes, credentials, SQL, network datasets, or invented fields.
+Return valid JSON only: no Markdown fence, explanation, comments, trailing commas, alternate versions, or JSON Patch for normal improvement/repair jobs. Never emit JavaScript, executable functions, callbacks, inline handlers, scripts, iframes, credentials, SQL, arbitrary network datasets, custom headers, request mutations, or invented fields. Preserve or create declared read-only remote sources only when the request provides their contract.
 
 Use version 2.0 for new specifications:
 
@@ -90,7 +90,7 @@ Each named dataset requires `source`. After resolving that source, operations ru
 
 `filter → derive → rename → select → groupBy/metrics → distinct → sort → limit`
 
-Only use operations and fields listed in the prompt. No SQL, joins, network sources, or functions.
+Only use operations, sources, and fields listed in the prompt. No SQL, joins, executable functions, arbitrary network sources, credentials, custom headers, or request mutations. Declared read-only remote sources are valid only when the prompt supplies them.
 
 ## Definitions and patterns
 

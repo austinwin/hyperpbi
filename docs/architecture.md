@@ -53,7 +53,7 @@ Uploaded data processing is deterministic:
 - CSV quoting/newlines are parsed locally and workbook sheets are read in a Web Worker;
 - file, row, and cell limits fail the whole source with a visible error—rows are never silently truncated.
 
-Joins, relationships, DAX, Power Query, SQL, and network data sources are out of scope.
+Joins, relationships, DAX, Power Query, and SQL remain out of scope. Read-only remote sources are resolved through the shared source layer: MiniUp table/Function sources plus web-only `rest.get` restricted by the build-time trusted-host list. Components never fetch directly.
 
 ## Local project persistence
 

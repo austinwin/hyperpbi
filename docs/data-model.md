@@ -1,6 +1,6 @@
 # HyperPBI data model
 
-HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. A specification may also declare read-only MiniUp table or Function sources; their JSON responses are normalized into the same workspace before components consume them. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI still does not execute SQL, arbitrary network URLs, mutations, custom request headers, or user code.
+HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. A specification may also declare read-only MiniUp table, MiniUp Function, or web-only trusted REST GET sources; their JSON responses are normalized into the same workspace before components consume them. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI still does not execute SQL, arbitrary network URLs, mutations, custom request headers, or user code.
 
 ## Base `powerbi` dataset
 
@@ -34,6 +34,25 @@ New 2.0 JSON uses Field Manifest aliases. Preparation resolves aliases in datase
 
 Table reads use the fixed `https://<site>.miniup.app/api/data/<site>/<table>` surface and page in bounded requests. HyperPBI never accepts an arbitrary URL or request method for this source type.
 
+### `rest.get` (web only)
+
+```json
+{
+  "data": {
+    "sources": {
+      "publicApi": {
+        "type": "rest.get",
+        "baseUrl": "https://api.example.com",
+        "path": "/v1/rows",
+        "dataPath": "rows"
+      }
+    }
+  }
+}
+```
+
+`rest.get` accepts an HTTPS origin plus a safe relative path. It is available only when the origin matches the web build's trusted host list. Set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of exact HTTPS origins or subdomain wildcard origins at web build time. When the variable is omitted, the trusted default is `https://*.miniup.app`. Dashboard JSON cannot expand this trust list.
+
 ### `miniup.function`
 
 ```json
@@ -56,11 +75,11 @@ Table reads use the fixed `https://<site>.miniup.app/api/data/<site>/<table>` su
 
 Function calls use the fixed `https://functions.miniup.app` origin. A parameter binding `{ "state": "region" }` reads `state.values.region`; changing that state value changes the request signature and refreshes the source. Static scalar query parameters are also supported.
 
-Both source types enforce GET-only requests, omitted credentials, no referrer, JSON responses, a 5 MB per-request response limit, a configurable timeout from 1 to 15 seconds, a maximum of 10,000 normalized rows, in-flight request deduplication, and an optional TTL cache. Protected table keys or other secrets must stay server-side behind a MiniUp Function. They must not be embedded in HyperPBI JSON.
+Remote sources enforce GET-only requests, omitted credentials, no referrer, JSON responses, a streamed 5 MB per-request response limit, a configurable timeout from 1 to 15 seconds, a maximum of 10,000 normalized rows, per-consumer cancellation, and an optional TTL cache. Cached completed responses may be shared, but in-flight requests are not shared across visual instances. Protected table keys or other secrets must stay server-side behind a MiniUp Function. They must not be embedded in HyperPBI JSON.
 
 Remote source lifecycle is exposed in render context as `loading`, `ready`, `empty`, or `error`. Before the first response arrives, static preparation treats the declared source as a dynamic schema rather than weakening validation for Power BI or local-file datasets.
 
-In Power BI, remote sources require the network-enabled package because external hosts must be declared through WebAccess. The Core package remains network-free. Remote rows do not receive Power BI selection identities, so they cannot accidentally select or externally filter unrelated semantic-model rows.
+In Power BI, only `miniup.function` is portable. It uses the network-enabled package and `https://functions.miniup.app`; direct `miniup.table` and `rest.get` are web-only because Power BI's opaque sandbox cannot rely on the MiniUp table CORS contract and generic REST hosts are intentionally excluded from the PBIVIZ trust boundary. The Core package remains network-free. Remote rows cannot select, filter, or clear Power BI external state.
 
 ## Named dataset definition
 
@@ -265,7 +284,7 @@ The runtime filters the already-prepared child view by the breadcrumb path and m
 
 - SQL or DAX text execution
 - arbitrary joins/unions
-- arbitrary network/file data sources outside declared MiniUp GET sources
+- arbitrary network/file data sources outside declared read-only sources and the web build trust list
 - user JavaScript/functions
 - mutation of the Power BI semantic model
 - treating a dataset metric as a model measure

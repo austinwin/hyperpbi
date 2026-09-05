@@ -35,13 +35,13 @@ Turn on **Inspect preview** to select a rendered or generated component without 
 
 ## Version 2.0 contract
 
-The root requires \`version: "2.0"\` and \`components: []\`. Optional roots are \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`css\`, \`styles\`, \`calculations\`, \`data.datasets\`, and \`definitions\`. Unknown root and component properties are errors. Every component requires a globally unique stable ID.
+The root requires \`version: "2.0"\` and \`components: []\`. Optional roots are \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`css\`, \`styles\`, \`calculations\`, \`data.sources\`, \`data.datasets\`, and \`definitions\`. Unknown root and component properties are errors. Every component requires a globally unique stable ID.
 
 Use Field Manifest aliases in AI-authored JSON. Preparation resolves aliases to canonical runtime keys. A display name is not automatically an alias. A query wrapper such as \`Sum(Sales.Amount)\` is still a summarized model column, not a true model measure.
 
 ## Logical datasets, definitions, and patterns
 
-Components without \`dataset\` use \`powerbi\`; a named dataset is local to components that select it. Dataset operations run as filter → derive → rename → select → groupBy/metrics → distinct → sort → limit after resolving \`source\`. Derived fields and metrics cannot directly filter the Power BI model; source-row lineage can preserve identity selection.
+Components without \`dataset\` use \`powerbi\`. \`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, or web-only \`rest.get\` sources; a component can bind to a source directly, or a named dataset can transform it. Dataset operations run as filter → derive → rename → select → groupBy/metrics → distinct → sort → limit after resolving \`source\`. Power BI external selection/filtering remains available only for data rooted in \`powerbi\`; remote rows use HyperPBI internal interactions only.
 
 Reusable \`definitions\` deep-merge objects, replace arrays, and require a new ID at each \`use\` site. Patterns \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\` expand to normal components with deterministic child IDs.
 
@@ -79,7 +79,7 @@ The native matrix renders every declared value metric, including column-group ×
 
 ## Security boundaries
 
-No user JavaScript, functions, callbacks, inline handlers, scripts, iframes, SQL, network datasets, or credentials. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
+No user JavaScript, executable functions, callbacks, inline handlers, scripts, iframes, SQL, credentials, custom request headers, or request mutations. Read-only remote data is limited to declared \`data.sources\`: MiniUp table/Function sources and web-only \`rest.get\`. The web build trusts only \`HYPERPBI_WEB_REST_HOSTS\` (default \`https://*.miniup.app\`), while Power BI remote data is limited to \`miniup.function\` through the network-enabled package. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
@@ -104,7 +104,7 @@ The minimal root is:
 {"version":"2.0","components":[]}
 \`\`\`
 
-Allowed root properties are \`version\`, \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`components\`, \`css\`, \`styles\`, \`calculations\`, \`data\`, and \`definitions\`. Under \`data\`, only \`datasets\` is allowed. Version 2.0 rejects unknown root and component properties.
+Allowed root properties are \`version\`, \`title\`, \`theme\`, \`layout\`, \`state\`, \`app\`, \`leftPanel\`, \`rightPanel\`, \`toolbar\`, \`components\`, \`css\`, \`styles\`, \`calculations\`, \`data\`, and \`definitions\`. Under \`data\`, only \`sources\` and \`datasets\` are allowed. Version 2.0 rejects unknown root and component properties.
 
 Every component requires \`type\` and a globally unique stable \`id\` matching \`^[A-Za-z][A-Za-z0-9_-]{0,99}$\`. IDs are behavior contracts: preserve them when the same component remains, and target only IDs that exist.
 
@@ -125,11 +125,11 @@ Never invent an alias, normalized key, model measure, aggregation, or business r
 
 ## Logical datasets
 
-Declare named datasets at \`data.datasets\`. Each definition requires \`source\`, which is \`powerbi\` or another named dataset. Allowed properties are \`source\`, \`filter\`, \`derive\`, \`rename\`, \`select\`, \`groupBy\`, \`metrics\`, \`distinct\`, \`sort\`, and \`limit\`.
+\`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, and web-only \`rest.get\` sources. A component may bind directly to a source name. \`data.datasets\` definitions require \`source\`, which may be \`powerbi\`, a declared source, or another named dataset. Allowed dataset properties are \`source\`, \`filter\`, \`derive\`, \`rename\`, \`select\`, \`groupBy\`, \`metrics\`, \`distinct\`, \`sort\`, and \`limit\`.
 
-Runtime and static-schema order is: resolve source; filter; derive; rename; select; groupBy/metrics; distinct; sort; limit. Metric operations are \`sum\`, \`avg\`, \`min\`, \`max\`, \`count\`, \`distinctCount\`, and \`first\`. Derive expressions use the safe calculation DSL. No SQL, joins, arbitrary JavaScript, or network sources.
+Runtime and static-schema order is: resolve source; filter; derive; rename; select; groupBy/metrics; distinct; sort; limit. Metric operations are \`sum\`, \`avg\`, \`min\`, \`max\`, \`count\`, \`distinctCount\`, and \`first\`. Derive expressions use the safe calculation DSL. Remote schemas are dynamic until a response arrives, so never invent remote fields; use only names explicitly supplied by the user/current specification or a known response contract. No SQL, joins, executable JavaScript, request mutations, custom headers, embedded credentials, or arbitrary untrusted hosts.
 
-A component omitting \`dataset\` uses \`powerbi\`; otherwise it sees only the selected dataset's output fields. Validate references at the stage where they are used. Source cycles, unknown sources, collisions, and missing fields are errors. Lineage combines contributing source rows through grouping/distinct and enables identity selection when possible.
+A component omitting \`dataset\` uses \`powerbi\`; otherwise it sees only the selected source/dataset output fields. Power BI external selection/filtering applies only to datasets rooted in \`powerbi\`. Remote rows support HyperPBI internal interaction but never gain Power BI identity. Source cycles, unknown sources, collisions, and missing known fields are errors.
 
 ## Reusable definitions and application patterns
 
@@ -203,7 +203,7 @@ Use supplied structured diagnostics as the authority. The version must be presen
 
 ## Security
 
-Never emit user JavaScript, eval, functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, joins, or network datasets. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
+Never emit user JavaScript, eval, executable functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, joins, request mutations, or custom request headers. Declared read-only remote sources are allowed only under \`data.sources\` and must follow the host policy. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
 
 ## Schema version boundary
 
