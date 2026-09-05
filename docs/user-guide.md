@@ -12,6 +12,8 @@ The HyperPBI website uses one shared navigation and five primary routes:
 
 For local development, run `npm install` and `npm run dev` from the repository root, then open `http://localhost:4178`. Run `npm run build` before release to type-check and build the shared runtime island and the complete Next.js application.
 
+For web builds that use `rest.get`, set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of trusted HTTPS origins or subdomain wildcard origins before the build. If you leave it unset, HyperPBI uses `https://*.miniup.app` by default. This setting is part of the web build/deployment boundary; dashboard JSON may select an allowed origin but cannot add a new trusted host.
+
 The eight dashboards in [`examples/dashboards`](../examples/dashboards) are the fastest starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. See the [dashboard example guide](dashboard-examples.md) for the folder list, package profiles, and exact import workflow.
 
 ## Install and bind data
