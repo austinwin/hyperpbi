@@ -767,6 +767,9 @@ export interface HyperPbiSchema {
     styles?: HyperPbiStyleSystem;
     calculations?: CalculationSpecification;
     /** Version 2 authoring structures are retained for round-tripping and compiled before rendering. */
-    data?: { datasets?: Record<string, import("../data/datasets").DatasetDefinition> };
+    data?: {
+        sources?: Record<string, import("../data/remoteDataSources").RemoteDataSourceDefinition>;
+        datasets?: Record<string, import("../data/datasets").DatasetDefinition>;
+    };
     definitions?: Record<string, Record<string, unknown>>;
 }

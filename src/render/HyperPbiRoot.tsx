@@ -36,6 +36,7 @@ import { prepareLogicalDatasets } from "../editor/prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
 import type { PersistedGeoLibreProject } from "../components/geolibre/types";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
+import { useRemoteDataWorkspace } from "../data/useRemoteDataWorkspace";
 
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
@@ -65,6 +66,7 @@ export function HyperPbiRoot({
   componentPathById,
   onMapViewportChange,
   onGeoLibreProjectChange,
+  remoteSourceHost = "web",
 }: {
   instanceId: string;
   schema: HyperPbiSchema;
@@ -98,6 +100,7 @@ export function HyperPbiRoot({
   componentPathById?: Readonly<Record<string, string>>;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
   onGeoLibreProjectChange?: (componentId: string, project: PersistedGeoLibreProject) => void;
+  remoteSourceHost?: "web" | "powerbi";
 }) {
   const effectiveSettings = useMemo(
     () => resolveSchemaRuntimeSettings(schema.theme, settings),
@@ -111,6 +114,7 @@ export function HyperPbiRoot({
     dashboardReducer,
     initialDashboardState(schema.state?.search, schema.state?.activeTab),
   );
+  const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost);
   const rowKeySignature = useMemo(
     () => JSON.stringify(data.rowKeys),
     [data.rowKeys],
@@ -173,17 +177,20 @@ export function HyperPbiRoot({
         (key) => sourceIndexByKey.get(key) ?? -1,
       ),
       sourceRowKeys: data.rowKeys,
-    }, dataWorkspace);
-  }, [filteredData, schema, filteredRowKeys, data.rowKeys, dataWorkspace]);
+    }, remoteData.workspace);
+  }, [filteredData, schema, filteredRowKeys, data.rowKeys, remoteData.workspace]);
   const runtimeWarnings = useMemo(
     () =>
       Array.from(
         new Set([
           ...referenceWarnings,
           ...datasetEvaluation.errors.map((item) => item.message),
+          ...Object.entries(remoteData.statuses).flatMap(([id, status]) =>
+            status.status === "error" && status.error ? [`Remote source “${id}”: ${status.error}`] : []
+          ),
         ]),
       ),
-    [referenceWarnings, datasetEvaluation.errors],
+    [referenceWarnings, datasetEvaluation.errors, remoteData.statuses],
   );
   const scope = `#${instanceId}`;
   const cssMode = config.security?.cssMode ?? "scoped";
@@ -231,6 +238,7 @@ export function HyperPbiRoot({
         .filter((index) => index >= 0);
       return {
         name,
+        sourceId: result.sourceId ?? "powerbi",
         rows: rowIndices.map((index) => datasetRows[index]),
         fields: result.data.fields,
         rowIndices,
@@ -287,6 +295,7 @@ export function HyperPbiRoot({
         ownerByRuntimeId,
         componentPathById,
         datasets: datasetEvaluation.datasets,
+        remoteSources: remoteData.statuses,
         onMapViewportChange,
         onGeoLibreProjectChange,
         executeUiAction: null as any,
@@ -319,6 +328,7 @@ export function HyperPbiRoot({
       ownerByRuntimeId,
       componentPathById,
       datasetEvaluation.datasets,
+      remoteData.statuses,
       onMapViewportChange,
       onGeoLibreProjectChange,
     ],
@@ -354,6 +364,7 @@ export function HyperPbiRoot({
       ownerByRuntimeId,
       componentPathById,
       datasets: datasetEvaluation.datasets,
+      remoteSources: remoteData.statuses,
       onMapViewportChange,
       onGeoLibreProjectChange,
       executeUiAction: execUiAction,
@@ -385,6 +396,7 @@ export function HyperPbiRoot({
       execUiAction,
       isOverlayOpen,
       datasetEvaluation.datasets,
+      remoteData.statuses,
       onMapViewportChange,
       onGeoLibreProjectChange,
     ],

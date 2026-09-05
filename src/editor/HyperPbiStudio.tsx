@@ -223,6 +223,7 @@ export function HyperPbiStudio({
   initialEditorTab = "ai",
   webAccessAvailable = false,
   providerAccess,
+  remoteSourceHost = "web",
 }: {
   instanceId: string;
   data: NormalizedData;
@@ -253,6 +254,7 @@ export function HyperPbiStudio({
   initialEditorTab?: EditorTab;
   webAccessAvailable?: boolean;
   providerAccess?: ProviderAccessState;
+  remoteSourceHost?: "web" | "powerbi";
 }) {
   const [specification, setSpecification] = useState(initialSpecification);
   const [configuration, setConfiguration] = useState(initialConfiguration);
@@ -1209,6 +1211,7 @@ export function HyperPbiStudio({
                     reportInteraction={reportInteraction}
                     webAccessAvailable={webAccessAvailable}
                     providerAccess={providerAccess}
+                    remoteSourceHost={remoteSourceHost}
                     ownerByRuntimeId={preview.ownerByRuntimeId}
                     componentPathById={preview.componentPathById}
                     onMapViewportChange={(id, viewport) =>

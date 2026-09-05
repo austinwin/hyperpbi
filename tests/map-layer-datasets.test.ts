@@ -40,6 +40,23 @@ describe("per-layer logical dataset scope", () => {
         expect(incidents.features[0].powerBiRowKeys).toEqual(["source-2"]);
     });
 
+    it("does not label remote dataset rows as Power BI map identities", () => {
+        const remote = resolvePowerBiLayer({ id: "remote", name: "Remote", dataset: "remote", source: { type: "powerbi", bindings: { latitude: "facilityLat", longitude: "facilityLon" } } }, {
+            rows,
+            fields,
+            rowIndices: [0, 1, 2],
+            rowKeys: ["remote-0", "remote-1", "remote-2"],
+            sourceRowIndices: [[0], [1], [2]],
+            sourceRowKeys: [["remote-0"], ["remote-1"], ["remote-2"]],
+            powerBiIdentityAvailable: false,
+            datasetName: "remote",
+            datasetFound: true,
+        });
+        expect(remote.features).toHaveLength(3);
+        expect(remote.powerBiIdentityAvailable).toBe(false);
+        expect(remote.features.every(feature => feature.powerBiRowIndices.length === 0 && feature.powerBiRowKeys.length === 0)).toBe(true);
+    });
+
     it("preserves every contributing identity for a grouped logical row", () => {
         const evaluated = evaluateDatasets(data, { grouped: { source: "powerbi", groupBy: ["kind"], metrics: { lat: { op: "avg", field: "facilityLat" }, lon: { op: "avg", field: "facilityLon" } } } });
         const grouped = evaluated.datasets.get("grouped")!;

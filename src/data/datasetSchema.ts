@@ -7,6 +7,8 @@ import { NormalizedData, NormalizedField } from "./normalizeData";
 export interface DatasetSchemaResult {
     name: string;
     fields: Record<string, NormalizedField>;
+    /** Remote placeholders are structurally valid before their response fields are known. */
+    dynamic?: boolean;
 }
 
 export interface DatasetSchemaEvaluation {
@@ -53,14 +55,21 @@ function inferExpressionType(expression: ExpressionNode, fields: Record<string, 
     return "unknown";
 }
 
-function validateExpressionFields(expression: ExpressionNode, fields: Record<string, NormalizedField>, diagnostics: Diagnostic[], path: string, dataset: string): void {
+function dynamicField(key: string): NormalizedField {
+    return { key, displayName: key, type: "dimension", kind: "unknown", dataType: "unknown", roles: [] };
+}
+
+function validateExpressionFields(expression: ExpressionNode, fields: Record<string, NormalizedField>, diagnostics: Diagnostic[], path: string, dataset: string, dynamic = false): void {
     if (!expression || typeof expression !== "object") return;
     const node = expression as Record<string, unknown>;
     for (const property of ["field", "valueFromRow"] as const) {
         const reference = node[property];
-        if (typeof reference === "string" && !fields[reference]) diagnostics.push({ code: "UNKNOWN_DATASET_FIELD", severity: "error", path: `${path}/${property}`, message: `Dataset “${dataset}” references missing field “${reference}” at this operation stage.`, received: reference });
+        if (typeof reference === "string" && !fields[reference]) {
+            if (dynamic) fields[reference] = dynamicField(reference);
+            else diagnostics.push({ code: "UNKNOWN_DATASET_FIELD", severity: "error", path: `${path}/${property}`, message: `Dataset “${dataset}” references missing field “${reference}” at this operation stage.`, received: reference });
+        }
     }
-    expressionChildren(node).forEach((child, index) => validateExpressionFields(child, fields, diagnostics, `${path}/args/${index}`, dataset));
+    expressionChildren(node).forEach((child, index) => validateExpressionFields(child, fields, diagnostics, `${path}/args/${index}`, dataset, dynamic));
 }
 
 function metricType(metric: DatasetMetric, fields: Record<string, NormalizedField>): PrimitiveType {
@@ -71,21 +80,24 @@ function metricType(metric: DatasetMetric, fields: Record<string, NormalizedFiel
 
 function propagateDefinition(name: string, definition: DatasetDefinition, input: DatasetSchemaResult, diagnostics: Diagnostic[]): DatasetSchemaResult {
     let fields = cloneFields(input.fields);
+    const dynamic = input.dynamic === true;
     const unknown = (reference: string, suffix: string, operation: string): void => {
-        diagnostics.push({ code: "UNKNOWN_DATASET_FIELD", severity: "error", path: pathFor(name, suffix), message: `Dataset “${name}” ${operation} references missing field “${reference}”.`, received: reference });
+        if (dynamic) fields[reference] = dynamicField(reference);
+        else diagnostics.push({ code: "UNKNOWN_DATASET_FIELD", severity: "error", path: pathFor(name, suffix), message: `Dataset “${name}” ${operation} references missing field “${reference}”.`, received: reference });
     };
 
     const filters = definition.filter ? (Array.isArray(definition.filter) ? definition.filter : [definition.filter]) : [];
     filters.forEach((filter, index) => { if (!fields[filter.field]) unknown(filter.field, `filter/${index}/field`, "filter"); });
 
     for (const [key, expression] of Object.entries(definition.derive ?? {})) {
-        validateExpressionFields(expression, fields, diagnostics, pathFor(name, `derive/${key}`), name);
+        validateExpressionFields(expression, fields, diagnostics, pathFor(name, `derive/${key}`), name, dynamic);
         fields[key] = generatedField(key, inferExpressionType(expression, fields), "dataset-derived");
     }
 
     for (const [from, rawTarget] of Object.entries(definition.rename ?? {})) {
         const target = rawTarget.trim();
-        if (!fields[from]) { unknown(from, `rename/${from}`, "rename"); continue; }
+        if (!fields[from]) unknown(from, `rename/${from}`, "rename");
+        if (!fields[from]) continue;
         if (!target) { diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `rename/${from}`), message: `Dataset “${name}” rename target for “${from}” cannot be empty.`, received: rawTarget }); continue; }
         if (target !== from && fields[target]) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `rename/${from}`), message: `Dataset “${name}” cannot rename “${from}” to “${target}” because that output already exists.`, received: target });
         const source = fields[from]; fields[target] = { ...source, key: target, displayName: target }; if (target !== from) delete fields[from];
@@ -93,7 +105,7 @@ function propagateDefinition(name: string, definition: DatasetDefinition, input:
 
     if (definition.select) {
         const selected: Record<string, NormalizedField> = {};
-        definition.select.forEach((field, index) => { if (!fields[field]) unknown(field, `select/${index}`, "select"); else selected[field] = fields[field]; });
+        definition.select.forEach((field, index) => { if (!fields[field]) unknown(field, `select/${index}`, "select"); if (fields[field]) selected[field] = fields[field]; });
         fields = selected;
     }
 
@@ -101,13 +113,13 @@ function propagateDefinition(name: string, definition: DatasetDefinition, input:
         const grouped: Record<string, NormalizedField> = {};
         (definition.groupBy ?? []).forEach((field, index) => {
             if (!fields[field]) unknown(field, `groupBy/${index}`, "groupBy");
-            else grouped[field] = { ...fields[field], origin: "dataset-group" };
+            if (fields[field]) grouped[field] = { ...fields[field], origin: "dataset-group" };
         });
         for (const [key, metric] of Object.entries(definition.metrics ?? {})) {
             const policy = aggregationFieldRequirement(metric.op, "first");
             if (policy.fieldRequired && !metric.field) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a field for ${metric.op}.` });
             else if (metric.field && !fields[metric.field]) unknown(metric.field, `metrics/${key}/field`, `metric “${key}”`);
-            else if (metric.field && policy.requirement === "numeric" && fields[metric.field].dataType !== "number" && fields[metric.field].dataType !== "unknown") diagnostics.push({ code: "NON_NUMERIC_DATASET_FIELD", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a numeric field for ${metric.op}, but “${metric.field}” is ${fields[metric.field].dataType}.`, received: metric.field });
+            if (metric.field && fields[metric.field] && policy.requirement === "numeric" && fields[metric.field].dataType !== "number" && fields[metric.field].dataType !== "unknown") diagnostics.push({ code: "NON_NUMERIC_DATASET_FIELD", severity: "error", path: pathFor(name, `metrics/${key}/field`), message: `Dataset metric “${name}.${key}” requires a numeric field for ${metric.op}, but “${metric.field}” is ${fields[metric.field].dataType}.`, received: metric.field });
             if (grouped[key]) diagnostics.push({ code: "INVALID_DATASET_DEFINITION", severity: "error", path: pathFor(name, `metrics/${key}`), message: `Dataset metric “${name}.${key}” collides with a group-by field.` });
             grouped[key] = generatedField(key, metricType(metric, fields), "dataset-metric");
         }
@@ -116,7 +128,7 @@ function propagateDefinition(name: string, definition: DatasetDefinition, input:
 
     if (Array.isArray(definition.distinct)) definition.distinct.forEach((field, index) => { if (!fields[field]) unknown(field, `distinct/${index}`, "distinct"); });
     (definition.sort ?? []).forEach((sort, index) => { if (!fields[sort.field]) unknown(sort.field, `sort/${index}/field`, "sort"); });
-    return { name, fields };
+    return { name, fields, dynamic };
 }
 
 export function resolveDatasetSchemas(
@@ -127,11 +139,12 @@ export function resolveDatasetSchemas(
     const diagnostics: Diagnostic[] = [];
     const datasets = new Map<string, DatasetSchemaResult>([["powerbi", { name: "powerbi", fields: cloneFields(base.fields) }]]);
     const sourceSchemas = new Map(
-        Object.entries(sourceData).map(([name, data]) => [
+        Object.entries(sourceData).filter(([name]) => name !== "powerbi").map(([name, data]) => [
             name,
-            { name, fields: cloneFields(data.fields) } satisfies DatasetSchemaResult
+            { name, fields: cloneFields(data.fields), dynamic: data.dynamicSchema === true } satisfies DatasetSchemaResult
         ])
     );
+    for (const [name, source] of sourceSchemas) datasets.set(name, source);
     const visiting: string[] = [];
     const failed = new Set<string>();
     const resolve = (name: string): DatasetSchemaResult | undefined => {

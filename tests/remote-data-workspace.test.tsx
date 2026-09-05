@@ -1,0 +1,130 @@
+import { h, render } from "preact";
+import { act } from "preact/test-utils";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { calculateAggregates } from "../src/data/aggregations";
+import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
+import type { NormalizedData } from "../src/data/normalizeData";
+import type { HyperPbiSchema } from "../src/schema/hyperpbiSchema";
+import { useRemoteDataWorkspace } from "../src/data/useRemoteDataWorkspace";
+import { clearRemoteDataSourceCache } from "../src/data/remoteDataSources";
+
+const base: NormalizedData = {
+  rows: [],
+  rowKeys: [],
+  fields: {},
+  aggregates: calculateAggregates([]),
+  map: normalizeMapBindings([], {}, undefined, undefined, []),
+};
+
+const schema: HyperPbiSchema = {
+  version: "2.0",
+  data: {
+    sources: {
+      remote: {
+        type: "miniup.function",
+        function: "district-rows",
+        params: { district: { state: "district" } },
+        cacheTtlSeconds: 0,
+      },
+    },
+  },
+  components: [],
+};
+
+function Probe({ district }: { district: number }) {
+  const result = useRemoteDataWorkspace(schema, undefined, base, { district });
+  const source = result.workspace.sources.remote;
+  return h("div", {
+    "data-status": result.statuses.remote?.status ?? "none",
+    "data-rows": JSON.stringify(source?.data.rows ?? []),
+  });
+}
+
+afterEach(() => {
+  clearRemoteDataSourceCache();
+  vi.restoreAllMocks();
+  document.body.replaceChildren();
+});
+
+describe("remote data workspace lifecycle", () => {
+  const tick = () => new Promise<void>(resolve => setTimeout(resolve, 10));
+  const waitForStatus = async (host: HTMLElement, expected: string) => {
+    const deadline = Date.now() + 1000;
+    while (Date.now() < deadline) {
+      if (host.firstElementChild?.getAttribute("data-status") === expected) return;
+      await act(async () => { await tick(); });
+    }
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe(expected);
+  };
+  it("rejects web-only sources in Power BI before any network request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const tableSchema: HyperPbiSchema = {
+      version: "2.0",
+      data: { sources: { remote: { type: "miniup.table", site: "demo", table: "rows" } } },
+      components: [],
+    };
+    function PowerBiProbe() {
+      const result = useRemoteDataWorkspace(tableSchema, undefined, base, {}, "powerbi");
+      return h("div", {
+        "data-status": result.statuses.remote?.status ?? "none",
+        "data-error": result.statuses.remote?.error ?? "",
+        "data-rows": JSON.stringify(result.workspace.sources.remote?.data.rows ?? []),
+      });
+    }
+    const host = document.createElement("div");
+    act(() => render(h(PowerBiProbe, {}), host));
+    await waitForStatus(host, "error");
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
+    expect(host.firstElementChild?.getAttribute("data-error")).toContain("web-only");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("invalidates old rows immediately when query state changes", async () => {
+    let resolveSecond!: (value: Response) => void;
+    const second = new Promise<Response>(resolve => { resolveSecond = resolve; });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ rows: [{ district: 8 }] }), { status: 200 }))
+      .mockReturnValueOnce(second);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const host = document.createElement("div");
+    document.body.append(host);
+    act(() => render(h(Probe, { district: 8 }), host));
+    await waitForStatus(host, "ready");
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":8');
+
+    await act(async () => {
+      render(h(Probe, { district: 9 }), host);
+      await Promise.resolve();
+    });
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("loading");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
+
+    resolveSecond(new Response(JSON.stringify({ rows: [{ district: 9 }] }), { status: 200 }));
+    await second;
+    await waitForStatus(host, "ready");
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toContain('"district":9');
+    expect(host.firstElementChild?.getAttribute("data-rows")).not.toContain('"district":8');
+  });
+
+  it("keeps a failed current request empty rather than restoring stale rows", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ rows: [{ district: 8 }] }), { status: 200 }))
+      .mockRejectedValueOnce(new Error("network down"));
+    vi.stubGlobal("fetch", fetchMock);
+    const host = document.createElement("div");
+
+    act(() => render(h(Probe, { district: 8 }), host));
+    await waitForStatus(host, "ready");
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("ready");
+
+    act(() => render(h(Probe, { district: 10 }), host));
+    await waitForStatus(host, "error");
+    expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
+    expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
+  });
+});

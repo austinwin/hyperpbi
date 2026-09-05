@@ -405,6 +405,8 @@ export interface ResolvedMapLayer {
     order: number;
     groupId?: string;
     datasetName?: string;
+    /** True only when feature row identities ultimately come from the Power BI data view. */
+    powerBiIdentityAvailable?: boolean;
     features: ResolvedMapFeature[];
     renderer: ResolvedMapRenderer;
     labels?: ResolvedMapLabels;

@@ -1,6 +1,6 @@
 import type { NormalizedData } from "./normalizeData";
 
-export type DataSourceKind = "powerbi" | "csv" | "xlsx-sheet";
+export type DataSourceKind = "powerbi" | "csv" | "xlsx-sheet" | "miniup.table" | "miniup.function" | "rest.get";
 
 export interface DataSource {
     id: string;

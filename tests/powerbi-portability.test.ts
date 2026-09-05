@@ -25,6 +25,31 @@ describe("Power BI portability", () => {
         expect(result.powerBiSpecification).toBeUndefined();
     });
 
+    it("permits MiniUp Functions in Power BI but blocks direct table and generic REST sources", () => {
+        const fn: HyperPbiSchema = {
+            version: "2.0",
+            data: { sources: { live: { type: "miniup.function", function: "live-orders" } } },
+            components: [{ type: "table", id: "live", dataset: "live", columns: ["status"] }]
+        };
+        const fnResult = analyzePowerBiPortability(fn, defaultConfig, workspace);
+        expect(fnResult.issues.map(issue => issue.code)).toContain("REMOTE_SOURCE_WEBACCESS_REQUIRED");
+        expect(fnResult.powerBiSpecification).toBeDefined();
+
+        for (const source of [
+            { type: "miniup.table" as const, site: "demo", table: "orders" },
+            { type: "rest.get" as const, baseUrl: "https://demo.miniup.app", path: "/rows" },
+        ]) {
+            const specification: HyperPbiSchema = {
+                version: "2.0",
+                data: { sources: { live: source } },
+                components: [{ type: "table", id: "live", dataset: "live", columns: ["status"] }]
+            };
+            const result = analyzePowerBiPortability(specification, defaultConfig, workspace);
+            expect(result.issues.map(issue => issue.code)).toContain("REMOTE_SOURCE_WEB_ONLY");
+            expect(result.powerBiSpecification).toBeUndefined();
+        }
+    });
+
     it("reports invalid field bindings as actionable blockers", () => {
         const specification: HyperPbiSchema = { version: "2.0", components: [{ type: "table", id: "bad", columns: ["missing"] }] };
         const result = analyzePowerBiPortability(specification, defaultConfig, workspace);

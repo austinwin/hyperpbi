@@ -74,17 +74,44 @@ export function analyzePowerBiPortability(
 ): PowerBiPortabilityResult {
     const issues: PortabilityIssue[] = [];
     const definitions = specification.data?.datasets ?? {};
+    const remoteSources = new Set(Object.keys(specification.data?.sources ?? {}));
     const roots = new Set<string>();
+    const sourceUse = new Map<string, Set<string>>();
+    const registerSourceUse = (sourceId: string, consumer: string) => {
+        const consumers = sourceUse.get(sourceId) ?? new Set<string>();
+        consumers.add(consumer);
+        sourceUse.set(sourceId, consumers);
+    };
     let requiresRewrite = false;
 
     for (const [name, definition] of Object.entries(definitions)) {
         const root = rootSource(name, definitions);
         if (!root) continue;
         roots.add(root);
+        if (remoteSources.has(root)) registerSourceUse(root, `dataset “${name}”`);
         if (workspace.defaultSourceId !== "powerbi" && root === workspace.defaultSourceId) {
             requiresRewrite = true;
         }
-        if (root !== "powerbi" && root !== workspace.defaultSourceId) {
+        if (remoteSources.has(root)) {
+            const source = specification.data?.sources?.[root];
+            if (source?.type === "miniup.function") {
+                issues.push({
+                    code: "REMOTE_SOURCE_WEBACCESS_REQUIRED",
+                    severity: "warning",
+                    message: `Dataset “${name}” depends on MiniUp Function source “${root}”.`,
+                    action: "Use the network-enabled package. The Function must allow browser CORS and must not require credentials embedded in HyperPBI."
+                });
+            } else {
+                issues.push({
+                    code: "REMOTE_SOURCE_WEB_ONLY",
+                    severity: "error",
+                    message: `Dataset “${name}” depends on ${source?.type ?? "remote"} source “${root}”, which is web-only.`,
+                    action: source?.type === "miniup.table"
+                        ? "Expose the required read through a public MiniUp Function and use miniup.function for Power BI."
+                        : "Use rest.get in the web build only; Power BI remote data must use miniup.function."
+                });
+            }
+        } else if (root !== "powerbi" && root !== workspace.defaultSourceId) {
             issues.push({
                 code: "INDEPENDENT_UPLOADED_SOURCE",
                 severity: "error",
@@ -103,7 +130,40 @@ export function analyzePowerBiPortability(
             });
         }
     }
-    const independentRoots = [...roots].filter(root => root !== "powerbi" && root !== workspace.defaultSourceId);
+    const visitRemoteComponents = (value: unknown): void => {
+        if (Array.isArray(value)) return value.forEach(visitRemoteComponents);
+        if (!object(value)) return;
+        if (typeof value.dataset === "string" && remoteSources.has(value.dataset)) {
+            registerSourceUse(value.dataset, `component “${String(value.id ?? value.type ?? "unknown")}”`);
+        }
+        Object.values(value).forEach(visitRemoteComponents);
+    };
+    visitRemoteComponents(specification.components);
+    visitRemoteComponents(specification.toolbar);
+    visitRemoteComponents(specification.leftPanel);
+    visitRemoteComponents(specification.rightPanel);
+    for (const [sourceId, consumers] of sourceUse) {
+        if ([...consumers].some(consumer => consumer.startsWith("dataset "))) continue;
+        const source = specification.data?.sources?.[sourceId];
+        if (source?.type === "miniup.function") {
+            issues.push({
+                code: "REMOTE_SOURCE_WEBACCESS_REQUIRED",
+                severity: "warning",
+                message: `${[...consumers].join(", ")} uses MiniUp Function source “${sourceId}”.`,
+                action: "Use the network-enabled package. The Function must allow browser CORS and must not require credentials embedded in HyperPBI."
+            });
+        } else {
+            issues.push({
+                code: "REMOTE_SOURCE_WEB_ONLY",
+                severity: "error",
+                message: `${[...consumers].join(", ")} uses ${source?.type ?? "remote"} source “${sourceId}”, which is web-only.`,
+                action: source?.type === "miniup.table"
+                    ? "Expose the required read through a public MiniUp Function and use miniup.function for Power BI."
+                    : "Use rest.get in the web build only; Power BI remote data must use miniup.function."
+            });
+        }
+    }
+    const independentRoots = [...roots].filter(root => root !== "powerbi" && root !== workspace.defaultSourceId && !remoteSources.has(root));
     if (independentRoots.length || roots.size > 1 && independentRoots.length) {
         issues.push({
             code: "MULTIPLE_SOURCE_DEPENDENCY",

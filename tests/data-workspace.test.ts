@@ -26,6 +26,7 @@ describe("DataWorkspace", () => {
             { [orders.id]: orders.data, [targets.id]: targets.data }
         );
         expect(evaluation.errors).toEqual([]);
+        expect(evaluation.datasets.get(targets.id)?.data.rows).toEqual([{ region: "North", target: 100 }]);
         expect(evaluation.datasets.get("targetSummary")?.data.rows).toEqual([{ region: "North", total: 100 }]);
     });
 });

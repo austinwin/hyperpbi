@@ -13,9 +13,12 @@ import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import type { MapViewportState } from "../components/maps/MapBlock";
 import type { PersistedGeoLibreProject } from "../components/geolibre/types";
+import type { RemoteDataSourceStatus } from "../data/remoteDataSources";
 
 export interface ResolvedDatasetView {
     name: string;
+    /** Root workspace source. Only "powerbi" carries report-model identity. Older test/adapter views may omit it and are treated as Power BI-rooted for compatibility. */
+    sourceId?: string;
     rows: DataRow[];
     fields: NormalizedData["fields"];
     /** Row positions in the evaluated logical dataset before component interaction filtering. */
@@ -61,6 +64,7 @@ export interface RenderContextValue {
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;
     datasets?: Map<string,DatasetResult>;
+    remoteSources?: Readonly<Record<string, RemoteDataSourceStatus>>;
     datasetLineage?: number[][];
     /** Internal interaction payload row indices are local to this dataset unless marked as Power BI source indices. */
     interactionIndexSpace?: "component" | "powerbi";

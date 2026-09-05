@@ -12,7 +12,7 @@ This reference describes the implemented HyperPBI dashboard schema 2.0 contract,
   "title": "Operations",
   "theme": { "mode": "light", "density": "compact" },
   "app": { "enabled": true },
-  "data": { "datasets": {} },
+  "data": { "sources": {}, "datasets": {} },
   "definitions": {},
   "components": []
 }
@@ -97,7 +97,7 @@ A query wrapper such as `Sum(Sales.Amount)` has `queryAggregation: "sum"` and `i
 
 ## Logical datasets
 
-`data.datasets` is a named object. Every definition requires a nonblank `source` of `powerbi` or another named dataset. Allowed operations are `filter`, `derive`, `rename`, `select`, `groupBy`, `metrics`, `distinct`, `sort`, and `limit`.
+`data.sources` may declare read-only `miniup.table`, `miniup.function`, or web-only `rest.get` sources. `data.datasets` is a named object. Every definition requires a nonblank `source` of `powerbi`, a declared source, or another named dataset. Allowed operations are `filter`, `derive`, `rename`, `select`, `groupBy`, `metrics`, `distinct`, `sort`, and `limit`.
 
 After resolving the source chain, runtime and static-schema order is:
 

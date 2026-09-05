@@ -9,6 +9,7 @@ export const DEFAULT_MAP_HOSTS = [
     "https://tile.openstreetmap.org",
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
+    "https://functions.miniup.app",
     "https://*.arcgis.com",
     "https://*.arcgisonline.com",
 ];

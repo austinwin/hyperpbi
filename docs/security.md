@@ -4,7 +4,7 @@ HyperPBI treats dashboard JSON and pasted AI output as untrusted data. It valida
 
 ## No executable dashboard code
 
-Dashboard JSON cannot supply JavaScript, `eval`, `new Function`, callbacks, formatter functions, inline event handlers, dynamic imports, scripts, iframes, arbitrary DOM code, SQL, or network dataset loaders.
+Dashboard JSON cannot supply JavaScript, `eval`, `new Function`, callbacks, formatter functions, inline event handlers, dynamic imports, scripts, iframes, arbitrary DOM code, SQL, credentials, custom request headers, request mutations, or arbitrary network dataset loaders. Read-only remote data is limited to validated `data.sources`.
 
 UI/data interactions are enums and structured payloads. Calculation/condition logic is a finite JSON operator DSL.
 
@@ -69,7 +69,7 @@ Geocoding is user-triggered, has no autocomplete, requires privacy acknowledgmen
 
 ## Data boundaries
 
-Logical datasets are deterministic in-memory transformations of the current Power BI data view. They cannot execute SQL, join network data, read files, fetch URLs, or mutate the semantic model.
+Logical datasets are deterministic transformations of an already-resolved source. They cannot execute SQL, join arbitrary network data, read files, create requests, attach credentials, or mutate the semantic model. Remote fetching occurs only in the separate read-only source layer before dataset evaluation.
 
 The visual receives one flattened Power BI data view. Per-layer map datasets can filter, derive, select, group, and aggregate those received rows, but cannot independently query arbitrary model tables or bypass semantic-model relationships. Grouped identity lineage is retained only from identities Power BI supplied.
 

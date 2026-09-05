@@ -20,6 +20,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const authoringOwnerId = context.ownerByRuntimeId?.[componentId] ?? componentId;
         const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
         const powerBiSourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+        const hasPowerBiLineage = datasetResult?.sourceId === "powerbi";
         const componentContext: RenderContextValue = datasetResult ? {
             ...context,
             data: datasetResult.data,
@@ -28,6 +29,11 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
             sourceRowKeys: datasetResult.data.rowKeys,
             datasetLineage: datasetResult.lineage,
             interactionIndexSpace: "component",
+            selectExternal: hasPowerBiLineage ? context.selectExternal : () => ({ sent: false, reason: "no selection identities" }),
+            selectSourceRows: hasPowerBiLineage ? context.selectSourceRows : () => ({ sent: false, reason: "no selection identities" }),
+            clearExternal: hasPowerBiLineage ? context.clearExternal : () => ({ sent: false, reason: "no selection identities" }),
+            applyExternalFilter: hasPowerBiLineage ? context.applyExternalFilter : () => ({ sent: false, reason: "field has no Power BI filter target" }),
+            clearExternalFilter: hasPowerBiLineage ? context.clearExternalFilter : () => ({ sent: false, reason: "field has no Power BI filter target" }),
             getRowsForComponent: (id: string) => rowsForComponent(
                 datasetResult.data.rows,
                 datasetResult.data.rowKeys,
@@ -40,6 +46,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
                 return datasetResult.lineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [index] : []);
             },
         } : context;
+        const remoteStatus = datasetResult?.sourceId ? context.remoteSources?.[datasetResult.sourceId] : undefined;
         const rules = schema.styles?.components ?? {};
         const globalRule = rules["*"] ?? {};
         const typeRule = rules[component.type] ?? {};
@@ -134,6 +141,8 @@ const componentClasses = [
                 <SlotRenderer component={component} name="header" />
                 <SlotRenderer component={component} name="subheader" />
                 <SlotRenderer component={component} name="actions" />
+                {remoteStatus?.status === "loading" && <div class="hp-remote-source-status" role="status">Loading remote data…</div>}
+                {remoteStatus?.status === "error" && <div class="hp-remote-source-status hp-remote-source-error" role="alert">Remote data unavailable: {remoteStatus.error ?? "request failed"}</div>}
                 <ComponentErrorBoundary id={componentId} type={component.type} dataset={component.dataset} developer={context.settings.debug.showSchemaErrors}><ComponentRegistry component={component} renderChildren={renderChildren} authoringOwnerId={authoringOwnerId} /></ComponentErrorBoundary>
                 <SlotRenderer component={component} name="footer" />
             </RenderContext.Provider>
