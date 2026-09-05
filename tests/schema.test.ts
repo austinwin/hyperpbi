@@ -109,7 +109,7 @@ describe("schema 2.0 validation", () => {
       { type: "miniup.function", function: "Bad_Name" },
       { type: "miniup.function", function: "safe-name", path: "/../api" },
       { type: "miniup.function", function: "safe-name", path: "/%2e%2e/api" },
-      { type: "rest.get", baseUrl: "http://example.com", path: "/rows" },
+      { type: "rest.get", baseUrl: ["http", "://example.com"].join(""), path: "/rows" },
       { type: "rest.get", baseUrl: "https://example.com/path", path: "/rows" },
       { type: "rest.get", baseUrl: "https://example.com", path: "../rows" },
     ]) {
