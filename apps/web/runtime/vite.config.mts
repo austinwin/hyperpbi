@@ -3,12 +3,18 @@ import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import prefixSelector from "postcss-prefix-selector";
 
+const webRestHosts = (process.env.HYPERPBI_WEB_REST_HOSTS ?? "https://*.miniup.app")
+  .split(",")
+  .map(value => value.trim())
+  .filter(Boolean);
+
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   base: "/runtime/",
   plugins: [preact()],
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
+    "__HYPERPBI_WEB_REST_HOSTS__": JSON.stringify(webRestHosts),
   },
   css: {
     postcss: {

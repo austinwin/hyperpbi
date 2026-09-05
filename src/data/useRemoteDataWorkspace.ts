@@ -9,7 +9,7 @@ import {
 import {
   createRemoteSourcePlaceholder,
   fetchRemoteDataSource,
-  remoteDataSourceDefinitions,
+  remoteDataSourceRequestKey,
   remoteDataSourceRequestSignature,
   type RemoteDataSourceStatus,
 } from "./remoteDataSources";
@@ -17,6 +17,11 @@ import {
 export interface RemoteDataWorkspaceResult {
   workspace: DataWorkspace;
   statuses: Record<string, RemoteDataSourceStatus>;
+}
+
+interface ResolvedRemoteSource {
+  requestKey: string;
+  source: DataSource;
 }
 
 export function useRemoteDataWorkspace(
@@ -30,8 +35,15 @@ export function useRemoteDataWorkspace(
     () => remoteDataSourceRequestSignature(definitions, stateValues),
     [definitions, stateValues],
   );
+  const requestKeys = useMemo(
+    () => Object.fromEntries(Object.entries(definitions).map(([id, definition]) => [
+      id,
+      remoteDataSourceRequestKey(id, definition, stateValues),
+    ])),
+    [signature],
+  );
   const sequence = useRef(0);
-  const [resolved, setResolved] = useState<Record<string, DataSource>>({});
+  const [resolved, setResolved] = useState<Record<string, ResolvedRemoteSource>>({});
   const [statuses, setStatuses] = useState<Record<string, RemoteDataSourceStatus>>({});
 
   useEffect(() => {
@@ -43,31 +55,35 @@ export function useRemoteDataWorkspace(
     }
     const current = ++sequence.current;
     const controller = new AbortController();
-    setStatuses(previous => Object.fromEntries(entries.map(([id]) => [
-      id,
-      { status: "loading", rowCount: previous[id]?.rowCount ?? resolved[id]?.data.rows.length ?? 0 },
-    ])));
+
+    // A changed request signature invalidates old rows immediately. HyperPBI
+    // must never present a previous parameter result as if it were current.
+    setResolved({});
+    setStatuses(Object.fromEntries(entries.map(([id]) => [id, { status: "loading", rowCount: 0 }])));
 
     for (const [id, definition] of entries) {
+      const requestKey = requestKeys[id];
       void fetchRemoteDataSource(id, definition, stateValues, controller.signal)
         .then(source => {
           if (current !== sequence.current) return;
-          setResolved(previous => ({ ...previous, [id]: source }));
+          setResolved(previous => ({ ...previous, [id]: { requestKey, source } }));
           setStatuses(previous => ({
             ...previous,
-            [id]: {
-              status: source.data.rows.length ? "ready" : "empty",
-              rowCount: source.data.rows.length,
-            },
+            [id]: { status: source.data.rows.length ? "ready" : "empty", rowCount: source.data.rows.length },
           }));
         })
         .catch(error => {
           if (controller.signal.aborted || current !== sequence.current) return;
+          setResolved(previous => {
+            const next = { ...previous };
+            delete next[id];
+            return next;
+          });
           setStatuses(previous => ({
             ...previous,
             [id]: {
               status: "error",
-              rowCount: resolved[id]?.data.rows.length ?? 0,
+              rowCount: 0,
               error: error instanceof Error ? error.message : "The remote data request failed.",
             },
           }));
@@ -80,10 +96,13 @@ export function useRemoteDataWorkspace(
     const base = baseWorkspace ?? createPowerBiDataWorkspace(baseData);
     const sources = { ...base.sources };
     for (const [id, definition] of Object.entries(definitions)) {
-      sources[id] = resolved[id] ?? createRemoteSourcePlaceholder(id, definition);
+      const candidate = resolved[id];
+      sources[id] = candidate?.requestKey === requestKeys[id]
+        ? candidate.source
+        : createRemoteSourcePlaceholder(id, definition);
     }
     return { ...base, sources };
-  }, [baseWorkspace, baseData, definitions, resolved]);
+  }, [baseWorkspace, baseData, definitions, requestKeys, resolved]);
 
   return { workspace, statuses };
 }

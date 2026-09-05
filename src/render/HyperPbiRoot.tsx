@@ -361,6 +361,7 @@ export function HyperPbiRoot({
       ownerByRuntimeId,
       componentPathById,
       datasets: datasetEvaluation.datasets,
+      remoteSources: remoteData.statuses,
       onMapViewportChange,
       onGeoLibreProjectChange,
       executeUiAction: execUiAction,

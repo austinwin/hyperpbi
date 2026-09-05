@@ -3,6 +3,8 @@ import type { DataSource } from "./dataWorkspace";
 import { createEmptyNormalizedData } from "./dataWorkspace";
 import { normalizeTabularData } from "./fileImport";
 
+declare const __HYPERPBI_WEB_REST_HOSTS__: string[] | undefined;
+
 export type RemoteDataSourceParam =
   | string
   | number
@@ -30,9 +32,17 @@ export interface MiniUpFunctionSourceDefinition extends RemoteDataSourceBase {
   dataPath?: string;
 }
 
+export interface RestGetSourceDefinition extends RemoteDataSourceBase {
+  type: "rest.get";
+  baseUrl: string;
+  path: string;
+  dataPath?: string;
+}
+
 export type RemoteDataSourceDefinition =
   | MiniUpTableSourceDefinition
-  | MiniUpFunctionSourceDefinition;
+  | MiniUpFunctionSourceDefinition
+  | RestGetSourceDefinition;
 
 export type RemoteDataSourceDefinitions = Record<string, RemoteDataSourceDefinition>;
 
@@ -42,28 +52,35 @@ export interface RemoteDataSourceStatus {
   error?: string;
 }
 
+export const DEFAULT_WEB_REST_HOSTS = ["https://*.miniup.app"] as const;
 const DEFAULT_MAX_ROWS = 1000;
 const MAX_REMOTE_ROWS = 10_000;
 const DEFAULT_TIMEOUT_MS = 12_000;
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 const MINIUP_FUNCTION_ORIGIN = "https://functions.miniup.app";
+const MINIUP_FUNCTION_RESERVED = new Set(["api", "assets", "docs", "functions", "health", "status"]);
 const sourceCache = new Map<string, { expiresAt: number; source: DataSource }>();
-const inFlight = new Map<string, Promise<DataSource>>();
 
 const object = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
-const safeSlug = (value: string): boolean => /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(value);
+const safeSiteSlug = (value: string): boolean => /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(value);
 
 function clampInteger(value: unknown, fallback: number, min: number, max: number): number {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(min, Math.min(max, Math.floor(number))) : fallback;
 }
 
+function scalarStateValue(value: unknown): Primitive | undefined {
+  if (value === null || value === undefined) return value as null | undefined;
+  if (value instanceof Date) return value;
+  return ["string", "number", "boolean"].includes(typeof value) ? value as Primitive : undefined;
+}
+
 function resolvedParam(value: RemoteDataSourceParam, stateValues: Record<string, unknown>): Primitive {
   if (!object(value) || typeof value.state !== "string") return value as Primitive;
-  const state = stateValues[value.state];
-  return state === undefined ? (value.default as Primitive) : state as Primitive;
+  const state = scalarStateValue(stateValues[value.state]);
+  return state === undefined ? value.default : state;
 }
 
 function resolvedParams(
@@ -83,8 +100,32 @@ function appendParams(url: URL, params: Record<string, Primitive>): URL {
   return url;
 }
 
+function validateMiniUpFunctionSlug(value: string): string {
+  if (value.length < 3 || value.length > 48 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) || MINIUP_FUNCTION_RESERVED.has(value)) {
+    throw new Error("MiniUp Function slugs must be 3-48 lowercase letters/numbers with single hyphens and cannot use a reserved name.");
+  }
+  return value;
+}
+
+function safeRelativePath(rawValue: string | undefined, label: string, maxLength = 1024): string {
+  const raw = (rawValue ?? "/").trim() || "/";
+  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://") || raw.includes("?") || raw.includes("#") || raw.includes("\\") || /[\u0000-\u001f\u007f]/.test(raw)) {
+    throw new Error(`${label} must be a safe relative path beginning with /.`);
+  }
+  if (raw.length > maxLength) throw new Error(`${label} is too long.`);
+  const segments = raw.split("/").filter(Boolean).map(segment => {
+    let decoded: string;
+    try { decoded = decodeURIComponent(segment); } catch { throw new Error(`${label} contains invalid URL encoding.`); }
+    if (decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\") || /[\u0000-\u001f\u007f]/.test(decoded)) {
+      throw new Error(`${label} contains an unsafe path segment.`);
+    }
+    return encodeURIComponent(decoded);
+  });
+  return `/${segments.join("/")}`;
+}
+
 function miniUpTableUrl(definition: MiniUpTableSourceDefinition, params: Record<string, Primitive>): URL {
-  if (!safeSlug(definition.site) || !safeSlug(definition.table)) {
+  if (!safeSiteSlug(definition.site) || !safeSiteSlug(definition.table)) {
     throw new Error("MiniUp table sources require simple site and table slugs.");
   }
   return appendParams(
@@ -94,27 +135,104 @@ function miniUpTableUrl(definition: MiniUpTableSourceDefinition, params: Record<
 }
 
 function miniUpFunctionUrl(definition: MiniUpFunctionSourceDefinition, params: Record<string, Primitive>): URL {
-  if (!safeSlug(definition.function)) throw new Error("MiniUp Function sources require a simple function slug.");
-  const path = (definition.path ?? "")
-    .split("/")
-    .filter(Boolean)
-    .map(segment => encodeURIComponent(segment))
-    .join("/");
+  const slug = validateMiniUpFunctionSlug(definition.function);
+  const path = safeRelativePath(definition.path, "MiniUp Function path", 512);
   return appendParams(
-    new URL(`/${encodeURIComponent(definition.function)}${path ? `/${path}` : ""}`, MINIUP_FUNCTION_ORIGIN),
+    new URL(`/${encodeURIComponent(slug)}${path === "/" ? "" : path}`, MINIUP_FUNCTION_ORIGIN),
     params,
   );
+}
+
+function normalizeTrustedHostPattern(value: string): string {
+  const pattern = value.trim().toLowerCase().replace(/\/$/, "");
+  if (!pattern.startsWith("https://")) throw new Error(`REST host patterns must use HTTPS: ${value}`);
+  if (pattern === "https://*") throw new Error("REST host patterns must name a real parent domain.");
+  const wildcard = pattern.startsWith("https://*.");
+  const candidate = wildcard ? `https://${pattern.slice("https://*.".length)}` : pattern;
+  let url: URL;
+  try { url = new URL(candidate); } catch { throw new Error(`Invalid REST host pattern: ${value}`); }
+  if (url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash || !url.hostname) {
+    throw new Error(`REST host patterns must be HTTPS origins without credentials, paths, queries, or hashes: ${value}`);
+  }
+  return wildcard ? `https://*.${url.hostname}${url.port ? `:${url.port}` : ""}` : url.origin.toLowerCase();
+}
+
+export function configuredWebRestHostPatterns(): string[] {
+  let configured: unknown;
+  try {
+    if (typeof __HYPERPBI_WEB_REST_HOSTS__ !== "undefined") configured = __HYPERPBI_WEB_REST_HOSTS__;
+  } catch {
+    configured = undefined;
+  }
+  const values = Array.isArray(configured) && configured.length ? configured : [...DEFAULT_WEB_REST_HOSTS];
+  return Array.from(new Set(values.map(value => normalizeTrustedHostPattern(String(value)))));
+}
+
+function originAllowed(origin: string, patterns = configuredWebRestHostPatterns()): boolean {
+  const url = new URL(origin);
+  const normalized = url.origin.toLowerCase();
+  return patterns.some(pattern => {
+    if (!pattern.startsWith("https://*.")) return normalized === pattern;
+    const withoutScheme = pattern.slice("https://*.".length);
+    const [hostname, port = ""] = withoutScheme.split(":");
+    if (url.protocol !== "https:" || (port && url.port !== port) || (!port && url.port)) return false;
+    return url.hostname !== hostname && url.hostname.endsWith(`.${hostname}`);
+  });
+}
+
+function restGetUrl(definition: RestGetSourceDefinition, params: Record<string, Primitive>): URL {
+  let base: URL;
+  try { base = new URL(definition.baseUrl); } catch { throw new Error("REST GET baseUrl must be a valid HTTPS origin."); }
+  if (base.protocol !== "https:" || base.username || base.password || base.pathname !== "/" || base.search || base.hash) {
+    throw new Error("REST GET baseUrl must be an HTTPS origin without credentials, path, query, or hash.");
+  }
+  if (!originAllowed(base.origin)) {
+    throw new Error(`REST GET origin ${base.origin} is not trusted by this web build. Rebuild with HYPERPBI_WEB_REST_HOSTS including that origin.`);
+  }
+  return appendParams(new URL(safeRelativePath(definition.path, "REST GET path"), base.origin), params);
+}
+
+async function readBoundedResponseText(response: Response): Promise<string> {
+  const declaredLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
+    throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+  }
+  if (!response.body) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > MAX_RESPONSE_BYTES) throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+    return new TextDecoder().decode(bytes);
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const parts: string[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+      }
+      parts.push(decoder.decode(value, { stream: true }));
+    }
+    parts.push(decoder.decode());
+    return parts.join("");
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 async function fetchJson(url: URL, timeoutMs: number, signal?: AbortSignal): Promise<unknown> {
   const controller = new AbortController();
   let timedOut = false;
-  const forwardAbort = () => controller.abort(signal?.reason);
+  const forwardAbort = () => controller.abort(signal?.reason ?? new DOMException("The remote data request was aborted.", "AbortError"));
   if (signal?.aborted) forwardAbort();
   else signal?.addEventListener("abort", forwardAbort, { once: true });
   const timer = setTimeout(() => {
     timedOut = true;
-    controller.abort();
+    controller.abort(new DOMException("The remote data request timed out.", "TimeoutError"));
   }, clampInteger(timeoutMs, DEFAULT_TIMEOUT_MS, 1000, 15_000));
   try {
     let response: Response;
@@ -133,21 +251,12 @@ async function fetchJson(url: URL, timeoutMs: number, signal?: AbortSignal): Pro
       throw new Error("The remote data request failed because of a network, CORS, or Power BI WebAccess restriction.");
     }
     if (response.status === 401 || response.status === 403) {
-      throw new Error(`The remote data source rejected access (HTTP ${response.status}). Keep protected MiniUp credentials inside a MiniUp Function, not HyperPBI JSON.`);
+      throw new Error(`The remote data source rejected access (HTTP ${response.status}). Keep credentials and protected upstream calls inside a public MiniUp Function instead of HyperPBI JSON.`);
     }
     if (response.status === 429) throw new Error("The remote data source rate limit was reached (HTTP 429).");
     if (!response.ok) throw new Error(`The remote data source returned HTTP ${response.status}.`);
-    const declaredLength = Number(response.headers.get("content-length"));
-    if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
-      throw new Error("The remote data response exceeds the 5 MB per-request limit.");
-    }
-    const text = await response.text();
-    if (text.length > MAX_RESPONSE_BYTES) throw new Error("The remote data response exceeds the 5 MB per-request limit.");
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error("The remote data source returned invalid JSON.");
-    }
+    const text = await readBoundedResponseText(response);
+    try { return JSON.parse(text); } catch { throw new Error("The remote data source returned invalid JSON."); }
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener("abort", forwardAbort);
@@ -163,45 +272,31 @@ function inertCell(value: unknown): unknown {
 function normalizeObjects(rows: Array<Record<string, unknown>>, sourceId: string): DataSource["data"] {
   const headers: string[] = [];
   const seen = new Set<string>();
-  for (const row of rows) {
-    for (const key of Object.keys(row)) {
-      if (!seen.has(key)) { seen.add(key); headers.push(key); }
-    }
-  }
+  for (const row of rows) for (const key of Object.keys(row)) if (!seen.has(key)) { seen.add(key); headers.push(key); }
   if (!headers.length) return { ...createEmptyNormalizedData(), loadStatus: { loadedRowCount: 0, moreRowsAvailable: false, fetchInProgress: false } };
-  return normalizeTabularData(
-    headers,
-    rows.map(row => headers.map(header => inertCell(row[header]))),
-    sourceId,
-  );
+  return normalizeTabularData(headers, rows.map(row => headers.map(header => inertCell(row[header]))), sourceId);
 }
 
 function tableRows(payload: unknown): Array<Record<string, unknown>> {
-  if (!object(payload) || !Array.isArray(payload.records)) {
-    throw new Error("The MiniUp table response did not contain a records array.");
-  }
+  if (!object(payload) || !Array.isArray(payload.records)) throw new Error("The MiniUp table response did not contain a records array.");
   return payload.records.flatMap(record => {
     if (!object(record) || !object(record.fields)) return [];
-    return [{
-      __record_id: record.id ?? null,
-      ...record.fields,
-      __created_at: record.createdAt ?? null,
-      __updated_at: record.updatedAt ?? null,
-    }];
+    return [{ __record_id: record.id ?? null, ...record.fields, __created_at: record.createdAt ?? null, __updated_at: record.updatedAt ?? null }];
   });
 }
 
 function valueAtPath(payload: unknown, path?: string): unknown {
   if (!path?.trim()) return payload;
-  return path.split(".").filter(Boolean).reduce<unknown>((value, segment) => object(value) ? value[segment] : undefined, payload);
+  return path.split(".").filter(Boolean).reduce<unknown>((value, segment) => {
+    if (["__proto__", "prototype", "constructor"].includes(segment)) return undefined;
+    return object(value) ? value[segment] : undefined;
+  }, payload);
 }
 
-function functionRows(payload: unknown, dataPath?: string): Array<Record<string, unknown>> {
+function responseRows(payload: unknown, dataPath?: string): Array<Record<string, unknown>> {
   let value = valueAtPath(payload, dataPath);
   if (!dataPath && object(value)) {
-    for (const key of ["records", "rows", "items", "data"]) {
-      if (Array.isArray(value[key])) { value = value[key]; break; }
-    }
+    for (const key of ["records", "rows", "items", "data"]) if (Array.isArray(value[key])) { value = value[key]; break; }
   }
   if (Array.isArray(value)) {
     return value.map(item => object(item)
@@ -209,15 +304,10 @@ function functionRows(payload: unknown, dataPath?: string): Array<Record<string,
       : { value: item });
   }
   if (object(value)) return [value];
-  throw new Error("The MiniUp Function response does not resolve to an object or array of rows.");
+  throw new Error("The remote response does not resolve to an object or array of rows.");
 }
 
-async function loadMiniUpTable(
-  id: string,
-  definition: MiniUpTableSourceDefinition,
-  stateValues: Record<string, unknown>,
-  signal?: AbortSignal,
-): Promise<DataSource> {
+async function loadMiniUpTable(id: string, definition: MiniUpTableSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal): Promise<DataSource> {
   const params = resolvedParams(definition, stateValues);
   const maxRows = clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS);
   const requestedLimit = params.limit === undefined ? maxRows : clampInteger(params.limit, maxRows, 1, maxRows);
@@ -234,19 +324,16 @@ async function loadMiniUpTable(
   return { id, name: id, kind: "miniup.table", data: normalizeObjects(rows, `miniup.table:${id}`) };
 }
 
-async function loadMiniUpFunction(
-  id: string,
-  definition: MiniUpFunctionSourceDefinition,
-  stateValues: Record<string, unknown>,
-  signal?: AbortSignal,
-): Promise<DataSource> {
-  const params = resolvedParams(definition, stateValues);
-  const payload = await fetchJson(miniUpFunctionUrl(definition, params), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
-  const rows = functionRows(payload, definition.dataPath).slice(
-    0,
-    clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS),
-  );
+async function loadMiniUpFunction(id: string, definition: MiniUpFunctionSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal): Promise<DataSource> {
+  const payload = await fetchJson(miniUpFunctionUrl(definition, resolvedParams(definition, stateValues)), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
+  const rows = responseRows(payload, definition.dataPath).slice(0, clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS));
   return { id, name: id, kind: "miniup.function", data: normalizeObjects(rows, `miniup.function:${id}`) };
+}
+
+async function loadRestGet(id: string, definition: RestGetSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal): Promise<DataSource> {
+  const payload = await fetchJson(restGetUrl(definition, resolvedParams(definition, stateValues)), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
+  const rows = responseRows(payload, definition.dataPath).slice(0, clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS));
+  return { id, name: id, kind: "rest.get", data: normalizeObjects(rows, `rest.get:${id}`) };
 }
 
 export function remoteDataSourceDefinitions(specification: unknown): RemoteDataSourceDefinitions {
@@ -255,69 +342,45 @@ export function remoteDataSourceDefinitions(specification: unknown): RemoteDataS
 }
 
 export function createRemoteSourcePlaceholder(id: string, definition: RemoteDataSourceDefinition): DataSource {
-  return {
-    id,
-    name: id,
-    kind: definition.type,
-    data: { ...createEmptyNormalizedData(), dynamicSchema: true },
-  };
+  return { id, name: id, kind: definition.type, data: { ...createEmptyNormalizedData(), dynamicSchema: true } };
 }
 
 export function remoteSourcePlaceholderData(specification: unknown): Record<string, DataSource["data"]> {
-  return Object.fromEntries(
-    Object.entries(remoteDataSourceDefinitions(specification)).map(([id, definition]) => [
-      id,
-      createRemoteSourcePlaceholder(id, definition).data,
-    ]),
-  );
+  return Object.fromEntries(Object.entries(remoteDataSourceDefinitions(specification)).map(([id, definition]) => [id, createRemoteSourcePlaceholder(id, definition).data]));
 }
 
+/** Only origins actually supported by the Power BI package belong here. */
 export function configuredRemoteDataEndpoints(specification: unknown): string[] {
   const origins = new Set<string>();
   for (const definition of Object.values(remoteDataSourceDefinitions(specification))) {
-    if (definition.type === "miniup.table" && safeSlug(definition.site)) origins.add(`https://${definition.site}.miniup.app`);
     if (definition.type === "miniup.function") origins.add(MINIUP_FUNCTION_ORIGIN);
   }
   return [...origins];
 }
 
-export function remoteDataSourceRequestSignature(
-  definitions: RemoteDataSourceDefinitions,
-  stateValues: Record<string, unknown>,
-): string {
-  return JSON.stringify(Object.entries(definitions).sort(([a], [b]) => a.localeCompare(b)).map(([id, definition]) => [
-    id,
-    definition,
-    resolvedParams(definition, stateValues),
-  ]));
+export function remoteDataSourceRequestKey(id: string, definition: RemoteDataSourceDefinition, stateValues: Record<string, unknown>): string {
+  return JSON.stringify([id, definition, resolvedParams(definition, stateValues)]);
 }
 
-export async function fetchRemoteDataSource(
-  id: string,
-  definition: RemoteDataSourceDefinition,
-  stateValues: Record<string, unknown> = {},
-  signal?: AbortSignal,
-): Promise<DataSource> {
-  const key = JSON.stringify([id, definition, resolvedParams(definition, stateValues)]);
+export function remoteDataSourceRequestSignature(definitions: RemoteDataSourceDefinitions, stateValues: Record<string, unknown>): string {
+  return JSON.stringify(Object.entries(definitions).sort(([a], [b]) => a.localeCompare(b)).map(([id, definition]) => remoteDataSourceRequestKey(id, definition, stateValues)));
+}
+
+export async function fetchRemoteDataSource(id: string, definition: RemoteDataSourceDefinition, stateValues: Record<string, unknown> = {}, signal?: AbortSignal): Promise<DataSource> {
+  const key = remoteDataSourceRequestKey(id, definition, stateValues);
   const now = Date.now();
   const cached = sourceCache.get(key);
   if (cached && cached.expiresAt > now) return cached.source;
-  const existing = inFlight.get(key);
-  if (existing) return existing;
-  const load = (definition.type === "miniup.table"
-    ? loadMiniUpTable(id, definition, stateValues, signal)
-    : loadMiniUpFunction(id, definition, stateValues, signal))
-    .then(source => {
-      const ttlMs = clampInteger(definition.cacheTtlSeconds, 30, 0, 3600) * 1000;
-      if (ttlMs > 0) sourceCache.set(key, { expiresAt: Date.now() + ttlMs, source });
-      return source;
-    })
-    .finally(() => inFlight.delete(key));
-  inFlight.set(key, load);
-  return load;
+  const source = definition.type === "miniup.table"
+    ? await loadMiniUpTable(id, definition, stateValues, signal)
+    : definition.type === "miniup.function"
+      ? await loadMiniUpFunction(id, definition, stateValues, signal)
+      : await loadRestGet(id, definition, stateValues, signal);
+  const ttlMs = clampInteger(definition.cacheTtlSeconds, 30, 0, 3600) * 1000;
+  if (ttlMs > 0) sourceCache.set(key, { expiresAt: Date.now() + ttlMs, source });
+  return source;
 }
 
 export function clearRemoteDataSourceCache(): void {
   sourceCache.clear();
-  inFlight.clear();
 }
