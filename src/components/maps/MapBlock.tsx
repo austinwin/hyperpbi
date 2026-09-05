@@ -246,7 +246,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 sourceRowKeys: view.sourceRowKeys,
                 fields: view.fields,
                 datasetName,
-                powerBiIdentityAvailable: view.sourceId === "powerbi",
+                powerBiIdentityAvailable: view.sourceId === undefined || view.sourceId === "powerbi",
                 datasetFound: true,
                 totalRows: view.totalRows,
                 geocodeCache: config.providers?.geocoder?.cacheEntries,
