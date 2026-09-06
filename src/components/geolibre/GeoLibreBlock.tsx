@@ -1,9 +1,14 @@
 import { useCallback, useMemo } from "preact/hooks";
 import { useRenderContext } from "../../render/RenderContext";
+import { MapBlock } from "../maps/MapBlock";
 import {
   createDefaultGeoLibreProject,
 } from "./projectBridge";
 import { hydratePowerBiLayers, featureIdsForSourceRows } from "./powerBiBridge";
+import {
+  createGeoLibrePowerBiCompatMap,
+  isPowerBiVisualSandbox,
+} from "./powerBiCompat";
 import { sanitizePersistedGeoLibreProject } from "./securityPolicy";
 import {
   GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN,
@@ -17,7 +22,33 @@ import type {
 } from "./types";
 import { GeoLibreWorkspaceHost } from "./GeoLibreWorkspaceHost";
 
+/**
+ * The environment split lives above the two hook-owning implementations so the
+ * Power BI path never builds the remote iframe bridge or duplicates a large
+ * Power BI dataset into an unused GeoJSON document.
+ */
 export function GeoLibreBlock({ component }: { component: GeoLibreComponent }) {
+  return isPowerBiVisualSandbox()
+    ? <GeoLibrePowerBiBlock component={component} />
+    : <GeoLibreBrowserBlock component={component} />;
+}
+
+function GeoLibrePowerBiBlock({ component }: { component: GeoLibreComponent }) {
+  const persistedProject = useMemo<PersistedGeoLibreProject>(
+    () =>
+      component.project
+        ? sanitizePersistedGeoLibreProject(component.project)
+        : createDefaultGeoLibreProject(component.title ?? "HyperPBI GeoLibre workspace"),
+    [component.project, component.title],
+  );
+  const powerBiCompatMap = useMemo(
+    () => createGeoLibrePowerBiCompatMap(component, persistedProject.document),
+    [component, persistedProject],
+  );
+  return <MapBlock component={powerBiCompatMap} />;
+}
+
+function GeoLibreBrowserBlock({ component }: { component: GeoLibreComponent }) {
   const context = useRenderContext();
   const persistedProject = useMemo<PersistedGeoLibreProject>(
     () =>
