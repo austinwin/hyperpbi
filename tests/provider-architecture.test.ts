@@ -69,7 +69,7 @@ describe("provider architecture", () => {
     expect(externalServiceAccess(access, "https://unrelated.example/service").allowed).toBe(false);
     expect(resolveProviderPolicy(config, { ...access, tiles: { allowed: true } }, true).tilesAllowed).toBe(true);
   });
-  it("normalizes templated tile hosts and discovers every schema-owned external map endpoint", () => {
+  it("normalizes templated tile hosts and discovers only Power BI-rendered schema endpoints", () => {
     expect(providerServiceOrigin("https://{s}.tiles.example.com/{z}/{x}/{y}.png"))
       .toBe("https://a.tiles.example.com");
     expect(configuredMapEndpoints(JSON.stringify({
@@ -97,8 +97,6 @@ describe("provider architecture", () => {
       "https://data.example.com/assets.geojson",
       "https://{s}.overlay.example.com/{z}/{x}/{y}.png",
       "https://services.arcgis.com/a/FeatureServer/0",
-      "https://www.hyperpbi.com/geolibre/index.html",
-      "https://web.geolibre.app",
     ]);
   });
   it.each([

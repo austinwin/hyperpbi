@@ -1,10 +1,5 @@
 import { parseJson } from "../utils/safeJson";
 import { providerServiceOrigin } from "./providerPolicy";
-import {
-    GEOLIBRE_MANAGED_RUNTIME_ORIGIN,
-    GEOLIBRE_MANAGED_RUNTIME_PATH,
-    GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN,
-} from "../components/geolibre/securityPolicy";
 
 const EXTERNAL_SOURCE_TYPES = new Set([
     "arcgisFeature",
@@ -15,11 +10,14 @@ const EXTERNAL_SOURCE_TYPES = new Set([
 ]);
 
 /**
- * Collect every external map endpoint authored in a dashboard.
+ * Collect every external map endpoint authored in a dashboard that Power BI's
+ * in-sandbox renderer will actually request.
  *
  * Runtime provider endpoints live in Runtime Config and are checked separately.
- * This collector covers schema-owned custom basemaps and external map layers so
- * Power BI is queried for the same origins that the renderer will request.
+ * GeoLibre's hosted browser runtime is deliberately excluded: inside Power BI a
+ * `geolibre` component is rendered by the bundled compatibility map and creates
+ * no remote GeoLibre iframe. Browser/Playground hosts do not use this Power BI
+ * WebAccess collector.
  */
 export function configuredMapEndpoints(specification: string): string[] {
     const parsed = parseJson(specification).value;
@@ -44,19 +42,6 @@ export function configuredMapEndpoints(specification: string): string[] {
         if (entry.type === "map" && entry.basemap && typeof entry.basemap === "object") {
             const basemap = entry.basemap as Record<string, unknown>;
             if (basemap.type !== "none" && basemap.type !== "osm") add(basemap.url);
-        }
-        if (entry.type === "geolibre") {
-            const runtime = entry.runtime && typeof entry.runtime === "object"
-                ? entry.runtime as Record<string, unknown>
-                : undefined;
-            if (runtime?.channel === "official") {
-                add(GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN);
-            } else {
-                add(`${GEOLIBRE_MANAGED_RUNTIME_ORIGIN}${GEOLIBRE_MANAGED_RUNTIME_PATH}`);
-                // The embedded host retries the browser-safe official runtime
-                // when the managed deployment cannot complete its handshake.
-                add(GEOLIBRE_OFFICIAL_RUNTIME_ORIGIN);
-            }
         }
 
         Object.values(entry).forEach(visit);
