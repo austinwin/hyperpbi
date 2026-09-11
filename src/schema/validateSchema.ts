@@ -4,6 +4,7 @@ import type { Diagnostic } from "./diagnostics";
 import { diagnosticsToStrings } from "./diagnostics";
 import { validateV2Schema } from "./validateV2Schema";
 import { validateNetworkGraphComponents } from "./networkGraphValidation";
+import { validateMermaidDiagramComponents } from "./mermaidDiagramValidation";
 
 export interface SchemaValidationResult {
   valid: boolean;
@@ -16,7 +17,7 @@ export interface SchemaValidationResult {
 /** Validates the only active HyperPBI dashboard schema contract: version 2.0. */
 export function validateSchema(value: unknown): SchemaValidationResult {
   const result = validateV2Schema(value);
-  const diagnostics = [...result.diagnostics, ...validateNetworkGraphComponents(value)];
+  const diagnostics = [...result.diagnostics, ...validateNetworkGraphComponents(value), ...validateMermaidDiagramComponents(value)];
   const errors = diagnostics.filter((item) => item.severity === "error");
   const warnings = diagnostics.filter((item) => item.severity === "warning");
   return {

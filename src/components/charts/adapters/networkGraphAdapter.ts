@@ -14,6 +14,8 @@ interface GraphNode {
     id: string;
     name: string;
     category: string;
+    categoryLabel: string;
+    entity?: NetworkGraphEntity;
     rows: Set<DataRow>;
     field?: string;
     key?: string;
@@ -44,6 +46,28 @@ interface HierarchyModel {
     incoming: Map<string, Set<string>>;
     outgoing: Map<string, Set<string>>;
     grouped: Map<number, GraphNode[]>;
+}
+
+export interface NetworkGraphDensity {
+    maxLevelNodeCount: number;
+    tier: "normal" | "dense" | "veryDense";
+    nodeScale: number;
+    labelWidthScale: number;
+    fontScale: number;
+    zoom: number;
+}
+
+export function networkGraphDensity(
+    nodes: GraphNode[],
+    links: GraphLink[],
+    threshold = 8,
+    enabled = true,
+): NetworkGraphDensity {
+    const grouped = hierarchyModel(nodes, links).grouped;
+    const maxLevelNodeCount = Math.max(0, ...Array.from(grouped.values(), group => group.length));
+    if (!enabled || maxLevelNodeCount < threshold) return { maxLevelNodeCount, tier: "normal", nodeScale: 1, labelWidthScale: 1, fontScale: 1, zoom: 1 };
+    if (maxLevelNodeCount < 12) return { maxLevelNodeCount, tier: "dense", nodeScale: .9, labelWidthScale: .82, fontScale: .95, zoom: 1.35 };
+    return { maxLevelNodeCount, tier: "veryDense", nodeScale: .8, labelWidthScale: .68, fontScale: .9, zoom: 1.9 };
 }
 
 function hierarchyModel(nodes: GraphNode[], links: GraphLink[]): HierarchyModel {
@@ -201,7 +225,9 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
             nodesById.set(id, {
                 id,
                 name: label || key,
-                category: entity.label || entity.id,
+                category: entity.id,
+                categoryLabel: entity.label || entity.id,
+                entity,
                 rows: new Set([row]),
                 field: entity.field,
                 key,
@@ -227,6 +253,7 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
                 id,
                 name: relationship.branchLabel,
                 category: "Group",
+                categoryLabel: "Group",
                 rows: new Set([row]),
             });
             return id;
@@ -304,6 +331,7 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
 
         const categories = Array.from(new Set(nodes.map(node => node.category)));
         const categoryIndex = new Map(categories.map((category, index) => [category, index] as const));
+        const density = networkGraphDensity(nodes, links, Math.round(clamp(component.denseThreshold, 8, 2, 100)), component.autoCompact !== false);
         const nodeSize = clamp(component.nodeSize, 22, 8, 80);
         const baseEdgeWidth = clamp(component.edgeWidth, 1.25, 0.5, 6);
         const edgeOpacity = clamp(component.edgeOpacity, 0.62, 0.1, 1);
@@ -313,16 +341,22 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
         const graphData = nodes.map(node => ({
             id: node.id,
             name: node.name,
-            value: node.category,
+            value: node.name,
             category: categoryIndex.get(node.category) ?? 0,
-            symbolSize: nodeSize,
+            symbol: node.entity?.symbol,
+            symbolSize: clamp(node.entity?.nodeSize, nodeSize * density.nodeScale, 8, 80),
             x: node.x,
             y: node.y,
+            tooltip: component.showNodeTooltip === false ? { show: false } : {
+                show: true,
+                formatter: () => node.name,
+            },
         }));
         const graphLinks = links.map(link => ({
             source: link.source,
             target: link.target,
             value: 1,
+            tooltip: { show: component.showEdgeTooltip === true },
         }));
 
         const draggable = component.draggable !== undefined ? component.draggable : layout === "force";
@@ -335,28 +369,35 @@ export const networkGraphAdapter: ChartAdapter<NetworkGraphComponent> = {
             data: graphData,
             links: graphLinks,
             categories: categories.map(category => ({
-                name: category,
-                itemStyle: { color: categoricalColor(category) },
+                name: nodes.find(node => node.category === category)?.categoryLabel ?? category,
+                itemStyle: { color: nodes.find(node => node.category === category)?.entity?.color ?? categoricalColor(nodes.find(node => node.category === category)?.categoryLabel ?? category) },
             })),
             label: {
                 show: component.showLabels !== false,
-                position: "bottom",
-                distance: 7,
-                overflow: "truncate",
-                width: 150,
+                position: component.labelPosition ?? "bottom",
+                distance: clamp(component.labelDistance, 8, 0, 40),
+                overflow: component.labelOverflow ?? "break",
+                width: clamp(component.labelWidth, 220, 40, 600) * density.labelWidthScale,
+                fontSize: Math.max(9, clamp(component.labelFontSize, 11, 8, 32) * density.fontScale),
+                lineHeight: Math.max(12, clamp(component.labelLineHeight, 15, 8, 48) * density.fontScale),
             },
             lineStyle: {
-                color: context.theme.border,
+                color: context.theme.text,
                 width: baseEdgeWidth,
                 opacity: edgeOpacity,
                 curveness: edgeCurvature,
             },
             emphasis: {
-                focus: "adjacency",
+                focus: component.focusMode ?? "none",
                 lineStyle: { color: context.theme.primary, opacity: 0.9 },
+            },
+            blur: {
+                lineStyle: { color: context.theme.text, width: baseEdgeWidth, opacity: edgeOpacity },
             },
             edgeSymbol: component.directed === false ? ["none", "none"] : ["none", "arrow"],
             edgeSymbolSize: component.directed === false ? [0, 0] : [0, arrowSize],
+            zoom: clamp(component.initialZoom, density.zoom, .2, 5),
+            z: 2,
         };
 
         if (layout === "force") {

@@ -9,6 +9,12 @@ export interface NetworkGraphEntity {
     field: string;
     /** Optional Field Manifest alias used as the node display label. */
     labelField?: string;
+    /** Safe CSS color. Explicit entity color wins over the categorical palette. */
+    color?: string;
+    /** Curated ECharts graph symbol. */
+    symbol?: "circle" | "rect" | "roundRect" | "triangle" | "diamond" | "pin" | "arrow";
+    /** Optional entity-specific node size. */
+    nodeSize?: number;
 }
 
 export interface NetworkGraphRelationship {
@@ -38,7 +44,19 @@ export interface NetworkGraphComponent extends BaseChartComponent {
     draggable?: boolean;
     directed?: boolean;
     showLabels?: boolean;
+    focusMode?: "none" | "adjacency";
+    showNodeTooltip?: boolean;
+    showEdgeTooltip?: boolean;
     nodeSize?: number;
+    labelWidth?: number;
+    labelOverflow?: "truncate" | "break" | "breakAll";
+    labelFontSize?: number;
+    labelLineHeight?: number;
+    labelDistance?: number;
+    labelPosition?: "top" | "left" | "right" | "bottom" | "inside";
+    autoCompact?: boolean;
+    denseThreshold?: number;
+    initialZoom?: number;
     repulsion?: number;
     edgeLength?: number;
     gravity?: number;

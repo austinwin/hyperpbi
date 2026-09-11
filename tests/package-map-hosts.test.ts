@@ -69,6 +69,21 @@ describe("ArcGIS Host Policy", () => {
         expect(checkHostPolicy("https://tiles.arcgisonline.com/test").allowed).toBe(true);
     });
 
+    it("broad Maps packaging declares supported MiniUp, GeoLibre, and GIS service families", async () => {
+        const { DEFAULT_MAP_HOSTS, buildWebAccessParameters } = await import("../scripts/package-profile-utils.mjs");
+        const hosts = buildWebAccessParameters({ profile: "maps" });
+        expect(hosts).toEqual(expect.arrayContaining([
+            "https://functions.miniup.app",
+            "https://*.miniup.app",
+            "https://web.geolibre.app",
+            "https://*.geolibre.app",
+            "https://*.arcgis.com",
+            "https://*.arcgisonline.com",
+        ]));
+        expect(hosts).toEqual(DEFAULT_MAP_HOSTS);
+        expect(buildWebAccessParameters({ profile: "core" })).toEqual([]);
+    });
+
     it("returns matched pattern in result", async () => {
         const { checkHostPolicy, setAllowedHostPatterns } = await getHostPolicy();
         setAllowedHostPatterns(["https://*.myorg.com"]);

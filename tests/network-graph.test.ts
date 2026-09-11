@@ -9,6 +9,7 @@ import { componentJsonExample } from "../src/catalog/componentJsonExamples";
 import { validateSchema } from "../src/schema/validateSchema";
 import { composeAiPrompt } from "../src/ai/promptComposer";
 import { defaultAiPromptSettings } from "../src/ai/aiPromptSettings";
+import { categoricalColor } from "../src/utils/colors";
 
 const rows: DataRow[] = [
     {
@@ -81,7 +82,7 @@ describe("networkGraph adapter",()=>{
         expect(series.data.filter((node:any)=>node.name==="Work Orders")).toHaveLength(1);
         expect(series.data.filter((node:any)=>node.name==="Inspection 10")).toHaveLength(1);
         expect(series.data.filter((node:any)=>node.name==="Work Order 20")).toHaveLength(1);
-        expect(series.lineStyle).toMatchObject({color:"#ddd",width:1.25,opacity:.62,curveness:0});
+        expect(series.lineStyle).toMatchObject({color:"#111",width:1.25,opacity:.62,curveness:0});
         expect(series.edgeSymbolSize).toEqual([0,5]);
     });
 
@@ -113,6 +114,58 @@ describe("networkGraph adapter",()=>{
             edgeSymbolSize:[0,5],
         });
         expect(series.force).toMatchObject({repulsion:260,edgeLength:120,gravity:.04,friction:.72});
+    });
+
+    it("keeps unrelated edges visible by default and supports explicit adjacency focus",()=>{
+        const normal=(networkGraphAdapter.build(component,rows,context).option as any).series[0];
+        const adjacency=(networkGraphAdapter.build({...component,focusMode:"adjacency"},rows,context).option as any).series[0];
+        expect(normal.emphasis.focus).toBe("none");
+        expect(normal.blur.lineStyle).toMatchObject({opacity:.62,width:1.25});
+        expect(adjacency.emphasis.focus).toBe("adjacency");
+    });
+
+    it("controls node and edge tooltips independently without leaking entity IDs",()=>{
+        const series=(networkGraphAdapter.build({...component,showNodeTooltip:true,showEdgeTooltip:false},rows,context).option as any).series[0];
+        expect(series.data[0].tooltip.show).toBe(true);
+        expect(series.data[0].tooltip.formatter()).toBe("Service Request 100");
+        expect(series.data[0].tooltip.formatter()).not.toContain("sr");
+        expect(series.links.every((link:any)=>link.tooltip.show===false)).toBe(true);
+        const hidden=(networkGraphAdapter.build({...component,showNodeTooltip:false,showEdgeTooltip:true},rows,context).option as any).series[0];
+        expect(hidden.data[0].tooltip.show).toBe(false);
+        expect(hidden.links[0].tooltip.show).toBe(true);
+    });
+
+    it("renders and removes target arrows with the requested size",()=>{
+        const directed=(networkGraphAdapter.build({...component,directed:true,arrowSize:9},rows,context).option as any).series[0];
+        const undirected=(networkGraphAdapter.build({...component,directed:false,arrowSize:9},rows,context).option as any).series[0];
+        expect(directed.edgeSymbol).toEqual(["none","arrow"]);
+        expect(directed.edgeSymbolSize).toEqual([0,9]);
+        expect(undirected.edgeSymbol).toEqual(["none","none"]);
+        expect(undirected.edgeSymbolSize).toEqual([0,0]);
+    });
+
+    it("applies entity colors and label controls while preserving authored line breaks",()=>{
+        const styled={...component,entities:component.entities.map((entity,index)=>({...entity,color:["#2563EB","#7C3AED","#16A34A","#EA580C"][index],symbol:index===0?"diamond" as const:undefined,nodeSize:index===0?30:undefined})),labelWidth:240,labelOverflow:"breakAll" as const,labelFontSize:13,labelLineHeight:18,labelDistance:10,labelPosition:"right" as const,autoCompact:false};
+        styled.entities[0].labelField="Multiline";
+        const multilineRows=rows.map(row=>({...row,Multiline:"500 MAYO SHELL RD\nGALENA PARK, TX 77547"}));
+        const multilineContext={...context,sourceRows:multilineRows,sourceIndex:new Map(multilineRows.map((row,index)=>[row,index] as const))};
+        const series=(networkGraphAdapter.build(styled,multilineRows,multilineContext).option as any).series[0];
+        expect(Object.fromEntries(series.categories.map((category:any)=>[category.name,category.itemStyle.color]))).toMatchObject({"Service Request":"#2563EB",Incident:"#7C3AED",Inspection:"#16A34A","Work Order":"#EA580C"});
+        expect(series.categories.find((category:any)=>category.name==="Group").itemStyle.color).toBe(categoricalColor("Group"));
+        expect(series.data.find((node:any)=>node.category===0)).toMatchObject({name:"500 MAYO SHELL RD\nGALENA PARK, TX 77547",symbol:"diamond",symbolSize:30});
+        expect(series.label).toMatchObject({width:240,overflow:"breakAll",fontSize:13,lineHeight:18,distance:10,position:"right"});
+    });
+
+    it("compacts based on maximum hierarchy-level density and honors explicit zoom",()=>{
+        const denseRows=Array.from({length:12},(_item,index)=>({Parent:"P",Child:`C${index}`}));
+        const denseContext={...context,sourceRows:denseRows,sourceRowKeys:denseRows.map((_row,index)=>String(index)),sourceIndex:new Map(denseRows.map((row,index)=>[row,index] as const))};
+        const denseComponent:NetworkGraphComponent={type:"networkGraph",id:"dense",entities:[{id:"parent",field:"Parent"},{id:"child",field:"Child"}],relationships:[{source:"parent",target:"child"}],layout:"hierarchical",denseThreshold:8};
+        const dense=(networkGraphAdapter.build(denseComponent,denseRows,denseContext).option as any).series[0];
+        expect(dense.label.width).toBeLessThan(220); expect(dense.label.fontSize).toBeGreaterThanOrEqual(9); expect(dense.zoom).toBe(1.9);
+        const disabled=(networkGraphAdapter.build({...denseComponent,autoCompact:false,initialZoom:1.4},denseRows,denseContext).option as any).series[0];
+        expect(disabled.label.width).toBe(220); expect(disabled.zoom).toBe(1.4); expect(disabled.draggable).toBe(false);
+        const draggable=(networkGraphAdapter.build({...denseComponent,draggable:true},denseRows,denseContext).option as any).series[0];
+        expect(draggable.draggable).toBe(true);
     });
 
     it("supports arbitrary relationship depth rather than a four-table hierarchy",()=>{
@@ -179,6 +232,9 @@ describe("networkGraph catalog and schema",()=>{
             version:"2.0",
             components:[{...example,relationships:[{source:"missing",target:"child"}]}],
         }).valid).toBe(false);
+        expect(validateSchema({version:"2.0",components:[{...example,focusMode:"nearby"}]}).errors.join(" ")).toContain("focusMode");
+        expect(validateSchema({version:"2.0",components:[{...example,initialZoom:9}]}).errors.join(" ")).toContain("initialZoom");
+        expect(validateSchema({version:"2.0",components:[{...example,entities:example.entities.map((entity:any)=>({...entity,color:"url(javascript:bad)"}))}]}).valid).toBe(false);
         expect(validateSchema({
             version:"2.0",
             components:[{...example,sourceField:"legacy"}],

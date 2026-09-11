@@ -4,10 +4,10 @@ import { renderSvgTemplate } from "../components/svg/svgBindings";
 import { safeSvgIdentifier } from "../components/svg/svgIdIsolation";
 import { SVG_ELEMENT_TYPES, SVG_LIMITS } from "../components/svg/svgTypes";
 
-export interface SanitizedSvg { svg: string; warnings: string[]; elementCount: number; animatedElementCount: number; pathCount: number; }
+export interface SanitizedSvg { svg: string; warnings: string[]; elementCount: number; animatedElementCount: number; pathCount: number; idMap: Map<string, string>; }
 const elementNames = ["svg", ...SVG_ELEMENT_TYPES];
 const elements = new Set<string>(elementNames.map(name => name.toLowerCase()));
-const attributes = new Set(["id", "class", "viewbox", "width", "height", "preserveaspectratio", "role", "aria-label", "aria-labelledby", "aria-describedby", "focusable", "tabindex", "opacity", "transform", "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "vector-effect", "paint-order", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end", "visibility", "pointer-events", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "dx", "dy", "d", "points", "pathlength", "text-anchor", "dominant-baseline", "font-family", "font-size", "font-weight", "font-style", "letter-spacing", "fx", "fy", "offset", "stop-color", "stop-opacity", "gradientunits", "gradienttransform", "spreadmethod", "markerwidth", "markerheight", "refx", "refy", "orient", "markerunits", "xmlns"]);
+const attributes = new Set(["id", "class", "data-hp-mermaid-node", "viewbox", "width", "height", "preserveaspectratio", "role", "aria-label", "aria-labelledby", "aria-describedby", "focusable", "tabindex", "opacity", "transform", "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "vector-effect", "paint-order", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end", "visibility", "pointer-events", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "dx", "dy", "d", "points", "pathlength", "text-anchor", "dominant-baseline", "font-family", "font-size", "font-weight", "font-style", "letter-spacing", "fx", "fy", "offset", "stop-color", "stop-opacity", "gradientunits", "gradienttransform", "spreadmethod", "markerwidth", "markerheight", "refx", "refy", "orient", "markerunits", "xmlns"]);
 const referenceAttributes = new Set(["fill", "stroke", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end", "aria-labelledby", "aria-describedby"]);
 const escapeXml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 export function resolveSvgMarkupTemplates(markup: string, context: SvgBindingContext): string {
@@ -16,12 +16,13 @@ export function resolveSvgMarkupTemplates(markup: string, context: SvgBindingCon
     return markup.replace(/\{\{\s*([A-Za-z_$][\w$.-]*)\s*\}\}/g, match => escapeXml(renderSvgTemplate(match, context)));
 }
 
-export function sanitizeSvg(input: string, namespace: string): SanitizedSvg {
+export function sanitizeSvg(input: string, namespace: string, options: { mermaidNodeIds?: ReadonlySet<string> } = {}): SanitizedSvg {
     const warnings: string[] = []; let elementCount = 0, animatedElementCount = 0, pathCount = 0;
-    if (input.length > 250_000) return { svg: "", warnings: ["Raw SVG exceeded the 250,000 character limit."], elementCount, animatedElementCount, pathCount };
+    const emptyIds = new Map<string, string>();
+    if (input.length > 250_000) return { svg: "", warnings: ["Raw SVG exceeded the 250,000 character limit."], elementCount, animatedElementCount, pathCount, idMap: emptyIds };
     const namespacedInput = /^\s*<svg\b[^>]*\bxmlns\s*=/.test(input) ? input : input.replace(/^\s*<svg\b/i, `<svg xmlns="http://www.w3.org/2000/svg"`);
     const parser = new DOMParser(), document = parser.parseFromString(namespacedInput, "image/svg+xml"), parseError = document.querySelector("parsererror"), root = document.documentElement;
-    if (parseError || root.localName.toLowerCase() !== "svg") return { svg: "", warnings: ["Raw SVG could not be parsed as a single SVG document."], elementCount, animatedElementCount, pathCount };
+    if (parseError || root.localName.toLowerCase() !== "svg") return { svg: "", warnings: ["Raw SVG could not be parsed as a single SVG document."], elementCount, animatedElementCount, pathCount, idMap: emptyIds };
     const ids = new Map<string, string>();
     const visit = (element: Element, depth: number): void => {
         const tag = element.localName.toLowerCase();
@@ -35,11 +36,12 @@ export function sanitizeSvg(input: string, namespace: string): SanitizedSvg {
             if (/javascript\s*:|data\s*:|blob\s*:|https?\s*:|\/\//i.test(value)) { warnings.push(`Blocked external SVG value on ${attribute.name}.`); element.removeAttribute(attribute.name); continue; }
             if (name === "id") { if (!/^[A-Za-z_][A-Za-z0-9_.:-]{0,127}$/.test(value) || ids.has(value)) { warnings.push(`Blocked invalid or duplicate SVG ID: ${value}.`); element.removeAttribute(attribute.name); } else ids.set(value, `${namespace}-${safeSvgIdentifier(value)}`); }
             if (name === "class" && !/^[A-Za-z0-9_ -]*$/.test(value)) { warnings.push("Blocked unsafe SVG class value."); element.removeAttribute(attribute.name); }
+            if (name === "data-hp-mermaid-node" && (!/^[A-Za-z][A-Za-z0-9_-]{0,127}$/.test(value) || !options.mermaidNodeIds?.has(value))) { warnings.push("Blocked uncontrolled Mermaid node identity."); element.removeAttribute(attribute.name); }
         }
         Array.from(element.children).forEach(child => visit(child, depth + 1));
     };
     visit(root, 0);
-    if (elementCount > SVG_LIMITS.maxElementsPerComponent) return { svg: "", warnings: [...warnings, `Raw SVG exceeded ${SVG_LIMITS.maxElementsPerComponent} elements.`], elementCount, animatedElementCount, pathCount };
+    if (elementCount > SVG_LIMITS.maxElementsPerComponent) return { svg: "", warnings: [...warnings, `Raw SVG exceeded ${SVG_LIMITS.maxElementsPerComponent} elements.`], elementCount, animatedElementCount, pathCount, idMap: ids };
     for (const element of [root, ...Array.from(root.querySelectorAll("*"))]) {
         const originalId = element.getAttribute("id"); if (originalId && ids.has(originalId)) element.setAttribute("id", ids.get(originalId)!);
         for (const attributeName of referenceAttributes) {
@@ -55,5 +57,5 @@ export function sanitizeSvg(input: string, namespace: string): SanitizedSvg {
     const serialized = new XMLSerializer().serializeToString(root);
     const svg = DOMPurify.sanitize(serialized, { USE_PROFILES: { svg: true, svgFilters: false }, ADD_TAGS: elementNames, ADD_ATTR: Array.from(attributes), FORBID_TAGS: ["script", "foreignObject", "iframe", "object", "embed", "image", "use", "audio", "video", "canvas", "style", "a", "switch", "set", "discard"], FORBID_ATTR: ["style", "href", "xlink:href", "src", "srcset"], ALLOW_DATA_ATTR: false, RETURN_TRUSTED_TYPE: false }) as string;
     if (svg !== serialized) warnings.push("Final SVG sanitization removed unsafe content.");
-    return { svg, warnings: Array.from(new Set(warnings)), elementCount, animatedElementCount, pathCount };
+    return { svg, warnings: Array.from(new Set(warnings)), elementCount, animatedElementCount, pathCount, idMap: ids };
 }

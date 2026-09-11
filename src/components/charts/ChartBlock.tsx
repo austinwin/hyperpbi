@@ -219,8 +219,8 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     const breadcrumbs = component.drill && drillLevels.length > 1 && component.drill.showBreadcrumbs !== false;
     const datasetMissing = drillLevel && !datasetView;
 
-    return (
-        <Card title={component.title}>
+    const body = (
+        <>
             {breadcrumbs && (
                 <nav class="hp-chart-drill" aria-label={`${component.title ?? id} drill path`}>
                     {drillLevels.slice(0, drillLevelIndex + 1).map((level, index) => (
@@ -259,6 +259,9 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
                             {result.warnings.length ? <div class="hp-chart-warnings" role="status">{result.warnings.join(" ")}</div> : null}
                         </>
                         : <EmptyState title="No data for this chart" />}
-        </Card>
+        </>
     );
+    return component.frameless
+        ? <div class="hp-chart-frameless">{body}</div>
+        : <Card title={component.title}>{body}</Card>;
 }

@@ -41,6 +41,8 @@ import { Avatar, AvatarGroup } from "../components/display/Avatar";
 import { OverlayTrigger } from "../components/overlays/OverlayTrigger";
 import { SvgBlock } from "../components/svg/SvgBlock";
 import { SvgMarkupBlock } from "../components/svg/SvgMarkupBlock";
+import { MermaidBlock } from "../components/mermaid/MermaidBlock";
+import type { MermaidDiagramComponent } from "../schema/mermaidDiagramSchema";
 import { SplitLayout } from "../components/layout/SplitLayout";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 
@@ -65,6 +67,7 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     custom: c => h(CustomComponent, { component: c as ContentComponent }),
     svg: c => h(SvgBlock, { component: c as SvgComponent }),
     svgMarkup: c => h(SvgMarkupBlock, { component: c as SvgMarkupComponent }),
+    mermaidDiagram: c => h(MermaidBlock, { component: c as MermaidDiagramComponent }),
     divider: () => h(Divider, {}),
     spacer: () => h(Spacer, {}),
     grid: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(GridLayout, { columns: comp.columns, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },

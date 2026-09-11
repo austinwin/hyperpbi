@@ -50,6 +50,8 @@ function loadTypeScriptModule(file) {
 
 const descriptorsModule = loadTypeScriptModule("src/catalog/componentDescriptors.ts");
 const geolibreModule = loadTypeScriptModule("src/catalog/geolibreDescriptor.ts");
+const networkGraphModule = loadTypeScriptModule("src/catalog/networkGraphDescriptor.ts");
+const mermaidDiagramModule = loadTypeScriptModule("src/catalog/mermaidDiagramDescriptor.ts");
 const examplesModule = loadTypeScriptModule("src/catalog/componentJsonExamples.ts");
 const patternsModule = loadTypeScriptModule("src/schema/patternRegistry.ts");
 const helpModule = loadTypeScriptModule("src/docs/hyperpbiHelp.ts");
@@ -57,7 +59,7 @@ const helpModule = loadTypeScriptModule("src/docs/hyperpbiHelp.ts");
 // GeoLibre is a repository-pinned integration descriptor rather than part of
 // the generated legacy registry. It still belongs in the public Component
 // Explorer and generated schema reference.
-const descriptors = [...descriptorsModule.componentDescriptors, geolibreModule.geolibreDescriptor];
+const descriptors = [...descriptorsModule.componentDescriptors, geolibreModule.geolibreDescriptor, networkGraphModule.networkGraphDescriptor, mermaidDiagramModule.mermaidDiagramDescriptor];
 const definitions = descriptors.map(item => ({...item,level:item.complexity}));
 const docs = Object.fromEntries(descriptors.map(item => [item.type,{status:item.maturity,keyProperties:item.schema.allowed.filter(property=>!["type","id"].includes(property)),accessibility:item.documentation.accessibility?.join(" "),related:item.documentation.relatedTypes,supportsUiAction:item.schema.allowed.includes("uiAction"),supportsDataInteraction:item.capabilities.interactions}]));
 const examples = Object.fromEntries(descriptors.map(item => [item.type,item.example]));

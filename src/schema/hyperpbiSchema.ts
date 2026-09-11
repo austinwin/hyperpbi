@@ -12,6 +12,8 @@ import type {
 } from "./mapSchema";
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
 import type { GeoLibreComponent } from "../components/geolibre/types";
+import type { NetworkGraphComponent } from "./networkGraphSchema";
+import type { MermaidDiagramComponent } from "./mermaidDiagramSchema";
 
 // Re-export map types
 export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition };
@@ -195,6 +197,8 @@ export interface DataDisplayComponent extends ComponentBase {
 }
 
 export interface BaseChartComponent extends ComponentBase {
+    /** Remove card chrome and let the chart occupy its layout container. */
+    frameless?: boolean;
     height?: number;
     maxDataRows?: number;
     initOptions?: EChartsInitOpts;
@@ -343,7 +347,7 @@ export interface RadarChartComponent extends BaseChartComponent {
     indicators: RadarIndicatorDefinition[];
 }
 
-export type ChartComponent = CategoryChartComponent | ScatterChartComponent | GaugeChartComponent | ComboChartComponent | WaterfallChartComponent | SankeyChartComponent | TreemapChartComponent | FunnelChartComponent | RadarChartComponent | AdvancedChartComponent;
+export type ChartComponent = CategoryChartComponent | ScatterChartComponent | GaugeChartComponent | ComboChartComponent | WaterfallChartComponent | SankeyChartComponent | TreemapChartComponent | FunnelChartComponent | RadarChartComponent | AdvancedChartComponent | NetworkGraphComponent;
 
 export interface SmallMultiplesComponent extends ComponentBase {
     type: "smallMultiples";
@@ -743,7 +747,8 @@ export type DashboardComponent =
     | AvatarComponent
     | AvatarGroupComponent
     | SvgComponent
-    | SvgMarkupComponent;
+    | SvgMarkupComponent
+    | MermaidDiagramComponent;
 
 export interface HyperPbiSchema {
     version: "2.0";

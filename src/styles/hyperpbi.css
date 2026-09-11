@@ -131,6 +131,21 @@
 .hp-progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }.hp-progress-label + .progress .progress-bar { background: var(--hp-primary); }
 .hp-stat-list { margin: 0; }.hp-stat-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--hp-border); }.hp-stat-list dt { font-weight: 500; }.hp-stat-list dd { margin: 0; font-weight: 650; }
 .hp-chart-canvas { width: 100%; min-height: 180px; }
+.hp-chart-frameless { width: 100%; min-width: 0; min-height: 0; }
+.hp-height-fill .hp-chart-frameless, .hp-fill-chain .hp-chart-frameless, .hp-height-aspect .hp-chart-frameless {
+  flex: 1 1 auto; height: 100%; display: flex; flex-direction: column;
+}
+.hp-chart-frameless > .hp-chart-canvas { flex: 1 1 auto; min-height: 0; }
+.hp-mermaid-frameless, .hp-mermaid-viewport { width: 100%; min-width: 0; min-height: 0; }
+.hp-mermaid-viewport { position: relative; overflow: hidden; height: 360px; touch-action: none; }
+.hp-height-fill .hp-mermaid-frameless, .hp-height-fill .hp-mermaid-viewport,
+.hp-fill-chain .hp-mermaid-frameless, .hp-fill-chain .hp-mermaid-viewport { height: 100%; flex: 1 1 auto; }
+.hp-mermaid-transform { width: 100%; height: 100%; transform-origin: 0 0; }
+.hp-mermaid-transform > svg { display: block; margin: auto; }
+.hp-mermaid-fit-contain .hp-mermaid-transform > svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; }
+.hp-mermaid-fit-width .hp-mermaid-transform > svg { width: 100%; height: auto; max-width: 100%; }
+.hp-mermaid-fit-none .hp-mermaid-transform > svg { max-width: none; }
+.hp-mermaid-reset { position: absolute; right: 8px; top: 8px; z-index: 2; padding: 3px 8px; border: 1px solid var(--hp-border); border-radius: 4px; background: var(--hp-surface); color: var(--hp-text); }
 .hp-chart-drill { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }.hp-chart-drill button { max-width: 180px; padding: 2px 6px; overflow: hidden; border: 0; border-radius: 4px; background: transparent; color: var(--hp-primary); font: inherit; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }.hp-chart-drill button:not(:first-child)::before { content: "›"; margin-right: 7px; color: color-mix(in srgb, var(--hp-text) 45%, transparent); }.hp-chart-drill button[aria-current="page"] { color: var(--hp-text); font-weight: 650; opacity: 1; }
 .hp-table-toolbar, .hp-pagination { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: color-mix(in srgb, var(--hp-text) 60%, transparent); font-size: 11px; }.hp-table-toolbar input { max-width: 260px; }.hp-table-toolbar-actions { display: flex; align-items: center; gap: 5px; margin-left: auto; }.hp-table-export { white-space: nowrap; }
 .hp-table-wrap { max-width: 100%; overflow: auto; border: 1px solid var(--hp-border); border-radius: calc(var(--hp-radius) - 2px); }

@@ -54,6 +54,9 @@ Each entity defines one node type:
 | `label` | no | Human-readable entity type, also used for graph category/color |
 | `field` | yes | Field Manifest alias containing the entity's stable key |
 | `labelField` | no | Field Manifest alias used as the displayed node label |
+| `color` | no | Safe explicit CSS color; wins over the stable categorical fallback |
+| `symbol` | no | `circle`, `rect`, `roundRect`, `triangle`, `diamond`, `pin`, or `arrow` |
+| `nodeSize` | no | Entity-specific size override from 8-80 |
 
 Entity IDs must start with a letter and contain only letters, numbers, underscores, or hyphens.
 
@@ -226,7 +229,20 @@ The contributing row identities are retained as sets, so HyperPBI can still perf
 | `draggable` | Boolean | layout-dependent | Defaults off for settled layouts and on for force layout. |
 | `directed` | Boolean | `true` | Shows target arrowheads when enabled. |
 | `showLabels` | Boolean | `true` | Shows node labels. |
+| `showNodeTooltip` | Boolean | `true` | Shows only the node's complete human-readable label. Entity/category IDs are not appended. |
+| `showEdgeTooltip` | Boolean | `false` | Enables edge tooltips independently; edges, arrows, lineage, and selection remain present when false. |
+| `focusMode` | `none`, `adjacency` | `none` | `none` keeps unrelated edges visible; adjacency dimming is opt-in. |
 | `nodeSize` | 8-80 | `22` | Values are clamped at runtime. |
+| `labelWidth` | 40-600 | `220` | Label wrapping width before dense-mode scaling. |
+| `labelOverflow` | `truncate`, `break`, `breakAll` | `break` | Explicit newlines in source labels are preserved. |
+| `labelFontSize` | 8-32 | `11` | Dense mode never reduces the effective size below 9. |
+| `labelLineHeight` | 8-48 | `15` | Dense mode never reduces the effective line height below 12. |
+| `labelDistance` | 0-40 | `8` | Distance between node and label. |
+| `labelPosition` | `top`, `left`, `right`, `bottom`, `inside` | `bottom` | Safe ECharts label positions only. |
+| `autoCompact` | Boolean | `true` | Compacts based on the maximum number of nodes at one hierarchy level. |
+| `denseThreshold` | 2-100 integer | `8` | 8-11 nodes use modest compaction; 12+ use stronger readable compaction. |
+| `initialZoom` | 0.2-5 | automatic | Explicit override for initial graph zoom. Automatic dense zoom is 1.35 or 1.9, deliberately favoring readable pan/zoom over squeezing every node into the initial frame. |
+| `frameless` | Boolean | `false` | Removes card border/background/header/padding and fills the available chart container. |
 | `levelGap` | 80-400 | `185` | Distance between hierarchy levels in hybrid/hierarchical layouts. |
 | `nodeGap` | 24-180 | `64` | Minimum spacing between nodes within a hierarchy level. |
 | `edgeWidth` | 0.5-6 | `1.25` | Base edge width. |
@@ -239,6 +255,10 @@ The contributing row identities are retained as sets, so HyperPBI can still perf
 | `maxNodes` | 2-5000 | `1500` | Hard safety bound for one component. |
 
 Normal shared chart properties such as `dataset`, `height`, `heightMode`, `options`, `interaction`, `responsive`, styling, and accessibility metadata remain available.
+
+ECharts clips a directed graph edge endpoint by half the target node's current visual size when a target edge symbol is present. HyperPBI therefore keeps the arrow target symbol enabled and passes entity-specific node sizes through to ECharts, positioning the arrow at the target boundary instead of beneath the node center. Undirected graphs use `none` at both ends.
+
+For settled `hierarchical` and `hybrid` layouts, `draggable: true` moves nodes without introducing force physics. ECharts retains connected edges during a drag, and the default `focusMode: "none"` prevents unrelated edges from being blurred. Positions persist for the lifetime of the ECharts instance and reset when the chart's data/schema is rebuilt.
 
 ## Layout guidance
 
@@ -273,6 +293,8 @@ Use `externalMode: "selection"` as the safe default. Use `interaction.targets` w
 ## AI authoring rules
 
 AI authors should choose `networkGraph` instead of `advancedChart` when the requested visual is an entity relationship graph, dependency graph, lineage view, operational tree, or relationship explorer and the supplied fields can identify the entities.
+
+Choose `mermaidDiagram` instead when the diagram is authored documentation/structure, the user asks for Mermaid, or Mermaid source is supplied. Mermaid does not replace this data-driven relationship explorer.
 
 AI must:
 

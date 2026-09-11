@@ -5,8 +5,12 @@ type Json = Record<string, unknown>;
 
 const layouts = new Set(["force", "circular", "hierarchical", "hybrid"]);
 const orientations = new Set(["horizontal", "vertical"]);
-const booleanProperties = ["roam", "draggable", "directed", "showLabels"] as const;
-const entityKeys = new Set(["id", "label", "field", "labelField"]);
+const focusModes = new Set(["none", "adjacency"]);
+const labelOverflows = new Set(["truncate", "break", "breakAll"]);
+const labelPositions = new Set(["top", "left", "right", "bottom", "inside"]);
+const symbols = new Set(["circle", "rect", "roundRect", "triangle", "diamond", "pin", "arrow"]);
+const booleanProperties = ["roam", "draggable", "directed", "showLabels", "showNodeTooltip", "showEdgeTooltip", "autoCompact", "frameless"] as const;
+const entityKeys = new Set(["id", "label", "field", "labelField", "color", "symbol", "nodeSize"]);
 const relationshipKeys = new Set(["source", "target", "branchLabel"]);
 const entityIdPattern = /^[A-Za-z][A-Za-z0-9_-]*$/;
 
@@ -158,6 +162,16 @@ export function validateNetworkGraphComponents(specification: unknown): Diagnost
                 requiredString(rawEntity, "field", path, componentId, diagnostics);
                 optionalString(rawEntity, "label", path, componentId, diagnostics);
                 optionalString(rawEntity, "labelField", path, componentId, diagnostics);
+                optionalString(rawEntity, "color", path, componentId, diagnostics);
+                if (typeof rawEntity.color === "string" && !/^#[0-9a-f]{3,8}$/i.test(rawEntity.color) && !/^(?:rgb|hsl)a?\([\d\s.,%+-]+\)$/i.test(rawEntity.color) && !/^[a-z]+$/i.test(rawEntity.color)) diagnostics.push({
+                    code: "INVALID_PROPERTY_TYPE", severity: "error", path: `${path}/color`, componentId,
+                    message: "Entity color must be a safe CSS color value.", received: rawEntity.color,
+                });
+                if (rawEntity.symbol !== undefined && !symbols.has(String(rawEntity.symbol))) diagnostics.push({
+                    code: "INVALID_ENUM_VALUE", severity: "error", path: `${path}/symbol`, componentId,
+                    message: "Entity symbol is not supported.", received: rawEntity.symbol, suggestions: Array.from(symbols),
+                });
+                numeric(diagnostics, rawEntity, path, "nodeSize", 8, 80);
 
                 if (!id) return;
                 if (!entityIdPattern.test(id)) {
@@ -257,6 +271,12 @@ export function validateNetworkGraphComponents(specification: unknown): Diagnost
             received: component.orientation,
             suggestions: Array.from(orientations),
         });
+        for (const [property, values] of [["focusMode", focusModes], ["labelOverflow", labelOverflows], ["labelPosition", labelPositions]] as const) {
+            if (component[property] !== undefined && !values.has(String(component[property]))) diagnostics.push({
+                code: "INVALID_ENUM_VALUE", severity: "error", path: `${visit.path}/${property}`, componentId,
+                message: `networkGraph ${property} has an unsupported value.`, received: component[property], suggestions: Array.from(values),
+            });
+        }
 
         for (const property of booleanProperties) {
             if (component[property] !== undefined && typeof component[property] !== "boolean") diagnostics.push({
@@ -270,6 +290,12 @@ export function validateNetworkGraphComponents(specification: unknown): Diagnost
         }
 
         numeric(diagnostics, component, visit.path, "nodeSize", 8, 80);
+        numeric(diagnostics, component, visit.path, "labelWidth", 40, 600);
+        numeric(diagnostics, component, visit.path, "labelFontSize", 8, 32);
+        numeric(diagnostics, component, visit.path, "labelLineHeight", 8, 48);
+        numeric(diagnostics, component, visit.path, "labelDistance", 0, 40);
+        numeric(diagnostics, component, visit.path, "denseThreshold", 2, 100, true);
+        numeric(diagnostics, component, visit.path, "initialZoom", 0.2, 5);
         numeric(diagnostics, component, visit.path, "repulsion", 20, 5000);
         numeric(diagnostics, component, visit.path, "edgeLength", 20, 600);
         numeric(diagnostics, component, visit.path, "gravity", 0, 1);

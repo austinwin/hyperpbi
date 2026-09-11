@@ -16,6 +16,7 @@
     "apps/web"
   ],
   "scripts": {
+    "postinstall": "node scripts/patch-mermaid-bundle.mjs",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "npm run package:core",
@@ -68,6 +69,7 @@
     "echarts": "^6.1.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
+    "mermaid": "11.17.2",
     "postcss": "8.5.23",
     "powerbi-visuals-api": "~5.11.0",
     "powerbi-visuals-utils-formattingmodel": "6.0.4",

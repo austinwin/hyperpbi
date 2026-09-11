@@ -113,7 +113,7 @@ describe("package profile host helpers", () => {
         expect(broad).toContain("https://web.geolibre.app");
         expect(broad).toContain("https://tile.openstreetmap.org");
         expect(broad).toContain("https://functions.miniup.app");
-        expect(broad).not.toContain("https://*.miniup.app");
+        expect(broad).toContain("https://*.miniup.app");
         expect(broad).toContain("https://*.arcgis.com");
         expect(broad).not.toContain("https://*");
         const restricted = buildWebAccessParameters({ profile: "maps", configuredHosts: ["https://example.com"] });
