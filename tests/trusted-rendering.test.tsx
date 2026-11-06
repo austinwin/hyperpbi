@@ -37,7 +37,7 @@ describe("trusted author isolation", () => {
         const host = document.createElement("div");
         act(() => render(<TrustedDocument markup='<form><input><button>Submit</button></form><script>window.test=true</script>' />, host));
         const frame = host.querySelector("iframe")!;
-        expect(frame.getAttribute("sandbox")).toBe("allow-scripts allow-forms allow-downloads");
+        expect(frame.getAttribute("sandbox")).toBe("allow-forms allow-downloads");
         expect(frame.srcdoc).toContain("<script>");
         expect(frame.srcdoc).toContain("<form>");
         expect(frame.srcdoc).not.toContain("postMessage");

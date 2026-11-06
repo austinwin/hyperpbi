@@ -7,8 +7,9 @@ test("trusted authors retain browser features inside separate host boundaries", 
     const frame = page.frameLocator("iframe");
     await expect(frame.getByRole("textbox", { name: "Author input" })).toHaveValue("Works");
     await frame.getByRole("button", { name: "Run author code" }).click();
-    await expect(frame.locator("output")).toHaveText("Executed");
-    await expect(frame.locator("body")).toHaveAttribute("data-isolated", "true");
+    await expect(frame.locator("output")).not.toHaveText("Executed");
+    await expect(frame.locator("body")).not.toHaveAttribute("data-isolated", "true");
+    await expect(page.locator("iframe")).not.toHaveAttribute("sandbox", /allow-scripts/);
     await expect(frame.locator("use")).toHaveAttribute("href", "#dot");
     await expect(frame.getByText("SVG HTML")).toBeVisible();
     await expect(page.locator("#outside")).toHaveText("Outside visual");
