@@ -10,7 +10,7 @@ import { componentKindForType, resolveInteractionPolicy } from "../interactions/
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
 import { componentOwnsResponsiveLayout, componentSubtreeRequestsFill, responsiveComponentStyle } from "../components/layout/responsiveLayout";
 function isFixedCanvasMapComponent(component: DashboardComponent): boolean {
-  return component.type === "map" || component.type === "geolibre";
+  return component.type === "map";
 }
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
     const context=useRenderContext();const { schema, config } = context;

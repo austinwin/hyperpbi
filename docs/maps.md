@@ -45,7 +45,7 @@ panning does not mutate JSON.
 | `arcgisTile` | cached MapServer URL | Display-only raster tile overlay |
 | `arcgisDynamic` | MapServer URL and optional layer selection | Dynamic export image with optional temporary click identify |
 
-The default/broad Maps package declares the supported HyperPBI, GeoLibre, MiniUp, OpenStreetMap, and ArcGIS HTTPS host families. This includes `https://*.miniup.app`, `https://*.geolibre.app`, `https://*.arcgis.com`, and `https://*.arcgisonline.com`. Add organization-specific GIS, basemap, or geocoder origins at package time with `HYPERPBI_MAP_HOSTS`; dashboard JSON cannot expand Power BI's WebAccess allowlist.
+The default/broad Maps package declares the supported HyperPBI, MiniUp, OpenStreetMap, and ArcGIS HTTPS host families. This includes `https://*.miniup.app`, `https://*.arcgis.com`, and `https://*.arcgisonline.com`. Add organization-specific GIS, basemap, or geocoder origins at package time with `HYPERPBI_MAP_HOSTS`; dashboard JSON cannot expand Power BI's WebAccess allowlist.
 
 Power BI fields use the normalized field key or prepared AI alias. A layer can name a logical
 dataset; lineage is preserved where the dataset operation can retain contributing source rows.

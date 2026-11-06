@@ -1,3 +1,0 @@
-[submodule "vendor/geolibre"]
-	path = vendor/geolibre
-	url = https://github.com/opengeos/GeoLibre.git

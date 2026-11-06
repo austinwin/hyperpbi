@@ -11,7 +11,6 @@ import type {
     MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition,
 } from "./mapSchema";
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
-import type { GeoLibreComponent } from "../components/geolibre/types";
 import type { NetworkGraphComponent } from "./networkGraphSchema";
 import type { MermaidDiagramComponent } from "./mermaidDiagramSchema";
 
@@ -723,7 +722,6 @@ export type DashboardComponent =
     | TableComponent
     | MatrixComponent
     | MapComponent
-    | GeoLibreComponent
     | ContentComponent
     | TabsComponent
     | TimelineComponent

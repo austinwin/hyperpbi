@@ -32,7 +32,6 @@ describe("packaged PBIVIZ capabilities", () => {
         expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
         expect(webAccessParameters(capabilities)).toEqual(expect.arrayContaining([
             "https://www.hyperpbi.com",
-            "https://web.geolibre.app",
             "https://tile.openstreetmap.org",
             "https://nominatim.openstreetmap.org",
             "https://geocode-api.arcgis.com",
@@ -110,7 +109,6 @@ describe("package profile host helpers", () => {
         const broad = buildWebAccessParameters({ profile: "maps" });
         expect(broad).toContain("https://hyperpbi.com");
         expect(broad).toContain("https://www.hyperpbi.com");
-        expect(broad).toContain("https://web.geolibre.app");
         expect(broad).toContain("https://tile.openstreetmap.org");
         expect(broad).toContain("https://functions.miniup.app");
         expect(broad).toContain("https://*.miniup.app");
