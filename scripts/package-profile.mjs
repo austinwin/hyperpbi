@@ -86,7 +86,6 @@ try {
         }
 
         const flags = [
-            profile === "core" ? "--certification-fix" : "",
             audit ? "--certification-audit" : "",
         ].filter(Boolean).join(" ");
         const result = spawnSync(`npx pbiviz package ${flags}`, {
