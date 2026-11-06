@@ -44,5 +44,7 @@ test("compact chart authoring remains keyboard accessible in dark mode",async({p
     await expect.poll(()=>page.evaluate(()=>JSON.parse(window.chartAuthoring.specification).components[0].chartStyle.yAxis[0].domain)).toBe("data");
     expect(await panel.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
     await expect(page.locator(".hp-spec-inspector")).toHaveCSS("background-color","rgb(24, 36, 51)");
+    await page.getByLabel("Search properties",{exact:true}).fill("height");
+    await expect(page.getByLabel("Search properties",{exact:true})).toHaveCSS("background-color","rgb(30, 41, 59)");
     if(process.platform==="win32")await expect(page).toHaveScreenshot("compact-chart-dark.png",{animations:"disabled"});
 });

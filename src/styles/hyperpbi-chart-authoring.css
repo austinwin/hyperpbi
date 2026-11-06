@@ -10,3 +10,4 @@
 .hp-studio-dark .hp-spec-inspector :is(input,select,textarea,button){background:#1e293b;color:#e2e8f0;border-color:#475569}
 .hp-studio-dark .hp-spec-inspector button:is([aria-pressed=true],[aria-selected=true]){background:#173e3b;color:#e2e8f0;border-color:#2dd4bf}
 .hp-studio-dark .hp-spec-inspector label{color:#cbd5e1}.hp-studio-dark .hp-spec-inspector :is(input,select,textarea)::placeholder{color:#94a3b8}
+.hp-studio.hp-studio-dark .hp-spec-inspector input,.hp-studio.hp-studio-dark .hp-spec-inspector select,.hp-studio.hp-studio-dark .hp-spec-inspector textarea{background:#1e293b;color:#e2e8f0;border-color:#475569}
