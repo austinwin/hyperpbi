@@ -1,0 +1,4 @@
+# Generated distributions must preserve the exact bytes recorded in the build manifest.
+apps/playground/dist/** -text -diff
+apps/web/public/runtime/** -text -diff
+dist/** -text -diff

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "753fb19cd358fec963eff8aedcf3d5f26ed46694",
+  "baselineRevision": "9d35a80a5f22e3e3a564102daf54aaa441f306f3",
+  "builtAt": "2026-11-06T04:19:13.106Z",
+  "verification": {
+    "unitTests": 818,
+    "unitFiles": 166,
+    "browserTests": 42,
+    "playgroundBrowserTests": 2,
+    "screenshotStates": 10,
+    "typecheck": "passed",
+    "webBuild": "passed",
+    "webSitesBuild": "passed",
+    "playgroundBuild": "passed",
+    "lint": "passed",
+    "docs": "passed",
+    "packageCapabilities": "passed"
+  },
+  "artifacts": [
+    {
+      "path": "apps/playground/dist/assets/charts-DtYNkKxi.js",
+      "bytes": 1083831,
+      "sha256": "776a4190b39c4b4c7a2f5a58a153e82c4e856e771382e66b7763d5d804c6bd4b"
+    },
+    {
+      "path": "apps/playground/dist/assets/charts-DtYNkKxi.js.map",
+      "bytes": 6327600,
+      "sha256": "a371fcaa892f6f347e0c659da38c8cabd13530e9b811e75724fdf869d84478c7"
+    },
+    {
+      "path": "apps/playground/dist/assets/fileParser.worker-CLDf5wpr.js",
+      "bytes": 382042,
+      "sha256": "19a651868521530f511bc192da1f3caf779bae50ae15a0c1435972d2ced3bdc8"
+    },
+    {
+      "path": "apps/playground/dist/assets/fileParser.worker-CLDf5wpr.js.map",
+      "bytes": 1773926,
+      "sha256": "a642bf756576cfd296af9873663d1216b5aa9e4244bce6f314e197218771024b"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-BSErESy4.js",
+      "bytes": 2004790,
+      "sha256": "28fe3dcc02359f620fb08f0f03b7c9c645c585ee33b07c03456343f5dcb244f0"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-BSErESy4.js.map",
+      "bytes": 6926770,
+      "sha256": "56a02be109bf143a821654874521ebca6f96797bedd1a04db427250bb4c96c51"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-Bb4StZQm.css",
+      "bytes": 802596,
+      "sha256": "5a1c7b35c36e6fdea9d55ba0e49044ea15a8da4bb657c19b978d057a3b6696ba"
+    },
+    {
+      "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js",
+      "bytes": 183979,
+      "sha256": "1a5aa30c58ec170195865f05a2f0812623726c899416d5f954bcc69df595c950"
+    },
+    {
+      "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js.map",
+      "bytes": 811009,
+      "sha256": "10f3925abe52dcd11c5616ac004faca787c9d2bfb81d498bbc2dfe6ed147597b"
+    },
+    {
+      "path": "apps/playground/dist/assets/mermaid.min-Ttmmddio.js",
+      "bytes": 3543591,
+      "sha256": "4bacf79f2f8f26ce77b6e0c5107f26853dac72482e73c55c1e8e90f05655b3e3"
+    },
+    {
+      "path": "apps/playground/dist/assets/mermaid.min-Ttmmddio.js.map",
+      "bytes": 7971490,
+      "sha256": "2b4c1765c649d4a3355b14bee3eed738e80efde74c3268f69ece586de5221b34"
+    },
+    {
+      "path": "apps/playground/dist/assets/spreadsheet-BW32yMZ9.js",
+      "bytes": 365830,
+      "sha256": "df337e2c4522d6dc275bff5a2c6da82131dc6fbbf47646defa049625759c9767"
+    },
+    {
+      "path": "apps/playground/dist/assets/spreadsheet-BW32yMZ9.js.map",
+      "bytes": 1696817,
+      "sha256": "7cb70b573ddf55357d5ad17210065ee059a64102b4719b1c4f12a7cbc6c1fbb6"
+    },
+    {
+      "path": "apps/playground/dist/index.html",
+      "bytes": 816,
+      "sha256": "cf84954647c6d438c0763acd598b5adc8310632e48d26a3eaae5c43772a85a55"
+    },
+    {
+      "path": "apps/web/public/runtime/assets/fileParser.worker-DlgPI3_3.js",
+      "bytes": 618383,
+      "sha256": "bcee9f1ce11abfddd1dee160112fd572d50cf3c1135c6396ddb96aea75ff1158"
+    },
+    {
+      "path": "apps/web/public/runtime/charts-B4Rh9tRM.mjs",
+      "bytes": 1587520,
+      "sha256": "36b2b52450a8fbca75e24f44466045f885da5c663b5680b4b738ca03d497ae7e"
+    },
+    {
+      "path": "apps/web/public/runtime/hyperpbi-island.css",
+      "bytes": 996721,
+      "sha256": "3a15db8b65d2157ffef15e6ded17bd13b454678ef1826a2ce61b91b05ef1914c"
+    },
+    {
+      "path": "apps/web/public/runtime/hyperpbi-island.js",
+      "bytes": 2915962,
+      "sha256": "63e692e78354311267817427d4082331b66493e898c8b8e743f4ea0fe4de7a3e"
+    },
+    {
+      "path": "apps/web/public/runtime/maps-CWfhSxLk.mjs",
+      "bytes": 363176,
+      "sha256": "93bd848cbd6dba445065fb428c02a0213bbe2d24fdc4d8c7fa6d2e3c0621030b"
+    },
+    {
+      "path": "apps/web/public/runtime/mermaid.min-CcCwTIc8.mjs",
+      "bytes": 4691278,
+      "sha256": "4ee12373a3033519316fdd445a2ac618906e75a9af183ef71a6594e5c970fd1d"
+    },
+    {
+      "path": "apps/web/public/runtime/spreadsheet-BHMLTf8C.mjs",
+      "bytes": 598474,
+      "sha256": "9820aaa80c99b6df8b0329f3a814523fbbc3a2038a6138d28e1dbf44f9a64b9e"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.1.3-core.pbiviz",
+      "bytes": 2048500,
+      "sha256": "548969be113fed8cf83e77041da9891aad559251d029ae5f4ef6ba017feb15f4"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.1.3-maps-broad.pbiviz",
+      "bytes": 2048820,
+      "sha256": "6faea82b3504b4a7dc80269e5f2c5f2af0e11172883f1c7a026002016eb52afc"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.1.3-maps-restricted.pbiviz",
+      "bytes": 2048820,
+      "sha256": "fb2d978b65f9a28a296e0ec7aa437800cda3efc4b60d2b5da70cc0a50514e9be"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.1.3-maps.pbiviz",
+      "bytes": 2048820,
+      "sha256": "6faea82b3504b4a7dc80269e5f2c5f2af0e11172883f1c7a026002016eb52afc"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.1.3.pbiviz",
+      "bytes": 2048500,
+      "sha256": "548969be113fed8cf83e77041da9891aad559251d029ae5f4ef6ba017feb15f4"
+    },
+    {
+      "path": "dist/hyperpbi-web-sites.zip",
+      "bytes": 22303917,
+      "sha256": "90527764e6b05a876f5e03fe053133e14f6a5fa81af22b5339b5d6fd96f0c2c8"
+    },
+    {
+      "path": "dist/package-capability-profiles.json",
+      "bytes": 1107,
+      "sha256": "6b4f1c6a296507ba0b48820cbc8ccac6bacfb2880acd5b3826731c7b387dcfc0"
+    },
+    {
+      "path": "dist/package.json",
+      "bytes": 649,
+      "sha256": "c38f2ce16db6e0a82706b9442e42fb19e84d9833384a8a38ae7009126514d1f3"
+    }
+  ]
+}
