@@ -5,6 +5,11 @@ const booleanKeys = new Set(`show scale inverse silent containLabel alignTicks a
 const numberKeys = new Set(`opacity shadowBlur shadowOffsetX shadowOffsetY rotate margin nameGap nameRotate splitNumber minInterval maxInterval logBase symbolRotate barMinHeight percentPrecision minAngle minShowLabelAngle nodeWidth nodeGap repulsion gravity friction curveness animationDuration animationDurationUpdate animationDelay animationDelayUpdate animationThreshold progressive progressiveThreshold largeThreshold throttle showDelay hideDelay transitionDuration precision dataIndex seriesIndex xAxisIndex yAxisIndex datasetIndex radarIndex polarIndex geoIndex calendarIndex`.split(" "));
 export function optionPropertyError(key: string, value: unknown, path: string): string | undefined {
     const inData = /\.(?:source|data|nodes|links|edges)\[/.test(path);
+    const object=(item:unknown)=>!!item&&typeof item==="object"&&!Array.isArray(item);
+    if(!inData&&path==="options"&&["series","xAxis","yAxis","dataset","legend","grid","tooltip","dataZoom","visualMap","graphic","radar","polar"].includes(key)&&value!==null&&!(object(value)||Array.isArray(value)&&value.every(object)))return "requires an object or an array of objects";
+    if(!inData&&["itemStyle","lineStyle","areaStyle","axisLabel","textStyle","label","labelLine","labelLayout","encode","nameTextStyle"].includes(key)&&value!==null&&!object(value))return "requires a declarative object";
+    if(key==="data"&&/^options\.series(?:\[\d+\])?(?:\.mark(?:Line|Area|Point))?$/.test(path)&&!Array.isArray(value))return "requires an array of data items";
+    if(key==="type"&&/\.transform(?:\[\d+\])?$/.test(path)&&!["filter","sort"].includes(String(value)))return "requires a registered declarative filter or sort transform";
     if (!(path === "options" ? root.has(key) : nested.has(key) || inData)) return "property is outside the supported declarative option schema";
     if (!inData && booleanKeys.has(key) && typeof value !== "boolean") return "must be a boolean";
     if (!inData && numberKeys.has(key) && (typeof value !== "number" || !Number.isFinite(value))) return "must be a finite number";

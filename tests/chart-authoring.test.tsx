@@ -37,7 +37,7 @@ describe("declarative visual chart authoring",()=>{
         expect(chartStyleErrors({yAxis:[{domain:"fixed",min:60,max:50}]})).not.toEqual([]);expect(chartStyleErrors({series:[{opacity:2}]})).not.toEqual([]);expect(chartStyleErrors({run:"alert(1)"})).not.toEqual([]);
     });
     it("rejects unknown engine keys, functions, unsafe markup, invalid numbers and URLs in the schema",()=>{
-        for(const options of [{imaginaryEngine:{run:true}},{series:[{type:"line",renderItem:()=>null}]},{tooltip:{formatter:"<img src=x onerror=alert(1)>"}},{xAxis:{min:"evil"}},{series:[{type:"line",itemStyle:{color:"https://example.com"}}]}]) {
+        for(const options of [{series:"invalid"},{series:[{type:"line",data:"invalid"}]},{imaginaryEngine:{run:true}},{series:[{type:"line",renderItem:()=>null}]},{tooltip:{formatter:"<img src=x onerror=alert(1)>"}},{xAxis:{min:"evil"}},{series:[{type:"line",itemStyle:{color:"https://example.com"}}]}]) {
             expect(sanitizeEChartOptions(options).warnings.length).toBeGreaterThan(0);
             expect(validateSchema({version:"2.0",components:[{type:"lineChart",id:"test",options}]}).errors.length).toBeGreaterThan(0);
         }
