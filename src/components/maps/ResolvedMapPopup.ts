@@ -17,6 +17,8 @@ import {
 } from "../../maps/model/mapFeatureValue";
 import type { FeatureFieldSource } from "../../maps/model/mapFeatureValue";
 import { sanitizeHtml } from "../../security/sanitizeHtml";
+import { h, render } from "preact";
+import { MapPopupContent } from "./MapPopupContent";
 
 const TOKEN_REGEX = /\{\{\s*([^{}]{1,120}?)\s*\}\}/g;
 
@@ -102,6 +104,11 @@ export function renderResolvedPopup(
   container.className = "hp-map-popup hp-map-popup-resolved";
   const cleanups: Array<() => void> = [];
   const view = resolveMapPopupViewModel(popup, feature);
+  if (popup.content?.length) {
+    const contentHost = document.createElement("div"); container.append(contentHost);
+    render(h(MapPopupContent, { blocks: popup.content, feature, executeAction: (action, event) => runtime?.executeAction({ id: "content-action", label: "Action", uiAction: action as import("../../schema/uiSchema").UiAction }, feature, event!) }), contentHost);
+    cleanups.push(() => render(null, contentHost));
+  }
 
   // ── Title ──────────────────────────────────────────────────────
   if (view.title) {
@@ -228,7 +235,8 @@ export function resolveSafeTemplate(
 
   return template.replace(TOKEN_REGEX, (_match, token: string) => {
     const key = token.trim();
-    const value = fieldSource
+    const explicit = /^(service|powerbi|joined)\.(.+)$/.exec(key);
+    const value = explicit ? resolvedFeatureValue(feature, explicit[2], explicit[1] as FeatureFieldSource) : fieldSource
       ? resolvedFeatureValue(feature, key, fieldSource)
       : Object.prototype.hasOwnProperty.call(merged, key)
         ? merged[key]

@@ -73,7 +73,9 @@ The rewrite changes only dataset inputs equal to the selected default source ID.
 
 ## Playground versus an HTML application platform
 
-The Playground is an authoring and reference runtime for governed analytics specifications. It is not a general HTML application builder. Custom presentation remains bounded by sanitized HTML/CSS, governed SVG, implemented components, declarative actions, safe expressions, and deterministic logical datasets. Scripts, callbacks, `eval`, arbitrary browser APIs, unsafe URLs, and executable workbook content remain prohibited.
+The Playground is an authoring and reference runtime for analytics specifications. Standard presentation uses sanitized HTML/CSS, governed SVG, implemented components, declarative actions, safe expressions, and deterministic logical datasets. Explicit trusted author mode preserves HTML/SVG in opaque-origin sandboxed documents and unrestricted CSS inside an isolated visual. Those documents have no report-service bridge; host CSP, network and frame restrictions still apply. The standard expression and workbook pipelines never execute scripts or callbacks.
+
+Published map imports use versioned generic definitions in `src/maps/imports`, explicit source adapters and three-way refresh merging. GeoJSON relationships reuse the existing map join engine and carry only real source-row lineage into host interactions. The compact Map Studio sends scoped commands to the same native map preview; it does not create a second renderer or an independent saved-state model. Remote GeoJSON lifecycle, popup content, color controls, effects and layer-origin presentation live in separate modules.
 
 ## Local development and deployment
 
@@ -88,9 +90,7 @@ npm run web:sites:build
 
 `npm run dev` builds the browser runtime island and starts Next.js on `http://localhost:4178`. `npm run build` performs the root and web type checks, rebuilds the island, and creates the production Next.js output.
 
-`npm run web:sites:build` first builds the pinned GeoLibre browser runtime under `apps/web/public/geolibre`, then produces the supported OpenNext worker and static assets, materializes the prerender cache, and stages both the native OpenNext layout and the compatibility entrypoint under `apps/web/dist` for Sites packaging. Configuration lives in `apps/web/open-next.config.ts` and `apps/web/wrangler.jsonc`; staged output and GeoLibre build assets are generated and are not checked in. The pristine `vendor/geolibre` submodule plus exact embed-client dependency are the reproducible inputs. See the [GeoLibre guide](geolibre.md) for its isolated runtime/project bridge and the official [OpenNext Cloudflare guide](https://opennext.js.org/cloudflare/get-started) for the adapter contract.
 
-Root `vercel.json` remains available for Vercel and builds the pinned GeoLibre runtime before `npm run web:build`; configure that project from the repository root so `vendor/geolibre`, `apps/web`, and the shared code under `src` are available.
 
 ## Future services
 

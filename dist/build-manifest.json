@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "1.0.2",
+  "powerBiVersion": "1.0.2.0",
+  "activeComponents": 83,
+  "sourceRevision": "63cd3f3544f4f3b35a7ca120fdb20d78b5d9673c",
+  "baselineRevision": "9d35a80a5f22e3e3a564102daf54aaa441f306f3",
+  "builtAt": "2026-11-06T12:43:28.695Z",
+  "verification": {
+    "unitTests": 827,
+    "unitFiles": 168,
+    "browserTests": 46,
+    "playgroundBrowserTests": 2,
+    "screenshotStates": 12,
+    "typecheck": "passed",
+    "webBuild": "passed",
+    "webSitesBuild": "passed",
+    "playgroundBuild": "passed",
+    "lint": "passed",
+    "docs": "passed",
+    "packageCapabilities": "passed"
+  },
+  "artifacts": [
+    {
+      "path": "apps/playground/dist/assets/charts-DtYNkKxi.js",
+      "bytes": 1083831,
+      "sha256": "776a4190b39c4b4c7a2f5a58a153e82c4e856e771382e66b7763d5d804c6bd4b"
+    },
+    {
+      "path": "apps/playground/dist/assets/charts-DtYNkKxi.js.map",
+      "bytes": 6327600,
+      "sha256": "a371fcaa892f6f347e0c659da38c8cabd13530e9b811e75724fdf869d84478c7"
+    },
+    {
+      "path": "apps/playground/dist/assets/fileParser.worker-CLDf5wpr.js",
+      "bytes": 382042,
+      "sha256": "19a651868521530f511bc192da1f3caf779bae50ae15a0c1435972d2ced3bdc8"
+    },
+    {
+      "path": "apps/playground/dist/assets/fileParser.worker-CLDf5wpr.js.map",
+      "bytes": 1773926,
+      "sha256": "a642bf756576cfd296af9873663d1216b5aa9e4244bce6f314e197218771024b"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-BHNVZxwW.js",
+      "bytes": 2043325,
+      "sha256": "44e4392ecbfb9ce5b74402bd42bd3228b3a4622dc8d12b2e270bc7063e7c2d65"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-BHNVZxwW.js.map",
+      "bytes": 7015157,
+      "sha256": "e305ea307071557d91e679a14d5f53a2511e17929bc5816bef73dba4b8276c9d"
+    },
+    {
+      "path": "apps/playground/dist/assets/index-C3A4msFU.css",
+      "bytes": 806111,
+      "sha256": "f3171d0633863b7b31a672b59241140d51d64b9b87b617c5d67fbc14992d5074"
+    },
+    {
+      "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js",
+      "bytes": 183979,
+      "sha256": "1a5aa30c58ec170195865f05a2f0812623726c899416d5f954bcc69df595c950"
+    },
+    {
+      "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js.map",
+      "bytes": 811009,
+      "sha256": "10f3925abe52dcd11c5616ac004faca787c9d2bfb81d498bbc2dfe6ed147597b"
+    },
+    {
+      "path": "apps/playground/dist/assets/mermaid.min-Ttmmddio.js",
+      "bytes": 3543591,
+      "sha256": "4bacf79f2f8f26ce77b6e0c5107f26853dac72482e73c55c1e8e90f05655b3e3"
+    },
+    {
+      "path": "apps/playground/dist/assets/mermaid.min-Ttmmddio.js.map",
+      "bytes": 7971490,
+      "sha256": "2b4c1765c649d4a3355b14bee3eed738e80efde74c3268f69ece586de5221b34"
+    },
+    {
+      "path": "apps/playground/dist/assets/spreadsheet-BW32yMZ9.js",
+      "bytes": 365830,
+      "sha256": "df337e2c4522d6dc275bff5a2c6da82131dc6fbbf47646defa049625759c9767"
+    },
+    {
+      "path": "apps/playground/dist/assets/spreadsheet-BW32yMZ9.js.map",
+      "bytes": 1696817,
+      "sha256": "7cb70b573ddf55357d5ad17210065ee059a64102b4719b1c4f12a7cbc6c1fbb6"
+    },
+    {
+      "path": "apps/playground/dist/index.html",
+      "bytes": 816,
+      "sha256": "5fc91f7201b451851df385737dd5422d4162fdafee9d064e34df22ae4cd4edb4"
+    },
+    {
+      "path": "apps/web/public/runtime/assets/fileParser.worker-DlgPI3_3.js",
+      "bytes": 618383,
+      "sha256": "bcee9f1ce11abfddd1dee160112fd572d50cf3c1135c6396ddb96aea75ff1158"
+    },
+    {
+      "path": "apps/web/public/runtime/charts-B4Rh9tRM.mjs",
+      "bytes": 1587520,
+      "sha256": "36b2b52450a8fbca75e24f44466045f885da5c663b5680b4b738ca03d497ae7e"
+    },
+    {
+      "path": "apps/web/public/runtime/hyperpbi-island.css",
+      "bytes": 1001028,
+      "sha256": "54cd320775d53dde3ff1f87af74d1e281908ee7d3c8a8a25696ebc226863fe69"
+    },
+    {
+      "path": "apps/web/public/runtime/hyperpbi-island.js",
+      "bytes": 2963923,
+      "sha256": "e5391bc06f3622ee342ef1dc87e4c3fa8b9662cdb7987c778e17508548def20d"
+    },
+    {
+      "path": "apps/web/public/runtime/maps-CWfhSxLk.mjs",
+      "bytes": 363176,
+      "sha256": "93bd848cbd6dba445065fb428c02a0213bbe2d24fdc4d8c7fa6d2e3c0621030b"
+    },
+    {
+      "path": "apps/web/public/runtime/mermaid.min-CcCwTIc8.mjs",
+      "bytes": 4691278,
+      "sha256": "4ee12373a3033519316fdd445a2ac618906e75a9af183ef71a6594e5c970fd1d"
+    },
+    {
+      "path": "apps/web/public/runtime/spreadsheet-BHMLTf8C.mjs",
+      "bytes": 598474,
+      "sha256": "9820aaa80c99b6df8b0329f3a814523fbbc3a2038a6138d28e1dbf44f9a64b9e"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-core.pbiviz",
+      "bytes": 2060949,
+      "sha256": "fd7d51dfeee298aedbc35e99e58a51730950234bc543a106e1f645e196434754"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps-broad.pbiviz",
+      "bytes": 2061387,
+      "sha256": "fdb07efea35f03d432fd22bf4483daf842a40f7e17195c97c18970964f4a00e1"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps-restricted.pbiviz",
+      "bytes": 2061387,
+      "sha256": "c5329c156ae2749bc1da8eee320dfa2a02a3900de4bff32c2516ff97d6784853"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps.pbiviz",
+      "bytes": 2061387,
+      "sha256": "fdb07efea35f03d432fd22bf4483daf842a40f7e17195c97c18970964f4a00e1"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0.pbiviz",
+      "bytes": 2061387,
+      "sha256": "c5329c156ae2749bc1da8eee320dfa2a02a3900de4bff32c2516ff97d6784853"
+    },
+    {
+      "path": "dist/hyperpbi-web-sites.zip",
+      "bytes": 22454567,
+      "sha256": "2bfc65f4fb40ba9deaa81f3e91afa1b0a1fe040e87ca790ed79b8a91a129e679"
+    },
+    {
+      "path": "dist/package-capability-profiles.json",
+      "bytes": 1107,
+      "sha256": "6b4f1c6a296507ba0b48820cbc8ccac6bacfb2880acd5b3826731c7b387dcfc0"
+    },
+    {
+      "path": "dist/package.json",
+      "bytes": 649,
+      "sha256": "915a4c0d54ee1c94bd8376a6c9ddd6edcd69a38378abbffb515a09f836a4e0f2"
+    }
+  ]
+}

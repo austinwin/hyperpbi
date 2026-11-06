@@ -72,6 +72,7 @@ function buildLabelIcon(
     span.textContent = labelText;
     span.style.color = labels.color ?? "#333";
     span.style.fontSize = `${labels.size ?? 12}px`;
+    if (labels.fontFamily) span.style.fontFamily = labels.fontFamily;
     span.style.fontWeight = String(labels.weight ?? "normal");
     if (labels.backgroundColor) span.style.backgroundColor = labels.backgroundColor;
     if (labels.padding !== undefined) span.style.padding = `${Math.max(0, labels.padding)}px`;

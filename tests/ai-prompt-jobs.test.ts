@@ -99,22 +99,21 @@ describe("AI prompt jobs", () => {
     }).prompt;
     expect(explicit).toContain("advancedChart [experimental");
   });
-  it("offers GeoLibre only for explicit GIS workspace intent", () => {
+  it("offers native mapping for GIS workspace intent", () => {
     const gis = composeAiPrompt(data, {
       ...defaultAiPromptSettings,
-      goal: "Build a GeoLibre GIS workspace for layer management and GeoParquet authoring",
+      goal: "Build a MiniUp GIS workspace for layer management",
       complexity: "advanced",
     });
     expect(gis.includedModules).toContain("maps");
-    expect(gis.prompt).toContain("geolibre [beta, advanced]");
-    expect(gis.prompt).toContain("MAP VS GEOLIBRE");
-    expect(gis.prompt).toContain("Do not generate a giant raw project");
+    expect(gis.prompt).toContain("map [beta, recommended]");
+    expect(gis.prompt).toContain("NATIVE MAPS");
+    expect(gis.prompt).toContain("hyperpbi.map");
     const analyticalMap = composeAiPrompt(data, {
       ...defaultAiPromptSettings,
       goal: "Build a lightweight analytical location map",
       mapRequired: true,
     }).prompt;
     expect(analyticalMap).toContain("map [beta, recommended]");
-    expect(analyticalMap).not.toContain("geolibre [");
   });
 });

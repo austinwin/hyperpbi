@@ -18,7 +18,6 @@ import {
   appendToContainer,
   compatibleContainerPaths,
   componentTree,
-  createComponent,
   deleteComponent,
   duplicateComponent,
   findComponent,
@@ -34,6 +33,9 @@ import { StudioButton } from "../ui/StudioButton";
 import { StudioCheckbox } from "../ui/StudioCheckbox";
 import { StudioSection } from "../ui/StudioSection";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
+import { ChartConfigurationPanel } from "./ChartConfigurationPanel";
+import "../../styles/hyperpbi-chart-authoring.css";
+import { createBoundComponent } from "./createBoundComponent";
 
 type Json = Record<string, unknown>;
 type Pane = "tree" | "properties";
@@ -273,6 +275,8 @@ export function SpecificationInspector({
   }, [json]);
   const parsed = parsedResult.value;
   const [search, setSearch] = useState("");
+  const [propertySearch, setPropertySearch] = useState("");
+  const [pickerSearch, setPickerSearch] = useState("");
   const [pane, setPane] = useState<Pane>("tree");
   const [treeWidth, setTreeWidth] = useState(280);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
@@ -284,6 +288,7 @@ export function SpecificationInspector({
   const [pendingDeleteId, setPendingDeleteId] = useState("");
   const [destination, setDestination] = useState("/components");
   const [newType, setNewType] = useState("text");
+  useEffect(()=>{const matches=componentDescriptors.filter(entry=>entry.maturity!=="deprecated"&&`${entry.type} ${entry.label} ${entry.category} ${entry.useWhen}`.toLowerCase().includes(pickerSearch.toLowerCase()));if(matches.length&&!matches.some(entry=>entry.type===newType))setNewType(matches[0].type);},[pickerSearch,newType]);
   const [openGroups, setOpenGroups] = useState<Set<InspectorPropertyGroup>>(
     () => new Set(["Identity", "Data"]),
   );
@@ -456,7 +461,7 @@ export function SpecificationInspector({
     ) ?? [];
   const simple =
     descriptor?.inspector
-      .filter((control) => control.control !== "json" && isControlVisible(control, item))
+      .filter((control) => control.control !== "json" && isControlVisible(control, item) && `${control.label} ${control.property} ${control.help??""}`.toLowerCase().includes(propertySearch.toLowerCase()))
       .sort((left, right) => (left.order ?? 1000) - (right.order ?? 1000)) ?? [];
   const controlsByGroup = new Map(
     propertyGroups.map((group) => [
@@ -605,12 +610,12 @@ export function SpecificationInspector({
   };
 
   const add = (mode: "before" | "after" | "container") => {
-    const child = createComponent(newType, parsed);
+    const child = createBoundComponent(newType, parsed, Object.keys(scopeFields).length?scopeFields:effectiveData.fields);
     const candidate =
       mode === "container"
         ? appendToContainer(parsed, destination, child)
         : insertComponent(parsed, selectedComponentId, mode, child);
-    if (commit(candidate)) onSelect(String(child.id));
+    if (commit(candidate)) { onSelect(String(child.id)); setPane("properties"); }
   };
   const activeTreeId = visibleTree.some(
     (entry) => entry.id === selectedComponentId,
@@ -919,6 +924,7 @@ export function SpecificationInspector({
             ) : (
               <div class="hp-inspector-search-empty" role="status">
                 <strong>{lowerSearch ? "No matching components" : "No components yet"}</strong>
+                {!tree.length&&<><label>Find a component<input type="search" aria-label="Search component picker" value={pickerSearch} onInput={event=>setPickerSearch(event.currentTarget.value)} /></label><select aria-label="Component type" value={newType} onChange={event=>setNewType(event.currentTarget.value)}>{componentDescriptors.filter(entry=>entry.maturity!=="deprecated"&&`${entry.label} ${entry.type} ${entry.useWhen}`.toLowerCase().includes(pickerSearch.toLowerCase())).map(entry=><option value={entry.type}>{entry.label}</option>)}</select><StudioButton onClick={()=>add("container")}>Add component</StudioButton></>}
                 <p>
                   {lowerSearch
                     ? "Try a shorter name, component type, or JSON path."
@@ -1063,7 +1069,10 @@ export function SpecificationInspector({
                 </button>
               )}
               <div class="hp-inspector-property-groups">
+                <label>Search properties<input type="search" aria-label="Search properties" value={propertySearch} onInput={event=>setPropertySearch(event.currentTarget.value)} /></label>
+                {descriptor?.category === "Charts" && descriptor.schema.allowed.includes("chartStyle") && <ChartConfigurationPanel key={String(item.id)} item={item} fields={Object.keys(scopeFields).length?scopeFields:effectiveData.fields} onChange={change} onReplace={changes=>commit(updateComponent(parsed,selectedComponentId,changes))} dataControls={(controlsByGroup.get("Data")??[]).map(renderControl)} />}
                 {propertyGroups.map((group) => {
+                  if(group === "Data" && descriptor?.category === "Charts" && descriptor.schema.allowed.includes("chartStyle")) return null;
                   const controls = controlsByGroup.get(group) ?? [];
                   if (!controls.length) return null;
                   return (
@@ -1077,7 +1086,7 @@ export function SpecificationInspector({
                       })}
                     >
                       <div class="hp-inspector-control-grid">
-                        {controls.map(renderControl)}
+                        {controls.map(control=><div class="hp-inspector-reset-row">{renderControl(control)}<button type="button" aria-label={`Reset ${control.label}`} title="Restore the component default" disabled={item[control.property]===undefined||descriptor?.schema.required.includes(control.property)} onClick={()=>change(control.property,undefined)}>↺</button></div>)}
                       </div>
                     </StudioSection>
                   );
@@ -1141,6 +1150,7 @@ export function SpecificationInspector({
                 </StudioSection>
               )}
               <StudioSection title="Add, insert, or move" className="hp-inspector-mutations">
+                <label>Find a component<input type="search" aria-label="Search component picker" placeholder="Chart, map, slicer…" value={pickerSearch} onInput={event=>setPickerSearch(event.currentTarget.value)} /></label>
                 <div class="hp-inspector-control-grid">
                   <label>
                     <span>Component type</span>
@@ -1153,7 +1163,7 @@ export function SpecificationInspector({
                       {componentDescriptors
                         .filter(
                           (entry) =>
-                            entry.maturity !== "deprecated",
+                            entry.maturity !== "deprecated" && `${entry.type} ${entry.label} ${entry.category} ${entry.useWhen}`.toLowerCase().includes(pickerSearch.toLowerCase()),
                         )
                         .map((entry) => (
                           <option value={entry.type}>

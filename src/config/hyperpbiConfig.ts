@@ -8,9 +8,10 @@ export interface HyperPbiConfig {
     bindings?: { map?: Partial<MapBindingKeys> };
     interactions?: { crossFilter?: boolean; multiSelect?: boolean; externalMode?: "auto" | "filter" | "selection" };
     renderer?: { showHeader?: boolean; showRowCount?: boolean; showStudioButton?: boolean };
-    security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
+    security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; svgMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
     providers?: ProviderConfiguration;
     fields?: { aliases?: Record<string,string> };
+    maps?: { publishedMaps?: import("../maps/imports/mapImportTypes").PublishedMapCatalogEntry[] };
     motion?: { enabled?: boolean; reducedMotion?: "respect-system" | "always-reduce" | "never-reduce"; maxConcurrentAnimations?: number };
 }
 
@@ -19,7 +20,7 @@ export const defaultConfig: HyperPbiConfig = {
     bindings: { map: {} },
     interactions: { crossFilter: true, multiSelect: true, externalMode: "auto" },
     renderer: { showHeader: false, showRowCount: false, showStudioButton: true },
-    security: { cssMode: "scoped", htmlMode: "sanitized", showSanitizerWarnings: false },
+    security: { cssMode: "scoped", htmlMode: "sanitized", svgMode: "sanitized", showSanitizerWarnings: false },
     providers: defaultProviderConfig,
     fields: { aliases: {} },
     motion: { enabled: true, reducedMotion: "respect-system", maxConcurrentAnimations: 12 }
@@ -36,8 +37,10 @@ export function parseConfig(text: string): { config?: HyperPbiConfig; errors: st
     const providers: ProviderConfiguration = { ...defaultConfig.providers, ...candidate.providers, basemap: { provider: candidate.providers?.basemap?.provider ?? defaultConfig.providers?.basemap?.provider ?? "none", enabled: candidate.providers?.basemap?.enabled ?? defaultConfig.providers?.basemap?.enabled ?? false, ...defaultConfig.providers?.basemap, ...candidate.providers?.basemap }, geocoder: { provider: candidate.providers?.geocoder?.provider ?? defaultConfig.providers?.geocoder?.provider ?? "none", enabled: candidate.providers?.geocoder?.enabled ?? defaultConfig.providers?.geocoder?.enabled ?? false, ...defaultConfig.providers?.geocoder, ...candidate.providers?.geocoder } };
     const config: HyperPbiConfig = { ...defaultConfig, ...candidate, version: "1.0", bindings: { ...defaultConfig.bindings, ...candidate.bindings }, interactions: { ...defaultConfig.interactions, ...candidate.interactions }, renderer: { ...defaultConfig.renderer, ...candidate.renderer }, security: { ...defaultConfig.security, ...candidate.security }, fields:{...defaultConfig.fields,...candidate.fields,aliases:{...defaultConfig.fields?.aliases,...candidate.fields?.aliases}}, motion:{...defaultConfig.motion,...candidate.motion}, providers };
     const errors = validateProviderConfig(config.providers);
+    if (config.maps?.publishedMaps !== undefined && (!Array.isArray(config.maps.publishedMaps) || config.maps.publishedMaps.some(item => !item || typeof item.name !== "string" || typeof item.manifestUrl !== "string" || !/^https:\/\//i.test(item.manifestUrl)))) errors.push("maps.publishedMaps must contain named public HTTPS manifest URLs.");
     if (config.security?.cssMode && !["scoped", "trusted"].includes(config.security.cssMode)) errors.push("security.cssMode must be scoped or trusted.");
     if (config.security?.htmlMode && !["sanitized", "trusted"].includes(config.security.htmlMode)) errors.push("security.htmlMode must be sanitized or trusted.");
+    if (config.security?.svgMode && !["sanitized", "trusted"].includes(config.security.svgMode)) errors.push("security.svgMode must be sanitized or trusted.");
     if (config.interactions?.externalMode && !["auto", "filter", "selection"].includes(config.interactions.externalMode)) errors.push("interactions.externalMode must be auto, filter, or selection.");
     if (config.motion?.reducedMotion && !["respect-system", "always-reduce", "never-reduce"].includes(config.motion.reducedMotion)) errors.push("motion.reducedMotion must be respect-system, always-reduce, or never-reduce.");
     if (config.motion?.maxConcurrentAnimations !== undefined && (!Number.isInteger(config.motion.maxConcurrentAnimations) || config.motion.maxConcurrentAnimations < 0 || config.motion.maxConcurrentAnimations > 50)) errors.push("motion.maxConcurrentAnimations must be an integer from 0 through 50.");

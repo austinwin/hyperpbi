@@ -4,7 +4,6 @@ import {
     getComponentDescriptor,
 } from "./componentDescriptors";
 import { networkGraphDescriptor } from "./networkGraphDescriptor";
-import { geolibreDescriptor } from "./geolibreDescriptor";
 import { mermaidDiagramDescriptor } from "./mermaidDiagramDescriptor";
 
 const chartDescriptorTypes = new Set([
@@ -35,10 +34,6 @@ const generatingLegacyCatalog =
 if (!generatingLegacyCatalog && !componentDescriptorsByType.has(networkGraphDescriptor.type)) {
     componentDescriptors.push(networkGraphDescriptor);
     componentDescriptorsByType.set(networkGraphDescriptor.type, networkGraphDescriptor);
-}
-if (!generatingLegacyCatalog && !componentDescriptorsByType.has(geolibreDescriptor.type)) {
-    componentDescriptors.push(geolibreDescriptor);
-    componentDescriptorsByType.set(geolibreDescriptor.type, geolibreDescriptor);
 }
 if (!generatingLegacyCatalog && !componentDescriptorsByType.has(mermaidDiagramDescriptor.type)) {
     componentDescriptors.push(mermaidDiagramDescriptor);

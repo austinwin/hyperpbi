@@ -1,3 +1,6 @@
+import type { GeoJsonMapLayerSource } from "../../schema/mapSchema";
+import { loadPublicGeoJson } from "../sources/publicGeoJson";
+import { resolveGeoJsonLayer } from "../sources/mapGeoJsonSource";
 import type { DataRow } from "../../data/normalizeData";
 import type {
   ArcGisFeatureLayerSource,
@@ -26,7 +29,7 @@ export interface MapJoinPreviewResult extends MapJoinDiagnostics {
 }
 
 export interface MapJoinPreviewInput {
-  source: ArcGisFeatureLayerSource;
+  source: ArcGisFeatureLayerSource | GeoJsonMapLayerSource;
   definition: MapJoinDefinition;
   rows: DataRow[];
   rowKeys: string[];
@@ -50,7 +53,7 @@ export async function runMapJoinPreview(
     (row) => row[input.definition.powerBiField],
   );
   const query = input.query ?? executeArcGisFeatureQuery;
-  const service: ArcGisFeatureQueryResult = await query({
+  const service = input.source.type === "geoJson" ? await geoJsonPreviewSource(input.source, input.signal, maximum) : await query({
     url: input.source.url,
     layerId: input.source.layerId,
     definitionExpression: input.source.definitionExpression,
@@ -99,4 +102,11 @@ export async function runMapJoinPreview(
     normalizationSamples,
     warnings: [...service.warnings, ...joined.warnings],
   };
+}
+
+async function geoJsonPreviewSource(source: GeoJsonMapLayerSource, signal: AbortSignal | undefined, maximum: number) {
+    const data = source.data ?? (source.url ? await loadPublicGeoJson(source.url, signal) : undefined);
+    if (!data) throw new Error("GeoJSON source has no data or URL.");
+    const layer = resolveGeoJsonLayer({ id: "preview", name: "Preview", source, performance: { maxFeatures: maximum } }, data);
+    return { features: layer.features.map(feature => ({ objectId: feature.id, attributes: feature.serviceAttributes, geometry: feature.geometry })), requestCount: source.data ? 0 : 1, truncated: layer.diagnostics.warnings.some(warning => warning.includes("Feature limit")), queryStrategy: "geojson", warnings: layer.diagnostics.warnings };
 }

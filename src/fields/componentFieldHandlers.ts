@@ -43,7 +43,7 @@ function expression(context: ComponentFieldHandlerContext, node: unknown, path: 
     for (const [key, child] of Object.entries(node)) if (!["field", "valueFromRow", "value"].includes(key)) expression(context, child, `${path}/${pointer(key)}`);
 }
 
-const tokenPattern = /{{\s*(?:(row|item|datum|field|sum|avg|min|max|distinctCount|metric|state|selected|config|configuration|runtime)\.)?([A-Za-z][A-Za-z0-9_-]*)\s*}}/g;
+const tokenPattern = /{{\s*(?:(row|item|datum|field|sum|avg|min|max|distinctCount|metric|state|selected|config|configuration|runtime|service|powerbi|joined)\.)?([A-Za-z][A-Za-z0-9_-]*)\s*}}/g;
 function templateString(context: ComponentFieldHandlerContext, owner: Json, key: string, path: string, source: FieldReferenceSource = sourceFor(context)): void {
     const value = owner[key];
     if (typeof value !== "string") return;
@@ -59,7 +59,7 @@ function templateString(context: ComponentFieldHandlerContext, owner: Json, key:
             componentId: context.componentId,
             datasetName: context.effectiveDataset,
             requirement: "any",
-            source,
+            source: namespace === "service" || namespace === "joined" ? namespace : namespace === "powerbi" ? sourceFor(context) : source,
             set: next => { owner[key] = String(owner[key]).replace(originalToken, replacement(next)); },
         });
     }
@@ -114,6 +114,16 @@ function mapLayers(context: ComponentFieldHandlerContext): void {
             if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(layerContext, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
             const templateSource = (sectionValue.defaultFieldSource ?? defaultSource) as FieldReferenceSource;
             for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, templateSource);
+            const visitPopupContent = (value: unknown, at: string, inherited: FieldReferenceSource): void => {
+                if (Array.isArray(value)) { value.forEach((item, index) => visitPopupContent(item, `${at}/${index}`, inherited)); return; }
+                if (!object(value)) return;
+                const declared = (value.fieldSource ?? inherited) as FieldReferenceSource;
+                const fieldSource = declared === "powerbi" ? sourceFor(layerContext) : declared;
+                emitValue(layerContext, value, "field", `${at}/field`, "any", fieldSource);
+                for (const key of ["text", "url", "label"]) templateString(layerContext, value, key, `${at}/${key}`, fieldSource);
+                for (const key of ["when", "colorWhen", "series", "children"]) visitPopupContent(value[key], `${at}/${key}`, fieldSource);
+            };
+            visitPopupContent(sectionValue.content, `${path}/${section}/content`, templateSource);
         }
         const filters = Array.isArray(raw.filter) ? raw.filter : [raw.filter];
         filters.forEach((filter, filterIndex) => { if (object(filter)) emitValue(layerContext, filter, "field", `${path}/filter/${filterIndex}/field`, "any", (filter.fieldSource ?? defaultSource) as FieldReferenceSource); });
@@ -135,28 +145,6 @@ function svgElements(context: ComponentFieldHandlerContext): void {
         }
     };
     visit(context.component[context.descriptorField.property], `${context.componentPath}/${context.descriptorField.property}`);
-}
-
-function geoLibrePowerBi(context: ComponentFieldHandlerContext): void {
-    const powerBi = context.component[context.descriptorField.property];
-    if (!object(powerBi) || !Array.isArray(powerBi.layers)) return;
-    powerBi.layers.forEach((raw, index) => {
-        if (!object(raw)) return;
-        const path = `${context.componentPath}/${context.descriptorField.property}/layers/${index}`;
-        const layerContext: ComponentFieldHandlerContext = {
-            ...context,
-            effectiveDataset: typeof raw.dataset === "string" && raw.dataset ? raw.dataset : context.effectiveDataset,
-        };
-        if (object(raw.geometry)) {
-            if (raw.geometry.type === "geojson") {
-                emitValue(layerContext, raw.geometry, "field", `${path}/geometry/field`);
-            } else {
-                emitValue(layerContext, raw.geometry, "latitudeField", `${path}/geometry/latitudeField`, "numeric");
-                emitValue(layerContext, raw.geometry, "longitudeField", `${path}/geometry/longitudeField`, "numeric");
-            }
-        }
-        emitArray(layerContext, raw, "fields", `${path}/fields`);
-    });
 }
 
 export const componentFieldHandlers: Record<FieldTraversalHandler, Handler> = {
@@ -211,7 +199,6 @@ export const componentFieldHandlers: Record<FieldTraversalHandler, Handler> = {
     "where-expression"(context) { expression(context, context.component[context.descriptorField.property], `${context.componentPath}/${context.descriptorField.property}`); },
     "value-from-row"(context) { emitValue(context, context.component, context.descriptorField.property, `${context.componentPath}/${context.descriptorField.property}`); },
     "map-layers": mapLayers,
-    "geolibre-powerbi": geoLibrePowerBi,
     "svg-elements": svgElements,
     "nested-chart"() { /* Traversed as a descriptor-declared single component container. */ },
     "chart-events"(context) {

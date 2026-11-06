@@ -12,12 +12,13 @@ export function featureAttribute(feature: ResolvedMapFeature, field: string, sou
 }
 export function defaultAttributeSource(layer: MapLayerDefinition, _purpose: MapAttributePurpose): MapAttributeSource {
     if (layer.source.type === "powerbi") return "powerbi";
-    if (layer.source.type === "arcgisFeature" && layer.source.mode === "join") return "joined";
+    if (layer.source.type === "arcgisFeature" && layer.source.mode === "join" || layer.source.type === "geoJson" && layer.join?.enabled) return "joined";
     return "service";
 }
 
 export function attributeSourceAvailable(layer: MapLayerDefinition, source: MapAttributeSource): boolean {
     if (layer.source.type === "powerbi") return source === "powerbi";
+    if (layer.source.type === "geoJson") return layer.join?.enabled === true || source === "service";
     if (layer.source.type !== "arcgisFeature") return false;
     if (layer.source.mode === "join") return true;
     return source === "service";

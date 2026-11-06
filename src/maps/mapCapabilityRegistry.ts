@@ -24,6 +24,7 @@ const entries = (status: MapCapabilityStatus, paths: string[], limitation?: stri
 
 export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
     ...entries("implemented", [
+        "map.toolbar.collapsed", "map.layers[].labels.fontFamily", "map.layers[].popup.content", "map.layers[].popup.content[].id", "map.layers[].popup.content[].type", "map.layers[].popup.content[].field", "map.layers[].popup.content[].fieldSource", "map.layers[].popup.content[].when", "map.layers[].popup.content[].colorWhen", "map.imports", "map.layers[].provenance",
         "map.view.center", "map.view.zoom", "map.view.minZoom", "map.view.maxZoom", "map.view.fitPadding",
         "map.height", "map.heightMode", "map.minHeight", "map.aspectRatio", "map.featureDetails.mode", "map.featureDetails.clearSelectionOnBackgroundClick", "map.featureDetails.clearSelectionOnClose",
         "map.basemap.type", "map.basemap.url", "map.basemap.attribution", "map.basemap.maxZoom", "map.basemap.visible",
@@ -43,6 +44,7 @@ export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
         "map.layers[].source.arcgisDynamic.identify", "map.layers[].source.arcgisDynamic.identify.enabled", "map.layers[].source.arcgisDynamic.identify.tolerance", "map.layers[].source.arcgisDynamic.identify.layerOption", "map.layers[].source.arcgisDynamic.identify.maxResults",
         "map.layers[].source.geoJson.data", "map.layers[].source.geoJson.url", "map.layers[].source.geoJson.idField", "map.layers[].source.geoJson.refreshIntervalMinutes",
         "map.layers[].source.xyz.url", "map.layers[].source.xyz.attribution", "map.layers[].source.xyz.minZoom", "map.layers[].source.xyz.maxZoom", "map.layers[].source.xyz.subdomains",
+        "map.layers[].source.xyz.wms", "map.layers[].source.xyz.wms.layers", "map.layers[].source.xyz.wms.styles", "map.layers[].source.xyz.wms.format", "map.layers[].source.xyz.wms.version", "map.layers[].source.xyz.wms.transparent",
         "map.layers[].join.enabled", "map.layers[].join.powerBiField", "map.layers[].join.serviceField", "map.layers[].join.cardinality", "map.layers[].join.normalization",
         "map.layers[].join.powerBiDuplicatePolicy", "map.layers[].join.serviceDuplicatePolicy", "map.layers[].join.unmatchedPolicy", "map.layers[].join.aggregations", "map.layers[].join.aggregations[].field", "map.layers[].join.aggregations[].aggregation", "map.layers[].join.aggregations[].as", "map.layers[].join.queryStrategy",
         "map.layers[].renderer.service.type", "map.layers[].renderer.simple.type", "map.layers[].renderer.simple.symbol", "map.layers[].renderer.uniqueValue.type", "map.layers[].renderer.uniqueValue.field",

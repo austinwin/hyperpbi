@@ -3860,7 +3860,8 @@
     "security": {
       "cssMode": "scoped",
       "htmlMode": "sanitized",
-      "showSanitizerWarnings": false
+      "showSanitizerWarnings": false,
+      "svgMode": "sanitized"
     },
     "version": "1.0"
   },

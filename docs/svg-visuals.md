@@ -3,7 +3,7 @@
 HyperPBI implements two governed vector components:
 
 - `svg`: structured declarative scene graph; preferred
-- `svgMarkup`: strictly sanitized raw SVG fallback
+- `svgMarkup`: sanitized by default; explicit `security.svgMode: "trusted"` preserves raw authored SVG in an isolated document
 
 Use SVG for diagrams, process flows, pictorial marks, schematics, custom gauges, and animated KPI presentation. Use semantic ECharts components for standard analytical charts.
 
@@ -177,3 +177,8 @@ Raw markup does not accept arbitrary CSS. Component `css`, if used, still passes
   ]
 }
 ```
+
+
+## Trusted SVG documents
+
+Select trusted SVG explicitly in Runtime Config. Raw `svgMarkup` retains definitions, filters, symbols/use, images, styles, foreignObject and animation without the Standard allowlist. Data templates remain inert. The opaque-origin iframe denies same-origin access, report host services, top navigation and popups. Browser and Power BI CSP/WebAccess/CORS policies still apply. Structured `svg` continues to use the governed, interaction-capable scene graph; use raw SVG for arbitrary authored markup. See [trusted rendering](security.md#trusted-author-documents).

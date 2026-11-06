@@ -16,9 +16,10 @@ export function resolveSvgMarkupTemplates(markup: string, context: SvgBindingCon
     return markup.replace(/\{\{\s*([A-Za-z_$][\w$.-]*)\s*\}\}/g, match => escapeXml(renderSvgTemplate(match, context)));
 }
 
-export function sanitizeSvg(input: string, namespace: string, options: { mermaidNodeIds?: ReadonlySet<string> } = {}): SanitizedSvg {
+export function sanitizeSvg(input: string, namespace: string, options: { mermaidNodeIds?: ReadonlySet<string>; mode?: "sanitized" | "trusted" } = {}): SanitizedSvg {
     const warnings: string[] = []; let elementCount = 0, animatedElementCount = 0, pathCount = 0;
     const emptyIds = new Map<string, string>();
+    if (options.mode === "trusted") return { svg: input, warnings: ["Trusted SVG must be rendered in an isolated document; browser and host policies still apply."], elementCount: 0, animatedElementCount: 0, pathCount: 0, idMap: emptyIds };
     if (input.length > 250_000) return { svg: "", warnings: ["Raw SVG exceeded the 250,000 character limit."], elementCount, animatedElementCount, pathCount, idMap: emptyIds };
     const namespacedInput = /^\s*<svg\b[^>]*\bxmlns\s*=/.test(input) ? input : input.replace(/^\s*<svg\b/i, `<svg xmlns="http://www.w3.org/2000/svg"`);
     const parser = new DOMParser(), document = parser.parseFromString(namespacedInput, "image/svg+xml"), parseError = document.querySelector("parsererror"), root = document.documentElement;

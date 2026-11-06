@@ -54,7 +54,7 @@ describe("remote data sources", () => {
   });
 
   it("supports build-trusted web REST GET sources and rejects untrusted origins", async () => {
-    expect(configuredWebRestHostPatterns()).toEqual(["https://*.miniup.app"]);
+    expect(configuredWebRestHostPatterns()).toEqual(["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]);
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ rows: [{ ok: true }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     const source = await fetchRemoteDataSource("web", {

@@ -5,13 +5,16 @@ import { inflateRawSync } from "node:zlib";
 export const DEFAULT_MAP_HOSTS = [
     "https://hyperpbi.com",
     "https://www.hyperpbi.com",
-    "https://web.geolibre.app",
-    "https://*.geolibre.app",
     "https://tile.openstreetmap.org",
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
     "https://functions.miniup.app",
+    "https://miniup.app",
     "https://*.miniup.app",
+    "https://miniup.io",
+    "https://*.miniup.io",
+    "https://arcgis.com",
+    "https://arcgisonline.com",
     "https://*.arcgis.com",
     "https://*.arcgisonline.com",
 ];
@@ -73,6 +76,12 @@ export async function acquirePackageProfileLock(
                 }
             } catch (inspectionError) {
                 if (inspectionError?.code === "ENOENT") continue;
+                // Windows can briefly deny stat while another owner closes/deletes the lock.
+                if (["EPERM", "EACCES"].includes(inspectionError?.code)) {
+                    if (Date.now() - started >= timeoutMs) throw new Error(`Timed out waiting for package profile lock: ${lockPath}`);
+                    await new Promise(resolve => setTimeout(resolve, pollMs));
+                    continue;
+                }
                 throw inspectionError;
             }
             if (Date.now() - started >= timeoutMs)

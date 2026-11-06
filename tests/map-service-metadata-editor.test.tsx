@@ -70,7 +70,7 @@ describe("metadata-driven ArcGIS authoring", () => {
   });
   it("fetches explicitly, selects root sublayers, and populates service field controls", async () => {
     const mounted = mountMapStudio(undefined, { webAccessAvailable: true });
-    act(() => button(mounted.host, "+ Add layer").click());
+    act(() => button(mounted.host, "+ Add source").click());
     act(() => button(mounted.host, "ArcGIS feature layer").click());
     change(
       mounted.host.querySelector('[aria-label="ArcGIS service URL"]')!,
@@ -117,7 +117,7 @@ describe("metadata-driven ArcGIS authoring", () => {
       },
     );
     const mounted = mountMapStudio(undefined, { webAccessAvailable: true });
-    act(() => button(mounted.host, "+ Add layer").click());
+    act(() => button(mounted.host, "+ Add source").click());
     act(() => button(mounted.host, "ArcGIS feature layer").click());
     const input = mounted.host.querySelector(
       '[aria-label="ArcGIS service URL"]',

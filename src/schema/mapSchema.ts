@@ -140,6 +140,7 @@ export interface MapLayerGroupDefinition {
 export interface MapLayerDefinition {
     id: string;
     name: string;
+    provenance?: import("../maps/imports/mapImportTypes").MapLayerProvenance;
     /** Logical row view for this layer. Falls back to the map component dataset, then powerbi. */
     dataset?: string;
     /** Optional canonical group membership. */
@@ -260,6 +261,8 @@ export interface GeoJsonMapLayerSource {
 
 export interface XyzMapLayerSource {
     type: "xyz";
+    /** Native Leaflet WMS raster mode; feature joins/selection are unavailable. */
+    wms?: { layers: string; styles?: string; format?: "image/png" | "image/jpeg"; transparent?: boolean; version?: "1.1.1" | "1.3.0" };
     url: string;
     attribution?: string;
     minZoom?: number;
@@ -499,6 +502,7 @@ export interface MapLabelDefinition {
     color?: string;
     size?: number;
     weight?: number | string;
+    fontFamily?: string;
     haloColor?: string;
     haloSize?: number;
     backgroundColor?: string;
@@ -510,6 +514,7 @@ export interface MapLabelDefinition {
 // ── Popup ─────────────────────────────────────────────────────────────
 
 export interface MapPopupDefinition {
+    content?: import("../maps/popup/mapPopupContent").MapPopupContentBlock[];
     enabled?: boolean;
     /** Namespace used by title and safe HTML template tokens. */
     defaultFieldSource?: "powerbi" | "service" | "joined";

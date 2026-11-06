@@ -1,8 +1,8 @@
 # Security model
 
-HyperPBI treats dashboard JSON and pasted AI output as untrusted data. It validates declarative structures and never provides a user-code sandbox.
+HyperPBI treats dashboard JSON and pasted AI output as untrusted data by default. Standard mode validates and sanitizes content. Explicit trusted author modes preserve HTML/CSS/SVG inside separate isolation boundaries described below.
 
-## No executable dashboard code
+## Standard declarative mode
 
 Dashboard JSON cannot supply JavaScript, `eval`, `new Function`, callbacks, formatter functions, inline event handlers, dynamic imports, scripts, iframes, arbitrary DOM code, SQL, credentials, custom request headers, request mutations, or arbitrary network dataset loaders. Read-only remote data is limited to validated `data.sources`.
 
@@ -22,11 +22,11 @@ The importer accepts exactly one JSON object. Multiple objects, arrays/primitive
 
 Normal HTML is DOMPurify-sanitized. It forbids script, iframe, object/embed, link/meta/base, form controls, and style elements; raw style/srcset/form-action/xlink attributes are blocked. Data attributes are disabled and ARIA attributes are allowed.
 
-Normal URL policy permits fragment/root/relative and mailto forms; external images are not enabled by default. Trusted/internal modes are implementation-controlled, not a dashboard option for bypassing security.
+Normal URL policy permits fragment/root/relative and mailto forms; external images are not enabled by default. Trusted mode is an explicit Runtime Config selection and uses a separate document renderer; it does not bypass browser or Power BI security.
 
 ## CSS parser, allowlist, and scope
 
-CSS is parsed with `css-tree`; parse failure returns empty CSS with a warning. It removes `@import`, `@font-face`, namespace, document, and page rules. Only an explicit property set (or safe custom properties in trusted mode) survives.
+Standard CSS is parsed with `css-tree`; parse failure returns empty CSS with a warning. It removes `@import`, `@font-face`, namespace, document, and page rules. Only an explicit property set and safe custom properties survive in Standard mode.
 
 The sanitizer blocks:
 
@@ -47,7 +47,7 @@ Only an allowlisted series-type set passes. Semantic chart options cannot replac
 
 ## SVG sanitizer and limits
 
-Declarative `svg` passes a strict element/property/binding/animation schema. Raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
+Declarative `svg` passes a strict element/property/binding/animation schema. Standard raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
 
 Scripts, handlers, style, foreignObject, link/image/use, audio/video/canvas, external resources, animation elements, unsafe transforms, unknown references, and field-injected path data are blocked. Exact limits are in [SVG visuals](svg-visuals.md).
 
@@ -83,21 +83,22 @@ External filters require a true model-column target. Dataset-derived fields/metr
 | WebAccess privilege | None | Broad or restricted HTTPS hosts |
 | External tiles/services | No | Subject to host/runtime policy |
 | Geocoder | No | User-triggered and policy-gated |
-| Dashboard JavaScript | No | No |
+| Standard dashboard JavaScript | No | No |
+| Explicit trusted author documents | Sandboxed; host policy applies | Sandboxed; host policy applies |
 | Credentials in JSON | No | No |
 
-These profiles affect network privilege only; neither relaxes JSON, HTML, CSS, chart, SVG, interaction, or dataset safety.
+These profiles affect network privileges. Trusted author selections remain separate from package choice; neither package grants access to report credentials, model queries or host services from author documents.
 
 Map Studio edits canonical JSON and does not store credentials or hidden provider configuration. Popup HTML passes the existing sanitizer; popup actions use the safe UI-action allowlist. Normal viewer diagnostics expose only sanitized service origins. Geocoding endpoint, privacy, cache, and rate-limit behavior is unchanged by layer authoring.
 
-## GeoLibre isolation
+## Trusted author documents
 
-The `geolibre` component runs the exact pinned upstream browser application in an iframe, so its React/CSS/MapLibre/GIS dependency stack does not enter HyperPBI’s component tree or PBIVIZ bundle. The host accepts messages only from that iframe window and exact runtime origin and rejects a runtime version other than the pinned GeoLibre 2.5.0. The frame denies popup/top-navigation, camera, microphone, geolocation, and clipboard capabilities.
+Standard mode remains the default. Explicit Runtime Config selections `security.htmlMode: "trusted"`, `security.cssMode: "trusted"`, and `security.svgMode: "trusted"` opt into separate authoring capabilities. HTML still requires `enableHtml`; trusted HTML/SVG documents do not use the Standard inline-SVG/image allowlists.
 
-Native GeoLibre project snapshots cross a separate strict JSON boundary. The envelope pins bridge, native format, GeoLibre version, and upstream revision. The sanitizer rejects executable keys/handlers/HTML/URLs, credentials and headers, environment/API-key values, absolute paths, non-HTTPS remote URLs, external plugin manifests, plugin activation/settings, unknown top-level fields, duplicate IDs, non-JSON/cyclic values, excessive depth/node counts, and projects over 12 MiB. Live Power BI GeoJSON/identity data and transient layer filters are rebuilt at runtime and never enter persisted dashboard JSON.
+Trusted HTML (including custom/repeat/slot content) and raw SVG preserve authored markup in an iframe with `sandbox="allow-forms allow-downloads"`, without same-origin, top navigation, popups, or a report-service bridge. Forms, inputs, iframes, media, custom attributes, foreignObject, filters, symbols, use references, and animations remain intact. Scripts and event handlers cannot execute, including in trusted mode. Only explicitly templated field values are passed; credentials, host APIs and the full model are never provided. Sandboxed custom content does not automatically emit Power BI selections; use native components for report interactions.
 
-The managed UI profile preserves normal project, data, layer, style, map, and browser-safe processing workflows while locking out plugin management, credential settings, AI/provider tools, Python/notebook tools, collaboration/sharing, device capture, desktop-only data sources, and high-risk plugins. See [GeoLibre GIS workspace](geolibre.md) for the exact contract and update audit.
+Templates bind after HTML parsing: text and non-executable attributes are data. Templates in script/style, event handlers, srcdoc, attribute/element names or unsafe URL attributes produce an explicit error. Never interpolate model values as author code.
 
-ArcGIS metadata fetch and **Run join preview** are explicit, cancellable actions; they are not triggered on each text edit. Metadata remains ephemeral, stale results are rejected, preview services/results/samples are bounded, and only service-origin fields are submitted as ArcGIS `outFields`. Controlled square/diamond/triangle marker SVG is generated internally and accepts no author markup or external resource. Unsupported analysis, feature editing, secured-service credentials, 3D, geoprocessing, and independent semantic-model queries remain outside the accepted 2.0 contract.
+Trusted CSS preserves native CSS including imports, fonts, keyframes, custom properties, fixed positioning and selectors. The visual uses a Shadow DOM inside an outer paint/layout containment boundary; trusted HTML/SVG have their own document stylesheet. Standard CSS keeps its existing sanitizer. Structured SVG remains the declarative interaction-capable renderer; use `svgMarkup` plus trusted SVG mode for arbitrary authored SVG.
 
-Service-root inspection fetches only the root summary; it never walks every sublayer/table. A selected spatial item causes one additional bounded metadata request. Group layers are navigation-only and nonspatial tables are not offered as geometry sources. Successful public metadata may be cached by normalized URL/item, but access, authentication, abort, and stale-response errors are not treated as successful cache entries. Map Studio validates candidate JSON through HyperPBI Studio's exact current Runtime Config, so authoring cannot bypass active provider or security settings with a hidden default.
+Browser CSP, CORS, frame policies, Power BI WebAccess permissions, report sandbox and tenant restrictions still apply. A loaded frame does not prove that every subresource loaded. Each trusted document exposes these limitations in its notice; HyperPBI does not strip trusted content or claim to override the host. External content cannot read its parent's report DOM; authors remain responsible for third-party resources they choose to include.

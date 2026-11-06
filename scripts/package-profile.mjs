@@ -86,13 +86,20 @@ try {
         }
 
         const flags = [
-            profile === "core" ? "--certification-fix" : "",
             audit ? "--certification-audit" : "",
         ].filter(Boolean).join(" ");
         const result = spawnSync(`npx pbiviz package ${flags}`, {
             cwd: root,
             stdio: "inherit",
             shell: true,
+            // The shared editor/chart/diagram bundle can exceed V8's default
+            // heap during production minification. Respect explicit overrides.
+            env: {
+                ...process.env,
+                NODE_OPTIONS: /(?:^|\s)--max[-_]old[-_]space[-_]size(?:=|\s)/.test(process.env.NODE_OPTIONS ?? "")
+                    ? process.env.NODE_OPTIONS
+                    : `${process.env.NODE_OPTIONS ?? ""} --max-old-space-size=4096`.trim(),
+            },
         });
 
         if (result.error) console.error(result.error);

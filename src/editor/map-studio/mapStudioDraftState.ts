@@ -7,6 +7,7 @@ export interface MapStudioDraftState {
   activeMapId: string;
   activeLayerId: string;
   activeSection: string;
+  sectionByLayer: Record<string,string>;
   layerDrafts: Record<string, unknown>;
   dirtyPaths: Set<string>;
   validationByPath: Record<string, MapStudioDraftDiagnostic[]>;
@@ -25,6 +26,7 @@ export function createMapStudioDraftState(mapId = ""): MapStudioDraftState {
     activeMapId: mapId,
     activeLayerId: "",
     activeSection: "source",
+    sectionByLayer: {},
     layerDrafts: {},
     dirtyPaths: new Set(),
     validationByPath: {},
@@ -42,11 +44,11 @@ export function mapStudioDraftReducer(
   if (action.type === "activateLayer")
     return state.activeLayerId === action.layerId
       ? state
-      : { ...state, activeLayerId: action.layerId };
+      : { ...state, activeLayerId: action.layerId, activeSection: state.sectionByLayer[action.layerId] ?? "source" };
   if (action.type === "activateSection")
     return state.activeSection === action.section
       ? state
-      : { ...state, activeSection: action.section };
+      : { ...state, activeSection: action.section, sectionByLayer: { ...state.sectionByLayer, [state.activeLayerId]: action.section } };
   if (action.type === "updateLayerDraft") {
     const dirtyPaths = new Set(state.dirtyPaths);
     dirtyPaths.add(action.dirtyPath);

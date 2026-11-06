@@ -7,13 +7,13 @@ describe("Map Studio workspace layout", () => {
     const mounted = mountMapStudio();
     const navigation = mounted.host.querySelector<HTMLElement>(".hp-map-property-tabs");
     expect(navigation?.getAttribute("aria-orientation")).toBe("vertical");
-    expect(navigation?.querySelectorAll('[role="tab"]')).toHaveLength(11);
+    expect(navigation?.querySelectorAll('[role="tab"]')).toHaveLength(12);
     expect(mounted.host.querySelector(".hp-map-property-workspace")).not.toBeNull();
-    expect(button(mounted.host, "+ Add layer").getAttribute("aria-expanded")).toBe("false");
+    expect(button(mounted.host, "+ Add source").getAttribute("aria-expanded")).toBe("false");
 
-    act(() => button(mounted.host, "+ Add layer").click());
-    expect(mounted.host.querySelector('[role="menu"][aria-label="Add layer"]')).not.toBeNull();
-    expect(mounted.host.querySelectorAll('[role="menuitem"]')).toHaveLength(7);
+    act(() => button(mounted.host, "+ Add source").click());
+    expect(mounted.host.querySelector('[role="menu"][aria-label="Add source"]')).not.toBeNull();
+    expect(mounted.host.querySelectorAll('[role="menuitem"]')).toHaveLength(9);
     act(() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
     expect(mounted.host.querySelector('[role="menu"]')).toBeNull();
     mounted.cleanup();

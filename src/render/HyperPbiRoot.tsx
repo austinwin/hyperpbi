@@ -34,9 +34,9 @@ import { ToastHost } from "../components/overlays/ToastHost";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import { prepareLogicalDatasets } from "../editor/prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
-import type { PersistedGeoLibreProject } from "../components/geolibre/types";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 import { useRemoteDataWorkspace } from "../data/useRemoteDataWorkspace";
+import { IsolatedVisual } from "../security/IsolatedVisual";
 
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
@@ -65,7 +65,7 @@ export function HyperPbiRoot({
   ownerByRuntimeId,
   componentPathById,
   onMapViewportChange,
-  onGeoLibreProjectChange,
+  mapCommands,
   remoteSourceHost = "web",
 }: {
   instanceId: string;
@@ -98,8 +98,8 @@ export function HyperPbiRoot({
   providerAccess?: ProviderAccessState;
   ownerByRuntimeId?: Readonly<Record<string, string>>;
   componentPathById?: Readonly<Record<string, string>>;
+  mapCommands?: import("../maps/interactions/mapStudioCommands").MapCommandChannel;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
-  onGeoLibreProjectChange?: (componentId: string, project: PersistedGeoLibreProject) => void;
   remoteSourceHost?: "web" | "powerbi";
 }) {
   const effectiveSettings = useMemo(
@@ -297,7 +297,7 @@ export function HyperPbiRoot({
         datasets: datasetEvaluation.datasets,
         remoteSources: remoteData.statuses,
         onMapViewportChange,
-        onGeoLibreProjectChange,
+  mapCommands,
         executeUiAction: null as any,
         isOverlayOpen: null as any,
       };
@@ -330,7 +330,7 @@ export function HyperPbiRoot({
       datasetEvaluation.datasets,
       remoteData.statuses,
       onMapViewportChange,
-      onGeoLibreProjectChange,
+  mapCommands,
     ],
   );
 
@@ -366,7 +366,7 @@ export function HyperPbiRoot({
       datasets: datasetEvaluation.datasets,
       remoteSources: remoteData.statuses,
       onMapViewportChange,
-      onGeoLibreProjectChange,
+  mapCommands,
       executeUiAction: execUiAction,
       isOverlayOpen,
     }),
@@ -398,7 +398,7 @@ export function HyperPbiRoot({
       datasetEvaluation.datasets,
       remoteData.statuses,
       onMapViewportChange,
-      onGeoLibreProjectChange,
+  mapCommands,
     ],
   );
   const style = themeVariables(schema.theme, effectiveSettings);
@@ -421,7 +421,7 @@ export function HyperPbiRoot({
   const rightPanelFill = componentListRequestsFill(schema.rightPanel ?? []);
 
   return (
-    <div
+    <IsolatedVisual enabled={cssMode === "trusted"}><div
       id={instanceId}
       class={`hyperpbi-root hp-density-${effectiveSettings.layout.density} hp-theme-${effectiveSettings.theme.mode} ${effectiveSettings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`}
       style={style}
@@ -568,6 +568,6 @@ export function HyperPbiRoot({
             </details>
           )}
       </RenderContext.Provider>
-    </div>
+    </div></IsolatedVisual>
   );
 }

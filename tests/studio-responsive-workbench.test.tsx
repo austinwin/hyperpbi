@@ -10,6 +10,8 @@ import {
 import { mapStudioData, mapStudioSpecification } from "./map-studio-fixture";
 
 const mountedHosts: HTMLElement[] = [];
+// These tests exercise shell state; real map lifecycle is covered by Chromium.
+vi.mock("../src/components/maps/LeafletMap",()=>({LeafletMap:()=> <div class="leaflet-layout-stub"/>}));
 
 afterEach(() => {
   for (const host of mountedHosts.splice(0)) {
@@ -30,7 +32,7 @@ function mountStudio(onLayoutChange = vi.fn()) {
         settings={toRuntimeSettings(new VisualFormattingSettingsModel())}
         initialSpecification={mapStudioSpecification}
         initialConfiguration={defaultConfigJson}
-        initialEditorTab="mapStudio"
+        initialEditorTab="inspector"
         initialLayout={JSON.stringify({
           editorPercent: 50,
           bottomHeight: 200,
@@ -84,7 +86,7 @@ describe("Studio responsive workbench state", () => {
       host.querySelector<HTMLSelectElement>(
         ".hp-studio-workspace-select select",
       )?.value,
-    ).toBe("mapStudio");
+    ).toBe("inspector");
   });
 
   it("persists simple and advanced mode choices through the layout callback", () => {

@@ -1,7 +1,7 @@
 import type { ComponentCapability, ComponentCategory, ComponentComplexity, ComponentMaturity, InspectorPropertyDescriptor } from "./componentTypes";
 
 export type ComponentRenderMode = "direct" | "overlay";
-export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "geolibre-powerbi" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
+export type FieldTraversalHandler = "scalar" | "field-array" | "table-columns" | "matrix-rows" | "matrix-values" | "combo-series" | "radar-indicators" | "display-metrics" | "detail-groups" | "item-bindings" | "repeat-bindings" | "template" | "interaction" | "event-actions" | "where-expression" | "value-from-row" | "map-layers" | "svg-elements" | "nested-chart" | "chart-events" | "chart-drill";
 export interface FieldReferenceDescriptor { property:string; requirement:"any"|"numeric"; handler:FieldTraversalHandler; }
 export interface ComponentContainerDescriptor { property:string; kind:"array"|"tabs"|"accordion"|"single"; allowedTypes?:string[]; }
 export interface ComponentMaturityEvidence {
@@ -23380,6 +23380,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "basemap",
         "layers",
         "layerGroups",
+        "imports",
         "bookmarks",
         "search",
         "legend",
@@ -25858,6 +25859,10 @@ for (const descriptor of componentDescriptors) {
     responsive:true,accessibility:true,
     interactions:descriptor.capabilities.interactions?true:"not-applicable",focusedTests
   };
+}
+for (const descriptor of componentDescriptors) if (descriptor.category === "Charts" && descriptor.schema.allowed.includes("options")) {
+  descriptor.schema.allowed.push("chartStyle");
+  descriptor.inspector.push({property:"chartStyle",label:"Chart presentation",control:"json",group:"Appearance",order:Math.max(0,...descriptor.inspector.map(property=>property.order??0))+10,advanced:true,help:"Use the visual chart configuration panel for axes, series, labels, annotations and navigation."});
 }
 export const componentDescriptorsByType=new Map(componentDescriptors.map(descriptor=>[descriptor.type,descriptor] as const));
 export const getComponentDescriptor=(type:string)=>componentDescriptorsByType.get(type);

@@ -8,6 +8,7 @@ const forbiddenTags = ["script", "iframe", "object", "embed", "link", "meta", "f
 export function sanitizeHtml(input: string, options: HtmlSanitizerOptions = {}): SanitizedHtml {
     const before = input;
     const trusted = options.mode === "trusted";
+    if (trusted) return { html: input, warnings: ["Trusted markup requires the isolated TrustedDocument renderer; browser and host policies still apply."] };
     const html = DOMPurify.sanitize(input, {
         USE_PROFILES: { html: true, svg: trusted || options.allowInlineSvg === true, svgFilters: false },
         FORBID_TAGS: trusted ? ["script", "iframe", "object", "embed", "link", "meta", "base"] : options.allowInlineSvg ? forbiddenTags : [...forbiddenTags, "svg", "math"],

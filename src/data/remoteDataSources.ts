@@ -52,7 +52,7 @@ export interface RemoteDataSourceStatus {
   error?: string;
 }
 
-export const DEFAULT_WEB_REST_HOSTS = ["https://*.miniup.app"] as const;
+export const DEFAULT_WEB_REST_HOSTS = ["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"] as const;
 const DEFAULT_MAX_ROWS = 1000;
 const MAX_REMOTE_ROWS = 10_000;
 const DEFAULT_TIMEOUT_MS = 12_000;

@@ -1,0 +1,48 @@
+{
+  "format": "hyperpbi.map",
+  "schemaVersion": "1.0",
+  "id": "facility-network",
+  "name": "Facility Network",
+  "version": "2026.11.1",
+  "view": { "center": [30.27, -97.74], "zoom": 11, "fitMode": "none" },
+  "basemap": { "type": "none" },
+  "layerGroups": [{ "id": "operations", "name": "Published · Operations", "order": 0 }],
+  "layers": [
+    {
+      "id": "facilities",
+      "name": "Facilities",
+      "groupId": "operations",
+      "order": 0,
+      "visible": true,
+      "opacity": 1,
+      "geometryType": "point",
+      "fields": [{ "name": "site_id", "type": "string" }, { "name": "name", "type": "string" }],
+      "source": { "type": "geoJson", "idField": "site_id", "data": { "type": "FeatureCollection", "features": [
+        { "type": "Feature", "id": "A", "properties": { "site_id": "A", "name": "Central facility" }, "geometry": { "type": "Point", "coordinates": [-97.74, 30.27] } },
+        { "type": "Feature", "id": "B", "properties": { "site_id": "B", "name": "North facility" }, "geometry": { "type": "Point", "coordinates": [-97.72, 30.32] } }
+      ] } },
+      "renderer": { "type": "simple", "symbol": { "color": "#0d9488", "radius": 8 } },
+      "labels": { "enabled": true, "field": "name", "fieldSource": "service" },
+      "popup": { "enabled": true, "title": "{{service.name}}", "fields": [{ "field": "site_id", "fieldSource": "service", "label": "Site ID" }] }
+    },
+    {
+      "id": "service-area",
+      "name": "Service area",
+      "groupId": "operations",
+      "order": 1,
+      "visible": true,
+      "opacity": 0.45,
+      "geometryType": "polygon",
+      "fields": [{ "name": "zone", "type": "string" }],
+      "source": { "type": "geoJson", "idField": "zone", "data": { "type": "FeatureCollection", "features": [
+        { "type": "Feature", "id": "central", "properties": { "zone": "Central" }, "geometry": { "type": "Polygon", "coordinates": [[[-97.8,30.23],[-97.68,30.23],[-97.68,30.35],[-97.8,30.35],[-97.8,30.23]]] } }
+      ] } },
+      "renderer": { "type": "polygon", "symbol": { "fillColor": "#38bdf8", "fillOpacity": 0.25, "color": "#0284c7", "weight": 2 } },
+      "legend": { "visible": true, "title": "Service area" }
+    }
+  ],
+  "bookmarks": [{ "id": "central", "label": "Central network", "center": [30.27,-97.74], "zoom": 12 }],
+  "legend": { "enabled": true },
+  "refresh": { "updatedAt": "2026-11-05T12:00:00Z" },
+  "interactions": { "selection": true, "rectangle": true, "lasso": true }
+}

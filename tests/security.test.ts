@@ -20,7 +20,7 @@ describe("security boundaries", () => {
 
     it("allows normal dashboard layout and table CSS declarations",()=>{const result=sanitizeCss(`.table::before{content:"";outline:1px solid;outline-offset:2px;display:grid;place-items:center;grid-auto-flow:column;flex-flow:row wrap;border-collapse:collapse;vertical-align:middle;pointer-events:none;user-select:none;filter:blur(0);inset:0;aspect-ratio:2/1;text-overflow:ellipsis;table-layout:fixed}`,"#scope");expect(result.warnings).toEqual([]);expect(result.css).toContain("border-collapse:collapse");expect(result.css).toContain("content:\"\"");});
 
-    it("keeps executable HTML blocked in trusted-author mode",()=>{const result=sanitizeHtml(`<section onclick="bad()"><input value="ok"><script>bad()</script>Safe</section>`,{mode:"trusted"});expect(result.html).toContain("input");expect(result.html).not.toMatch(/onclick|script/i);});
+    it("preserves trusted markup and requires isolation",()=>{const result=sanitizeHtml(`<section onclick="bad()"><input value="ok"><script>bad()</script>Safe</section>`,{mode:"trusted"});expect(result.html).toContain("input");expect(result.html).toContain("onclick");expect(result.html).toContain("<script>");expect(result.warnings.join(" ")).toContain("isolated");});
 
     it("denies network and script URLs by default", () => {
         expect(safeUrl("javascript:alert(1)")).toBeNull();

@@ -1,0 +1,492 @@
+{
+  "version": "2.0",
+  "title": "Published map and Power BI",
+  "components": [
+    {
+      "type": "map",
+      "id": "facility-network",
+      "title": "Facilities and report analytics",
+      "heightMode": "fill",
+      "layers": [
+        {
+          "id": "report-facilities",
+          "name": "Report facilities",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "lat",
+              "longitude": "lon"
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "color": "#7c3aed",
+              "radius": 5
+            }
+          }
+        },
+        {
+          "id": "published-facility-network-facilities",
+          "name": "Facilities",
+          "groupId": "published-facility-network-operations",
+          "order": 1,
+          "visible": true,
+          "opacity": 1,
+          "source": {
+            "type": "geoJson",
+            "idField": "site_id",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "id": "A",
+                  "properties": {
+                    "site_id": "A",
+                    "name": "Central facility"
+                  },
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -97.74,
+                      30.27
+                    ]
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "id": "B",
+                  "properties": {
+                    "site_id": "B",
+                    "name": "North facility"
+                  },
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -97.72,
+                      30.32
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "renderer": {
+            "type": "proportionalSize",
+            "field": "sales",
+            "fieldSource": "joined",
+            "minSize": 8,
+            "maxSize": 15,
+            "color": "#0f766e"
+          },
+          "labels": {
+            "enabled": true,
+            "field": "name",
+            "fieldSource": "service"
+          },
+          "popup": {
+            "enabled": true,
+            "title": "{{service.name}}",
+            "fields": [
+              {
+                "field": "site_id",
+                "fieldSource": "service",
+                "label": "Site ID"
+              }
+            ],
+            "content": [
+              {
+                "id": "sales",
+                "type": "field",
+                "label": "Sales",
+                "field": "sales",
+                "fieldSource": "joined",
+                "decimals": 2,
+                "units": "USD"
+              },
+              {
+                "id": "note",
+                "type": "text",
+                "text": "Report filters recalculate the joined sales value."
+              }
+            ]
+          },
+          "provenance": {
+            "provider": "published",
+            "importId": "published-facility-network",
+            "mapId": "facility-network",
+            "mapName": "Facility Network",
+            "mapVersion": "2026.11.1",
+            "layerId": "facilities",
+            "fields": [
+              {
+                "name": "site_id",
+                "type": "string"
+              },
+              {
+                "name": "name",
+                "type": "string"
+              }
+            ],
+            "geometryType": "point"
+          },
+          "join": {
+            "enabled": true,
+            "powerBiField": "code",
+            "serviceField": "site_id",
+            "unmatchedPolicy": "diagnose",
+            "aggregations": [
+              {
+                "field": "amount",
+                "aggregation": "sum",
+                "as": "sales"
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": true,
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "multiSelect": true
+          }
+        },
+        {
+          "id": "published-facility-network-service-area",
+          "name": "Service area",
+          "groupId": "published-facility-network-operations",
+          "order": 2,
+          "visible": true,
+          "opacity": 0.45,
+          "source": {
+            "type": "geoJson",
+            "idField": "zone",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "id": "central",
+                  "properties": {
+                    "zone": "Central"
+                  },
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -97.8,
+                          30.23
+                        ],
+                        [
+                          -97.68,
+                          30.23
+                        ],
+                        [
+                          -97.68,
+                          30.35
+                        ],
+                        [
+                          -97.8,
+                          30.35
+                        ],
+                        [
+                          -97.8,
+                          30.23
+                        ]
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "renderer": {
+            "type": "polygon",
+            "symbol": {
+              "fillColor": "#38bdf8",
+              "fillOpacity": 0.25,
+              "color": "#0284c7",
+              "weight": 2
+            }
+          },
+          "legend": {
+            "visible": true,
+            "title": "Service area"
+          },
+          "provenance": {
+            "provider": "published",
+            "importId": "published-facility-network",
+            "mapId": "facility-network",
+            "mapName": "Facility Network",
+            "mapVersion": "2026.11.1",
+            "layerId": "service-area",
+            "fields": [
+              {
+                "name": "zone",
+                "type": "string"
+              }
+            ],
+            "geometryType": "polygon"
+          }
+        }
+      ],
+      "layerGroups": [
+        {
+          "id": "published-facility-network-operations",
+          "name": "Published · Operations",
+          "order": 0
+        }
+      ],
+      "bookmarks": [
+        {
+          "id": "published-facility-network-central",
+          "label": "Central network",
+          "center": [
+            30.27,
+            -97.74
+          ],
+          "zoom": 12
+        }
+      ],
+      "view": {
+        "center": [
+          30.27,
+          -97.74
+        ],
+        "zoom": 11,
+        "fitMode": "none"
+      },
+      "basemap": {
+        "type": "none"
+      },
+      "legend": {
+        "enabled": true
+      },
+      "tools": {
+        "rectangleSelection": true,
+        "lassoSelection": true
+      },
+      "layerPanel": {
+        "visible": true
+      },
+      "imports": [
+        {
+          "id": "published-facility-network",
+          "mapId": "facility-network",
+          "name": "Facility Network",
+          "version": "2026.11.1",
+          "mode": "snapshot",
+          "importedAt": "2026-11-05T00:00:00.000Z",
+          "refresh": {
+            "updatedAt": "2026-11-05T12:00:00Z"
+          },
+          "baseline": {
+            "layers": [
+              {
+                "id": "published-facility-network-facilities",
+                "name": "Facilities",
+                "groupId": "published-facility-network-operations",
+                "order": 1,
+                "visible": true,
+                "opacity": 1,
+                "source": {
+                  "type": "geoJson",
+                  "idField": "site_id",
+                  "data": {
+                    "type": "FeatureCollection",
+                    "features": [
+                      {
+                        "type": "Feature",
+                        "id": "A",
+                        "properties": {
+                          "site_id": "A",
+                          "name": "Central facility"
+                        },
+                        "geometry": {
+                          "type": "Point",
+                          "coordinates": [
+                            -97.74,
+                            30.27
+                          ]
+                        }
+                      },
+                      {
+                        "type": "Feature",
+                        "id": "B",
+                        "properties": {
+                          "site_id": "B",
+                          "name": "North facility"
+                        },
+                        "geometry": {
+                          "type": "Point",
+                          "coordinates": [
+                            -97.72,
+                            30.32
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "renderer": {
+                  "type": "simple",
+                  "symbol": {
+                    "color": "#0d9488",
+                    "radius": 8
+                  }
+                },
+                "labels": {
+                  "enabled": true,
+                  "field": "name",
+                  "fieldSource": "service"
+                },
+                "popup": {
+                  "enabled": true,
+                  "title": "{{service.name}}",
+                  "fields": [
+                    {
+                      "field": "site_id",
+                      "fieldSource": "service",
+                      "label": "Site ID"
+                    }
+                  ]
+                },
+                "provenance": {
+                  "provider": "published",
+                  "importId": "published-facility-network",
+                  "mapId": "facility-network",
+                  "mapName": "Facility Network",
+                  "mapVersion": "2026.11.1",
+                  "layerId": "facilities",
+                  "fields": [
+                    {
+                      "name": "site_id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    }
+                  ],
+                  "geometryType": "point"
+                }
+              },
+              {
+                "id": "published-facility-network-service-area",
+                "name": "Service area",
+                "groupId": "published-facility-network-operations",
+                "order": 2,
+                "visible": true,
+                "opacity": 0.45,
+                "source": {
+                  "type": "geoJson",
+                  "idField": "zone",
+                  "data": {
+                    "type": "FeatureCollection",
+                    "features": [
+                      {
+                        "type": "Feature",
+                        "id": "central",
+                        "properties": {
+                          "zone": "Central"
+                        },
+                        "geometry": {
+                          "type": "Polygon",
+                          "coordinates": [
+                            [
+                              [
+                                -97.8,
+                                30.23
+                              ],
+                              [
+                                -97.68,
+                                30.23
+                              ],
+                              [
+                                -97.68,
+                                30.35
+                              ],
+                              [
+                                -97.8,
+                                30.35
+                              ],
+                              [
+                                -97.8,
+                                30.23
+                              ]
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "renderer": {
+                  "type": "polygon",
+                  "symbol": {
+                    "fillColor": "#38bdf8",
+                    "fillOpacity": 0.25,
+                    "color": "#0284c7",
+                    "weight": 2
+                  }
+                },
+                "legend": {
+                  "visible": true,
+                  "title": "Service area"
+                },
+                "provenance": {
+                  "provider": "published",
+                  "importId": "published-facility-network",
+                  "mapId": "facility-network",
+                  "mapName": "Facility Network",
+                  "mapVersion": "2026.11.1",
+                  "layerId": "service-area",
+                  "fields": [
+                    {
+                      "name": "zone",
+                      "type": "string"
+                    }
+                  ],
+                  "geometryType": "polygon"
+                }
+              }
+            ],
+            "layerGroups": [
+              {
+                "id": "published-facility-network-operations",
+                "name": "Published · Operations",
+                "order": 0
+              }
+            ],
+            "bookmarks": [
+              {
+                "id": "published-facility-network-central",
+                "label": "Central network",
+                "center": [
+                  30.27,
+                  -97.74
+                ],
+                "zoom": 12
+              }
+            ],
+            "view": {
+              "center": [
+                30.27,
+                -97.74
+              ],
+              "zoom": 11,
+              "fitMode": "none"
+            },
+            "basemap": {
+              "type": "none"
+            },
+            "legend": {
+              "enabled": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

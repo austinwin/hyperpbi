@@ -1,4 +1,6 @@
 import { h } from "preact";
+import { TrustedDocument } from "../../security/TrustedDocument";
+import { renderTrustedTemplate } from "../../security/trustedTemplate";
 import { useMemo } from "preact/hooks";
 import { useRenderContext } from "../../render/RenderContext";
 import type { SvgMarkupComponent } from "../../schema/hyperpbiSchema";
@@ -9,7 +11,11 @@ import { createSvgNamespace, rewriteSvgCssReferences, safeSvgIdentifier } from "
 
 export function SvgMarkupBlock({ component }: { component: SvgMarkupComponent }) {
     const context = useRenderContext(), namespace = createSvgNamespace(context.instanceId ?? "visual", component.id ?? "svg-markup"), bindingWarnings: string[] = [], row = resolveSvgDataContextRow(component.dataContext, context.rows, context.sourceRowKeys, context.state.selectedRowKeys, bindingWarnings), binding = { row, rows: context.rows, state: context.state, warnings: bindingWarnings };
-    const compiled = useMemo(() => { const templated = resolveSvgMarkupTemplates(component.svg, binding), sanitized = sanitizeSvg(templated, namespace); const ids = new Map<string, string>(); for (const match of templated.matchAll(/\bid\s*=\s*["']([A-Za-z_][\w:.-]*)["']/g)) ids.set(match[1], `${namespace}-${safeSvgIdentifier(match[1])}`); const css = sanitizeCss(rewriteSvgCssReferences(component.css ?? "", ids), `[data-hp-svg="${namespace}"]`, { mode: context.config.security?.cssMode, keyframeNamespace: namespace, allowLocalSvgReferences: true }); return { ...sanitized, css: css.css, warnings: [...binding.warnings, ...sanitized.warnings, ...css.warnings] }; }, [component.svg, component.css, namespace, context.rows, context.state, context.config.security?.cssMode]);
+    const compiled = useMemo(() => { const templated = context.config.security?.svgMode === "trusted" ? "<svg/>" : resolveSvgMarkupTemplates(component.svg, binding), sanitized = sanitizeSvg(templated, namespace); const ids = new Map<string, string>(); for (const match of templated.matchAll(/\bid\s*=\s*["']([A-Za-z_][\w:.-]*)["']/g)) ids.set(match[1], `${namespace}-${safeSvgIdentifier(match[1])}`); const css = sanitizeCss(rewriteSvgCssReferences(component.css ?? "", ids), `[data-hp-svg="${namespace}"]`, { mode: context.config.security?.cssMode, keyframeNamespace: namespace, allowLocalSvgReferences: true }); return { ...sanitized, css: css.css, warnings: [...binding.warnings, ...sanitized.warnings, ...css.warnings] }; }, [component.svg, component.css, namespace, context.rows, context.state, context.config.security?.cssMode]);
+    if (context.config.security?.svgMode === "trusted") {
+        try { return <TrustedDocument title={component.ariaLabel ?? component.title ?? "Trusted SVG"} markup={renderTrustedTemplate(component.svg, context.data, context.state.values, component.title ?? "", { row, state: context.state.values })} css={component.css} />; }
+        catch (error) { return <div role="alert" class="hp-component-error">Trusted SVG: {error instanceof Error ? error.message : String(error)}</div>; }
+    }
     if (!compiled.svg) return <div class="hp-component-error" role="alert">Raw SVG was blocked by the HyperPBI sanitizer.</div>;
     return <div class="hp-svg-block hp-svg-markup" data-hp-svg={namespace} role={component.role ?? "img"} aria-label={component.ariaLabel}>
         {component.title ? <div class="hp-svg-heading">{component.title}</div> : null}<style>{compiled.css}</style><div class="hp-svg-markup-host" dangerouslySetInnerHTML={{ __html: compiled.svg }} />

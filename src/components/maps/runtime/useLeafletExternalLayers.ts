@@ -86,15 +86,17 @@ export function synchronizeLeafletExternalLayer({
         mounted = undefined;
       }
       if (!mounted) {
-        const tile = L.tileLayer(layer.sourceType === "xyz" ? layer.tile.url : buildArcGisTileUrl(layer.tile.url), {
+        if(layer.tile.wms&&!layer.tile.wms.layers.trim())throw new Error("Choose WMS layer names before loading this raster service.");
+        const options = {
           maxZoom: layer.tile.maxZoom ?? 19,
-          minZoom: layer.tile.minZoom,
+          minZoom: layer.tile.minZoom ?? 0,
           opacity,
           attribution: layer.tile.attribution ?? "",
           pane,
-          subdomains: layer.tile.subdomains,
+          subdomains: layer.tile.subdomains ?? "abc",
           detectRetina: true,
-        });
+        };
+        const tile = layer.tile.wms ? L.tileLayer.wms(layer.tile.url,{...options,...layer.tile.wms,format:layer.tile.wms.format??"image/png",transparent:layer.tile.wms.transparent??true,version:layer.tile.wms.version??"1.1.1"}) : L.tileLayer(layer.sourceType === "xyz" ? layer.tile.url : buildArcGisTileUrl(layer.tile.url),options);
         mounted = { signature, layer: tile };
         runtime.tileLayers.set(layer.id, mounted);
       } else mounted.layer.setOpacity(opacity);

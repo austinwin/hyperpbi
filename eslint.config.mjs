@@ -12,11 +12,12 @@ export default [
             "apps/web/.wrangler/**",
             "apps/web/dist/**",
             "apps/web/out/**",
-            "apps/web/public/geolibre/**",
             "apps/web/public/runtime/**",
             "vendor/**",
             ".vscode/**",
             ".tmp/**",
+            "test-results/",
+            "playwright-report/",
         ],
     },
 ];

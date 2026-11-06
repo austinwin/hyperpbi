@@ -1,0 +1,1121 @@
+{
+  "activeComponents": 83,
+  "newComponentTypesAdded": 0,
+  "removedPreviously": "GeoLibre, per the earlier approved direction",
+  "architecture": {
+    "rendering": "Shared Preact runtime, existing ECharts adapters and Leaflet engine",
+    "validation": "Canonical schema 2.0, prepareSpecification, descriptor fields and dataset lineage",
+    "authoring": "Existing Visual Inspector and Map Studio, shared history and native preview",
+    "network": "Core without WebAccess; Maps explicit MiniUp app/io and ArcGIS HTTPS hosts"
+  },
+  "components": [
+    {
+      "type": "grid",
+      "category": "Layout",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "flex",
+      "category": "Layout",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "split",
+      "category": "Layout",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 40,
+      "schemaProperties": 42,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "section",
+      "category": "Layout",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "toolbar",
+      "category": "Layout",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "leftPanel",
+      "category": "Layout",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "rightPanel",
+      "category": "Layout",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "spacer",
+      "category": "Layout",
+      "maturity": "beta",
+      "fieldBindings": 2,
+      "inspectorControls": 27,
+      "schemaProperties": 29,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "divider",
+      "category": "Layout",
+      "maturity": "beta",
+      "fieldBindings": 2,
+      "inspectorControls": 26,
+      "schemaProperties": 28,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "searchBox",
+      "category": "Controls",
+      "maturity": "stable",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "textInput",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "numberInput",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "slider",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "select",
+      "category": "Controls",
+      "maturity": "stable",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "multiSelect",
+      "category": "Controls",
+      "maturity": "stable",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "segmentedControl",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "toggle",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "button",
+      "category": "Controls",
+      "maturity": "stable",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "buttonGroup",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "filterChips",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "dateRange",
+      "category": "Controls",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "tabs",
+      "category": "Navigation",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 27,
+      "schemaProperties": 29,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "collapsible",
+      "category": "Navigation",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "accordion",
+      "category": "Navigation",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 29,
+      "schemaProperties": 31,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "steps",
+      "category": "Navigation",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 31,
+      "schemaProperties": 33,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "kpi",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "metricGrid",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "infoCard",
+      "category": "Display",
+      "maturity": "beta",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "statusBadge",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "progressBar",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "alert",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "statList",
+      "category": "Display",
+      "maturity": "beta",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "detailPanel",
+      "category": "Display",
+      "maturity": "stable",
+      "fieldBindings": 6,
+      "inspectorControls": 38,
+      "schemaProperties": 40,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "timeline",
+      "category": "Display",
+      "maturity": "beta",
+      "fieldBindings": 7,
+      "inspectorControls": 33,
+      "schemaProperties": 35,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "card",
+      "category": "Primitives",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 39,
+      "schemaProperties": 41,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "icon",
+      "category": "Primitives",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 26,
+      "schemaProperties": 28,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "iconButton",
+      "category": "Primitives",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 26,
+      "schemaProperties": 28,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "avatar",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 2,
+      "inspectorControls": 30,
+      "schemaProperties": 32,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "avatarGroup",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 2,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "listGroup",
+      "category": "Primitives",
+      "maturity": "stable",
+      "fieldBindings": 7,
+      "inspectorControls": 34,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "dataGrid",
+      "category": "Primitives",
+      "maturity": "stable",
+      "fieldBindings": 4,
+      "inspectorControls": 30,
+      "schemaProperties": 32,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "countUp",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 33,
+      "schemaProperties": 35,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "tracking",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 31,
+      "schemaProperties": 33,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "dropdown",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 30,
+      "schemaProperties": 32,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "modal",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 36,
+      "schemaProperties": 38,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "offcanvas",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 39,
+      "schemaProperties": 41,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "popover",
+      "category": "Primitives",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 39,
+      "schemaProperties": 41,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "emptyState",
+      "category": "Feedback",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 30,
+      "schemaProperties": 32,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "placeholder",
+      "category": "Feedback",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "spinner",
+      "category": "Feedback",
+      "maturity": "stable",
+      "fieldBindings": 2,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "textarea",
+      "category": "Forms",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "checkbox",
+      "category": "Forms",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "checkboxGroup",
+      "category": "Forms",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "radioGroup",
+      "category": "Forms",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "inputGroup",
+      "category": "Forms",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 49,
+      "schemaProperties": 51,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "barChart",
+      "category": "Charts",
+      "maturity": "stable",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "horizontalBarChart",
+      "category": "Charts",
+      "maturity": "stable",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "lineChart",
+      "category": "Charts",
+      "maturity": "stable",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "areaChart",
+      "category": "Charts",
+      "maturity": "stable",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "pieChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "donutChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "scatterChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "gauge",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "heatmap",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 41,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "comboChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 10,
+      "inspectorControls": 42,
+      "schemaProperties": 44,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "waterfallChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 46,
+      "schemaProperties": 48,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "sankeyChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 12,
+      "inspectorControls": 46,
+      "schemaProperties": 48,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "treemapChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 12,
+      "inspectorControls": 45,
+      "schemaProperties": 47,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "funnelChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 9,
+      "inspectorControls": 43,
+      "schemaProperties": 45,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "radarChart",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 11,
+      "inspectorControls": 43,
+      "schemaProperties": 45,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "smallMultiples",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 31,
+      "schemaProperties": 33,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "table",
+      "category": "Tables",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 42,
+      "schemaProperties": 44,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "matrix",
+      "category": "Tables",
+      "maturity": "stable",
+      "fieldBindings": 5,
+      "inspectorControls": 32,
+      "schemaProperties": 34,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "map",
+      "category": "Maps",
+      "maturity": "beta",
+      "fieldBindings": 3,
+      "inspectorControls": 40,
+      "schemaProperties": 43,
+      "unexposedProperties": [
+        "type",
+        "id",
+        "imports"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "text",
+      "category": "Custom components",
+      "maturity": "stable",
+      "fieldBindings": 5,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "markdown",
+      "category": "Custom components",
+      "maturity": "stable",
+      "fieldBindings": 5,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "html",
+      "category": "Custom components",
+      "maturity": "beta",
+      "fieldBindings": 5,
+      "inspectorControls": 28,
+      "schemaProperties": 30,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "custom",
+      "category": "Custom components",
+      "maturity": "beta",
+      "fieldBindings": 6,
+      "inspectorControls": 29,
+      "schemaProperties": 31,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "svg",
+      "category": "Custom components",
+      "maturity": "stable",
+      "fieldBindings": 3,
+      "inspectorControls": 36,
+      "schemaProperties": 38,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "svgMarkup",
+      "category": "Advanced components",
+      "maturity": "beta",
+      "fieldBindings": 4,
+      "inspectorControls": 36,
+      "schemaProperties": 38,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "advancedChart",
+      "category": "Advanced components",
+      "maturity": "experimental",
+      "fieldBindings": 9,
+      "inspectorControls": 40,
+      "schemaProperties": 42,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "networkGraph",
+      "category": "Charts",
+      "maturity": "beta",
+      "fieldBindings": 8,
+      "inspectorControls": 69,
+      "schemaProperties": 71,
+      "unexposedProperties": [
+        "type",
+        "id"
+      ],
+      "canonicalExampleErrors": []
+    },
+    {
+      "type": "mermaidDiagram",
+      "category": "Advanced components",
+      "maturity": "beta",
+      "fieldBindings": 1,
+      "inspectorControls": 6,
+      "schemaProperties": 36,
+      "unexposedProperties": [
+        "type",
+        "id",
+        "dataset",
+        "title",
+        "subtitle",
+        "span",
+        "className",
+        "hidden",
+        "props",
+        "style",
+        "css",
+        "slots",
+        "data",
+        "visibility",
+        "interactions",
+        "interaction",
+        "ariaLabel",
+        "icon",
+        "variant",
+        "size",
+        "disabled",
+        "tooltip",
+        "uiAction",
+        "width",
+        "height",
+        "order",
+        "responsive",
+        "heightMode",
+        "minHeight",
+        "aspectRatio"
+      ],
+      "canonicalExampleErrors": []
+    }
+  ]
+}

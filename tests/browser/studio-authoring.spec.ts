@@ -52,6 +52,8 @@ async function validateCandidate(page: Page) {
   await expect(page.locator(".hp-import-message")).toContainText(
     "synchronized with the working JSON",
   );
+  const expand = page.getByRole("button", { name: "Expand map tools", exact: true });
+  if (await expand.count()) await expand.click();
 }
 
 async function showDiagnostics(page: Page) {

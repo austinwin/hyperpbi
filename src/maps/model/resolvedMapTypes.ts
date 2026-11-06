@@ -194,6 +194,7 @@ export interface ResolvedMapLabels {
     color: string;
     size: number;
     weight: number | string;
+    fontFamily?: string;
     haloColor?: string;
     haloSize?: number;
     backgroundColor?: string;
@@ -205,6 +206,7 @@ export interface ResolvedMapLabels {
 // ── Resolved Popup ────────────────────────────────────────────────────
 
 export interface ResolvedMapPopup {
+    content?: import("../popup/mapPopupContent").MapPopupContentBlock[];
     enabled: boolean;
     title?: string;
     fields: ResolvedMapPopupField[];
@@ -359,6 +361,7 @@ export interface MapJoinAggregationDiagnostic {
 // ── Resolved Tile Configuration ───────────────────────────────────────
 
 export interface ResolvedTileConfig {
+    wms?: import("../../schema/mapSchema").XyzMapLayerSource["wms"];
     url: string;
     attribution?: string;
     minZoom?: number;
@@ -393,6 +396,7 @@ export interface ResolvedMapTooltip {
 // ── Resolved Layer ────────────────────────────────────────────────────
 
 export interface ResolvedMapLayer {
+    provenance?: import("../imports/mapImportTypes").MapLayerProvenance;
     id: string;
     name: string;
     sourceType: MapLayerSourceType;

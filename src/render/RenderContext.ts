@@ -12,7 +12,6 @@ import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import type { MapViewportState } from "../components/maps/MapBlock";
-import type { PersistedGeoLibreProject } from "../components/geolibre/types";
 import type { RemoteDataSourceStatus } from "../data/remoteDataSources";
 
 export interface ResolvedDatasetView {
@@ -70,9 +69,8 @@ export interface RenderContextValue {
     interactionIndexSpace?: "component" | "powerbi";
     /** Use original row keys for linked internal filtering while retaining semantic external-filter fields. */
     interactionUsesSourceIdentity?: boolean;
+    mapCommands?: import("../maps/interactions/mapStudioCommands").MapCommandChannel;
     onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
-    /** Authoring-only persistence boundary for native GeoLibre project state. */
-    onGeoLibreProjectChange?: (componentId: string, project: PersistedGeoLibreProject) => void;
 }
 
 export const RenderContext = createContext<RenderContextValue | undefined>(undefined);

@@ -11,7 +11,6 @@ import type {
     MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition,
 } from "./mapSchema";
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
-import type { GeoLibreComponent } from "../components/geolibre/types";
 import type { NetworkGraphComponent } from "./networkGraphSchema";
 import type { MermaidDiagramComponent } from "./mermaidDiagramSchema";
 
@@ -197,6 +196,7 @@ export interface DataDisplayComponent extends ComponentBase {
 }
 
 export interface BaseChartComponent extends ComponentBase {
+    chartStyle?: import("../components/charts/chartStyle").ChartStyle;
     /** Remove card chrome and let the chart occupy its layout container. */
     frameless?: boolean;
     height?: number;
@@ -428,6 +428,7 @@ export interface MapComponent extends ComponentBase {
     view?: MapViewDefinition;
     basemap?: MapBasemapDefinition;
     layers?: MapLayerDefinition[];
+    imports?: import("../maps/imports/mapImportTypes").PublishedMapImport[];
     layerGroups?: MapLayerGroupDefinition[];
     bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;
@@ -445,6 +446,7 @@ export interface MapComponent extends ComponentBase {
     };
 
     toolbar?: {
+        collapsed?: boolean;
         visible?: boolean;
         home?: boolean;
         layers?: boolean;
@@ -723,7 +725,6 @@ export type DashboardComponent =
     | TableComponent
     | MatrixComponent
     | MapComponent
-    | GeoLibreComponent
     | ContentComponent
     | TabsComponent
     | TimelineComponent

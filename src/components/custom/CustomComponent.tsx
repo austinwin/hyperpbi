@@ -1,8 +1,7 @@
 import { DataRow } from "../../data/normalizeData";
 import { ContentComponent } from "../../schema/hyperpbiSchema";
 import { useRenderContext } from "../../render/RenderContext";
-import { renderTemplate } from "../../render/renderTemplate";
-import { sanitizeHtml } from "../../security/sanitizeHtml";
+import { AuthoredMarkup } from "../../security/AuthoredMarkup";
 import { runSafeInteraction } from "./customInteractionResolver";
 import { validateCustomComponent } from "./customComponentSchema";
 import { executeComponentInteraction } from "../../interactions/componentInteraction";
@@ -36,7 +35,6 @@ export function prepareCustomRepeatRows(rows: DataRow[], sourceRows: DataRow[], 
 export function CustomComponent({ component }: { component: ContentComponent }) {
     const context = useRenderContext(); const { data, sourceRows, sourceRowKeys, state, schema, settings, config } = context; const errors = validateCustomComponent(component);const componentId = component.id ?? "custom";const rows=context.getRowsForComponent(componentId);const policy=resolveInteractionPolicy(component,config,"custom");
     if (errors.length) return <div class="hp-custom-error">{errors.join(" ")}</div>;
-    const scopedData={...data,rows};const render = (template: string, row?: DataRow) => sanitizeHtml(renderTemplate(template, scopedData, state.values, component.title ?? schema.title ?? "", { row, props: component.props, state: state.values, title: component.title }), { allowInlineSvg: settings.allowInlineSvg, allowSafeImages: settings.allowSafeImages, mode: config.security?.htmlMode }).html;
     const click = component.interactions?.onClick;
     const repeated = component.repeat ? prepareCustomRepeatRows(rows, sourceRows, sourceRowKeys, component.repeat) : [];
     const selectedRows = context.componentRows(componentId);
@@ -47,8 +45,8 @@ export function CustomComponent({ component }: { component: ContentComponent }) 
     const enabled=policy.enabled;
     return <div class="hp-custom" role={!component.repeat && enabled ? "button" : undefined} tabIndex={!component.repeat && enabled ? 0 : undefined} onClick={!component.repeat && enabled ? event => invoke(undefined, undefined, event) : undefined} onKeyDown={!component.repeat && enabled ? event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); invoke(undefined, undefined, event); } } : undefined}>
         <div class="hp-custom-body">
-            {component.html && <div class="hp-custom-static" dangerouslySetInnerHTML={{ __html: render(component.html) }} />}
-            {repeated.map(item => <div key={item.sourceRowKey} class={`hp-custom-repeat-row ${selected(item) ? "is-selected hp-row-selected" : ""}`} role={enabled ? "button" : undefined} tabIndex={enabled ? 0 : undefined} data-row-index={item.sourceIndex} onClick={enabled ? event => invoke(item.row, item.sourceIndex, event) : undefined} onKeyDown={enabled ? event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); invoke(item.row, item.sourceIndex, event); } } : undefined}><div dangerouslySetInnerHTML={{ __html: render(component.repeat?.template ?? "", item.row) }} /></div>)}
+            {component.html && <div class="hp-custom-static"><AuthoredMarkup template={component.html} componentId={componentId} title={component.title} props={component.props} css={component.css} /></div>}
+            {repeated.map(item => <div key={item.sourceRowKey} class={`hp-custom-repeat-row ${selected(item) ? "is-selected hp-row-selected" : ""}`} role={enabled ? "button" : undefined} tabIndex={enabled ? 0 : undefined} data-row-index={item.sourceIndex} onClick={enabled ? event => invoke(item.row, item.sourceIndex, event) : undefined} onKeyDown={enabled ? event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); invoke(item.row, item.sourceIndex, event); } } : undefined}><AuthoredMarkup template={component.repeat?.template ?? ""} componentId={componentId} title={component.title} row={item.row} props={component.props} css={component.css} /></div>)}
         </div>
     </div>;
 }

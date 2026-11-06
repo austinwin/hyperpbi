@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "preact/hooks";
 import { h, type ComponentChildren } from "preact";
 import { MapComponent } from "../../schema/hyperpbiSchema";
 import type { MapToolbarPopover as MapToolbarPopoverState } from "../../render/stateStore";
@@ -57,6 +58,11 @@ export function MapToolbar({
     selectedRowCount = 0,
 }: MapToolbarProps) {
     const toolbar = component.toolbar ?? {};
+    const [collapsed, setCollapsed] = useState(toolbar.collapsed !== false && !activePopover);
+    const authoredCollapsed = useRef(toolbar.collapsed);
+    useEffect(() => { if (authoredCollapsed.current !== toolbar.collapsed) { authoredCollapsed.current = toolbar.collapsed; setCollapsed(toolbar.collapsed !== false); } }, [toolbar.collapsed]);
+    useEffect(() => { if (activePopover) setCollapsed(false); }, [activePopover]);
+    const isCollapsed = collapsed && !activePopover;
     const actions: Array<{
         id: string;
         icon: string;
@@ -80,7 +86,8 @@ export function MapToolbar({
     if (visibleActions.length === 0) return null;
 
     return (
-        <div class={`hp-map-toolbar hp-map-toolbar-${toolbar.position ?? "topleft"}`} role="toolbar" aria-label="Map tools">
+        <div class={`hp-map-toolbar hp-map-toolbar-${toolbar.position ?? "topleft"} ${isCollapsed ? "is-collapsed" : ""}`} role="toolbar" aria-label="Map tools">
+            <button type="button" class="hp-map-toolbar-btn" aria-label={isCollapsed ? "Expand map tools" : "Collapse map tools"} title={isCollapsed ? "Expand map tools" : "Collapse map tools"} aria-expanded={!isCollapsed} onClick={() => { if (!isCollapsed && activePopover) onSetPopover(null); setCollapsed(!isCollapsed); }}><Icon name="menu" size="xs" decorative /></button>
             {visibleActions.map(action => {
                 const active = action.active === true || Boolean(action.popover && activePopover === action.popover);
                 const controls = action.popover ? mapToolbarPopoverId(mapId, action.popover) : undefined;

@@ -1,3 +1,4 @@
+import { MapPopupContent } from "./MapPopupContent";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { MapComponent } from "../../schema/hyperpbiSchema";
 import type { ResolvedMapLayer } from "../../maps/model/resolvedMapTypes";
@@ -28,6 +29,7 @@ export function MapFeatureDetails({
   onIdentifyChoice?: (featureKey: string) => void;
 }) {
   const active = interaction?.activeFeature;
+  const [minimized, setMinimized] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const mode = component.featureDetails?.mode ?? "auto";
   const anchor = active?.anchor;
@@ -121,7 +123,7 @@ export function MapFeatureDetails({
   return (
     <aside
       ref={panelRef}
-      class={`hp-map-feature-details is-${mode}`}
+      class={`hp-map-feature-details is-${mode} ${minimized ? "is-minimized" : ""}`}
       style={anchoredPosition}
       role="dialog"
       aria-modal="false"
@@ -142,6 +144,7 @@ export function MapFeatureDetails({
             <span>{selectedCount.toLocaleString()} features selected</span>
           )}
         </div>
+        <button type="button" aria-label={minimized ? "Expand feature details" : "Minimize feature details"} onClick={() => setMinimized(!minimized)}>{minimized ? "+" : "−"}</button>
         <button type="button" aria-label="Close feature details" onClick={onClose}>
           ×
         </button>
@@ -163,6 +166,7 @@ export function MapFeatureDetails({
         </label>
       )}
       <div class="hp-map-feature-details-body">
+        <MapPopupContent blocks={layer.popup?.content ?? []} feature={feature} executeAction={executeAction} />
         {view.html && (
           <div
             class="hp-map-feature-details-html"

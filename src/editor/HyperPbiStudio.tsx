@@ -1,3 +1,4 @@
+import { createMapCommandChannel } from "../maps/interactions/mapStudioCommands";
 import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
@@ -41,7 +42,7 @@ import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { prepareSpecification } from "../schema/prepareSpecification";
 import { SpecificationInspector } from "./inspector/SpecificationInspector";
-import { componentTree, updateComponent } from "./inspector/specificationEditor";
+import { componentTree, findComponent, updateComponent } from "./inspector/specificationEditor";
 import { SpecificationHistory } from "./inspector/specificationEditor";
 import { MapStudio } from "./map-studio/MapStudio";
 import type { ProviderAccessState } from "../providers/providerTypes";
@@ -268,6 +269,7 @@ export function HyperPbiStudio({
   const [workbenchStacked, setWorkbenchStacked] = useState(
     settings.editor.previewPosition === "bottom",
   );
+  const mapCommands = useMemo(() => createMapCommandChannel(), []);
   const [mapViewports, setMapViewports] = useState<
     Record<string, MapViewportState>
   >({});
@@ -276,7 +278,6 @@ export function HyperPbiStudio({
   );
   const specificationRef = useRef(specification);
   specificationRef.current = specification;
-  const geoLibreHistorySession = useRef<{ componentId: string; specification: string }>();
   const [logs, setLogs] = useState<StudioLog[]>([
     {
       level: "info",
@@ -482,36 +483,6 @@ export function HyperPbiStudio({
     reason: ExternalSelectionFailureReason = "component did not call selectExternal",
     indices: number[] = [],
   ) => updateInteraction(indices, details, { sent: false, reason });
-  const updateGeoLibreProject = useCallback((componentId: string, project: import("../components/geolibre/types").PersistedGeoLibreProject) => {
-    try {
-      const currentSpecification = specificationRef.current;
-      const parsed = JSON.parse(currentSpecification) as unknown;
-      const next = JSON.stringify(updateComponent(parsed, componentId, { project }), null, 2);
-      if (next === currentSpecification) return;
-      const session = geoLibreHistorySession.current;
-      if (session?.componentId === componentId && session.specification === currentSpecification) {
-        // GeoLibre owns fine-grained GIS undo/redo. Keep one HyperPBI history
-        // transaction for the live session instead of one per upstream state
-        // snapshot (map movement, layer styling, and similar edits).
-        specificationHistory.current.replaceCurrent(next);
-      } else {
-        specificationHistory.current.commit(next);
-      }
-      geoLibreHistorySession.current = { componentId, specification: next };
-      specificationRef.current = next;
-      setSpecification(next);
-      setPreview(current => current ? {
-        ...current,
-        schema: updateComponent(current.schema, componentId, { project }) as HyperPbiSchema,
-        sourceSpecification: next,
-      } : current);
-    } catch (error) {
-      const message = `GeoLibre project could not update the authoring draft: ${error instanceof Error ? error.message : String(error)}`;
-      setErrors([message]);
-      appendLog(message, "error");
-      setBottomTab("errors");
-    }
-  }, []);
   const validate = () => {
     try {
       const result = validateDraft(specification, configuration, data, dataWorkspace);
@@ -591,6 +562,12 @@ export function HyperPbiStudio({
       return false;
     }
   };
+  useEffect(() => {
+    if (editorTab === "mapStudio" || editorTab === "inspector") run();
+  }, [editorTab, data]);
+  useEffect(() => {
+    if (editorTab === "mapStudio") persistLayout({ ...layout, bottomOpen: false });
+  }, [editorTab]);
   const save = () => {
     const result = validate();
     if (!result.errors.length && result.schema && result.config && run())
@@ -635,7 +612,7 @@ export function HyperPbiStudio({
   const parsedConfig = parseConfig(configuration).config;
   const changeConfig = (config: HyperPbiConfig) =>
     setConfiguration(JSON.stringify(config, null, 2));
-  const showBottom =
+  const showBottom = editorTab === "mapStudio" ? layout.bottomOpen :
     (layout.advanced && layout.bottomOpen) ||
     (!layout.advanced && issueCount > 0);
   const authoringTree = useMemo(() => {
@@ -663,9 +640,7 @@ export function HyperPbiStudio({
     if (!inspectorMode) return;
     event.preventDefault();
     event.stopPropagation();
-    const element = (event.target as HTMLElement | null)?.closest?.(
-      "[data-hp-id]",
-    ) as HTMLElement | null;
+    const element = (event.composedPath().find(node => node instanceof HTMLElement && node.matches("[data-hp-id]")) ?? (event.target as HTMLElement | null)?.closest?.("[data-hp-id]")) as HTMLElement | null;
     if (!element) return;
     const owner = element.dataset.hpOwnerId;
     const runtimeId = element.dataset.hpId ?? "";
@@ -871,6 +846,55 @@ export function HyperPbiStudio({
       tabs[nextIndex]?.focus();
     });
   };
+  const selectedPreviewMap = preview && editorTab === "mapStudio" ? findComponent(preview.schema, mapIdForSelection(selectedComponentId, authoringTree)) : undefined;
+  const mapPreviewSchema: HyperPbiSchema | undefined = preview && selectedPreviewMap ? { ...preview.schema, app: { enabled: false }, components: [{ ...selectedPreviewMap, heightMode: "fill", minHeight: 200 } as unknown as DashboardComponent], leftPanel: [], rightPanel: [], toolbar: [] } : undefined;
+  const previewContent = preview ? (
+                  <HyperPbiRoot
+                    instanceId={`${instanceId}-preview`}
+                    schema={mapPreviewSchema ?? preview.schema}
+                    data={preview.data}
+                    settings={settings}
+                    config={preview.config}
+                    referenceWarnings={validateReferences(
+                      preview.schema,
+                      preview.data,
+                    )}
+                    renderMs={0}
+                    selectExternal={selectExternal}
+                    clearExternal={clearExternal}
+                    applyExternalFilter={applyExternalFilter}
+                    clearExternalFilter={clearExternalFilter}
+                    reportInteraction={reportInteraction}
+                    webAccessAvailable={webAccessAvailable}
+                    providerAccess={providerAccess}
+                    remoteSourceHost={remoteSourceHost}
+                    mapCommands={editorTab === "mapStudio" ? mapCommands : undefined}
+                    ownerByRuntimeId={preview.ownerByRuntimeId}
+                    componentPathById={preview.componentPathById}
+                    onMapViewportChange={(id, viewport) =>
+                      setMapViewports((current) => ({
+                        ...current,
+                        [id]: viewport,
+                      }))
+                    }
+                  />
+                ) : (
+                  <div class="hp-preview-empty" role="status">
+                    <span class="hp-preview-empty-icon" aria-hidden="true">▣</span>
+                    <h2>Preview your working dashboard</h2>
+                    <p>
+                      Preview validates the current draft without changing the
+                      saved Power BI visual.
+                    </p>
+                    <button
+                      class="hp-studio-button hp-studio-button-primary hp-preview-validate"
+                      type="button"
+                      onClick={() => run()}
+                    >
+                      Preview changes
+                    </button>
+                  </div>
+                );
   return (
     <div
       class={`hp-studio hp-studio-${settings.theme.mode} hp-preview-${settings.editor.previewPosition} ${layout.advanced ? "hp-studio-advanced" : "hp-studio-simple"}`}
@@ -980,7 +1004,7 @@ export function HyperPbiStudio({
       </header>
       <div class="hp-studio-navigation-row">
         <StudioWorkspaceNav value={editorTab} advanced={layout.advanced} onChange={setEditorTab} />
-        {settings.editor.previewPosition !== "hidden" && (
+        {settings.editor.previewPosition !== "hidden" && editorTab !== "mapStudio" && (
           <div
             class="hp-studio-focus-actions"
             role="group"
@@ -1012,7 +1036,7 @@ export function HyperPbiStudio({
       </div>
       <div
         ref={workbenchRef}
-        class={`hp-studio-workbench is-focus-${focusMode}`}
+        class={`hp-studio-workbench ${editorTab === "mapStudio" ? "is-map-workspace" : `is-focus-${focusMode}`}`}
         style={{ "--hp-editor-size": `${layout.editorPercent}%` }}
       >
         <section class="hp-studio-editor-pane">
@@ -1051,6 +1075,10 @@ export function HyperPbiStudio({
             <MapStudio
               json={specification}
               data={data}
+              preview={<div class="hp-map-author-preview">{previewContent}</div>}
+              mapCommands={mapCommands}
+              onPreview={() => run()}
+              configurationJson={configuration}
               prepared={preparedAuthoring}
               validateCandidate={validateCandidate}
               aliasOverrides={parsedConfig?.fields?.aliases}
@@ -1137,7 +1165,7 @@ export function HyperPbiStudio({
           )}{" "}
           {editorTab === "help" && <HelpDocsPanel />}
         </section>
-        {settings.editor.previewPosition !== "hidden" && (
+        {settings.editor.previewPosition !== "hidden" && editorTab !== "mapStudio" && (
           <>
             <div
               class="hp-main-resize-handle"
@@ -1192,53 +1220,7 @@ export function HyperPbiStudio({
                 </button>
               </header>
               <div class="hp-preview-content">
-                {preview ? (
-                  <HyperPbiRoot
-                    instanceId={`${instanceId}-preview`}
-                    schema={preview.schema}
-                    data={preview.data}
-                    settings={settings}
-                    config={preview.config}
-                    referenceWarnings={validateReferences(
-                      preview.schema,
-                      preview.data,
-                    )}
-                    renderMs={0}
-                    selectExternal={selectExternal}
-                    clearExternal={clearExternal}
-                    applyExternalFilter={applyExternalFilter}
-                    clearExternalFilter={clearExternalFilter}
-                    reportInteraction={reportInteraction}
-                    webAccessAvailable={webAccessAvailable}
-                    providerAccess={providerAccess}
-                    remoteSourceHost={remoteSourceHost}
-                    ownerByRuntimeId={preview.ownerByRuntimeId}
-                    componentPathById={preview.componentPathById}
-                    onMapViewportChange={(id, viewport) =>
-                      setMapViewports((current) => ({
-                        ...current,
-                        [id]: viewport,
-                      }))
-                    }
-                    onGeoLibreProjectChange={updateGeoLibreProject}
-                  />
-                ) : (
-                  <div class="hp-preview-empty" role="status">
-                    <span class="hp-preview-empty-icon" aria-hidden="true">▣</span>
-                    <h2>Preview your working dashboard</h2>
-                    <p>
-                      Preview validates the current draft without changing the
-                      saved Power BI visual.
-                    </p>
-                    <button
-                      class="hp-studio-button hp-studio-button-primary hp-preview-validate"
-                      type="button"
-                      onClick={() => run()}
-                    >
-                      Preview changes
-                    </button>
-                  </div>
-                )}
+                {previewContent}
               </div>
             </section>
           </>

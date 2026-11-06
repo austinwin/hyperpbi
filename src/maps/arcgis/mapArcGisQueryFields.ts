@@ -4,10 +4,11 @@ import { defaultAttributeSource, type MapAttributePurpose, type MapAttributeSour
 function effectiveSource(layer: MapLayerDefinition, explicit: MapAttributeSource | undefined, purpose: MapAttributePurpose): MapAttributeSource {
     return explicit ?? defaultAttributeSource(layer, purpose);
 }
-function templateFields(template: string, fields: Set<string>): void {
+function templateFields(template: string, fields: Set<string>, defaultSource: string = "service"): void {
     for (const match of template.matchAll(/\{\{\s*([^{}]{1,120}?)\s*\}\}/g)) {
         const field = match[1]?.trim();
-        if (field) fields.add(field);
+        const explicit = /^(service|powerbi|joined)\.(.+)$/.exec(field);
+        if (field && (explicit ? explicit[1] === "service" : defaultSource === "service")) fields.add(explicit?.[2] ?? field);
     }
 }
 
@@ -38,8 +39,17 @@ export function collectArcGisQueryFields(layer: MapLayerDefinition, source: ArcG
     const tooltipTemplateSource = effectiveSource(layer, layer.tooltip?.defaultFieldSource, "tooltip");
     if (layer.tooltip?.template && tooltipTemplateSource === "service") templateFields(layer.tooltip.template, fields);
     const popupTemplateSource = effectiveSource(layer, layer.popup?.defaultFieldSource, "popup");
-    if (layer.popup?.title && popupTemplateSource === "service") templateFields(layer.popup.title, fields);
-    if (layer.popup?.html && popupTemplateSource === "service") templateFields(layer.popup.html, fields);
+    if (layer.popup?.title) templateFields(layer.popup.title, fields, popupTemplateSource);
+    if (layer.popup?.html) templateFields(layer.popup.html, fields, popupTemplateSource);
+    const visitContent = (value: unknown, inheritedSource: string): void => {
+        if (Array.isArray(value)) { value.forEach(item => visitContent(item, inheritedSource)); return; }
+        if (!value || typeof value !== "object") return;
+        const block = value as Record<string, unknown>, source = String(block.fieldSource ?? inheritedSource);
+        if (typeof block.field === "string" && source === "service") fields.add(block.field);
+        for (const key of ["text", "url", "label"]) if (typeof block[key] === "string") templateFields(block[key] as string, fields, source);
+        for (const key of ["when", "colorWhen", "series", "children"]) visitContent(block[key], source);
+    };
+    visitContent(layer.popup?.content, popupTemplateSource);
 
     if (layer.visibility?.conditionField && effectiveSource(layer, layer.visibility.conditionFieldSource, "visibility") === "service") fields.add(layer.visibility.conditionField);
     for (const filter of layer.filter ? (Array.isArray(layer.filter) ? layer.filter : [layer.filter]) : []) {

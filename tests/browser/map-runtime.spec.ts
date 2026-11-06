@@ -20,6 +20,8 @@ declare global {
 test.beforeEach(async ({ page }) => {
   await page.goto("/tests/browser/map-runtime.html");
   await expect(page.locator(".leaflet-container")).toBeVisible();
+  const expand = page.getByRole("button", { name: "Expand map tools", exact: true });
+  if (await expand.count()) await expand.click();
 });
 
 test("one click selects points, lines, and polygons and keeps details stable", async ({ page }) => {

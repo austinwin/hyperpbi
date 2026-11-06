@@ -61,7 +61,7 @@ const CAPABILITIES: Readonly<Record<MapLayerSourceType, MapLayerCapabilities>> =
     featureInteraction: true,
     popup: true,
     tooltip: true,
-    join: false,
+    join: true,
     selection: true,
     serviceRenderer: false,
     serviceLabels: false,
@@ -93,7 +93,7 @@ export function mapLayerCapabilityExplanation(
   if (sourceType === "arcgisDynamic")
     return "ArcGIS dynamic layers render server images and support temporary, read-only click identify details. Persistent selection, joins, tooltips, service labels, and client feature rendering are unavailable.";
   if (sourceType === "powerbi")
-    return "Power BI geometry supports native row selection; ArcGIS service joins are only available on ArcGIS feature layers.";
+    return "Power BI geometry supports native row selection; Spatial joins are available on ArcGIS feature and GeoJSON layers.";
   if (sourceType === "xyz")
     return "XYZ tile layers are display-only images. Feature details, joins, labels, and selection are unavailable.";
   return undefined;

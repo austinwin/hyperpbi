@@ -63,7 +63,7 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 - HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
 - Dashboard schema 1.0 and missing versions are rejected by visual loading, Edit Mode, AI import, preview, save, and rendering. Legacy JSON can be converted explicitly with the development-only `npm run schema:migrate-v1 -- input.json output.json` utility; runtime migration is intentionally unsupported.
 <!-- component-summary:start -->
-- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+- The canonical implementation defines **83 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
 - Power BI visual package version `1.0.1.2` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
 
@@ -150,6 +150,14 @@ Every component supports mobile-first `responsive` rules at `xs` (0), `sm` (480)
 
 `heightMode: "fill"` propagates a bounded flex/grid height through nested grids, cards, tabs, charts, tables, maps, and split panes. `aspectRatio` creates a ratio-bound surface, and `minHeight` supplies a safe lower bound. A `split` becomes viewer-resizable with `resizable: true`; `sizes`, `minSizes`, and `maxSizes` are pane percentages, handles support pointer and keyboard input, and `persist: "none"|"session"|"local"` controls per-visual saved sizes. See the [flexible application dashboard example](examples/specs/v2-flexible-application-dashboard.json).
 
+## Compact Map Studio
+
+Map Studio uses a 40 px floating icon rail and one adjustable settings drawer over the existing Leaflet map. Configure multiple layers, service/GeoJSON joins, symbols, label fonts, filters, selections, legends and structured popups without JSON. The color picker, popup blocks and layer settings update canonical HyperPBI 2.0 JSON with undo/redo. Public GeoJSON/ArcGIS URLs on `miniup.app`, `miniup.io` and their subdomains use the same generic source adapters; there is no dedicated MiniUp map integration.
+
+See [Map Studio](docs/map-studio.md), [portable map definitions](docs/map-imports.md), and [trusted rendering](docs/security.md#trusted-author-documents).
+
+Visual Inspector now provides shared chart configuration for independent series, automatic/fixed axes, date and numeric formatting, gradients, labels, thresholds, annotations and zoom. It also creates field-bound components through a searchable metadata picker. See [advanced visual authoring](docs/advanced-authoring.md), [the configuration example](examples/specs/advanced-chart-authoring.json), and [1,200 sample readings](examples/data/advanced-chart-authoring.csv). The active registry audit covers 83 components after GeoLibre removal; these improvements add no component types.
+
 ## Charts, tables, maps, and SVG
 
 Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, gauge, heatmap, combo, waterfall, sankey, treemap, funnel, radar, and small multiples. Their ECharts `options` can alter safe presentation but cannot replace generated datasets, axes, series types/counts, links, nodes, encodings, or transforms. Declarative `events.zoom`, `events.rangeSelect`, and `events.brush` persist view state and can link filtered/highlighted source rows to named components. `drill.levels` navigates preloaded logical datasets with dataset-aware fields, parent-key filtering, source lineage, and breadcrumbs. `advancedChart` is the sanitized JSON-only escape hatch for implemented ECharts configurations that a semantic chart cannot express.
@@ -158,7 +166,6 @@ Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, ga
 
 `map` uses the same single **Values** field well as every other HyperPBI component for Power BI-backed fields; reference-only service and GeoJSON maps require no Values fields. HyperPBI 2.0 maps provide explicit Power BI, ArcGIS Feature/Tile/Dynamic, inline/remote GeoJSON, and generic XYZ layers; simple, unique, class-break, continuous, proportional, cluster, true canvas heatmap, density-grid, rich icon, line, and polygon renderers; interactive multi-layer legends; rectangle, lasso, and circle selection; quick filters; safe popups/labels; and compact operational tools. A shared controller synchronizes click, legend, spatial, external Power BI, and other HyperPBI component interactions across selected, hovered, externally highlighted, dimmed, and filtered states. Map Studio configures the major capabilities while retaining advanced JSON. See the [analytical map guide](docs/maps.md), [map services](docs/map-services.md), and the manifest-driven [map gallery](examples/map/README.md).
 
-`geolibre` is the separate full-GIS choice. It embeds the authentic pinned GeoLibre browser GUI—toolbar, map, layer panel, style panel, native project workflow, and browser-safe GIS tools—in an isolated frame. Power BI fields become ordinary native GeoJSON layers with private source-lineage mappings, while GeoLibre-authored view, layers, styles, and project state round-trip through the HyperPBI specification. Use `map` for ordinary analytical dashboards and `geolibre` only when the report explicitly needs a richer GIS workspace. See the [GeoLibre GIS workspace guide](docs/geolibre.md).
 
 ## Map demos
 
@@ -176,9 +183,9 @@ Power BI coordinate and geometry layers support feature clicks and native row se
 
 Map Studio candidate edits are validated with the exact current Runtime Config. Feature click, legend, rectangle, lasso, circle, Select visible, Invert, quick-filter reconciliation, external Power BI state, and linked HyperPBI state use one analytical interaction pipeline. ArcGIS tile/dynamic definition changes rebuild only the affected mounted overlay while preserving the viewport; access denial removes already-loaded content. ArcGIS root inspection is one bounded summary request, with lazy selected-item metadata and separate spatial/group/table classification. Join cardinality and unmatched policies are enforced and diagnosed; blank/invalid numeric aggregation inputs never fabricate zero, and empty numeric groups return `null`. Computed class breaks reduce to the supported distinct/ramp count, and map diagnostics use canonical RFC 6901 pointers scoped to the exact selected layer.
 
-`svg` is the preferred governed vector system for diagrams, schematics, pictorial marks, and custom gauges. It uses structured allowlisted elements, bindings, scales, conditions, state, bounded repeats, normal interactions, ID isolation, animation presets, and reduced-motion handling. `svgMarkup` is a strictly sanitized fallback for a single raw SVG document. See [SVG visuals](docs/svg-visuals.md).
+`svg` is the preferred governed vector system for diagrams, schematics, pictorial marks, and custom gauges. It uses structured allowlisted elements, bindings, scales, conditions, state, bounded repeats, normal interactions, ID isolation, animation presets, and reduced-motion handling. `svgMarkup` defaults to a sanitized raw SVG document; explicit trusted SVG mode preserves authored markup inside a sandboxed document. See [SVG visuals](docs/svg-visuals.md).
 
-For content, distinguish `text`, `markdown`, sanitized `html`, repeated/scoped `custom`, declarative `svg`, and sanitized `svgMarkup`. Prefer a first-class component when one fits.
+For content, distinguish `text`, `markdown`, Standard or trusted `html`/`custom`, declarative `svg`, and Standard or trusted `svgMarkup`. Prefer a first-class component when one fits.
 
 ## Interactions
 
@@ -202,13 +209,12 @@ The importer accepts one JSON object directly or inside one Markdown fence and c
 
 ## Security
 
-- No user JavaScript, `eval`, `new Function`, callbacks, inline handlers, scripts, iframes, arbitrary SQL, credentials, custom request headers, or request mutations. Remote data must use declared read-only sources.
+- Standard mode rejects executable author content. Explicit trusted HTML/SVG render without script execution inside opaque-origin sandboxed documents; trusted CSS uses a contained Shadow DOM. Credentials, host services and the full report model are not exposed.
 - HTML is sanitized; forms and executable/embed elements are removed in normal mode.
-- CSS is parsed, property-allowlisted, scoped, and stripped of imports, external URLs, fixed positioning, abusive z-index, and unsafe animation forms.
+- Standard CSS remains parsed, allowlisted and scoped. Trusted CSS preserves native imports, fonts, positioning and animation inside isolation boundaries. Browser and Power BI policies still apply.
 - ECharts options are recursively sanitized; functions, URL-bearing keys, executable strings, and unsafe semantic data overrides are removed.
-- SVG elements/attributes/references are allowlisted, IDs are namespaced, external resources are blocked, and exact element/path/depth/repeat/animation limits are enforced.
+- Structured SVG and Standard raw SVG remain governed. Trusted raw SVG retains filters, symbols, foreignObject, images and animation in its own sandboxed document.
 - ArcGIS and provider URLs require HTTPS, no embedded credentials, an allowed host, and the appropriate package privilege.
-- GeoLibre project snapshots are version/revision pinned, size/depth bounded, and stripped of live Power BI rows; credentials, executable state, absolute paths, plugin manifests, and plugin activation/settings are rejected before persistence.
 - Prompt data stays local until the user copies it. HyperPBI has no AI API key and should never receive credentials in dashboard JSON.
 
 See the full [security model](docs/security.md).
@@ -221,7 +227,7 @@ npm run package:maps
 ```
 
 - **Core** removes WebAccess privileges. Bound Power BI geometry remains available; external tiles, ArcGIS services, and geocoders are unavailable.
-- **Maps broad** is the default Maps artifact label. It declares the managed/official GeoLibre origins plus the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
+- **Maps broad** is the default Maps artifact label. It declares the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
 - **Maps restricted** uses the same safe built-ins and the restricted artifact label when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
 - Add comma-separated exact hosts or real-domain subdomain wildcards through `HYPERPBI_MAP_HOSTS` when packaging custom basemap or geocoder endpoints. Power BI doesn't support an all-host `https://*` WebAccess declaration, so custom hosts must be known when the PBIVIZ is built.
 
@@ -235,8 +241,6 @@ npm run dev
 npm run build
 npm run web:start
 npm run web:sites:build
-npm run geolibre:build
-npm run geolibre:build:cached
 npm run typecheck
 npm test
 npm run test:browser
@@ -309,5 +313,5 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 - External identity selection depends on Power BI identities and retained lineage.
 - Core has no external provider access. Maps access depends on WebAccess approval and host policy.
 - ArcGIS support is public-service, 2D, REST-oriented scope; secured services, editing, relationships, tracing, and non-4326 output are not implemented.
-- SVG is governed and bounded; it is not a browser SVG/JavaScript sandbox.
+- Structured SVG is governed and bounded. Trusted raw SVG is an isolated author document, with browser and host restrictions.
 - Every maintained dashboard example declares and validates as schema 2.0. The only schema 1.0 fixture is isolated under migration-specific tests.
