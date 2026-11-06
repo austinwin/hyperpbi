@@ -1,8 +1,8 @@
 # Security model
 
-HyperPBI treats dashboard JSON and pasted AI output as untrusted data. It validates declarative structures and never provides a user-code sandbox.
+HyperPBI treats dashboard JSON and pasted AI output as untrusted data by default. Standard mode validates and sanitizes content. Explicit trusted author modes preserve HTML/CSS/SVG inside separate isolation boundaries described below.
 
-## No executable dashboard code
+## Standard declarative mode
 
 Dashboard JSON cannot supply JavaScript, `eval`, `new Function`, callbacks, formatter functions, inline event handlers, dynamic imports, scripts, iframes, arbitrary DOM code, SQL, credentials, custom request headers, request mutations, or arbitrary network dataset loaders. Read-only remote data is limited to validated `data.sources`.
 
@@ -22,11 +22,11 @@ The importer accepts exactly one JSON object. Multiple objects, arrays/primitive
 
 Normal HTML is DOMPurify-sanitized. It forbids script, iframe, object/embed, link/meta/base, form controls, and style elements; raw style/srcset/form-action/xlink attributes are blocked. Data attributes are disabled and ARIA attributes are allowed.
 
-Normal URL policy permits fragment/root/relative and mailto forms; external images are not enabled by default. Trusted/internal modes are implementation-controlled, not a dashboard option for bypassing security.
+Normal URL policy permits fragment/root/relative and mailto forms; external images are not enabled by default. Trusted mode is an explicit Runtime Config selection and uses a separate document renderer; it does not bypass browser or Power BI security.
 
 ## CSS parser, allowlist, and scope
 
-CSS is parsed with `css-tree`; parse failure returns empty CSS with a warning. It removes `@import`, `@font-face`, namespace, document, and page rules. Only an explicit property set (or safe custom properties in trusted mode) survives.
+Standard CSS is parsed with `css-tree`; parse failure returns empty CSS with a warning. It removes `@import`, `@font-face`, namespace, document, and page rules. Only an explicit property set and safe custom properties survive in Standard mode.
 
 The sanitizer blocks:
 
@@ -47,7 +47,7 @@ Only an allowlisted series-type set passes. Semantic chart options cannot replac
 
 ## SVG sanitizer and limits
 
-Declarative `svg` passes a strict element/property/binding/animation schema. Raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
+Declarative `svg` passes a strict element/property/binding/animation schema. Standard raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
 
 Scripts, handlers, style, foreignObject, link/image/use, audio/video/canvas, external resources, animation elements, unsafe transforms, unknown references, and field-injected path data are blocked. Exact limits are in [SVG visuals](svg-visuals.md).
 
@@ -83,10 +83,11 @@ External filters require a true model-column target. Dataset-derived fields/metr
 | WebAccess privilege | None | Broad or restricted HTTPS hosts |
 | External tiles/services | No | Subject to host/runtime policy |
 | Geocoder | No | User-triggered and policy-gated |
-| Dashboard JavaScript | No | No |
+| Standard dashboard JavaScript | No | No |
+| Explicit trusted author documents | Sandboxed; host policy applies | Sandboxed; host policy applies |
 | Credentials in JSON | No | No |
 
-These profiles affect network privilege only; neither relaxes JSON, HTML, CSS, chart, SVG, interaction, or dataset safety.
+These profiles affect network privileges. Trusted author selections remain separate from package choice; neither package grants access to report credentials, model queries or host services from author documents.
 
 Map Studio edits canonical JSON and does not store credentials or hidden provider configuration. Popup HTML passes the existing sanitizer; popup actions use the safe UI-action allowlist. Normal viewer diagnostics expose only sanitized service origins. Geocoding endpoint, privacy, cache, and rate-limit behavior is unchanged by layer authoring.
 

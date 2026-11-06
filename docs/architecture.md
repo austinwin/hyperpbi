@@ -73,7 +73,9 @@ The rewrite changes only dataset inputs equal to the selected default source ID.
 
 ## Playground versus an HTML application platform
 
-The Playground is an authoring and reference runtime for governed analytics specifications. It is not a general HTML application builder. Custom presentation remains bounded by sanitized HTML/CSS, governed SVG, implemented components, declarative actions, safe expressions, and deterministic logical datasets. Scripts, callbacks, `eval`, arbitrary browser APIs, unsafe URLs, and executable workbook content remain prohibited.
+The Playground is an authoring and reference runtime for analytics specifications. Standard presentation uses sanitized HTML/CSS, governed SVG, implemented components, declarative actions, safe expressions, and deterministic logical datasets. Explicit trusted author mode preserves HTML/SVG in opaque-origin sandboxed documents and unrestricted CSS inside an isolated visual. Those documents have no report-service bridge; host CSP, network and frame restrictions still apply. The standard expression and workbook pipelines never execute scripts or callbacks.
+
+Published map imports use versioned generic definitions in `src/maps/imports`, explicit source adapters and three-way refresh merging. GeoJSON relationships reuse the existing map join engine and carry only real source-row lineage into host interactions. The compact Map Studio sends scoped commands to the same native map preview; it does not create a second renderer or an independent saved-state model. Remote GeoJSON lifecycle, popup content, color controls, effects and layer-origin presentation live in separate modules.
 
 ## Local development and deployment
 

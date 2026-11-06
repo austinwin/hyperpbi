@@ -45,7 +45,7 @@ panning does not mutate JSON.
 | `arcgisTile` | cached MapServer URL | Display-only raster tile overlay |
 | `arcgisDynamic` | MapServer URL and optional layer selection | Dynamic export image with optional temporary click identify |
 
-The default/broad Maps package declares the supported HyperPBI, MiniUp, OpenStreetMap, and ArcGIS HTTPS host families. This includes `https://*.miniup.app`, `https://*.arcgis.com`, and `https://*.arcgisonline.com`. Add organization-specific GIS, basemap, or geocoder origins at package time with `HYPERPBI_MAP_HOSTS`; dashboard JSON cannot expand Power BI's WebAccess allowlist.
+The default/broad Maps package declares the supported HyperPBI, MiniUp, OpenStreetMap, and ArcGIS HTTPS host families. This includes `https://miniup.app`, `https://*.miniup.app`, `https://miniup.io`, `https://*.miniup.io`, `https://*.arcgis.com`, and `https://*.arcgisonline.com`. Add organization-specific GIS, basemap, or geocoder origins at package time with `HYPERPBI_MAP_HOSTS`; dashboard JSON cannot expand Power BI's WebAccess allowlist.
 
 Power BI fields use the normalized field key or prepared AI alias. A layer can name a logical
 dataset; lineage is preserved where the dataset operation can retain contributing source rows.
@@ -289,3 +289,10 @@ filter, and tool settings. Advanced JSON remains available for complete expert a
 See [map services](map-services.md), [interactions](interactions.md), the
 [HyperPBI specification reference](hyperpbi-spec-reference.md), and the machine-readable
 [`mapCapabilityRegistry.ts`](../src/maps/mapCapabilityRegistry.ts).
+
+
+## Compact authoring and generic published sources
+
+[Map Studio](map-studio.md) now uses a floating rail and one contextual drawer. The map retains its full container width when the drawer opens. Data, Style, Labels, Popup, Filter, Effects, Interactions and Advanced categories are remembered per layer. Generic GeoJSON, FeatureServer, tiles and portable map-definition imports support public MiniUp app/io hosts and ArcGIS services without a dedicated MiniUp map workflow.
+
+GeoJSON joins use the same cardinality, aggregation and lineage engine as ArcGIS feature joins. Source fields, Power BI fields and joined fields remain separate. Date/report slicers rebind analytical data while source definitions and feature IDs remain stable. Hidden remote GeoJSON sources stop polling; identical URLs within a map share one fetch; stale responses are discarded. Remote GeoJSON is bounded to 25 MB and configured feature limits; use FeatureServer viewport loading for larger data. See [portable definitions and controlled refresh](map-imports.md).

@@ -1,6 +1,6 @@
 # Content and custom components
 
-Choose the narrowest implemented component. Custom content is not an escape hatch for JavaScript or arbitrary websites.
+Choose the narrowest implemented component. Standard custom content is sanitized. Explicit trusted mode supports authored browser markup in an isolated document; it does not replace native map integration.
 
 | Type | Content | Binding/repetition | Security |
 |---|---|---|---|
@@ -34,3 +34,8 @@ For an interactive custom slicer/list, combine a repeat with a safe `interaction
 ## Prefer first-class components
 
 Use `card`, `listGroup`, `dataGrid`, `detailPanel`, `dropdown`, `popover`, `offcanvas`, `modal`, semantic charts, `table`, `matrix`, or `map` when they fit. These components provide stronger schema validation, accessibility, interactions, and responsive behavior than simulated custom markup.
+
+
+## Trusted authoring
+
+Runtime Config `security.htmlMode: "trusted"` uses the same isolated document renderer for HTML, custom repeats and slots. `security.svgMode: "trusted"` enables arbitrary raw SVG. `security.cssMode: "trusted"` isolates unrestricted styles in a contained Shadow DOM and passes authored styles to trusted documents. Standard behavior remains the default. Field values are bound after parsing and cannot become executable markup. See [security boundaries and host limits](security.md#trusted-author-documents).
