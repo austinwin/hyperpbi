@@ -25860,5 +25860,9 @@ for (const descriptor of componentDescriptors) {
     interactions:descriptor.capabilities.interactions?true:"not-applicable",focusedTests
   };
 }
+for (const descriptor of componentDescriptors) if (descriptor.category === "Charts" && descriptor.schema.allowed.includes("options")) {
+  descriptor.schema.allowed.push("chartStyle");
+  descriptor.inspector.push({property:"chartStyle",label:"Chart presentation",control:"json",group:"Appearance",order:Math.max(0,...descriptor.inspector.map(property=>property.order??0))+10,advanced:true,help:"Use the visual chart configuration panel for axes, series, labels, annotations and navigation."});
+}
 export const componentDescriptorsByType=new Map(componentDescriptors.map(descriptor=>[descriptor.type,descriptor] as const));
 export const getComponentDescriptor=(type:string)=>componentDescriptorsByType.get(type);

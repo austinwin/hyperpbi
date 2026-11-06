@@ -1,4 +1,6 @@
 import { useEffect, useMemo } from "preact/hooks";
+import { applyChartStyle } from "./chartStyle";
+import { chartDataState } from "./chartDataState";
 import type {
     ChartComponent,
     ChartDrillLevelDefinition,
@@ -99,6 +101,9 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
             : rows;
     }, [datasetView?.rows, baseRows, drillLevel?.parentField, drillPath]);
     const effectiveComponent = useMemo(() => componentAtDrillLevel(component, drillLevel), [component, drillLevel]);
+    // Presentation controls must not regroup source rows or rebuild identity bindings.
+    const adapterRevision=JSON.stringify({...effectiveComponent,chartStyle:undefined});
+    const adapterComponent=useMemo(()=>({...effectiveComponent,chartStyle:undefined}) as ChartComponent,[adapterRevision]);
     const adapter = getChartAdapter(effectiveComponent);
     const effectiveFields: Record<string, NormalizedField> = datasetView?.fields ?? context.data.fields;
     const powerBiRows = context.powerBiSourceRows ?? context.sourceRows;
@@ -123,8 +128,9 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         sourceIndicesForRow: lineageForRow,
     }), [context.settings.theme, currentRows, powerBiRowKeys, datasetView, datasetRowIndex, staticRowIndex, context.datasetLineage, powerBiIndex]);
     const missing = adapter.fields(effectiveComponent).filter(field => !effectiveFields[field]);
-    const result = useMemo(() => adapter.build(effectiveComponent, currentRows, buildContext), [adapter, effectiveComponent, currentRows, buildContext]);
-    const option = useMemo(() => enableDeclarativeChartEvents(result.option, component.events), [result.option, component.events]);
+    const result = useMemo(() => adapter.build(adapterComponent, currentRows, buildContext), [adapter, adapterComponent, currentRows, buildContext]);
+    const sourceStatus=chartDataState(context.getDatasetView?.(effectiveComponent.dataset,id)?.name??effectiveComponent.dataset,context.schema.data?.datasets,context.remoteSources);
+    const option = useMemo(() => applyChartStyle(enableDeclarativeChartEvents(result.option, component.events), component.chartStyle), [result.option, component.events, component.chartStyle]);
     const selectedRows = useMemo(() => new Set([
         ...selectedSourceRows(id, { state: context.state }),
         ...(context.state.componentSelectedRows[id] ?? []),
@@ -221,6 +227,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
 
     const body = (
         <>
+            {sourceStatus?.status==="loading"&&<div class="hp-chart-warnings" role="status" aria-live="polite">Loading chart data…</div>}
             {breadcrumbs && (
                 <nav class="hp-chart-drill" aria-label={`${component.title ?? id} drill path`}>
                     {drillLevels.slice(0, drillLevelIndex + 1).map((level, index) => (
@@ -251,14 +258,14 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
                                 completeOption={component.type !== "advancedChart"}
                                 selectedDataPoints={selectionRefs}
                                 onDataPoint={onDataPoint}
-                                onZoom={component.events?.zoom?.enabled || component.events?.rangeSelect?.enabled ? onZoom : undefined}
+                                onZoom={component.chartStyle?.zoom || component.events?.zoom?.enabled || component.events?.rangeSelect?.enabled ? onZoom : undefined}
                                 onBrush={component.events?.brush?.enabled ? onBrush : undefined}
                                 onDrill={component.drill && component.drill.trigger !== "click" ? drillFromEvent : undefined}
                                 restoredZoom={context.state.chartViewState[id]?.zoom}
                             />
                             {result.warnings.length ? <div class="hp-chart-warnings" role="status">{result.warnings.join(" ")}</div> : null}
                         </>
-                        : <EmptyState title="No data for this chart" />}
+                        : <EmptyState title={sourceStatus?.status==="loading"?"Loading chart data…":sourceStatus?.status==="error"?"Chart data is unavailable":component.chartStyle?.noDataText ?? "No data for this chart"}>{sourceStatus?.error}</EmptyState>}
         </>
     );
     return component.frameless

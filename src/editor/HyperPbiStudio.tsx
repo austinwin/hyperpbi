@@ -563,7 +563,7 @@ export function HyperPbiStudio({
     }
   };
   useEffect(() => {
-    if (editorTab === "mapStudio") run();
+    if (editorTab === "mapStudio" || editorTab === "inspector") run();
   }, [editorTab, data]);
   useEffect(() => {
     if (editorTab === "mapStudio") persistLayout({ ...layout, bottomOpen: false });

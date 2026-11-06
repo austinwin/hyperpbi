@@ -10,6 +10,8 @@ import {
 import { mapStudioData, mapStudioSpecification } from "./map-studio-fixture";
 
 const mountedHosts: HTMLElement[] = [];
+// These tests exercise shell state; real map lifecycle is covered by Chromium.
+vi.mock("../src/components/maps/LeafletMap",()=>({LeafletMap:()=> <div class="leaflet-layout-stub"/>}));
 
 afterEach(() => {
   for (const host of mountedHosts.splice(0)) {

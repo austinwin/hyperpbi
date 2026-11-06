@@ -196,6 +196,7 @@ export interface DataDisplayComponent extends ComponentBase {
 }
 
 export interface BaseChartComponent extends ComponentBase {
+    chartStyle?: import("../components/charts/chartStyle").ChartStyle;
     /** Remove card chrome and let the chart occupy its layout container. */
     frameless?: boolean;
     height?: number;
