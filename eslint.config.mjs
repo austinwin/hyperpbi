@@ -16,6 +16,8 @@ export default [
             "vendor/**",
             ".vscode/**",
             ".tmp/**",
+            "test-results/",
+            "playwright-report/",
         ],
     },
 ];

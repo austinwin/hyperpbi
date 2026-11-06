@@ -1,0 +1,24 @@
+# HyperPBI 1.0.2 / Power BI 1.0.2.0
+
+This release extends the compact native Map Studio work with safe visual chart authoring and field-aware component creation. The synchronized baseline is `9d35a80a5f22e3e3a564102daf54aaa441f306f3`. Final delivery reports the resulting main commit and review URL.
+
+## Implementation
+
+- Existing ECharts adapters and selection bindings remain authoritative. `chartStyle` is an optional schema 2.0 presentation model with shared metadata-driven controls for axes, series, formats, labels, gradients, thresholds, reference lines/bands, zoom, animation and no-data text. Style changes reuse aggregation and identity results. Remote loading/error indicators follow actual source status through logical dataset aliases.
+- Safe ECharts options use a bounded allowlist and schema diagnostics. Unknown properties, callback functions, executable source, unsafe markup, URL-bearing options and invalid values are rejected. Library-owned formatters implement declarative formatting. Built-in tooltip data is escaped. Advanced row limits report their effect explicitly.
+- The existing Visual Inspector gains property search/reset, a searchable component picker, metadata-seeded field-bound templates, field provenance and immediate valid preview. History and last-valid-state behavior remain shared.
+- Native Leaflet supports WMS within the existing raster adapter. URL/layer/style/version/format/transparency controls, fit-to-layer, source-aware style suggestions and inline GeoJSON category generation improve map authoring. Raster defaults no longer overwrite Leaflet defaults with undefined values. WMS remains display only; vector tiles require unsupported decoding and receive explicit guidance.
+- The latest safety instruction supersedes the earlier executable trusted-document design. All authored HTML/SVG now run without script permission. Static markup, CSS/SVG features and isolation remain; no JavaScript component, runtime AI call or host bridge is introduced.
+- Package versions advance to avoid reusing the previous Power BI upgrade version. Core remains without WebAccess; Maps retains explicit MiniUp app/io and ArcGIS host families. Certification-driven code stripping is not enabled; certification is not claimed.
+
+The [audit](../advanced-authoring-audit.json) covers all 83 active component descriptors and validates every canonical example. The earlier GeoLibre removal explains the count relative to the previous 84-component inventory. See [authoring documentation](../advanced-authoring.md), [native map guide](../map-studio.md), [example chart specification](../../examples/specs/advanced-chart-authoring.json), [sample data](../../examples/data/advanced-chart-authoring.csv), and [changed-file inventory](2026-11-advanced-authoring-files.txt).
+
+## Verification and limits
+
+The complete unit run passes 827 tests in 168 files. Main Chromium coverage passes 46 scenarios, including keyboard interaction, retained ECharts instances, independent axes, automatic nonzero ranges, numeric/date formats, 1,200-reading report-date updates, creation without JSON, save/reload, WMS requests and visibility, authored-script blocking, compact map workflows and light/dark layouts. Both Playground browser cases pass separately. Twelve reviewed Windows Chromium screenshot states cover maps and charts. Schema preparation also validates the complete chart example's logical datasets.
+
+Root/web/Playground type checks, lint, generated-documentation checks and production builds are required before packaging. Core, Maps and restricted Maps are built sequentially under Node 22.13 with a 4 GB heap, then inspected for exact WebAccess and Values-only capabilities. Final distributables include PBIVIZ archives, Playground output, browser runtime assets and the verified web deployment archive, with byte-preserving Git attributes and SHA-256 checksums.
+
+Actual Power BI Desktop/Service reports and tenant settings were unavailable. Browser host simulations verify received-row lineage and date updates; they cannot prove tenant permissions, semantic-model relationships or report-specific identity behavior. External services still require allowed hosts and applicable CORS/host permissions. The WMS sample GetCapabilities endpoint was checked; deterministic browser tests do not depend on live service availability. Node/OpenNext on Windows emits its platform caution; production deployment still requires the target runtime checks. Existing large chart/diagram bundles retain Vite size warnings.
+
+No certification or product-wide superiority claim is made. Microsoft certification requires its own review, including restrictions on external resources; Maps and optional external trusted content remain material considerations. See [Microsoft's current requirements](https://learn.microsoft.com/en-us/power-bi/developer/visuals/power-bi-custom-visuals-certified).

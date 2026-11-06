@@ -1,0 +1,39 @@
+{
+  "version": "2.0",
+  "title": "Advanced chart authoring",
+  "data": {"datasets": {"daily": {"source": "powerbi", "groupBy": ["date"], "metrics": {
+    "temperature": {"field": "temperature", "op": "avg"},
+    "rainfall": {"field": "rainfall", "op": "sum"}
+  }, "sort": [{"field": "date", "direction": "asc"}]}}},
+  "components": [
+    {
+      "type": "comboChart", "id": "quality", "title": "Daily quality and rainfall", "dataset": "daily", "category": "date",
+      "series": [
+        {"field": "temperature", "label": "Temperature", "chartType": "line", "aggregation": "avg"},
+        {"field": "rainfall", "label": "Rainfall", "chartType": "bar", "aggregation": "sum", "axis": "right"}
+      ],
+      "chartStyle": {
+        "xAxis": [{"dateFormat": "iso", "rotate": 20}],
+        "yAxis": [{"domain": "auto", "decimals": 2}, {"domain": "zero", "suffix": " mm"}],
+        "series": [
+          {"color": "#2563eb", "smooth": true, "referenceLines": [{"value": 55, "label": "Target"}], "referenceBands": [{"from": 52, "to": 58, "label": "Operating range", "color": "#99f6e433"}]},
+          {"color": "#0f766e", "gradientEnd": "#99f6e4", "opacity": 0.75, "thresholds": [{"above": 2000, "color": "#ea580c"}]}
+        ],
+        "tooltipDecimals": 2, "legend": true, "zoom": true, "gridBottom": 65
+      }
+    },
+    {
+      "type": "advancedChart", "id": "declarative-options", "title": "Validated advanced options", "dataset": "daily", "height": 320,
+      "options": {
+        "tooltip": {"trigger": "axis", "confine": true}, "legend": {"top": 0},
+        "grid": {"left": 55, "right": 55, "top": 40, "bottom": 55},
+        "xAxis": {"type": "category", "axisLabel": {"rotate": 20}},
+        "yAxis": [{"type": "value", "scale": true}, {"type": "value", "position": "right", "min": 0}],
+        "series": [
+          {"type": "line", "name": "Temperature", "encode": {"x": "date", "y": "temperature"}, "smooth": true},
+          {"type": "bar", "name": "Rainfall", "encode": {"x": "date", "y": "rainfall"}, "yAxisIndex": 1, "itemStyle": {"opacity": 0.7}}
+        ]
+      }
+    }
+  ]
+}

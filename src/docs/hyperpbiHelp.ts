@@ -79,7 +79,7 @@ The native matrix renders every declared value metric, including column-group ×
 
 ## Security boundaries
 
-Standard mode rejects user scripts, executable callbacks and unsafe HTML/CSS/SVG. Trusted HTML/SVG run only in opaque-origin documents; trusted CSS uses Shadow DOM and outer paint containment. No credentials, host APIs or the full model are exposed to author documents. SQL, custom request headers and request mutations are unsupported. Read-only remote data is limited to declared \`data.sources\`: MiniUp table/Function sources and web-only \`rest.get\`. The web build trusts only \`HYPERPBI_WEB_REST_HOSTS\` (default public miniup.app/miniup.io host families), while Power BI remote data is limited to \`miniup.function\` through the network-enabled package. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
+Standard mode rejects user scripts, executable callbacks and unsafe HTML/CSS/SVG. Trusted HTML/SVG remain non-executable in opaque-origin documents; trusted CSS uses Shadow DOM and outer paint containment. No credentials, host APIs or the full model are exposed to author documents. SQL, custom request headers and request mutations are unsupported. Read-only remote data is limited to declared \`data.sources\`: MiniUp table/Function sources and web-only \`rest.get\`. The web build trusts only \`HYPERPBI_WEB_REST_HOSTS\` (default public miniup.app/miniup.io host families), while Power BI remote data is limited to \`miniup.function\` through the network-enabled package. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
@@ -203,7 +203,7 @@ Use supplied structured diagnostics as the authority. The version must be presen
 
 ## Security
 
-Standard mode is the default. Generate trusted author code only when the user explicitly selected trusted mode in Runtime Config. Trusted HTML and raw SVG preserve markup in sandboxed documents; trusted CSS is isolated. Browser/Power BI policies remain authoritative. Field templates cannot supply executable contexts. Native map popups remain declarative and sanitized.
+Standard mode is the default. Generate trusted static markup only when the user explicitly selected trusted mode in Runtime Config. Trusted HTML and raw SVG preserve markup in sandboxed documents; trusted CSS is isolated. Browser/Power BI policies remain authoritative. Field templates cannot supply executable contexts. Native map popups remain declarative and sanitized.
 
 In Standard mode, never emit user JavaScript, eval, executable functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, cross-source logical-dataset joins, request mutations, or custom request headers. Declared read-only remote sources are allowed only under \`data.sources\` and must follow the host policy. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
 

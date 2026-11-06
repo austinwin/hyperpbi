@@ -156,6 +156,8 @@ Map Studio uses a 40 px floating icon rail and one adjustable settings drawer ov
 
 See [Map Studio](docs/map-studio.md), [portable map definitions](docs/map-imports.md), and [trusted rendering](docs/security.md#trusted-author-documents).
 
+Visual Inspector now provides shared chart configuration for independent series, automatic/fixed axes, date and numeric formatting, gradients, labels, thresholds, annotations and zoom. It also creates field-bound components through a searchable metadata picker. See [advanced visual authoring](docs/advanced-authoring.md), [the configuration example](examples/specs/advanced-chart-authoring.json), and [1,200 sample readings](examples/data/advanced-chart-authoring.csv). The active registry audit covers 83 components after GeoLibre removal; these improvements add no component types.
+
 ## Charts, tables, maps, and SVG
 
 Semantic charts include bar, horizontal bar, line, area, pie, donut, scatter, gauge, heatmap, combo, waterfall, sankey, treemap, funnel, radar, and small multiples. Their ECharts `options` can alter safe presentation but cannot replace generated datasets, axes, series types/counts, links, nodes, encodings, or transforms. Declarative `events.zoom`, `events.rangeSelect`, and `events.brush` persist view state and can link filtered/highlighted source rows to named components. `drill.levels` navigates preloaded logical datasets with dataset-aware fields, parent-key filtering, source lineage, and breadcrumbs. `advancedChart` is the sanitized JSON-only escape hatch for implemented ECharts configurations that a semantic chart cannot express.
@@ -207,7 +209,7 @@ The importer accepts one JSON object directly or inside one Markdown fence and c
 
 ## Security
 
-- Standard mode rejects executable author content. Explicit trusted HTML/SVG run inside opaque-origin sandboxed documents; trusted CSS uses a contained Shadow DOM. Credentials, host services and the full report model are not exposed.
+- Standard mode rejects executable author content. Explicit trusted HTML/SVG render without script execution inside opaque-origin sandboxed documents; trusted CSS uses a contained Shadow DOM. Credentials, host services and the full report model are not exposed.
 - HTML is sanitized; forms and executable/embed elements are removed in normal mode.
 - Standard CSS remains parsed, allowlisted and scoped. Trusted CSS preserves native imports, fonts, positioning and animation inside isolation boundaries. Browser and Power BI policies still apply.
 - ECharts options are recursively sanitized; functions, URL-bearing keys, executable strings, and unsafe semantic data overrides are removed.

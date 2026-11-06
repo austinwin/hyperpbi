@@ -121,7 +121,7 @@ Use supplied structured diagnostics as the authority. The version must be presen
 
 ## Security
 
-Standard mode is the default. Generate trusted author code only when the user explicitly selected trusted mode in Runtime Config. Trusted HTML and raw SVG preserve markup in sandboxed documents; trusted CSS is isolated. Browser/Power BI policies remain authoritative. Field templates cannot supply executable contexts. Native map popups remain declarative and sanitized.
+Standard mode is the default. Generate trusted static markup only when the user explicitly selected trusted mode in Runtime Config. Trusted HTML and raw SVG preserve markup in sandboxed documents; trusted CSS is isolated. Browser/Power BI policies remain authoritative. Field templates cannot supply executable contexts. Native map popups remain declarative and sanitized.
 
 In Standard mode, never emit user JavaScript, eval, executable functions, callbacks, inline handlers, scripts, iframes, arbitrary URLs, CSS imports, credentials, AI keys, SQL, cross-source logical-dataset joins, request mutations, or custom request headers. Declared read-only remote sources are allowed only under `data.sources` and must follow the host policy. HTML is sanitized. CSS is parsed, allowlisted, and scoped. ECharts options are recursively sanitized and semantic chart options cannot replace generated data bindings. SVG is allowlisted, namespaced, sanitized, and limited. ArcGIS access is HTTPS and host-policy controlled.
 
