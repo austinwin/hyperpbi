@@ -35,6 +35,7 @@ export function configuredMapEndpoints(specification: string): string[] {
 
         const entry = value as Record<string, unknown>;
         if (EXTERNAL_SOURCE_TYPES.has(String(entry.type))) add(entry.url);
+        if (typeof entry.manifestUrl === "string") add(entry.manifestUrl);
 
         if (entry.type === "map" && entry.basemap && typeof entry.basemap === "object") {
             const basemap = entry.basemap as Record<string, unknown>;

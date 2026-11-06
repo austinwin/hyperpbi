@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { resolve } from "node:path";
 
 declare global {
   interface Window {
@@ -46,6 +47,20 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/tests/browser/map-studio.html");
   await expect(page.locator(".hp-map-studio")).toBeVisible();
+});
+
+test("imports a portable MiniUp map with multiple native layers on a compact viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 780 });
+  await page.getByRole("button", { name: "Import MiniUp map", exact: true }).click();
+  await page.getByLabel("Open MiniUp manifest").setInputFiles(resolve("examples/map/miniup-published-map.json"));
+  await expect(page.locator(".hp-miniup-preview")).toContainText("Facility Network");
+  await page.getByRole("button", { name: "Import map and 2 layers" }).click();
+  await expect(page.getByRole("button", { name: "Select layer Facilities", exact: true })).toBeVisible();
+  const specification = await page.evaluate(() => JSON.parse(window.hpMapStudioHarness.json));
+  expect(specification.components[0].layers).toHaveLength(5);
+  expect(specification.components[0].imports[0].mode).toBe("snapshot");
+  expect(specification.components[0].layers.filter((layer: { provenance?: unknown }) => layer.provenance)).toHaveLength(2);
+  expect(await page.locator(".hp-map-studio").evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
 });
 
 test("switching property sections preserves the selected layer and Studio instance", async ({ page }) => {

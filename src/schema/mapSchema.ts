@@ -140,6 +140,7 @@ export interface MapLayerGroupDefinition {
 export interface MapLayerDefinition {
     id: string;
     name: string;
+    provenance?: import("../maps/miniup/miniupTypes").MapLayerProvenance;
     /** Logical row view for this layer. Falls back to the map component dataset, then powerbi. */
     dataset?: string;
     /** Optional canonical group membership. */

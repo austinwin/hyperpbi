@@ -6,6 +6,7 @@ import { closestMatches, type Diagnostic } from "./diagnostics";
 import { resolveMapLayerCapabilities } from "../maps/model/mapLayerCapabilities";
 import type { MapLayerSourceType } from "./mapSchema";
 import { isValidIconName } from "../components/icons/iconRegistry";
+import { validateMiniUpMetadata } from "../maps/miniup/miniupValidation";
 
 type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json =>
@@ -342,7 +343,7 @@ export function validateMapComponentSchema(
   path: string,
   componentId?: string,
 ): Diagnostic[] {
-  const diagnostics: Diagnostic[] = [];
+  const diagnostics: Diagnostic[] = validateMiniUpMetadata(component, path, componentId);
   const nested: Array<[string, Set<string>]> = [
     [
       "view",
@@ -756,6 +757,7 @@ function validateLayer(
       "id",
       "name",
       "dataset",
+      "provenance",
       "groupId",
       "visible",
       "opacity",

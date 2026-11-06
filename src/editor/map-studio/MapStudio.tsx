@@ -1,3 +1,5 @@
+import { MiniUpImportPanel } from "./MiniUpImportPanel";
+import { parseConfig } from "../../config/hyperpbiConfig";
 import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import type { NormalizedData, NormalizedField } from "../../data/normalizeData";
 import type { DatasetDefinition } from "../../data/datasets";
@@ -178,6 +180,7 @@ export function MapStudio({
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
   const [candidateWarnings, setCandidateWarnings] = useState<string[]>([]);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [miniupOpen, setMiniupOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState("");
   const [dragging, setDragging] = useState("");
   const [metadata, setMetadata] = useState<{
@@ -746,6 +749,7 @@ export function MapStudio({
           </select>
         </div>
         <div class="hp-map-studio-actions">
+          <StudioButton variant="compact" onClick={() => setMiniupOpen(open => !open)} aria-expanded={miniupOpen}>Import MiniUp map</StudioButton>
           <StudioButton
             variant="compact"
             disabled={!history.canUndo}
@@ -776,6 +780,7 @@ export function MapStudio({
           )}
         </div>
       </header>
+      {miniupOpen && <MiniUpImportPanel map={map} publishedMaps={parseConfig(configurationJson ?? "{}").config?.miniup?.publishedMaps} providerAccess={providerAccess} webAccessAvailable={webAccessAvailable} onClose={() => setMiniupOpen(false)} onApply={(imported, warnings) => { const applied = mutateMap(candidate => Object.assign(candidate, imported)); if (applied) setCandidateWarnings(warnings); return applied; }} />}
       <div
         class="hp-map-studio-pane-switch"
         role="tablist"
@@ -859,6 +864,7 @@ export function MapStudio({
                 ] as const).map(([type, label]) => (
                   <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
                 ))}
+                <button role="menuitem" onClick={() => { setAddMenuOpen(false); setMiniupOpen(true); }}>MiniUp published map</button>
                 <button role="menuitem" onClick={() => { setAddMenuOpen(false); addGroup(); }}>Layer group</button>
               </div>
             )}
@@ -1221,7 +1227,7 @@ export function MapStudio({
           <strong title={item.name}>{item.name}</strong>
           <small>
             <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
-              {item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
+              {item.provenance?.provider === "miniup" ? "MiniUp" : item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
             </span>
             <span title={featureCount}>{featureCount}</span>
           </small>

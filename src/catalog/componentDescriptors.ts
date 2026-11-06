@@ -23380,6 +23380,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "basemap",
         "layers",
         "layerGroups",
+        "imports",
         "bookmarks",
         "search",
         "legend",

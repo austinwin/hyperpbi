@@ -427,6 +427,7 @@ export interface MapComponent extends ComponentBase {
     view?: MapViewDefinition;
     basemap?: MapBasemapDefinition;
     layers?: MapLayerDefinition[];
+    imports?: import("../maps/miniup/miniupTypes").MiniUpMapImport[];
     layerGroups?: MapLayerGroupDefinition[];
     bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;

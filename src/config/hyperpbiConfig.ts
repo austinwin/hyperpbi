@@ -11,6 +11,7 @@ export interface HyperPbiConfig {
     security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; svgMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
     providers?: ProviderConfiguration;
     fields?: { aliases?: Record<string,string> };
+    miniup?: { publishedMaps?: import("../maps/miniup/miniupTypes").PublishedMiniUpMap[] };
     motion?: { enabled?: boolean; reducedMotion?: "respect-system" | "always-reduce" | "never-reduce"; maxConcurrentAnimations?: number };
 }
 
@@ -36,6 +37,7 @@ export function parseConfig(text: string): { config?: HyperPbiConfig; errors: st
     const providers: ProviderConfiguration = { ...defaultConfig.providers, ...candidate.providers, basemap: { provider: candidate.providers?.basemap?.provider ?? defaultConfig.providers?.basemap?.provider ?? "none", enabled: candidate.providers?.basemap?.enabled ?? defaultConfig.providers?.basemap?.enabled ?? false, ...defaultConfig.providers?.basemap, ...candidate.providers?.basemap }, geocoder: { provider: candidate.providers?.geocoder?.provider ?? defaultConfig.providers?.geocoder?.provider ?? "none", enabled: candidate.providers?.geocoder?.enabled ?? defaultConfig.providers?.geocoder?.enabled ?? false, ...defaultConfig.providers?.geocoder, ...candidate.providers?.geocoder } };
     const config: HyperPbiConfig = { ...defaultConfig, ...candidate, version: "1.0", bindings: { ...defaultConfig.bindings, ...candidate.bindings }, interactions: { ...defaultConfig.interactions, ...candidate.interactions }, renderer: { ...defaultConfig.renderer, ...candidate.renderer }, security: { ...defaultConfig.security, ...candidate.security }, fields:{...defaultConfig.fields,...candidate.fields,aliases:{...defaultConfig.fields?.aliases,...candidate.fields?.aliases}}, motion:{...defaultConfig.motion,...candidate.motion}, providers };
     const errors = validateProviderConfig(config.providers);
+    if (config.miniup?.publishedMaps !== undefined && (!Array.isArray(config.miniup.publishedMaps) || config.miniup.publishedMaps.some(item => !item || typeof item.name !== "string" || typeof item.manifestUrl !== "string" || !/^https:\/\//i.test(item.manifestUrl)))) errors.push("miniup.publishedMaps must contain named public HTTPS manifest URLs.");
     if (config.security?.cssMode && !["scoped", "trusted"].includes(config.security.cssMode)) errors.push("security.cssMode must be scoped or trusted.");
     if (config.security?.htmlMode && !["sanitized", "trusted"].includes(config.security.htmlMode)) errors.push("security.htmlMode must be sanitized or trusted.");
     if (config.security?.svgMode && !["sanitized", "trusted"].includes(config.security.svgMode)) errors.push("security.svgMode must be sanitized or trusted.");
