@@ -3838,11 +3838,8 @@
     },
     "providers": {
       "basemap": {
-        "attribution": "© OpenStreetMap contributors",
         "enabled": false,
-        "maxZoom": 19,
-        "provider": "none",
-        "tileUrl": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        "provider": "none"
       },
       "geocoder": {
         "autocomplete": false,
