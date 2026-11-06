@@ -36,6 +36,7 @@ function safeDeclaration(property: string, value: string, mode: "scoped" | "trus
 }
 export function sanitizeStyleObject(input: Record<string, string | number> | undefined, mode: "scoped" | "trusted" = "scoped"): Record<string, string | number> {
     if (!input) return {};
+    if (mode === "trusted") return Object.fromEntries(Object.entries(input).map(([key, value]) => [kebab(key), value]));
     return Object.fromEntries(Object.entries(input).map(([property, value]) => [kebab(property), value] as const).filter(([property, value]) => safeDeclaration(property, String(value), mode)));
 }
 
@@ -52,6 +53,7 @@ function scopeKeyframes(input: string, namespace: string): string {
 export function sanitizeCss(input: string, scopeSelector: string, options: { mode?: "scoped" | "trusted"; keyframeNamespace?: string; allowLocalSvgReferences?: boolean } = {}): SanitizedCss {
     const warnings: string[] = [];
     if (!input.trim()) return { css: "", warnings };
+    if (options.mode === "trusted") return { css: input, warnings: [] }; // Only mounted inside an isolation boundary.
     let ast: csstree.CssNode;
     try { ast = csstree.parse(options.keyframeNamespace ? scopeKeyframes(input, options.keyframeNamespace) : input); } catch (error) { return { css: "", warnings: [`CSS parse error: ${error instanceof Error ? error.message : String(error)}`] }; }
     csstree.walk(ast, {

@@ -8,7 +8,7 @@ export interface HyperPbiConfig {
     bindings?: { map?: Partial<MapBindingKeys> };
     interactions?: { crossFilter?: boolean; multiSelect?: boolean; externalMode?: "auto" | "filter" | "selection" };
     renderer?: { showHeader?: boolean; showRowCount?: boolean; showStudioButton?: boolean };
-    security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
+    security?: { cssMode?: "scoped" | "trusted"; htmlMode?: "sanitized" | "trusted"; svgMode?: "sanitized" | "trusted"; showSanitizerWarnings?: boolean };
     providers?: ProviderConfiguration;
     fields?: { aliases?: Record<string,string> };
     motion?: { enabled?: boolean; reducedMotion?: "respect-system" | "always-reduce" | "never-reduce"; maxConcurrentAnimations?: number };
@@ -19,7 +19,7 @@ export const defaultConfig: HyperPbiConfig = {
     bindings: { map: {} },
     interactions: { crossFilter: true, multiSelect: true, externalMode: "auto" },
     renderer: { showHeader: false, showRowCount: false, showStudioButton: true },
-    security: { cssMode: "scoped", htmlMode: "sanitized", showSanitizerWarnings: false },
+    security: { cssMode: "scoped", htmlMode: "sanitized", svgMode: "sanitized", showSanitizerWarnings: false },
     providers: defaultProviderConfig,
     fields: { aliases: {} },
     motion: { enabled: true, reducedMotion: "respect-system", maxConcurrentAnimations: 12 }
@@ -38,6 +38,7 @@ export function parseConfig(text: string): { config?: HyperPbiConfig; errors: st
     const errors = validateProviderConfig(config.providers);
     if (config.security?.cssMode && !["scoped", "trusted"].includes(config.security.cssMode)) errors.push("security.cssMode must be scoped or trusted.");
     if (config.security?.htmlMode && !["sanitized", "trusted"].includes(config.security.htmlMode)) errors.push("security.htmlMode must be sanitized or trusted.");
+    if (config.security?.svgMode && !["sanitized", "trusted"].includes(config.security.svgMode)) errors.push("security.svgMode must be sanitized or trusted.");
     if (config.interactions?.externalMode && !["auto", "filter", "selection"].includes(config.interactions.externalMode)) errors.push("interactions.externalMode must be auto, filter, or selection.");
     if (config.motion?.reducedMotion && !["respect-system", "always-reduce", "never-reduce"].includes(config.motion.reducedMotion)) errors.push("motion.reducedMotion must be respect-system, always-reduce, or never-reduce.");
     if (config.motion?.maxConcurrentAnimations !== undefined && (!Number.isInteger(config.motion.maxConcurrentAnimations) || config.motion.maxConcurrentAnimations < 0 || config.motion.maxConcurrentAnimations > 50)) errors.push("motion.maxConcurrentAnimations must be an integer from 0 through 50.");

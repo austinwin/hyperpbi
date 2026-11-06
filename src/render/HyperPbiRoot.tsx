@@ -37,6 +37,7 @@ import type { MapViewportState } from "../components/maps/MapBlock";
 import type { PersistedGeoLibreProject } from "../components/geolibre/types";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 import { useRemoteDataWorkspace } from "../data/useRemoteDataWorkspace";
+import { IsolatedVisual } from "../security/IsolatedVisual";
 
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
@@ -421,7 +422,7 @@ export function HyperPbiRoot({
   const rightPanelFill = componentListRequestsFill(schema.rightPanel ?? []);
 
   return (
-    <div
+    <IsolatedVisual enabled={cssMode === "trusted"}><div
       id={instanceId}
       class={`hyperpbi-root hp-density-${effectiveSettings.layout.density} hp-theme-${effectiveSettings.theme.mode} ${effectiveSettings.layout.internalScrolling ? "hp-scroll" : "hp-no-scroll"}`}
       style={style}
@@ -568,6 +569,6 @@ export function HyperPbiRoot({
             </details>
           )}
       </RenderContext.Provider>
-    </div>
+    </div></IsolatedVisual>
   );
 }

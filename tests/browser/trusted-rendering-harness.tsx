@@ -1,0 +1,5 @@
+import { render } from "preact";
+import { TrustedDocument } from "../../src/security/TrustedDocument";
+import { IsolatedVisual } from "../../src/security/IsolatedVisual";
+
+render(<IsolatedVisual enabled><style>{'body,#outside{color:rgb(255,0,0)}@keyframes pulse{to{opacity:.5}}.animated{animation:pulse 1s infinite}'}</style><div class="animated">Isolated native content</div><TrustedDocument markup={`<style>body{background:rgb(220,240,250)}</style><form><input aria-label="Author input" value="Works"><button type="button" onclick="document.querySelector('output').textContent='Executed'">Run author code</button></form><output>Ready</output><svg viewBox="0 0 100 40"><defs><symbol id="dot"><circle cx="10" cy="10" r="8"/></symbol><filter id="blur"><feGaussianBlur stdDeviation="1"/></filter></defs><use href="#dot" filter="url(#blur)"/><foreignObject x="30" width="60" height="40"><div xmlns="http://www.w3.org/1999/xhtml">SVG HTML</div></foreignObject></svg><script>try{parent.document.querySelector('#outside').textContent='Escaped'}catch{document.body.dataset.isolated='true'}</script>`} /></IsolatedVisual>, document.getElementById("app")!);
