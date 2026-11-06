@@ -19,6 +19,10 @@ export interface HostPolicyResult {
 
 // Default public ArcGIS hosts
 const DEFAULT_PUBLIC_HOSTS = [
+    "https://miniup.app",
+    "https://*.miniup.app",
+    "https://miniup.io",
+    "https://*.miniup.io",
     "https://*.arcgis.com",
     "https://*.arcgisonline.com",
 ];

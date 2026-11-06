@@ -20,7 +20,7 @@ describe("Map Studio performance editor", () => {
 
   it("uses ArcGIS runtime defaults and omits nonfunctional authoring options", () => {
     const mounted = mountMapStudio();
-    act(() => button(mounted.host, "+ Add layer").click());
+    act(() => button(mounted.host, "+ Add source").click());
     act(() => button(mounted.host, "ArcGIS feature layer").click());
     act(() => button(mounted.host, "Performance").click());
 

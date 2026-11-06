@@ -5,7 +5,7 @@ import { button, mountMapStudio } from "./map-studio-fixture";
 describe("Map Studio join editor", () => {
     it("guides ArcGIS joins and keeps them inactive until a valid preview is saved", () => {
         const mounted = mountMapStudio();
-        act(() => button(mounted.host, "+ Add layer").click());
+        act(() => button(mounted.host, "+ Add source").click());
         act(() => button(mounted.host, "ArcGIS feature layer").click());
         act(() => button(mounted.host, "Join").click());
         expect(mounted.host.textContent).toContain("Join is not active");

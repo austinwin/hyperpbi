@@ -23,7 +23,7 @@ describe("canonical map feature-details layering", () => {
   });
 
   it("renders bounded canonical details modes outside the Leaflet popup API", () => {
-    expect(detailsRuntime).toContain('class={`hp-map-feature-details is-${mode}`}');
+    expect(detailsRuntime).toContain('class={`hp-map-feature-details is-${mode}');
     expect(detailsRuntime).toContain('mode === "panel"');
     expect(detailsRuntime).not.toContain("legacyPopup");
     expect(mapCss).toMatch(/\.hp-map-feature-details\s*\{[^}]*max-height:/);

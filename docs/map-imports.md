@@ -1,16 +1,16 @@
-# Published MiniUp maps
+# Published maps
 
-HyperPBI imports portable map definitions into its existing Leaflet runtime. It does not embed a published website or execute its JavaScript. Map Studio → Add layer → MiniUp published map, or **Import MiniUp map**, opens a preview and import workflow.
+HyperPBI imports portable map definitions into its existing Leaflet runtime. It does not embed a published website or execute its JavaScript. Map Studio → Add source → Import published map definition, or **Import published map**, opens a preview and import workflow.
 
 ## Supported publishing interfaces
 
-MiniUp's connected tooling exposes site assets and hosted datasets with `mapDataUrl`, `geoJsonUrl`, and published ArcGIS-compatible FeatureServer URLs. Reuse the actual public URLs returned by the publisher; do not construct undocumented dataset routes. Arbitrary MiniUp HTML/JavaScript maps do not inherently expose a portable project. HyperPBI therefore defines the export contract below. No universal production map-manifest endpoint or automatic website/project converter is assumed.
+Any publisher can supply a public GeoJSON URL, ArcGIS FeatureServer URL, tile URL or a portable definition using this contract. MiniUp app/io resources use these same generic adapters. There is no dedicated MiniUp account, map selector or inferred project endpoint. Arbitrary HTML/JavaScript is not a portable map export and is never scraped or executed.
 
 Publish the exported JSON as a site asset and paste that asset's HTTPS URL, or open a local JSON export for a snapshot. A private page, HTML response, authorization error, invalid definition, or blocked origin leaves saved JSON untouched. Redirects are rejected: supply the final public asset URL. Credential-bearing and signed URLs are rejected. Authentication is intentionally outside the dashboard JSON.
 
 ## Manifest 1.0
 
-Required envelope: `format: "hyperpbi.map"`, `schemaVersion: "1.0"`, stable `id`, `name`, publisher `version`, and 1–256 `layers`. See [the complete two-layer fixture](../examples/map/miniup-published-map.json).
+Required envelope: `format: "hyperpbi.map"`, `schemaVersion: "1.0"`, stable `id`, `name`, publisher `version`, and 1–256 `layers`. See [the complete two-layer fixture](../examples/map/published-map.json).
 
 Optional metadata: `sourceUrl`, `view`, WGS84 `extent: [west,south,east,north]`, `basemap`, `layerGroups`, `bookmarks`, `legend`, `refresh: {updatedAt,intervalMinutes}`, and `interactions: {selection,rectangle,lasso}`. Center/bookmark coordinates use Leaflet `[latitude,longitude]`; GeoJSON coordinates use `[longitude,latitude]`. An extent without a view is converted to an approximate center/zoom, since exact fit depends on the report viewport.
 
@@ -18,14 +18,14 @@ Each layer uses the native HyperPBI `MapLayerDefinition`: stable `id`, `name`, `
 
 Supported sources are inline/public remote `geoJson`, `arcgisFeature`, `arcgisTile`, `arcgisDynamic`, and `xyz`. GeoJSON needs stable feature IDs or `source.idField`; FeatureServer uses its object IDs. Local row-position fallback is diagnosed and cannot guarantee persistence after data reorder. URLs may be relative only when resolving a remote manifest against its published URL. Source data is not fetched while previewing a manifest.
 
-The typed `exportMiniUpManifest` adapter in `src/maps/miniup/miniupSourceAdapter.ts` validates a publisher-supplied configuration and adds the format/version envelope. This adapter requires explicit map configuration; it never scrapes or evaluates a website's source.
+The typed `exportMapManifest` adapter in `src/maps/imports/mapManifestSource.ts` validates a publisher-supplied configuration and adds the format/version envelope. This adapter requires explicit map configuration; it never scrapes or evaluates a website's source.
 
-## Published-map picker
+## Generic published-map picker
 
 Configure a report's reusable library in Runtime Config JSON:
 
 ```json
-{"version":"1.0","miniup":{"publishedMaps":[{"name":"Facility Network","manifestUrl":"https://YOUR-PUBLISHED-HOST/map.hyperpbi.json"}]}}
+{"version":"1.0","maps":{"publishedMaps":[{"name":"Facility Network","manifestUrl":"https://YOUR-PUBLISHED-HOST/map.hyperpbi.json"}]}}
 ```
 
 These are author-configured URLs, not an account discovery API. Selecting a map loads and validates its manifest, then **Import map and layers** applies one undoable transaction. The URL is illustrative: replace it with the actual exported asset URL.

@@ -1,3 +1,4 @@
+import { validatePopupContent } from "../maps/popup/validatePopupContent";
 import {
   mapCapability,
   mapCapabilityRegistry,
@@ -6,7 +7,7 @@ import { closestMatches, type Diagnostic } from "./diagnostics";
 import { resolveMapLayerCapabilities } from "../maps/model/mapLayerCapabilities";
 import type { MapLayerSourceType } from "./mapSchema";
 import { isValidIconName } from "../components/icons/iconRegistry";
-import { validateMiniUpMetadata } from "../maps/miniup/miniupValidation";
+import { validateMapImportMetadata } from "../maps/imports/mapImportValidation";
 
 type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json =>
@@ -343,7 +344,7 @@ export function validateMapComponentSchema(
   path: string,
   componentId?: string,
 ): Diagnostic[] {
-  const diagnostics: Diagnostic[] = validateMiniUpMetadata(component, path, componentId);
+  const diagnostics: Diagnostic[] = validateMapImportMetadata(component, path, componentId);
   const nested: Array<[string, Set<string>]> = [
     [
       "view",
@@ -393,6 +394,7 @@ export function validateMapComponentSchema(
       "toolbar",
       allowed(
         "visible",
+        "collapsed",
         "home",
         "layers",
         "legend",
@@ -631,7 +633,7 @@ export function validateMapComponentSchema(
       });
   if (object(component.view))
     for (const key of ["fitMode", "preserveView"])
-      if (component.view[key] !== undefined)
+      if (component.view[key] !== undefined && !(key === "fitMode" && component.view[key] === "none") && !(key === "preserveView" && component.view[key] === false))
         limitation(
           `map.view.${key}`,
           `${path}/view/${key}`,
@@ -1367,6 +1369,7 @@ function validateLayer(
       "color",
       "size",
       "weight",
+      "fontFamily",
       "haloColor",
       "haloSize",
       "backgroundColor",
@@ -1396,7 +1399,7 @@ function validateLayer(
   validateSection(
     raw,
     "popup",
-    allowed("enabled", "defaultFieldSource", "title", "fields", "actions", "html"),
+    allowed("enabled", "defaultFieldSource", "title", "fields", "actions", "html", "content"),
     path,
     componentId,
     diagnostics,
@@ -1409,6 +1412,7 @@ function validateLayer(
     componentId,
     diagnostics,
   );
+  if (object(raw.popup) && raw.popup.content !== undefined) diagnostics.push(...validatePopupContent(raw.popup.content, `${path}/popup/content`, componentId));
   for (const section of ["popup", "tooltip"]) {
     const value = raw[section];
     if (!object(value)) continue;

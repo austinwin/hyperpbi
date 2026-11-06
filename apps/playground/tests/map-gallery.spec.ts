@@ -26,5 +26,6 @@ test("map gallery loads focused examples and critical analytical workflows", asy
   await page.setViewportSize({ width: 390, height: 760 });
   await page.getByRole("button", { name: /Compact responsive tools/ }).click();
   await expect(page.locator(".hp-map-toolbar")).toBeVisible();
+  await page.getByRole("button", { name: "Expand map tools", exact: true }).click();
   await expect(page.getByRole("button", { name: "Selection tools" })).toBeVisible();
 });

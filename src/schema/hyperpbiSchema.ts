@@ -427,7 +427,7 @@ export interface MapComponent extends ComponentBase {
     view?: MapViewDefinition;
     basemap?: MapBasemapDefinition;
     layers?: MapLayerDefinition[];
-    imports?: import("../maps/miniup/miniupTypes").MiniUpMapImport[];
+    imports?: import("../maps/imports/mapImportTypes").PublishedMapImport[];
     layerGroups?: MapLayerGroupDefinition[];
     bookmarks?: MapViewBookmarkDefinition[];
     search?: MapSearchDefinition;
@@ -445,6 +445,7 @@ export interface MapComponent extends ComponentBase {
     };
 
     toolbar?: {
+        collapsed?: boolean;
         visible?: boolean;
         home?: boolean;
         layers?: boolean;

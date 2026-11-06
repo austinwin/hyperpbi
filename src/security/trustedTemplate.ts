@@ -28,7 +28,7 @@ export function renderTrustedTemplate(template: string, data: NormalizedData, se
                 const value = bind(attribute.value);
                 if (/^(href|src|action|formaction|poster|xlink:href|data|codebase)$/i.test(attribute.name)) {
                     const url = new URL(value, "https://hyperpbi.invalid/");
-                    if (!["https:", "http:", "mailto:", "tel:"].includes(url.protocol) || url.username || url.password) throw new Error(`Field template supplied an unsafe URL in ${attribute.name}.`);
+                    if (!["https:", "mailto:", "tel:"].includes(url.protocol) || url.username || url.password) throw new Error(`Field template supplied an unsafe URL in ${attribute.name}.`);
                 }
                 element.setAttribute(attribute.name, value);
             }

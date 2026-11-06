@@ -6,6 +6,8 @@ import { HyperPbiStudio } from "../src/editor/HyperPbiStudio";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
 import { mapStudioData, mapStudioSpecification } from "./map-studio-fixture";
 
+vi.mock("../src/components/maps/LeafletMap", () => ({ LeafletMap: () => <div class="map-canvas-stub" /> }));
+
 describe("Map Studio and Visual Inspector integration", () => {
     it("opens the selected map on shared canonical JSON and selection state", () => {
         const host = document.createElement("div");

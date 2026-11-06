@@ -69,6 +69,7 @@ export interface RenderContextValue {
     interactionIndexSpace?: "component" | "powerbi";
     /** Use original row keys for linked internal filtering while retaining semantic external-filter fields. */
     interactionUsesSourceIdentity?: boolean;
+    mapCommands?: import("../maps/interactions/mapStudioCommands").MapCommandChannel;
     onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
 }
 

@@ -1,6 +1,6 @@
 import type { MapComponent } from "../../schema/hyperpbiSchema";
 import type { MapLayerDefinition } from "../../schema/mapSchema";
-import type { MiniUpMapImport, MiniUpMapManifest } from "./miniupTypes";
+import type { PublishedMapImport, PublishedMapManifest } from "./mapImportTypes";
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
@@ -18,19 +18,19 @@ export function mergeMapOverrides<T>(baseline: T, local: T, upstream: T): T {
     return local;
 }
 
-export function importMiniUpMap(current: MapComponent, manifest: MiniUpMapManifest, options: { mode: "snapshot" | "linked"; manifestUrl?: string; refreshId?: string; now?: string }): { map: MapComponent; warnings: string[] } {
+export function importPublishedMap(current: MapComponent, manifest: PublishedMapManifest, options: { mode: "snapshot" | "linked"; manifestUrl?: string; refreshId?: string; now?: string }): { map: MapComponent; warnings: string[] } {
     if (options.mode === "linked" && !options.manifestUrl) throw new Error("Linked imports require a published manifest URL.");
     const map = clone(current), warnings: string[] = [];
     const previous = map.imports?.find(item => item.id === options.refreshId);
     if (options.refreshId && (!previous || previous.mode !== "linked")) throw new Error("Only an existing linked map can be refreshed.");
     if (previous && previous.mapId !== manifest.id) throw new Error("The published map id changed. Import it as a new source to protect existing layers.");
-    let importId = previous?.id ?? `miniup-${manifest.id}`;
+    let importId = previous?.id ?? `published-${manifest.id}`;
     let suffix = 2;
     const usedIds = new Set([...(map.imports ?? []).map(item => item.id), ...(map.layers ?? []).map(item => item.id), ...(map.layerGroups ?? []).map(item => item.id)]);
-    while (!previous && (usedIds.has(importId) || manifest.layers.some(layer => usedIds.has(`${importId}-${layer.id}`)))) importId = `miniup-${manifest.id}-${suffix++}`;
+    while (!previous && (usedIds.has(importId) || manifest.layers.some(layer => usedIds.has(`${importId}-${layer.id}`)))) importId = `published-${manifest.id}-${suffix++}`;
     const scoped = (id: string) => `${importId}-${id}`;
-    const layers: MapLayerDefinition[] = manifest.layers.map(({ fields, geometryType, ...layer }, index) => ({ ...clone(layer), id: scoped(layer.id), groupId: layer.groupId ? scoped(layer.groupId) : undefined, order: (previous?.baseline.layers?.[index]?.order ?? (map.layers?.length ?? 0) + index), provenance: { provider: "miniup", importId, mapId: manifest.id, mapName: manifest.name, mapVersion: manifest.version, layerId: layer.id, sourceUrl: manifest.sourceUrl ?? options.manifestUrl, fields, geometryType } }));
-    const baseline: MiniUpMapImport["baseline"] = {
+    const layers: MapLayerDefinition[] = [...manifest.layers].sort((a, b) => (a.order ?? manifest.layers.indexOf(a)) - (b.order ?? manifest.layers.indexOf(b))).map(({ fields, geometryType, ...layer }, index) => ({ ...clone(layer), id: scoped(layer.id), groupId: layer.groupId ? scoped(layer.groupId) : undefined, order: (previous?.baseline.layers?.[index]?.order ?? (map.layers?.length ?? 0) + index), provenance: { provider: "published", importId, mapId: manifest.id, mapName: manifest.name, mapVersion: manifest.version, layerId: layer.id, sourceUrl: manifest.sourceUrl ?? options.manifestUrl, fields, geometryType } }));
+    const baseline: PublishedMapImport["baseline"] = {
         layers,
         layerGroups: manifest.layerGroups?.map(group => ({ ...clone(group), id: scoped(group.id) })),
         bookmarks: manifest.bookmarks?.map(bookmark => ({ ...clone(bookmark), id: scoped(bookmark.id) })),
@@ -58,7 +58,7 @@ export function importMiniUpMap(current: MapComponent, manifest: MiniUpMapManife
         if (manifest.interactions) map.tools = { ...map.tools, rectangleSelection: manifest.interactions.rectangle ?? map.tools?.rectangleSelection, lassoSelection: manifest.interactions.lasso ?? map.tools?.lassoSelection };
     }
     map.layerPanel = { ...map.layerPanel, visible: true };
-    const reference: MiniUpMapImport = { id: importId, mapId: manifest.id, name: manifest.name, version: manifest.version, mode: options.mode, manifestUrl: options.manifestUrl, sourceUrl: manifest.sourceUrl, importedAt: options.now ?? new Date().toISOString(), refresh: manifest.refresh, baseline: clone(baseline) };
+    const reference: PublishedMapImport = { id: importId, mapId: manifest.id, name: manifest.name, version: manifest.version, mode: options.mode, manifestUrl: options.manifestUrl, sourceUrl: manifest.sourceUrl, importedAt: options.now ?? new Date().toISOString(), refresh: manifest.refresh, baseline: clone(baseline) };
     map.imports = [...(map.imports ?? []).filter(item => item.id !== importId), reference];
     return { map, warnings };
 }

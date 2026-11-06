@@ -24,6 +24,7 @@ const entries = (status: MapCapabilityStatus, paths: string[], limitation?: stri
 
 export const mapCapabilityRegistry: readonly MapCapabilityRegistryEntry[] = [
     ...entries("implemented", [
+        "map.toolbar.collapsed", "map.layers[].labels.fontFamily", "map.layers[].popup.content", "map.layers[].popup.content[].id", "map.layers[].popup.content[].type", "map.layers[].popup.content[].field", "map.layers[].popup.content[].fieldSource", "map.layers[].popup.content[].when", "map.layers[].popup.content[].colorWhen", "map.imports", "map.layers[].provenance",
         "map.view.center", "map.view.zoom", "map.view.minZoom", "map.view.maxZoom", "map.view.fitPadding",
         "map.height", "map.heightMode", "map.minHeight", "map.aspectRatio", "map.featureDetails.mode", "map.featureDetails.clearSelectionOnBackgroundClick", "map.featureDetails.clearSelectionOnClose",
         "map.basemap.type", "map.basemap.url", "map.basemap.attribution", "map.basemap.maxZoom", "map.basemap.visible",

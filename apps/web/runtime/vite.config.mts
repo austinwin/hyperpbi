@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import prefixSelector from "postcss-prefix-selector";
 
-const webRestHosts = (process.env.HYPERPBI_WEB_REST_HOSTS ?? "https://*.miniup.app")
+const webRestHosts = (process.env.HYPERPBI_WEB_REST_HOSTS ?? "https://miniup.app,https://*.miniup.app,https://miniup.io,https://*.miniup.io")
   .split(",")
   .map(value => value.trim())
   .filter(Boolean);

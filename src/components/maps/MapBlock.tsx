@@ -1,3 +1,5 @@
+import { MapFeatureSearch } from "./MapFeatureSearch";
+import { useRemoteGeoJsonLayers } from "./runtime/useRemoteGeoJsonLayers";
 import {
   useEffect,
   useMemo,
@@ -169,8 +171,6 @@ export function arcGisViewportQueryEligibility(
   runtimeVisibility: Readonly<Record<string, boolean>> | undefined,
   viewport: MapViewportState | null,
 ): ArcGisViewportQueryEligibility {
-  if (definition.performance?.viewportQuery !== true) return "eligible";
-  if (!viewport) return "waitingForViewport";
   const group = definition.groupId
     ? layerGroups?.find((candidate) => candidate.id === definition.groupId)
     : undefined;
@@ -178,6 +178,8 @@ export function arcGisViewportQueryEligibility(
     (definition.visible ?? true) && (group?.visible ?? true);
   if ((runtimeVisibility?.[definition.id] ?? authoredVisible) === false)
     return "hidden";
+  if (definition.performance?.viewportQuery !== true) return "eligible";
+  if (!viewport) return "waitingForViewport";
   const minimum = definition.visibility?.minZoom;
   const maximum = definition.visibility?.maxZoom;
   if (
@@ -396,7 +398,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const legendEnabled = component.legend?.enabled !== false;
   const configuredGeocoder = config.providers?.geocoder;
   const searchEnabled =
-    component.search?.enabled === true ||
+    component.search?.enabled !== false ||
     (component.search?.enabled !== false &&
       Boolean(
         configuredGeocoder?.enabled && configuredGeocoder.provider !== "none",
@@ -419,11 +421,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
   const [arcGisFeatureState, setArcGisFeatureState] = useState<
     Record<string, ArcGisFeatureRuntimeEntry>
   >({});
-  const [remoteGeoJsonState, setRemoteGeoJsonState] = useState<
-    Record<string, { data?: GeoJSON.GeoJsonObject; loading: boolean; error?: string }>
-  >({});
-  const geoJsonControllersRef = useRef(new Map<string, AbortController>());
-  const geoJsonRefreshTimersRef = useRef(new Map<string, ReturnType<typeof setInterval>>());
+  const remoteGeoJsonState = useRemoteGeoJsonLayers(layerDefinitions, component.layerGroups, context.state.mapLayerState[id]?.visibility, serviceAccess);
   const dynamicIdentifyControllerRef = useRef<AbortController | null>(null);
   const dynamicIdentifyVersionRef = useRef(0);
   const [dynamicIdentifyState, setDynamicIdentifyState] =
@@ -731,6 +729,23 @@ export function MapBlock({ component }: { component: MapComponent }) {
     }
   }, [arcGisRequestRevision, resolveArcGisFeatureDefinition]);
 
+  // Non-viewport layers also suspend hidden work and reload on becoming visible.
+  const previousVisibility = useRef(new Map<string, boolean>());
+  const visibilityRevision = stableMapRevision(arcGisFeatureDefinitions.filter(definition => definition.performance?.viewportQuery !== true).map(definition => ({
+    id: definition.id,
+    visible: (runtimeLayerVisibilityRef.current?.[definition.id] ?? ((definition.visible ?? true) && (component.layerGroups?.find(group => group.id === definition.groupId)?.visible ?? true))),
+  })));
+  useEffect(() => {
+    const next = new Map<string, boolean>();
+    for (const definition of arcGisFeatureDefinitionsRef.current) {
+      if (definition.performance?.viewportQuery === true) continue;
+      const visible = arcGisViewportQueryEligibility(definition, layerGroupsRef.current, runtimeLayerVisibilityRef.current, viewportRef.current) !== "hidden";
+      next.set(definition.id, visible);
+      if (previousVisibility.current.has(definition.id) && previousVisibility.current.get(definition.id) !== visible) void resolveArcGisFeatureDefinition(definition, "initial");
+    }
+    previousVisibility.current = next;
+  }, [visibilityRevision, resolveArcGisFeatureDefinition]);
+
   // Viewport path: only layers explicitly configured for viewport queries rerun.
   useEffect(() => {
     if (viewportSig === null) return;
@@ -777,78 +792,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
       layerAbortControllersRef.current.clear();
       requestVersionsRef.current.clear();
       layerRefreshTimersRef.current.clear();
-      for (const controller of geoJsonControllersRef.current.values()) controller.abort();
-      for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
-      geoJsonControllersRef.current.clear();
-      geoJsonRefreshTimersRef.current.clear();
     },
     [],
   );
-
-  const remoteGeoJsonRevision = useMemo(
-    () => stableMapRevision(layerDefinitions.flatMap((definition) =>
-      definition.source.type === "geoJson" && definition.source.url
-        ? [{ id: definition.id, url: definition.source.url, refresh: definition.source.refreshIntervalMinutes }]
-        : [],
-    )),
-    [layerDefinitions],
-  );
-  useEffect(() => {
-    for (const controller of geoJsonControllersRef.current.values()) controller.abort();
-    for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
-    geoJsonControllersRef.current.clear();
-    geoJsonRefreshTimersRef.current.clear();
-    const definitions = layerDefinitions.filter((definition) =>
-      definition.source.type === "geoJson" && Boolean(definition.source.url),
-    );
-    const load = async (definition: MapLayerDefinition) => {
-      if (definition.source.type !== "geoJson" || !definition.source.url) return;
-      const access = serviceAccess(definition.source.url);
-      if (!access.allowed) {
-        setRemoteGeoJsonState((previous) => ({
-          ...previous,
-          [definition.id]: { loading: false, error: access.reason ?? "Remote GeoJSON access is unavailable." },
-        }));
-        return;
-      }
-      geoJsonControllersRef.current.get(definition.id)?.abort();
-      const controller = new AbortController();
-      geoJsonControllersRef.current.set(definition.id, controller);
-      setRemoteGeoJsonState((previous) => ({
-        ...previous,
-        [definition.id]: { ...previous[definition.id], loading: true, error: undefined },
-      }));
-      try {
-        const response = await fetch(definition.source.url, { signal: controller.signal, credentials: "omit" });
-        if (!response.ok) throw new Error(`GeoJSON request failed (${response.status}).`);
-        const value = await response.json() as GeoJSON.GeoJsonObject;
-        if (!value || typeof value !== "object" || typeof value.type !== "string")
-          throw new Error("Remote response is not valid GeoJSON.");
-        if (!controller.signal.aborted)
-          setRemoteGeoJsonState((previous) => ({
-            ...previous,
-            [definition.id]: { data: value, loading: false },
-          }));
-      } catch (error) {
-        if (!controller.signal.aborted)
-          setRemoteGeoJsonState((previous) => ({
-            ...previous,
-            [definition.id]: { loading: false, error: error instanceof Error ? error.message : String(error) },
-          }));
-      }
-    };
-    for (const definition of definitions) {
-      void load(definition);
-      if (definition.source.type === "geoJson" && (definition.source.refreshIntervalMinutes ?? 0) >= 1)
-        geoJsonRefreshTimersRef.current.set(definition.id, setInterval(() => void load(definition), definition.source.refreshIntervalMinutes! * 60_000));
-    }
-    return () => {
-      for (const controller of geoJsonControllersRef.current.values()) controller.abort();
-      for (const timer of geoJsonRefreshTimersRef.current.values()) clearInterval(timer);
-      geoJsonControllersRef.current.clear();
-      geoJsonRefreshTimersRef.current.clear();
-    };
-  }, [remoteGeoJsonRevision, serviceAccess]);
 
   const handleLayerRuntimeStateChange = useCallback(
     (
@@ -920,8 +866,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
     () => layerDefinitions.flatMap((definition) => {
       if (definition.source.type !== "geoJson") return [];
       const data = definition.source.data ?? remoteGeoJsonState[definition.id]?.data;
-      if (!data) return [];
-      const layer = resolveGeoJsonLayer(definition, data);
+      if (!data) { const remote = remoteGeoJsonState[definition.id]; return [{ ...resolveGeoJsonLayer(definition, { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection), loading: remote?.loading ?? false, error: remote?.error, diagnostics: { ...resolveGeoJsonLayer(definition, { type: "FeatureCollection", features: [] } as GeoJSON.FeatureCollection).diagnostics, loading: remote?.loading ?? false, error: remote?.error } }]; }
+      const layer = resolveGeoJsonLayer(definition, data, layerSourceContexts.get(definition.id));
       const remote = remoteGeoJsonState[definition.id];
       return [{
         ...layer,
@@ -935,7 +881,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
         },
       }];
     }),
-    [layerDefinitions, remoteGeoJsonState],
+    [layerDefinitions, remoteGeoJsonState, layerSourceContexts],
   );
 
   const allResolvedLayers: ResolvedMapLayer[] = useMemo(() => {
@@ -950,10 +896,11 @@ export function MapBlock({ component }: { component: MapComponent }) {
     ]
       .map((layer) => {
         const authored = definitionById.get(layer.id);
+        const sourceLayer = { ...layer, provenance: authored?.provenance };
         const presentedLayer =
           layer.sourceType === "arcgisFeature" && authored
-            ? applyAuthoredArcGisLayerPresentation(layer, authored)
-            : layer;
+            ? { ...applyAuthoredArcGisLayerPresentation(layer, authored), provenance: authored.provenance }
+            : sourceLayer;
         const group = presentedLayer.groupId
           ? component.layerGroups?.find(
               (candidate) => candidate.id === presentedLayer.groupId,
@@ -1014,6 +961,9 @@ export function MapBlock({ component }: { component: MapComponent }) {
     [id, allResolvedLayers],
   );
   runtimeLayersRef.current = runtimeLayers;
+  useEffect(() => {
+    context.mapCommands?.publishStatus(authoredComponentId, Object.fromEntries(runtimeLayers.map(layer => [layer.id, { loading: layer.loading, error: layer.error ?? layer.diagnostics.error, warnings: layer.diagnostics.warnings, featureCount: layer.features.length }])));
+  }, [context.mapCommands, authoredComponentId, runtimeLayers]);
   useEffect(() => {
     context.dispatch({
       type: "reconcileMapFeatures",
@@ -1259,6 +1209,14 @@ export function MapBlock({ component }: { component: MapComponent }) {
     setSelectionStatus(undefined);
   }, [context, id]);
 
+  useEffect(() => context.mapCommands?.subscribe((mapId, command) => {
+    if (mapId !== id && mapId !== authoredComponentId) return;
+    if (command === "fit") mapControllerRef.current?.home();
+    else if (command === "clear") clearMapSelection();
+    else if (command === "close") context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
+    else context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: command });
+  }), [context.mapCommands, context.dispatch, clearMapSelection, id, authoredComponentId]);
+
   useEffect(() => {
     const active = context.state.mapInteractionState[id]?.activeFeature;
     if (!active || active.kind === "identify" || !dynamicIdentifyState.layers.length)
@@ -1304,7 +1262,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     const sizing = resolveMapSizing(component, {
       studioPreview: context.instanceId?.includes("-preview") === true,
     });
-    const showToolbar = component.toolbar?.visible !== false;
+    const showToolbar = component.toolbar?.visible !== false && !context.mapCommands;
     const closePopover = () =>
       context.dispatch({
         type: "setMapToolbarPopover",
@@ -1414,17 +1372,22 @@ export function MapBlock({ component }: { component: MapComponent }) {
         <MapToolbarPopover
           id={mapToolbarPopoverId(id, "search")}
           title="Location search"
-          subtitle="User-triggered geocoding"
+          subtitle="Visible features and locations"
           onClose={closePopover}
         >
-          <MapSearchPanel
+          <MapFeatureSearch layers={analyticalLayers.filter(layer => context.state.mapLayerState[id]?.visibility?.[layer.id] ?? layer.visible)} onSelect={(layer, feature) => {
+            if (feature.featureKey) commitAnalyticalSelection([feature.featureKey], "replace", layer);
+            context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
+            requestAnimationFrame(() => mapControllerRef.current?.zoomToSelection());
+          }} />
+          {configuredGeocoder?.enabled && configuredGeocoder.provider !== "none" && <MapSearchPanel
             mapId={id}
             definition={component.search}
             onResult={(result) =>
               mapControllerRef.current?.showSearchResult(result)
             }
             onClearResult={() => mapControllerRef.current?.clearSearchResult()}
-          />
+          />}
         </MapToolbarPopover>
       ) : activeToolbarPopover === "bookmarks" ? (
         <MapToolbarPopover
@@ -1529,6 +1492,7 @@ if (clearSelection) {
               </div>
             )}
             {selectionStatus && <div class="hp-map-selection-status" role="status">{selectionStatus}</div>}
+            {!showToolbar && context.mapCommands && popoverContent && <div class="hp-map-author-popover">{popoverContent}</div>}
             {showToolbar && (
               <MapToolbar
               mapId={id}
@@ -1606,7 +1570,8 @@ export function applyAuthoredArcGisLayerPresentation(
         color: definition.labels.color ?? "#333333",
         size: definition.labels.size ?? 12,
         weight: definition.labels.weight ?? "normal",
-        haloColor: definition.labels.haloColor,
+        fontFamily: definition.labels.fontFamily,
+            haloColor: definition.labels.haloColor,
         haloSize: definition.labels.haloSize,
         backgroundColor: definition.labels.backgroundColor,
         padding: definition.labels.padding,
@@ -1629,6 +1594,7 @@ export function applyAuthoredArcGisLayerPresentation(
         })),
         actions: (definition.popup.actions ?? []).map((action) => ({ ...action })),
         html: definition.popup.html,
+            content: definition.popup.content,
         defaultFieldSource:
           definition.popup.defaultFieldSource ??
           defaultAttributeSource(definition, "popup"),
@@ -2035,7 +2001,8 @@ export async function resolveArcGisFeatureLayer(
         color: def.labels.color ?? "#333333",
         size: def.labels.size ?? 12,
         weight: def.labels.weight ?? "normal",
-        haloColor: def.labels.haloColor,
+        fontFamily: def.labels.fontFamily,
+            haloColor: def.labels.haloColor,
         haloSize: def.labels.haloSize,
         backgroundColor: def.labels.backgroundColor,
         padding: def.labels.padding,
@@ -2231,6 +2198,7 @@ export async function resolveArcGisFeatureLayer(
             uiAction: a.uiAction,
           })),
           html: def.popup.html,
+          content: def.popup.content,
           defaultFieldSource:
             def.popup.defaultFieldSource ?? defaultAttributeSource(def, "popup"),
         }

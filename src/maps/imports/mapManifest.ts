@@ -1,21 +1,22 @@
 import { validateMapComponentSchema } from "../../schema/mapSchemaValidation";
-import type { MiniUpMapManifest, MiniUpManifestLayer } from "./miniupTypes";
+import type { PublishedMapManifest, PublishedMapLayer } from "./mapImportTypes";
 
 const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 const id = (value: unknown): value is string => typeof value === "string" && /^[A-Za-z][\w-]{0,79}$/.test(value);
 const sourceTypes = new Set(["geoJson", "arcgisFeature", "arcgisTile", "arcgisDynamic", "xyz"]);
 export function publicMapUrl(value: string, base?: string): string {
     const url = new URL(value, base);
-    if (url.protocol !== "https:" || url.username || url.password || Array.from(url.searchParams.keys()).some(key => /token|key|secret|password|signature|credential|auth/i.test(key))) throw new Error("Use a public, credential-free HTTPS URL. Credentials and signed URLs cannot be saved in a dashboard.");
+    let sensitiveQuery = false; url.searchParams.forEach((_value, key) => { if (/token|key|secret|password|signature|credential|auth/i.test(key)) sensitiveQuery = true; });
+    if (url.protocol !== "https:" || url.username || url.password || sensitiveQuery) throw new Error("Use a public, credential-free HTTPS URL. Credentials and signed URLs cannot be saved in a dashboard.");
     return url.href;
 }
 
-export function parseMiniUpManifest(input: unknown, manifestUrl?: string): { manifest: MiniUpMapManifest; warnings: string[] } {
+export function parseMapManifest(input: unknown, manifestUrl?: string): { manifest: PublishedMapManifest; warnings: string[] } {
     if (!object(input) || input.format !== "hyperpbi.map" || input.schemaVersion !== "1.0") throw new Error("Expected a hyperpbi.map manifest with schemaVersion 1.0. Export a portable manifest from the published map; arbitrary website HTML is not imported.");
     if (!id(input.id) || typeof input.name !== "string" || !input.name.trim() || typeof input.version !== "string" || !input.version.trim()) throw new Error("Map manifest requires a stable id, name and version.");
     if (!Array.isArray(input.layers) || !input.layers.length || input.layers.length > 256) throw new Error("Map manifest must contain between 1 and 256 layers.");
     if (JSON.stringify(input).length > 12_000_000) throw new Error("Map manifest exceeds the 12 MB configuration limit. Publish large datasets as remote GeoJSON or FeatureServer layers.");
-    const manifest = JSON.parse(JSON.stringify(input)) as MiniUpMapManifest;
+    const manifest = JSON.parse(JSON.stringify(input)) as PublishedMapManifest;
     const warnings: string[] = [];
     const scan = (value: unknown, path: string): void => {
         if (Array.isArray(value)) { value.forEach((item, index) => scan(item, `${path}/${index}`)); return; }
@@ -40,7 +41,7 @@ export function parseMiniUpManifest(input: unknown, manifestUrl?: string): { man
         const errors = diagnostics.filter(item => item.severity === "error");
         if (errors.length) throw new Error(`Layer ${raw.name}: ${errors.map(item => item.message).join(" ")}`);
         warnings.push(...diagnostics.filter(item => item.severity === "warning").map(item => `${raw.name}: ${item.message}`));
-        return [{ ...layer, fields, geometryType } as MiniUpManifestLayer];
+        return [{ ...layer, fields, geometryType } as PublishedMapLayer];
     });
     if (!manifest.layers.length) throw new Error("No supported layers remain. Export at least one GeoJSON, FeatureServer or tile layer.");
     if (manifest.extent && (!Array.isArray(manifest.extent) || manifest.extent.length !== 4 || manifest.extent.some(value => typeof value !== "number" || !Number.isFinite(value)) || manifest.extent[0] < -180 || manifest.extent[2] > 180 || manifest.extent[1] < -90 || manifest.extent[3] > 90 || manifest.extent[0] > manifest.extent[2] || manifest.extent[1] > manifest.extent[3])) throw new Error("extent must be [west, south, east, north] in WGS84.");

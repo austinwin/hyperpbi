@@ -1,4 +1,15 @@
-import { MiniUpImportPanel } from "./MiniUpImportPanel";
+import { PopupContentEditor } from "./PopupContentEditor";
+import { MapPropertyCategories } from "./MapPropertyCategories";
+import { MapColorPicker } from "./MapColorPicker";
+import { MapStudioRail, type MapStudioDrawer } from "./MapStudioRail";
+import { MapLayerEffectsEditor } from "./MapLayerEffectsEditor";
+import { loadPublicGeoJson } from "../../maps/sources/publicGeoJson";
+import { MapContentsActions } from "./MapContentsActions";
+import { MAP_ORIGIN_GROUPS, mapLayerOrigin } from "../../maps/model/mapLayerOrigin";
+import type { ComponentChildren } from "preact";
+import type { MapCommandChannel, MapStudioCommand, MapLayerStatuses } from "../../maps/interactions/mapStudioCommands";
+import { geoJsonLayerMetadata } from "./geoJsonLayerMetadata";
+import { MapImportPanel } from "./MapImportPanel";
 import { parseConfig } from "../../config/hyperpbiConfig";
 import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import type { NormalizedData, NormalizedField } from "../../data/normalizeData";
@@ -66,12 +77,14 @@ type PropertyTab =
   | "interaction"
   | "legend"
   | "performance"
-  | "diagnostics";
+  | "diagnostics"
+  | "effects";
 type PropertyGroup = "Data" | "Appearance" | "Interaction" | "Advanced";
 const propertyTabs: readonly { id: PropertyTab; label: string; group: PropertyGroup }[] = [
   { id: "source", label: "Source", group: "Data" },
   { id: "join", label: "Join", group: "Data" },
   { id: "renderer", label: "Renderer", group: "Appearance" },
+  { id: "effects", label: "Effects", group: "Appearance" },
   { id: "labels", label: "Labels", group: "Appearance" },
   { id: "tooltip", label: "Tooltip", group: "Appearance" },
   { id: "popup", label: "Feature details", group: "Interaction" },
@@ -127,6 +140,9 @@ export interface MapStudioProps {
   webAccessAvailable?: boolean;
   providerAccess?: ProviderAccessState;
   configurationJson?: string;
+  preview?: ComponentChildren;
+  mapCommands?: MapCommandChannel;
+  onPreview?: () => void;
   validateCandidate?: (candidateSpecificationJson: string) => PreparedAuthoringData;
 }
 
@@ -143,6 +159,9 @@ export function MapStudio({
   webAccessAvailable = false,
   providerAccess,
   configurationJson,
+  preview,
+  mapCommands,
+  onPreview,
   validateCandidate,
 }: MapStudioProps) {
   const parsed = useMemo(() => {
@@ -174,18 +193,24 @@ export function MapStudio({
   const propertyTab = draftState.activeSection as PropertyTab;
   const setPropertyTab = (section: PropertyTab) =>
     draftDispatch({ type: "activateSection", section });
-  const [mobilePane, setMobilePane] = useState<"layers" | "properties">(
+  const [mobilePane, setMobilePane] = useState<"layers" | "properties" | "map">(
     "layers",
   );
+  const [drawer, setDrawer] = useState<MapStudioDrawer>("layers");
+  const [layerSearch, setLayerSearch] = useState("");
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
   const [candidateWarnings, setCandidateWarnings] = useState<string[]>([]);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [miniupOpen, setMiniupOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState("");
+  const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>([]);
+  const [layerStatuses, setLayerStatuses] = useState<MapLayerStatuses>({});
+  useEffect(() => { setLayerStatuses({}); return mapCommands?.subscribeStatus((id, status) => { if (id === mapId) setLayerStatuses(status); }); }, [mapCommands, mapId]);
   const [dragging, setDragging] = useState("");
   const [metadata, setMetadata] = useState<{
     loading?: boolean;
     result?: ArcGisServiceInspection;
+    geoJson?: ArcGisLayerMetadata;
     sourceUrl?: string;
     errors?: string[];
   }>({});
@@ -222,6 +247,8 @@ export function MapStudio({
   }, [json, history]);
   useEffect(() => {
     draftDispatch({ type: "activateMap", mapId });
+    setSelectedLayerIds([]);
+    setImportOpen(false);
     if (!mapId) return;
     if (selectedComponentId !== mapId) onSelect(mapId);
   }, [mapId]);
@@ -352,7 +379,7 @@ export function MapStudio({
   }));
   const rows = (dataset?.data.rows ?? []) as Json[];
   const serviceMetadata: ArcGisLayerMetadata | undefined =
-    metadata.result?.selectedLayer ??
+    geoJsonLayerMetadata(layer) ?? metadata.geoJson ?? metadata.result?.selectedLayer ??
     metadata.result?.layers.find(
       (item) =>
         item.id ===
@@ -621,6 +648,13 @@ export function MapStudio({
       errors: undefined,
     }));
     try {
+      if (layer.source.type === "geoJson") {
+        const data = await loadPublicGeoJson(url, controller.signal);
+        if (version !== metadataRequest.current.version || controller.signal.aborted) return;
+        const geoJson = geoJsonLayerMetadata({ ...layer, source: { ...layer.source, data } });
+        setMetadata({ sourceUrl: url, geoJson, errors: geoJson ? [] : ["No feature attributes were found. Publish fields in the manifest or choose a dataset with feature properties."] });
+        return;
+      }
       const result = await inspectArcGisService(url, {
         signal: controller.signal,
       });
@@ -665,14 +699,14 @@ export function MapStudio({
   const runJoin = async () => {
     if (
       !layer ||
-      layer.source.type !== "arcgisFeature" ||
+      (layer.source.type !== "arcgisFeature" && layer.source.type !== "geoJson") ||
       !layer.join ||
       !dataset
     )
       return;
-    const access = externalServiceAccess(
+    const access = layer.source.type === "geoJson" && layer.source.data ? { allowed: true } : externalServiceAccess(
       providerAccess,
-      layer.source.url,
+      layer.source.url ?? "",
       webAccessAvailable,
     );
     if (!access.allowed) {
@@ -734,7 +768,7 @@ export function MapStudio({
     (left, right) => (left.order ?? 0) - (right.order ?? 0),
   );
   return (
-    <div class="hp-studio hp-map-studio" data-mobile-pane={mobilePane}>
+    <div class={`hp-studio hp-map-studio ${preview ? "has-map-canvas" : ""}`} data-mobile-pane={mobilePane} data-drawer={drawer ?? "none"}>
       <header class="hp-map-studio-toolbar">
         <div class="hp-map-studio-title">
           <strong>Map Studio</strong>
@@ -749,7 +783,36 @@ export function MapStudio({
           </select>
         </div>
         <div class="hp-map-studio-actions">
-          <StudioButton variant="compact" onClick={() => setMiniupOpen(open => !open)} aria-expanded={miniupOpen}>Import MiniUp map</StudioButton>
+          <div class="hp-map-studio-add" ref={addMenuRef}>
+            <StudioButton
+              variant="primary"
+              aria-haspopup="menu"
+              aria-expanded={addMenuOpen}
+              onClick={() => setAddMenuOpen((open) => !open)}
+            >
+              + Add source
+            </StudioButton>
+            {addMenuOpen && (
+              <div class="hp-map-studio-add-menu" role="menu" aria-label="Add source">
+                {([
+                  ["powerbi", "Power BI layer"],
+                  ["arcgisFeature", "ArcGIS feature layer"],
+                  ["arcgisTile", "ArcGIS tile layer"],
+                  ["arcgisDynamic", "ArcGIS dynamic layer"],
+                  ["geoJson", "GeoJSON layer"],
+                  ["xyz", "XYZ tile layer"],
+                ] as const).map(([type, label]) => (
+                  <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
+                ))}
+                <button role="menuitem" onClick={() => { setAddMenuOpen(false); setImportOpen(true); }}>Published map definition</button>
+                <button role="menuitem" onClick={() => { setAddMenuOpen(false); addGroup(); }}>Layer group</button>
+              </div>
+            )}
+          </div>
+          <StudioButton variant="compact" onClick={() => { setSelectedLayerId("__basemap__"); setMobilePane("properties"); }}>Basemap</StudioButton>
+          {mapCommands && ([ ["search", "Search"], ["selection", "Select"], ["fit", "Fit to extent"], ["bookmarks", "Bookmarks"], ["legend", "Legend"], ["clear", "Reset selection"] ] as [MapStudioCommand, string][]).map(([command, label]) => <StudioButton variant="compact" onClick={() => { mapCommands.send(mapId, command); setMobilePane("map"); }}>{label}</StudioButton>)}
+          {onPreview && <StudioButton variant="compact" onClick={() => { onPreview(); setMobilePane("map"); }}>Preview</StudioButton>}
+          <StudioButton variant="compact" onClick={() => setImportOpen(open => !open)} aria-expanded={importOpen}>Import published map</StudioButton>
           <StudioButton
             variant="compact"
             disabled={!history.canUndo}
@@ -780,7 +843,7 @@ export function MapStudio({
           )}
         </div>
       </header>
-      {miniupOpen && <MiniUpImportPanel map={map} publishedMaps={parseConfig(configurationJson ?? "{}").config?.miniup?.publishedMaps} providerAccess={providerAccess} webAccessAvailable={webAccessAvailable} onClose={() => setMiniupOpen(false)} onApply={(imported, warnings) => { const applied = mutateMap(candidate => Object.assign(candidate, imported)); if (applied) setCandidateWarnings(warnings); return applied; }} />}
+      {importOpen && <MapImportPanel map={map} publishedMaps={parseConfig(configurationJson ?? "{}").config?.maps?.publishedMaps} providerAccess={providerAccess} webAccessAvailable={webAccessAvailable} onClose={() => setImportOpen(false)} onApply={(imported, warnings) => { const applied = mutateMap(candidate => Object.assign(candidate, imported)); if (applied) setCandidateWarnings(warnings); return applied; }} />}
       <div
         class="hp-map-studio-pane-switch"
         role="tablist"
@@ -793,6 +856,7 @@ export function MapStudio({
         >
           Layers
         </button>
+        {preview && <button role="tab" aria-selected={mobilePane === "map"} onClick={() => setMobilePane("map")}>Map</button>}
         <button
           role="tab"
           aria-selected={mobilePane === "properties"}
@@ -820,59 +884,39 @@ export function MapStudio({
         </details>
       )}
       <div class="hp-map-studio-body">
+        {preview && <MapStudioRail drawer={drawer} onDrawer={next => { mapCommands?.send(mapId, "close"); setImportOpen(false); setDrawer(next); }} onBasemap={() => { mapCommands?.send(mapId, "close"); setSelectedLayerId("__basemap__"); setDrawer("properties"); }} onCommand={command => mapCommands?.send(mapId, command)} onPreview={onPreview} onUndo={() => restore(history.undo())} onRedo={() => restore(history.redo())} canUndo={history.canUndo} canRedo={history.canRedo} />}
+        {preview && drawer === "sources" && <section class="hp-map-source-drawer hp-map-floating-drawer" aria-label="Add source"><header class="hp-map-drawer-heading"><strong>Add source</strong><button type="button" aria-label="Close source panel" onClick={() => setDrawer(null)}>×</button></header><div class="hp-map-source-choices">{([ ["powerbi", "Power BI data"], ["geoJson", "GeoJSON URL"], ["arcgisFeature", "ArcGIS FeatureServer"], ["arcgisTile", "ArcGIS tile service"], ["arcgisDynamic", "ArcGIS map service"], ["xyz", "XYZ tiles"] ] as const).map(([type, label]) => <button type="button" onClick={() => { addLayer(type); setDrawer("properties"); }}>{label}</button>)}<button type="button" onClick={() => { setDrawer(null); setImportOpen(true); }}>Import published map definition</button><button type="button" onClick={() => { addGroup(); setDrawer("layers"); }}>New layer group</button><small>Public sources on miniup.app, miniup.io and ArcGIS hosts use the same native adapters. Host WebAccess and CORS policies apply.</small></div></section>}
+
         <aside
-          class={`hp-map-studio-layers ${mobilePane === "properties" ? "is-mobile-hidden" : ""}`}
+          class={`hp-map-studio-layers ${mobilePane !== "layers" ? "is-mobile-hidden" : ""}`}
         >
+          {preview && <header class="hp-map-drawer-heading"><strong>Layers</strong><button type="button" aria-label="Close layers panel" onClick={() => setDrawer(null)}>×</button></header>}
+          {preview && <label class="hp-map-layer-search"><input type="search" aria-label="Search layers" placeholder="Find a layer…" value={layerSearch} onInput={event => setLayerSearch(event.currentTarget.value)} /></label>}
+          <MapContentsActions total={orderedLayers.length} selected={selectedLayerIds.filter(id => orderedLayers.some(layer => layer.id === id)).length} onSelectAll={() => setSelectedLayerIds(orderedLayers.map(layer => layer.id))} onClear={() => setSelectedLayerIds([])} onVisibility={visible => mutateMap(candidate => { candidate.layers?.forEach(layer => { if (selectedLayerIds.includes(layer.id)) layer.visible = visible; }); })} />
           <StudioButton
             variant="ghost"
             class={selectedLayerId === "__basemap__" ? "is-selected" : ""}
             onClick={() => {
               setSelectedLayerId("__basemap__");
+              if (preview) setDrawer("properties");
               setMobilePane("properties");
             }}
           >
             Basemap & view
           </StudioButton>
           {groups.map((group, index) => groupTree(group, index))}
-          {orderedLayers
-            .filter(
-              (item) =>
-                !item.groupId ||
-                !groups.some((group) => group.id === item.groupId),
-            )
-            .map((item, index, items) =>
-              layerTreeRow(item, index, items.length),
-            )}
-          <div class="hp-map-studio-add" ref={addMenuRef}>
-            <StudioButton
-              variant="primary"
-              aria-haspopup="menu"
-              aria-expanded={addMenuOpen}
-              onClick={() => setAddMenuOpen((open) => !open)}
-            >
-              + Add layer
-            </StudioButton>
-            {addMenuOpen && (
-              <div class="hp-map-studio-add-menu" role="menu" aria-label="Add layer">
-                {([
-                  ["powerbi", "Power BI layer"],
-                  ["arcgisFeature", "ArcGIS feature layer"],
-                  ["arcgisTile", "ArcGIS tile layer"],
-                  ["arcgisDynamic", "ArcGIS dynamic layer"],
-                  ["geoJson", "GeoJSON layer"],
-                  ["xyz", "XYZ tile layer"],
-                ] as const).map(([type, label]) => (
-                  <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
-                ))}
-                <button role="menuitem" onClick={() => { setAddMenuOpen(false); setMiniupOpen(true); }}>MiniUp published map</button>
-                <button role="menuitem" onClick={() => { setAddMenuOpen(false); addGroup(); }}>Layer group</button>
-              </div>
-            )}
-          </div>
+          {MAP_ORIGIN_GROUPS.map(origin => {
+            const children = orderedLayers.filter(item => (!item.groupId || !groups.some(group => group.id === item.groupId)) && mapLayerOrigin(item) === origin);
+            return children.length ? <section class="hp-map-origin-group"><h4>{origin}</h4>{children.map((item, index) => layerTreeRow(item, index, children.length))}</section> : null;
+          })}
+
         </aside>
+        {preview && <section class={`hp-map-studio-canvas ${mobilePane !== "map" ? "is-map-mobile-hidden" : ""}`} aria-label="Native map preview">{preview}</section>}
         <div
-          class={`hp-map-studio-properties ${mobilePane === "layers" ? "is-mobile-hidden" : ""}`}
+          class={`hp-map-studio-properties ${mobilePane !== "properties" ? "is-mobile-hidden" : ""}`}
         >
+          {preview && <header class="hp-map-drawer-heading"><button type="button" aria-label="Back to layers" onClick={() => setDrawer("layers")}>‹</button><strong>{selectedLayerId === "__basemap__" ? "Basemap & view" : "Layer settings"}</strong><button type="button" aria-label="Close properties panel" onClick={() => setDrawer(null)}>×</button></header>}
+          {preview && selectedLayerId !== "__basemap__" && <label class="hp-map-active-layer"><span>Active layer</span><select aria-label="Active layer" value={selectedLayerId} onChange={event => setSelectedLayerId(event.currentTarget.value)}>{orderedLayers.map(item => <option value={item.id}>{item.name}</option>)}</select></label>}
           {selectedLayerId === "__basemap__" ? (
             <BasemapViewEditor
               map={map}
@@ -901,6 +945,7 @@ export function MapStudio({
                   </StudioButton>
                 </div>
               </header>
+              {preview && <MapPropertyCategories value={propertyTab} onChange={value => setPropertyTab(value as PropertyTab)} supported={value => propertyTabSupported(value as PropertyTab, layer.source.type)} />}
               <label class="hp-map-property-select">
                 <span>Property category</span>
                 <select value={propertyTab} onChange={(event) => setPropertyTab(event.currentTarget.value as PropertyTab)}>
@@ -938,6 +983,9 @@ export function MapStudio({
                 ))}
                 </nav>
                 <section class="hp-map-property-panel" role="tabpanel">
+                {layerStatuses[layer.id]?.error && <p role="alert" class="hp-studio-inline-error">{layerStatuses[layer.id].error}</p>}
+                {layerStatuses[layer.id]?.warnings.length > 0 && <details><summary>{layerStatuses[layer.id].warnings.length} source warnings</summary>{layerStatuses[layer.id].warnings.map(warning => <p>{warning}</p>)}</details>}
+                {propertyTab === "effects" && <MapLayerEffectsEditor layer={layer} mutate={mutateLayer} />}
                 {capabilityExplanation && (
                   <p class="hp-map-capability-note" role="note">
                     {capabilityExplanation}
@@ -957,6 +1005,7 @@ export function MapStudio({
                     serviceMetadata={serviceMetadata}
                   />
                 )}
+                {preview && propertyTab === "source" && resolveMapLayerCapabilities(layer.source.type).join && <button type="button" class="hp-map-join-shortcut" onClick={() => setPropertyTab("join")}>Set data relationship →</button>}
                 {propertyTab === "renderer" && (
                   <RendererEditor
                     layer={layer}
@@ -1051,7 +1100,7 @@ export function MapStudio({
     group: NonNullable<MapComponent["layerGroups"]>[number],
     index: number,
   ) {
-    const children = orderedLayers.filter((item) => item.groupId === group.id);
+    const children = orderedLayers.filter((item) => item.groupId === group.id && (!layerSearch || item.name.toLowerCase().includes(layerSearch.toLowerCase())));
     return (
       <section data-group-id={group.id}>
         <header>
@@ -1161,7 +1210,8 @@ export function MapStudio({
     index: number,
     count: number,
   ) {
-    const selected = selectedLayerId === item.id;
+    if (layerSearch && !item.name.toLowerCase().includes(layerSearch.toLowerCase())) return null;
+    const selected = selectedLayerId === item.id || selectedLayerIds.includes(item.id);
     const sourceLabel: Record<MapLayerSourceType, string> = {
       powerbi: "Power BI",
       arcgisFeature: "ArcGIS Feature",
@@ -1182,14 +1232,15 @@ export function MapStudio({
             diagnostic.path === itemPath || diagnostic.path.startsWith(`${itemPath}/`),
         )
       : [];
-    const errorCount = itemIssues.filter(
+    const runtimeStatus = layerStatuses[item.id];
+    const errorCount = (runtimeStatus?.error ? 1 : 0) + itemIssues.filter(
       (diagnostic) => diagnostic.severity === "error",
     ).length;
-    const warningCount = itemIssues.filter(
+    const warningCount = (runtimeStatus?.warnings.length ?? 0) + itemIssues.filter(
       (diagnostic) => diagnostic.severity === "warning",
     ).length;
-    const loading = selected && metadata.loading === true;
-    const featureCount =
+    const loading = runtimeStatus?.loading || selected && metadata.loading === true;
+    const featureCount = runtimeStatus ? `${runtimeStatus.featureCount.toLocaleString()} features` :
       item.source.type === "powerbi"
         ? `${rows.length.toLocaleString()} features`
         : selected && joinPreview.result
@@ -1215,9 +1266,13 @@ export function MapStudio({
         />
         <button
           aria-label={`Select layer ${item.name}`}
-          onClick={() => {
+          aria-pressed={selected}
+          title="Ctrl/Cmd-click to select multiple layers"
+          onClick={event => {
+            setSelectedLayerIds(current => event.ctrlKey || event.metaKey ? current.includes(item.id) ? current.filter(id => id !== item.id) : [...current, item.id] : [item.id]);
             setSelectedLayerId(item.id);
-            setMobilePane("properties");
+            if (preview) setDrawer("properties");
+            if (!event.ctrlKey && !event.metaKey) setMobilePane("properties");
           }}
           onKeyDown={(event) => {
             if (event.key === "ArrowUp") moveLayer(item.id, -1);
@@ -1227,7 +1282,7 @@ export function MapStudio({
           <strong title={item.name}>{item.name}</strong>
           <small>
             <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
-              {item.provenance?.provider === "miniup" ? "MiniUp" : item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
+              {item.provenance?.provider === "published" ? "Published" : item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
             </span>
             <span title={featureCount}>{featureCount}</span>
           </small>
@@ -1237,11 +1292,11 @@ export function MapStudio({
           title={
             loading
               ? "Loading source metadata"
-              : errorCount
+              : runtimeStatus?.error ?? (errorCount
                 ? `${errorCount} error${errorCount === 1 ? "" : "s"}`
                 : warningCount
                   ? `${warningCount} warning${warningCount === 1 ? "" : "s"}`
-                  : "Ready"
+                  : "Ready")
           }
           aria-label={loading ? "Loading" : errorCount ? "Error" : warningCount ? "Warning" : "Ready"}
         >
@@ -1250,6 +1305,9 @@ export function MapStudio({
         <details class="hp-map-layer-actions">
           <summary aria-label={`Actions for ${item.name}`}>⋯</summary>
           <div>
+            <button type="button" onClick={() => { setSelectedLayerId(item.id); if (preview) setDrawer("properties"); }}>Layer settings</button>
+            <button type="button" onClick={() => { const duplicate = copy(item); duplicate.id = uniqueId(`${item.id}-copy`); duplicate.name = `${item.name} copy`; duplicate.provenance = undefined; mutateMap(candidate => { candidate.layers = [...candidate.layers ?? [], duplicate]; }); }}>Duplicate this layer</button>
+            <button type="button" onClick={() => mutateMap(candidate => { candidate.layers = candidate.layers?.filter(layer => layer.id !== item.id); })}>Delete this layer</button>
             <button
               disabled={index === 0}
               aria-label={`Move ${item.name} up`}
@@ -1294,6 +1352,7 @@ function SourceEditor({
   metadata: {
     loading?: boolean;
     result?: ArcGisServiceInspection;
+    geoJson?: ArcGisLayerMetadata;
     sourceUrl?: string;
     errors?: string[];
   };
@@ -1311,6 +1370,8 @@ function SourceEditor({
     });
   return (
     <div class="hp-map-form-grid">
+      <DraftInput label="Layer name" value={layer.name} onCommit={name => mutate(candidate => { candidate.name = name; })} />
+      {layer.provenance && <div class="hp-map-origin-card"><strong>Published · {layer.provenance.mapName}</strong><small>Layer {layer.provenance.layerId} · version {layer.provenance.mapVersion} · {layer.provenance.geometryType ?? "geometry"}</small>{layer.provenance.sourceUrl && <a href={layer.provenance.sourceUrl} target="_blank" rel="noopener noreferrer">Published source ↗</a>}</div>}
       <label>
         <span>Effective dataset</span>
         <select
@@ -1453,8 +1514,8 @@ function SourceEditor({
             value={String(source.url ?? "")}
             onCommit={(value) =>
               mutate((candidate) => {
-                if (candidate.source.type !== "powerbi")
-                  candidate.source.url = value;
+                if (candidate.source.type !== "powerbi") candidate.source.url = value;
+                if (candidate.source.type === "geoJson" && value) delete candidate.source.data;
               })
             }
           />
@@ -1465,6 +1526,7 @@ function SourceEditor({
           )}
           {layer.source.type === "geoJson" && (
             <>
+              {layer.source.url && <button type="button" onClick={() => inspect()} disabled={metadata.loading}>{metadata.loading ? "Inspecting…" : "Inspect GeoJSON fields"}</button>}
               <DraftInput
                 label="Feature ID field"
                 value={layer.source.idField ?? ""}
@@ -1958,7 +2020,7 @@ function RendererEditor({
   const defaultSource: MapAttributeSource =
     layer.source.type === "powerbi"
       ? "powerbi"
-      : layer.source.type === "arcgisFeature" && layer.source.mode === "join"
+      : (layer.source.type === "arcgisFeature" && layer.source.mode === "join" || layer.source.type === "geoJson" && layer.join?.enabled)
         ? "joined"
         : "service";
   const setRenderer = (next: Json) =>
@@ -2177,23 +2239,9 @@ function RendererEditor({
               <option value="fill">fill</option>
             </select>
           </label>
-          <DraftInput
-            label="Fill color"
-            value={String(
-              (object(r.symbol)
-                ? (r.symbol.fillColor ?? r.symbol.color)
-                : "") ?? "",
-            )}
-            onCommit={(value) =>
-              setRenderer({
-                ...r,
-                symbol: {
-                  ...(object(r.symbol) ? r.symbol : {}),
-                  fillColor: value,
-                },
-              })
-            }
-          />
+          <MapColorPicker label="Fill color" value={String(object(r.symbol) ? r.symbol.fillColor ?? r.symbol.color ?? "#2563eb" : "#2563eb")} opacity={Number(object(r.symbol) ? r.symbol.fillOpacity ?? 1 : 1)} onChange={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), fillColor: value } })} onOpacity={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), fillOpacity: value } })} />
+          <MapColorPicker label="Outline" value={String(object(r.symbol) ? r.symbol.outlineColor ?? r.symbol.color ?? "#1e40af" : "#1e40af")} onChange={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), outlineColor: value } })} />
+          <label><span>Outline width</span><input type="number" min="0" max="12" step="0.5" value={Number(object(r.symbol) ? r.symbol.outlineWidth ?? r.symbol.weight ?? 1 : 1)} onChange={event => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), outlineWidth: Number(event.currentTarget.value), weight: Number(event.currentTarget.value) } })} /></label>
           <label>
             <span>Radius / size</span>
             <input
@@ -2662,6 +2710,7 @@ function LabelsEditor({
           />
         </label>
       ))}
+      <label><span>Font</span><select aria-label="Label font" value={labels.fontFamily ?? "system-ui"} onChange={event => set({ fontFamily: event.currentTarget.value })}>{["system-ui", "Arial", "Segoe UI", "Georgia", "monospace"].map(font => <option>{font}</option>)}</select></label>
       <DraftInput
         label="Text weight"
         value={String(labels.weight ?? "normal")}
@@ -2723,6 +2772,7 @@ function PopupEditor({
   const actions = section === "popup" ? (layer.popup?.actions ?? []) : [];
   return (
     <div class="hp-map-form-grid">
+      {section === "popup" && <PopupContentEditor blocks={layer.popup?.content ?? []} onChange={content => set({ content, enabled: true })} fieldSets={fieldSets} defaultSource={defaultFieldSource(layer)} />}
       <label>
         <input
           type="checkbox"
@@ -3012,8 +3062,8 @@ function JoinEditor({
   runPreview: () => void;
   invalidatePreview: () => void;
 }) {
-  if (layer.source.type !== "arcgisFeature")
-    return <p>Join mode is available for ArcGIS feature layers.</p>;
+  if (layer.source.type !== "arcgisFeature" && layer.source.type !== "geoJson")
+    return <p>Joins are available for ArcGIS feature and GeoJSON layers.</p>;
   const join = layer.join ?? {
     enabled: false,
     powerBiField: fields[0]?.key ?? "",
@@ -3041,7 +3091,7 @@ function JoinEditor({
     counts.set(value, (counts.get(value) ?? 0) + 1),
   );
   const duplicates = [...counts.entries()].filter(([, count]) => count > 1);
-  const powerBiFieldExists = fields.some((field) => field.key === join.powerBiField);
+  const powerBiFieldExists = fields.some((field) => field.key === join.powerBiField && field.kind !== "measure");
   const serviceFieldExists = Boolean(
     join.serviceField &&
       serviceMetadata?.fields?.some((field) => field.name === join.serviceField),
@@ -3064,9 +3114,9 @@ function JoinEditor({
         <strong>Guided feature join</strong>
         <p>Build and validate the relationship before saving it to the map layer.</p>
       </header>
-      <ol class="hp-map-join-steps" aria-label="Join workflow progress">
+      <details class="hp-map-join-progress"><summary>Join validation steps</summary><ol class="hp-map-join-steps" aria-label="Join workflow progress">
         {[
-          ["ArcGIS feature source", true],
+          ["Spatial feature source", true],
           ["Power BI dataset", true],
           ["Power BI key", powerBiFieldExists],
           ["Service key", serviceFieldExists],
@@ -3085,7 +3135,8 @@ function JoinEditor({
             <span>{index + 1}</span>{label}
           </li>
         ))}
-      </ol>
+      </ol></details>
+      <div class="hp-map-join-relationship"><span>{layer.provenance?.mapName ?? "Spatial layer"}<strong>{join.serviceField || "Choose feature key"}</strong></span><b aria-hidden="true">→</b><span>Power BI / logical dataset<strong>{fields.find(field => field.key === join.powerBiField)?.displayName ?? "Choose data key"}</strong></span></div>
       <div class="hp-map-join-status" role="status">
         <strong>{join.enabled ? "Join is active" : "Join is not active"}</strong>
         <span>
@@ -3101,7 +3152,7 @@ function JoinEditor({
       <FieldSelect
         label="Power BI / logical dataset field"
         value={join.powerBiField}
-        fields={fields}
+        fields={fields.filter(field => field.kind !== "measure")}
         onChange={(value) => set({ powerBiField: value })}
       />
       {!powerBiFieldExists && join.powerBiField && (
@@ -3682,7 +3733,7 @@ function LegendEditor({
   const legend = layer.legend ?? {};
   const defaultSource: MapAttributeSource = layer.source.type === "powerbi"
     ? "powerbi"
-    : layer.source.type === "arcgisFeature" && layer.source.mode === "join"
+    : (layer.source.type === "arcgisFeature" && layer.source.mode === "join" || layer.source.type === "geoJson" && layer.join?.enabled)
       ? "joined"
       : "service";
   const source = legend.valueFieldSource ?? defaultSource;
@@ -4523,7 +4574,7 @@ function BasemapViewEditor({
 function defaultFieldSource(layer: MapLayerDefinition): MapAttributeSource {
   return layer.source.type === "powerbi"
     ? "powerbi"
-    : layer.source.type === "arcgisFeature" && layer.source.mode === "join"
+    : (layer.source.type === "arcgisFeature" && layer.source.mode === "join" || layer.source.type === "geoJson" && layer.join?.enabled)
       ? "joined"
       : "service";
 }

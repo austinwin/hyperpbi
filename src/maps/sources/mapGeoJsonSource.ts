@@ -1,3 +1,6 @@
+import { bindGeoJsonLayer } from "../join/mapGeoJsonBinding";
+import type { MapSourceContext } from "./mapSourceResolver";
+import { validateGeoJson } from "./publicGeoJson";
 import type { MapLayerDefinition } from "../../schema/mapSchema";
 import type { ResolvedMapFeature, ResolvedMapLayer } from "../model/resolvedMapTypes";
 import { geometryAnalysis } from "./mapSourceResolver";
@@ -9,13 +12,19 @@ import type { Primitive } from "../../data/normalizeData";
 export function resolveGeoJsonLayer(
     definition: MapLayerDefinition,
     data: GeoJSON.GeoJsonObject,
+    context?: MapSourceContext,
 ): ResolvedMapLayer {
     const started = globalThis.performance?.now?.() ?? Date.now();
     const source = definition.source.type === "geoJson" ? definition.source : undefined;
-    const rawFeatures = flattenGeoJson(data);
-    let features = rawFeatures.map((raw, index) => materializeGeoJsonFeature(definition, raw, index, source?.idField));
+    const rawFeatures = flattenGeoJson(validateGeoJson(data));
+    const maximum = Math.max(1, Math.min(100_000, definition.performance?.maxFeatures ?? 30_000));
+    const warnings: string[] = [];
+    if (rawFeatures.length > maximum) warnings.push(`Feature limit: showing ${maximum} of ${rawFeatures.length} GeoJSON features. Use FeatureServer viewport queries for larger datasets.`);
+    const ids = new Set<string>();
+    if (rawFeatures.some(raw => (source?.idField ? raw.properties?.[source.idField] : undefined) == null && raw.id == null)) warnings.push("Some features have no stable ID. Set source.idField; positional identity cannot survive reordered data.");
+    let features = rawFeatures.slice(0, maximum).map((raw, index) => { const feature = materializeGeoJsonFeature(definition, raw, index, source?.idField); if (ids.has(feature.id)) warnings.push(`Duplicate feature ID “${feature.id}”; set a unique source.idField to preserve selection identity.`); ids.add(feature.id); return feature; });
     const filters = definition.filter ? Array.isArray(definition.filter) ? definition.filter : [definition.filter] : [];
-    if (filters.length)
+    if (filters.length && !definition.join?.enabled)
         features = features.filter((feature) => filters.every((filter) =>
             matchesFilter(
                 featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive,
@@ -29,7 +38,7 @@ export function resolveGeoJsonLayer(
         features,
         "service",
     );
-    return {
+    const layer: ResolvedMapLayer = {
         id: definition.id,
         name: definition.name,
         sourceType: "geoJson",
@@ -39,7 +48,9 @@ export function resolveGeoJsonLayer(
         opacity: definition.opacity ?? 1,
         order: definition.order ?? 0,
         groupId: definition.groupId,
-        datasetName: definition.dataset,
+        datasetName: context?.datasetName ?? definition.dataset,
+        provenance: definition.provenance,
+        powerBiIdentityAvailable: false,
         features,
         renderer,
         labels: definition.labels ? {
@@ -53,6 +64,7 @@ export function resolveGeoJsonLayer(
             color: definition.labels.color ?? "#111827",
             size: definition.labels.size ?? 12,
             weight: definition.labels.weight ?? 500,
+            fontFamily: definition.labels.fontFamily,
             haloColor: definition.labels.haloColor,
             haloSize: definition.labels.haloSize,
             backgroundColor: definition.labels.backgroundColor,
@@ -70,6 +82,7 @@ export function resolveGeoJsonLayer(
             })),
             actions: definition.popup.actions ?? [],
             html: definition.popup.html,
+            content: definition.popup.content,
             defaultFieldSource: definition.popup.defaultFieldSource ?? "service",
         } : undefined,
         tooltip: definition.tooltip ? {
@@ -94,13 +107,20 @@ export function resolveGeoJsonLayer(
             geometryType: geometry.type,
             usedServiceSymbology: false,
             usedServiceLabels: false,
-            warnings: [],
+            warnings: [...new Set(warnings)],
             geometryTypeCounts: geometry.counts,
             validFeatureCount: features.length,
             sourceResolutionMs: (globalThis.performance?.now?.() ?? Date.now()) - started,
         },
         loading: false,
     };
+    if (definition.join?.enabled && context) {
+        const bound = bindGeoJsonLayer(layer, definition, context);
+        if (filters.length) bound.features = bound.features.filter(feature => filters.every(filter => matchesFilter(featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive, filter.operator, filter.value as Primitive)));
+        bound.renderer = resolveRenderer(definition.renderer ?? { type: "simple", symbol: {} }, bound.features, "joined");
+        return bound;
+    }
+    return layer;
 }
 
 function flattenGeoJson(data: GeoJSON.GeoJsonObject): GeoJSON.Feature[] {
@@ -121,7 +141,7 @@ function materializeGeoJsonFeature(
         ? { ...raw.properties } as Record<string, unknown>
         : {};
     const geometry = raw.geometry;
-    const idValue = idField ? properties[idField] : raw.id;
+    const idValue = (idField ? properties[idField] : undefined) ?? raw.id;
     const id = idValue === undefined || idValue === null ? `geojson-${index}` : String(idValue);
     const point = geometry?.type === "Point" ? geometry.coordinates : undefined;
     return {

@@ -218,6 +218,22 @@ afterEach(() => {
 });
 
 describe("MapBlock ArcGIS runtime", () => {
+  it("suspends non-viewport layers while hidden and resumes when shown", async () => {
+    const definition = { ...featureLayer("hidden"), visible: false };
+    const map = component([definition]);
+    const { host, value } = mount(map);
+    await settle();
+    expect(queryMock).not.toHaveBeenCalled();
+    const shown = { ...value, state: { ...value.state, mapLayerState: { map: { visibility: { hidden: true } } } } };
+    rerender(host, shown, map);
+    await settle();
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    rerender(host, value, map);
+    await settle();
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(latestLeafletProps?.resolvedLayers[0].loading).toBe(false);
+    act(() => render(null, host));
+  });
   it("keeps the map mounted while the first ArcGIS feature request is pending", async () => {
     queryMock.mockReturnValue(new Promise(() => undefined));
     const { host } = mount(component([featureLayer("pending")]));
@@ -601,7 +617,7 @@ describe("MapBlock exported runtime helpers", () => {
       height: 600,
     };
     expect(
-      arcGisViewportQueryEligibility(definition, groups, undefined, null),
+      arcGisViewportQueryEligibility(definition, groups, { viewport: true }, null),
     ).toBe("waitingForViewport");
     expect(
       arcGisViewportQueryEligibility(definition, groups, undefined, viewport),

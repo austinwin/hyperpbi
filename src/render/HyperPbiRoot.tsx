@@ -65,6 +65,7 @@ export function HyperPbiRoot({
   ownerByRuntimeId,
   componentPathById,
   onMapViewportChange,
+  mapCommands,
   remoteSourceHost = "web",
 }: {
   instanceId: string;
@@ -97,6 +98,7 @@ export function HyperPbiRoot({
   providerAccess?: ProviderAccessState;
   ownerByRuntimeId?: Readonly<Record<string, string>>;
   componentPathById?: Readonly<Record<string, string>>;
+  mapCommands?: import("../maps/interactions/mapStudioCommands").MapCommandChannel;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
   remoteSourceHost?: "web" | "powerbi";
 }) {
@@ -295,6 +297,7 @@ export function HyperPbiRoot({
         datasets: datasetEvaluation.datasets,
         remoteSources: remoteData.statuses,
         onMapViewportChange,
+  mapCommands,
         executeUiAction: null as any,
         isOverlayOpen: null as any,
       };
@@ -327,6 +330,7 @@ export function HyperPbiRoot({
       datasetEvaluation.datasets,
       remoteData.statuses,
       onMapViewportChange,
+  mapCommands,
     ],
   );
 
@@ -362,6 +366,7 @@ export function HyperPbiRoot({
       datasets: datasetEvaluation.datasets,
       remoteSources: remoteData.statuses,
       onMapViewportChange,
+  mapCommands,
       executeUiAction: execUiAction,
       isOverlayOpen,
     }),
@@ -393,6 +398,7 @@ export function HyperPbiRoot({
       datasetEvaluation.datasets,
       remoteData.statuses,
       onMapViewportChange,
+  mapCommands,
     ],
   );
   const style = themeVariables(schema.theme, effectiveSettings);

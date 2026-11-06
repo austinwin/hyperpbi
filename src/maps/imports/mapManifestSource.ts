@@ -1,10 +1,10 @@
 import type { ProviderAccessState } from "../../providers/providerTypes";
 import { externalServiceAccess } from "../../providers/providerPolicy";
-import { parseMiniUpManifest, publicMapUrl } from "./miniupManifest";
-import type { MiniUpMapManifest } from "./miniupTypes";
+import { parseMapManifest, publicMapUrl } from "./mapManifest";
+import type { PublishedMapManifest } from "./mapImportTypes";
 
-export interface MiniUpSourceOptions { signal?: AbortSignal; providerAccess?: ProviderAccessState; webAccessAvailable?: boolean; }
-export async function loadMiniUpManifest(url: string, options: MiniUpSourceOptions = {}) {
+export interface MapManifestSourceOptions { signal?: AbortSignal; providerAccess?: ProviderAccessState; webAccessAvailable?: boolean; }
+export async function loadMapManifest(url: string, options: MapManifestSourceOptions = {}) {
     const endpoint = publicMapUrl(url);
     const access = externalServiceAccess(options.providerAccess, endpoint, options.webAccessAvailable);
     if (!access.allowed) throw new Error(access.reason ?? "Manifest origin is unavailable. Configure Power BI WebAccess for this host.");
@@ -15,10 +15,10 @@ export async function loadMiniUpManifest(url: string, options: MiniUpSourceOptio
     if (text.length > 12_000_000) throw new Error("Map manifest exceeds 12 MB.");
     let value: unknown;
     try { value = JSON.parse(text); } catch { throw new Error("This URL did not return a JSON map manifest. Export hyperpbi.map 1.0 and paste its published asset URL; website HTML is not scraped."); }
-    return parseMiniUpManifest(value, endpoint);
+    return parseMapManifest(value, endpoint);
 }
 
 /** Explicit export adapter for a publisher holding its own map configuration. */
-export function exportMiniUpManifest(map: Omit<MiniUpMapManifest, "format" | "schemaVersion">): MiniUpMapManifest {
-    return parseMiniUpManifest({ ...map, format: "hyperpbi.map", schemaVersion: "1.0" }).manifest;
+export function exportMapManifest(map: Omit<PublishedMapManifest, "format" | "schemaVersion">): PublishedMapManifest {
+    return parseMapManifest({ ...map, format: "hyperpbi.map", schemaVersion: "1.0" }).manifest;
 }

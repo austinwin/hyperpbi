@@ -6,7 +6,7 @@
   "version": "2026.11.1",
   "view": { "center": [30.27, -97.74], "zoom": 11, "fitMode": "none" },
   "basemap": { "type": "none" },
-  "layerGroups": [{ "id": "operations", "name": "MiniUp · Operations", "order": 0 }],
+  "layerGroups": [{ "id": "operations", "name": "Published · Operations", "order": 0 }],
   "layers": [
     {
       "id": "facilities",

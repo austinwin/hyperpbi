@@ -30,7 +30,7 @@ function mountStudio(onLayoutChange = vi.fn()) {
         settings={toRuntimeSettings(new VisualFormattingSettingsModel())}
         initialSpecification={mapStudioSpecification}
         initialConfiguration={defaultConfigJson}
-        initialEditorTab="mapStudio"
+        initialEditorTab="inspector"
         initialLayout={JSON.stringify({
           editorPercent: 50,
           bottomHeight: 200,
@@ -84,7 +84,7 @@ describe("Studio responsive workbench state", () => {
       host.querySelector<HTMLSelectElement>(
         ".hp-studio-workspace-select select",
       )?.value,
-    ).toBe("mapStudio");
+    ).toBe("inspector");
   });
 
   it("persists simple and advanced mode choices through the layout callback", () => {

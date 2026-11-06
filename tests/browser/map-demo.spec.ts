@@ -23,6 +23,8 @@ async function openDemo(page: Page, demo: string) {
   await page.goto(`/tests/browser/map-demo.html?demo=${demo}`);
   await expect.poll(() => page.evaluate(() => window.hpMapDemo.ready)).toBe(true);
   await expect(page.locator(".leaflet-container")).toBeVisible();
+  const expand = page.getByRole("button", { name: "Expand map tools", exact: true });
+  if (await expand.count()) await expand.click();
 }
 
 test("feature showcase proves one-click, stable repeat click, and visual patching", async ({ page }) => {
@@ -167,10 +169,10 @@ test("delayed viewport queries keep the wastewater map mounted through navigatio
     .toBeGreaterThan(1);
   await expect(page.locator('[data-viewport-lifecycle="stable"]')).toHaveCount(1);
 
-  await page.getByRole("button", { name: "Zoom in" }).click();
   const requestsBeforeRelease = await page.evaluate(
     () => window.hpMapDemo.arcGisRequestCount,
   );
+  await page.getByRole("button", { name: "Zoom in" }).click();
   await expect
     .poll(() => page.evaluate(() => window.hpMapDemo.arcGisRequestCount))
     .toBeGreaterThan(requestsBeforeRelease);

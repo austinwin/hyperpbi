@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { createPortal } from "preact/compat";
+import { ExternalMount } from "../render/ExternalMount";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 
 /** Shadow styles cannot select another visual; paint containment clips fixed/positioned content. */
@@ -16,5 +16,5 @@ export function IsolatedVisual({ enabled, children }: { enabled: boolean; childr
         return () => { observer.disconnect(); styles.remove(); };
     }, [enabled]);
     if (!enabled) return <>{children}</>;
-    return <div class="hp-isolated-visual" style={{ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0, contain: "layout paint style", isolation: "isolate", overflow: "hidden" }}><div ref={host} style={{ width: "100%", height: "100%", minWidth: 0 }}>{root ? createPortal(children, root) : null}</div></div>;
+    return <div class="hp-isolated-visual" style={{ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0, contain: "layout paint style", isolation: "isolate", overflow: "hidden" }}><div ref={host} style={{ width: "100%", height: "100%", minWidth: 0 }}>{root && <ExternalMount container={root}>{children}</ExternalMount>}</div></div>;
 }

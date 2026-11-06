@@ -49,11 +49,11 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator(".hp-map-studio")).toBeVisible();
 });
 
-test("imports a portable MiniUp map with multiple native layers on a compact viewport", async ({ page }) => {
+test("imports a portable published map with multiple native layers on a compact viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 780 });
-  await page.getByRole("button", { name: "Import MiniUp map", exact: true }).click();
-  await page.getByLabel("Open MiniUp manifest").setInputFiles(resolve("examples/map/miniup-published-map.json"));
-  await expect(page.locator(".hp-miniup-preview")).toContainText("Facility Network");
+  await page.getByRole("button", { name: "Import published map", exact: true }).click();
+  await page.getByLabel("Open map manifest").setInputFiles(resolve("examples/map/published-map.json"));
+  await expect(page.locator(".hp-map-import-preview")).toContainText("Facility Network");
   await page.getByRole("button", { name: "Import map and 2 layers" }).click();
   await expect(page.getByRole("button", { name: "Select layer Facilities", exact: true })).toBeVisible();
   const specification = await page.evaluate(() => JSON.parse(window.hpMapStudioHarness.json));
@@ -123,12 +123,12 @@ test("narrow Map Studio uses one pane without clipped or overlapping controls", 
 });
 
 test("keyboard navigation and Escape close the layer menu", async ({ page }) => {
-  const add = page.getByRole("button", { name: "+ Add layer" });
+  const add = page.getByRole("button", { name: "+ Add source" });
   await add.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("menu", { name: "Add layer" })).toBeVisible();
+  await expect(page.getByRole("menu", { name: "Add source" })).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu", { name: "Add layer" })).toHaveCount(0);
+  await expect(page.getByRole("menu", { name: "Add source" })).toHaveCount(0);
   await expect(add).toBeFocused();
 });
 

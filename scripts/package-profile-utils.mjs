@@ -9,7 +9,12 @@ export const DEFAULT_MAP_HOSTS = [
     "https://nominatim.openstreetmap.org",
     "https://geocode-api.arcgis.com",
     "https://functions.miniup.app",
+    "https://miniup.app",
     "https://*.miniup.app",
+    "https://miniup.io",
+    "https://*.miniup.io",
+    "https://arcgis.com",
+    "https://arcgisonline.com",
     "https://*.arcgis.com",
     "https://*.arcgisonline.com",
 ];

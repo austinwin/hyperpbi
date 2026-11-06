@@ -105,7 +105,7 @@ export function MapLayerPanel({ mapId, layers, groups = [], configuration, onZoo
     return (
         <div class="hp-map-layer-panel">
             <div class="hp-map-layer-panel-header">
-                <span>{layers.length.toLocaleString()} layer{layers.length === 1 ? "" : "s"}</span>
+                <span>{layers.length.toLocaleString()} layer{layers.length === 1 ? "" : "s"}</span><button type="button" class="hp-map-layer-reset" onClick={() => layers.forEach(layer => context.dispatch({ type: "mapLayerVisibility", mapId, layerId: layer.id, visible: true }))}>Show all</button><button type="button" class="hp-map-layer-reset" onClick={() => layers.forEach(layer => context.dispatch({ type: "mapLayerVisibility", mapId, layerId: layer.id, visible: false }))}>Hide all</button>
                 <button type="button" class="hp-map-layer-reset" onClick={() => context.dispatch({ type: "resetMapLayers", mapId })}>Reset</button>
             </div>
             {orderedLayers.length === 0 ? (
@@ -136,7 +136,7 @@ export function MapLayerPanel({ mapId, layers, groups = [], configuration, onZoo
                                         <Icon name={isVisible ? "eye" : "eye-off"} size="xs" decorative />
                                     </button>
                                     <span class="hp-map-layer-icon" title={layer.sourceType}><Icon name={iconName} size="xs" decorative /></span>
-                                    <span class="hp-map-layer-name" title={`${layer.name} · dataset ${layer.datasetName ?? "powerbi"}`}>{layer.name}</span>
+                                    <span class="hp-map-layer-name" title={`${layer.name} · ${layer.provenance ? `MiniUp ${layer.provenance.mapName} v${layer.provenance.mapVersion} · ` : ""}dataset ${layer.datasetName ?? "powerbi"}`}>{layer.name}</span>{layer.provenance && <small class="hp-map-source-badge" title={layer.provenance.sourceUrl ?? "Imported published map"}>MiniUp</small>}
                                     {loading && <span class="hp-map-layer-loading" title="Loading" aria-label={`${layer.name} is loading`} />}
                                     {(hasError || hasWarnings) && (
                                         <button

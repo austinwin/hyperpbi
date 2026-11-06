@@ -140,7 +140,7 @@ export interface MapLayerGroupDefinition {
 export interface MapLayerDefinition {
     id: string;
     name: string;
-    provenance?: import("../maps/miniup/miniupTypes").MapLayerProvenance;
+    provenance?: import("../maps/imports/mapImportTypes").MapLayerProvenance;
     /** Logical row view for this layer. Falls back to the map component dataset, then powerbi. */
     dataset?: string;
     /** Optional canonical group membership. */
@@ -500,6 +500,7 @@ export interface MapLabelDefinition {
     color?: string;
     size?: number;
     weight?: number | string;
+    fontFamily?: string;
     haloColor?: string;
     haloSize?: number;
     backgroundColor?: string;
@@ -511,6 +512,7 @@ export interface MapLabelDefinition {
 // ── Popup ─────────────────────────────────────────────────────────────
 
 export interface MapPopupDefinition {
+    content?: import("../maps/popup/mapPopupContent").MapPopupContentBlock[];
     enabled?: boolean;
     /** Namespace used by title and safe HTML template tokens. */
     defaultFieldSource?: "powerbi" | "service" | "joined";

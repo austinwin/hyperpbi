@@ -478,7 +478,8 @@ export function resolvePowerBiLayer(
           color: layer.labels.color ?? "#333333",
           size: layer.labels.size ?? 12,
           weight: layer.labels.weight ?? "normal",
-          haloColor: layer.labels.haloColor,
+          fontFamily: layer.labels.fontFamily,
+            haloColor: layer.labels.haloColor,
           haloSize: layer.labels.haloSize,
           backgroundColor: layer.labels.backgroundColor,
           padding: layer.labels.padding,
@@ -497,6 +498,7 @@ export function resolvePowerBiLayer(
           })),
           actions: (layer.popup.actions ?? []).map((action) => ({ ...action })),
           html: layer.popup.html,
+            content: layer.popup.content,
           defaultFieldSource: layer.popup.defaultFieldSource ?? "powerbi",
         }
       : undefined,

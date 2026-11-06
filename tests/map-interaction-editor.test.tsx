@@ -17,7 +17,7 @@ describe("Map Studio interaction editor", () => {
         mounted.cleanup();
     });
     it("does not imply external selection for reference-only ArcGIS features", () => {
-        const mounted = mountMapStudio(); act(() => button(mounted.host, "+ Add layer").click()); act(() => button(mounted.host, "ArcGIS feature layer").click()); act(() => button(mounted.host, "Interactions").click());
+        const mounted = mountMapStudio(); act(() => button(mounted.host, "+ Add source").click()); act(() => button(mounted.host, "ArcGIS feature layer").click()); act(() => button(mounted.host, "Interactions").click());
         expect(mounted.host.textContent).toContain("reference-only ArcGIS features have no Power BI identities"); mounted.cleanup();
     });
 });
