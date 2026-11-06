@@ -13,7 +13,7 @@ describe("Map Studio workspace layout", () => {
 
     act(() => button(mounted.host, "+ Add source").click());
     expect(mounted.host.querySelector('[role="menu"][aria-label="Add source"]')).not.toBeNull();
-    expect(mounted.host.querySelectorAll('[role="menuitem"]')).toHaveLength(8);
+    expect(mounted.host.querySelectorAll('[role="menuitem"]')).toHaveLength(9);
     act(() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
     expect(mounted.host.querySelector('[role="menu"]')).toBeNull();
     mounted.cleanup();

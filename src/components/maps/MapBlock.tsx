@@ -1212,9 +1212,10 @@ export function MapBlock({ component }: { component: MapComponent }) {
   useEffect(() => context.mapCommands?.subscribe((mapId, command) => {
     if (mapId !== id && mapId !== authoredComponentId) return;
     if (command === "fit") mapControllerRef.current?.home();
+    else if (command.startsWith("fitLayer:")) mapControllerRef.current?.zoomToLayer(command.slice(9));
     else if (command === "clear") clearMapSelection();
     else if (command === "close") context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: null });
-    else context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: command });
+    else if(command==="search"||command==="selection"||command==="bookmarks"||command==="legend") context.dispatch({ type: "setMapToolbarPopover", mapId: id, popover: command });
   }), [context.mapCommands, context.dispatch, clearMapSelection, id, authoredComponentId]);
 
   useEffect(() => {
@@ -2390,6 +2391,7 @@ export function createXyzShell(def: MapLayerDefinition): ResolvedMapLayer {
       minZoom: source.minZoom,
       maxZoom: source.maxZoom,
       subdomains: source.subdomains,
+      wms: source.wms,
     },
   };
 }

@@ -261,6 +261,8 @@ export interface GeoJsonMapLayerSource {
 
 export interface XyzMapLayerSource {
     type: "xyz";
+    /** Native Leaflet WMS raster mode; feature joins/selection are unavailable. */
+    wms?: { layers: string; styles?: string; format?: "image/png" | "image/jpeg"; transparent?: boolean; version?: "1.1.1" | "1.3.0" };
     url: string;
     attribution?: string;
     minZoom?: number;

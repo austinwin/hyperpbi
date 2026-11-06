@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "title": "Public WMS raster reference",
+  "components": [{
+    "type": "map", "id": "wms", "heightMode": "fill",
+    "basemap": {"type": "none"},
+    "view": {"center": [30.27, -97.74], "zoom": 6, "fitMode": "none"},
+    "layers": [{"id": "population", "name": "Population raster", "source": {
+      "type": "xyz",
+      "url": "https://sampleserver6.arcgisonline.com/arcgis/services/USA/MapServer/WMSServer",
+      "wms": {"layers": "0", "format": "image/png", "transparent": true, "version": "1.1.1"}
+    }}]
+  }]
+}

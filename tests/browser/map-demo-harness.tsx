@@ -26,7 +26,8 @@ type DemoId =
   | "selection"
   | "arcgis"
   | "dynamic"
-  | "wastewater";
+  | "wastewater"
+  | "wms";
 
 interface DemoDefinition {
   spec: string;
@@ -34,6 +35,7 @@ interface DemoDefinition {
 }
 
 const demoDefinitions: Record<DemoId, DemoDefinition> = {
+  wms: {spec:"wms-reference-map.json",data:[]},
   feature: {
     spec: "map-feature-showcase.json",
     data: [{ file: "map-feature-showcase.csv", keyField: "asset_id" }],

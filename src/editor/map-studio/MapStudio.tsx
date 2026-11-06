@@ -489,7 +489,7 @@ export function MapStudio({
     while (used.has(result)) result = `${base}-${index++}`;
     return result;
   };
-  const addLayer = (type: MapLayerSourceType) => {
+  const addLayer = (type: MapLayerSourceType, wms = false) => {
     const id = uniqueId(
       type === "powerbi"
         ? "powerbi-layer"
@@ -504,14 +504,14 @@ export function MapStudio({
                 : "xyz-tile",
     );
     const source =
-      type === "powerbi" ? { type, bindings: {} } : { type, url: "" };
+      type === "powerbi" ? { type, bindings: {} } : { type, url: "", ...(wms?{wms:{layers:""}}:{}) };
     if (
       mutateMap((candidate) => {
         candidate.layers = [
           ...(candidate.layers ?? []),
           {
             id,
-            name:
+            name: wms ? "WMS raster layer" :
               type === "powerbi"
                 ? "Power BI layer"
                 : type === "arcgisFeature"
@@ -805,6 +805,7 @@ export function MapStudio({
                   <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer(type); }}>{label}</button>
                 ))}
                 <button role="menuitem" onClick={() => { setAddMenuOpen(false); setImportOpen(true); }}>Published map definition</button>
+                <button role="menuitem" onClick={() => { setAddMenuOpen(false); addLayer("xyz",true); }}>WMS raster service</button>
                 <button role="menuitem" onClick={() => { setAddMenuOpen(false); addGroup(); }}>Layer group</button>
               </div>
             )}
@@ -885,7 +886,7 @@ export function MapStudio({
       )}
       <div class="hp-map-studio-body">
         {preview && <MapStudioRail drawer={drawer} onDrawer={next => { mapCommands?.send(mapId, "close"); setImportOpen(false); setDrawer(next); }} onBasemap={() => { mapCommands?.send(mapId, "close"); setSelectedLayerId("__basemap__"); setDrawer("properties"); }} onCommand={command => mapCommands?.send(mapId, command)} onPreview={onPreview} onUndo={() => restore(history.undo())} onRedo={() => restore(history.redo())} canUndo={history.canUndo} canRedo={history.canRedo} />}
-        {preview && drawer === "sources" && <section class="hp-map-source-drawer hp-map-floating-drawer" aria-label="Add source"><header class="hp-map-drawer-heading"><strong>Add source</strong><button type="button" aria-label="Close source panel" onClick={() => setDrawer(null)}>×</button></header><div class="hp-map-source-choices">{([ ["powerbi", "Power BI data"], ["geoJson", "GeoJSON URL"], ["arcgisFeature", "ArcGIS FeatureServer"], ["arcgisTile", "ArcGIS tile service"], ["arcgisDynamic", "ArcGIS map service"], ["xyz", "XYZ tiles"] ] as const).map(([type, label]) => <button type="button" onClick={() => { addLayer(type); setDrawer("properties"); }}>{label}</button>)}<button type="button" onClick={() => { setDrawer(null); setImportOpen(true); }}>Import published map definition</button><button type="button" onClick={() => { addGroup(); setDrawer("layers"); }}>New layer group</button><small>Public sources on miniup.app, miniup.io and ArcGIS hosts use the same native adapters. Host WebAccess and CORS policies apply.</small></div></section>}
+        {preview && drawer === "sources" && <section class="hp-map-source-drawer hp-map-floating-drawer" aria-label="Add source"><header class="hp-map-drawer-heading"><strong>Add source</strong><button type="button" aria-label="Close source panel" onClick={() => setDrawer(null)}>×</button></header><div class="hp-map-source-choices">{([ ["powerbi", "Power BI data"], ["geoJson", "GeoJSON URL"], ["arcgisFeature", "ArcGIS FeatureServer"], ["arcgisTile", "ArcGIS tile service"], ["arcgisDynamic", "ArcGIS map service"], ["xyz", "XYZ tiles"] ] as const).map(([type, label]) => <button type="button" onClick={() => { addLayer(type); setDrawer("properties"); }}>{label}</button>)}<button type="button" onClick={() => { addLayer("xyz",true); setDrawer("properties"); }}>WMS raster service</button><button type="button" onClick={() => { setDrawer(null); setImportOpen(true); }}>Import published map definition</button><button type="button" onClick={() => { addGroup(); setDrawer("layers"); }}>New layer group</button><small>Public sources on miniup.app, miniup.io and ArcGIS hosts use the same native adapters. Host WebAccess and CORS policies apply.</small></div></section>}
 
         <aside
           class={`hp-map-studio-layers ${mobilePane !== "layers" ? "is-mobile-hidden" : ""}`}
@@ -1282,7 +1283,7 @@ export function MapStudio({
           <strong title={item.name}>{item.name}</strong>
           <small>
             <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
-              {item.provenance?.provider === "published" ? "Published" : item.join?.enabled ? "Joined" : sourceLabel[item.source.type]}
+              {item.provenance?.provider === "published" ? "Published" : item.join?.enabled ? "Joined" : item.source.type==="xyz"&&item.source.wms?"WMS raster":sourceLabel[item.source.type]}
             </span>
             <span title={featureCount}>{featureCount}</span>
           </small>
@@ -1306,6 +1307,7 @@ export function MapStudio({
           <summary aria-label={`Actions for ${item.name}`}>⋯</summary>
           <div>
             <button type="button" onClick={() => { setSelectedLayerId(item.id); if (preview) setDrawer("properties"); }}>Layer settings</button>
+            {mapCommands && resolveMapLayerCapabilities(item.source.type).selection && <button type="button" disabled={runtimeStatus?.featureCount===0} onClick={()=>mapCommands.send(mapId,`fitLayer:${item.id}`)}>Fit to this layer</button>}
             <button type="button" onClick={() => { const duplicate = copy(item); duplicate.id = uniqueId(`${item.id}-copy`); duplicate.name = `${item.name} copy`; duplicate.provenance = undefined; mutateMap(candidate => { candidate.layers = [...candidate.layers ?? [], duplicate]; }); }}>Duplicate this layer</button>
             <button type="button" onClick={() => mutateMap(candidate => { candidate.layers = candidate.layers?.filter(layer => layer.id !== item.id); })}>Delete this layer</button>
             <button
@@ -1509,8 +1511,8 @@ function SourceEditor({
       ) : (
         <>
           <DraftInput
-            label={layer.source.type === "geoJson" ? "Approved GeoJSON URL" : layer.source.type === "xyz" ? "XYZ URL template" : "Public service URL"}
-            ariaLabel={layer.source.type === "geoJson" ? "GeoJSON URL" : layer.source.type === "xyz" ? "XYZ tile URL" : "ArcGIS service URL"}
+            label={layer.source.type === "geoJson" ? "Approved GeoJSON URL" : layer.source.type === "xyz" ? layer.source.wms?"WMS service URL":"XYZ URL template" : "Public service URL"}
+            ariaLabel={layer.source.type === "geoJson" ? "GeoJSON URL" : layer.source.type === "xyz" ? layer.source.wms?"WMS service URL":"XYZ tile URL" : "ArcGIS service URL"}
             value={String(source.url ?? "")}
             onCommit={(value) =>
               mutate((candidate) => {
@@ -1545,6 +1547,8 @@ function SourceEditor({
           )}
           {layer.source.type === "xyz" && (
             <>
+              <label><span>Raster protocol</span><select aria-label="Raster protocol" value={layer.source.wms?"wms":"xyz"} onChange={event=>mutate(candidate=>{if(candidate.source.type==="xyz"){candidate.source.wms=event.currentTarget.value==="wms"?{layers:""}:undefined;candidate.source.url="";}})}><option value="xyz">XYZ tiles</option><option value="wms">WMS raster</option></select></label>
+              {layer.source.wms&&<><DraftInput label="WMS layer names" value={layer.source.wms.layers} onCommit={value=>mutate(candidate=>{if(candidate.source.type==="xyz"&&candidate.source.wms)candidate.source.wms.layers=value;})} /><DraftInput label="WMS styles" value={layer.source.wms.styles??""} onCommit={value=>mutate(candidate=>{if(candidate.source.type==="xyz"&&candidate.source.wms)candidate.source.wms.styles=value||undefined;})} /><label><span>WMS version</span><select aria-label="WMS version" value={layer.source.wms.version??"1.1.1"} onChange={event=>mutate(candidate=>{if(candidate.source.type==="xyz"&&candidate.source.wms)candidate.source.wms.version=event.currentTarget.value as "1.1.1"|"1.3.0";})}><option value="1.1.1">1.1.1</option><option value="1.3.0">1.3.0</option></select></label><label><span>WMS image format</span><select aria-label="WMS image format" value={layer.source.wms.format??"image/png"} onChange={event=>mutate(candidate=>{if(candidate.source.type==="xyz"&&candidate.source.wms)candidate.source.wms.format=event.currentTarget.value as "image/png"|"image/jpeg";})}><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option></select></label><label><span>Transparent background</span><input type="checkbox" checked={layer.source.wms.transparent!==false} onChange={event=>mutate(candidate=>{if(candidate.source.type==="xyz"&&candidate.source.wms)candidate.source.wms.transparent=event.currentTarget.checked;})} /></label><small>Display only. Use server-published layer names; WMS does not provide Power BI identities, joins or feature popups.</small></>}
               <DraftInput label="Attribution" value={layer.source.attribution ?? ""} onCommit={(value) => mutate((candidate) => {
                 if (candidate.source.type === "xyz") candidate.source.attribution = value || undefined;
               })} />
@@ -2029,8 +2033,8 @@ function RendererEditor({
     });
   const changeType = (next: MapRendererDefinition["type"]) => {
     const numeric =
-      fields.find((field) => field.dataType === "number")?.key ?? "";
-    const any = fields[0]?.key ?? "";
+      fieldSets[defaultSource]?.find((field) => field.dataType === "number")?.key ?? "";
+    const any = fieldSets[defaultSource]?.find(field=>field.dataType!=="number")?.key ?? fieldSets[defaultSource]?.[0]?.key ?? "";
     const defaults: Record<string, Json> = {
       service: { type: "service" },
       simple: {
@@ -2131,10 +2135,10 @@ function RendererEditor({
     "heatmap",
   ].includes(type);
   const values =
-    fieldKey && fieldSource === "powerbi"
+    fieldKey && (fieldSource === "powerbi" || fieldSource === "service" && layer.source.type === "geoJson" && layer.source.data?.type === "FeatureCollection")
       ? Array.from(
           new Set(
-            rows
+            (fieldSource === "service" && layer.source.type === "geoJson" ? ((layer.source.data as GeoJSON.FeatureCollection).features.map(feature=>feature.properties??{})) : rows)
               .map((row) => row[fieldKey])
               .filter((value) => value !== null && value !== undefined)
               .map(String),
@@ -2176,6 +2180,7 @@ function RendererEditor({
   };
   return (
     <div class="hp-map-form-grid">
+      <button type="button" disabled={!fieldSets[defaultSource]?.length} onClick={()=>changeType(fieldSets[defaultSource]?.some(field=>field.dataType==="number")?"classBreaks":"uniqueValue")}>Suggest style from fields</button>
       <label>
         <span>Renderer</span>
         <select

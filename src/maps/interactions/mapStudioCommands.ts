@@ -1,4 +1,4 @@
-export type MapStudioCommand = "search" | "selection" | "fit" | "bookmarks" | "legend" | "clear" | "close";
+export type MapStudioCommand = "search" | "selection" | "fit" | "bookmarks" | "legend" | "clear" | "close" | `fitLayer:${string}`;
 export interface MapLayerStatus { loading: boolean; error?: string; warnings: string[]; featureCount: number; }
 export type MapLayerStatuses = Record<string, MapLayerStatus>;
 export interface MapCommandChannel {

@@ -220,7 +220,7 @@ const sourceKeys: Record<string, Set<string>> = {
     "identify",
   ),
   geoJson: allowed("type", "data", "url", "idField", "refreshIntervalMinutes"),
-  xyz: allowed("type", "url", "attribution", "minZoom", "maxZoom", "subdomains"),
+  xyz: allowed("type", "url", "attribution", "minZoom", "maxZoom", "subdomains", "wms"),
 };
 const rendererKeys: Record<string, Set<string>> = {
   service: allowed("type"),
@@ -917,17 +917,13 @@ function validateLayer(
       maximum: 24,
       integer: true,
     });
-    if (
-      typeof xyzUrl !== "string" ||
-      !/^https:\/\//i.test(xyzUrl) ||
-      !["{z}", "{x}", "{y}"].every((token) => xyzUrl.includes(token))
-    )
+    if (xyzUrl !== "" && (typeof xyzUrl !== "string" || !/^https:\/\//i.test(xyzUrl) || !raw.source.wms && !["{z}", "{x}", "{y}"].every((token) => xyzUrl.includes(token))))
       diagnostics.push({
         code: "INVALID_PROPERTY_TYPE",
         severity: "error",
         path: `${path}/source/url`,
         componentId,
-        message: "XYZ layers require an HTTPS URL containing {z}, {x}, and {y}.",
+        message: "Raster sources require HTTPS. XYZ URLs need {z}, {x}, and {y}; WMS uses a service URL. Vector tile services require a decoder and are unsupported by this raster adapter.",
         received: xyzUrl,
       });
     if (
@@ -1018,7 +1014,16 @@ function validateLayer(
       message: `${sourceType} needs a public HTTPS service URL before it can load.`,
     });
   if (sourceType === "xyz" && (typeof raw.source.url !== "string" || !raw.source.url))
-    diagnostics.push({ code: "MAP_LAYER_BINDING_INCOMPLETE", severity: "error", path: `${path}/source/url`, componentId, message: "XYZ layers require a tile URL template." });
+    diagnostics.push({ code: "MAP_LAYER_BINDING_INCOMPLETE", severity: "warning", path: `${path}/source/url`, componentId, message: "Configure the raster source's public HTTPS URL before loading." });
+  if(sourceType==="xyz"&&raw.source.wms!==undefined&&validateObject(raw.source.wms,`${path}/source/wms`,componentId,diagnostics)){
+    const wms=raw.source.wms;unknownKeys(wms,allowed("layers","styles","format","transparent","version"),`${path}/source/wms`,componentId,diagnostics);
+    for(const key of ["layers","styles"])if(wms[key]!=="")validateString(wms[key],`${path}/source/wms/${key}`,componentId,diagnostics);
+    if(typeof wms.layers!=="string")diagnostics.push({code:"INVALID_PROPERTY_TYPE",severity:"error",path:`${path}/source/wms/layers`,componentId,message:"WMS layers must be a comma-separated string of server layer names."});
+    validateEnum(wms.format,["image/png","image/jpeg"],`${path}/source/wms/format`,componentId,diagnostics);
+    validateEnum(wms.version,["1.1.1","1.3.0"],`${path}/source/wms/version`,componentId,diagnostics);
+    validateBoolean(wms.transparent,`${path}/source/wms/transparent`,componentId,diagnostics);
+    if(wms.layers==="")diagnostics.push({code:"MAP_LAYER_BINDING_INCOMPLETE",severity:"warning",path:`${path}/source/wms/layers`,componentId,message:"Choose WMS server layer names before loading."});
+  }
   if (sourceType === "geoJson" && raw.source.data === undefined && (typeof raw.source.url !== "string" || !raw.source.url))
     diagnostics.push({ code: "MAP_LAYER_BINDING_INCOMPLETE", severity: "error", path: `${path}/source`, componentId, message: "GeoJSON layers require inline data or an approved HTTPS URL." });
   if (

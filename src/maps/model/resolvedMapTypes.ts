@@ -361,6 +361,7 @@ export interface MapJoinAggregationDiagnostic {
 // ── Resolved Tile Configuration ───────────────────────────────────────
 
 export interface ResolvedTileConfig {
+    wms?: import("../../schema/mapSchema").XyzMapLayerSource["wms"];
     url: string;
     attribution?: string;
     minZoom?: number;
