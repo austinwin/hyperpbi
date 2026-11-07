@@ -1,3 +1,0 @@
-export function MapContentsActions({ total, selected, onSelectAll, onClear, onVisibility }: { total: number; selected: number; onSelectAll: () => void; onClear: () => void; onVisibility: (visible: boolean) => void }) {
-    return <div class="hp-map-contents-actions"><header><strong>Map Contents</strong><small>{total} layers</small></header><div><button type="button" onClick={selected === total && total ? onClear : onSelectAll}>{selected === total && total ? "Deselect all" : "Select all"}</button>{selected > 0 && <><button type="button" onClick={() => onVisibility(true)}>Show selected</button><button type="button" onClick={() => onVisibility(false)}>Hide selected</button></>}</div>{selected > 1 && <small>{selected} selected · Ctrl/Cmd-click to adjust</small>}</div>;
-}

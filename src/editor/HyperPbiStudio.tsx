@@ -897,7 +897,7 @@ export function HyperPbiStudio({
                 );
   return (
     <div
-      class={`hp-studio hp-studio-${settings.theme.mode} hp-preview-${settings.editor.previewPosition} ${layout.advanced ? "hp-studio-advanced" : "hp-studio-simple"}`}
+      class={`hp-studio hp-studio-${settings.theme.mode} ${editorTab === "mapStudio" ? "is-map-studio" : ""} hp-preview-${settings.editor.previewPosition} ${layout.advanced ? "hp-studio-advanced" : "hp-studio-simple"}`}
     >
       <header class="hp-studio-header">
         <div class="hp-header-left">

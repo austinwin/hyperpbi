@@ -29,6 +29,12 @@ describe("structured popup content", () => {
         expect(host.textContent).not.toContain("Hidden content"); expect(host.querySelector("meter")?.value).toBe(42);
         act(() => host.querySelector("button")!.click()); expect(execute).toHaveBeenCalledWith({ type: "showToast", message: "Selected" }, expect.anything());
         expect(host.querySelector("p")?.style.color).toBe("rgb(220, 38, 38)"); act(() => render(null, host));
+        execute.mockClear();
+        act(() => render(<MapPopupContent blocks={blocks} feature={feature} executeAction={execute} actionsEnabled={false} />, host));
+        expect(host.querySelector("button")?.disabled).toBe(true);
+        act(() => host.querySelector("button")!.click());
+        expect(execute).not.toHaveBeenCalled();
+        act(() => render(null, host));
     });
     it("rejects unsupported code, duplicate block IDs, excessive precision and unsafe URLs", () => {
         expect(validatePopupContent([{ id: "a", type: "text", onclick: "bad()" }, { id: "a", type: "field", decimals: 99 }], "/popup").length).toBeGreaterThan(0);

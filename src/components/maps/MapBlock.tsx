@@ -408,6 +408,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     layerPanelEnabled ? component.layerPanel?.defaultOpen : false,
     legendEnabled ? component.legend?.defaultOpen : false,
   );
+  useEffect(() => { context.mapCommands?.publishTool(authoredComponentId, activeToolbarPopover); }, [context.mapCommands, authoredComponentId, activeToolbarPopover]);
 
   // ── Per-layer abort controllers and refresh timers ───────────────
   const layerAbortControllersRef = useRef<Map<string, AbortController>>(
@@ -962,7 +963,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
   );
   runtimeLayersRef.current = runtimeLayers;
   useEffect(() => {
-    context.mapCommands?.publishStatus(authoredComponentId, Object.fromEntries(runtimeLayers.map(layer => [layer.id, { loading: layer.loading, error: layer.error ?? layer.diagnostics.error, warnings: layer.diagnostics.warnings, featureCount: layer.features.length }])));
+    context.mapCommands?.publishLayers(authoredComponentId, runtimeLayers);
+    context.mapCommands?.publishStatus(authoredComponentId, Object.fromEntries(runtimeLayers.map(layer => [layer.id, { loading: layer.loading, error: layer.error ?? layer.diagnostics.error, warnings: layer.diagnostics.warnings, featureCount: layer.features.length, geometryTypes: [...new Set(layer.features.map(feature => feature.geometryType))], canFit: layer.features.some(feature => feature.geometry !== null || feature.lat !== null && feature.lon !== null) }])));
   }, [context.mapCommands, authoredComponentId, runtimeLayers]);
   useEffect(() => {
     context.dispatch({
@@ -1190,6 +1192,12 @@ export function MapBlock({ component }: { component: MapComponent }) {
     () => [...runtimeLayers, ...dynamicIdentifyState.layers],
     [runtimeLayers, dynamicIdentifyState.layers],
   );
+  const studioActiveFeature = context.state.mapInteractionState[id]?.activeFeature;
+  useEffect(() => {
+    const feature = detailsLayers.find(layer => layer.id === studioActiveFeature?.layerId)?.features.find(feature => feature.featureKey === studioActiveFeature?.featureKey);
+    context.mapCommands?.publishFeature(authoredComponentId, feature);
+  }, [context.mapCommands, authoredComponentId, detailsLayers, studioActiveFeature]);
+  useEffect(() => () => context.mapCommands?.publishFeature(authoredComponentId, undefined), [context.mapCommands, authoredComponentId]);
   const clearMapSelection = useCallback(() => {
     context.dispatch({ type: "clearMapFeatures", mapId: id });
     context.dispatch({ type: "selectComponentRows", id, rows: [] });
