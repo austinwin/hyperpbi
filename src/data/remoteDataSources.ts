@@ -1,3 +1,5 @@
+import { checkHostPolicy } from "../maps/arcgis/arcGisHostPolicy";
+import { MINIUP_HOSTS, DEMO_HOSTS, matchesHttpsHost } from "../security/networkHostPolicy";
 import type { Primitive } from "./normalizeData";
 import type { DataSource } from "./dataWorkspace";
 import { createEmptyNormalizedData } from "./dataWorkspace";
@@ -52,7 +54,7 @@ export interface RemoteDataSourceStatus {
   error?: string;
 }
 
-export const DEFAULT_WEB_REST_HOSTS = ["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"] as const;
+export const DEFAULT_WEB_REST_HOSTS = MINIUP_HOSTS;
 const DEFAULT_MAX_ROWS = 1000;
 const MAX_REMOTE_ROWS = 10_000;
 const DEFAULT_TIMEOUT_MS = 12_000;
@@ -164,42 +166,34 @@ export function configuredWebRestHostPatterns(): string[] {
   } catch {
     configured = undefined;
   }
-  const values = Array.isArray(configured) && configured.length ? configured : [...DEFAULT_WEB_REST_HOSTS];
+  const values = [...DEFAULT_WEB_REST_HOSTS, ...DEMO_HOSTS, ...(Array.isArray(configured) ? configured : [])];
   return Array.from(new Set(values.map(value => normalizeTrustedHostPattern(String(value)))));
 }
 
-function originAllowed(origin: string, patterns = configuredWebRestHostPatterns()): boolean {
-  const url = new URL(origin);
-  const normalized = url.origin.toLowerCase();
-  return patterns.some(pattern => {
-    if (!pattern.startsWith("https://*.")) return normalized === pattern;
-    const withoutScheme = pattern.slice("https://*.".length);
-    const [hostname, port = ""] = withoutScheme.split(":");
-    if (url.protocol !== "https:" || (port && url.port !== port) || (!port && url.port)) return false;
-    return url.hostname !== hostname && url.hostname.endsWith(`.${hostname}`);
-  });
+export function originAllowed(origin: string, patterns = configuredWebRestHostPatterns()): boolean {
+  return matchesHttpsHost(origin, patterns);
 }
 
-function restGetUrl(definition: RestGetSourceDefinition, params: Record<string, Primitive>): URL {
+function restGetUrl(definition: RestGetSourceDefinition, params: Record<string, Primitive>, hostMode: "web" | "powerbi" = "web"): URL {
   let base: URL;
   try { base = new URL(definition.baseUrl); } catch { throw new Error("REST GET baseUrl must be a valid HTTPS origin."); }
   if (base.protocol !== "https:" || base.username || base.password || base.pathname !== "/" || base.search || base.hash) {
     throw new Error("REST GET baseUrl must be an HTTPS origin without credentials, path, query, or hash.");
   }
-  if (!originAllowed(base.origin)) {
+  if (!(hostMode === "powerbi" ? checkHostPolicy(base.href).allowed : originAllowed(base.origin))) {
     throw new Error(`REST GET origin ${base.origin} is not trusted by this web build. Rebuild with HYPERPBI_WEB_REST_HOSTS including that origin.`);
   }
   return appendParams(new URL(safeRelativePath(definition.path, "REST GET path"), base.origin), params);
 }
 
-async function readBoundedResponseText(response: Response): Promise<string> {
+async function readBoundedResponseText(response: Response, maxBytes = MAX_RESPONSE_BYTES): Promise<string> {
   const declaredLength = Number(response.headers.get("content-length"));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
-    throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+  if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+    throw new Error("The remote data response exceeds the per-request size limit.");
   }
   if (!response.body) {
     const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.byteLength > MAX_RESPONSE_BYTES) throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+    if (bytes.byteLength > maxBytes) throw new Error("The remote data response exceeds the per-request size limit.");
     return new TextDecoder().decode(bytes);
   }
   const reader = response.body.getReader();
@@ -211,9 +205,9 @@ async function readBoundedResponseText(response: Response): Promise<string> {
       const { done, value } = await reader.read();
       if (done) break;
       total += value.byteLength;
-      if (total > MAX_RESPONSE_BYTES) {
+      if (total > maxBytes) {
         await reader.cancel().catch(() => undefined);
-        throw new Error("The remote data response exceeds the 5 MB per-request limit.");
+        throw new Error("The remote data response exceeds the per-request size limit.");
       }
       parts.push(decoder.decode(value, { stream: true }));
     }
@@ -224,7 +218,7 @@ async function readBoundedResponseText(response: Response): Promise<string> {
   }
 }
 
-async function fetchJson(url: URL, timeoutMs: number, signal?: AbortSignal): Promise<unknown> {
+export async function fetchRemoteJson(url: URL, timeoutMs: number, signal?: AbortSignal, maxBytes = MAX_RESPONSE_BYTES): Promise<unknown> {
   const controller = new AbortController();
   let timedOut = false;
   const forwardAbort = () => controller.abort(signal?.reason ?? new DOMException("The remote data request was aborted.", "AbortError"));
@@ -240,6 +234,7 @@ async function fetchJson(url: URL, timeoutMs: number, signal?: AbortSignal): Pro
       response = await fetch(url.toString(), {
         method: "GET",
         credentials: "omit",
+        redirect: "error",
         referrerPolicy: "no-referrer",
         cache: "no-store",
         headers: { Accept: "application/json" },
@@ -255,8 +250,12 @@ async function fetchJson(url: URL, timeoutMs: number, signal?: AbortSignal): Pro
     }
     if (response.status === 429) throw new Error("The remote data source rate limit was reached (HTTP 429).");
     if (!response.ok) throw new Error(`The remote data source returned HTTP ${response.status}.`);
-    const text = await readBoundedResponseText(response);
+    const text = await readBoundedResponseText(response, maxBytes);
     try { return JSON.parse(text); } catch { throw new Error("The remote data source returned invalid JSON."); }
+  } catch (error) {
+    if (timedOut) throw new Error("The remote data request timed out.");
+    if (signal?.aborted) throw signal.reason ?? error;
+    throw error;
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener("abort", forwardAbort);
@@ -316,7 +315,7 @@ async function loadMiniUpTable(id: string, definition: MiniUpTableSourceDefiniti
   while (rows.length < requestedLimit) {
     const pageLimit = Math.min(200, requestedLimit - rows.length);
     const pageParams = { ...params, limit: pageLimit, offset: startingOffset + rows.length };
-    const payload = await fetchJson(miniUpTableUrl(definition, pageParams), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
+    const payload = await fetchRemoteJson(miniUpTableUrl(definition, pageParams), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
     const page = tableRows(payload);
     rows.push(...page.slice(0, requestedLimit - rows.length));
     if (page.length < pageLimit) break;
@@ -325,13 +324,13 @@ async function loadMiniUpTable(id: string, definition: MiniUpTableSourceDefiniti
 }
 
 async function loadMiniUpFunction(id: string, definition: MiniUpFunctionSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal): Promise<DataSource> {
-  const payload = await fetchJson(miniUpFunctionUrl(definition, resolvedParams(definition, stateValues)), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
+  const payload = await fetchRemoteJson(miniUpFunctionUrl(definition, resolvedParams(definition, stateValues)), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
   const rows = responseRows(payload, definition.dataPath).slice(0, clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS));
   return { id, name: id, kind: "miniup.function", data: normalizeObjects(rows, `miniup.function:${id}`) };
 }
 
-async function loadRestGet(id: string, definition: RestGetSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal): Promise<DataSource> {
-  const payload = await fetchJson(restGetUrl(definition, resolvedParams(definition, stateValues)), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
+async function loadRestGet(id: string, definition: RestGetSourceDefinition, stateValues: Record<string, unknown>, signal?: AbortSignal, hostMode: "web" | "powerbi" = "web"): Promise<DataSource> {
+  const payload = await fetchRemoteJson(restGetUrl(definition, resolvedParams(definition, stateValues), hostMode), definition.timeoutMs ?? DEFAULT_TIMEOUT_MS, signal);
   const rows = responseRows(payload, definition.dataPath).slice(0, clampInteger(definition.maxRows, DEFAULT_MAX_ROWS, 1, MAX_REMOTE_ROWS));
   return { id, name: id, kind: "rest.get", data: normalizeObjects(rows, `rest.get:${id}`) };
 }
@@ -353,7 +352,10 @@ export function remoteSourcePlaceholderData(specification: unknown): Record<stri
 export function configuredRemoteDataEndpoints(specification: unknown): string[] {
   const origins = new Set<string>();
   for (const definition of Object.values(remoteDataSourceDefinitions(specification))) {
-    if (definition.type === "miniup.function") origins.add(MINIUP_FUNCTION_ORIGIN);
+    try {
+      const url = definition.type === "miniup.function" ? miniUpFunctionUrl(definition, {}) : definition.type === "miniup.table" ? miniUpTableUrl(definition, {}) : restGetUrl(definition, {}, "powerbi");
+      origins.add(url.origin);
+    } catch { /* Invalid definitions are reported by validation/request errors. */ }
   }
   return [...origins];
 }
@@ -366,7 +368,7 @@ export function remoteDataSourceRequestSignature(definitions: RemoteDataSourceDe
   return JSON.stringify(Object.entries(definitions).sort(([a], [b]) => a.localeCompare(b)).map(([id, definition]) => remoteDataSourceRequestKey(id, definition, stateValues)));
 }
 
-export async function fetchRemoteDataSource(id: string, definition: RemoteDataSourceDefinition, stateValues: Record<string, unknown> = {}, signal?: AbortSignal): Promise<DataSource> {
+export async function fetchRemoteDataSource(id: string, definition: RemoteDataSourceDefinition, stateValues: Record<string, unknown> = {}, signal?: AbortSignal, hostMode: "web" | "powerbi" = "web"): Promise<DataSource> {
   const key = remoteDataSourceRequestKey(id, definition, stateValues);
   const now = Date.now();
   const cached = sourceCache.get(key);
@@ -375,7 +377,7 @@ export async function fetchRemoteDataSource(id: string, definition: RemoteDataSo
     ? await loadMiniUpTable(id, definition, stateValues, signal)
     : definition.type === "miniup.function"
       ? await loadMiniUpFunction(id, definition, stateValues, signal)
-      : await loadRestGet(id, definition, stateValues, signal);
+      : await loadRestGet(id, definition, stateValues, signal, hostMode);
   const ttlMs = clampInteger(definition.cacheTtlSeconds, 30, 0, 3600) * 1000;
   if (ttlMs > 0) sourceCache.set(key, { expiresAt: Date.now() + ttlMs, source });
   return source;
@@ -383,4 +385,9 @@ export async function fetchRemoteDataSource(id: string, definition: RemoteDataSo
 
 export function clearRemoteDataSourceCache(): void {
   sourceCache.clear();
+}
+
+export function remoteDataSourceUrl(definition: RemoteDataSourceDefinition, stateValues: Record<string, unknown> = {}, hostMode: "web" | "powerbi" = "web"): URL {
+  const params = resolvedParams(definition, stateValues);
+  return definition.type === "miniup.function" ? miniUpFunctionUrl(definition, params) : definition.type === "miniup.table" ? miniUpTableUrl(definition, params) : restGetUrl(definition, params, hostMode);
 }

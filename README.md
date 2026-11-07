@@ -24,7 +24,7 @@ The Playground is embedded as a Preact runtime island inside that application. I
 
 From the repository root, run `npm install` and `npm run dev`, then open `http://localhost:4178`. Use `npm run build` for the complete production build, including root and web type checks, the shared runtime island, and the Next.js application.
 
-For the web runtime, `rest.get` origins are frozen into the build trust policy. Set `HYPERPBI_WEB_REST_HOSTS` to comma-separated exact HTTPS origins or subdomain wildcard origins before `npm run web:build` / the full web build. If omitted, the default is `https://*.miniup.app`. The dashboard specification may choose only an origin allowed by that build; it cannot expand the trust list.
+For the web runtime, `rest.get` origins are frozen into the build trust policy. Set `HYPERPBI_WEB_REST_HOSTS` to comma-separated exact HTTPS origins or subdomain wildcard origins before `npm run web:build` / the full web build. Defaults include the miniup.app and miniup.io apex/subdomain families plus the HyperPBI demonstration origin. The dashboard specification may choose only an origin allowed by that build; it cannot expand the trust list.
 
 The local workflow is:
 
@@ -227,11 +227,10 @@ npm run package:maps
 ```
 
 - **Core** removes WebAccess privileges. Bound Power BI geometry remains available; external tiles, ArcGIS services, and geocoders are unavailable.
-- **Maps broad** is the default Maps artifact label. It declares the built-in OpenStreetMap, Nominatim, and ArcGIS HTTPS hosts using Power BI-supported exact-host and subdomain-wildcard forms.
-- **Maps restricted** uses the same safe built-ins and the restricted artifact label when `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false`.
+- **Maps** declares the built-in HyperPBI, MiniUp .app/.io, OpenStreetMap, Nominatim and ArcGIS hosts using exact HTTPS origins and concrete-domain subdomain wildcards.
 - Add comma-separated exact hosts or real-domain subdomain wildcards through `HYPERPBI_MAP_HOSTS` when packaging custom basemap or geocoder endpoints. Power BI doesn't support an all-host `https://*` WebAccess declaration, so custom hosts must be known when the PBIVIZ is built.
 
-The packaging script labels outputs `*-core.pbiviz`, `*-maps-broad.pbiviz`, or `*-maps-restricted.pbiviz`; it also writes the convenience package filename `*-maps.pbiviz` for a Maps package. Exact base names derive from the PBIVIZ packager, so documentation should not invent a fixed artifact filename.
+The packaging script produces `*-core.pbiviz` and `*-maps.pbiviz`. Each profile is built once and inspected from its ZIP archive. Exact base names derive from the PBIVIZ packager.
 
 ## Development commands
 
@@ -315,3 +314,8 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 - ArcGIS support is public-service, 2D, REST-oriented scope; secured services, editing, relationships, tracing, and non-4326 output are not implemented.
 - Structured SVG is governed and bounded. Trusted raw SVG is an isolated author document, with browser and host restrictions.
 - Every maintained dashboard example declares and validates as schema 2.0. The only schema 1.0 fixture is isolated under migration-specific tests.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](docs/remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

@@ -1,7 +1,9 @@
+import { h, render } from "preact";
+import { act } from "preact/test-utils";
+import { MapPopupDetails } from "../src/components/maps/MapPopupDetails";
 import { describe, expect, it, vi } from "vitest";
 import {
     createResolvedTooltipElement,
-    renderResolvedPopup,
     renderResolvedTooltip,
     resolveSafeTemplate,
 } from "../src/components/maps/ResolvedMapPopup";
@@ -16,7 +18,13 @@ const feature: ResolvedMapFeature = {
 };
 
 function popup(overrides: Partial<ResolvedMapPopup> = {}): ResolvedMapPopup {
-    return { enabled: true, fields: [], actions: [], ...overrides };
+    return { mode: "custom", fields: [], actions: [], ...overrides };
+}
+
+function renderResolvedPopup(popup: ResolvedMapPopup, feature: ResolvedMapFeature, runtime?: { executeAction: (...args: unknown[]) => void }) {
+    const element = document.createElement("div");
+    act(() => render(h(MapPopupDetails, { popup, feature, executeAction: () => undefined, executePopupAction: runtime?.executeAction }), element));
+    return { element, cleanup: () => { act(() => render(null, element)); } };
 }
 
 describe("resolved map popup", () => {
@@ -56,7 +64,7 @@ describe("resolved map popup", () => {
         button.click();
         expect(executeAction).toHaveBeenCalledWith(expect.objectContaining({ id: "open" }), feature, expect.any(Event));
         rendered.cleanup();
-        button.click();
+        expect(rendered.element.childElementCount).toBe(0);
         expect(executeAction).toHaveBeenCalledTimes(1);
     });
 

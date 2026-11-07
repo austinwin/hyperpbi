@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 import type { NormalizedField } from "../src/data/normalizeData";

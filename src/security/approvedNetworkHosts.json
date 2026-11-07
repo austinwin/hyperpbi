@@ -1,0 +1,24 @@
+{
+  "miniup": [
+    "https://miniup.app",
+    "https://*.miniup.app",
+    "https://miniup.io",
+    "https://*.miniup.io"
+  ],
+  "maps": [
+    "https://hyperpbi.com",
+    "https://www.hyperpbi.com",
+    "https://tile.openstreetmap.org",
+    "https://nominatim.openstreetmap.org",
+    "https://geocode-api.arcgis.com",
+    "https://arcgis.com",
+    "https://arcgisonline.com",
+    "https://*.arcgis.com",
+    "https://*.arcgisonline.com"
+  ],
+  "demo": [
+    "https://hyperpbi.com",
+    "https://www.hyperpbi.com",
+    "https://raw.githubusercontent.com"
+  ]
+}

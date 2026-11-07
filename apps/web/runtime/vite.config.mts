@@ -1,12 +1,10 @@
+import { parseMapHostPatterns } from "../../../scripts/package-profile-utils.mjs";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import prefixSelector from "postcss-prefix-selector";
 
-const webRestHosts = (process.env.HYPERPBI_WEB_REST_HOSTS ?? "https://miniup.app,https://*.miniup.app,https://miniup.io,https://*.miniup.io")
-  .split(",")
-  .map(value => value.trim())
-  .filter(Boolean);
+const webRestHosts = parseMapHostPatterns(process.env.HYPERPBI_WEB_REST_HOSTS ?? "");
 
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),

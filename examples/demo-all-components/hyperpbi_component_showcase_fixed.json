@@ -10046,7 +10046,6 @@
                     }
                   },
                   "popup": {
-                    "enabled": true,
                     "title": "{{hyperpbi_component_showcase_data_recordid}}",
                     "fields": [
                       {
@@ -10059,7 +10058,8 @@
                         "fieldSource": "powerbi",
                         "label": "Actual"
                       }
-                    ]
+                    ],
+                    "mode": "custom"
                   },
                   "tooltip": {
                     "enabled": true,
@@ -10141,7 +10141,6 @@
                     }
                   },
                   "popup": {
-                    "enabled": true,
                     "title": "{{hyperpbi_component_showcase_data_recordid}}",
                     "fields": [
                       {
@@ -10154,7 +10153,8 @@
                         "fieldSource": "powerbi",
                         "label": "Actual"
                       }
-                    ]
+                    ],
+                    "mode": "custom"
                   },
                   "tooltip": {
                     "enabled": true,

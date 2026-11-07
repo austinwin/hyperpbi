@@ -23,7 +23,7 @@ describe("map schema/runtime capability parity", () => {
     });
 
     it("rejects unknown nested properties and unsupported natural breaks", () => {
-        const unknown = validateV2Schema(specification({ popup: { enabled: true, fields: [{ field: "name", executable: true }] } }));
+        const unknown = validateV2Schema(specification({ popup: { mode: "custom", fields: [{ field: "name", executable: true }] } }));
         expect(unknown.diagnostics).toContainEqual(expect.objectContaining({ code: "UNKNOWN_PROPERTY", path: "/components/0/layers/0/popup/fields/0/executable" }));
         const unsupported = validateV2Schema(specification({ renderer: { type: "classBreaks", field: "value", method: "naturalBreaks" } }));
         expect(unsupported.valid).toBe(false);
@@ -46,7 +46,7 @@ describe("map schema/runtime capability parity", () => {
     });
 
     it("accepts bounded Dynamic identify details but rejects Dynamic selection and Tile identify", () => {
-        const dynamic = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "dynamic", name: "Dynamic", source: { type: "arcgisDynamic", url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer", identify: { enabled: true, tolerance: 7, layerOption: "visible", maxResults: 8 } }, popup: { enabled: true, fields: [{ field: "NAME", fieldSource: "service" }] } }] }] });
+        const dynamic = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "dynamic", name: "Dynamic", source: { type: "arcgisDynamic", url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer", identify: { enabled: true, tolerance: 7, layerOption: "visible", maxResults: 8 } }, popup: { mode: "custom", fields: [{ field: "NAME", fieldSource: "service" }] } }] }] });
         expect(dynamic.valid).toBe(true);
         const invalidDynamic = validateV2Schema({ version: "2.0", components: [{ type: "map", id: "map", layers: [{ id: "dynamic", name: "Dynamic", source: { type: "arcgisDynamic", url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer", identify: { tolerance: 99 } }, interaction: { enabled: true } }] }] });
         expect(invalidDynamic.diagnostics).toEqual(expect.arrayContaining([

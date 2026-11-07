@@ -1,3 +1,4 @@
+import { parseMapHostPatterns } from "../../scripts/package-profile-utils.mjs";
 import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import { fileURLToPath, URL } from "node:url";
@@ -5,6 +6,7 @@ import { fileURLToPath, URL } from "node:url";
 export default defineConfig({
     root: fileURLToPath(new URL(".", import.meta.url)),
     plugins: [preact()],
+    define: { "__HYPERPBI_WEB_REST_HOSTS__": JSON.stringify(parseMapHostPatterns(process.env.HYPERPBI_WEB_REST_HOSTS ?? "")) },
     resolve: {
         alias: {
             "@hyperpbi": fileURLToPath(new URL("../../src", import.meta.url))

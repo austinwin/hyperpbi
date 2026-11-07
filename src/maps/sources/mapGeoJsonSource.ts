@@ -73,7 +73,8 @@ export function resolveGeoJsonLayer(
             maxLabels: definition.labels.maxLabels,
         } : undefined,
         popup: definition.popup ? {
-            enabled: definition.popup.enabled ?? true,
+            mode: definition.popup.mode,
+          remote: definition.popup.remote,
             title: definition.popup.title,
             fields: (definition.popup.fields ?? []).map((field) => ({
                 ...field,

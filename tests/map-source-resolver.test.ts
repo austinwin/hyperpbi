@@ -111,13 +111,13 @@ describe("Map Source Resolver", () => {
                 source: { type: "powerbi", bindings: { latitude: "lat", longitude: "lon" } },
                 renderer: { type: "simple", symbol: { color: "#ff0000" } } as any,
                 labels: { enabled: true, field: "lat", placement: "center", color: "#333", size: 12, weight: "normal" } as any,
-                popup: { enabled: true, title: "Point {{name}}", fields: [{ field: "lat", fieldSource: "powerbi", display: "number" }] } as any,
+                popup: { mode: "custom", title: "Point {{name}}", fields: [{ field: "lat", fieldSource: "powerbi", display: "number" }] } as any,
             };
 
             const result = resolvePowerBiLayer(layer, context);
             expect(result.renderer.type).toBe("simple");
             expect(result.labels?.enabled).toBe(true);
-            expect(result.popup?.enabled).toBe(true);
+            expect(result.popup?.mode).toBe("custom");
             expect(result.popup?.title).toBe("Point {{name}}");
         });
     });

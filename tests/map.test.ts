@@ -4,7 +4,8 @@ import { buildFieldDictionary } from "../src/data/fieldDictionary";
 import { normalizeMapBindings } from "../src/data/normalizeMapBindings";
 import { DataRow, NormalizedField } from "../src/data/normalizeData";
 import { parseGeometry } from "../src/maps/geometryParser";
-import { renderMapPopupTemplate } from "../src/components/maps/MapPopup";
+import { resolveSafeTemplate } from "../src/components/maps/ResolvedMapPopup";
+import type { ResolvedMapFeature } from "../src/maps/model/resolvedMapTypes";
 import { parseDataView } from "../src/data/parseDataView";
 
 const field = (key: string, displayName: string, role: string, type: NormalizedField["type"] = "dimension"): NormalizedField => ({ key, displayName, type, roles: [role] });
@@ -96,6 +97,6 @@ describe("Power BI map bindings", () => {
     it("parses supported geometry and resolves popup tokens without expressions", () => {
         expect(parseGeometry("LINESTRING(-87 41,-88 42)")?.type).toBe("line"); expect(parseGeometry("POLYGON((0 0,1 0,1 1,0 0))")?.type).toBe("polygon"); expect(parseGeometry("POINT(bad data)")).toBeNull();
         const feature = normalizeMapBindings([{ asset: "MH001" }], { asset: field("asset", "Asset ID", "values") }, { address: "asset" }).layers[0].features[0];
-        expect(renderMapPopupTemplate("<b>{{Asset ID}}</b>{{constructor.constructor}}{{__proto__}}", feature)).toBe("<b>MH001</b>");
+        expect(resolveSafeTemplate("<b>{{Asset ID}}</b>", { serviceAttributes: feature.properties, powerBiAttributes: {}, joinedAttributes: {} } as ResolvedMapFeature)).toBe("<b>MH001</b>");
     });
 });

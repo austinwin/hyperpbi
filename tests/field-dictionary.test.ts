@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import powerbi from "powerbi-visuals-api";
 import { buildFieldDictionary, parseQueryName } from "../src/data/fieldDictionary";

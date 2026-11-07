@@ -59,3 +59,8 @@ npm run examples:check
 Generation is deterministic. The check verifies the manifest and required files, strict schema preparation, CSV field and row limits, direct Power BI portability, project-bundle import, and byte-equivalent regeneration from the host-neutral template helper.
 
 When adding an example, create one use-case-named folder, keep all field references portable to the single Power BI data view, declare the correct package profile, and add the entry to the manifest. Implement generally useful behavior in the shared runtime rather than hiding an example-specific workaround in its specification.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

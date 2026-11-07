@@ -492,7 +492,7 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
     it("patches renderer, opacity, and details content without recreating geometry", () => {
         const host = document.createElement("div"); const test = testContext();
         const component: MapComponent = { type: "map", id: "map", basemap: { type: "none" }, view: { fitMode: "none" } };
-        const initial = layer("stable", { popup: { enabled: true, title: "{{NAME}}", fields: [], actions: [] } });
+        const initial = layer("stable", { popup: { mode: "custom", title: "{{NAME}}", fields: [], actions: [] } });
         renderMap(host, test.value, component, [initial]);
         const marker = mocks.circles.at(-1)!;
         const created = mocks.circles.length;
@@ -500,7 +500,7 @@ describe("LeafletMap feature interactions, popups, and labels", () => {
             ...initial,
             opacity: 0.45,
             renderer: { type: "simple", symbol: { color: "#d63939", fillColor: "#f8b4b4" } },
-            popup: { ...initial.popup!, title: "Feature {{NAME}}" },
+            popup: { mode: "custom", ...initial.popup!, title: "Feature {{NAME}}" },
         }]);
         expect(mocks.circles).toHaveLength(created);
         expect(mocks.circles.at(-1)).toBe(marker);

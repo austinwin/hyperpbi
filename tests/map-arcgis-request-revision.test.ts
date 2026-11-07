@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { arcGisLayerRequestRevision } from "../src/components/maps/runtime/arcGisLayerRequestRevision";
 import type { MapLayerDefinition } from "../src/schema/mapSchema";
@@ -7,7 +8,7 @@ const layer = (): MapLayerDefinition => ({
   name: "Facilities",
   source: { type: "arcgisFeature", url: "https://example.test/FeatureServer/0", mode: "reference" },
   renderer: { type: "simple", symbol: { color: "#111" } },
-  popup: { enabled: true, title: "Facility {{NAME}}", fields: [] },
+  popup: { mode: "custom", title: "Facility {{NAME}}", fields: [] },
 });
 
 describe("ArcGIS request revisions", () => {

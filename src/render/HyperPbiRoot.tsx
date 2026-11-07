@@ -67,7 +67,9 @@ export function HyperPbiRoot({
   onMapViewportChange,
   mapCommands,
   remoteSourceHost = "web",
+  executionMode = "dashboard",
 }: {
+  executionMode?: "dashboard" | "fragment";
   instanceId: string;
   schema: HyperPbiSchema;
   data: NormalizedData;
@@ -114,7 +116,7 @@ export function HyperPbiRoot({
     dashboardReducer,
     initialDashboardState(schema.state?.search, schema.state?.activeTab),
   );
-  const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost);
+  const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost, providerAccess, webAccessAvailable);
   const rowKeySignature = useMemo(
     () => JSON.stringify(data.rowKeys),
     [data.rowKeys],
@@ -266,8 +268,10 @@ export function HyperPbiRoot({
   // Build a context object that executeUiAction can read from
   const execUiAction = useCallback(
     (action: UiAction | UiAction[], event?: Event): UiActionResult => {
+      if (executionMode === "fragment" && (Array.isArray(action) ? action : [action]).some(item => !["setTab", "setState", "toggleState", "clearFilters", "setStep", "nextStep", "previousStep"].includes(item.type))) return { success: false, message: "This action is unavailable in remote fragments." };
       const ctx: RenderContextValue = {
         instanceId,
+        remoteSourceHost,
         data: filteredData,
         rows,
         sourceRows: data.rows,
@@ -305,6 +309,8 @@ export function HyperPbiRoot({
     },
     [
       instanceId,
+      remoteSourceHost,
+      executionMode,
       filteredData,
       rows,
       data.rows,
@@ -337,6 +343,7 @@ export function HyperPbiRoot({
   const context = useMemo(
     (): RenderContextValue => ({
       instanceId,
+      remoteSourceHost,
       data: filteredData,
       rows,
       sourceRows: data.rows,
@@ -372,6 +379,8 @@ export function HyperPbiRoot({
     }),
     [
       instanceId,
+      remoteSourceHost,
+      executionMode,
       filteredData,
       rows,
       data.rows,

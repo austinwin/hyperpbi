@@ -1,3 +1,4 @@
+// @vitest-environment node
 // ── ArcGIS Host Policy Tests ──────────────────────────────────────────
 import { describe, it, expect, beforeEach } from "vitest";
 import { checkHostPolicy, setAllowedHostPatterns } from "../src/maps/arcgis/arcGisHostPolicy";
@@ -51,14 +52,14 @@ describe("ArcGIS Host Policy", () => {
     });
 
     describe("universal wildcard", () => {
-        it("allows any HTTPS host with https://*", () => {
+        it("rejects arbitrary hosts with unsupported https://*", () => {
             setAllowedHostPatterns(["https://*"]);
-            expect(checkHostPolicy("https://geogimstest.houstontx.gov/arcgis/rest").allowed).toBe(true);
+            expect(checkHostPolicy("https://geogimstest.houstontx.gov/arcgis/rest").allowed).toBe(false);
             expect(checkHostPolicy("https://services.arcgis.com/rest").allowed).toBe(true);
-            expect(checkHostPolicy("https://example.com/arcgis").allowed).toBe(true);
-            expect(checkHostPolicy("https://maps.example.org/server").allowed).toBe(true);
-            expect(checkHostPolicy("https://localhost:6443/arcgis").allowed).toBe(true);
-            expect(checkHostPolicy("https://192.168.1.1/arcgis").allowed).toBe(true);
+            expect(checkHostPolicy("https://example.com/arcgis").allowed).toBe(false);
+            expect(checkHostPolicy("https://maps.example.org/server").allowed).toBe(false);
+            expect(checkHostPolicy("https://localhost:6443/arcgis").allowed).toBe(false);
+            expect(checkHostPolicy("https://192.168.1.1/arcgis").allowed).toBe(false);
         });
 
         it("rejects HTTP even with universal wildcard", () => {
@@ -68,9 +69,9 @@ describe("ArcGIS Host Policy", () => {
             expect(result.allowed).toBe(false);
         });
 
-        it("allows with bare * sentinel", () => {
+        it("rejects bare * sentinel", () => {
             setAllowedHostPatterns(["*"]);
-            expect(checkHostPolicy("https://any-host.example.com/arcgis").allowed).toBe(true);
+            expect(checkHostPolicy("https://any-host.example.com/arcgis").allowed).toBe(false);
         });
     });
 

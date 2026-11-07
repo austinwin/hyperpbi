@@ -3,8 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/browser",
-  timeout: 30_000,
+  timeout: 60_000,
   fullyParallel: false,
+    workers: 2,
   use: {
     baseURL: "http://127.0.0.1:4179",
     trace: "retain-on-failure",

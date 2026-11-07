@@ -8,7 +8,7 @@ vi.mock("../src/maps/arcgis/arcGisFeatureQuery", async (importOriginal) => {
 });
 
 import { resolveArcGisFeatureLayer } from "../src/components/maps/MapBlock";
-import { renderResolvedPopup } from "../src/components/maps/ResolvedMapPopup";
+import { resolveMapPopupViewModel } from "../src/components/maps/ResolvedMapPopup";
 import type { MapLayerDefinition } from "../src/schema/mapSchema";
 
 const result: ArcGisFeatureQueryResult = {
@@ -62,7 +62,7 @@ describe("ArcGIS joined popup runtime", () => {
         aggregations: [{ field: "risk", aggregation: "sum", as: "totalRisk" }],
       },
       popup: {
-        enabled: true,
+        mode: "custom",
         defaultFieldSource: "joined",
         title: "Risk {{totalRisk}}",
         fields: [
@@ -104,7 +104,7 @@ describe("ArcGIS joined popup runtime", () => {
     expect(feature.serviceAttributes.OBJECTID).toBe(11);
     expect(feature.joinedAttributes.totalRisk).toBe(10);
     expect(feature.powerBiRowKeys).toEqual(["row-0", "row-1"]);
-    const popup = renderResolvedPopup(resolved.popup!, feature).element.textContent ?? "";
+    const popup = JSON.stringify(resolveMapPopupViewModel(resolved.popup!, feature));
     expect(popup).toContain("Risk 10");
     expect(popup).toContain("Power BI Clinic");
     expect(popup).toContain("11");

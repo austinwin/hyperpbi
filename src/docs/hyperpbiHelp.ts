@@ -41,7 +41,7 @@ Use Field Manifest aliases in AI-authored JSON. Preparation resolves aliases to 
 
 ## Logical datasets, definitions, and patterns
 
-Components without \`dataset\` use \`powerbi\`. \`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, or web-only \`rest.get\` sources; a component can bind to a source directly, or a named dataset can transform it. Dataset operations run as filter → derive → rename → select → groupBy/metrics → distinct → sort → limit after resolving \`source\`. Power BI external selection/filtering remains available only for data rooted in \`powerbi\`; remote rows use HyperPBI internal interactions only.
+Components without \`dataset\` use \`powerbi\`. \`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, or approved HTTPS \`rest.get\` sources; a component can bind to a source directly, or a named dataset can transform it. Dataset operations run as filter → derive → rename → select → groupBy/metrics → distinct → sort → limit after resolving \`source\`. Power BI external selection/filtering remains available only for data rooted in \`powerbi\`; remote rows use HyperPBI internal interactions only.
 
 Reusable \`definitions\` deep-merge objects, replace arrays, and require a new ID at each \`use\` site. Patterns \`kpi-row\`, \`trend-and-breakdown\`, \`record-explorer\`, and \`map-and-details\` expand to normal components with deterministic child IDs.
 
@@ -79,7 +79,14 @@ The native matrix renders every declared value metric, including column-group ×
 
 ## Security boundaries
 
-Standard mode rejects user scripts, executable callbacks and unsafe HTML/CSS/SVG. Trusted HTML/SVG remain non-executable in opaque-origin documents; trusted CSS uses Shadow DOM and outer paint containment. No credentials, host APIs or the full model are exposed to author documents. SQL, custom request headers and request mutations are unsupported. Read-only remote data is limited to declared \`data.sources\`: MiniUp table/Function sources and web-only \`rest.get\`. The web build trusts only \`HYPERPBI_WEB_REST_HOSTS\` (default public miniup.app/miniup.io host families), while Power BI remote data is limited to \`miniup.function\` through the network-enabled package. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.`;
+Standard mode rejects user scripts, executable callbacks and unsafe HTML/CSS/SVG. Trusted HTML/SVG remain non-executable in opaque-origin documents; trusted CSS uses Shadow DOM and outer paint containment. No credentials, host APIs or the full model are exposed to author documents. SQL, custom request headers and request mutations are unsupported. Read-only remote data is limited to declared \`data.sources\`: MiniUp table/Function sources and approved HTTPS \`rest.get\`. The web build trusts only \`HYPERPBI_WEB_REST_HOSTS\` (default public miniup.app/miniup.io host families), while Power BI requires Maps package host declarations, runtime WebAccess and endpoint CORS for all remote source types. HTML is sanitized; CSS is parsed, allowlisted, and scoped; ECharts options are recursively sanitized; SVG elements, attributes, references, depth, paths, repeats, and animations are bounded; URLs and ArcGIS hosts are policy-controlled.
+
+## Remote HyperPBI Fragments
+
+Popup configuration requires \`mode: "none" | "default" | "custom" | "remote"\`; never emit popup.enabled. Remote mode uses \`remote: { endpoint, timeoutMs?, cacheTtlSeconds?, fallback?, fallbackMessage?, width?, maxHeight? }\`. Endpoints are literal HTTPS origins with encoded \`{{service.site_id}}\`, \`{{powerbi.station_id}}\` or \`{{joined.asset_id}}\` bindings in path/query values. Both MiniUp .app and .io apex/subdomain families are approved by default. Additional origins require build-time policy; Power BI also requires Maps WebAccess permission and CORS.
+
+API responses use \`{ kind: "hyperpbi.fragment", version: "1.0", title?, datasets: { name: [scalarRows] }, components: [canonicalSchema2Components] }\`. Bind components to their dataset names; use canonical registry properties. The host namespaces IDs and isolates state/data. No nested maps, remote sources, HTML/custom documents, global panels, overlays, model identities, scripts or permission expansion. Local tabs/state/steps and existing ECharts zoom/legend/brush behavior are supported. Limit responses to 1 MiB, 100 components, eight layout levels and 5000 total rows. See docs/remote-fragments.md and examples/remote-fragments for executable responses.
+`;
 
 export const HYPERPBI_SKILL_MARKDOWN = `# HyperPBI dashboard authoring skill
 
@@ -125,7 +132,7 @@ Never invent an alias, normalized key, model measure, aggregation, or business r
 
 ## Logical datasets
 
-\`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, and web-only \`rest.get\` sources. A component may bind directly to a source name. \`data.datasets\` definitions require \`source\`, which may be \`powerbi\`, a declared source, or another named dataset. Allowed dataset properties are \`source\`, \`filter\`, \`derive\`, \`rename\`, \`select\`, \`groupBy\`, \`metrics\`, \`distinct\`, \`sort\`, and \`limit\`.
+\`data.sources\` may declare read-only \`miniup.table\`, \`miniup.function\`, and approved HTTPS \`rest.get\` sources. A component may bind directly to a source name. \`data.datasets\` definitions require \`source\`, which may be \`powerbi\`, a declared source, or another named dataset. Allowed dataset properties are \`source\`, \`filter\`, \`derive\`, \`rename\`, \`select\`, \`groupBy\`, \`metrics\`, \`distinct\`, \`sort\`, and \`limit\`.
 
 Runtime and static-schema order is: resolve source; filter; derive; rename; select; groupBy/metrics; distinct; sort; limit. Metric operations are \`sum\`, \`avg\`, \`min\`, \`max\`, \`count\`, \`distinctCount\`, and \`first\`. Derive expressions use the safe calculation DSL. Remote schemas are dynamic until a response arrives, so never invent remote fields; use only names explicitly supplied by the user/current specification or a known response contract. No SQL, joins, executable JavaScript, request mutations, custom headers, embedded credentials, or arbitrary untrusted hosts.
 
@@ -209,4 +216,11 @@ In Standard mode, never emit user JavaScript, eval, executable functions, callba
 
 ## Schema version boundary
 
-Dashboard schema 2.0 is the only active contract. Dashboard schema 1.0 is never migrated during visual loading, Edit Mode, AI import, preview, save, or rendering. Developers may convert a legacy JSON file explicitly with \`npm run schema:migrate-v1 -- input.json output.json\`; the temporary converter is not part of the PBIVIZ runtime. The Power BI package version and Runtime Config version are independent version numbers.`;
+Dashboard schema 2.0 is the only active contract. Dashboard schema 1.0 is never migrated during visual loading, Edit Mode, AI import, preview, save, or rendering. Developers may convert a legacy JSON file explicitly with \`npm run schema:migrate-v1 -- input.json output.json\`; the temporary converter is not part of the PBIVIZ runtime. The Power BI package version and Runtime Config version are independent version numbers.
+
+## Remote HyperPBI Fragments
+
+Popup configuration requires \`mode: "none" | "default" | "custom" | "remote"\`; never emit popup.enabled. Remote mode uses \`remote: { endpoint, timeoutMs?, cacheTtlSeconds?, fallback?, fallbackMessage?, width?, maxHeight? }\`. Endpoints are literal HTTPS origins with encoded \`{{service.site_id}}\`, \`{{powerbi.station_id}}\` or \`{{joined.asset_id}}\` bindings in path/query values. Both MiniUp .app and .io apex/subdomain families are approved by default. Additional origins require build-time policy; Power BI also requires Maps WebAccess permission and CORS.
+
+API responses use \`{ kind: "hyperpbi.fragment", version: "1.0", title?, datasets: { name: [scalarRows] }, components: [canonicalSchema2Components] }\`. Bind components to their dataset names; use canonical registry properties. The host namespaces IDs and isolates state/data. No nested maps, remote sources, HTML/custom documents, global panels, overlays, model identities, scripts or permission expansion. Local tabs/state/steps and existing ECharts zoom/legend/brush behavior are supported. Limit responses to 1 MiB, 100 components, eight layout levels and 5000 total rows. See docs/remote-fragments.md and examples/remote-fragments for executable responses.
+`;

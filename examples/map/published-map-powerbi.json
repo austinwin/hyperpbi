@@ -86,7 +86,6 @@
             "fieldSource": "service"
           },
           "popup": {
-            "enabled": true,
             "title": "{{service.name}}",
             "fields": [
               {
@@ -110,7 +109,8 @@
                 "type": "text",
                 "text": "Report filters recalculate the joined sales value."
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "provenance": {
             "provider": "published",
@@ -342,7 +342,6 @@
                   "fieldSource": "service"
                 },
                 "popup": {
-                  "enabled": true,
                   "title": "{{service.name}}",
                   "fields": [
                     {
@@ -350,7 +349,8 @@
                       "fieldSource": "service",
                       "label": "Site ID"
                     }
-                  ]
+                  ],
+                  "mode": "custom"
                 },
                 "provenance": {
                   "provider": "published",

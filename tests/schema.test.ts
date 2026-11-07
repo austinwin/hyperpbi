@@ -1,3 +1,4 @@
+import { prepareRemoteFragment } from "../src/fragments/prepareRemoteFragment";
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
@@ -122,6 +123,7 @@ describe("schema 2.0 validation", () => {
     for (const file of dashboardFiles(resolve(process.cwd(), "examples"))) {
       if (file.includes(`${resolve(process.cwd(), "examples", "config")}`) || file.endsWith("runtime_config.json") || file.endsWith("coverage.json")) continue;
       const value = JSON.parse(readFileSync(file, "utf8"));
+      if (value.kind === "hyperpbi.fragment") { expect(prepareRemoteFragment(value, "fixture").schema.version).toBe("2.0"); continue; }
       if (!Array.isArray(value.components)) continue;
       expect(value.version, file).toBe("2.0");
       const expanded = expandPatterns(expandDefinitions(value).value);

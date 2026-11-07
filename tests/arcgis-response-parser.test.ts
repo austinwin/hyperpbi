@@ -1,3 +1,4 @@
+// @vitest-environment node
 // ── ArcGIS Response Parser Tests ──────────────────────────────────────
 import { describe, it, expect } from "vitest";
 import { parseArcGisResponse } from "../src/maps/arcgis/arcGisResponseParser";

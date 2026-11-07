@@ -65,7 +65,6 @@
             }
           },
           "popup": {
-            "enabled": true,
             "defaultFieldSource": "service",
             "title": "{{STATE_NAME}}",
             "fields": [
@@ -85,7 +84,8 @@
                 "label": "Population",
                 "display": "number"
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "legend": {
             "visible": false

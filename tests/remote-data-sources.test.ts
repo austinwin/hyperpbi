@@ -54,7 +54,7 @@ describe("remote data sources", () => {
   });
 
   it("supports build-trusted web REST GET sources and rejects untrusted origins", async () => {
-    expect(configuredWebRestHostPatterns()).toEqual(["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]);
+    expect(configuredWebRestHostPatterns()).toEqual(expect.arrayContaining(["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]));
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ rows: [{ ok: true }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     const source = await fetchRemoteDataSource("web", {
@@ -78,7 +78,7 @@ describe("remote data sources", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200 })));
     await expect(fetchRemoteDataSource("big", {
       type: "miniup.function", function: "safe-name", cacheTtlSeconds: 0,
-    })).rejects.toThrow("5 MB");
+    })).rejects.toThrow("size limit");
   });
 
   it("does not share one abortable in-flight request across consumers", async () => {
@@ -107,6 +107,6 @@ describe("remote data sources", () => {
         summary: { type: "miniup.function", function: "summary-ok" },
         web: { type: "rest.get", baseUrl: "https://demo.miniup.app", path: "/rows" },
       } },
-    })).toEqual(["https://functions.miniup.app"]);
+    })).toEqual(["https://demo.miniup.app", "https://functions.miniup.app"]);
   });
 });

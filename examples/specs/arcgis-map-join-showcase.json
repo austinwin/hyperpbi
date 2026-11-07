@@ -129,7 +129,6 @@
             ]
           },
           "popup": {
-            "enabled": true,
             "defaultFieldSource": "service",
             "title": "Facility {{facilityid}}",
             "fields": [
@@ -150,7 +149,8 @@
                 "fieldSource": "powerbi",
                 "label": "Priority"
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "interaction": {
             "enabled": true,

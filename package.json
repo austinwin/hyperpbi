@@ -49,7 +49,10 @@
     "web:cloudflare:build": "npm run web:runtime:build && npm --workspace @hyperpbi/web run cloudflare:build",
     "web:cloudflare:preview": "npm run web:runtime:build && npm --workspace @hyperpbi/web run cloudflare:preview",
     "web:sites:build": "npm run web:runtime:build && npm --workspace @hyperpbi/web run sites:build",
-    "web:start": "npm --workspace @hyperpbi/web run start"
+    "web:start": "npm --workspace @hyperpbi/web run start",
+    "verify:fast": "node scripts/verify.mjs fast",
+    "verify:pr": "node scripts/verify.mjs pr",
+    "verify:full": "node scripts/verify.mjs full"
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.2",

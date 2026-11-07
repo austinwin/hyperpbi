@@ -105,7 +105,6 @@
             ]
           },
           "popup": {
-            "enabled": true,
             "defaultFieldSource": "powerbi",
             "title": "{{site_id}}",
             "fields": [
@@ -120,7 +119,8 @@
                 "label": "Severity",
                 "display": "badge"
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "interaction": {
             "enabled": true,

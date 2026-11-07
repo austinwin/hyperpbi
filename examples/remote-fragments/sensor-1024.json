@@ -1,0 +1,246 @@
+{
+  "kind": "hyperpbi.fragment",
+  "version": "1.0",
+  "title": "North pressure station \u00b7 1024",
+  "datasets": {
+    "current": [
+      {
+        "psi": 65.7,
+        "minimum": 58.9,
+        "average": 62.6,
+        "maximum": 65.9,
+        "status": "Healthy",
+        "site_id": "1024"
+      }
+    ],
+    "pressure": [
+      {
+        "time": "00:00",
+        "psi": 62.4,
+        "target": 60
+      },
+      {
+        "time": "01:00",
+        "psi": 64.4,
+        "target": 60
+      },
+      {
+        "time": "02:00",
+        "psi": 65.7,
+        "target": 60
+      },
+      {
+        "time": "03:00",
+        "psi": 65.8,
+        "target": 60
+      },
+      {
+        "time": "04:00",
+        "psi": 64.8,
+        "target": 60
+      },
+      {
+        "time": "05:00",
+        "psi": 62.9,
+        "target": 60
+      },
+      {
+        "time": "06:00",
+        "psi": 60.9,
+        "target": 60
+      },
+      {
+        "time": "07:00",
+        "psi": 59.3,
+        "target": 60
+      },
+      {
+        "time": "08:00",
+        "psi": 58.9,
+        "target": 60
+      },
+      {
+        "time": "09:00",
+        "psi": 59.7,
+        "target": 60
+      },
+      {
+        "time": "10:00",
+        "psi": 61.4,
+        "target": 60
+      },
+      {
+        "time": "11:00",
+        "psi": 63.5,
+        "target": 60
+      },
+      {
+        "time": "12:00",
+        "psi": 65.2,
+        "target": 60
+      },
+      {
+        "time": "13:00",
+        "psi": 65.9,
+        "target": 60
+      },
+      {
+        "time": "14:00",
+        "psi": 65.4,
+        "target": 60
+      },
+      {
+        "time": "15:00",
+        "psi": 63.8,
+        "target": 60
+      },
+      {
+        "time": "16:00",
+        "psi": 61.8,
+        "target": 60
+      },
+      {
+        "time": "17:00",
+        "psi": 60.0,
+        "target": 60
+      },
+      {
+        "time": "18:00",
+        "psi": 59.0,
+        "target": 60
+      },
+      {
+        "time": "19:00",
+        "psi": 59.2,
+        "target": 60
+      },
+      {
+        "time": "20:00",
+        "psi": 60.5,
+        "target": 60
+      },
+      {
+        "time": "21:00",
+        "psi": 62.5,
+        "target": 60
+      },
+      {
+        "time": "22:00",
+        "psi": 64.5,
+        "target": 60
+      },
+      {
+        "time": "23:00",
+        "psi": 65.7,
+        "target": 60
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "grid",
+      "id": "summary",
+      "columns": 2,
+      "gap": 10,
+      "children": [
+        {
+          "type": "kpi",
+          "id": "pressure_now",
+          "title": "Current pressure (psi)",
+          "dataset": "current",
+          "field": "psi",
+          "aggregation": "first",
+          "format": "0.0"
+        },
+        {
+          "type": "statusBadge",
+          "id": "sensor_status",
+          "title": "Sensor status",
+          "dataset": "current",
+          "field": "status",
+          "intent": "success"
+        }
+      ]
+    },
+    {
+      "type": "lineChart",
+      "id": "pressure_history",
+      "title": "Pressure history \u00b7 24 hours",
+      "dataset": "pressure",
+      "category": "time",
+      "measure": "psi",
+      "height": 240,
+      "chartStyle": {
+        "zoom": true,
+        "tooltip": true,
+        "legend": true,
+        "yAxis": [
+          {
+            "domain": "auto",
+            "suffix": " psi"
+          }
+        ]
+      },
+      "events": {
+        "zoom": {
+          "enabled": true
+        }
+      },
+      "options": {
+        "toolbox": {
+          "feature": {
+            "restore": {}
+          }
+        }
+      }
+    },
+    {
+      "type": "metricGrid",
+      "id": "statistics",
+      "dataset": "current",
+      "metrics": [
+        {
+          "title": "Minimum psi",
+          "field": "minimum",
+          "aggregation": "first",
+          "format": "0.0"
+        },
+        {
+          "title": "Average psi",
+          "field": "average",
+          "aggregation": "first",
+          "format": "0.0"
+        },
+        {
+          "title": "Maximum psi",
+          "field": "maximum",
+          "aggregation": "first",
+          "format": "0.0"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "measurements",
+      "title": "Measurements",
+      "dataset": "pressure",
+      "columns": [
+        {
+          "field": "time",
+          "title": "Time"
+        },
+        {
+          "field": "psi",
+          "title": "Pressure (psi)",
+          "format": "0.0"
+        }
+      ],
+      "pageSize": 4
+    },
+    {
+      "type": "text",
+      "id": "notes",
+      "text": "Synthetic demonstration data. Scroll or drag the chart to zoom; use Restore to reset the view."
+    }
+  ]
+}

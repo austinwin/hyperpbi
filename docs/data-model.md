@@ -1,6 +1,6 @@
 # HyperPBI data model
 
-HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. A specification may also declare read-only MiniUp table, MiniUp Function, or web-only trusted REST GET sources; their JSON responses are normalized into the same workspace before components consume them. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI still does not execute SQL, arbitrary network URLs, mutations, custom request headers, or user code.
+HyperPBI receives a host-neutral normalized data workspace, augments its default source schema with validated root calculated-field metadata, applies those fields to rows at runtime, and evaluates named in-memory logical datasets. Power BI contributes one normalized visual data view. The Playground contributes normalized CSV and XLSX-sheet sources. A specification may also declare read-only MiniUp table, MiniUp Function, or approved HTTPS REST GET sources; their JSON responses are normalized into the same workspace before components consume them. Dataset schemas therefore expose calculated fields to chained select/derive/group/metrics operations even when the current result has zero rows. Root scalar metrics remain separate from row fields. HyperPBI still does not execute SQL, arbitrary network URLs, mutations, custom request headers, or user code.
 
 ## Base `powerbi` dataset
 
@@ -34,7 +34,7 @@ New 2.0 JSON uses Field Manifest aliases. Preparation resolves aliases in datase
 
 Table reads use the fixed `https://<site>.miniup.app/api/data/<site>/<table>` surface and page in bounded requests. HyperPBI never accepts an arbitrary URL or request method for this source type.
 
-### `rest.get` (web only)
+### `rest.get`
 
 ```json
 {
@@ -51,7 +51,7 @@ Table reads use the fixed `https://<site>.miniup.app/api/data/<site>/<table>` su
 }
 ```
 
-`rest.get` accepts an HTTPS origin plus a safe relative path. It is available only when the origin matches the web build's trusted host list. Set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of exact HTTPS origins or subdomain wildcard origins at web build time. When the variable is omitted, the trusted default is `https://*.miniup.app`. Dashboard JSON cannot expand this trust list.
+`rest.get` accepts an HTTPS origin plus a safe relative path. It is available only when the origin matches the web build's trusted host list. Set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of exact HTTPS origins or subdomain wildcard origins at web build time. Defaults include miniup.app and miniup.io apex/subdomain families and the HyperPBI demo origin. Dashboard JSON cannot expand this trust list.
 
 ### `miniup.function`
 
@@ -79,7 +79,7 @@ Remote sources enforce GET-only requests, omitted credentials, no referrer, JSON
 
 Remote source lifecycle is exposed in render context as `loading`, `ready`, `empty`, or `error`. Before the first response arrives, static preparation treats the declared source as a dynamic schema rather than weakening validation for Power BI or local-file datasets.
 
-In Power BI, only `miniup.function` is portable. It uses the network-enabled package and `https://functions.miniup.app`; direct `miniup.table` and `rest.get` are web-only because Power BI's opaque sandbox cannot rely on the MiniUp table CORS contract and generic REST hosts are intentionally excluded from the PBIVIZ trust boundary. The Core package remains network-free. Remote rows cannot select, filter, or clear Power BI external state.
+Power BI supports all three GET source types when the Maps package declares the actual origin and the host grants runtime WebAccess. Endpoint CORS is still required. Extra REST origins require build-time HYPERPBI_MAP_HOSTS configuration. The Core package remains network-free. Remote rows cannot select, filter, or clear Power BI external state.
 
 ## Named dataset definition
 
@@ -291,3 +291,8 @@ The runtime filters the already-prepared child view by the breadcrumb path and m
 - direct Power BI filters on derived/metric outputs
 
 These boundaries keep evaluation deterministic, inspectable, and safe inside the custom visual.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

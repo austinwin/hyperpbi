@@ -54,4 +54,9 @@ The latest safety requirement disables authored scripts and event handlers in al
 
 Core has no WebAccess. Maps declares only specific HTTPS host families, including MiniUp app/io and ArcGIS; tenant policies still apply. These packages are **not claimed to be Microsoft certified**. External maps/resources, optional trusted external content and the full dependency/code review remain certification considerations. Microsoft certification tests include checking access to external services/resources. See [Microsoft's certification requirements](https://learn.microsoft.com/en-us/power-bi/developer/visuals/power-bi-custom-visuals-certified).
 
-The [metadata audit](advanced-authoring-audit.json) covers all 83 active registered components and their canonical examples. The earlier authorized GeoLibre removal accounts for the difference from the previous 84-component inventory. This work adds zero component types and preserves the remaining registry and schema version.
+The [metadata audit](advanced-authoring-audit.json) covers all 83 active registered components and their canonical examples. This work adds zero component types and preserves the remaining registry and schema version.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

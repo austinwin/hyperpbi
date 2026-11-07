@@ -5,6 +5,7 @@ export default [
     {
         ignores: [
             "node_modules/**",
+            ".verification/**",
             "dist/**",
             "apps/playground/dist/**",
             "apps/web/.next/**",

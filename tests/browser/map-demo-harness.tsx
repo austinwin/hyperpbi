@@ -118,7 +118,7 @@ async function installArcGisFixture(): Promise<() => void> {
   const fixture = parseDemoCsv(fixtureText);
   const serviceOrigin = "https://geogimstest.houstontx.gov";
   const originalFetch = window.fetch.bind(window);
-  setAllowedHostPatterns(["https://*"]);
+  setAllowedHostPatterns(["https://geogimstest.houstontx.gov"]);
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url =
       typeof input === "string"
@@ -170,7 +170,7 @@ function installDelayedWastewaterFixture(): () => void {
   const serviceOrigin = "https://geogimstest.houstontx.gov";
   const originalFetch = window.fetch.bind(window);
   const pendingQueries = new Set<() => void>();
-  setAllowedHostPatterns(["https://*"]);
+  setAllowedHostPatterns(["https://geogimstest.houstontx.gov"]);
   window.hpMapDemo.releaseArcGis = () => {
     for (const release of pendingQueries) release();
     pendingQueries.clear();
@@ -246,7 +246,7 @@ function installDynamicIdentifyFixture(): () => void {
     atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+X5W2WQAAAABJRU5ErkJggg=="),
     (character) => character.charCodeAt(0),
   );
-  setAllowedHostPatterns(["https://*"]);
+  setAllowedHostPatterns(["https://geogimstest.houstontx.gov"]);
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url =
       typeof input === "string"

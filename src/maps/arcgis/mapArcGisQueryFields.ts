@@ -40,6 +40,7 @@ export function collectArcGisQueryFields(layer: MapLayerDefinition, source: ArcG
     if (layer.tooltip?.template && tooltipTemplateSource === "service") templateFields(layer.tooltip.template, fields);
     const popupTemplateSource = effectiveSource(layer, layer.popup?.defaultFieldSource, "popup");
     if (layer.popup?.title) templateFields(layer.popup.title, fields, popupTemplateSource);
+    if (layer.popup?.remote?.endpoint) templateFields(layer.popup.remote.endpoint, fields, "service");
     if (layer.popup?.html) templateFields(layer.popup.html, fields, popupTemplateSource);
     const visitContent = (value: unknown, inheritedSource: string): void => {
         if (Array.isArray(value)) { value.forEach(item => visitContent(item, inheritedSource)); return; }

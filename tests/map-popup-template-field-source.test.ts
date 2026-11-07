@@ -15,7 +15,7 @@ describe("map popup and tooltip template field sources", () => {
         mode: "reference",
       },
       popup: {
-        enabled: true,
+        mode: "custom",
         defaultFieldSource: "service",
         title: "Facility {{OBJECTID}}",
         html: "<strong>{{facilityName}}</strong>",
@@ -54,7 +54,7 @@ describe("map popup and tooltip template field sources", () => {
         serviceField: "FACILITY_ID",
         aggregations: [{ field: "risk", aggregation: "max", as: "joinedRisk" }],
       },
-      popup: { enabled: true, defaultFieldSource: "joined", title: "Risk {{joinedRisk}}" },
+      popup: { mode: "custom", defaultFieldSource: "joined", title: "Risk {{joinedRisk}}" },
       tooltip: { enabled: true, defaultFieldSource: "joined", template: "{{joinedRisk}}" },
     };
     const occurrences = specificationFieldReferences({ version: "2.0", components: [{ type: "map", id: "map", layers: [layer] }] });

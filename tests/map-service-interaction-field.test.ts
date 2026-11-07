@@ -65,7 +65,7 @@ describe("ArcGIS service interaction fields", () => {
         fieldSource: "service",
       },
       popup: {
-        enabled: true,
+        mode: "custom",
         defaultFieldSource: "service",
         title: "{{OBJECTID}}",
       },

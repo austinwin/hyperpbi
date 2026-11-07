@@ -34,6 +34,7 @@ export function configuredMapEndpoints(specification: string): string[] {
         if (!value || typeof value !== "object") return;
 
         const entry = value as Record<string, unknown>;
+        if (entry.mode === "remote" && entry.remote && typeof entry.remote === "object") add((entry.remote as Record<string, unknown>).endpoint);
         if (EXTERNAL_SOURCE_TYPES.has(String(entry.type))) add(entry.url);
         if (typeof entry.manifestUrl === "string") add(entry.manifestUrl);
 

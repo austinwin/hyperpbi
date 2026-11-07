@@ -1,10 +1,11 @@
+// @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { executeArcGisDynamicIdentify } from "../src/maps/arcgis/arcGisDynamicIdentify";
 import { setAllowedHostPatterns } from "../src/maps/arcgis/arcGisHostPolicy";
 
 describe("ArcGIS Dynamic identify", () => {
   beforeEach(() => {
-    setAllowedHostPatterns(["https://*"]);
+    setAllowedHostPatterns(["https://geogimstest.houstontx.gov"]);
   });
 
   it("posts click, extent, image, layer, and definition context and converts all results", async () => {

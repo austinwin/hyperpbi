@@ -69,3 +69,8 @@ The Vite build retains its existing large-chunk warning; Power BI formatting uti
 - The smallest visual uses an overlay and scrolling. Close the drawer when inspecting map features underneath it.
 - Native Power BI Desktop/service host behavior should receive a release smoke test with real model identities and WebAccess policies; the automated browser host verifies the existing selection bridge contracts.
 - Useful follow-ups: richer editable icon mappings, larger categorical legends, and deeper hierarchy only after an explicit canonical schema design.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](../remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

@@ -1,3 +1,4 @@
+// @vitest-environment node
 // ── Map Join Engine Tests ─────────────────────────────────────────────
 import { describe, it, expect } from "vitest";
 import { executeMapJoin } from "../src/maps/join/mapJoinEngine";

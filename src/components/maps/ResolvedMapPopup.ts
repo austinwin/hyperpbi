@@ -17,23 +17,8 @@ import {
 } from "../../maps/model/mapFeatureValue";
 import type { FeatureFieldSource } from "../../maps/model/mapFeatureValue";
 import { sanitizeHtml } from "../../security/sanitizeHtml";
-import { h, render } from "preact";
-import { MapPopupContent } from "./MapPopupContent";
 
 const TOKEN_REGEX = /\{\{\s*([^{}]{1,120}?)\s*\}\}/g;
-
-export interface ResolvedPopupRuntime {
-  executeAction: (
-    action: ResolvedMapPopupAction,
-    feature: ResolvedMapFeature,
-    event: Event,
-  ) => void;
-}
-
-export interface RenderedResolvedPopup {
-  element: HTMLElement;
-  cleanup: () => void;
-}
 
 export interface ResolvedMapPopupFieldView {
   label: string;
@@ -53,6 +38,9 @@ export function resolveMapPopupViewModel(
   popup: ResolvedMapPopup,
   feature: ResolvedMapFeature,
 ): ResolvedMapPopupViewModel {
+  if (popup.mode === "none") return { fields: [], actions: [] };
+  if (popup.mode === "remote") return { title: popup.title ? resolveSafeTemplate(popup.title, feature, popup.defaultFieldSource ?? "service") : undefined, fields: [], actions: [] };
+  if (popup.mode === "default") return { fields: Object.entries(mergedFeatureAttributes(feature)).slice(0, 50).map(([label, value]) => ({ label, value: formatFeatureValue(value), display: "text" as const })), actions: [] };
   const title = popup.title
     ? resolveSafeTemplate(
         popup.title,
@@ -88,103 +76,6 @@ export function resolveMapPopupViewModel(
       display: fieldDef.display,
     })),
     actions: popup.actions ?? [],
-  };
-}
-
-/**
- * Render a popup HTML element for a resolved map feature.
- * Supports templates, structured fields, safe HTML output, and bound action execution.
- */
-export function renderResolvedPopup(
-  popup: ResolvedMapPopup,
-  feature: ResolvedMapFeature,
-  runtime?: ResolvedPopupRuntime,
-): RenderedResolvedPopup {
-  const container = document.createElement("div");
-  container.className = "hp-map-popup hp-map-popup-resolved";
-  const cleanups: Array<() => void> = [];
-  const view = resolveMapPopupViewModel(popup, feature);
-  if (popup.content?.length) {
-    const contentHost = document.createElement("div"); container.append(contentHost);
-    render(h(MapPopupContent, { blocks: popup.content, feature, executeAction: (action, event) => runtime?.executeAction({ id: "content-action", label: "Action", uiAction: action as import("../../schema/uiSchema").UiAction }, feature, event!) }), contentHost);
-    cleanups.push(() => render(null, contentHost));
-  }
-
-  // ── Title ──────────────────────────────────────────────────────
-  if (view.title) {
-    const title = document.createElement("h4");
-    title.className = "hp-map-popup-title";
-    title.textContent = view.title;
-    container.appendChild(title);
-  }
-
-  // ── HTML template ──────────────────────────────────────────────
-  if (view.html) {
-    const parsed = new DOMParser().parseFromString(view.html, "text/html");
-    while (parsed.body.firstChild) {
-      container.appendChild(parsed.body.firstChild);
-    }
-  }
-
-  // ── Structured fields ──────────────────────────────────────────
-  if (view.fields.length > 0) {
-    const table = document.createElement("table");
-    table.className = "hp-map-popup-fields";
-
-    for (const fieldDef of view.fields) {
-      const row = document.createElement("tr");
-
-      const labelCell = document.createElement("th");
-      labelCell.textContent = fieldDef.label;
-      row.appendChild(labelCell);
-
-      const valueCell = document.createElement("td");
-
-      if (fieldDef.display === "badge") {
-        const badge = document.createElement("span");
-        badge.className = "hp-badge";
-        badge.textContent = fieldDef.value;
-        valueCell.appendChild(badge);
-      } else {
-        valueCell.textContent = fieldDef.value;
-      }
-
-      row.appendChild(valueCell);
-      table.appendChild(row);
-    }
-
-    container.appendChild(table);
-  }
-
-  // ── Actions ────────────────────────────────────────────────────
-  if (view.actions.length > 0) {
-    const actionsContainer = document.createElement("div");
-    actionsContainer.className = "hp-map-popup-actions";
-
-    for (const action of view.actions) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "hp-btn hp-btn-sm";
-      btn.textContent = action.label;
-      if (action.icon) {
-        btn.setAttribute("data-icon", action.icon);
-      }
-      if (runtime) {
-        const handler = (e: Event) => runtime.executeAction(action, feature, e);
-        btn.addEventListener("click", handler);
-        cleanups.push(() => btn.removeEventListener("click", handler));
-      }
-      actionsContainer.appendChild(btn);
-    }
-
-    container.appendChild(actionsContainer);
-  }
-
-  return {
-    element: container,
-    cleanup: () => {
-      for (const fn of cleanups) fn();
-    },
   };
 }
 

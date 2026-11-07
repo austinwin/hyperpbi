@@ -1073,6 +1073,7 @@ export function HyperPbiStudio({
           )}
           {editorTab === "mapStudio" && (
             <MapStudio
+              fragmentEnvironment={{ settings, remoteSourceHost, providerAccess, webAccessAvailable }}
               json={specification}
               data={data}
               preview={<div class="hp-map-author-preview">{previewContent}</div>}

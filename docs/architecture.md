@@ -53,7 +53,7 @@ Uploaded data processing is deterministic:
 - CSV quoting/newlines are parsed locally and workbook sheets are read in a Web Worker;
 - file, row, and cell limits fail the whole source with a visible error—rows are never silently truncated.
 
-Joins, relationships, DAX, Power Query, and SQL remain out of scope. Read-only remote sources are resolved through the shared source layer: MiniUp table/Function sources plus web-only `rest.get` restricted by the build-time trusted-host list. Components never fetch directly.
+Joins, relationships, DAX, Power Query, and SQL remain out of scope. Read-only remote sources are resolved through the shared source layer: MiniUp table/Function sources plus approved HTTPS `rest.get` restricted by the build-time trusted-host list. Components never fetch directly.
 
 ## Local project persistence
 
@@ -95,3 +95,8 @@ npm run web:sites:build
 ## Future services
 
 `SpecificationAuthoringService` is the future AI integration seam. A provider adapter will receive an `AuthoringContext` and return a candidate `HyperPbiSchema`; it must never save or render before the shared validator accepts it. A future publishing service should sit beside `ProjectStorage`, persist projects/specifications to an authenticated backend, and deploy the same web host. Neither service should fork the schema, editor, renderer, or security pipeline.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

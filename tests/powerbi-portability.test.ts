@@ -22,7 +22,7 @@ describe("Power BI portability", () => {
         const result = analyzePowerBiPortability(specification, defaultConfig, workspace);
         expect(result.status).toBe("not-fully-portable");
         expect(result.issues.map(issue => issue.code)).toContain("INDEPENDENT_UPLOADED_SOURCE");
-        expect(result.powerBiSpecification).toBeUndefined();
+        expect(result.issues.filter(issue => issue.code === "REMOTE_SOURCE_WEB_ONLY")).toEqual([]);
     });
 
     it("permits MiniUp Functions in Power BI but blocks direct table and generic REST sources", () => {
@@ -45,8 +45,8 @@ describe("Power BI portability", () => {
                 components: [{ type: "table", id: "live", dataset: "live", columns: ["status"] }]
             };
             const result = analyzePowerBiPortability(specification, defaultConfig, workspace);
-            expect(result.issues.map(issue => issue.code)).toContain("REMOTE_SOURCE_WEB_ONLY");
-            expect(result.powerBiSpecification).toBeUndefined();
+            expect(result.issues.map(issue => issue.code)).toContain("REMOTE_SOURCE_WEBACCESS_REQUIRED");
+            expect(result.issues.filter(issue => issue.code === "REMOTE_SOURCE_WEB_ONLY")).toEqual([]);
         }
     });
 

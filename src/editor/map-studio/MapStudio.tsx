@@ -1,3 +1,5 @@
+import type { FragmentEnvironment } from "../../fragments/RemoteFragmentHost";
+import { RemotePopupEditor } from "./RemotePopupEditor";
 import { MapDrawerResize } from "./MapDrawerResize";
 import { MapSourcePicker } from "./MapSourcePicker";
 import { RendererEditor } from "./MapRendererEditor";
@@ -143,6 +145,7 @@ export interface MapStudioProps {
   webAccessAvailable?: boolean;
   providerAccess?: ProviderAccessState;
   configurationJson?: string;
+  fragmentEnvironment?: FragmentEnvironment;
   preview?: ComponentChildren;
   mapCommands?: MapCommandChannel;
   onPreview?: () => void;
@@ -162,6 +165,7 @@ export function MapStudio({
   webAccessAvailable = false,
   providerAccess,
   configurationJson,
+  fragmentEnvironment,
   preview,
   mapCommands,
   onPreview,
@@ -1001,6 +1005,8 @@ export function MapStudio({
                     fieldSets={fieldSets}
                     mutate={mutateLayer}
                     section="popup"
+                    fragmentEnvironment={fragmentEnvironment}
+                    testFeatures={runtimeLayer?.id === layer.id ? runtimeLayer.features : []}
                     previewFeature={previewFeature?.layerId === layer.id ? previewFeature : undefined}
                   />
                 )}
@@ -1892,14 +1898,20 @@ function PopupEditor({
   mutate,
   section,
   previewFeature,
+  testFeatures = [],
+  fragmentEnvironment,
 }: {
   layer: MapLayerDefinition;
   fieldSets: Record<MapAttributeSource, NormalizedField[]>;
   mutate: (fn: (layer: MapLayerDefinition) => void) => boolean;
   section: "popup" | "tooltip";
   previewFeature?: ResolvedMapFeature;
+  fragmentEnvironment?: FragmentEnvironment;
+  testFeatures?: readonly ResolvedMapFeature[];
 }) {
-  const definition = layer[section] ?? { enabled: false, fields: [] };
+  const [testFeatureId, setTestFeatureId] = useState("");
+  const testFeature = testFeatures.find(feature => feature.id === testFeatureId) ?? previewFeature;
+  const definition = layer[section] ?? { fields: [] };
   const items = definition.fields ?? [];
   const set = (patch: Json) =>
     mutate((candidate) => {
@@ -1911,14 +1923,18 @@ function PopupEditor({
   const actions = section === "popup" ? (layer.popup?.actions ?? []) : [];
   return (
     <div class="hp-map-form-grid">
-      <label>
+      {section === "tooltip" && <label>
         <input
           type="checkbox"
-          checked={definition.enabled === true}
+          checked={layer.tooltip?.enabled === true}
           onChange={(event) => set({ enabled: event.currentTarget.checked })}
         />{" "}
         Enable {section}
-      </label>
+      </label>}
+      {section === "popup" && <label>Popup mode<select aria-label="Popup mode" value={layer.popup?.mode ?? "default"} onChange={event => mutate(candidate => { candidate.popup = { mode: event.currentTarget.value as "none" | "default" | "custom" | "remote", ...(event.currentTarget.value === "remote" ? { remote: { endpoint: "https://hyperpbi.com/api/demo/sensors/{{service.site_id}}" } } : {}) }; })}><option value="none">None</option><option value="default">Feature attributes</option><option value="custom">Custom builder</option><option value="remote">Remote Fragment</option></select></label>}
+      {section === "popup" && layer.popup?.mode === "remote" && <RemotePopupEditor request={layer.popup.remote ?? { endpoint: "" }} fieldSets={fieldSets} onChange={remote => set({ remote })} />}
+      {section === "popup" && <><label>Test feature<select aria-label="Test feature" value={testFeatureId} onChange={event => setTestFeatureId(event.currentTarget.value)}><option value="">Clicked feature</option>{testFeatures.slice(0, 100).map(feature => <option value={feature.id}>{feature.id}</option>)}</select></label><MapPopupPreview environment={fragmentEnvironment} layer={layer} feature={testFeature} /></>}
+      {(section === "tooltip" || layer.popup?.mode === "custom") && <>
       {section === "popup" && (
         <DraftInput
           label="Title template"
@@ -1927,8 +1943,7 @@ function PopupEditor({
         />
       )}
       {section === "popup" && <FieldSelect label="Use a field as popup title" value="" fields={fieldSets[defaultFieldSource(layer)]} onChange={value => { if (value) set({ title: `{{${defaultFieldSource(layer)}.${value}}}` }); }} />}
-      {section === "popup" && <MapPopupPreview layer={layer} feature={previewFeature} />}
-      {section === "popup" && <PopupContentEditor blocks={layer.popup?.content ?? []} onChange={content => set({ content, enabled: true })} fieldSets={fieldSets} defaultSource={defaultFieldSource(layer)} />}
+      {section === "popup" && <PopupContentEditor blocks={layer.popup?.content ?? []} onChange={content => set({ content, mode: "custom" })} fieldSets={fieldSets} defaultSource={defaultFieldSource(layer)} />}
       <details class="hp-map-popup-advanced" open={section === "tooltip" || items.length > 0 || actions.length > 0}><summary>{section === "popup" ? "Attribute table, templates & existing actions" : "Tooltip content"}</summary>
       <label>
         <span>Template field source</span>
@@ -2180,6 +2195,7 @@ function PopupEditor({
       <small>Scripts, event handlers, iframes, and unsafe URLs are blocked.</small>
       </details>
       <small>Images and links use HTTPS. Actions follow the map's permitted commands.</small>
+      </>}
     </div>
   );
 }

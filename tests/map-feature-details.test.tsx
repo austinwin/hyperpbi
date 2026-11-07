@@ -40,7 +40,7 @@ const layer = (name: string): ResolvedMapLayer => ({
   }],
   renderer: { type: "simple", symbol: {} },
   popup: {
-    enabled: true,
+    mode: "custom",
     title: "{{NAME}}",
     defaultFieldSource: "service",
     fields: [{ field: "NAME", fieldSource: "service", label: "Name", display: "text" }],
@@ -100,7 +100,7 @@ describe("MapFeatureDetails", () => {
   it("uses a meaningful attribute instead of an internal Power BI row identity", () => {
     const host = document.createElement("div");
     const fallbackLayer = layer("unused");
-    fallbackLayer.popup = { enabled: true, fields: [], actions: [] };
+    fallbackLayer.popup = { mode: "default", fields: [], actions: [] };
     fallbackLayer.features[0] = {
       ...fallbackLayer.features[0],
       id: '[{"identityIndex":8},{"identityIndex":8}]',

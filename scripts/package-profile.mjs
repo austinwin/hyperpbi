@@ -41,11 +41,6 @@ try {
         // A build without the ArcGIS host policy has nothing to restore here.
     }
 
-    // Retain the historical artifact labels, but never emit the unsupported
-    // https://* WebAccess sentinel. Power BI only supports wildcards on a
-    // concrete parent host (for example, https://*.arcgis.com).
-    const broadProfileLabel = process.env.HYPERPBI_ALLOW_ALL_MAP_HOSTS !== "false";
-
     try {
         const extraHosts = parseMapHostPatterns(process.env.HYPERPBI_MAP_HOSTS ?? "");
         const webAccessParams = buildWebAccessParameters({
@@ -109,9 +104,7 @@ try {
             const { readdir } = await import("node:fs/promises");
             const dist = join(root, "dist");
             const files = await readdir(dist);
-            const packageLabel = profile === "maps"
-                ? broadProfileLabel ? "maps-broad" : "maps-restricted"
-                : "core";
+            const packageLabel = profile;
             const pbiviz = JSON.parse(await readFile(join(root, "pbiviz.json"), "utf8"));
             const packageBase = `${pbiviz.visual.guid}.${pbiviz.visual.version}`;
             const sourceName = `${packageBase}.pbiviz`;
@@ -126,15 +119,12 @@ try {
                 if (
                     staleProfilePattern.test(file) ||
                     (staleBasePattern.test(file) && file !== sourceName) ||
-                    (profile === "maps" && broadProfileLabel && new RegExp(`^${escapedGuid}\\..+-maps\\.pbiviz$`).test(file))
+                    (profile === "maps" && /-maps-(?:broad|restricted)\.pbiviz$/.test(file))
                 ) {
                     await unlink(join(dist, file));
                 }
             }
             await copyFile(source, join(dist, `${packageBase}-${packageLabel}.pbiviz`));
-            if (profile === "maps" && broadProfileLabel) {
-                await copyFile(source, join(dist, `${packageBase}-maps.pbiviz`));
-            }
 
             const profileManifestPath = join(dist, "package-capability-profiles.json");
             let profileManifest = {};
@@ -143,6 +133,8 @@ try {
             } catch {
                 // The first package in a validation run creates the manifest.
             }
+            delete profileManifest["maps-broad"];
+            delete profileManifest["maps-restricted"];
             profileManifest[packageLabel] = { webAccessParameters: webAccessParams };
             await writeFile(profileManifestPath, JSON.stringify(profileManifest, null, 2) + "\n");
         }

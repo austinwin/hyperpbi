@@ -673,7 +673,7 @@ describe("MapBlock exported runtime helpers", () => {
       },
       renderer: { type: "uniqueValue" as const, field: "STATUS" },
       labels: { field: "LABEL", template: "{{LABEL2}}" },
-      popup: {
+      popup: { mode: "custom",
         fields: [
           { field: "POP", fieldSource: "service" as const },
           { field: "LOCAL", fieldSource: "powerbi" as const },

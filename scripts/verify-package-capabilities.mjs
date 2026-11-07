@@ -7,7 +7,7 @@ const files = await readdir(dist);
 const profileManifest = JSON.parse(await readFile(join(dist, "package-capability-profiles.json"), "utf8"));
 const requiredDataRoles = [{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }];
 
-const profiles = ["core", "maps-broad", "maps-restricted"];
+const profiles = ["core", "maps"];
 for (const profile of profiles) {
     const archives = files.filter(file => file.endsWith(`-${profile}.pbiviz`));
     if (archives.length !== 1) {
@@ -26,19 +26,14 @@ for (const profile of profiles) {
     if (profile === "core" && actual !== null) {
         throw new Error("Core package must not contain a WebAccess privilege.");
     }
-    if (profile === "maps-broad") {
+    if (profile === "maps") {
         if (!Array.isArray(actual) || actual.includes("https://*")) {
             throw new Error(`Broad Maps WebAccess contains an unsupported all-host wildcard: ${JSON.stringify(actual)}.`);
         }
-        for (const required of ["https://tile.openstreetmap.org", "https://nominatim.openstreetmap.org"]) {
+        for (const required of ["https://tile.openstreetmap.org", "https://nominatim.openstreetmap.org", "https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]) {
             if (!actual.includes(required)) {
                 throw new Error(`Broad Maps WebAccess is missing ${required}.`);
             }
-        }
-    }
-    if (profile === "maps-restricted") {
-        if (!Array.isArray(actual) || actual.includes("https://*")) {
-            throw new Error(`Restricted Maps package has invalid WebAccess parameters: ${JSON.stringify(actual)}.`);
         }
     }
     if (JSON.stringify(actual ?? []) !== JSON.stringify(expected)) {
@@ -47,4 +42,4 @@ for (const profile of profiles) {
     console.log(`${profile}: ${archives[0]} WebAccess=${JSON.stringify(actual ?? [])} roles=values`);
 }
 
-console.log("PBIVIZ capability inspection passed for Core, broad Maps, and restricted Maps archives.");
+console.log("PBIVIZ capability inspection passed for Core and Maps archives.");

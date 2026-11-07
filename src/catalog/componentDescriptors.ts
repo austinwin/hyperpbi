@@ -23709,7 +23709,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
             }
           },
           "popup": {
-            "enabled": true,
+            "mode": "custom",
             "title": "{{__field_key__}}",
             "fields": [
               {

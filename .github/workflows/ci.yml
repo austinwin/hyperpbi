@@ -4,27 +4,74 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  validate:
+  pull-request:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 22.13.0
           cache: npm
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run web:typecheck
-      - run: npm run web:build
-      - run: npm run web:sites:build
-      - run: npm test
-      - run: npm run lint
-      - run: npm run docs:check
-      - run: npm run package:core
-      - run: npm run package:maps
-      - run: npm run package:verify
+      - uses: actions/cache@v4
+        with:
+          path: .tmp
+          key: verify-pr-${{ runner.os }}-${{ hashFiles('package-lock.json', 'tsconfig*.json', 'eslint.config.mjs') }}-${{ github.sha }}
+          restore-keys: verify-pr-${{ runner.os }}-${{ hashFiles('package-lock.json', 'tsconfig*.json', 'eslint.config.mjs') }}-
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify:pr
+        env:
+          HYPERPBI_VERIFY_BASE: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-verification
+          path: |
+            .verification/pr-timings.json
+            test-results/
+          if-no-files-found: ignore
+
+  integration:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .tmp
+          key: verify-full-${{ runner.os }}-${{ hashFiles('package-lock.json', 'tsconfig*.json', 'eslint.config.mjs') }}-${{ github.sha }}
+          restore-keys: verify-full-${{ runner.os }}-${{ hashFiles('package-lock.json', 'tsconfig*.json', 'eslint.config.mjs') }}-
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify:full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verified-release
+          path: |
+            dist/*-core.pbiviz
+            dist/*-maps.pbiviz
+            dist/package-capability-profiles.json
+            apps/web/dist/
+            .verification/full-timings.json
+            test-results/
+          if-no-files-found: ignore

@@ -82,7 +82,7 @@ The ArcGIS join specification uses the repository's existing public Houston serv
       "source": {"type":"powerbi","bindings":{"latitude":"facilityLatitude","longitude":"facilityLongitude"}},
       "renderer": {"type":"uniqueValue","field":"facilityStatus","fieldSource":"powerbi"},
       "labels": {"enabled":true,"field":"facilityName","fieldSource":"powerbi","maxLabels":300},
-      "popup": {"enabled":true,"title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
+      "popup": {"mode":"custom","title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
       "filter": {"field":"facilityStatus","fieldSource":"powerbi","operator":"!=","value":"Retired"},
       "performance": {"maxFeatures":5000}
     },
@@ -211,3 +211,8 @@ Use pre-geocoded coordinates and organizationally approved public services for p
 For renderer, legend, selection, quick-filter, tool, performance, and security examples, see the
 [complete analytical map guide](maps.md) and the manifest-driven
 [`examples/map`](../examples/map/README.md) gallery.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

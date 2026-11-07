@@ -114,7 +114,7 @@ const candidate = JSON.stringify({
           ],
         },
         popup: {
-          enabled: true,
+          mode: "custom",
           defaultFieldSource: "powerbi",
           title: "{{asset_id}}",
           fields: [{ field: "status", fieldSource: "powerbi", label: "Status" }],

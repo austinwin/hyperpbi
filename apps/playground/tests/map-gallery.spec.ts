@@ -1,9 +1,10 @@
+import mapManifest from "../../../examples/map/manifest.json";
 import { expect, test } from "@playwright/test";
 
 test("map gallery loads focused examples and critical analytical workflows", async ({ page }) => {
   await page.goto("/components/map");
   await expect(page.getByRole("heading", { name: "Analytical maps" })).toBeVisible();
-  await expect(page.locator(".pg-map-example-nav button")).toHaveCount(29);
+  await expect(page.locator(".pg-map-example-nav button")).toHaveCount(mapManifest.examples.length);
   await expect(page.locator(".leaflet-container")).toBeVisible();
   await expect(page.getByText("JSON specification")).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy spec" })).toBeVisible();

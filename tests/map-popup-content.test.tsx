@@ -44,7 +44,7 @@ describe("structured popup content", () => {
     });
     it("keeps popup service fields separate from report and joined fields in request planning", () => {
         const source = { type: "arcgisFeature" as const, url: "https://services.arcgis.com/a/FeatureServer/0" };
-        const layer = { id: "sites", name: "Sites", source, popup: { content: [{ id: "data", type: "field" as const, field: "SiteID", fieldSource: "powerbi" as const }, { id: "text", type: "text" as const, text: "{{service.status}} / {{joined.total}}", fieldSource: "joined" as const }, { id: "chart", type: "chart" as const, series: [{ field: "value", fieldSource: "service" as const }] }] } };
+        const layer = { id: "sites", name: "Sites", source, popup: { mode: "custom", content: [{ id: "data", type: "field" as const, field: "SiteID", fieldSource: "powerbi" as const }, { id: "text", type: "text" as const, text: "{{service.status}} / {{joined.total}}", fieldSource: "joined" as const }, { id: "chart", type: "chart" as const, series: [{ field: "value", fieldSource: "service" as const }] }] } };
         const fields = collectArcGisQueryFields(layer, source);
         expect(fields).toContain("status"); expect(fields).toContain("value"); expect(fields).not.toContain("total"); expect(fields).not.toContain("SiteID");
         const references = specificationFieldReferences({ version: "2.0", components: [{ type: "map", id: "map", layers: [layer] }] });

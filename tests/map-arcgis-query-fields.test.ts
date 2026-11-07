@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { collectArcGisQueryFields } from "../src/maps/arcgis/mapArcGisQueryFields";
 import type { MapLayerDefinition } from "../src/schema/mapSchema";
@@ -28,7 +29,7 @@ describe("ArcGIS query field namespaces", () => {
       },
       labels: { enabled: true, field: "SERVICE_NAME", fieldSource: "service" },
       popup: {
-        enabled: true,
+        mode: "custom",
         fields: [
           { field: "joined_sales", fieldSource: "joined" },
           { field: "SERVICE_TYPE", fieldSource: "service" },
