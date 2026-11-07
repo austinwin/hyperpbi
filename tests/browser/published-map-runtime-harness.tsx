@@ -30,8 +30,11 @@ imported.layers![1].interaction = { enabled: true, internalMode: "highlight", ex
 imported.layers![1].renderer = { type: "proportionalSize", field: "sales", fieldSource: "joined", minSize: 8, maxSize: 15, color: "#0f766e" };
 imported.layers![2].order = -1;
 imported.view = { center: [30.29, -97.74], zoom: 11, fitMode: "none" };
+const requestedLayerCount = Math.min(100, Number(new URLSearchParams(location.search).get("layers") ?? 0));
+for (let index = imported.layers!.length; index < requestedLayerCount; index++) imported.layers!.push({ ...imported.layers![0], id: `stress-${index}`, name: `Report layer ${index + 1}`, visible: false, order: index });
 const schema = { version: "2.0" as const, title: "Facility Network", components: [imported] };
 const settings = toRuntimeSettings(new VisualFormattingSettingsModel());
+if (new URLSearchParams(location.search).get("theme") === "dark") settings.theme.mode = "dark";
 function Harness() {
     const [month, setMonth] = useState("all");
     const data = useMemo<NormalizedData>(() => { const indices = allRows.flatMap((row, index) => month === "all" || row.date.startsWith(month) ? [index] : []); const rows = indices.map(index => allRows[index]), rowKeys = indices.map(index => `facility-${index}`); return { rows, rowKeys, fields, aggregates: calculateAggregates(rows), map: normalizeMapBindings(rows, fields, { latitude: "lat", longitude: "lon" }, {}, rowKeys) }; }, [month]);

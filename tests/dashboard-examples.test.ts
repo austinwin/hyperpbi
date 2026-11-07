@@ -342,7 +342,7 @@ describe("portable dashboard examples", () => {
                     );
                 }
 
-                const expectedBundle = readFileSync(asset(example, "project"), "utf8").trim();
+                const expectedBundle = readFileSync(asset(example, "project"), "utf8").replace(/\r\n/g, "\n").trim();
                 const actualBundle = exportProjectBundle(instantiated.project);
                 if (actualBundle !== expectedBundle) failures.push(`${example.slug} project bundle is stale`);
 

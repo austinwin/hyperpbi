@@ -4,8 +4,8 @@ import type { IconName } from "../../schema/uiSchema";
 import type { MapStudioCommand } from "../../maps/interactions/mapStudioCommands";
 
 export type MapStudioDrawer = "layers" | "properties" | "sources" | null;
-export function MapStudioRail({ drawer, onDrawer, onBasemap, onCommand, onPreview, onUndo, onRedo, canUndo, canRedo }: {
-    drawer: MapStudioDrawer; onDrawer: (drawer: MapStudioDrawer) => void; onBasemap: () => void;
+export function MapStudioRail({ drawer, activeTool, onDrawer, onBasemap, onCommand, onPreview, onUndo, onRedo, canUndo, canRedo }: {
+    activeTool?: string | null; drawer: MapStudioDrawer; onDrawer: (drawer: MapStudioDrawer) => void; onBasemap: () => void;
     onCommand: (command: MapStudioCommand) => void; onPreview?: () => void;
     onUndo: () => void; onRedo: () => void; canUndo: boolean; canRedo: boolean;
 }) {
@@ -18,12 +18,14 @@ export function MapStudioRail({ drawer, onDrawer, onBasemap, onCommand, onPrevie
             {button("Add source", "plus", () => onDrawer(drawer === "sources" ? null : "sources"), drawer === "sources")}
             {button("Layer properties", "settings", () => onDrawer(drawer === "properties" ? null : "properties"), drawer === "properties")}
             {button("Basemap", "map", onBasemap)}
-            {button("Search", "search", () => { onDrawer(null); onCommand("search"); })}
-            {button("Select features", "select-rectangle", () => { onDrawer(null); onCommand("selection"); })}
+            <span class="hp-map-rail-divider" />
+            {button("Search", "search", () => { onDrawer(null); onCommand(activeTool === "search" ? "close" : "search"); }, activeTool === "search")}
+            {button("Select features", "select-rectangle", () => { onDrawer(null); onCommand(activeTool === "selection" ? "close" : "selection"); }, activeTool === "selection")}
             {button("Fit to extent", "target", () => onCommand("fit"))}
-            {button("Bookmarks", "bookmark", () => { onDrawer(null); onCommand("bookmarks"); })}
-            {button("Legend", "list", () => { onDrawer(null); onCommand("legend"); })}
+            {button("Bookmarks", "bookmark", () => { onDrawer(null); onCommand(activeTool === "bookmarks" ? "close" : "bookmarks"); }, activeTool === "bookmarks")}
+            {button("Legend", "list", () => { onDrawer(null); onCommand(activeTool === "legend" ? "close" : "legend"); }, activeTool === "legend")}
             {button("Reset selection", "refresh", () => onCommand("clear"))}
+            <span class="hp-map-rail-divider" />
             {button("Undo", "chevron-left", onUndo, false, !canUndo)}
             {button("Redo", "chevron-right", onRedo, false, !canRedo)}
             {onPreview && button("Preview", "eye", onPreview)}

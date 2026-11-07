@@ -122,6 +122,7 @@ export function StudioWorkspaceNav({
         {
           label: "Start",
           items: [
+            ...(value === "mapStudio" ? [{ id: "mapStudio" as const, label: "Map Studio" }] : []),
             { id: "ai" as const, label: "Guided Builder" },
             { id: "help" as const, label: "How it works" },
           ],

@@ -1,11 +1,16 @@
+import { MapDrawerResize } from "./MapDrawerResize";
+import { MapSourcePicker } from "./MapSourcePicker";
+import { RendererEditor } from "./MapRendererEditor";
 import { PopupContentEditor } from "./PopupContentEditor";
 import { MapPropertyCategories } from "./MapPropertyCategories";
 import { MapColorPicker } from "./MapColorPicker";
 import { MapStudioRail, type MapStudioDrawer } from "./MapStudioRail";
 import { MapLayerEffectsEditor } from "./MapLayerEffectsEditor";
 import { loadPublicGeoJson } from "../../maps/sources/publicGeoJson";
-import { MapContentsActions } from "./MapContentsActions";
-import { MAP_ORIGIN_GROUPS, mapLayerOrigin } from "../../maps/model/mapLayerOrigin";
+import { MapContentsPanel } from "./MapContentsPanel";
+import { MapGeoJsonInput } from "./MapGeoJsonInput";
+import type { ResolvedMapLayer, ResolvedMapFeature } from "../../maps/model/resolvedMapTypes";
+import { MapPopupPreview } from "./MapPopupPreview";
 import type { ComponentChildren } from "preact";
 import type { MapCommandChannel, MapStudioCommand, MapLayerStatuses } from "../../maps/interactions/mapStudioCommands";
 import { geoJsonLayerMetadata } from "./geoJsonLayerMetadata";
@@ -18,7 +23,6 @@ import type { MapComponent } from "../../schema/hyperpbiSchema";
 import type {
   MapLayerDefinition,
   MapLayerSourceType,
-  MapRendererDefinition,
 } from "../../schema/mapSchema";
 import { inspectArcGisService } from "../../maps/arcgis/arcGisServiceInspector";
 import {
@@ -49,7 +53,6 @@ import { MapDiagnosticsPanel } from "./MapDiagnosticsPanel";
 import { DraftInput } from "./MapDraftInput";
 import { FieldSelect } from "./MapFieldSelect";
 import { StudioButton } from "../ui/StudioButton";
-import { StudioCheckbox } from "../ui/StudioCheckbox";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
 import {
   mapLayerCapabilityExplanation,
@@ -196,17 +199,21 @@ export function MapStudio({
   const [mobilePane, setMobilePane] = useState<"layers" | "properties" | "map">(
     "layers",
   );
+  const [drawerWidth, setDrawerWidth] = useState(300);
   const [drawer, setDrawer] = useState<MapStudioDrawer>("layers");
-  const [layerSearch, setLayerSearch] = useState("");
   const [candidateErrors, setCandidateErrors] = useState<string[]>([]);
   const [candidateWarnings, setCandidateWarnings] = useState<string[]>([]);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState("");
-  const [selectedLayerIds, setSelectedLayerIds] = useState<string[]>([]);
+  const [activeTool, setActiveTool] = useState<string | null>(null);
+  useEffect(() => { setActiveTool(null); return mapCommands?.subscribeTool((id, tool) => { if (id === mapId) setActiveTool(tool); }); }, [mapCommands, mapId]);
   const [layerStatuses, setLayerStatuses] = useState<MapLayerStatuses>({});
+  const [runtimeLayer, setRuntimeLayer] = useState<ResolvedMapLayer>();
+  useEffect(() => { setRuntimeLayer(undefined); const unsubscribe = mapCommands?.subscribeLayer((id, layer) => { if (id === mapId) setRuntimeLayer(layer); }); mapCommands?.requestLayer(mapId, selectedLayerId); return unsubscribe; }, [mapCommands, mapId, selectedLayerId]);
+  const [previewFeature, setPreviewFeature] = useState<ResolvedMapFeature>();
+  useEffect(() => { setPreviewFeature(undefined); return mapCommands?.subscribeFeature((id, feature) => { if (id === mapId) setPreviewFeature(feature); }); }, [mapCommands, mapId]);
   useEffect(() => { setLayerStatuses({}); return mapCommands?.subscribeStatus((id, status) => { if (id === mapId) setLayerStatuses(status); }); }, [mapCommands, mapId]);
-  const [dragging, setDragging] = useState("");
   const [metadata, setMetadata] = useState<{
     loading?: boolean;
     result?: ArcGisServiceInspection;
@@ -247,7 +254,6 @@ export function MapStudio({
   }, [json, history]);
   useEffect(() => {
     draftDispatch({ type: "activateMap", mapId });
-    setSelectedLayerIds([]);
     setImportOpen(false);
     if (!mapId) return;
     if (selectedComponentId !== mapId) onSelect(mapId);
@@ -503,8 +509,9 @@ export function MapStudio({
                 ? "geojson"
                 : "xyz-tile",
     );
-    const source =
-      type === "powerbi" ? { type, bindings: {} } : { type, url: "", ...(wms?{wms:{layers:""}}:{}) };
+    const source = type === "powerbi" ? { type, bindings: {} } : type === "geoJson"
+      ? { type, data: { type: "FeatureCollection", features: [] } }
+      : { type, url: "", ...(wms?{wms:{layers:""}}:{}) };
     if (
       mutateMap((candidate) => {
         candidate.layers = [
@@ -544,37 +551,6 @@ export function MapStudio({
           order: candidate.layerGroups?.length ?? 0,
         },
       ];
-    });
-  const moveLayer = (id: string, direction: -1 | 1) =>
-    mutateMap((candidate) => {
-      const layers = candidate.layers ?? [];
-      const index = layers.findIndex((item) => item.id === id);
-      const target = index + direction;
-      if (
-        index < 0 ||
-        target < 0 ||
-        target >= layers.length ||
-        layers[index].groupId !== layers[target].groupId
-      )
-        return;
-      [layers[index], layers[target]] = [layers[target], layers[index]];
-      layers.forEach((item, order) => {
-        item.order = order;
-      });
-    });
-  const dropLayer = (targetId: string) =>
-    mutateMap((candidate) => {
-      if (!dragging || dragging === targetId) return;
-      const layers = candidate.layers ?? [];
-      const from = layers.findIndex((item) => item.id === dragging),
-        to = layers.findIndex((item) => item.id === targetId);
-      if (from < 0 || to < 0 || layers[from].groupId !== layers[to].groupId)
-        return;
-      layers.splice(to, 0, layers.splice(from, 1)[0]);
-      layers.forEach((item, order) => {
-        item.order = order;
-      });
-      setDragging("");
     });
   const duplicateLayer = () => {
     if (!layer) return;
@@ -884,38 +860,33 @@ export function MapStudio({
           <StudioButton variant="compact" onClick={() => setPropertyTab("diagnostics")}>Open diagnostics</StudioButton>
         </details>
       )}
-      <div class="hp-map-studio-body">
-        {preview && <MapStudioRail drawer={drawer} onDrawer={next => { mapCommands?.send(mapId, "close"); setImportOpen(false); setDrawer(next); }} onBasemap={() => { mapCommands?.send(mapId, "close"); setSelectedLayerId("__basemap__"); setDrawer("properties"); }} onCommand={command => mapCommands?.send(mapId, command)} onPreview={onPreview} onUndo={() => restore(history.undo())} onRedo={() => restore(history.redo())} canUndo={history.canUndo} canRedo={history.canRedo} />}
-        {preview && drawer === "sources" && <section class="hp-map-source-drawer hp-map-floating-drawer" aria-label="Add source"><header class="hp-map-drawer-heading"><strong>Add source</strong><button type="button" aria-label="Close source panel" onClick={() => setDrawer(null)}>×</button></header><div class="hp-map-source-choices">{([ ["powerbi", "Power BI data"], ["geoJson", "GeoJSON URL"], ["arcgisFeature", "ArcGIS FeatureServer"], ["arcgisTile", "ArcGIS tile service"], ["arcgisDynamic", "ArcGIS map service"], ["xyz", "XYZ tiles"] ] as const).map(([type, label]) => <button type="button" onClick={() => { addLayer(type); setDrawer("properties"); }}>{label}</button>)}<button type="button" onClick={() => { addLayer("xyz",true); setDrawer("properties"); }}>WMS raster service</button><button type="button" onClick={() => { setDrawer(null); setImportOpen(true); }}>Import published map definition</button><button type="button" onClick={() => { addGroup(); setDrawer("layers"); }}>New layer group</button><small>Public sources on miniup.app, miniup.io and ArcGIS hosts use the same native adapters. Host WebAccess and CORS policies apply.</small></div></section>}
+      <div class="hp-map-studio-body" style={{ "--hp-map-drawer-width": `${drawerWidth}px` }}>
+        {preview && <MapStudioRail drawer={drawer} activeTool={activeTool} onDrawer={next => { mapCommands?.send(mapId, "close"); setImportOpen(false); setDrawer(next); }} onBasemap={() => { mapCommands?.send(mapId, "close"); setSelectedLayerId("__basemap__"); setDrawer("properties"); }} onCommand={command => mapCommands?.send(mapId, command)} onPreview={onPreview} onUndo={() => restore(history.undo())} onRedo={() => restore(history.redo())} canUndo={history.canUndo} canRedo={history.canRedo} />}
+        {preview && drawer === "sources" && <section class="hp-map-source-drawer hp-map-floating-drawer" aria-label="Add source"><header class="hp-map-drawer-heading"><strong>Add source</strong><button type="button" aria-label="Close source panel" onClick={() => setDrawer(null)}>×</button></header><MapSourcePicker onAdd={(type, wms) => { addLayer(type, wms); setDrawer("properties"); }} onImport={() => { setDrawer(null); setImportOpen(true); }} onGroup={() => { addGroup(); setDrawer("layers"); }} /><MapDrawerResize width={drawerWidth} onChange={setDrawerWidth} /></section>}
 
         <aside
           class={`hp-map-studio-layers ${mobilePane !== "layers" ? "is-mobile-hidden" : ""}`}
         >
           {preview && <header class="hp-map-drawer-heading"><strong>Layers</strong><button type="button" aria-label="Close layers panel" onClick={() => setDrawer(null)}>×</button></header>}
-          {preview && <label class="hp-map-layer-search"><input type="search" aria-label="Search layers" placeholder="Find a layer…" value={layerSearch} onInput={event => setLayerSearch(event.currentTarget.value)} /></label>}
-          <MapContentsActions total={orderedLayers.length} selected={selectedLayerIds.filter(id => orderedLayers.some(layer => layer.id === id)).length} onSelectAll={() => setSelectedLayerIds(orderedLayers.map(layer => layer.id))} onClear={() => setSelectedLayerIds([])} onVisibility={visible => mutateMap(candidate => { candidate.layers?.forEach(layer => { if (selectedLayerIds.includes(layer.id)) layer.visible = visible; }); })} />
-          <StudioButton
-            variant="ghost"
-            class={selectedLayerId === "__basemap__" ? "is-selected" : ""}
-            onClick={() => {
-              setSelectedLayerId("__basemap__");
-              if (preview) setDrawer("properties");
-              setMobilePane("properties");
-            }}
-          >
-            Basemap & view
-          </StudioButton>
-          {groups.map((group, index) => groupTree(group, index))}
-          {MAP_ORIGIN_GROUPS.map(origin => {
-            const children = orderedLayers.filter(item => (!item.groupId || !groups.some(group => group.id === item.groupId)) && mapLayerOrigin(item) === origin);
-            return children.length ? <section class="hp-map-origin-group"><h4>{origin}</h4>{children.map((item, index) => layerTreeRow(item, index, children.length))}</section> : null;
-          })}
-
+          {preview && <MapDrawerResize width={drawerWidth} onChange={setDrawerWidth} />}
+          <MapContentsPanel map={map} activeId={selectedLayerId} statuses={layerStatuses}
+            issues={Object.fromEntries((map.layers ?? []).map((item, index) => {
+              const path = appendJsonPointer(selectedMapPath, "layers", index);
+              const diagnostics = prepared.diagnostics.filter(diagnostic => diagnostic.path === path || diagnostic.path.startsWith(`${path}/`));
+              return [item.id, { errors: diagnostics.filter(diagnostic => diagnostic.severity === "error").length, warnings: diagnostics.filter(diagnostic => diagnostic.severity === "warning").length }];
+            }))}
+            mutate={mutateMap}
+            onOpen={(id, section) => { setSelectedLayerId(id); if (section) setPropertyTab(section); if (preview) setDrawer("properties"); setMobilePane("properties"); }}
+            onBasemap={() => { setSelectedLayerId("__basemap__"); if (preview) setDrawer("properties"); setMobilePane("properties"); }}
+            onAdd={() => preview ? setDrawer("sources") : setAddMenuOpen(true)}
+            onFit={mapCommands ? id => mapCommands.send(mapId, `fitLayer:${id}`) : undefined}
+          />
         </aside>
         {preview && <section class={`hp-map-studio-canvas ${mobilePane !== "map" ? "is-map-mobile-hidden" : ""}`} aria-label="Native map preview">{preview}</section>}
         <div
           class={`hp-map-studio-properties ${mobilePane !== "properties" ? "is-mobile-hidden" : ""}`}
         >
+          {preview && <MapDrawerResize width={drawerWidth} onChange={setDrawerWidth} />}
           {preview && <header class="hp-map-drawer-heading"><button type="button" aria-label="Back to layers" onClick={() => setDrawer("layers")}>‹</button><strong>{selectedLayerId === "__basemap__" ? "Basemap & view" : "Layer settings"}</strong><button type="button" aria-label="Close properties panel" onClick={() => setDrawer(null)}>×</button></header>}
           {preview && selectedLayerId !== "__basemap__" && <label class="hp-map-active-layer"><span>Active layer</span><select aria-label="Active layer" value={selectedLayerId} onChange={event => setSelectedLayerId(event.currentTarget.value)}>{orderedLayers.map(item => <option value={item.id}>{item.name}</option>)}</select></label>}
           {selectedLayerId === "__basemap__" ? (
@@ -946,7 +917,7 @@ export function MapStudio({
                   </StudioButton>
                 </div>
               </header>
-              {preview && <MapPropertyCategories value={propertyTab} onChange={value => setPropertyTab(value as PropertyTab)} supported={value => propertyTabSupported(value as PropertyTab, layer.source.type)} />}
+              {preview && <MapPropertyCategories unsupportedReason={capabilityExplanation} value={propertyTab} onChange={value => setPropertyTab(value as PropertyTab)} supported={value => propertyTabSupported(value as PropertyTab, layer.source.type)} />}
               <label class="hp-map-property-select">
                 <span>Property category</span>
                 <select value={propertyTab} onChange={(event) => setPropertyTab(event.currentTarget.value as PropertyTab)}>
@@ -1008,11 +979,12 @@ export function MapStudio({
                 )}
                 {preview && propertyTab === "source" && resolveMapLayerCapabilities(layer.source.type).join && <button type="button" class="hp-map-join-shortcut" onClick={() => setPropertyTab("join")}>Set data relationship →</button>}
                 {propertyTab === "renderer" && (
-                  <RendererEditor
+                  <RendererEditor key={layer.id}
                     layer={layer}
-                    fields={fields}
                     fieldSets={fieldSets}
                     rows={rows}
+                    geometryTypes={layerStatuses[layer.id]?.geometryTypes}
+                    runtimeFeatures={runtimeLayer?.id === layer.id ? runtimeLayer.features : undefined}
                     mutate={mutateLayer}
                   />
                 )}
@@ -1029,6 +1001,7 @@ export function MapStudio({
                     fieldSets={fieldSets}
                     mutate={mutateLayer}
                     section="popup"
+                    previewFeature={previewFeature?.layerId === layer.id ? previewFeature : undefined}
                   />
                 )}
                 {propertyTab === "tooltip" && (
@@ -1097,239 +1070,8 @@ export function MapStudio({
     </div>
   );
 
-  function groupTree(
-    group: NonNullable<MapComponent["layerGroups"]>[number],
-    index: number,
-  ) {
-    const children = orderedLayers.filter((item) => item.groupId === group.id && (!layerSearch || item.name.toLowerCase().includes(layerSearch.toLowerCase())));
-    return (
-      <section data-group-id={group.id}>
-        <header>
-          <button
-            aria-label={`${group.collapsed ? "Expand" : "Collapse"} ${group.name}`}
-            onClick={() =>
-              mutateMap((candidate) => {
-                const found = candidate.layerGroups?.find(
-                  (item) => item.id === group.id,
-                );
-                if (found) found.collapsed = !found.collapsed;
-              })
-            }
-          >
-            {group.collapsed ? "▸" : "▾"}
-          </button>
-          <input
-            type="checkbox"
-            aria-label={`Show group ${group.name}`}
-            checked={group.visible !== false}
-            onChange={(event) =>
-              mutateMap((candidate) => {
-                const found = candidate.layerGroups?.find(
-                  (item) => item.id === group.id,
-                );
-                if (found) found.visible = event.currentTarget.checked;
-              })
-            }
-          />
-          <DraftInput
-            ariaLabel={`Group ${index + 1} name`}
-            value={group.name}
-            onCommit={(value) =>
-              mutateMap((candidate) => {
-                const found = candidate.layerGroups?.find(
-                  (item) => item.id === group.id,
-                );
-                if (found) found.name = value;
-              })
-            }
-          />
-          <input
-            aria-label={`Group ${index + 1} opacity`}
-            title="Group opacity"
-            type="number"
-            min="0"
-            max="1"
-            step="0.05"
-            value={group.opacity ?? 1}
-            onChange={(event) =>
-              mutateMap((candidate) => {
-                const found = candidate.layerGroups?.find(
-                  (item) => item.id === group.id,
-                );
-                if (found) found.opacity = Number(event.currentTarget.value);
-              })
-            }
-          />
-          <button
-            disabled={index === 0}
-            aria-label={`Move group ${group.name} up`}
-            onClick={() =>
-              mutateMap((candidate) => {
-                if (!candidate.layerGroups || index === 0) return;
-                [
-                  candidate.layerGroups[index - 1],
-                  candidate.layerGroups[index],
-                ] = [
-                  candidate.layerGroups[index],
-                  candidate.layerGroups[index - 1],
-                ];
-                candidate.layerGroups.forEach((item, order) => {
-                  item.order = order;
-                });
-              })
-            }
-          >
-            ↑
-          </button>
-          <button
-            aria-label={`Delete group ${group.name}`}
-            onClick={() =>
-              mutateMap((candidate) => {
-                candidate.layerGroups = candidate.layerGroups?.filter(
-                  (item) => item.id !== group.id,
-                );
-                candidate.layers?.forEach((item) => {
-                  if (item.groupId === group.id) item.groupId = undefined;
-                });
-              })
-            }
-          >
-            ×
-          </button>
-          <span>{children.length}</span>
-        </header>
-        {!group.collapsed &&
-          children.map((item, childIndex) =>
-            layerTreeRow(item, childIndex, children.length),
-          )}
-      </section>
-    );
-  }
-
-  function layerTreeRow(
-    item: MapLayerDefinition,
-    index: number,
-    count: number,
-  ) {
-    if (layerSearch && !item.name.toLowerCase().includes(layerSearch.toLowerCase())) return null;
-    const selected = selectedLayerId === item.id || selectedLayerIds.includes(item.id);
-    const sourceLabel: Record<MapLayerSourceType, string> = {
-      powerbi: "Power BI",
-      arcgisFeature: "ArcGIS Feature",
-      arcgisDynamic: "ArcGIS Dynamic",
-      arcgisTile: "ArcGIS Tile",
-      geoJson: "GeoJSON",
-      xyz: "XYZ Tile",
-    };
-    const authoredIndex = map?.layers?.findIndex(
-      (candidate) => candidate.id === item.id,
-    ) ?? -1;
-    const itemPath = authoredIndex >= 0
-      ? appendJsonPointer(selectedMapPath, "layers", authoredIndex)
-      : "";
-    const itemIssues = itemPath
-      ? prepared.diagnostics.filter(
-          (diagnostic) =>
-            diagnostic.path === itemPath || diagnostic.path.startsWith(`${itemPath}/`),
-        )
-      : [];
-    const runtimeStatus = layerStatuses[item.id];
-    const errorCount = (runtimeStatus?.error ? 1 : 0) + itemIssues.filter(
-      (diagnostic) => diagnostic.severity === "error",
-    ).length;
-    const warningCount = (runtimeStatus?.warnings.length ?? 0) + itemIssues.filter(
-      (diagnostic) => diagnostic.severity === "warning",
-    ).length;
-    const loading = runtimeStatus?.loading || selected && metadata.loading === true;
-    const featureCount = runtimeStatus ? `${runtimeStatus.featureCount.toLocaleString()} features` :
-      item.source.type === "powerbi"
-        ? `${rows.length.toLocaleString()} features`
-        : selected && joinPreview.result
-          ? `${joinPreview.result.outputFeatureCount.toLocaleString()} preview features`
-          : "Count after preview";
-    return (
-      <div
-        class={`hp-map-studio-layer ${selected ? "is-selected" : ""}`}
-        draggable
-        onDragStart={() => setDragging(item.id)}
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={() => dropLayer(item.id)}
-      >
-        <span class="hp-map-layer-drag" aria-hidden="true">⋮⋮</span>
-        <StudioCheckbox
-          label={<span class="hp-visually-hidden">Show {item.name}</span>}
-          checked={item.visible !== false}
-          onChange={(visible) => mutateMap((candidate) => {
-            const found = candidate.layers?.find((candidateLayer) => candidateLayer.id === item.id);
-            if (found) found.visible = visible;
-          })}
-          className="hp-map-layer-visibility"
-        />
-        <button
-          aria-label={`Select layer ${item.name}`}
-          aria-pressed={selected}
-          title="Ctrl/Cmd-click to select multiple layers"
-          onClick={event => {
-            setSelectedLayerIds(current => event.ctrlKey || event.metaKey ? current.includes(item.id) ? current.filter(id => id !== item.id) : [...current, item.id] : [item.id]);
-            setSelectedLayerId(item.id);
-            if (preview) setDrawer("properties");
-            if (!event.ctrlKey && !event.metaKey) setMobilePane("properties");
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowUp") moveLayer(item.id, -1);
-            if (event.key === "ArrowDown") moveLayer(item.id, 1);
-          }}
-        >
-          <strong title={item.name}>{item.name}</strong>
-          <small>
-            <span class={`hp-map-source-badge is-${item.source.type === "powerbi" ? "powerbi" : item.join ? "joined" : "service"}`}>
-              {item.provenance?.provider === "published" ? "Published" : item.join?.enabled ? "Joined" : item.source.type==="xyz"&&item.source.wms?"WMS raster":sourceLabel[item.source.type]}
-            </span>
-            <span title={featureCount}>{featureCount}</span>
-          </small>
-        </button>
-        <span
-          class={`hp-map-layer-status ${loading ? "is-loading" : errorCount ? "is-error" : warningCount ? "is-warning" : "is-ready"}`}
-          title={
-            loading
-              ? "Loading source metadata"
-              : runtimeStatus?.error ?? (errorCount
-                ? `${errorCount} error${errorCount === 1 ? "" : "s"}`
-                : warningCount
-                  ? `${warningCount} warning${warningCount === 1 ? "" : "s"}`
-                  : "Ready")
-          }
-          aria-label={loading ? "Loading" : errorCount ? "Error" : warningCount ? "Warning" : "Ready"}
-        >
-          {loading ? "…" : errorCount ? "!" : warningCount ? "△" : "✓"}
-        </span>
-        <details class="hp-map-layer-actions">
-          <summary aria-label={`Actions for ${item.name}`}>⋯</summary>
-          <div>
-            <button type="button" onClick={() => { setSelectedLayerId(item.id); if (preview) setDrawer("properties"); }}>Layer settings</button>
-            {mapCommands && resolveMapLayerCapabilities(item.source.type).selection && <button type="button" disabled={runtimeStatus?.featureCount===0} onClick={()=>mapCommands.send(mapId,`fitLayer:${item.id}`)}>Fit to this layer</button>}
-            <button type="button" onClick={() => { const duplicate = copy(item); duplicate.id = uniqueId(`${item.id}-copy`); duplicate.name = `${item.name} copy`; duplicate.provenance = undefined; mutateMap(candidate => { candidate.layers = [...candidate.layers ?? [], duplicate]; }); }}>Duplicate this layer</button>
-            <button type="button" onClick={() => mutateMap(candidate => { candidate.layers = candidate.layers?.filter(layer => layer.id !== item.id); })}>Delete this layer</button>
-            <button
-              disabled={index === 0}
-              aria-label={`Move ${item.name} up`}
-              onClick={() => moveLayer(item.id, -1)}
-            >
-              Move up
-            </button>
-            <button
-              disabled={index === count - 1}
-              aria-label={`Move ${item.name} down`}
-              onClick={() => moveLayer(item.id, 1)}
-            >
-              Move down
-            </button>
-          </div>
-        </details>
-      </div>
-    );
-  }
 }
+
 
 function SourceEditor({
   layer,
@@ -1374,6 +1116,7 @@ function SourceEditor({
     <div class="hp-map-form-grid">
       <DraftInput label="Layer name" value={layer.name} onCommit={name => mutate(candidate => { candidate.name = name; })} />
       {layer.provenance && <div class="hp-map-origin-card"><strong>Published · {layer.provenance.mapName}</strong><small>Layer {layer.provenance.layerId} · version {layer.provenance.mapVersion} · {layer.provenance.geometryType ?? "geometry"}</small>{layer.provenance.sourceUrl && <a href={layer.provenance.sourceUrl} target="_blank" rel="noopener noreferrer">Published source ↗</a>}</div>}
+      <details class="hp-map-source-organization"><summary>Layer organization & report dataset</summary>
       <label>
         <span>Effective dataset</span>
         <select
@@ -1394,8 +1137,7 @@ function SourceEditor({
         </select>
       </label>
       <output>
-        {rowCount.toLocaleString()} rows · {fields.length} fields · source
-        lineage retained
+        {rowCount.toLocaleString()} report rows · {fields.length} report fields
       </output>
       <label>
         <span>Group</span>
@@ -1441,6 +1183,7 @@ function SourceEditor({
           }
         />
       </label>
+      </details>
       {layer.source.type === "powerbi" ? (
         <>
           <fieldset>
@@ -1517,6 +1260,7 @@ function SourceEditor({
             onCommit={(value) =>
               mutate((candidate) => {
                 if (candidate.source.type !== "powerbi") candidate.source.url = value;
+                if (candidate.source.type === "geoJson" && !value) delete candidate.source.url;
                 if (candidate.source.type === "geoJson" && value) delete candidate.source.data;
               })
             }
@@ -1542,7 +1286,8 @@ function SourceEditor({
                   if (candidate.source.type === "geoJson") candidate.source.refreshIntervalMinutes = event.currentTarget.value ? Number(event.currentTarget.value) : undefined;
                 })} />
               </label>
-              <small>Use Advanced JSON for small inline FeatureCollections. Remote requests remain subject to provider and host policy.</small>
+              <MapGeoJsonInput key={layer.id} layer={layer} mutate={mutate} />
+              <small>Remote sources must allow CORS and be approved by Power BI WebAccess.</small>
             </>
           )}
           {layer.source.type === "xyz" && (
@@ -2006,619 +1751,6 @@ function SourceEditor({
   );
 }
 
-function RendererEditor({
-  layer,
-  fields,
-  fieldSets,
-  rows,
-  mutate,
-}: {
-  layer: MapLayerDefinition;
-  fields: NormalizedField[];
-  fieldSets: Record<MapAttributeSource, NormalizedField[]>;
-  rows: Json[];
-  mutate: (fn: (layer: MapLayerDefinition) => void) => boolean;
-}) {
-  const renderer = layer.renderer ?? { type: "simple", symbol: {} };
-  const type = renderer.type;
-  const defaultSource: MapAttributeSource =
-    layer.source.type === "powerbi"
-      ? "powerbi"
-      : (layer.source.type === "arcgisFeature" && layer.source.mode === "join" || layer.source.type === "geoJson" && layer.join?.enabled)
-        ? "joined"
-        : "service";
-  const setRenderer = (next: Json) =>
-    mutate((candidate) => {
-      candidate.renderer = next as unknown as MapRendererDefinition;
-    });
-  const changeType = (next: MapRendererDefinition["type"]) => {
-    const numeric =
-      fieldSets[defaultSource]?.find((field) => field.dataType === "number")?.key ?? "";
-    const any = fieldSets[defaultSource]?.find(field=>field.dataType!=="number")?.key ?? fieldSets[defaultSource]?.[0]?.key ?? "";
-    const defaults: Record<string, Json> = {
-      service: { type: "service" },
-      simple: {
-        type: "simple",
-        symbol: {
-          shape: "circle",
-          fillColor: "#2563eb",
-          outlineColor: "#1d4ed8",
-          radius: 6,
-        },
-      },
-      icon: {
-        type: "icon",
-        symbol: {
-          shape: "icon",
-          radius: 12,
-          icon: { type: "builtIn", name: "location" },
-          fillColor: "#2563eb",
-          selectedStyle: { outlineColor: "#f59e0b", outlineWidth: 4 },
-          hoverStyle: { outlineColor: "#06b6d4", outlineWidth: 3 },
-        },
-      },
-      line: {
-        type: "line",
-        symbol: { shape: "line", color: "#2563eb", weight: 4, lineCap: "round", lineJoin: "round" },
-      },
-      polygon: {
-        type: "polygon",
-        symbol: { shape: "fill", fillColor: "#60a5fa", outlineColor: "#1d4ed8", fillOpacity: 0.45, weight: 2 },
-      },
-      uniqueValue: {
-        type: "uniqueValue",
-        field: any,
-        fieldSource: defaultSource,
-        defaultSymbol: { fillColor: "#64748b", radius: 6 },
-      },
-      classBreaks: {
-        type: "classBreaks",
-        field: numeric,
-        fieldSource: defaultSource,
-        method: "quantile",
-        classes: 5,
-        colorRamp: ["#dbeafe", "#93c5fd", "#3b82f6", "#1d4ed8", "#172554"],
-      },
-      continuousColor: {
-        type: "continuousColor",
-        field: numeric,
-        fieldSource: defaultSource,
-        minColor: "#dbeafe",
-        maxColor: "#1d4ed8",
-        clamp: true,
-      },
-      proportionalSize: {
-        type: "proportionalSize",
-        field: numeric,
-        fieldSource: defaultSource,
-        minSize: 4,
-        maxSize: 24,
-        color: "#2563eb",
-      },
-      heatmap: {
-        type: "heatmap",
-        weightField: numeric,
-        fieldSource: defaultSource,
-        radius: 24,
-        blur: 18,
-        minOpacity: 0.2,
-      },
-      cluster: {
-        type: "cluster",
-        radius: 44,
-        disableAtZoom: 16,
-        showCoverageOnHover: false,
-        clusterLabel: "count",
-        fieldSource: defaultSource,
-      },
-      densityGrid: {
-        type: "densityGrid",
-        statistic: "count",
-        cellSizePixels: 40,
-        classes: 5,
-        colorRamp: ["#dbeafe", "#1d4ed8"],
-      },
-    };
-    setRenderer(defaults[next]);
-  };
-  const r = renderer as unknown as Json;
-  const symbol = object(r.symbol) ? r.symbol : {};
-  const fieldSource = String(
-    r.fieldSource ?? defaultSource,
-  ) as MapAttributeSource;
-  const selectableFields = fieldSets[fieldSource] ?? [];
-  const fieldKey = String(r.field ?? r.weightField ?? r.aggregateField ?? "");
-  const numericRequired = [
-    "classBreaks",
-    "continuousColor",
-    "proportionalSize",
-    "heatmap",
-  ].includes(type);
-  const values =
-    fieldKey && (fieldSource === "powerbi" || fieldSource === "service" && layer.source.type === "geoJson" && layer.source.data?.type === "FeatureCollection")
-      ? Array.from(
-          new Set(
-            (fieldSource === "service" && layer.source.type === "geoJson" ? ((layer.source.data as GeoJSON.FeatureCollection).features.map(feature=>feature.properties??{})) : rows)
-              .map((row) => row[fieldKey])
-              .filter((value) => value !== null && value !== undefined)
-              .map(String),
-          ),
-        ).slice(0, 25)
-      : [];
-  const numericValues =
-    fieldKey && fieldSource === "powerbi"
-      ? rows.map((row) => Number(row[fieldKey])).filter(Number.isFinite)
-      : [];
-  const uniqueClasses = Array.isArray(r.values) ? r.values.filter(object) : [];
-  const breaks = Array.isArray(r.breaks) ? r.breaks.filter(object) : [];
-  const palette = [
-    "#2563eb",
-    "#dc2626",
-    "#16a34a",
-    "#9333ea",
-    "#ea580c",
-    "#0891b2",
-    "#4f46e5",
-    "#be123c",
-  ];
-  const generateBreaks = () => {
-    if (!numericValues.length) return;
-    const count = Math.max(2, Math.min(12, Number(r.classes ?? 5)));
-    const min = Math.min(...numericValues),
-      max = Math.max(...numericValues),
-      step = (max - min || 1) / count;
-    setRenderer({
-      ...r,
-      method: "manual",
-      breaks: Array.from({ length: count }, (_value, index) => ({
-        min: min + step * index,
-        max: index === count - 1 ? max : min + step * (index + 1),
-        label: `${(min + step * index).toFixed(2)}–${(index === count - 1 ? max : min + step * (index + 1)).toFixed(2)}`,
-        symbol: { fillColor: palette[index % palette.length] },
-      })),
-    });
-  };
-  return (
-    <div class="hp-map-form-grid">
-      <button type="button" disabled={!fieldSets[defaultSource]?.length} onClick={()=>changeType(fieldSets[defaultSource]?.some(field=>field.dataType==="number")?"classBreaks":"uniqueValue")}>Suggest style from fields</button>
-      <label>
-        <span>Renderer</span>
-        <select
-          aria-label="Renderer type"
-          value={type}
-          onChange={(event) =>
-            changeType(
-              event.currentTarget.value as MapRendererDefinition["type"],
-            )
-          }
-        >
-          {[
-            "service",
-            "simple",
-            "icon",
-            "line",
-            "polygon",
-            "uniqueValue",
-            "classBreaks",
-            "continuousColor",
-            "proportionalSize",
-            "heatmap",
-            "cluster",
-            "densityGrid",
-          ].map((value) => (
-            <option value={value}>{value}</option>
-          ))}
-        </select>
-      </label>
-      {type === "densityGrid" && (
-        <p class="hp-map-experimental">
-          Experimental: bounded density-grid preview; capability limitations remain
-          visible in diagnostics.
-        </p>
-      )}
-      {["simple", "icon", "line", "polygon"].includes(type) && (
-        <>
-          <label>
-            <span>Point shape</span>
-            <select
-              aria-label="Point shape"
-              value={String(
-                object(r.symbol) ? (r.symbol.shape ?? "circle") : "circle",
-              )}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  symbol: {
-                    ...(object(r.symbol) ? r.symbol : {}),
-                    shape: event.currentTarget.value,
-                  },
-                })
-              }
-            >
-              <option value="circle">circle</option>
-              <option value="square">square</option>
-              <option value="diamond">diamond</option>
-              <option value="triangle">triangle</option>
-              <option value="icon">icon</option>
-              <option value="line">line</option>
-              <option value="fill">fill</option>
-            </select>
-          </label>
-          <MapColorPicker label="Fill color" value={String(object(r.symbol) ? r.symbol.fillColor ?? r.symbol.color ?? "#2563eb" : "#2563eb")} opacity={Number(object(r.symbol) ? r.symbol.fillOpacity ?? 1 : 1)} onChange={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), fillColor: value } })} onOpacity={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), fillOpacity: value } })} />
-          <MapColorPicker label="Outline" value={String(object(r.symbol) ? r.symbol.outlineColor ?? r.symbol.color ?? "#1e40af" : "#1e40af")} onChange={value => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), outlineColor: value } })} />
-          <label><span>Outline width</span><input type="number" min="0" max="12" step="0.5" value={Number(object(r.symbol) ? r.symbol.outlineWidth ?? r.symbol.weight ?? 1 : 1)} onChange={event => setRenderer({ ...r, symbol: { ...(object(r.symbol) ? r.symbol : {}), outlineWidth: Number(event.currentTarget.value), weight: Number(event.currentTarget.value) } })} /></label>
-          <label>
-            <span>Radius / size</span>
-            <input
-              type="number"
-              value={Number(
-                object(r.symbol) ? (r.symbol.radius ?? r.symbol.size ?? 6) : 6,
-              )}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  symbol: {
-                    ...(object(r.symbol) ? r.symbol : {}),
-                    radius: Number(event.currentTarget.value),
-                  },
-                })
-              }
-            />
-          </label>
-        </>
-      )}
-      {type === "icon" && (
-        <fieldset>
-          <legend>Rich icon</legend>
-          <label>
-            <span>Built-in icon</span>
-            <select
-              aria-label="Built-in map icon"
-              value={object(symbol.icon) ? String(symbol.icon.name ?? "location") : "location"}
-              onChange={(event) => setRenderer({
-                ...r,
-                symbol: { ...symbol, shape: "icon", icon: { type: "builtIn", name: event.currentTarget.value } },
-              })}
-            >
-              {["location", "pin", "home", "user", "alert", "activity", "map", "database"].map((name) => <option value={name}>{name}</option>)}
-            </select>
-          </label>
-          <FieldSelect label="Icon mapping field" value={String(symbol.iconField ?? "")} fields={selectableFields} onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, iconField: value || undefined, iconFieldSource: fieldSource } })} />
-          <DraftInput
-            label="Icon mapping JSON"
-            value={object(symbol.iconMap) ? JSON.stringify(symbol.iconMap) : ""}
-            onCommit={(value) => {
-              let iconMap: Json | undefined;
-              try { iconMap = value ? JSON.parse(value) as Json : undefined; } catch { return; }
-              setRenderer({ ...r, symbol: { ...symbol, iconMap } });
-            }}
-          />
-          <FieldSelect label="Rotation field" value={String(symbol.rotationField ?? "")} fields={selectableFields} numeric onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, rotationField: value || undefined, rotationFieldSource: fieldSource } })} />
-          <FieldSelect label="Size field" value={String(symbol.sizeField ?? "")} fields={selectableFields} numeric onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, sizeField: value || undefined, sizeFieldSource: fieldSource } })} />
-          <FieldSelect label="Color field" value={String(symbol.colorField ?? "")} fields={selectableFields} onChange={(value) => setRenderer({ ...r, symbol: { ...symbol, colorField: value || undefined, colorFieldSource: fieldSource } })} />
-          <DraftInput label="Marker text" value={String(symbol.markerText ?? "")} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, markerText: value || undefined } })} />
-          <DraftInput label="Marker badge" value={String(symbol.badge ?? "")} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, badge: value || undefined } })} />
-        </fieldset>
-      )}
-      {["line", "polygon"].includes(type) && (
-        <fieldset>
-          <legend>Stroke and fill</legend>
-          <label><span>Dash style</span><select value={String(symbol.dashStyle ?? "solid")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, dashStyle: event.currentTarget.value } })}>
-            <option value="solid">Solid</option><option value="dash">Dash</option><option value="dot">Dot</option><option value="dashDot">Dash-dot</option>
-          </select></label>
-          <label><span>Line cap</span><select value={String(symbol.lineCap ?? "round")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, lineCap: event.currentTarget.value } })}>
-            <option value="round">Round</option><option value="butt">Butt</option><option value="square">Square</option>
-          </select></label>
-          <label><span>Line join</span><select value={String(symbol.lineJoin ?? "round")} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, lineJoin: event.currentTarget.value } })}>
-            <option value="round">Round</option><option value="miter">Miter</option><option value="bevel">Bevel</option>
-          </select></label>
-        </fieldset>
-      )}
-      {["simple", "icon", "line", "polygon"].includes(type) && (
-        <fieldset>
-          <legend>Interaction styles</legend>
-          <DraftInput label="Selected outline color" value={object(symbol.selectedStyle) ? String(symbol.selectedStyle.outlineColor ?? "") : ""} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, selectedStyle: { ...(object(symbol.selectedStyle) ? symbol.selectedStyle : {}), outlineColor: value || undefined } } })} />
-          <DraftInput label="Hover outline color" value={object(symbol.hoverStyle) ? String(symbol.hoverStyle.outlineColor ?? "") : ""} onCommit={(value) => setRenderer({ ...r, symbol: { ...symbol, hoverStyle: { ...(object(symbol.hoverStyle) ? symbol.hoverStyle : {}), outlineColor: value || undefined } } })} />
-          <label><span>Dimmed opacity</span><input type="number" min="0" max="1" step="0.05" value={Number(symbol.dimmedOpacity ?? 0.2)} onChange={(event) => setRenderer({ ...r, symbol: { ...symbol, dimmedOpacity: Number(event.currentTarget.value) } })} /></label>
-        </fieldset>
-      )}
-      {!["service", "simple"].includes(type) &&
-        (type !== "cluster" || r.clusterLabel === "sum") && (
-          <>
-            <label>
-              <span>Field source</span>
-              <select
-                aria-label="Renderer field source"
-                value={fieldSource}
-                onChange={(event) => {
-                  const source = event.currentTarget
-                    .value as MapAttributeSource;
-                  setRenderer({
-                    ...r,
-                    fieldSource: source,
-                    [type === "heatmap"
-                      ? "weightField"
-                      : type === "cluster"
-                        ? "aggregateField"
-                        : "field"]: fieldSets[source][0]?.key ?? "",
-                  });
-                }}
-              >
-                <option value="powerbi">Power BI</option>
-                <option value="service">ArcGIS service</option>
-                <option value="joined">Joined output</option>
-              </select>
-            </label>
-            <FieldSelect
-              label={
-                type === "heatmap"
-                  ? "weight field"
-                  : type === "cluster"
-                    ? "aggregate field"
-                    : "field"
-              }
-              value={fieldKey}
-              fields={selectableFields}
-              numeric={numericRequired || type === "cluster"}
-              onChange={(value) =>
-                setRenderer({
-                  ...r,
-                  [type === "heatmap"
-                    ? "weightField"
-                    : type === "cluster"
-                      ? "aggregateField"
-                      : "field"]: value,
-                })
-              }
-            />
-          </>
-        )}
-      {type === "uniqueValue" && (
-        <fieldset>
-          <legend>Unique-value classes</legend>
-          <button
-            onClick={() =>
-              setRenderer({
-                ...r,
-                values: values.slice(0, 25).map((value, index) => ({
-                  value,
-                  label: value,
-                  symbol: {
-                    fillColor: palette[index % palette.length],
-                    radius: 6,
-                  },
-                })),
-              })
-            }
-          >
-            Generate bounded unique classes
-          </button>
-          {uniqueClasses.map((entry, index) => (
-            <div class="hp-map-class-edit">
-              <span>{String(entry.value ?? "(Blank)")}</span>
-              <DraftInput
-                ariaLabel={`Class ${index + 1} label`}
-                value={String(entry.label ?? entry.value ?? "")}
-                onCommit={(value) => {
-                  const next = copy(uniqueClasses);
-                  next[index].label = value;
-                  setRenderer({ ...r, values: next });
-                }}
-              />
-              <DraftInput
-                ariaLabel={`Class ${index + 1} color`}
-                value={String(
-                  object(entry.symbol) ? (entry.symbol.fillColor ?? "") : "",
-                )}
-                onCommit={(value) => {
-                  const next = copy(uniqueClasses);
-                  next[index].symbol = {
-                    ...(object(next[index].symbol) ? next[index].symbol : {}),
-                    fillColor: value,
-                  };
-                  setRenderer({ ...r, values: next });
-                }}
-              />
-            </div>
-          ))}
-        </fieldset>
-      )}
-      {type === "classBreaks" && (
-        <>
-          <label>
-            <span>Method</span>
-            <select
-              value={String(r.method ?? "quantile")}
-              onChange={(event) =>
-                setRenderer({ ...r, method: event.currentTarget.value })
-              }
-            >
-              <option value="manual">manual</option>
-              <option value="equalInterval">equal interval</option>
-              <option value="quantile">quantile</option>
-            </select>
-          </label>
-          <label>
-            <span>Classes</span>
-            <input
-              type="number"
-              min="2"
-              max="12"
-              value={Number(r.classes ?? 5)}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  classes: Number(event.currentTarget.value),
-                })
-              }
-            />
-          </label>
-          <button onClick={generateBreaks}>
-            Generate editable manual breaks
-          </button>
-          {breaks.map((entry, index) => (
-            <div class="hp-map-class-edit">
-              <input
-                aria-label={`Break ${index + 1} minimum`}
-                type="number"
-                value={Number(entry.min ?? 0)}
-                onChange={(event) => {
-                  const next = copy(breaks);
-                  next[index].min = Number(event.currentTarget.value);
-                  setRenderer({ ...r, breaks: next });
-                }}
-              />
-              <input
-                aria-label={`Break ${index + 1} maximum`}
-                type="number"
-                value={Number(entry.max ?? 0)}
-                onChange={(event) => {
-                  const next = copy(breaks);
-                  next[index].max = Number(event.currentTarget.value);
-                  setRenderer({ ...r, breaks: next });
-                }}
-              />
-              <DraftInput
-                ariaLabel={`Break ${index + 1} label`}
-                value={String(entry.label ?? "")}
-                onCommit={(value) => {
-                  const next = copy(breaks);
-                  next[index].label = value;
-                  setRenderer({ ...r, breaks: next });
-                }}
-              />
-            </div>
-          ))}
-        </>
-      )}
-      {type === "continuousColor" && (
-        <>
-          <DraftInput
-            label="Minimum color"
-            value={String(r.minColor ?? "#dbeafe")}
-            onCommit={(value) => setRenderer({ ...r, minColor: value })}
-          />
-          <DraftInput
-            label="Maximum color"
-            value={String(r.maxColor ?? "#1d4ed8")}
-            onCommit={(value) => setRenderer({ ...r, maxColor: value })}
-          />
-        </>
-      )}
-      {type === "proportionalSize" && (
-        <>
-          <label>
-            <span>Minimum size</span>
-            <input
-              type="number"
-              value={Number(r.minSize ?? 4)}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  minSize: Number(event.currentTarget.value),
-                })
-              }
-            />
-          </label>
-          <label>
-            <span>Maximum size</span>
-            <input
-              type="number"
-              value={Number(r.maxSize ?? 24)}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  maxSize: Number(event.currentTarget.value),
-                })
-              }
-            />
-          </label>
-        </>
-      )}
-      {type === "heatmap" && (
-        <fieldset>
-          <legend>Heatmap canvas</legend>
-          <label><span>Radius</span><input type="number" min="4" max="120" value={Number(r.radius ?? 25)} onChange={(event) => setRenderer({ ...r, radius: Number(event.currentTarget.value) })} /></label>
-          <label><span>Blur</span><input type="number" min="0" max="80" value={Number(r.blur ?? 18)} onChange={(event) => setRenderer({ ...r, blur: Number(event.currentTarget.value) })} /></label>
-          <label><span>Minimum opacity</span><input type="number" min="0" max="1" step="0.05" value={Number(r.minOpacity ?? 0.05)} onChange={(event) => setRenderer({ ...r, minOpacity: Number(event.currentTarget.value) })} /></label>
-          <label><span>Maximum intensity</span><input type="number" min="0" value={r.maxIntensity === undefined ? "" : Number(r.maxIntensity)} onChange={(event) => setRenderer({ ...r, maxIntensity: event.currentTarget.value ? Number(event.currentTarget.value) : undefined })} /></label>
-          <label><span>Normalization</span><select value={String(r.normalization ?? "global")} onChange={(event) => setRenderer({ ...r, normalization: event.currentTarget.value })}><option value="global">Global</option><option value="viewport">Visible viewport</option></select></label>
-          <label><input type="checkbox" checked={r.interactivePoints !== false} onChange={(event) => setRenderer({ ...r, interactivePoints: event.currentTarget.checked })} /> Keep transparent selectable source points</label>
-        </fieldset>
-      )}
-      {type === "cluster" && (
-        <>
-          <label>
-            <span>Cluster label</span>
-            <select
-              aria-label="Cluster label"
-              value={String(r.clusterLabel ?? "count")}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  clusterLabel: event.currentTarget.value,
-                  aggregateField:
-                    event.currentTarget.value === "sum"
-                      ? (fieldSets[fieldSource].find(
-                          (field) => field.dataType === "number",
-                        )?.key ?? "")
-                      : undefined,
-                })
-              }
-            >
-              <option value="count">count</option>
-              <option value="sum">sum</option>
-            </select>
-          </label>
-          <DraftInput
-            label="Cluster number format"
-            value={String(r.format ?? "")}
-            onCommit={(value) =>
-              setRenderer({ ...r, format: value || undefined })
-            }
-          />
-          <label>
-            <span>Cluster radius</span>
-            <input
-              type="number"
-              value={Number(r.radius ?? 44)}
-              onChange={(event) =>
-                setRenderer({ ...r, radius: Number(event.currentTarget.value) })
-              }
-            />
-          </label>
-          <label>
-            <span>Disable at zoom</span>
-            <input
-              type="number"
-              value={Number(r.disableAtZoom ?? 16)}
-              onChange={(event) =>
-                setRenderer({
-                  ...r,
-                  disableAtZoom: Number(event.currentTarget.value),
-                })
-              }
-            />
-          </label>
-        </>
-      )}
-      {values.length > 0 && (
-        <div class="hp-map-domain-preview">
-          <strong>Bounded values/domain preview</strong>
-          <span>{values.join(" · ")}</span>
-          {numericValues.length > 0 && (
-            <small>
-              Numeric domain {Math.min(...numericValues).toLocaleString()}…
-              {Math.max(...numericValues).toLocaleString()} ·{" "}
-              {numericValues.length} value(s)
-            </small>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function LabelsEditor({
   layer,
   fieldSets,
@@ -2759,11 +1891,13 @@ function PopupEditor({
   fieldSets,
   mutate,
   section,
+  previewFeature,
 }: {
   layer: MapLayerDefinition;
   fieldSets: Record<MapAttributeSource, NormalizedField[]>;
   mutate: (fn: (layer: MapLayerDefinition) => void) => boolean;
   section: "popup" | "tooltip";
+  previewFeature?: ResolvedMapFeature;
 }) {
   const definition = layer[section] ?? { enabled: false, fields: [] };
   const items = definition.fields ?? [];
@@ -2777,7 +1911,6 @@ function PopupEditor({
   const actions = section === "popup" ? (layer.popup?.actions ?? []) : [];
   return (
     <div class="hp-map-form-grid">
-      {section === "popup" && <PopupContentEditor blocks={layer.popup?.content ?? []} onChange={content => set({ content, enabled: true })} fieldSets={fieldSets} defaultSource={defaultFieldSource(layer)} />}
       <label>
         <input
           type="checkbox"
@@ -2786,6 +1919,17 @@ function PopupEditor({
         />{" "}
         Enable {section}
       </label>
+      {section === "popup" && (
+        <DraftInput
+          label="Title template"
+          value={layer.popup?.title ?? ""}
+          onCommit={(value) => set({ title: value || undefined })}
+        />
+      )}
+      {section === "popup" && <FieldSelect label="Use a field as popup title" value="" fields={fieldSets[defaultFieldSource(layer)]} onChange={value => { if (value) set({ title: `{{${defaultFieldSource(layer)}.${value}}}` }); }} />}
+      {section === "popup" && <MapPopupPreview layer={layer} feature={previewFeature} />}
+      {section === "popup" && <PopupContentEditor blocks={layer.popup?.content ?? []} onChange={content => set({ content, enabled: true })} fieldSets={fieldSets} defaultSource={defaultFieldSource(layer)} />}
+      <details class="hp-map-popup-advanced" open={section === "tooltip" || items.length > 0 || actions.length > 0}><summary>{section === "popup" ? "Attribute table, templates & existing actions" : "Tooltip content"}</summary>
       <label>
         <span>Template field source</span>
         <select
@@ -2802,13 +1946,6 @@ function PopupEditor({
           <option value="joined">Joined</option>
         </select>
       </label>
-      {section === "popup" && (
-        <DraftInput
-          label="Title template"
-          value={layer.popup?.title ?? ""}
-          onCommit={(value) => set({ title: value || undefined })}
-        />
-      )}
       <DraftInput
         multiline
         label="Safe template"
@@ -3040,10 +2177,9 @@ function PopupEditor({
           ))}
         </fieldset>
       )}
-      <p>
-        Scripts, event handlers, iframes, unsafe URLs, and arbitrary callbacks
-        are rejected by the existing sanitization boundary.
-      </p>
+      <small>Scripts, event handlers, iframes, and unsafe URLs are blocked.</small>
+      </details>
+      <small>Images and links use HTTPS. Actions follow the map's permitted commands.</small>
     </div>
   );
 }

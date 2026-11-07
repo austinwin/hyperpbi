@@ -174,7 +174,7 @@ async function writeOrCheck(path, content) {
         return true;
     }
     const existing = await readFile(path, "utf8").catch(() => "");
-    if (existing === content) return true;
+    if (existing.replace(/\r\n/g, "\n") === content.replace(/\r\n/g, "\n")) return true;
     console.error(`Out of date: ${path}`);
     return false;
 }
