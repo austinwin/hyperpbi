@@ -6,7 +6,7 @@ import { externalServiceAccess } from "../providers/providerPolicy";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import { FRAGMENT_LIMITS, type RemoteFragmentRequest } from "./fragmentTypes";
 
-const cache = new Map<string, { expires: number; payload: unknown }>();
+const cache = new Map<string, { created: number; expires: number; payload: unknown }>();
 export const boundedFragmentNumber = (value: number | undefined, fallback: number, min: number, max: number) => Number.isFinite(value) ? Math.max(min, Math.min(max, value!)) : fallback;
 
 export function fragmentEndpoint(template: string, feature?: ResolvedMapFeature): URL {
@@ -40,13 +40,13 @@ export async function fetchRemoteFragment(url: URL, request: RemoteFragmentReque
     const key = url.href;
     const ttl = boundedFragmentNumber(request.cacheTtlSeconds, 30, 0, 3600) * 1000;
     const cached = cache.get(key);
-    if (!refresh && ttl > 0 && cached && cached.expires > Date.now()) return cached.payload;
+    if (!refresh && ttl > 0 && cached && cached.expires > Date.now() && cached.created + ttl > Date.now()) return cached.payload;
     const payload = await fetchRemoteJson(url, boundedFragmentNumber(request.timeoutMs, 10000, 1000, 15000), signal, FRAGMENT_LIMITS.bytes);
     if (signal.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError");
     if (ttl > 0) {
         // Bound both payload size and the number of retained responses.
         if (cache.size >= 32) cache.delete(cache.keys().next().value!);
-        cache.set(key, { expires: Date.now() + ttl, payload });
+        cache.set(key, { created: Date.now(), expires: Date.now() + ttl, payload });
     }
     return payload;
 }

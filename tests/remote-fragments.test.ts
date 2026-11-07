@@ -94,6 +94,16 @@ describe("bounded fragment requests", () => {
         expect(fetcher).toHaveBeenCalledTimes(3);
     });
 
+    it("honors a shorter TTL requested by a later consumer", async () => {
+        vi.useFakeTimers();
+        const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify(sample))));
+        vi.stubGlobal("fetch", fetcher);
+        await fetchRemoteFragment(url, { ...request, cacheTtlSeconds: 60 }, new AbortController().signal);
+        vi.advanceTimersByTime(1500);
+        await fetchRemoteFragment(url, { ...request, cacheTtlSeconds: 1 }, new AbortController().signal);
+        expect(fetcher).toHaveBeenCalledTimes(2);
+    });
+
     it("explains CORS and WebAccess failures and rejects invalid or oversized JSON", async () => {
         vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
         await expect(fetchRemoteFragment(url, request, new AbortController().signal)).rejects.toThrow("CORS, or Power BI WebAccess");
