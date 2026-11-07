@@ -45,7 +45,8 @@ describe("unified Next web application structural contract", () => {
         expect(island).toContain("runtime.mount");
         expect(runtimeBuildConfig).toContain('"process.env.NODE_ENV": JSON.stringify("production")');
         expect(runtimeBuildConfig).toContain("HYPERPBI_WEB_REST_HOSTS");
-        expect(runtimeBuildConfig).toContain("https://*.miniup.app");
+        expect(runtimeBuildConfig).toContain("parseMapHostPatterns");
+        expect(read("src/security/approvedNetworkHosts.json")).toContain("https://*.miniup.app");
         expect(runtimeBuildConfig).toContain('"__HYPERPBI_WEB_REST_HOSTS__": JSON.stringify(webRestHosts)');
         expect(runtimeBuildConfig).toContain('prefix: ".runtime-island__host"');
     });

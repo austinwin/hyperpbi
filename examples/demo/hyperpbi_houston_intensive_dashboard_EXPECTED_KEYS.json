@@ -4162,7 +4162,6 @@
                     ]
                   },
                   "popup": {
-                    "enabled": true,
                     "title": "{{hyperpbi_houston_demo_data_casenumber}} — {{hyperpbi_houston_demo_data_neighborhood}}",
                     "fields": [
                       {
@@ -4237,7 +4236,8 @@
                           "durationMs": 3200
                         }
                       }
-                    ]
+                    ],
+                    "mode": "custom"
                   },
                   "interaction": {
                     "enabled": true,
@@ -4355,7 +4355,6 @@
                     "template": "{{hyperpbi_houston_demo_data_casenumber}} • {{hyperpbi_houston_demo_data_priority}} • Risk {{hyperpbi_houston_demo_data_riskscore}}"
                   },
                   "popup": {
-                    "enabled": true,
                     "title": "{{hyperpbi_houston_demo_data_casenumber}}",
                     "fields": [
                       {
@@ -4380,7 +4379,8 @@
                         "fieldSource": "powerbi",
                         "label": "Description"
                       }
-                    ]
+                    ],
+                    "mode": "custom"
                   },
                   "interaction": {
                     "enabled": true,

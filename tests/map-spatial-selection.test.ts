@@ -53,7 +53,7 @@ describe("map rectangle, lasso, and circle selection", () => {
             id: "assets", name: "Assets", visible: true, sourceType: "powerbi", features: [
                 feature("a", { type: "Point", coordinates: [0, 0] }, [2, 1]),
                 feature("b", { type: "Point", coordinates: [5, 5] }, [4]),
-            ], diagnostics: { warnings: [] }, renderer: { type: "simple" }, labels: { enabled: false }, popup: { enabled: false, fields: [], actions: [] }, tooltip: { enabled: false, fields: [] }, opacity: 1, order: 0,
+            ], diagnostics: { warnings: [] }, renderer: { type: "simple" }, labels: { enabled: false }, popup: { mode: "none", fields: [], actions: [] }, tooltip: { enabled: false, fields: [] }, opacity: 1, order: 0,
         } as unknown as ResolvedMapLayer;
         const hidden = { ...visible, id: "hidden", visible: false, features: [feature("hidden", { type: "Point", coordinates: [0, 0] }, [9])] };
         const result = selectMapFeaturesByShape("operations", [visible, hidden], rectangle);
@@ -68,7 +68,7 @@ describe("map rectangle, lasso, and circle selection", () => {
         const crossing = { ...feature("crossing", { type: "LineString", coordinates: [[-2, 0], [2, 0]] }, [7]), lat: 50, lon: 50 };
         const layer = {
             id: "assets", name: "Assets", visible: true, sourceType: "powerbi", features: [...outside, crossing],
-            diagnostics: { warnings: [] }, renderer: { type: "simple" }, labels: { enabled: false }, popup: { enabled: false, fields: [], actions: [] }, tooltip: { enabled: false, fields: [] }, opacity: 1, order: 0,
+            diagnostics: { warnings: [] }, renderer: { type: "simple" }, labels: { enabled: false }, popup: { mode: "none", fields: [], actions: [] }, tooltip: { enabled: false, fields: [] }, opacity: 1, order: 0,
         } as unknown as ResolvedMapLayer;
         expect(selectMapFeaturesByShape("operations", [layer], rectangle).sourceRowIndices).toEqual([7]);
     });

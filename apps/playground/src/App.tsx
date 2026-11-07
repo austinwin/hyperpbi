@@ -17,7 +17,7 @@ export function App() {
     }, []);
 
     if (route.page === "home") return <HomePage storage={storage} />;
-    if (route.page === "mapGallery") return <MapGalleryPage />;
+    if (route.page === "mapGallery") return <MapGalleryPage storage={storage} />;
     if (route.page === "play") return <PlayPage projectId={route.projectId} storage={storage} />;
     return <ProjectPage projectId={route.projectId} storage={storage} />;
 }

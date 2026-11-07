@@ -7,7 +7,7 @@ if (typeof globalThis.ResizeObserver === "undefined") {
 }
 
 const canvasContexts = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>();
-Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+if (typeof HTMLCanvasElement !== "undefined") Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
     configurable: true,
     value(this: HTMLCanvasElement, contextId: string) {
         if (contextId !== "2d") return null;

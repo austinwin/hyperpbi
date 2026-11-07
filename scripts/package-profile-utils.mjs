@@ -1,23 +1,9 @@
+import approvedHosts from "../src/security/approvedNetworkHosts.json" with { type: "json" };
 import { mkdir, open, readFile, stat, unlink } from "node:fs/promises";
 import { dirname } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
-export const DEFAULT_MAP_HOSTS = [
-    "https://hyperpbi.com",
-    "https://www.hyperpbi.com",
-    "https://tile.openstreetmap.org",
-    "https://nominatim.openstreetmap.org",
-    "https://geocode-api.arcgis.com",
-    "https://functions.miniup.app",
-    "https://miniup.app",
-    "https://*.miniup.app",
-    "https://miniup.io",
-    "https://*.miniup.io",
-    "https://arcgis.com",
-    "https://arcgisonline.com",
-    "https://*.arcgis.com",
-    "https://*.arcgisonline.com",
-];
+export const DEFAULT_MAP_HOSTS = [...new Set([...approvedHosts.maps, ...approvedHosts.miniup, ...approvedHosts.demo])];
 
 /**
  * Serialize packaging profiles because pbiviz reads fixed workspace files.

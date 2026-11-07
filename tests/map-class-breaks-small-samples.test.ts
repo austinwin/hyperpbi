@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { generateClassBreaks } from "../src/maps/renderers/mapClassBreaks";
 import { featureStyle } from "../src/maps/renderers/mapFeatureSymbol";

@@ -1,3 +1,7 @@
+import { remoteDataSourceUrl } from "./remoteDataSources";
+import { checkHostPolicy } from "../maps/arcgis/arcGisHostPolicy";
+import { externalServiceAccess } from "../providers/providerPolicy";
+import type { ProviderAccessState } from "../providers/providerTypes";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { HyperPbiSchema } from "../schema/hyperpbiSchema";
 import type { NormalizedData } from "./normalizeData";
@@ -30,6 +34,8 @@ export function useRemoteDataWorkspace(
   baseData: NormalizedData,
   stateValues: Record<string, unknown>,
   hostMode: "web" | "powerbi" = "web",
+  providerAccess?: ProviderAccessState,
+  webAccessAvailable = false,
 ): RemoteDataWorkspaceResult {
   const definitions = schema.data?.sources ?? {};
   const signature = useMemo(
@@ -64,20 +70,19 @@ export function useRemoteDataWorkspace(
 
     for (const [id, definition] of entries) {
       const requestKey = requestKeys[id];
-      if (hostMode === "powerbi" && definition.type !== "miniup.function") {
-        setStatuses(previous => ({
-          ...previous,
-          [id]: {
-            status: "error",
-            rowCount: 0,
-            error: definition.type === "miniup.table"
-              ? "MiniUp table sources are web-only in HyperPBI. Use a public MiniUp Function gateway in Power BI."
-              : "rest.get sources are web-only in HyperPBI. Power BI remote data must use miniup.function.",
-          },
-        }));
-        continue;
+      if (hostMode === "powerbi") {
+        try {
+          const endpoint = remoteDataSourceUrl(definition, stateValues, hostMode);
+          const policy = checkHostPolicy(endpoint.href);
+          if (!policy.allowed) throw new Error(policy.reason);
+          const permission = externalServiceAccess(providerAccess, endpoint.href, webAccessAvailable);
+          if (!permission.allowed) throw new Error(permission.reason ?? "Power BI WebAccess denied.");
+        } catch (error) {
+          setStatuses(previous => ({ ...previous, [id]: { status: "error", rowCount: 0, error: error instanceof Error ? error.message : "Power BI WebAccess denied." } }));
+          continue;
+        }
       }
-      void fetchRemoteDataSource(id, definition, stateValues, controller.signal)
+      void fetchRemoteDataSource(id, definition, stateValues, controller.signal, hostMode)
         .then(source => {
           if (current !== sequence.current) return;
           setResolved(previous => ({ ...previous, [id]: { requestKey, source } }));
@@ -104,7 +109,7 @@ export function useRemoteDataWorkspace(
         });
     }
     return () => controller.abort();
-  }, [signature, hostMode]);
+  }, [signature, hostMode, providerAccess, webAccessAvailable]);
 
   const workspace = useMemo(() => {
     const base = baseWorkspace ?? createPowerBiDataWorkspace(baseData);

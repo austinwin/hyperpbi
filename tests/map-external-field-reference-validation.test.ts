@@ -46,7 +46,7 @@ describe("external map field-reference validation", () => {
               renderer: { type: "uniqueValue", field: "status", fieldSource: "service" },
               labels: { enabled: true, field: "facilityName", fieldSource: "service" },
               popup: {
-                enabled: true,
+                mode: "custom",
                 defaultFieldSource: "service",
                 title: "Facility {{OBJECTID}}",
                 fields: [{ field: "OBJECTID", fieldSource: "service" }],
@@ -117,7 +117,7 @@ describe("external map field-reference validation", () => {
                 aggregations: [{ field: "facilityId", aggregation: "count", as: "joinedRisk" }],
               },
               popup: {
-                enabled: true,
+                mode: "custom",
                 defaultFieldSource: "joined",
                 title: "{{joinedRisk}}",
                 fields: [{ field: "joinedRisk", fieldSource: "joined" }],

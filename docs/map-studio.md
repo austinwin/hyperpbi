@@ -27,3 +27,8 @@ Viewer tools start collapsed. Expand them for layers, legends, loaded-feature se
 Open [published-map-powerbi.json](../examples/map/published-map-powerbi.json) with [its CSV](../examples/map/published-map-powerbi.csv), or import [the two-layer manifest](../examples/map/published-map.json). The example combines a report layer and published point/polygon layers, a column-key join, measure aggregation and formatted popup content.
 
 `tests/browser/map-studio-compact.spec.ts` verifies wide/narrow drawers, categories, immediate colors, popup content, save/reload, collapsed viewer tools and information cards. Ten reviewed Windows Chromium screenshots are stored beside the test. Other platforms retain functional geometry assertions and emit screenshots without comparing platform-specific fonts. `published-map-runtime.spec.ts` separately verifies report-date filtering and feature-to-row selection with a simulated host. Actual Desktop/Service tenant permissions and semantic-model relationships require validation in the target report.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

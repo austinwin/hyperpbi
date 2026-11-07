@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe,expect,it } from "vitest";
 import { evaluateExpression } from "../src/calculations/expressionEvaluator";
 import { validateCalculations } from "../src/calculations/calculationValidator";

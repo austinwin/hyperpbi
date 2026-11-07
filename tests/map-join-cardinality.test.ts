@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { executeMapJoin } from "../src/maps/join/mapJoinEngine";
 import type { MapJoinDefinition } from "../src/schema/mapSchema";

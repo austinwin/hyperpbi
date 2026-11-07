@@ -109,7 +109,9 @@ function resolveIdentifyPopup(
   const authored = definition.popup;
   if (authored)
     return {
-      enabled: authored.enabled ?? true,
+      mode: authored.mode,
+      remote: authored.remote,
+      content: authored.content,
       title: authored.title,
       fields: (authored.fields ?? []).map((field) => ({
         ...field,
@@ -122,7 +124,7 @@ function resolveIdentifyPopup(
     };
   const fieldNames = uniqueFieldNames(results).slice(0, 6);
   return {
-    enabled: true,
+    mode: "custom",
     title: "{{__hp_identify_title}}",
     defaultFieldSource: "service",
     fields: [

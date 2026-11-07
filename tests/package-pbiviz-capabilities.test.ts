@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -110,7 +111,9 @@ describe("package profile host helpers", () => {
         expect(broad).toContain("https://hyperpbi.com");
         expect(broad).toContain("https://www.hyperpbi.com");
         expect(broad).toContain("https://tile.openstreetmap.org");
-        expect(broad).toContain("https://functions.miniup.app");
+        expect(broad).toContain("https://miniup.app");
+        expect(broad).toContain("https://miniup.io");
+        expect(broad).toContain("https://*.miniup.io");
         expect(broad).toContain("https://*.miniup.app");
         expect(broad).toContain("https://*.arcgis.com");
         expect(broad).not.toContain("https://*");

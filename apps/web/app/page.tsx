@@ -79,6 +79,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="content-section"><div className="page-shell"><span className="eyebrow">Remote HyperPBI Fragments</span><h2>Click a location. Explore its live analytics.</h2><p>Dynamic GIS popups render interactive charts, pressure KPIs and data tables through the existing HyperPBI engine. Connect a public MiniUp .app or .io endpoint, or an approved HTTPS API.</p><Link className="button button--primary" href="/examples/maps?example=remote-analytics">Try remote analytics <ArrowRight size={16} /></Link> <Link href="/docs/remote-fragments">Read the fragment contract</Link></div></section>
       <section className="home-stats">
         <div className="page-shell home-stats__grid">
           <div><strong>{componentCatalog.componentCount}</strong><span>governed components</span></div>

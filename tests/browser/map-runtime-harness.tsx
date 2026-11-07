@@ -50,7 +50,7 @@ const baseLayers = (): ResolvedMapLayer[] => [
     interaction: { enabled: true, trigger: "click", internalMode: "highlight", externalMode: "selection" },
     renderer: { type: "simple", symbol: { color: "#1d4ed8", fillColor: "#60a5fa", radius: 8, weight: 2 } },
     popup: {
-      enabled: true,
+      mode: "custom",
       title: "{{name}}",
       defaultFieldSource: "service",
       fields: [{ field: "name", fieldSource: "service", label: "Name", display: "text" }],
@@ -82,7 +82,7 @@ const baseLayers = (): ResolvedMapLayer[] => [
       selected: false,
     }],
     renderer: { type: "simple", symbol: { color: "#15803d", weight: 5 } },
-    popup: { enabled: true, title: "{{name}}", defaultFieldSource: "service", fields: [], actions: [] },
+    popup: { mode: "custom", title: "{{name}}", defaultFieldSource: "service", fields: [], actions: [] },
     diagnostics: { featureCount: 1, requestCount: 1, loading: false, sourceType: "arcgisFeature", sourceUrl: "https://example.test/FeatureServer/1", geometryType: "polyline", usedServiceSymbology: false, usedServiceLabels: false, warnings: [] },
     loading: false,
   },
@@ -109,7 +109,7 @@ const baseLayers = (): ResolvedMapLayer[] => [
       selected: false,
     }],
     renderer: { type: "simple", symbol: { color: "#7e22ce", fillColor: "#d8b4fe", weight: 2, fillOpacity: 0.6 } },
-    popup: { enabled: true, title: "{{name}}", defaultFieldSource: "service", fields: [], actions: [] },
+    popup: { mode: "custom", title: "{{name}}", defaultFieldSource: "service", fields: [], actions: [] },
     diagnostics: { featureCount: 1, requestCount: 1, loading: false, sourceType: "arcgisFeature", sourceUrl: "https://example.test/FeatureServer/2", geometryType: "polygon", usedServiceSymbology: false, usedServiceLabels: false, warnings: [] },
     loading: false,
   },
@@ -175,7 +175,7 @@ function Harness() {
       )),
       updateDetails: () => setLayers((current) => current.map((layer) =>
         layer.id === "points"
-          ? { ...layer, popup: { ...layer.popup!, title: "Updated {{name}}" } }
+          ? { ...layer, popup: { mode: "custom", ...layer.popup!, title: "Updated {{name}}" } }
           : layer,
       )),
       updateOpacity: () => dispatch({ type: "mapLayerOpacity", mapId: "browser-map", layerId: "points", opacity: 0.35 }),

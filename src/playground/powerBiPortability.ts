@@ -31,6 +31,7 @@ function scanBrowserOnly(value: unknown, issues: PortabilityIssue[], path = ""):
         return;
     }
     if (!object(value)) return;
+    if (value.mode === "remote" && object(value.remote)) issues.push({ code: "REMOTE_FRAGMENT_WEBACCESS_REQUIRED", severity: "warning", message: `${path} fetches a remote fragment.`, action: "Use the Maps package with build-time host approval, runtime WebAccess permission and endpoint CORS. Fragment interactions stay local." });
     const type = typeof value.type === "string" ? value.type : "";
     if (["fileUpload", "browserDownload", "clipboardWrite"].includes(type) || value.browserOnly === true) {
         issues.push({
@@ -94,23 +95,7 @@ export function analyzePowerBiPortability(
         }
         if (remoteSources.has(root)) {
             const source = specification.data?.sources?.[root];
-            if (source?.type === "miniup.function") {
-                issues.push({
-                    code: "REMOTE_SOURCE_WEBACCESS_REQUIRED",
-                    severity: "warning",
-                    message: `Dataset “${name}” depends on MiniUp Function source “${root}”.`,
-                    action: "Use the network-enabled package. The Function must allow browser CORS and must not require credentials embedded in HyperPBI."
-                });
-            } else {
-                issues.push({
-                    code: "REMOTE_SOURCE_WEB_ONLY",
-                    severity: "error",
-                    message: `Dataset “${name}” depends on ${source?.type ?? "remote"} source “${root}”, which is web-only.`,
-                    action: source?.type === "miniup.table"
-                        ? "Expose the required read through a public MiniUp Function and use miniup.function for Power BI."
-                        : "Use rest.get in the web build only; Power BI remote data must use miniup.function."
-                });
-            }
+            issues.push({ code: "REMOTE_SOURCE_WEBACCESS_REQUIRED", severity: "warning", message: `Dataset “${name}” depends on ${source?.type ?? "remote"} source “${root}”.`, action: "Use the Maps package with this HTTPS origin approved at build time, runtime WebAccess permission, and endpoint CORS. Remote data has no Power BI selection identities." });
         } else if (root !== "powerbi" && root !== workspace.defaultSourceId) {
             issues.push({
                 code: "INDEPENDENT_UPLOADED_SOURCE",
@@ -145,23 +130,7 @@ export function analyzePowerBiPortability(
     for (const [sourceId, consumers] of sourceUse) {
         if ([...consumers].some(consumer => consumer.startsWith("dataset "))) continue;
         const source = specification.data?.sources?.[sourceId];
-        if (source?.type === "miniup.function") {
-            issues.push({
-                code: "REMOTE_SOURCE_WEBACCESS_REQUIRED",
-                severity: "warning",
-                message: `${[...consumers].join(", ")} uses MiniUp Function source “${sourceId}”.`,
-                action: "Use the network-enabled package. The Function must allow browser CORS and must not require credentials embedded in HyperPBI."
-            });
-        } else {
-            issues.push({
-                code: "REMOTE_SOURCE_WEB_ONLY",
-                severity: "error",
-                message: `${[...consumers].join(", ")} uses ${source?.type ?? "remote"} source “${sourceId}”, which is web-only.`,
-                action: source?.type === "miniup.table"
-                    ? "Expose the required read through a public MiniUp Function and use miniup.function for Power BI."
-                    : "Use rest.get in the web build only; Power BI remote data must use miniup.function."
-            });
-        }
+        issues.push({ code: "REMOTE_SOURCE_WEBACCESS_REQUIRED", severity: "warning", message: `${[...consumers].join(", ")} uses ${source?.type ?? "remote"} source “${sourceId}”.`, action: "Use the Maps package with an approved HTTPS origin, runtime WebAccess permission, and endpoint CORS." });
     }
     const independentRoots = [...roots].filter(root => root !== "powerbi" && root !== workspace.defaultSourceId && !remoteSources.has(root));
     if (independentRoots.length || roots.size > 1 && independentRoots.length) {

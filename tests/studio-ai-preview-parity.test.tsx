@@ -40,7 +40,7 @@ const validatedMap = JSON.stringify({
         fields: [{ field: "code", fieldSource: "powerbi", label: "Asset" }],
       },
       popup: {
-        enabled: true,
+        mode: "custom",
         defaultFieldSource: "powerbi",
         title: "{{code}}",
         fields: [{ field: "status", fieldSource: "powerbi", label: "Status" }],

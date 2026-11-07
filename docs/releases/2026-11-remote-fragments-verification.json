@@ -1,0 +1,124 @@
+{
+  "sourceRevision": "c73cc1d843fc25d324489327f75593dfedf1f90e",
+  "baselineRevision": "001466eead5d0659639e5f489370f42005272420",
+  "unitTests": {
+    "files": 173,
+    "passed": 860,
+    "failed": 0
+  },
+  "browserTests": {
+    "runtime": 57,
+    "playground": 3,
+    "failed": 0
+  },
+  "beforeSeconds": {
+    "unit": 155.2525592,
+    "website": 88.983332,
+    "core": 199.1457991,
+    "maps": 190.2998698,
+    "runtimeBrowser": 113.674259,
+    "previousMainCI": 249
+  },
+  "afterSeconds": {
+    "fastFocused": 43.64,
+    "unit": 180.96,
+    "website": 62.4,
+    "websiteWorker": 133.37,
+    "core": 154.05,
+    "maps": 97.67,
+    "runtimeBrowser": 92.42,
+    "playgroundBrowser": 38.46,
+    "playgroundBuild": 47.87,
+    "localFullCheckpoint": 794.52,
+    "pullRequestCI": 209
+  },
+  "notes": [
+    "Single-run wall times; cache warmth, machine activity and workload differ. Do not treat them as controlled benchmarks.",
+    "Baseline runtime browser suite had 52/53 passing; its chart authoring case hit the old timeout.",
+    "The complete unit suite is larger and was slower in the final run; no unit speedup is claimed.",
+    "Reviewed Windows popup screenshot baselines were refreshed; runtime browser checks were rerun before continuing the same checkpoint.",
+    "The independent website build was repeated once to obtain a comparable npm run web:build measurement.",
+    "No Power BI tenant connectivity test or ChatGPT Sites publication was performed."
+  ],
+  "pullRequestCI": "https://github.com/austinwin/hyperpbi/actions/runs/42379446945",
+  "productionNextSmoke": {
+    "popupChart": true,
+    "expansion": true,
+    "editNavigationAndReload": true,
+    "sensorResponses200WithCors": 3,
+    "unknownSensor404WithCors": true,
+    "options204": true
+  },
+  "fullSteps": [
+    {
+      "name": "types:runtime",
+      "seconds": 5.14,
+      "exitCode": 0
+    },
+    {
+      "name": "types:web",
+      "seconds": 17.45,
+      "exitCode": 0
+    },
+    {
+      "name": "types:playground",
+      "seconds": 13.12,
+      "exitCode": 0
+    },
+    {
+      "name": "lint",
+      "seconds": 2.29,
+      "exitCode": 0
+    },
+    {
+      "name": "unit",
+      "seconds": 180.96,
+      "exitCode": 0
+    },
+    {
+      "name": "docs",
+      "seconds": 2.23,
+      "exitCode": 0
+    },
+    {
+      "name": "content",
+      "seconds": 8.47,
+      "exitCode": 0
+    },
+    {
+      "name": "browser:runtime",
+      "seconds": 92.42,
+      "exitCode": 0
+    },
+    {
+      "name": "browser:playground",
+      "seconds": 38.46,
+      "exitCode": 0
+    },
+    {
+      "name": "build:playground",
+      "seconds": 47.87,
+      "exitCode": 0
+    },
+    {
+      "name": "build:website-worker",
+      "seconds": 133.37,
+      "exitCode": 0
+    },
+    {
+      "name": "package:core",
+      "seconds": 154.05,
+      "exitCode": 0
+    },
+    {
+      "name": "package:maps",
+      "seconds": 97.67,
+      "exitCode": 0
+    },
+    {
+      "name": "package:capabilities",
+      "seconds": 1.02,
+      "exitCode": 0
+    }
+  ]
+}

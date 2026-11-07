@@ -44,7 +44,6 @@
             "cacheMinutes": 0
           },
           "popup": {
-            "enabled": true,
             "title": "Wastewater Pipe {{FACILITYID}}",
             "fields": [
               {
@@ -67,7 +66,8 @@
                 "label": "Install Date",
                 "display": "date"
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "tooltip": {
             "enabled": true,

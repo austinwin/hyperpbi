@@ -1,3 +1,4 @@
+import { validateRemotePopup } from "./remotePopupValidation";
 import { validatePopupContent } from "../maps/popup/validatePopupContent";
 import {
   mapCapability,
@@ -1404,7 +1405,7 @@ function validateLayer(
   validateSection(
     raw,
     "popup",
-    allowed("enabled", "defaultFieldSource", "title", "fields", "actions", "html", "content"),
+    allowed("mode", "remote", "defaultFieldSource", "title", "fields", "actions", "html", "content"),
     path,
     componentId,
     diagnostics,
@@ -1417,6 +1418,7 @@ function validateLayer(
     componentId,
     diagnostics,
   );
+  if (object(raw.popup)) diagnostics.push(...validateRemotePopup(raw.popup, `${path}/popup`, componentId));
   if (object(raw.popup) && raw.popup.content !== undefined) diagnostics.push(...validatePopupContent(raw.popup.content, `${path}/popup/content`, componentId));
   for (const section of ["popup", "tooltip"]) {
     const value = raw[section];

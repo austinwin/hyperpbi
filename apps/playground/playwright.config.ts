@@ -7,6 +7,7 @@ export default defineConfig({
     // keep the end-to-end workflow deterministic on slower CI machines.
     timeout: 120_000,
     fullyParallel: false,
+    workers: 2,
     use: {
         baseURL: "http://127.0.0.1:4180",
         trace: "retain-on-failure",

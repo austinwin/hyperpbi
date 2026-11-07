@@ -32,6 +32,7 @@ export interface ResolvedDatasetView {
 
 export interface RenderContextValue {
     instanceId?: string;
+    remoteSourceHost?: "web" | "powerbi";
     data: NormalizedData;
     rows: DataRow[];
     sourceRows: DataRow[];

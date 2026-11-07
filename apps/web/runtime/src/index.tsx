@@ -79,7 +79,7 @@ export function mountHyperPbiIsland(
   } else if (view.kind === "playground-play") {
     render(<PlayPage projectId={view.projectId} storage={storage} />, host);
   } else if (view.kind === "map-gallery") {
-    render(<MapGalleryPage />, host);
+    render(<MapGalleryPage storage={storage} />, host);
   } else {
     const parsed = parseProject(view.bundle);
     render(

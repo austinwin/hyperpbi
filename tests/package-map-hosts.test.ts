@@ -1,3 +1,4 @@
+// @vitest-environment node
 // ── Package Map Host Tests ───────────────────────────────────────────
 import { describe, it, expect, vi } from "vitest";
 
@@ -9,24 +10,24 @@ describe("ArcGIS Host Policy", () => {
         return await import("../src/maps/arcgis/arcGisHostPolicy");
     }
 
-    it("allows https://* pattern for any HTTPS host", async () => {
+    it("ignores unsupported https://* while retaining approved defaults", async () => {
         const { checkHostPolicy, setAllowedHostPatterns } = await getHostPolicy();
         setAllowedHostPatterns(["https://*"]);
         expect(checkHostPolicy("https://services.arcgis.com/test").allowed).toBe(true);
-        expect(checkHostPolicy("https://example.com/arcgis/rest").allowed).toBe(true);
+        expect(checkHostPolicy("https://example.com/arcgis/rest").allowed).toBe(false);
     });
 
-    it("allows wildcard sentinel * for any HTTPS host", async () => {
+    it("rejects unsupported wildcard sentinel *", async () => {
         const { checkHostPolicy, setAllowedHostPatterns } = await getHostPolicy();
         setAllowedHostPatterns(["*"]);
-        expect(checkHostPolicy("https://any-host.example.com/test").allowed).toBe(true);
+        expect(checkHostPolicy("https://any-host.example.com/test").allowed).toBe(false);
     });
 
     it("allows subdomain wildcard pattern", async () => {
         const { checkHostPolicy, setAllowedHostPatterns } = await getHostPolicy();
         setAllowedHostPatterns(["https://*.houstontx.gov"]);
         expect(checkHostPolicy("https://geogimstest.houstontx.gov/path").allowed).toBe(true);
-        expect(checkHostPolicy("https://houstontx.gov/path").allowed).toBe(true);
+        expect(checkHostPolicy("https://houstontx.gov/path").allowed).toBe(false);
     });
 
     it("allows exact host match", async () => {
@@ -73,7 +74,9 @@ describe("ArcGIS Host Policy", () => {
         const { DEFAULT_MAP_HOSTS, buildWebAccessParameters } = await import("../scripts/package-profile-utils.mjs");
         const hosts = buildWebAccessParameters({ profile: "maps" });
         expect(hosts).toEqual(expect.arrayContaining([
-            "https://functions.miniup.app",
+            "https://miniup.app",
+            "https://miniup.io",
+            "https://*.miniup.io",
             "https://*.miniup.app",
             "https://*.arcgis.com",
             "https://*.arcgisonline.com",

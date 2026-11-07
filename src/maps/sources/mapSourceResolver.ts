@@ -489,7 +489,8 @@ export function resolvePowerBiLayer(
       : undefined,
     popup: layer.popup
       ? {
-          enabled: layer.popup.enabled ?? true,
+          mode: layer.popup.mode,
+          remote: layer.popup.remote,
           title: layer.popup.title,
           fields: (layer.popup.fields ?? []).map((field) => ({
             ...field,

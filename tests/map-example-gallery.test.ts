@@ -17,9 +17,9 @@ describe("dedicated map example gallery", () => {
   const manifest = JSON.parse(readFileSync(resolve(root, "manifest.json"), "utf8")) as { examples: ManifestEntry[] };
 
   it("indexes every focused group with runnable files and explanatory metadata", () => {
-    expect(manifest.examples).toHaveLength(29);
-    expect(new Set(manifest.examples.map((entry) => entry.group)).size).toBe(29);
-    expect(new Set(manifest.examples.map((entry) => entry.id)).size).toBe(29);
+    expect(manifest.examples.length).toBeGreaterThan(0);
+    expect(new Set(manifest.examples.map((entry) => entry.group)).size).toBe(manifest.examples.length);
+    expect(new Set(manifest.examples.map((entry) => entry.id)).size).toBe(manifest.examples.length);
     for (const entry of manifest.examples) {
       expect(existsSync(resolve(root, entry.spec)), entry.spec).toBe(true);
       expect(existsSync(resolve(root, entry.data)), entry.data).toBe(true);

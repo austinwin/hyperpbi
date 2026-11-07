@@ -1,3 +1,4 @@
+// @vitest-environment node
 // ── ArcGIS Service Renderer Tests ─────────────────────────────────────
 import { describe, it, expect } from "vitest";
 import { adaptArcGisRenderer, arcGisSymbolToResolved, adaptArcGisLabels } from "../src/maps/renderers/arcGisRendererAdapter";

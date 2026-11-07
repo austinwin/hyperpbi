@@ -69,7 +69,6 @@
             ]
           },
           "popup": {
-            "enabled": true,
             "defaultFieldSource": "powerbi",
             "title": "{{asset_id}}",
             "fields": [
@@ -84,7 +83,8 @@
                 "label": "Status",
                 "display": "badge"
               }
-            ]
+            ],
+            "mode": "custom"
           },
           "interaction": {
             "enabled": true,

@@ -114,6 +114,7 @@ function mapLayers(context: ComponentFieldHandlerContext): void {
             if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(layerContext, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
             const templateSource = (sectionValue.defaultFieldSource ?? defaultSource) as FieldReferenceSource;
             for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, templateSource);
+            if (section === "popup" && object(sectionValue.remote)) templateString(layerContext, sectionValue.remote, "endpoint", `${path}/popup/remote/endpoint`, templateSource);
             const visitPopupContent = (value: unknown, at: string, inherited: FieldReferenceSource): void => {
                 if (Array.isArray(value)) { value.forEach((item, index) => visitPopupContent(item, `${at}/${index}`, inherited)); return; }
                 if (!object(value)) return;

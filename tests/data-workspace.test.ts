@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { parseCsvText } from "../src/data/fileImport";
 import { defaultWorkspaceData, resolveDataSource, type DataWorkspace } from "../src/data/dataWorkspace";

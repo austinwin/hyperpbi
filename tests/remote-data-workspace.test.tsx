@@ -56,7 +56,7 @@ describe("remote data workspace lifecycle", () => {
     }
     expect(host.firstElementChild?.getAttribute("data-status")).toBe(expected);
   };
-  it("rejects web-only sources in Power BI before any network request", async () => {
+  it("rejects sources without WebAccess in Power BI before any network request", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const tableSchema: HyperPbiSchema = {
@@ -76,7 +76,7 @@ describe("remote data workspace lifecycle", () => {
     act(() => render(h(PowerBiProbe, {}), host));
     await waitForStatus(host, "error");
     expect(host.firstElementChild?.getAttribute("data-status")).toBe("error");
-    expect(host.firstElementChild?.getAttribute("data-error")).toContain("web-only");
+    expect(host.firstElementChild?.getAttribute("data-error")).toContain("WebAccess");
     expect(host.firstElementChild?.getAttribute("data-rows")).toBe("[]");
     expect(fetchMock).not.toHaveBeenCalled();
   });

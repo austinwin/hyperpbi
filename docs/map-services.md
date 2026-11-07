@@ -82,7 +82,7 @@ The ArcGIS join specification uses the repository's existing public Houston serv
       "source": {"type":"powerbi","bindings":{"latitude":"facilityLatitude","longitude":"facilityLongitude"}},
       "renderer": {"type":"uniqueValue","field":"facilityStatus","fieldSource":"powerbi"},
       "labels": {"enabled":true,"field":"facilityName","fieldSource":"powerbi","maxLabels":300},
-      "popup": {"enabled":true,"title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
+      "popup": {"mode":"custom","title":"{{facilityName}}","fields":[{"field":"facilityStatus","fieldSource":"powerbi","label":"Status"}]},
       "filter": {"field":"facilityStatus","fieldSource":"powerbi","operator":"!=","value":"Retired"},
       "performance": {"maxFeatures":5000}
     },
@@ -188,8 +188,7 @@ This architecture change does not alter geocoding. The default geocoder remains 
 ## Packaging profiles
 
 - **Core:** the single Values role and no WebAccess privilege; bound Power BI geometry remains available.
-- **Maps broad:** the same Values role and Power BI-compatible declarations for the built-in OpenStreetMap, Nominatim, and ArcGIS hosts.
-- **Maps restricted:** the same Values role and the restricted artifact label.
+- **Maps:** the same Values role and concrete HTTPS declarations for the built-in HyperPBI, MiniUp .app/.io, OpenStreetMap, Nominatim, ArcGIS and public fixture hosts. Custom hosts are added at package time; there is one Maps artifact.
 - Custom basemap and geocoder domains must be included at package time through `HYPERPBI_MAP_HOSTS` as exact HTTPS hosts or subdomain wildcards on a real parent domain. Power BI doesn't support an all-host `https://*` WebAccess declaration.
 
 Run `npm run package:core`, `npm run package:maps`, and `npm run package:verify`. Never store tokens, credentials, or private service secrets in dashboard JSON.
@@ -211,3 +210,8 @@ Use pre-geocoded coordinates and organizationally approved public services for p
 For renderer, legend, selection, quick-filter, tool, performance, and security examples, see the
 [complete analytical map guide](maps.md) and the manifest-driven
 [`examples/map`](../examples/map/README.md) gallery.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

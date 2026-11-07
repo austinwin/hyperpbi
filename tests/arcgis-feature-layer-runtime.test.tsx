@@ -8,7 +8,7 @@ vi.mock("../src/maps/arcgis/arcGisFeatureQuery", async (importOriginal) => {
 });
 
 import { resolveArcGisFeatureLayer } from "../src/components/maps/MapBlock";
-import { renderResolvedPopup, renderResolvedTooltip } from "../src/components/maps/ResolvedMapPopup";
+import { resolveMapPopupViewModel, renderResolvedTooltip } from "../src/components/maps/ResolvedMapPopup";
 import type { MapLayerDefinition } from "../src/schema/mapSchema";
 
 const queryResult: ArcGisFeatureQueryResult = {
@@ -66,7 +66,7 @@ describe("ArcGIS feature-layer runtime integration", () => {
       filter: { field: "status", fieldSource: "service", operator: "=", value: "Active" },
       visibility: { conditionField: "riskScore", conditionFieldSource: "service", conditionValues: [9.2] },
       popup: {
-        enabled: true,
+        mode: "custom",
         defaultFieldSource: "service",
         title: "Facility {{OBJECTID}}",
         fields: [{ field: "facilityName", fieldSource: "service", label: "Name" }],
@@ -99,7 +99,7 @@ describe("ArcGIS feature-layer runtime integration", () => {
     expect(resolved.renderer.symbol?.radius).toBe(6);
     expect(resolved.labels).toMatchObject({ enabled: true, field: "facilityName", fieldSource: "service" });
     expect(renderResolvedTooltip(resolved.features[0], resolved.tooltip)).toBe("Active");
-    expect(renderResolvedPopup(resolved.popup!, resolved.features[0]).element.textContent).toContain("Facility 7");
+    expect(JSON.stringify(resolveMapPopupViewModel(resolved.popup!, resolved.features[0]))).toContain("Facility 7");
     expect(resolved.interaction).toMatchObject({ internalMode: "highlight", externalMode: "none", fieldSource: "service" });
     expect(resolved.diagnostics).toMatchObject({ requestCount: 2, featureCount: 1, usedServiceSymbology: true, usedServiceLabels: true });
     expect(resolved.diagnostics.issues).not.toEqual(expect.arrayContaining([expect.objectContaining({ code: "MAP_LAYER_FIELD_NOT_FOUND" })]));

@@ -13,3 +13,5 @@ apps/web/out/
 apps/web/public/runtime/
 *.pbiviz
 *.tsbuildinfo
+
+.verification/

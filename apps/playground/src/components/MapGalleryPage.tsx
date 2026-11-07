@@ -1,3 +1,5 @@
+import type { ProjectStorage } from "@hyperpbi/playground/projectStorage";
+import sampleResponse from "../../../../examples/remote-fragments/sensor-1024.json";
 import { useMemo, useState } from "preact/hooks";
 import type { HyperPbiSchema } from "@hyperpbi/schema/hyperpbiSchema";
 import type { DataRow, NormalizedData, NormalizedField } from "@hyperpbi/data/normalizeData";
@@ -27,9 +29,9 @@ const pathSuffix = (path: string) => path.replaceAll("\\", "/").split("/examples
 const specifications = new Map(Object.entries(specificationModules).map(([path, module]) => [pathSuffix(path), module.default]));
 const datasets = new Map(Object.entries(dataModules).map(([path, module]) => [pathSuffix(path), module.default]));
 
-export function MapGalleryPage() {
+export function MapGalleryPage({ storage }: { storage?: ProjectStorage }) {
     const entries = manifest.examples as MapGalleryEntry[];
-    const [selectedId, setSelectedId] = useState(entries[0]?.id ?? "");
+    const [selectedId, setSelectedId] = useState(new URLSearchParams(globalThis.location?.search).get("example") ?? entries[0]?.id ?? "");
     const [copied, setCopied] = useState(false);
     const selected = entries.find((entry) => entry.id === selectedId) ?? entries[0];
     const specification = selected ? specifications.get(selected.spec) : undefined;
@@ -83,6 +85,7 @@ export function MapGalleryPage() {
                 <article class="pg-map-example">
                     <header>
                         <div><span class="pg-eyebrow">{selected?.group}</span><h2>{selected?.title}</h2><p>{selected?.summary}</p></div>
+                        {storage && project && <button type="button" onClick={() => { void storage.saveProject(project).then(() => navigate(`/project/${encodeURIComponent(project.metadata.id)}`)); }}>Edit in Playground</button>}
                         <button type="button" onClick={() => void copy()}>{copied ? "Copied" : "Copy spec"}</button>
                     </header>
                     <section class="pg-map-example-preview" aria-label={`${selected?.title} preview`}>
@@ -93,6 +96,7 @@ export function MapGalleryPage() {
                         <div><strong>Limitations</strong><p>{selected?.limitations}</p></div>
                         <div><strong>Power BI</strong><p>{selected?.powerBi ?? "Browser previews use deterministic row keys. In Power BI, eligible selections use retained host identities and configured external filter targets."}</p></div>
                     </div>
+                    {selected?.id === "remote-analytics" && <details class="pg-map-spec"><summary>Copyable API response</summary><button type="button" onClick={() => void navigator.clipboard.writeText(JSON.stringify(sampleResponse, null, 2))}>Copy API response</button><pre><code>{JSON.stringify(sampleResponse, null, 2)}</code></pre></details>}
                     <details class="pg-map-spec" open>
                         <summary>JSON specification</summary>
                         <pre><code>{json}</code></pre>

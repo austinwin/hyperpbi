@@ -87,4 +87,4 @@ npm run package:maps
 npm run package:verify
 ```
 
-Maps defaults to the broad artifact label with Power BI-compatible built-in host declarations. Set `HYPERPBI_ALLOW_ALL_MAP_HOSTS=false` for the restricted artifact label, and set `HYPERPBI_MAP_HOSTS` to include custom exact hosts or real-domain subdomain wildcards. See [Map services](map-services.md) and [Security](security.md).
+Maps declares approved HTTPS host families. Set `HYPERPBI_MAP_HOSTS` to add exact hosts or concrete-domain subdomain wildcards at package time. Runtime WebAccess and endpoint CORS are still required. See [Map services](map-services.md) and [Security](security.md).

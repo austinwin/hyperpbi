@@ -1590,7 +1590,8 @@ export function applyAuthoredArcGisLayerPresentation(
     : layer.labels;
   const popup = definition.popup
     ? {
-        enabled: definition.popup.enabled ?? true,
+        mode: definition.popup.mode,
+          remote: definition.popup.remote,
         title: definition.popup.title,
         fields: (definition.popup.fields ?? []).map((field) => ({
           field: field.field,
@@ -2190,7 +2191,8 @@ export async function resolveArcGisFeatureLayer(
     labels: resolvedLabels,
     popup: def.popup
       ? {
-          enabled: def.popup.enabled ?? true,
+          mode: def.popup.mode,
+          remote: def.popup.remote,
           title: def.popup.title,
           fields: (def.popup.fields ?? []).map((f) => ({
             field: f.field,

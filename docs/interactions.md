@@ -153,3 +153,8 @@ deterministic and reported rather than silently dropping state. See [Analytical 
 ## Compatibility
 
 Schema 2.0 uses `interaction` exclusively. Top-level `internal`, `external`, table `selectable`, and table `selectionMode` are rejected. Properties such as `externalSelection`, `selectionTarget`, `crossFilter`, and `powerBISelection` are not dashboard JSON contracts and are rejected by strict validation.
+
+
+## Remote fragments and dynamic GIS popups
+
+Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.

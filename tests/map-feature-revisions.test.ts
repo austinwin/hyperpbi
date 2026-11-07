@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { resolveMapFeatureRevision } from "../src/components/maps/runtime/mapFeatureRevisions";
 import type { ResolvedMapFeature, ResolvedMapLayer } from "../src/maps/model/resolvedMapTypes";
@@ -18,7 +19,7 @@ const feature: ResolvedMapFeature = {
 };
 const layer = {
   renderer: { type: "simple", symbol: { color: "#000" } },
-  popup: { enabled: true, title: "{{name}}", fields: [], actions: [] },
+  popup: { mode: "custom", title: "{{name}}", fields: [], actions: [] },
   tooltip: { enabled: true, template: "{{name}}" },
   opacity: 1,
 } as Pick<ResolvedMapLayer, "renderer" | "popup" | "tooltip" | "labels" | "opacity">;
