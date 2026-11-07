@@ -1,17 +1,53 @@
 # Remote HyperPBI Fragments — implementation and verification
 
-Remote endpoints can supply `hyperpbi.fragment` 1.0 JSON with canonical schema 2.0 components and independent datasets. Dynamic GIS Popups use the existing renderer, ECharts adapters, data engine and sanitizers. Map Studio offers none/default/custom/remote modes, feature bindings, live preview and bounded request/fallback/size settings. The map gallery includes **Dynamic GIS Popup — Remote Analytics**, three deterministic pressure-sensor responses and a public Next.js GET route with CORS headers. The example opens as an editable, saved Playground project.
+Remote endpoints can supply `hyperpbi.fragment` 1.0 JSON containing canonical schema 2.0 components and independent datasets. Dynamic GIS Popups fetch, validate and render those components through the existing HyperPBI engine. The changes are recorded in [the full file inventory](2026-11-remote-fragments-files.txt); [machine-readable verification](2026-11-remote-fragments-verification.json) contains timings and step results.
 
-The runtime namespaces component IDs, scopes data/state/styles, blocks external model actions and privileged UI actions, bounds trees/rows/response sizes, cancels obsolete requests and caches completed responses. Both MiniUp apex/subdomain families share one host list with packaging. Generic HTTPS endpoints require build-time approval; Power BI additionally requires Maps WebAccess and endpoint CORS. No Power BI tenant test is implied by browser or package verification.
+## Implementation and architecture
 
-The old `popup.enabled` model, unused template-only popup module and unused DOM popup renderer have been removed. Built-in popup bodies now share a Preact component. All repository examples and fixtures use the canonical mode contract. Generated documentation comes from metadata and AI-help sources. Remote fragments explicitly restrict nested maps, remote sources, overlays, authored HTML/custom documents and global panels; the existing compatible component library is reused without adding another component type.
+- `src/fragments/` owns the transport, bounded fetching/cache, canonical preparation and reusable host. No component-specific API renderer, chart library or additional component type was added.
+- `HyperPbiRoot`, `DashboardRenderer`, the registry, data workspace and sanitizers render fragments with separate data/state, namespaced IDs, scoped styles and error boundaries. Only validated local state/tab/step actions are allowed. Model actions, nested remote sources/maps, overlays and authored HTML/custom documents are restricted.
+- Map Studio exposes none/default/custom/remote modes, feature attribute bindings, live test-feature preview, timeout/cache/fallback/size settings, refresh and expansion. Chart instances and zoom survive expansion; switching features cancels obsolete requests. Model aliases are canonicalized inside endpoint bindings.
+- One shared policy declares MiniUp .app and .io apex/subdomain families. Browser builds can add trusted HTTPS origins; Power BI Maps additionally needs valid WebAccess declarations, runtime host permission and endpoint CORS. Returned JSON cannot grant permissions. Core remains network-free.
+- The three-sensor **Dynamic GIS Popup — Remote Analytics** gallery entry fetches public repository fixtures and opens as an editable, persistent Playground project. The Next website also supplies CORS-enabled `/api/demo/sensors/1024`, `1025` and `1026` routes. Homepage, examples, Playground and documentation navigation expose the feature.
+- Documentation, AI help/prompt sources and generated references use the canonical contract. Link, count, host-claim and executable-response checks run automatically. Screenshots are in `docs/screenshots/`.
 
-The release adds `verify:fast`, `verify:pr` and `verify:full`, incremental type/lint caches, Node environments for pure unit suites, controlled browser workers and change-based verification. Full website verification builds Next once through OpenNext before Worker staging. Core and Maps packages are serialized and archive-verified once each. Redundant broad/restricted Maps artifact labels are replaced by the single canonical Maps artifact.
+Compatible KPIs, metrics, charts, gauges, tables, matrices, cards, detail panels, text/Markdown, safe SVG/images and nested layouts use their current renderers. Compatibility derives from canonical descriptors with explicit exclusions. This release accepts no Power BI identity mapping from a fragment; all fragment interactions remain local. See [the contract and restrictions](../remote-fragments.md).
 
-## Verification measurements
+## Removed implementations
 
-Measurements use the same Windows workstation. Baseline source: `001466e`. Initial baseline unit run: **832 tests in 155.25 seconds**; website build: **88.98 seconds**; Core package: **199.15 seconds**; Maps package: **190.30 seconds**. The isolated baseline browser suite completed in **113.67 seconds with 52 of 53 tests passing**; chart authoring exceeded its old 30-second timeout while another build was active. It is not a clean browser speed benchmark. A separate initial browser run overlapped changing files and is excluded from comparisons.
+`popup.enabled` and its historical configuration path were removed. Maintained examples and fixtures were converted to canonical modes. The unused `MapPopup.tsx` template renderer and imperative `renderResolvedPopup` renderer were removed; map and authoring previews share `MapPopupDetails`. Duplicate broad/restricted Maps artifact labels were replaced by one canonical Maps package. Unrelated map, custom-builder and dashboard behavior was retained.
 
-The existing successful main GitHub Actions run [42321849643](https://github.com/austinwin/hyperpbi/actions/runs/42321849643) took **249 seconds** from start to update. Hosted CI timing is separate from local timing; no estimate is presented as a measurement. Final verification timings, results and publication status are recorded after the integration checkpoint.
+## Validation
 
-See [Remote fragments](../remote-fragments.md) for executable JSON, restrictions, cache semantics, API/CORS details and troubleshooting, and [Development verification](../development-verification.md) for the impact matrix. Screenshots are captured by the real browser integration tests in `docs/screenshots/`.
+- **860 unit tests in 173 files passed**, including schema, security, portability, fragment isolation, multi-dataset preparation, attribute bindings, host matching, cache expiry/TTL changes, cancellation, timeout, size limits and invalid responses.
+- **57 runtime browser tests and 3 Playground browser tests passed**, including real ECharts interactions, popup switching/expansion, stale-response protection, narrow layouts and save/reload. Two intentional Windows popup screenshot baselines were visually reviewed and refreshed before rerunning the browser suite.
+- Runtime, website and Playground typechecks, lint, generated-doc checks, link/count/host-claim validation and executable example checks passed.
+- Playground, production Next website, existing Worker distribution, Core PBIVIZ and Maps PBIVIZ builds completed. ZIP capability inspection confirmed Values-only roles, no Core WebAccess and all four MiniUp declarations in Maps.
+- The production Next server returned 200 for the homepage, examples, map gallery, Playground and remote-fragment documentation. All three demo API responses returned fragment 1.0 JSON with `Access-Control-Allow-Origin: *`; unknown sensors returned CORS-enabled 404 and OPTIONS returned 204. A production island smoke test rendered the chart, expanded it, opened an editable project and reloaded it successfully.
+- [GitHub PR verification](https://github.com/austinwin/hyperpbi/actions/runs/42379446945) passed. Website hosting remains the existing Vercel/GitHub workflow. No ChatGPT Site was created or published.
+
+## Measured verification times
+
+Times are seconds on the same Windows workstation except the explicitly labeled hosted CI rows. Baseline source: `001466e`; runtime/build source: `c73cc1d`.
+
+| Check | Before | After |
+|---|---:|---:|
+| Focused fast check | No equivalent command | 43.64 |
+| Complete unit suite | 155.25 (832 tests) | 180.96 (860 tests) |
+| Runtime browser suite | 113.67 (52/53 passed) | 92.42 (57/57 passed) |
+| Playground browser suite | Not separately measured | 38.46 (3/3 passed) |
+| `npm run web:build` | 88.98 | 62.40 |
+| Website plus Worker staging | Not separately measured | 133.37 |
+| Playground build | Not separately measured | 47.87 |
+| Core packaging | 199.15 | 154.05 |
+| Maps packaging | 190.30 | 97.67 |
+| Hosted CI | 249 (previous main pipeline) | 209 (new PR pipeline) |
+| Local full checkpoint | Not measured as one command | 794.52 |
+
+These are recorded wall times, not controlled benchmarks: cache warmth, machine activity and coverage differ. The baseline browser run hit its old chart-authoring timeout while another build was active. **The complete unit suite did not become faster in the final run.** The main productivity gain is the narrower daily workflow: focused checks omit production builds and packaging, while PR and full levels broaden coverage deliberately. Full validation retains all meaningful tests.
+
+The largest avoidable costs were repeated production builds and packaging in routine verification, jsdom startup for pure computation suites, and unconstrained concurrent browser pages. Fast/PR/full selection, incremental type/lint caches, Node environments for pure suites and two browser workers address those costs. Full verification builds the website once through the existing Worker pipeline and serializes Core then Maps because their temporary capability files share the checkout. CI reuses verified artifacts for upload. The hosted full integration workflow runs on main; its live result is available in [GitHub Actions](https://github.com/austinwin/hyperpbi/actions/workflows/ci.yml).
+
+## Limits
+
+Browser and archive tests do not establish Power BI tenant connectivity, administrator approval or CORS behavior for a user's private endpoint. Secrets, authenticated API headers, redirected requests, model identity mappings and privileged fragment actions are outside this contract. Images/SVG retain the existing sanitizer and asset-host restrictions. Refresh replaces the fragment and resets its local state; expansion preserves it. The public repository demo fixtures become available when the changes reach main.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-11-06 — Remote HyperPBI Fragments
+## 2026-11-07 — Remote HyperPBI Fragments
 
 - Add validated fragment transport 1.0 using canonical schema 2.0 components, isolated data/state, scoped IDs/styles and restricted local actions.
 - Add canonical none/default/custom/remote GIS popups, a Map Studio endpoint/binding/test-feature workflow, cancellation, bounded JSON, TTL caching, refresh and expansion that retains chart state.

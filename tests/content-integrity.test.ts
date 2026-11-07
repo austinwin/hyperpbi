@@ -38,6 +38,7 @@ describe("published documentation and examples", () => {
     it("does not contradict current source host and popup support", () => {
         const content = docs.map(read).join("\n");
         expect(content).not.toMatch(/(?:only `miniup\.function` is portable|`rest\.get` \(web only\)|direct `miniup\.table` and `rest\.get` are web-only|default is `https:\/\/\*\.miniup\.app`)/i);
+        expect(content).not.toMatch(/\*\*Maps (?:broad|restricted):\*\*/);
         expect(content).not.toMatch(/"popup"\s*:\s*\{\s*"enabled"/);
         const guide = read("docs/remote-fragments.md");
         for (const host of ["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]) expect(guide).toContain(host);

@@ -3,22 +3,86 @@
   "releaseVersion": "1.0.2",
   "powerBiVersion": "1.0.2.0",
   "activeComponents": 83,
-  "sourceRevision": "63cd3f3544f4f3b35a7ca120fdb20d78b5d9673c",
-  "baselineRevision": "9d35a80a5f22e3e3a564102daf54aaa441f306f3",
-  "builtAt": "2026-11-06T12:43:28.695Z",
+  "sourceRevision": "c73cc1d843fc25d324489327f75593dfedf1f90e",
+  "baselineRevision": "001466eead5d0659639e5f489370f42005272420",
+  "builtAt": "2026-11-07T14:24:34.720485+00:00",
   "verification": {
-    "unitTests": 827,
-    "unitFiles": 168,
-    "browserTests": 46,
-    "playgroundBrowserTests": 2,
-    "screenshotStates": 12,
-    "typecheck": "passed",
-    "webBuild": "passed",
-    "webSitesBuild": "passed",
-    "playgroundBuild": "passed",
-    "lint": "passed",
-    "docs": "passed",
-    "packageCapabilities": "passed"
+    "unitTests": 860,
+    "runtimeBrowserTests": 57,
+    "playgroundBrowserTests": 3,
+    "packageCapabilities": "passed",
+    "steps": [
+      {
+        "name": "types:runtime",
+        "seconds": 5.14,
+        "exitCode": 0
+      },
+      {
+        "name": "types:web",
+        "seconds": 17.45,
+        "exitCode": 0
+      },
+      {
+        "name": "types:playground",
+        "seconds": 13.12,
+        "exitCode": 0
+      },
+      {
+        "name": "lint",
+        "seconds": 2.29,
+        "exitCode": 0
+      },
+      {
+        "name": "unit",
+        "seconds": 180.96,
+        "exitCode": 0
+      },
+      {
+        "name": "docs",
+        "seconds": 2.23,
+        "exitCode": 0
+      },
+      {
+        "name": "content",
+        "seconds": 8.47,
+        "exitCode": 0
+      },
+      {
+        "name": "browser:runtime",
+        "seconds": 92.42,
+        "exitCode": 0
+      },
+      {
+        "name": "browser:playground",
+        "seconds": 38.46,
+        "exitCode": 0
+      },
+      {
+        "name": "build:playground",
+        "seconds": 47.87,
+        "exitCode": 0
+      },
+      {
+        "name": "build:website-worker",
+        "seconds": 133.37,
+        "exitCode": 0
+      },
+      {
+        "name": "package:core",
+        "seconds": 154.05,
+        "exitCode": 0
+      },
+      {
+        "name": "package:maps",
+        "seconds": 97.67,
+        "exitCode": 0
+      },
+      {
+        "name": "package:capabilities",
+        "seconds": 1.02,
+        "exitCode": 0
+      }
+    ]
   },
   "artifacts": [
     {
@@ -42,19 +106,19 @@
       "sha256": "a642bf756576cfd296af9873663d1216b5aa9e4244bce6f314e197218771024b"
     },
     {
-      "path": "apps/playground/dist/assets/index-BHNVZxwW.js",
-      "bytes": 2043325,
-      "sha256": "44e4392ecbfb9ce5b74402bd42bd3228b3a4622dc8d12b2e270bc7063e7c2d65"
+      "path": "apps/playground/dist/assets/index-BFgqrg75.js",
+      "bytes": 2089874,
+      "sha256": "6a5fe52bd957adec8a2b06c9ca53b2c25b27cec3897d890b68fb664ff4548435"
     },
     {
-      "path": "apps/playground/dist/assets/index-BHNVZxwW.js.map",
-      "bytes": 7015157,
-      "sha256": "e305ea307071557d91e679a14d5f53a2511e17929bc5816bef73dba4b8276c9d"
+      "path": "apps/playground/dist/assets/index-BFgqrg75.js.map",
+      "bytes": 7126721,
+      "sha256": "429b143c1346b3b55b58579f89ebbd1c93daaa04db7e225710a59d19bcb5dfcb"
     },
     {
-      "path": "apps/playground/dist/assets/index-C3A4msFU.css",
-      "bytes": 806111,
-      "sha256": "f3171d0633863b7b31a672b59241140d51d64b9b87b617c5d67fbc14992d5074"
+      "path": "apps/playground/dist/assets/index-fu5lMZXq.css",
+      "bytes": 821511,
+      "sha256": "b39d47f3f145a62a22920cd69840d81c0ef74e7116b522e26f37b2a6d8f8379e"
     },
     {
       "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js",
@@ -89,7 +153,7 @@
     {
       "path": "apps/playground/dist/index.html",
       "bytes": 816,
-      "sha256": "5fc91f7201b451851df385737dd5422d4162fdafee9d064e34df22ae4cd4edb4"
+      "sha256": "6b0dc5d96bb946ea42e0ae3033b65dcc1fed9b3d4ee9455dfcc57cc17f305070"
     },
     {
       "path": "apps/web/public/runtime/assets/fileParser.worker-DlgPI3_3.js",
@@ -103,13 +167,13 @@
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.css",
-      "bytes": 1001028,
-      "sha256": "54cd320775d53dde3ff1f87af74d1e281908ee7d3c8a8a25696ebc226863fe69"
+      "bytes": 1019970,
+      "sha256": "8767dfc4d6c66cff6192758ea83423424dcb55e526c6b9f7aadbe2c51619595d"
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.js",
-      "bytes": 2963923,
-      "sha256": "e5391bc06f3622ee342ef1dc87e4c3fa8b9662cdb7987c778e17508548def20d"
+      "bytes": 3022834,
+      "sha256": "34c1fc62c486cb13b992baad2a6e87af55d9bbd9a85f837eb239b41fc575dc80"
     },
     {
       "path": "apps/web/public/runtime/maps-CWfhSxLk.mjs",
@@ -127,39 +191,29 @@
       "sha256": "9820aaa80c99b6df8b0329f3a814523fbbc3a2038a6138d28e1dbf44f9a64b9e"
     },
     {
+      "path": "dist/hyperpbi-web-sites.zip",
+      "bytes": 23080113,
+      "sha256": "ac2889bed3a4874c9416926f3a1f761c2f1ddb4e61e3169aac56e202c01f4047"
+    },
+    {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-core.pbiviz",
-      "bytes": 2060949,
-      "sha256": "fd7d51dfeee298aedbc35e99e58a51730950234bc543a106e1f645e196434754"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps-broad.pbiviz",
-      "bytes": 2061387,
-      "sha256": "fdb07efea35f03d432fd22bf4483daf842a40f7e17195c97c18970964f4a00e1"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps-restricted.pbiviz",
-      "bytes": 2061387,
-      "sha256": "c5329c156ae2749bc1da8eee320dfa2a02a3900de4bff32c2516ff97d6784853"
+      "bytes": 2077278,
+      "sha256": "14e1b6734a0052227fdf6bbc36129857c40ac9ef0beadb087c789ae4cb97036a"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps.pbiviz",
-      "bytes": 2061387,
-      "sha256": "fdb07efea35f03d432fd22bf4483daf842a40f7e17195c97c18970964f4a00e1"
+      "bytes": 2077846,
+      "sha256": "5fe015328498e97597eb16c306e39b8a805a6c1355c27e3b5300c127153d5c0d"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0.pbiviz",
-      "bytes": 2061387,
-      "sha256": "c5329c156ae2749bc1da8eee320dfa2a02a3900de4bff32c2516ff97d6784853"
-    },
-    {
-      "path": "dist/hyperpbi-web-sites.zip",
-      "bytes": 22454567,
-      "sha256": "2bfc65f4fb40ba9deaa81f3e91afa1b0a1fe040e87ca790ed79b8a91a129e679"
+      "bytes": 2077846,
+      "sha256": "5fe015328498e97597eb16c306e39b8a805a6c1355c27e3b5300c127153d5c0d"
     },
     {
       "path": "dist/package-capability-profiles.json",
-      "bytes": 1107,
-      "sha256": "6b4f1c6a296507ba0b48820cbc8ccac6bacfb2880acd5b3826731c7b387dcfc0"
+      "bytes": 575,
+      "sha256": "2befc2cc84eb2ca6353ef767f9cd1996c04966cf8f97b783bc7a92462fe172e8"
     },
     {
       "path": "dist/package.json",
