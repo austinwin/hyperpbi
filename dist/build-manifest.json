@@ -2,84 +2,84 @@
   "schemaVersion": 1,
   "releaseVersion": "1.0.2",
   "powerBiVersion": "1.0.2.0",
-  "activeComponents": 83,
-  "sourceRevision": "c73cc1d843fc25d324489327f75593dfedf1f90e",
-  "baselineRevision": "001466eead5d0659639e5f489370f42005272420",
-  "builtAt": "2026-11-07T14:24:34.720485+00:00",
+  "activeComponents": 84,
+  "sourceRevision": "d6126da9fa508d3c66d2bb9f4345630cb2b9f19c",
+  "baselineRevision": "8b127f812b98d17ac81c8344b05d90d36812753c",
+  "builtAt": "2026-11-09T13:30:31.630606+00:00",
   "verification": {
-    "unitTests": 860,
-    "runtimeBrowserTests": 57,
-    "playgroundBrowserTests": 3,
+    "unitTests": 864,
+    "runtimeBrowserTests": 60,
+    "playgroundBrowserTests": 4,
     "packageCapabilities": "passed",
     "steps": [
       {
         "name": "types:runtime",
-        "seconds": 5.14,
+        "seconds": 11.71,
         "exitCode": 0
       },
       {
         "name": "types:web",
-        "seconds": 17.45,
+        "seconds": 18.07,
         "exitCode": 0
       },
       {
         "name": "types:playground",
-        "seconds": 13.12,
+        "seconds": 13.48,
         "exitCode": 0
       },
       {
         "name": "lint",
-        "seconds": 2.29,
+        "seconds": 8.22,
         "exitCode": 0
       },
       {
         "name": "unit",
-        "seconds": 180.96,
+        "seconds": 99.86,
         "exitCode": 0
       },
       {
         "name": "docs",
-        "seconds": 2.23,
+        "seconds": 1.41,
         "exitCode": 0
       },
       {
         "name": "content",
-        "seconds": 8.47,
+        "seconds": 3.65,
         "exitCode": 0
       },
       {
         "name": "browser:runtime",
-        "seconds": 92.42,
+        "seconds": 102.55,
         "exitCode": 0
       },
       {
         "name": "browser:playground",
-        "seconds": 38.46,
+        "seconds": 29.93,
         "exitCode": 0
       },
       {
         "name": "build:playground",
-        "seconds": 47.87,
+        "seconds": 47.67,
         "exitCode": 0
       },
       {
         "name": "build:website-worker",
-        "seconds": 133.37,
+        "seconds": 165.93,
         "exitCode": 0
       },
       {
         "name": "package:core",
-        "seconds": 154.05,
+        "seconds": 185.7,
         "exitCode": 0
       },
       {
         "name": "package:maps",
-        "seconds": 97.67,
+        "seconds": 157.28,
         "exitCode": 0
       },
       {
         "name": "package:capabilities",
-        "seconds": 1.02,
+        "seconds": 1.37,
         "exitCode": 0
       }
     ]
@@ -106,19 +106,19 @@
       "sha256": "a642bf756576cfd296af9873663d1216b5aa9e4244bce6f314e197218771024b"
     },
     {
-      "path": "apps/playground/dist/assets/index-BFgqrg75.js",
-      "bytes": 2089874,
-      "sha256": "6a5fe52bd957adec8a2b06c9ca53b2c25b27cec3897d890b68fb664ff4548435"
+      "path": "apps/playground/dist/assets/index-CvU9s8_D.css",
+      "bytes": 821678,
+      "sha256": "bb40fe5bd8f9d1b5dad441e7259fa4a555d8cbffd496c1a92f04bf0217f9dfce"
     },
     {
-      "path": "apps/playground/dist/assets/index-BFgqrg75.js.map",
-      "bytes": 7126721,
-      "sha256": "429b143c1346b3b55b58579f89ebbd1c93daaa04db7e225710a59d19bcb5dfcb"
+      "path": "apps/playground/dist/assets/index-DgQwYbj0.js",
+      "bytes": 2130190,
+      "sha256": "91d87d2436c2adbc1cb60b8ca8d39247d567bb1fc1207ff82d0ba72682604e6c"
     },
     {
-      "path": "apps/playground/dist/assets/index-fu5lMZXq.css",
-      "bytes": 821511,
-      "sha256": "b39d47f3f145a62a22920cd69840d81c0ef74e7116b522e26f37b2a6d8f8379e"
+      "path": "apps/playground/dist/assets/index-DgQwYbj0.js.map",
+      "bytes": 7180554,
+      "sha256": "0c43a7b3f562313d7fbd301c5774d7e7bc9b81a6b9177c7deb9ff70aa13019a9"
     },
     {
       "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js",
@@ -153,7 +153,7 @@
     {
       "path": "apps/playground/dist/index.html",
       "bytes": 816,
-      "sha256": "6b0dc5d96bb946ea42e0ae3033b65dcc1fed9b3d4ee9455dfcc57cc17f305070"
+      "sha256": "273839547473fff02469377609b8bac6a603ed01d778a2b59116907d85c87778"
     },
     {
       "path": "apps/web/public/runtime/assets/fileParser.worker-DlgPI3_3.js",
@@ -167,13 +167,13 @@
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.css",
-      "bytes": 1019970,
-      "sha256": "8767dfc4d6c66cff6192758ea83423424dcb55e526c6b9f7aadbe2c51619595d"
+      "bytes": 1020203,
+      "sha256": "7879fab570db9ace24a4d8d194c3932be5838335b448a24f0e808614df3df98c"
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.js",
-      "bytes": 3022834,
-      "sha256": "34c1fc62c486cb13b992baad2a6e87af55d9bbd9a85f837eb239b41fc575dc80"
+      "bytes": 3043715,
+      "sha256": "2a152e0943f9853656e1ca0b614b69e43f379eb9f6a1df7c54b4eaa19161a0ba"
     },
     {
       "path": "apps/web/public/runtime/maps-CWfhSxLk.mjs",
@@ -192,28 +192,28 @@
     },
     {
       "path": "dist/hyperpbi-web-sites.zip",
-      "bytes": 23080113,
-      "sha256": "ac2889bed3a4874c9416926f3a1f761c2f1ddb4e61e3169aac56e202c01f4047"
+      "bytes": 23067356,
+      "sha256": "39f9b2357e6666968e0e2d6644d1d13decb91e5cd6b44f98600de7afbcdf0f03"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-core.pbiviz",
-      "bytes": 2077278,
-      "sha256": "14e1b6734a0052227fdf6bbc36129857c40ac9ef0beadb087c789ae4cb97036a"
+      "bytes": 2080381,
+      "sha256": "2562f038cb5676db0378b8fb6c4537862fb6dcb06f491acd119fcf56f7165334"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps.pbiviz",
-      "bytes": 2077846,
-      "sha256": "5fe015328498e97597eb16c306e39b8a805a6c1355c27e3b5300c127153d5c0d"
+      "bytes": 2081017,
+      "sha256": "6b1fbdc2a104132e3a66ec976005c94630886ea36a5907227ebf61f65c2a8b8b"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0.pbiviz",
-      "bytes": 2077846,
-      "sha256": "5fe015328498e97597eb16c306e39b8a805a6c1355c27e3b5300c127153d5c0d"
+      "bytes": 2081017,
+      "sha256": "6b1fbdc2a104132e3a66ec976005c94630886ea36a5907227ebf61f65c2a8b8b"
     },
     {
       "path": "dist/package-capability-profiles.json",
-      "bytes": 575,
-      "sha256": "2befc2cc84eb2ca6353ef767f9cd1996c04966cf8f97b783bc7a92462fe172e8"
+      "bytes": 532,
+      "sha256": "3095e71797fe47dc3e6227ca3f5da882774c99e67bdbcf2671f9a2dd606b9a99"
     },
     {
       "path": "dist/package.json",

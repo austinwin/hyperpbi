@@ -16,8 +16,7 @@
       "https://miniup.app",
       "https://*.miniup.app",
       "https://miniup.io",
-      "https://*.miniup.io",
-      "https://raw.githubusercontent.com"
+      "https://*.miniup.io"
     ]
   }
 }
