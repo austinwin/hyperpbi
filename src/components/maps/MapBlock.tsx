@@ -1283,7 +1283,8 @@ export function MapBlock({ component }: { component: MapComponent }) {
         <MapToolbarPopover
           id={mapToolbarPopoverId(id, "layers")}
           title="Layers"
-          subtitle={`${runtimeLayers.length.toLocaleString()} total`}
+          subtitle={`${runtimeLayers.length.toLocaleString()} ${runtimeLayers.length === 1 ? "layer" : "layers"}`}
+          variant="layers"
           onClose={closePopover}
         >
           <MapLayerPanel

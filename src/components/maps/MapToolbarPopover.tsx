@@ -6,6 +6,7 @@ export function MapToolbarPopover({
     id,
     title,
     subtitle,
+    variant,
     onClose,
     children,
     footer,
@@ -14,6 +15,7 @@ export function MapToolbarPopover({
     id: string;
     title: string;
     subtitle?: string;
+    variant?: "layers";
     onClose: () => void;
     children: ComponentChildren;
     footer?: ComponentChildren;
@@ -69,7 +71,7 @@ export function MapToolbarPopover({
         <div
             ref={ref}
             id={id}
-            class="hp-map-toolbar-popover"
+            class={variant === "layers" ? "hp-map-toolbar-popover is-layers" : "hp-map-toolbar-popover"}
             role="dialog"
             aria-modal="false"
             aria-labelledby={`${id}-title`}
@@ -80,6 +82,7 @@ export function MapToolbarPopover({
             onWheel={stop}
         >
             <header class="hp-map-popover-header">
+                {variant === "layers" && <span class="hp-map-layer-panel-icon"><Icon name="layers" size="sm" decorative /></span>}
                 <div class="hp-map-popover-heading">
                     <strong id={`${id}-title`}>{title}</strong>
                     {subtitle && <span>{subtitle}</span>}

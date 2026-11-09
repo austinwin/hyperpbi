@@ -4,6 +4,50 @@ const api = "https://functions.miniup.app/hyperpbi-dynamic-demo";
 const harness = "/tests/browser/remote-fragments.html";
 const sensor = (id: number) => `${api}/sensor?id=${id}`;
 
+test("layers keep names and controls on separate lines in a narrow map", async ({ page }) => {
+    await page.setViewportSize({ width: 300, height: 600 });
+    await page.goto(harness);
+    const expand = page.getByRole("button", { name: "Expand map tools", exact: true });
+    if (await expand.isVisible()) await expand.click();
+    await page.getByRole("button", { name: "Layers", exact: true }).click();
+    const panel = page.getByRole("dialog", { name: "Layers", exact: true });
+    const names = panel.locator(".hp-map-layer-name");
+    await expect(names).toHaveText(["Illustrative distribution mains", "Pressure sensors"]);
+    expect(await panel.evaluate(element => {
+        const frame = element.closest(".hp-map-frame")!.getBoundingClientRect();
+        const dialog = element.getBoundingClientRect();
+        return dialog.left >= frame.left && dialog.right <= frame.right;
+    })).toBe(true);
+    expect(await names.evaluateAll(elements => elements.every(name => {
+        const row = name.closest(".hp-map-layer-row")!;
+        const identity = row.querySelector(".hp-map-layer-rowline")!;
+        const controls = row.querySelector(".hp-map-layer-controls")!;
+        return name.scrollWidth <= name.clientWidth && name.scrollHeight <= name.clientHeight
+            && identity.getBoundingClientRect().bottom <= controls.getBoundingClientRect().top
+            && controls.scrollWidth <= controls.clientWidth;
+    }))).toBe(true);
+
+    const opacity = panel.getByRole("spinbutton", { name: "Pressure sensors opacity" });
+    await opacity.fill("45");
+    await opacity.press("Enter");
+    await expect(opacity).toHaveValue("45");
+    await panel.getByRole("button", { name: "Hide labels for Pressure sensors" }).click();
+    await expect(panel.getByRole("button", { name: "Show labels for Pressure sensors" })).toBeVisible();
+    await panel.getByRole("button", { name: "Hide all", exact: true }).click();
+    await expect(panel.getByRole("button", { name: "Show Pressure sensors", exact: true })).toBeVisible();
+    await panel.getByRole("button", { name: "Show all", exact: true }).click();
+    await expect(panel.getByRole("button", { name: "Hide Pressure sensors", exact: true })).toBeVisible();
+    await panel.getByRole("button", { name: "Move Pressure sensors up" }).click();
+    await expect(names).toHaveText(["Pressure sensors", "Illustrative distribution mains"]);
+    const rows = panel.locator(".hp-map-layer-row");
+    await rows.first().locator(".hp-map-layer-drag").dragTo(rows.last());
+    await expect(names).toHaveText(["Illustrative distribution mains", "Pressure sensors"]);
+    await panel.getByRole("button", { name: "Move Pressure sensors up" }).click();
+    await panel.getByRole("button", { name: "Reset", exact: true }).click();
+    await expect(names).toHaveText(["Illustrative distribution mains", "Pressure sensors"]);
+    await expect(opacity).toHaveValue("100");
+});
+
 test("real fragments render interactive charts, resize and refresh without remounting, and switch sensor", async ({ page }) => {
     await page.goto(harness);
     const responsePromise = page.waitForResponse(sensor(1024));

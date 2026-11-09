@@ -12,8 +12,14 @@ test("viewer surfaces stay compact while layers and feature cards remain usable"
     await checkAppearance(page, "viewer-collapsed.png");
     await page.getByRole("button", { name: "Expand map tools" }).click();
     await page.getByRole("button", { name: "Layers", exact: true }).click();
-    await expect(page.locator(".hp-map-layer-panel")).toContainText("3 layers");
+    const layers = page.getByRole("dialog", { name: "Layers", exact: true });
+    await expect(layers).toContainText("3 layers");
     await checkAppearance(page, "viewer-layers.png");
+    await expect(layers.getByRole("button", { name: "Move Power BI facilities down" })).toBeDisabled();
+    await layers.getByRole("button", { name: "Collapse Published · Operations" }).click();
+    await expect(layers.getByRole("button", { name: "Hide Facilities", exact: true })).toHaveCount(0);
+    await layers.getByRole("button", { name: "Expand Published · Operations" }).click();
+    await expect(layers.getByRole("button", { name: "Hide Facilities", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Close Layers", exact: true }).click();
     await page.locator('[data-hp-layer-id="published-facility-network-facilities"][data-hp-feature-id="B"]').click({ force: true });
     await expect(page.locator(".hp-map-feature-details")).toContainText("North facility");
