@@ -1,5 +1,7 @@
 # Remote HyperPBI Fragments — implementation and verification
 
+This report records the November 7 release. The current schema and public MiniUp examples are in the [Dynamic Content guide](../remote-fragments.md).
+
 Remote endpoints can supply `hyperpbi.fragment` 1.0 JSON containing canonical schema 2.0 components and independent datasets. Dynamic GIS Popups fetch, validate and render those components through the existing HyperPBI engine. The changes are recorded in [the full file inventory](2026-11-remote-fragments-files.txt); [machine-readable verification](2026-11-remote-fragments-verification.json) contains timings and step results.
 
 ## Implementation and architecture

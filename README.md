@@ -41,7 +41,7 @@ See [architecture](docs/architecture.md) for host contracts, persistence, portab
 
 ## Dashboard examples
 
-The `/examples` gallery loads eight complete, deterministic dashboards from [`examples/dashboards`](examples/dashboards). Every folder contains `specification.json`, `runtime.json`, `data.csv`, a complete `project.hyperpbi` Playground bundle, and host-specific instructions in `README.md`.
+The `/examples` gallery loads ten complete dashboards from [`examples/dashboards`](examples/dashboards). Every folder contains `specification.json`, `runtime.json`, `data.csv`, a complete `project.hyperpbi` Playground bundle, and host-specific instructions in `README.md`.
 
 | Dashboard | Folder | Power BI package |
 |---|---|---|
@@ -53,8 +53,10 @@ The `/examples` gallery loads eight complete, deterministic dashboards from [`ex
 | Digital Banking Overview | [`digital-banking-overview`](examples/dashboards/digital-banking-overview) | Core |
 | Media & Web Performance | [`media-web-performance`](examples/dashboards/media-web-performance) | Core |
 | Industrial Network Telemetry | [`industrial-network-telemetry`](examples/dashboards/industrial-network-telemetry) | Core |
+| Dynamic GIS Analytics | [`dynamic-gis-analytics`](examples/dashboards/dynamic-gis-analytics) | Maps |
+| Universal Dynamic Content | [`universal-dynamic-content`](examples/dashboards/universal-dynamic-content) | Maps |
 
-Open an example detail page to preview the real project, inspect its JSON, or load a copy into `/playground`. For Power BI, import `data.csv` as one table, add every CSV column to HyperPBI's single **Values** field well without renaming the lowercase headers, paste `runtime.json` into Runtime Configuration, and paste `specification.json` into Advanced JSON. Use the Core PBIVIZ for seven offline examples and the Maps PBIVIZ for Urban Mobility, whose OpenStreetMap tiles require the declared WebAccess profile and network access. The `.hyperpbi` file is for Playground import, not Power BI.
+Open an example to preview the project, inspect its JSON, or open a copy in `/playground`. For Power BI, import `data.csv` as one table, add its columns to HyperPBI's single **Values** field well, paste `runtime.json` into Runtime Configuration, and paste `specification.json` into Advanced JSON. Use the package shown in the table. Urban Mobility requests OpenStreetMap tiles, and the two Dynamic Content examples request MiniUp data. Import the `.hyperpbi` bundle in Playground.
 
 See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, package-profile, and portability details.
 
@@ -63,9 +65,9 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 - HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
 - Dashboard schema 1.0 and missing versions are rejected by visual loading, Edit Mode, AI import, preview, save, and rendering. Legacy JSON can be converted explicitly with the development-only `npm run schema:migrate-v1 -- input.json output.json` utility; runtime migration is intentionally unsupported.
 <!-- component-summary:start -->
-- The canonical implementation defines **83 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
-- Power BI visual package version `1.0.1.2` in `pbiviz.json` is a package version and is independent of the dashboard schema version.
+- The Power BI visual package is version `1.0.2.0`. Dashboard specifications use their own schema version.
 
 ## Power BI workflow
 
@@ -255,7 +257,7 @@ npm run package:verify
 
 `npm run dev` builds the shared browser runtime and starts the unified Next.js site at `http://localhost:4178`. `npm run build` runs the complete production type-check and build pipeline. The lower-level `playground:*` and `web:*` commands remain available to maintainers who need to isolate one workspace; they are not separate public websites.
 
-`npm run examples:generate` deterministically regenerates the eight dashboard folders and manifest. `npm run examples:check` validates strict schema preparation, Power BI portability, data limits, documentation, and checked-in project bundles.
+`npm run examples:generate` deterministically regenerates the dashboard folders and manifest. `npm run examples:check` validates strict schema preparation, Power BI portability, data limits, documentation, and checked-in project bundles.
 
 `npm run docs:generate` is documentation-only. It executes canonical TypeScript metadata without building the visual. It fully regenerates:
 
@@ -274,7 +276,7 @@ Do not hand-edit the fully generated reference outputs or the marked region. The
 | Document | Purpose |
 |---|---|
 | [Architecture and unified website](docs/architecture.md) | Next.js shell, shared runtime islands, host bridges, projects, portability, deployment |
-| [Dashboard examples](docs/dashboard-examples.md) | Eight complete dashboards, Playground loading, Power BI import, package profiles |
+| [Dashboard examples](docs/dashboard-examples.md) | Ten complete dashboards, Playground loading, Power BI import, package profiles |
 | [User guide](docs/user-guide.md) | Power BI and Edit Mode workflow |
 | [2.0 specification](docs/hyperpbi-spec-reference.md) | Root, components, app, styles, behavior, diagnostics |
 | [Generated component catalog](docs/hyperpbi-component-catalog-reference.md) | Canonical component inventory and examples |
@@ -315,7 +317,6 @@ Dataset contracts come from `src/data/datasets.ts` and `src/data/datasetSchema.t
 - Structured SVG is governed and bounded. Trusted raw SVG is an isolated author document, with browser and host restrictions.
 - Every maintained dashboard example declares and validates as schema 2.0. The only schema 1.0 fixture is isolated under migration-specific tests.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](docs/remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Use `dynamicContent` to load interactive details from a public HTTPS API in a card, panel, modal, or dashboard region. Map feature popups use the same renderer. Both examples use MiniUp and open as editable projects. [Dynamic GIS Analytics](https://hyperpbi.com/examples/dynamic-gis-analytics) · [Universal Dynamic Content](https://hyperpbi.com/examples/universal-dynamic-content) · [Dynamic Content guide](docs/remote-fragments.md)

@@ -40,7 +40,6 @@ Use `card`, `listGroup`, `dataGrid`, `detailPanel`, `dropdown`, `popover`, `offc
 
 Runtime Config `security.htmlMode: "trusted"` uses the same isolated document renderer for HTML, custom repeats and slots. `security.svgMode: "trusted"` enables arbitrary raw SVG. `security.cssMode: "trusted"` isolates unrestricted styles in a contained Shadow DOM and passes authored styles to trusted documents. Standard behavior remains the default. Field values are bound after parsing and cannot become executable markup. See [security boundaries and host limits](security.md#trusted-author-documents).
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Use `dynamicContent` for declarative trees returned from an approved API. Fragments can include validated text, Markdown, SVG, charts, and tables. Author custom HTML, slots, and overlays in the surrounding dashboard. [Dynamic Content guide](remote-fragments.md).

@@ -1,0 +1,140 @@
+{
+  "version": "2.0",
+  "title": "Universal Dynamic Content",
+  "theme": {
+    "mode": "light",
+    "density": "comfortable",
+    "primaryColor": "#3156a8",
+    "accentColor": "#0d9488",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 14
+  },
+  "toolbar": [
+    {
+      "type": "markdown",
+      "id": "work_intro",
+      "text": "# Utility maintenance · Dispatch\n\nSelect an asset for its live work plan. Change the priority or refresh the workload to query the dispatch API."
+    }
+  ],
+  "components": [
+    {
+      "type": "card",
+      "id": "work_queue",
+      "header": {
+        "title": "Scheduled work orders"
+      },
+      "children": [
+        {
+          "type": "flex",
+          "id": "work_controls",
+          "gap": 12,
+          "children": [
+            {
+              "type": "select",
+              "id": "priority",
+              "title": "Work priority",
+              "field": "priority",
+              "options": [
+                "High",
+                "Normal"
+              ],
+              "interaction": {
+                "enabled": true,
+                "internalMode": "filter",
+                "targets": [
+                  "assets"
+                ],
+                "externalMode": "none"
+              }
+            },
+            {
+              "type": "button",
+              "id": "refresh_workload",
+              "title": "Refresh workload"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "id": "assets",
+          "title": "Assets",
+          "columns": [
+            {
+              "field": "assetid",
+              "title": "Asset ID"
+            },
+            {
+              "field": "asset",
+              "title": "Equipment"
+            },
+            {
+              "field": "zone",
+              "title": "Zone"
+            },
+            {
+              "field": "priority",
+              "title": "Priority"
+            }
+          ],
+          "hover": true,
+          "interaction": {
+            "enabled": true,
+            "internalMode": "highlight",
+            "internalScope": "self",
+            "externalMode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "id": "dispatch",
+      "header": {
+        "title": "Dispatch workload"
+      },
+      "children": [
+        {
+          "type": "dynamicContent",
+          "id": "workload",
+          "title": "Workload",
+          "loadOnMount": true,
+          "trigger": {
+            "source": "refresh_workload",
+            "event": "click",
+            "refresh": true
+          },
+          "request": {
+            "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}",
+            "cacheTtlSeconds": 30
+          }
+        }
+      ]
+    }
+  ],
+  "rightPanel": [
+    {
+      "type": "card",
+      "id": "asset_panel",
+      "header": {
+        "title": "Asset work plan"
+      },
+      "children": [
+        {
+          "type": "dynamicContent",
+          "id": "asset_details",
+          "title": "Asset details",
+          "emptyText": "Select a work order to see its assignment and scheduled tasks.",
+          "trigger": {
+            "source": "assets",
+            "event": "click"
+          },
+          "request": {
+            "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/asset?id={{context.assetid}}",
+            "cacheTtlSeconds": 30
+          }
+        }
+      ]
+    }
+  ]
+}

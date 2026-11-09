@@ -7,7 +7,7 @@ import { matchesHttpsHost } from "../security/networkHostPolicy";
 import { FRAGMENT_LIMITS, type RemoteFragment } from "./fragmentTypes";
 
 const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
-const restricted = new Set(["map", "modal", "offcanvas", "dropdown", "popover", "html", "custom", "mermaidDiagram", "leftPanel", "rightPanel"]);
+const restricted = new Set(["dynamicContent", "map", "modal", "offcanvas", "dropdown", "popover", "html", "custom", "mermaidDiagram", "leftPanel", "rightPanel"]);
 export const fragmentComponentTypes = Object.freeze(componentDescriptors.map(item => item.type).filter(type => !restricted.has(type)).sort());
 const supported = new Set(fragmentComponentTypes);
 const localActions = new Set(["setTab", "setState", "toggleState", "clearFilters", "setStep", "nextStep", "previousStep"]);
@@ -67,6 +67,7 @@ export function prepareRemoteFragment(input: unknown, namespace: string) {
                 for (const action of Array.isArray(child) ? child : [child]) if (!object(action) || !localActions.has(String(action.type))) throw new Error("Fragments permit only local state and navigation actions.");
             }
             if (key === "externalMode" && child !== "none") throw new Error("Remote fragments cannot interact with the Power BI model.");
+            if (key === "appendToBody" && child !== false) throw new Error("Fragment chart tooltips must stay inside the chart.");
             if (typeof child === "string") validateAssetReferences(child);
             visit(child, depth + 1, ["children", "footer"].includes(key) || key === "chart");
         }

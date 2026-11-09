@@ -1,4 +1,4 @@
-import { validateRemotePopup } from "./remotePopupValidation";
+import { dynamicContentValidation } from "./dynamicContentValidation";
 import { validatePopupContent } from "../maps/popup/validatePopupContent";
 import {
   mapCapability,
@@ -1405,7 +1405,7 @@ function validateLayer(
   validateSection(
     raw,
     "popup",
-    allowed("mode", "remote", "defaultFieldSource", "title", "fields", "actions", "html", "content"),
+    allowed("mode", "request", "width", "maxHeight", "defaultFieldSource", "title", "fields", "actions", "html", "content"),
     path,
     componentId,
     diagnostics,
@@ -1418,7 +1418,16 @@ function validateLayer(
     componentId,
     diagnostics,
   );
-  if (object(raw.popup)) diagnostics.push(...validateRemotePopup(raw.popup, `${path}/popup`, componentId));
+  if (object(raw.popup)) {
+    const popup = raw.popup;
+    const validation = dynamicContentValidation(`${path}/popup`, componentId);
+    if (popup.mode !== "none" && popup.mode !== "default" && popup.mode !== "custom" && popup.mode !== "dynamic") validation.error("mode", "Use none, default, custom, or dynamic.");
+    if (popup.mode === "dynamic") validation.request(popup.request);
+    else if (popup.request !== undefined) validation.error("request", "The request requires popup.mode dynamic.");
+    validation.bounded("width", popup.width, 280, 1000);
+    validation.bounded("maxHeight", popup.maxHeight, 200, 1000);
+    diagnostics.push(...validation.diagnostics);
+  }
   if (object(raw.popup) && raw.popup.content !== undefined) diagnostics.push(...validatePopupContent(raw.popup.content, `${path}/popup/content`, componentId));
   for (const section of ["popup", "tooltip"]) {
     const value = raw[section];

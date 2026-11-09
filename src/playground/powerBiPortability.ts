@@ -31,7 +31,7 @@ function scanBrowserOnly(value: unknown, issues: PortabilityIssue[], path = ""):
         return;
     }
     if (!object(value)) return;
-    if (value.mode === "remote" && object(value.remote)) issues.push({ code: "REMOTE_FRAGMENT_WEBACCESS_REQUIRED", severity: "warning", message: `${path} fetches a remote fragment.`, action: "Use the Maps package with build-time host approval, runtime WebAccess permission and endpoint CORS. Fragment interactions stay local." });
+    if ((value.mode === "dynamic" || value.type === "dynamicContent") && object(value.request)) issues.push({ code: "REMOTE_FRAGMENT_WEBACCESS_REQUIRED", severity: "warning", message: `${path} fetches dynamic content.`, action: "Use the Maps package with build-time host approval, runtime WebAccess permission and endpoint CORS. Fragment interactions stay local." });
     const type = typeof value.type === "string" ? value.type : "";
     if (["fileUpload", "browserDownload", "clipboardWrite"].includes(type) || value.browserOnly === true) {
         issues.push({

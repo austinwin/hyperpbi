@@ -490,7 +490,9 @@ export function resolvePowerBiLayer(
     popup: layer.popup
       ? {
           mode: layer.popup.mode,
-          remote: layer.popup.remote,
+          request: layer.popup.request,
+          width: layer.popup.width,
+          maxHeight: layer.popup.maxHeight,
           title: layer.popup.title,
           fields: (layer.popup.fields ?? []).map((field) => ({
             ...field,

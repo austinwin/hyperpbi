@@ -1,5 +1,5 @@
 import type { ProjectStorage } from "@hyperpbi/playground/projectStorage";
-import sampleResponse from "../../../../examples/remote-fragments/sensor-1024.json";
+import gisBundle from "../../../../examples/dashboards/dynamic-gis-analytics/project.hyperpbi?raw";
 import { useMemo, useState } from "preact/hooks";
 import type { HyperPbiSchema } from "@hyperpbi/schema/hyperpbiSchema";
 import type { DataRow, NormalizedData, NormalizedField } from "@hyperpbi/data/normalizeData";
@@ -7,6 +7,7 @@ import { calculateAggregates } from "@hyperpbi/data/aggregations";
 import { normalizeMapBindings } from "@hyperpbi/data/normalizeMapBindings";
 import { createPowerBiDataWorkspace } from "@hyperpbi/data/dataWorkspace";
 import { createPlaygroundProject } from "@hyperpbi/playground/project";
+import { importProjectBundle } from "@hyperpbi/playground/projectBundle";
 import { PlaygroundRenderer } from "./PlaygroundRenderer";
 import { navigate } from "../router";
 import manifest from "../../../../examples/map/manifest.json";
@@ -21,6 +22,7 @@ interface MapGalleryEntry {
     expected: string;
     limitations: string;
     powerBi?: string;
+    dashboard?: string;
 }
 
 const specificationModules = import.meta.glob("../../../../examples/map/**/spec.json", { eager: true }) as Record<string, { default: HyperPbiSchema }>;
@@ -37,6 +39,7 @@ export function MapGalleryPage({ storage }: { storage?: ProjectStorage }) {
     const specification = selected ? specifications.get(selected.spec) : undefined;
     const rows = selected ? datasets.get(selected.data) ?? [] : [];
     const project = useMemo(() => {
+        if (selected?.dashboard === "dynamic-gis-analytics") return importProjectBundle(gisBundle).project;
         if (!selected || !specification) return undefined;
         const next = createPlaygroundProject(selected.title);
         next.specification = specification;
@@ -44,7 +47,7 @@ export function MapGalleryPage({ storage }: { storage?: ProjectStorage }) {
         return next;
     }, [selected, specification, rows]);
     const groups = [...new Set(entries.map((entry) => entry.group))];
-    const json = specification ? JSON.stringify(specification, null, 2) : "";
+    const json = project?.specification ? JSON.stringify(project.specification, null, 2) : "";
     const copy = async () => {
         await navigator.clipboard.writeText(json);
         setCopied(true);
@@ -96,7 +99,7 @@ export function MapGalleryPage({ storage }: { storage?: ProjectStorage }) {
                         <div><strong>Limitations</strong><p>{selected?.limitations}</p></div>
                         <div><strong>Power BI</strong><p>{selected?.powerBi ?? "Browser previews use deterministic row keys. In Power BI, eligible selections use retained host identities and configured external filter targets."}</p></div>
                     </div>
-                    {selected?.id === "remote-analytics" && <details class="pg-map-spec"><summary>Copyable API response</summary><button type="button" onClick={() => void navigator.clipboard.writeText(JSON.stringify(sampleResponse, null, 2))}>Copy API response</button><pre><code>{JSON.stringify(sampleResponse, null, 2)}</code></pre></details>}
+                    {selected?.dashboard && <p><a href={`/examples/${selected.dashboard}`}>Complete dashboard and project files ↗</a></p>}
                     <details class="pg-map-spec" open>
                         <summary>JSON specification</summary>
                         <pre><code>{json}</code></pre>

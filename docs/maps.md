@@ -270,7 +270,7 @@ and advanced JSON controls.
 ## Examples and authoring
 
 The [map example manifest](../examples/map/manifest.json) drives the unified website's map gallery at
-`/examples/maps`. It contains 29 focused groups, deterministic data, expected behavior, limitations,
+`/examples/maps`. It contains 30 focused groups, deterministic data, expected behavior, limitations,
 and Power BI notes. Use **Copy spec** to copy the exact JSON shown beside the running preview.
 
 Map Studio configures the major source, renderer, icon, legend, heatmap, interaction, selection,
@@ -297,7 +297,6 @@ See [map services](map-services.md), [interactions](interactions.md), the
 
 GeoJSON joins use the same cardinality, aggregation and lineage engine as ArcGIS feature joins. Source fields, Power BI fields and joined fields remain separate. Date/report slicers rebind analytical data while source definitions and feature IDs remain stable. Hidden remote GeoJSON sources stop polling; identical URLs within a map share one fetch; stale responses are discarded. Remote GeoJSON is bounded to 25 MB and configured feature limits; use FeatureServer viewport loading for larger data. See [portable definitions and controlled refresh](map-imports.md).
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Set a layer popup to `mode: "dynamic"` and specify `request.endpoint`. Use `{{context.field}}` to read the clicked feature. A map click can also drive a separate dashboard region. [Dynamic GIS Analytics](https://hyperpbi.com/examples/dynamic-gis-analytics) [Dynamic Content guide](remote-fragments.md).

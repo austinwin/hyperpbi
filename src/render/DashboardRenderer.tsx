@@ -4,7 +4,7 @@ import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
 import { sanitizeStyleObject } from "../security/sanitizeCss";
 import { RenderContext, useRenderContext, type RenderContextValue } from "./RenderContext";
-import { componentRows as selectedComponentRows, executeComponentInteraction, rowsForComponent } from "../interactions/componentInteraction";
+import { componentRowKeys, componentRows as selectedComponentRows, executeComponentInteraction, rowsForComponent } from "../interactions/componentInteraction";
 import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
@@ -19,7 +19,9 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const componentId = component.id ?? `${component.type}-${index}`;
         const authoringOwnerId = context.ownerByRuntimeId?.[componentId] ?? componentId;
         const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
-        const powerBiSourceRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
+        const fragmentDatasetRoot = context.executionMode === "fragment" && datasetResult?.sourceId
+            ? context.datasets?.get(datasetResult.sourceId)?.data : undefined;
+        const powerBiSourceRowKeys = fragmentDatasetRoot?.rowKeys ?? context.powerBiSourceRowKeys ?? context.sourceRowKeys;
         const hasPowerBiLineage = datasetResult?.sourceId === "powerbi";
         const componentContext: RenderContextValue = datasetResult ? {
             ...context,
@@ -27,6 +29,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
             rows: datasetResult.data.rows,
             sourceRows: datasetResult.data.rows,
             sourceRowKeys: datasetResult.data.rowKeys,
+            ...(fragmentDatasetRoot ? { powerBiSourceRows: fragmentDatasetRoot.rows, powerBiSourceRowKeys } : {}),
             datasetLineage: datasetResult.lineage,
             interactionIndexSpace: "component",
             selectExternal: hasPowerBiLineage ? context.selectExternal : () => ({ sent: false, reason: "no selection identities" }),
@@ -42,6 +45,10 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
                 { state: context.state, datasetLineage: datasetResult.lineage, powerBiSourceRowKeys },
             ),
             componentRows: (id: string) => {
+                if (fragmentDatasetRoot) {
+                    const selected = new Set(componentRowKeys(id, context));
+                    return datasetResult.lineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(powerBiSourceRowKeys[sourceIndex])) ? [index] : []);
+                }
                 const selected = new Set(selectedComponentRows(id, { state: context.state }));
                 return datasetResult.lineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [index] : []);
             },
@@ -64,7 +71,7 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
         const isOverlayOnly = ["modal", "dropdown", "popover", "offcanvas"].includes(component.type);
 
         // UI action execution (separate from data interaction)
-        const hasUiAction = Boolean(component.uiAction);
+        const hasUiAction = component.type !== "button" && Boolean(component.uiAction);
         const handleUiAction = (event: Event) => {
             if (!hasUiAction) return;
             if (component.uiAction) {

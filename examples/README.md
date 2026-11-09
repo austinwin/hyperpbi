@@ -1,12 +1,13 @@
 # HyperPBI examples
 
-Example files intentionally cover both schema generations.
+Maintained dashboards use schema 2.0.
 
 ## Current 2.0 examples
 
 - `hyperpbi_svg_full_demo_bundle/hyperpbi_svg_full_demo.json`
 - prompt files beginning with `v2-`
 - prompt guidance in this directory that explicitly requests version 2.0
+- [Dynamic GIS Analytics](dashboards/dynamic-gis-analytics/README.md) and [Universal Dynamic Content](dashboards/universal-dynamic-content/README.md), with live MiniUp requests and complete Playground projects
 
 Use these as the starting point for new authoring. Confirm every alias against the current Field Manifest; aliases depend on the bound Power BI fields.
 

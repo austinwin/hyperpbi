@@ -1,5 +1,5 @@
 import { useEffect } from "preact/hooks";
-import { overlayRuntime } from "./overlayRuntime";
+import { useOverlayRuntime } from "./overlayRuntime";
 
 export const focusableSelector = [
     "button:not([disabled])", "[href]", "input:not([disabled])", "select:not([disabled])",
@@ -7,6 +7,7 @@ export const focusableSelector = [
 ].join(",");
 
 export function useOverlayFocus(id: string, panelRef: { current: HTMLElement | null }, options: { trap?: boolean; focusFirst?: boolean; restore?: boolean } = {}): void {
+    const overlayRuntime = useOverlayRuntime();
     useEffect(() => {
         const panel = panelRef.current;
         if (!panel) return;
@@ -18,8 +19,9 @@ export function useOverlayFocus(id: string, panelRef: { current: HTMLElement | n
             const items = Array.from(panel.querySelectorAll<HTMLElement>(focusableSelector)).filter(item => item.offsetParent !== null);
             if (!items.length) { event.preventDefault(); panel.focus(); return; }
             const first = items[0]; const last = items[items.length - 1];
-            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            const active = (panel.getRootNode() as Document | ShadowRoot).activeElement;
+            if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
         };
         document.addEventListener("keydown", onKeyDown);
         return () => {
@@ -27,5 +29,5 @@ export function useOverlayFocus(id: string, panelRef: { current: HTMLElement | n
             if (overlayRuntime.panels.get(id) === panel) overlayRuntime.panels.delete(id);
             if (options.restore !== false && !overlayRuntime.restoreSuppressed.delete(id)) overlayRuntime.triggers.get(id)?.focus();
         };
-    }, [id, options.trap, options.focusFirst, options.restore]);
+    }, [overlayRuntime, id, options.trap, options.focusFirst, options.restore]);
 }

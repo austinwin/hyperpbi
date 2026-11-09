@@ -9,6 +9,7 @@ import { EmptyState } from "../system/EmptyState";
 import { SlotRenderer } from "../custom/slotRenderer";
 import { clearComponentInteraction, executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { downloadTableExport, rowsForTableExport, tableExportColumns } from "./tableExport";
 
@@ -84,6 +85,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const context = useRenderContext();
     const { sourceRows, sourceRowKeys, data, settings, state, dispatch, getRowsForComponent, componentRows } = context;
     const id = component.id ?? "table";
+    const dynamicTrigger = !component.disabled && context.dynamicEventKeys?.has(dynamicEventKey(id, "click"));
     const policy = resolveInteractionPolicy(component, context.config, "dataPoint");
     const rows = getRowsForComponent(id);
     const [page, setPage] = useState(1);
@@ -110,9 +112,13 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const selectedSourceRows = state.componentSelectedRows[id] ?? [];
     const selectedRows = useMemo(() => {
         if (context.interactionIndexSpace !== "component" || !context.datasetLineage) return selectedSourceRows;
+        if (context.executionMode === "fragment" && context.powerBiSourceRowKeys) {
+            const keys = new Set(state.componentSelectedRowKeys[id] ?? []);
+            return context.datasetLineage.flatMap((indices, index) => indices.some(sourceIndex => keys.has(context.powerBiSourceRowKeys![sourceIndex])) ? [index] : []);
+        }
         const selected = new Set(selectedSourceRows);
         return context.datasetLineage.flatMap((indices, index) => indices.some(sourceIndex => selected.has(sourceIndex)) ? [index] : []);
-    }, [selectedSourceRows, context.interactionIndexSpace, context.datasetLineage]);
+    }, [selectedSourceRows, context.interactionIndexSpace, context.datasetLineage, context.executionMode, context.powerBiSourceRowKeys, state.componentSelectedRowKeys, id]);
     const highlightedRows = componentRows(id);
     const selectedRowSet = useMemo(() => new Set(selectedRows), [selectedRows]);
     const highlightedRowSet = useMemo(() => new Set(highlightedRows), [highlightedRows]);
@@ -229,15 +235,24 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                         const index = sourceIndices.get(row) ?? -1;
                         const selected = selectedRowSet.has(index);
                         const highlighted = highlightedRowSet.has(index);
-                        return <tr key={rowKey(row, preparedIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2} onClick={event => {
+                        const activate = (event: MouseEvent | KeyboardEvent) => {
                             const field = policy.field;
                             executeComponentInteraction(policy, createInteractionPayload(component, {
                                 rowIndices: index >= 0 ? [index] : [],
                                 sourceRowKeys: context.sourceRowKeys,
                                 field,
                                 value: field ? row[field] : undefined,
+                                contextRows: [row],
                             }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
-                        }}>
+                        };
+                        return <tr key={rowKey(row, preparedIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2}
+                            tabIndex={dynamicTrigger ? 0 : undefined} onClick={activate}
+                            onKeyDown={dynamicTrigger ? event => {
+                                if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                                    event.preventDefault();
+                                    activate(event);
+                                }
+                            } : undefined}>
                             {policy.showSelector && <td><input type="checkbox" checked={selected} aria-label="Select row" /></td>}
                             {columns.map(column => <td key={column.field} class={column.hozAlign ? `text-${column.hozAlign}` : ""} style={cellStyle(column, row[column.field])}>{formatValue(row[column.field], column.format ?? data.fields[column.field]?.format)}</td>)}
                         </tr>;

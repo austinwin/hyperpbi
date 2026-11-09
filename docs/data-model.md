@@ -292,7 +292,6 @@ The runtime filters the already-prepared child view by the breadcrumb path and m
 
 These boundaries keep evaluation deterministic, inspectable, and safe inside the custom visual.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+`data.sources` loads records into a dashboard's workspace. Dynamic Content loads an independent `hyperpbi.fragment` containing named scalar datasets and components. A fragment component binds to its `dataset`, with the first named dataset as its default. Returned rows and selections stay inside the fragment. [Dynamic Content guide](remote-fragments.md).

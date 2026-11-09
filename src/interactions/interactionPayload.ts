@@ -32,6 +32,7 @@ export function createInteractionPayload(component: ComponentBase, options: {
     mapFeatureKey?: string;
     mapLayerId?: string;
     mapFeatureId?: string;
+    contextRows?: DataRow[];
 } = {}): InteractionPayload {
     const field = component.interaction?.field ?? options.field;
     const value = component.interaction?.value !== undefined ? component.interaction.value : options.value;
@@ -68,6 +69,7 @@ export function createInteractionPayload(component: ComponentBase, options: {
         mapFeatureKey: options.mapFeatureKey,
         mapLayerId: options.mapLayerId,
         mapFeatureId: options.mapFeatureId,
+        ...(options.contextRows ? { contextRows: options.contextRows } : {}),
     };
 }
 

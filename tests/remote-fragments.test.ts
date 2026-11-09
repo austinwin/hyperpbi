@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { prepareRemoteFragment, fragmentComponentTypes } from "../src/fragments/prepareRemoteFragment";
-import { assertFragmentAccess, clearRemoteFragmentCache, fetchRemoteFragment, fragmentEndpoint } from "../src/fragments/remoteFragmentRequest";
+import { assertFragmentAccess, clearRemoteFragmentCache, fetchRemoteFragment } from "../src/fragments/remoteFragmentRequest";
 import { matchesHttpsHost, MINIUP_HOSTS } from "../src/security/networkHostPolicy";
 import { validateV2Schema } from "../src/schema/validateV2Schema";
 import { evaluateDatasets } from "../src/data/datasets";
-import type { ResolvedMapFeature } from "../src/maps/model/resolvedMapTypes";
-import sample from "../examples/remote-fragments/sensor-1024.json";
+import { fragmentEndpoint } from "../src/fragments/fragmentBindings";
+import { configuredMapEndpoints } from "../src/providers/configuredMapEndpoints";
+import demo from "../examples/dashboards/dynamic-content-api.mjs";
+
+const sample = await (await demo.fetch(new Request("https://functions.miniup.app/hyperpbi-dynamic-demo/sensor?id=1024"))).json();
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const request = { endpoint: "https://demo.miniup.io/api/sensor", cacheTtlSeconds: 1 };
@@ -15,14 +18,14 @@ afterEach(() => { clearRemoteFragmentCache(); vi.unstubAllGlobals(); vi.useRealT
 describe("remote fragment canonical preparation", () => {
     it("prepares real components with independent datasets and namespaced IDs", () => {
         const result = prepareRemoteFragment(sample, "popupA");
-        expect(result.schema.components[0].id).toBe("popupA-summary");
+        expect(result.schema.components[0].id).toBe("popupA-current_pressure");
         expect(result.workspace.sources.pressure.data.rows).toHaveLength(24);
         expect(result.workspace.sources.current.data.rows).toHaveLength(1);
         expect(result.schema.data?.sources).toBeUndefined();
         const evaluated = evaluateDatasets(result.data, {}, undefined, {}, Object.fromEntries(Object.entries(result.workspace.sources).map(([id, source]) => [id, source.data])));
         expect(evaluated.datasets.get("pressure")?.sourceId).toBe("pressure");
-        expect(prepareRemoteFragment(sample, "popupB").schema.components[0].id).toBe("popupB-summary");
-        expect(sample.components[0].id).toBe("summary");
+        expect(prepareRemoteFragment(sample, "popupB").schema.components[0].id).toBe("popupB-current_pressure");
+        expect(sample.components[0].id).toBe("current_pressure");
     });
 
     it("rejects noncanonical IDs and unapproved asset URLs hidden in datasets", () => {
@@ -35,9 +38,8 @@ describe("remote fragment canonical preparation", () => {
         expect(validateV2Schema(result.schema).valid).toBe(true);
     });
 
-    it.each(["map", "modal", "offcanvas", "html", "custom", "mermaidDiagram"])("rejects restricted %s components at any layout depth", type => {
-        const value = clone(sample);
-        (value.components[0] as unknown as { children: unknown[] }).children.push({ type, id: "unsafe" });
+    it.each(["dynamicContent", "map", "modal", "offcanvas", "html", "custom", "mermaidDiagram"])("rejects restricted %s components at any layout depth", type => {
+        const value = { ...clone(sample), components: [{ type: "card", id: "card", children: [{ type, id: "unsafe" }] }] };
         expect(() => prepareRemoteFragment(value, "local")).toThrow("restricted");
         expect(fragmentComponentTypes).not.toContain(type);
     });
@@ -49,18 +51,32 @@ describe("remote fragment canonical preparation", () => {
         expect(() => prepareRemoteFragment({ ...sample, components: Array.from({ length: 101 }, (_, index) => ({ type: "text", id: `text${index}`, text: "Safe" })) }, "local")).toThrow("100-component");
         expect(() => prepareRemoteFragment({ ...sample, datasets: { rows: Array.from({ length: 5001 }, () => ({ x: 1 })) } }, "local")).toThrow("5000-row");
         expect(() => prepareRemoteFragment({ ...sample, components: [{ type: "kpi", id: "k", field: "psi", interaction: { externalMode: "filter" } }] }, "local")).toThrow("Power BI");
+        expect(() => prepareRemoteFragment({ ...sample, components: [{ type: "barChart", id: "chart", options: { tooltip: { appendToBody: true } } }] }, "local")).toThrow("inside the chart");
     });
 });
 
 describe("endpoint bindings and host permissions", () => {
-    it("encodes service, Power BI and joined attributes without changing origin", () => {
-        const feature = { serviceAttributes: { site_id: "A&B/ C" }, powerBiAttributes: { station_id: 4 }, joinedAttributes: { asset_id: "pump" } } as unknown as ResolvedMapFeature;
-        const result = fragmentEndpoint("https://demo.miniup.io/api/{{service.site_id}}?station={{powerbi.station_id}}&asset={{joined.asset_id}}", feature);
+    it("validates trigger references, canonical popup requests, and Power BI origin discovery", () => {
+        const source = { type: "button", id: "refresh", title: "Refresh" };
+        const region = { type: "dynamicContent", id: "work", trigger: { source: "refresh", event: "click", refresh: true }, request: { endpoint: "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}" } };
+        const specification = { version: "2.0", components: [source, region] };
+        expect(validateV2Schema(specification).valid).toBe(true);
+        expect(configuredMapEndpoints(JSON.stringify(specification))).toEqual([region.request.endpoint]);
+        expect(validateV2Schema({ ...specification, components: [region] }).diagnostics).toContainEqual(expect.objectContaining({ path: "/components/0/trigger/source", code: "UNKNOWN_COMPONENT_TARGET" }));
+        expect(validateV2Schema({ ...specification, components: [{ ...region, trigger: undefined, request: { endpoint: "https://demo.miniup.app/asset?id={{context.asset_id}}", headers: {} } }] }).valid).toBe(false);
+    });
+    it("encodes event context and control state without changing origin", () => {
+        const context = { site_id: "A&B/ C", station_id: 4 };
+        const result = fragmentEndpoint("https://demo.miniup.io/api/{{context.site_id}}?station={{context.station_id}}&priority={{state.priority}}", context, { priority: "high & urgent" });
         expect(result.origin).toBe("https://demo.miniup.io");
         expect(result.pathname).toBe("/api/A%26B%2F%20C");
         expect(result.searchParams.get("station")).toBe("4");
-        expect(() => fragmentEndpoint("https://{{service.site_id}}/api", feature)).toThrow("literal HTTPS");
-        expect(() => fragmentEndpoint("https://demo.miniup.io/api/{{service.missing}}", feature)).toThrow("Missing feature");
+        expect(result.searchParams.get("priority")).toBe("high & urgent");
+        expect(() => fragmentEndpoint("https://{{context.site_id}}/api", context)).toThrow("literal HTTPS");
+        expect(() => fragmentEndpoint("https://demo.miniup.io/api/{{context.missing}}", context)).toThrow("Missing dynamic value");
+        expect(() => fragmentEndpoint("https://demo.miniup.io/api/{{context.constructor}}", context)).toThrow("Missing dynamic value");
+        expect(() => fragmentEndpoint("https://demo.miniup.io/?{{context.site_id}}=query", context)).toThrow("parameter values");
+        expect(() => fragmentEndpoint("https://demo.miniup.io/api/{{context.site_id}}", { site_id: ".." })).toThrow("Dot path");
         expect(() => fragmentEndpoint("https://user:pass@demo.miniup.io/api")).toThrow("credential-free");
     });
 

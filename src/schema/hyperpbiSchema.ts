@@ -716,7 +716,16 @@ export interface SvgMarkupComponent extends ComponentBase {
     performance?: SvgPerformanceOptions;
 }
 
+export interface DynamicContentComponent extends ComponentBase {
+    type: "dynamicContent";
+    request: import("../fragments/fragmentTypes").RemoteFragmentRequest;
+    trigger?: import("../fragments/fragmentTypes").DynamicTrigger;
+    loadOnMount?: boolean;
+    emptyText?: string;
+}
+
 export type DashboardComponent =
+    | DynamicContentComponent
     | ContainerComponent
     | ControlComponent
     | DataDisplayComponent

@@ -1,6 +1,6 @@
 import { RemoteFragmentHost } from "../../fragments/RemoteFragmentHost";
 import { boundedFragmentNumber } from "../../fragments/remoteFragmentRequest";
-import { mergedFeatureAttributes, formatFeatureValue } from "../../maps/model/mapFeatureValue";
+import { mapFeatureDynamicContext, mergedFeatureAttributes, formatFeatureValue } from "../../maps/model/mapFeatureValue";
 import { MapPopupDetails } from "./MapPopupDetails";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { MapComponent } from "../../schema/hyperpbiSchema";
@@ -69,8 +69,16 @@ export function MapFeatureDetails({
   useEffect(() => {
     if (!resolved) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      const frame = panelRef.current?.closest(".hp-map-frame");
+      const panel = panelRef.current;
+      const root = panel?.getRootNode() as Document | ShadowRoot | undefined;
+      if (event.key !== "Escape" || event.defaultPrevented || !panel) return;
+      const active = root?.activeElement;
+      const viewer = panel.closest(".hyperpbi-root");
+      if (viewer && !viewer.contains(active ?? null)) return;
+      const frame = panel.closest(".hp-map-frame");
+      const activeMap = active?.closest(".hp-map-frame");
+      const activeOverlay = active?.closest(".hp-overlay-host");
+      if (activeMap && activeMap !== frame || activeOverlay && !activeOverlay.contains(panel)) return;
       if (frame?.querySelector(".hp-map-toolbar-popover")) return;
       event.preventDefault();
       event.stopPropagation();
@@ -127,8 +135,8 @@ export function MapFeatureDetails({
   return (
     <aside
       ref={panelRef}
-      class={`hp-map-feature-details is-${mode} ${minimized ? "is-minimized" : ""} ${expanded ? "is-expanded" : ""} ${layer.popup?.mode === "remote" ? "has-remote-fragment" : ""}`}
-      style={{ ...(!expanded ? anchoredPosition : {}), ...(layer.popup?.mode === "remote" && !expanded ? { width: `${boundedFragmentNumber(layer.popup.remote?.width, 520, 280, 1000)}px`, maxHeight: `${boundedFragmentNumber(layer.popup.remote?.maxHeight, 560, 200, 1000)}px` } : {}) }}
+      class={`hp-map-feature-details is-${mode} ${minimized ? "is-minimized" : ""} ${expanded ? "is-expanded" : ""} ${layer.popup?.mode === "dynamic" ? "has-remote-fragment" : ""}`}
+      style={{ ...(!expanded ? anchoredPosition : {}), ...(layer.popup?.mode === "dynamic" && !expanded ? { width: `${boundedFragmentNumber(layer.popup.width, 520, 280, 1000)}px`, maxHeight: `${boundedFragmentNumber(layer.popup.maxHeight, 560, 200, 1000)}px` } : {}) }}
       onWheel={event => event.stopPropagation()} onMouseDown={event => event.stopPropagation()} onPointerDown={event => event.stopPropagation()} onTouchStart={event => event.stopPropagation()} onDblClick={event => event.stopPropagation()}
       role="dialog"
       aria-modal="false"
@@ -149,7 +157,7 @@ export function MapFeatureDetails({
             <span>{selectedCount.toLocaleString()} features selected</span>
           )}
         </div>
-        {layer.popup?.mode === "remote" && <button type="button" aria-label={expanded ? "Restore popup size" : "Expand popup"} onClick={() => setExpanded(value => !value)}>{expanded ? "↙" : "↗"}</button>}
+        {layer.popup?.mode === "dynamic" && <button type="button" aria-label={expanded ? "Restore popup size" : "Expand popup"} onClick={() => setExpanded(value => !value)}>{expanded ? "↙" : "↗"}</button>}
         <button type="button" aria-label={minimized ? "Expand feature details" : "Minimize feature details"} onClick={() => setMinimized(!minimized)}>{minimized ? "+" : "−"}</button>
         <button type="button" aria-label="Close feature details" onClick={onClose}>
           ×
@@ -172,7 +180,7 @@ export function MapFeatureDetails({
         </label>
       )}
       <div class="hp-map-feature-details-body">
-        {layer.popup?.mode === "remote" && layer.popup.remote && <RemoteFragmentHost key={feature.featureKey ?? feature.id} request={layer.popup.remote} feature={feature} fallback={<dl class="hp-map-feature-details-fields">{Object.entries(mergedFeatureAttributes(feature)).slice(0, 50).map(([field, value]) => <div><dt>{field}</dt><dd>{formatFeatureValue(value)}</dd></div>)}</dl>} />}
+        {layer.popup?.mode === "dynamic" && layer.popup.request && <RemoteFragmentHost request={layer.popup.request} values={mapFeatureDynamicContext(feature)} fallback={<dl class="hp-map-feature-details-fields">{Object.entries(mergedFeatureAttributes(feature)).slice(0, 50).map(([field, value]) => <div><dt>{field}</dt><dd>{formatFeatureValue(value)}</dd></div>)}</dl>} />}
         <MapPopupDetails popup={layer.popup ?? { mode: "default", fields: [], actions: [] }} feature={feature} executeAction={executeAction} showActions={false} />
       </div>
       {view.actions.length > 0 && (

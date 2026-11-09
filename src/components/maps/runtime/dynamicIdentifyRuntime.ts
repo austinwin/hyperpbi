@@ -110,7 +110,9 @@ function resolveIdentifyPopup(
   if (authored)
     return {
       mode: authored.mode,
-      remote: authored.remote,
+      request: authored.request,
+      width: authored.width,
+      maxHeight: authored.maxHeight,
       content: authored.content,
       title: authored.title,
       fields: (authored.fields ?? []).map((field) => ({

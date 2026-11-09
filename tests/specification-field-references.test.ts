@@ -18,10 +18,15 @@ const dashboard=()=>({version:"2.0",data:{datasets:{base:{source:"powerbi",selec
 ]});
 
 describe("shared specification field occurrences",()=>{
- it("canonicalizes model aliases in remote popup endpoint bindings",()=>{
-  const prepared=prepareSpecification({version:"2.0",components:[{type:"map",id:"remote-map",layers:[{id:"points",name:"Points",source:{type:"powerbi",bindings:{latitude:"latitude",longitude:"longitude"}},popup:{mode:"remote",remote:{endpoint:"https://demo.miniup.io/api?station={{powerbi.status}}"}}}]}]},data);
+ it("canonicalizes model aliases in map popup and dashboard region request bindings",()=>{
+  const prepared=prepareSpecification({version:"2.0",components:[
+   {type:"map",id:"remote-map",layers:[{id:"points",name:"Points",source:{type:"powerbi",bindings:{latitude:"latitude",longitude:"longitude"}},popup:{mode:"dynamic",request:{endpoint:"https://demo.miniup.io/api?station={{context.status}}"}}}]},
+   {type:"table",id:"work",columns:["status"]},
+   {type:"dynamicContent",id:"detail",trigger:{source:"work",event:"click"},request:{endpoint:"https://demo.miniup.io/api?status={{context.status}}&priority={{state.priority}}"}},
+  ]},data);
   expect(prepared.errors).toEqual([]);
-  expect(JSON.stringify(prepared.schema)).toContain("{{powerbi.model_status_key}}");
+  expect(JSON.stringify(prepared.schema)).toContain("station={{context.model_status_key}}");
+  expect(JSON.stringify(prepared.schema)).toContain("status={{context.model_status_key}}&priority={{state.priority}}");
  });
 
  it("canonicalizes nested aliases while preserving service and runtime namespaces",()=>{const value=dashboard();const datasets=resolveDatasetSchemas(data,{});const diagnostics=canonicalizeSpecificationFieldReferences(value,data,datasets);expect(diagnostics.filter(item=>item.code==="UNKNOWN_FIELD")).toEqual([]);const text=JSON.stringify(value);expect(text).toContain("model_status_key");expect(text).toContain("model_amount_sum");expect(text).toContain("SERVICE_STATUS");expect(text).toContain("{{metric.total}}");expect(text).toContain("{{state.mode}}");const paths=specificationFieldReferences(value).map(item=>item.path);expect(paths).toContain("/components/0/columns/0/field");expect(paths).toContain("/components/1/groups/0/fields/1/field");expect(paths).toContain("/components/4/layers/0/visibility/conditionField");});

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "preact/hooks";
 import type { OverlayAnchor } from "../../render/stateStore";
 import type { OverlayPlacement } from "./overlayTypes";
-import { overlayRuntime } from "./overlayRuntime";
+import { useOverlayRuntime } from "./overlayRuntime";
 import { positionAnchoredOverlay, type OverlayPosition } from "./overlayPositioning";
 
 export function useAnchoredOverlayPosition(id: string, anchor: OverlayAnchor | undefined, panelRef: { current: HTMLElement | null }, placement: OverlayPlacement): OverlayPosition | undefined {
+    const overlayRuntime = useOverlayRuntime();
     const [position, setPosition] = useState<OverlayPosition>();
     useEffect(() => {
         const update = () => {
@@ -20,6 +21,6 @@ export function useAnchoredOverlayPosition(id: string, anchor: OverlayAnchor | u
         window.addEventListener("resize", update);
         window.addEventListener("scroll", update, true);
         return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", update); window.removeEventListener("scroll", update, true); };
-    }, [id, anchor?.top, anchor?.left, anchor?.width, anchor?.height, panelRef, placement]);
+    }, [overlayRuntime, id, anchor?.top, anchor?.left, anchor?.width, anchor?.height, panelRef, placement]);
     return position;
 }

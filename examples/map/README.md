@@ -7,7 +7,7 @@ with `import.meta.glob`, so examples are not hardcoded into the page component.
 
 The examples are intentionally focused. They share `data/analytical-points.json` to avoid copying
 large datasets, while inline GeoJSON examples keep only the geometry needed to explain the feature.
-All specifications are valid HyperPBI 2.0 JSON and are suitable for the **Copy spec** action.
+All specifications use HyperPBI 2.0 JSON and are available through **Copy spec**. The Dynamic GIS Analytics entry opens the complete dashboard project and fetches station details from MiniUp. [Dynamic GIS Analytics](../dashboards/dynamic-gis-analytics/README.md)
 
 Folders mirror the analytical model:
 

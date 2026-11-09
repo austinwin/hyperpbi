@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "preact/hooks";
 import { calculateAggregates } from "../data/aggregations";
 import { normalizeMapBindings } from "../data/normalizeMapBindings";
 import { filterRows } from "../data/filtering";
@@ -30,6 +30,7 @@ import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
 import { resolveAppShell } from "../components/app/appShellResolver";
 import { AppShell } from "../components/app/AppShell";
 import { OverlayHost } from "../components/overlays/OverlayHost";
+import { createOverlayRuntime } from "../components/overlays/overlayRuntime";
 import { ToastHost } from "../components/overlays/ToastHost";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import { prepareLogicalDatasets } from "../editor/prepareAuthoringData";
@@ -37,6 +38,8 @@ import type { MapViewportState } from "../components/maps/MapBlock";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 import { useRemoteDataWorkspace } from "../data/useRemoteDataWorkspace";
 import { IsolatedVisual } from "../security/IsolatedVisual";
+import { visitSpecificationComponents } from "../catalog/componentTraversal";
+import { dynamicEventKey, type DynamicEvent } from "../fragments/fragmentTypes";
 
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
@@ -116,15 +119,36 @@ export function HyperPbiRoot({
     dashboardReducer,
     initialDashboardState(schema.state?.search, schema.state?.activeTab),
   );
+  const overlayRuntime = useMemo(() => executionMode === "dashboard" ? createOverlayRuntime(instanceId) : undefined, [instanceId, executionMode]);
+  const { keys: dynamicEventKeys, defaults: dynamicDefaults } = useMemo(() => {
+    const keys = new Set<string>();
+    const defaults: Record<string, unknown> = {};
+    if (executionMode === "dashboard") visitSpecificationComponents(schema, ({ component }) => {
+      if (typeof component.id === "string" && component.defaultValue !== undefined) Object.defineProperty(defaults, component.id, { value: component.defaultValue, enumerable: true });
+      if (component.type !== "dynamicContent") return;
+      const trigger = (component as unknown as import("../schema/hyperpbiSchema").DynamicContentComponent).trigger;
+      if (trigger) keys.add(dynamicEventKey(trigger.source, trigger.event));
+    });
+    return { keys, defaults };
+  }, [schema, executionMode]);
+  const dynamicState = useMemo(() => ({ ...dynamicDefaults, ...state.values }), [dynamicDefaults, state.values]);
+  const [dynamicEvents, setDynamicEvents] = useState<Record<string, DynamicEvent>>({});
+  const emitDynamicEvent = useCallback<NonNullable<RenderContextValue["emitDynamicEvent"]>>((source, event, values) => {
+    const key = dynamicEventKey(source, event);
+    if (!dynamicEventKeys.has(key)) return;
+    setDynamicEvents(previous => ({ ...previous, [key]: { context: values, revision: (previous[key]?.revision ?? 0) + 1 } }));
+  }, [dynamicEventKeys]);
   const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost, providerAccess, webAccessAvailable);
   const rowKeySignature = useMemo(
-    () => JSON.stringify(data.rowKeys),
-    [data.rowKeys],
+    () => JSON.stringify(executionMode === "fragment" && dataWorkspace
+      ? Object.values(dataWorkspace.sources).flatMap(source => source.data.rowKeys)
+      : data.rowKeys),
+    [data.rowKeys, dataWorkspace, executionMode],
   );
   useEffect(() => {
     dispatch({
       type: "reconcileRowKeys",
-      rowKeys: data.rowKeys,
+      rowKeys: JSON.parse(rowKeySignature),
     });
   }, [rowKeySignature]);
   const rows = useMemo(
@@ -271,6 +295,7 @@ export function HyperPbiRoot({
       if (executionMode === "fragment" && (Array.isArray(action) ? action : [action]).some(item => !["setTab", "setState", "toggleState", "clearFilters", "setStep", "nextStep", "previousStep"].includes(item.type))) return { success: false, message: "This action is unavailable in remote fragments." };
       const ctx: RenderContextValue = {
         instanceId,
+        executionMode,
         remoteSourceHost,
         data: filteredData,
         rows,
@@ -300,17 +325,20 @@ export function HyperPbiRoot({
         componentPathById,
         datasets: datasetEvaluation.datasets,
         remoteSources: remoteData.statuses,
+        dynamicEventKeys,
+        emitDynamicEvent,
         onMapViewportChange,
   mapCommands,
         executeUiAction: null as any,
         isOverlayOpen: null as any,
+        overlayRuntime,
       };
       return executeUiActions(action, ctx, event);
     },
     [
       instanceId,
-      remoteSourceHost,
       executionMode,
+      remoteSourceHost,
       filteredData,
       rows,
       data.rows,
@@ -335,6 +363,9 @@ export function HyperPbiRoot({
       componentPathById,
       datasetEvaluation.datasets,
       remoteData.statuses,
+      dynamicEventKeys,
+      emitDynamicEvent,
+      overlayRuntime,
       onMapViewportChange,
   mapCommands,
     ],
@@ -343,6 +374,7 @@ export function HyperPbiRoot({
   const context = useMemo(
     (): RenderContextValue => ({
       instanceId,
+      executionMode,
       remoteSourceHost,
       data: filteredData,
       rows,
@@ -372,10 +404,15 @@ export function HyperPbiRoot({
       componentPathById,
       datasets: datasetEvaluation.datasets,
       remoteSources: remoteData.statuses,
+      dynamicEvents,
+      dynamicState,
+      dynamicEventKeys,
+      emitDynamicEvent,
       onMapViewportChange,
   mapCommands,
       executeUiAction: execUiAction,
       isOverlayOpen,
+      overlayRuntime,
     }),
     [
       instanceId,
@@ -404,8 +441,13 @@ export function HyperPbiRoot({
       componentPathById,
       execUiAction,
       isOverlayOpen,
+      overlayRuntime,
       datasetEvaluation.datasets,
       remoteData.statuses,
+      dynamicEvents,
+      dynamicState,
+      dynamicEventKeys,
+      emitDynamicEvent,
       onMapViewportChange,
   mapCommands,
     ],
@@ -526,8 +568,7 @@ export function HyperPbiRoot({
             </div>
           </>
         )}
-        <OverlayHost />
-        <ToastHost />
+        {executionMode === "dashboard" && <><OverlayHost /><ToastHost /></>}
         {settings.debug.showSchemaErrors && runtimeWarnings.length > 0 && (
           <details class="hp-reference-warning">
             <summary>{runtimeWarnings.length} schema field warning(s)</summary>

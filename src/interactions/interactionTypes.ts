@@ -1,4 +1,5 @@
 import type { FilterOperator } from "../schema/hyperpbiSchema";
+import type { DataRow } from "../data/normalizeData";
 
 export type InteractionTrigger = "auto" | "click" | "change";
 export type ResolvedInteractionTrigger = Exclude<InteractionTrigger, "auto">;
@@ -58,12 +59,15 @@ export interface InteractionPayload {
     mapFeatureKey?: string;
     mapLayerId?: string;
     mapFeatureId?: string;
+    contextRows?: DataRow[];
 }
 
 export interface InteractionModifiers {
     trigger: ResolvedInteractionTrigger;
     multiSelect?: boolean;
     event?: Event;
+    dynamicEvent?: import("../fragments/fragmentTypes").DynamicTrigger["event"] | false;
+    contextValue?: unknown;
 }
 
 export interface InternalInteractionFilter {

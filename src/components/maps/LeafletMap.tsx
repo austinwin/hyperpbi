@@ -41,7 +41,8 @@ import {
   LeafletHeatCanvasLayer,
 } from "./LeafletHeatCanvasLayer";
 import { featureAttribute } from "../../maps/attributes/mapFeatureAttributes";
-import { formatFeatureValue } from "../../maps/model/mapFeatureValue";
+import { formatFeatureValue, mapFeatureDynamicContext } from "../../maps/model/mapFeatureValue";
+import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { normalizeFitPadding } from "../../maps/view/mapFitPadding";
 import {
   synchronizeLeafletExternalLayer,
@@ -1360,6 +1361,9 @@ export function LeafletMap({
           const currentFeature = mounted.feature;
           const currentLayer = mounted.layer;
           const currentContext = renderContextRef.current;
+          if (currentContext.dynamicEventKeys?.has(dynamicEventKey(id, "click"))) {
+            currentContext.emitDynamicEvent?.(id, "click", mapFeatureDynamicContext(currentFeature));
+          }
           const multiSelect = Boolean(
             event.originalEvent?.ctrlKey || event.originalEvent?.metaKey,
           );
@@ -1434,7 +1438,7 @@ const interactionResult = executeComponentInteraction(
     mapFeatureId: mounted.featureId,
   }),
   interactionContext,
-  { trigger: "click", multiSelect, event: event.originalEvent },
+  { trigger: "click", multiSelect, event: event.originalEvent, dynamicEvent: false },
 );
 
 if (interactionResult.cleared) {
@@ -1819,6 +1823,10 @@ if (interactionResult.cleared) {
     <div
       ref={ref}
       class="hp-leaflet-container"
+      onMouseDownCapture={event => {
+        // Leaflet's keyboard handler otherwise scrolls the dashboard before the click lands.
+        if (event.button === 0) event.currentTarget.focus({ preventScroll: true });
+      }}
     />
   );
 }

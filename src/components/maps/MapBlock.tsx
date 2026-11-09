@@ -373,7 +373,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
       rowKeys: exceedsIdentityLimit ? synchronizedRowKeys.filter((key) => externalKeys.has(key)) : synchronizedRowKeys,
       sourceRowKeys,
       field: policy.field,
-    }), interactionContext, { trigger: "click" });
+    }), interactionContext, { trigger: "click", dynamicEvent: false });
     const warnings = [
       resolution.overflowCount ? `${resolution.overflowCount.toLocaleString()} feature(s) exceeded the configured selection maximum.` : "",
       exceedsIdentityLimit ? `${(synchronizedRowIndices.length - externalRows.length).toLocaleString()} Power BI identities remained local because the identity limit is ${identityLimit.toLocaleString()}.` : "",
@@ -1591,7 +1591,9 @@ export function applyAuthoredArcGisLayerPresentation(
   const popup = definition.popup
     ? {
         mode: definition.popup.mode,
-          remote: definition.popup.remote,
+        request: definition.popup.request,
+        width: definition.popup.width,
+        maxHeight: definition.popup.maxHeight,
         title: definition.popup.title,
         fields: (definition.popup.fields ?? []).map((field) => ({
           field: field.field,
@@ -2192,7 +2194,9 @@ export async function resolveArcGisFeatureLayer(
     popup: def.popup
       ? {
           mode: def.popup.mode,
-          remote: def.popup.remote,
+          request: def.popup.request,
+          width: def.popup.width,
+          maxHeight: def.popup.maxHeight,
           title: def.popup.title,
           fields: (def.popup.fields ?? []).map((f) => ({
             field: f.field,

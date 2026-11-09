@@ -28,6 +28,7 @@ import { ExternalFilterResult } from "./powerbi/externalFilters";
 import { FilterOperator } from "./schema/hyperpbiSchema";
 import type { ProviderAccessState } from "./providers/providerTypes";
 import { providerServiceOrigin } from "./providers/providerPolicy";
+import { EXTERNAL_PROVIDERS_AVAILABLE } from "./providers/providerBuild";
 import { configuredMapEndpoints } from "./providers/configuredMapEndpoints";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
@@ -233,6 +234,7 @@ export class Visual implements IVisual {
     }
 
     private async checkProviderAccess():Promise<void>{
+        if(!EXTERNAL_PROVIDERS_AVAILABLE)return;
         const activeConfiguration=this.editMode===powerbi.EditMode.Advanced&&this.draftConfiguration?this.draftConfiguration:this.configuration;
         const activeSpecification=this.editMode===powerbi.EditMode.Advanced&&this.draftSpecification?this.draftSpecification:this.specification;
         const providers=parseConfig(activeConfiguration||defaultConfigJson).config?.providers;

@@ -206,8 +206,10 @@ export interface ResolvedMapLabels {
 // ── Resolved Popup ────────────────────────────────────────────────────
 
 export interface ResolvedMapPopup {
-    mode: "none" | "default" | "custom" | "remote";
-    remote?: import("../../fragments/fragmentTypes").RemoteFragmentRequest;
+    mode: "none" | "default" | "custom" | "dynamic";
+    request?: import("../../fragments/fragmentTypes").RemoteFragmentRequest;
+    width?: number;
+    maxHeight?: number;
     content?: import("../popup/mapPopupContent").MapPopupContentBlock[];
     title?: string;
     fields: ResolvedMapPopupField[];

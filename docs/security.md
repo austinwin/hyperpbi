@@ -103,7 +103,6 @@ Trusted CSS preserves native CSS including imports, fonts, keyframes, custom pro
 
 Browser CSP, CORS, frame policies, Power BI WebAccess permissions, report sandbox and tenant restrictions still apply. A loaded frame does not prove that every subresource loaded. Each trusted document exposes these limitations in its notice; HyperPBI does not strip trusted content or claim to override the host. External content cannot read its parent's report DOM; authors remain responsible for third-party resources they choose to include.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Dynamic Content checks the literal HTTPS origin before issuing anonymous GET. Encoded scalar bindings occupy path or query values. Requests omit credentials and reject redirects. Power BI requires the Maps build and runtime WebAccess. CORS still applies. Responses cannot grant permissions, trigger nested requests, or act on the model. [Dynamic Content guide](remote-fragments.md).

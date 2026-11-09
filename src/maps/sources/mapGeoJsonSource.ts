@@ -74,7 +74,9 @@ export function resolveGeoJsonLayer(
         } : undefined,
         popup: definition.popup ? {
             mode: definition.popup.mode,
-          remote: definition.popup.remote,
+            request: definition.popup.request,
+            width: definition.popup.width,
+            maxHeight: definition.popup.maxHeight,
             title: definition.popup.title,
             fields: (definition.popup.fields ?? []).map((field) => ({
                 ...field,

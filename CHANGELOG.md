@@ -1,5 +1,11 @@
 # Changelog
 
+## Dynamic Content
+
+- Add event-driven dashboard regions and overlays. Map popups use the same request and fragment renderer.
+- Bind endpoints to table and map clicks, chart selections, button clicks, and filter state. Keep charts mounted on same-URL refresh and scope overlay state to each dashboard root.
+- Publish two editable dashboards that fetch station telemetry, work plans, and workload from MiniUp.
+
 ## 2026-11-07 — Remote HyperPBI Fragments
 
 - Add validated fragment transport 1.0 using canonical schema 2.0 components, isolated data/state, scoped IDs/styles and restricted local actions.

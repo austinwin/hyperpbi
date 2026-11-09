@@ -1,6 +1,6 @@
 # Dashboard examples
 
-HyperPBI includes eight complete, deterministic dashboards that run through the same schema, data, and rendering pipeline in the unified website, the Playground, and Power BI. Browse live previews at `/examples`; the source-of-truth manifest is [`examples/dashboards/manifest.json`](../examples/dashboards/manifest.json).
+HyperPBI includes ten complete dashboards that run through the same schema, data, and rendering pipeline on the website, in the Playground, and in Power BI. Browse live previews at `/examples`. [Dashboard manifest](../examples/dashboards/manifest.json)
 
 ## Included dashboards
 
@@ -14,20 +14,22 @@ HyperPBI includes eight complete, deterministic dashboards that run through the 
 | Consumer banking | [`digital-banking-overview`](../examples/dashboards/digital-banking-overview) | Core | Balances, debit and credit activity, expense mix, and transactions |
 | Digital media and website analytics | [`media-web-performance`](../examples/dashboards/media-web-performance) | Core | Conversions, sessions, engagement, channels, and live locations |
 | Industrial network monitoring | [`industrial-network-telemetry`](../examples/dashboards/industrial-network-telemetry) | Core | Throughput, latency, uptime, alerts, site ranking, and telemetry |
+| Water distribution | [`dynamic-gis-analytics`](../examples/dashboards/dynamic-gis-analytics) | Maps | Pressure telemetry, map popups, and station operations |
+| Maintenance dispatch | [`universal-dynamic-content`](../examples/dashboards/universal-dynamic-content) | Maps | Asset work plans in a side panel and live workload |
 
 Each folder is self-contained:
 
 - `specification.json` is a strict HyperPBI dashboard schema 2.0 document.
 - `runtime.json` is Runtime Configuration protocol 1.0.
 - `data.csv` is deterministic synthetic data with portable lowercase field names.
-- `project.hyperpbi` contains the complete offline Playground project, including normalized data and stable row keys.
+- `project.hyperpbi` contains the complete Playground project, including normalized local data and stable row keys.
 - `README.md` explains expected behavior, limitations, source fields, and host-specific loading.
 
 ## Use an example in the Playground
 
 1. Open `/examples` in the unified website.
 2. Choose a dashboard to see its live shared-runtime preview and portability notes.
-3. Select **Load in Playground** to import a new local copy and open its project workspace.
+3. Select **Open in Playground** to import a new local copy and open its project workspace.
 4. Edit, validate, preview, and export the project normally.
 
 Alternatively, open `/playground` and import the folder's `project.hyperpbi` file. The import creates a new browser-local project ID; it does not change the checked-in example. A `.hyperpbi` project bundle is a Playground artifact and is not imported by Power BI.
@@ -35,8 +37,8 @@ Alternatively, open `/playground` and import the folder's `project.hyperpbi` fil
 ## Use an example in Power BI
 
 1. Build or obtain the package profile declared by the example:
-   - Run `npm run package:core` for every example except Urban Mobility.
-   - Run `npm run package:maps` for Urban Mobility. Its OpenStreetMap basemap needs the package's declared WebAccess hosts and network access.
+   - Run `npm run package:core` for examples marked Core.
+   - Run `npm run package:maps` for examples marked Maps. Urban Mobility uses OpenStreetMap tiles. Dynamic GIS Analytics and Universal Dynamic Content use `https://functions.miniup.app`.
 2. In Power BI Desktop, import the appropriate `.pbiviz` package and add HyperPBI to the report canvas.
 3. Import the example's `data.csv` as one table.
 4. Add every CSV column to HyperPBI's single **Values** field well. Keep the simple lowercase headers unchanged.
@@ -45,7 +47,7 @@ Alternatively, open `/playground` and import the folder's `project.hyperpbi` fil
 
 Every logical dataset in these examples starts from the host-neutral `powerbi` alias, so the same specification resolves the uploaded CSV in the Playground and the visual data view in Power BI. Each CSV remains below the visual's 50-field mapping limit and 30,000-row data window. Power BI still controls the received query grain, relationships, field summarization, and identity selection.
 
-The Core profile has no external-provider WebAccess. The Maps profile is required only where a dashboard uses approved basemap, geocoding, ArcGIS, GeoJSON, or XYZ network access. Do not put credentials or private service tokens in example JSON.
+The Core profile has no external-provider WebAccess. The Maps profile is required where a dashboard uses approved basemap, geocoding, ArcGIS, GeoJSON, XYZ, or Dynamic Content network access. Keep credentials and private service tokens outside example JSON.
 
 ## Regenerate and verify
 
@@ -60,7 +62,6 @@ Generation is deterministic. The check verifies the manifest and required files,
 
 When adding an example, create one use-case-named folder, keep all field references portable to the single Power BI data view, declare the correct package profile, and add the entry to the manifest. Implement generally useful behavior in the shared runtime rather than hiding an example-specific workaround in its specification.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Dynamic GIS Analytics loads station telemetry when a feature is clicked. Universal Dynamic Content loads an asset work plan in a responsive side panel and queries workload by priority. Both previews call the public MiniUp Function. [Dynamic Content guide](remote-fragments.md).

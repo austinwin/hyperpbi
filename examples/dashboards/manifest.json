@@ -211,6 +211,54 @@
       "theme": "dark",
       "title": "Industrial Network Telemetry",
       "useCase": "Network, plant, and infrastructure telemetry"
+    },
+    {
+      "accent": "#0f766e",
+      "data": "dynamic-gis-analytics/data.csv",
+      "description": "A synthetic water distribution network pairs inline station geometry with on-demand pressure telemetry, operating assignments, and maintenance notes.",
+      "expected": "Click each station to load different pressure readings. Hover or zoom its chart, expand the popup, page through the measurements, or refresh the station data.",
+      "folder": "dynamic-gis-analytics",
+      "id": "dynamic-gis-analytics",
+      "limitations": "The local CSV is synthetic. Live details require HTTPS access to the public MiniUp Function. In Power BI, the Maps package and runtime WebAccess permission are required.",
+      "powerBiPackage": "maps",
+      "project": "dynamic-gis-analytics/project.hyperpbi",
+      "referenceImages": [],
+      "runtime": "dynamic-gis-analytics/runtime.json",
+      "slug": "dynamic-gis-analytics",
+      "specification": "dynamic-gis-analytics/specification.json",
+      "summary": "Three Houston pressure stations open interactive, live API analytics in map popups.",
+      "tags": [
+        "GIS",
+        "utilities",
+        "live-api"
+      ],
+      "theme": "light",
+      "title": "Dynamic GIS Analytics",
+      "useCase": "Water utility pressure monitoring"
+    },
+    {
+      "accent": "#3156a8",
+      "data": "universal-dynamic-content/data.csv",
+      "description": "A maintenance dispatcher browses a local asset queue while a responsive side panel and workload card fetch their component trees from MiniUp.",
+      "expected": "Select P-204 or another asset to load its work plan in the side panel. Select High under Work priority to query the filtered workload, then click Refresh workload to repeat the live request.",
+      "folder": "universal-dynamic-content",
+      "id": "universal-dynamic-content",
+      "limitations": "The local CSV is synthetic. Live details require HTTPS access to the public MiniUp Function. In Power BI, the Maps package and runtime WebAccess permission are required.",
+      "powerBiPackage": "maps",
+      "project": "universal-dynamic-content/project.hyperpbi",
+      "referenceImages": [],
+      "runtime": "universal-dynamic-content/runtime.json",
+      "slug": "universal-dynamic-content",
+      "specification": "universal-dynamic-content/specification.json",
+      "summary": "Select a work order to open its live details, and query workload independently by priority.",
+      "tags": [
+        "maintenance",
+        "work-orders",
+        "live-api"
+      ],
+      "theme": "light",
+      "title": "Universal Dynamic Content",
+      "useCase": "Maintenance dispatch and asset work orders"
     }
   ],
   "version": "1.0"

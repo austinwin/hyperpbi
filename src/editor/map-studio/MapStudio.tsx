@@ -1,5 +1,5 @@
 import type { FragmentEnvironment } from "../../fragments/RemoteFragmentHost";
-import { RemotePopupEditor } from "./RemotePopupEditor";
+import { DynamicPopupEditor } from "./DynamicPopupEditor";
 import { MapDrawerResize } from "./MapDrawerResize";
 import { MapSourcePicker } from "./MapSourcePicker";
 import { RendererEditor } from "./MapRendererEditor";
@@ -1931,8 +1931,8 @@ function PopupEditor({
         />{" "}
         Enable {section}
       </label>}
-      {section === "popup" && <label>Popup mode<select aria-label="Popup mode" value={layer.popup?.mode ?? "default"} onChange={event => mutate(candidate => { candidate.popup = { mode: event.currentTarget.value as "none" | "default" | "custom" | "remote", ...(event.currentTarget.value === "remote" ? { remote: { endpoint: "https://hyperpbi.com/api/demo/sensors/{{service.site_id}}" } } : {}) }; })}><option value="none">None</option><option value="default">Feature attributes</option><option value="custom">Custom builder</option><option value="remote">Remote Fragment</option></select></label>}
-      {section === "popup" && layer.popup?.mode === "remote" && <RemotePopupEditor request={layer.popup.remote ?? { endpoint: "" }} fieldSets={fieldSets} onChange={remote => set({ remote })} />}
+      {section === "popup" && <label>Popup mode<select aria-label="Popup mode" value={layer.popup?.mode ?? "default"} onChange={event => mutate(candidate => { candidate.popup = { mode: event.currentTarget.value as "none" | "default" | "custom" | "dynamic", ...(event.currentTarget.value === "dynamic" ? { request: { endpoint: "https://functions.miniup.app/hyperpbi-dynamic-demo/sensor?id={{context.$featureId}}" } } : {}) }; })}><option value="none">None</option><option value="default">Feature attributes</option><option value="custom">Custom builder</option><option value="dynamic">Dynamic Content</option></select></label>}
+      {section === "popup" && layer.popup?.mode === "dynamic" && <DynamicPopupEditor popup={layer.popup} fieldSets={fieldSets} onChange={set} />}
       {section === "popup" && <><label>Test feature<select aria-label="Test feature" value={testFeatureId} onChange={event => setTestFeatureId(event.currentTarget.value)}><option value="">Clicked feature</option>{testFeatures.slice(0, 100).map(feature => <option value={feature.id}>{feature.id}</option>)}</select></label><MapPopupPreview environment={fragmentEnvironment} layer={layer} feature={testFeature} /></>}
       {(section === "tooltip" || layer.popup?.mode === "custom") && <>
       {section === "popup" && (

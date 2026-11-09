@@ -311,7 +311,6 @@ Schema 1.0 is not active runtime material. Visual loading, Edit Mode, AI import,
 
 Developers may explicitly convert a supported legacy file with `npm run schema:migrate-v1 -- input.json output.json`. The temporary converter is outside `src`, validates the converted schema 2.0 result, and is not part of PBIVIZ packages. See [migration/versioning](migration-versioning.md) for the removed aliases and converter limitations.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+A `dynamicContent` component requires `id` and `request.endpoint`. Optional properties include `trigger: { source, event, refresh? }`, `loadOnMount`, and `emptyText`. The same request goes in `map.layers[].popup.request` when `popup.mode` is `dynamic`. The request accepts `timeoutMs`, `cacheTtlSeconds`, and `fallbackMessage`. [Dynamic Content guide](remote-fragments.md).

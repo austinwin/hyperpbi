@@ -39,7 +39,7 @@ export function resolveMapPopupViewModel(
   feature: ResolvedMapFeature,
 ): ResolvedMapPopupViewModel {
   if (popup.mode === "none") return { fields: [], actions: [] };
-  if (popup.mode === "remote") return { title: popup.title ? resolveSafeTemplate(popup.title, feature, popup.defaultFieldSource ?? "service") : undefined, fields: [], actions: [] };
+  if (popup.mode === "dynamic") return { title: popup.title ? resolveSafeTemplate(popup.title, feature, popup.defaultFieldSource ?? "service") : undefined, fields: [], actions: [] };
   if (popup.mode === "default") return { fields: Object.entries(mergedFeatureAttributes(feature)).slice(0, 50).map(([label, value]) => ({ label, value: formatFeatureValue(value), display: "text" as const })), actions: [] };
   const title = popup.title
     ? resolveSafeTemplate(

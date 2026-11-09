@@ -46,7 +46,7 @@ export default function ExamplesPage() {
           <div className="example-card__body">
             <span>Component gallery</span>
             <h2>Analytical maps</h2>
-            <p>Explore {mapManifest.examples.length} map configurations, including Dynamic GIS Popup — Remote Analytics.</p>
+            <p>Explore {mapManifest.examples.length} map configurations, including live pressure-station popups from Dynamic GIS Analytics.</p>
             <b>Open map gallery <ArrowRight size={15} /></b>
           </div>
         </Link>

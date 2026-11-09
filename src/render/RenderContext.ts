@@ -13,6 +13,7 @@ import type { DatasetResult } from "../data/datasets";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import type { MapViewportState } from "../components/maps/MapBlock";
 import type { RemoteDataSourceStatus } from "../data/remoteDataSources";
+import type { DynamicContext, DynamicEvent, DynamicTrigger } from "../fragments/fragmentTypes";
 
 export interface ResolvedDatasetView {
     name: string;
@@ -32,6 +33,7 @@ export interface ResolvedDatasetView {
 
 export interface RenderContextValue {
     instanceId?: string;
+    executionMode?: "dashboard" | "fragment";
     remoteSourceHost?: "web" | "powerbi";
     data: NormalizedData;
     rows: DataRow[];
@@ -63,8 +65,13 @@ export interface RenderContextValue {
     // ── UI Actions ──
     executeUiAction: (action: UiAction | UiAction[], event?: Event) => UiActionResult;
     isOverlayOpen: (id: string) => boolean;
+    overlayRuntime?: import("../components/overlays/overlayRuntime").OverlayRuntime;
     datasets?: Map<string,DatasetResult>;
     remoteSources?: Readonly<Record<string, RemoteDataSourceStatus>>;
+    dynamicEvents?: Readonly<Record<string, DynamicEvent>>;
+    dynamicState?: DynamicContext;
+    dynamicEventKeys?: ReadonlySet<string>;
+    emitDynamicEvent?: (source: string, event: DynamicTrigger["event"], values: DynamicContext) => void;
     datasetLineage?: number[][];
     /** Internal interaction payload row indices are local to this dataset unless marked as Power BI source indices. */
     interactionIndexSpace?: "component" | "powerbi";

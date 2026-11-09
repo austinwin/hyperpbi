@@ -1,0 +1,528 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_9ihzbd",
+    "sources": {
+      "src_data_9ihzbd": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "latitude": 29.769333333333332,
+              "longitude": -95.383,
+              "siteid": 1025
+            },
+            "count": 3,
+            "distinctCount": {
+              "latitude": 3,
+              "longitude": 3,
+              "name": 3,
+              "siteid": 3,
+              "zone": 3
+            },
+            "first": {
+              "latitude": 29.79,
+              "longitude": -95.382,
+              "name": "North pressure station",
+              "siteid": 1024,
+              "zone": "North Loop"
+            },
+            "max": {
+              "latitude": 29.79,
+              "longitude": -95.34,
+              "siteid": 1026
+            },
+            "min": {
+              "latitude": 29.752,
+              "longitude": -95.427,
+              "siteid": 1024
+            },
+            "sum": {
+              "latitude": 89.30799999999999,
+              "longitude": -286.149,
+              "siteid": 3075
+            }
+          },
+          "fields": {
+            "latitude": {
+              "dataType": "number",
+              "displayName": "latitude",
+              "key": "latitude",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [
+                "latitude"
+              ],
+              "type": "latitude"
+            },
+            "longitude": {
+              "dataType": "number",
+              "displayName": "longitude",
+              "key": "longitude",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [
+                "longitude"
+              ],
+              "type": "longitude"
+            },
+            "name": {
+              "dataType": "text",
+              "displayName": "name",
+              "key": "name",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "siteid": {
+              "dataType": "number",
+              "displayName": "siteid",
+              "key": "siteid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "zone": {
+              "dataType": "text",
+              "displayName": "zone",
+              "key": "zone",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 3,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 3,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 3
+            },
+            "diagnostics": [
+              {
+                "code": "MAP_COORDINATE_BINDING_VALID",
+                "message": "3 valid coordinate pair(s) were loaded from 3 current data-view row(s).",
+                "severity": "info"
+              }
+            ],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": true,
+            "hasXY": false,
+            "invalidFeatureCount": 0,
+            "layers": [
+              {
+                "features": [
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_8o1rne",
+                    "lat": 29.79,
+                    "lon": -95.382,
+                    "properties": {
+                      "latitude": 29.79,
+                      "longitude": -95.382,
+                      "name": "North pressure station",
+                      "siteid": 1024,
+                      "zone": "North Loop"
+                    },
+                    "row": {
+                      "latitude": 29.79,
+                      "longitude": -95.382,
+                      "name": "North pressure station",
+                      "siteid": 1024,
+                      "zone": "North Loop"
+                    },
+                    "rowIndex": 0,
+                    "rowKey": "row_8o1rne",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  },
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_15vfsg2",
+                    "lat": 29.752,
+                    "lon": -95.34,
+                    "properties": {
+                      "latitude": 29.752,
+                      "longitude": -95.34,
+                      "name": "River pressure station",
+                      "siteid": 1025,
+                      "zone": "East River"
+                    },
+                    "row": {
+                      "latitude": 29.752,
+                      "longitude": -95.34,
+                      "name": "River pressure station",
+                      "siteid": 1025,
+                      "zone": "East River"
+                    },
+                    "rowIndex": 1,
+                    "rowKey": "row_15vfsg2",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  },
+                  {
+                    "address": null,
+                    "colorValue": null,
+                    "geometry": null,
+                    "id": "row_1sfriv7",
+                    "lat": 29.766,
+                    "lon": -95.427,
+                    "properties": {
+                      "latitude": 29.766,
+                      "longitude": -95.427,
+                      "name": "West pressure station",
+                      "siteid": 1026,
+                      "zone": "West Loop"
+                    },
+                    "row": {
+                      "latitude": 29.766,
+                      "longitude": -95.427,
+                      "name": "West pressure station",
+                      "siteid": 1026,
+                      "zone": "West Loop"
+                    },
+                    "rowIndex": 2,
+                    "rowKey": "row_1sfriv7",
+                    "sizeValue": null,
+                    "type": "point",
+                    "x": null,
+                    "y": null
+                  }
+                ],
+                "name": "Map data"
+              }
+            ],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 3,
+              "validFeatureCount": 3
+            },
+            "mode": "latLon",
+            "warnings": []
+          },
+          "rowKeys": [
+            "row_8o1rne",
+            "row_15vfsg2",
+            "row_1sfriv7"
+          ],
+          "rows": [
+            {
+              "latitude": 29.79,
+              "longitude": -95.382,
+              "name": "North pressure station",
+              "siteid": 1024,
+              "zone": "North Loop"
+            },
+            {
+              "latitude": 29.752,
+              "longitude": -95.34,
+              "name": "River pressure station",
+              "siteid": 1025,
+              "zone": "East River"
+            },
+            {
+              "latitude": 29.766,
+              "longitude": -95.427,
+              "name": "West pressure station",
+              "siteid": 1026,
+              "zone": "West Loop"
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_9ihzbd",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-dynamic-gis-analytics",
+    "name": "Dynamic GIS Analytics",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 12,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "maps",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false,
+      "svgMode": "sanitized"
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "components": [
+      {
+        "basemap": {
+          "type": "none"
+        },
+        "featureDetails": {
+          "mode": "auto"
+        },
+        "heightMode": "fill",
+        "id": "sensor_map",
+        "layers": [
+          {
+            "id": "mains",
+            "interaction": {
+              "enabled": false,
+              "externalMode": "none",
+              "internalMode": "none"
+            },
+            "name": "Illustrative distribution mains",
+            "popup": {
+              "mode": "none"
+            },
+            "renderer": {
+              "symbol": {
+                "outlineColor": "#438d9b",
+                "outlineWidth": 4
+              },
+              "type": "simple"
+            },
+            "source": {
+              "data": {
+                "features": [
+                  {
+                    "geometry": {
+                      "coordinates": [
+                        [
+                          -95.427,
+                          29.766
+                        ],
+                        [
+                          -95.404,
+                          29.777
+                        ],
+                        [
+                          -95.382,
+                          29.79
+                        ],
+                        [
+                          -95.366,
+                          29.765
+                        ],
+                        [
+                          -95.34,
+                          29.752
+                        ]
+                      ],
+                      "type": "LineString"
+                    },
+                    "properties": {},
+                    "type": "Feature"
+                  }
+                ],
+                "type": "FeatureCollection"
+              },
+              "type": "geoJson"
+            }
+          },
+          {
+            "id": "sensors",
+            "interaction": {
+              "enabled": true,
+              "externalMode": "none"
+            },
+            "labels": {
+              "color": "#0f766e",
+              "enabled": true,
+              "field": "name",
+              "fieldSource": "service",
+              "placement": "right",
+              "size": 12
+            },
+            "name": "Pressure sensors",
+            "popup": {
+              "maxHeight": 560,
+              "mode": "dynamic",
+              "request": {
+                "cacheTtlSeconds": 30,
+                "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/sensor?id={{context.site_id}}",
+                "fallbackMessage": "Station telemetry is temporarily unavailable.",
+                "timeoutMs": 10000
+              },
+              "title": "{{service.name}}",
+              "width": 540
+            },
+            "renderer": {
+              "symbol": {
+                "fillColor": "#0f766e",
+                "outlineColor": "#ffffff",
+                "outlineWidth": 3,
+                "shape": "circle",
+                "size": 18
+              },
+              "type": "simple"
+            },
+            "source": {
+              "data": {
+                "features": [
+                  {
+                    "geometry": {
+                      "coordinates": [
+                        -95.382,
+                        29.79
+                      ],
+                      "type": "Point"
+                    },
+                    "id": "1024",
+                    "properties": {
+                      "name": "North pressure station",
+                      "site_id": "1024",
+                      "zone": "North Loop"
+                    },
+                    "type": "Feature"
+                  },
+                  {
+                    "geometry": {
+                      "coordinates": [
+                        -95.34,
+                        29.752
+                      ],
+                      "type": "Point"
+                    },
+                    "id": "1025",
+                    "properties": {
+                      "name": "River pressure station",
+                      "site_id": "1025",
+                      "zone": "East River"
+                    },
+                    "type": "Feature"
+                  },
+                  {
+                    "geometry": {
+                      "coordinates": [
+                        -95.427,
+                        29.766
+                      ],
+                      "type": "Point"
+                    },
+                    "id": "1026",
+                    "properties": {
+                      "name": "West pressure station",
+                      "site_id": "1026",
+                      "zone": "West Loop"
+                    },
+                    "type": "Feature"
+                  }
+                ],
+                "type": "FeatureCollection"
+              },
+              "type": "geoJson"
+            },
+            "tooltip": {
+              "enabled": true,
+              "template": "{{service.name}} · Click for pressure analytics"
+            }
+          }
+        ],
+        "minHeight": 420,
+        "title": "Pressure monitoring network",
+        "toolbar": {
+          "home": true,
+          "visible": true,
+          "zoomIn": true,
+          "zoomOut": true
+        },
+        "type": "map",
+        "view": {
+          "center": [
+            29.77,
+            -95.385
+          ],
+          "fitMode": "none",
+          "zoom": 12
+        }
+      }
+    ],
+    "theme": {
+      "accentColor": "#0284c7",
+      "cardPadding": 14,
+      "density": "comfortable",
+      "gap": 14,
+      "mode": "light",
+      "primaryColor": "#0f766e",
+      "radius": 12
+    },
+    "title": "Dynamic GIS Analytics",
+    "toolbar": [
+      {
+        "id": "gis_intro",
+        "text": "# Water distribution · Houston\n\nSelect a pressure station to inspect its last 24 hours, measurements, and next maintenance action.",
+        "type": "markdown"
+      }
+    ],
+    "version": "2.0"
+  }
+}

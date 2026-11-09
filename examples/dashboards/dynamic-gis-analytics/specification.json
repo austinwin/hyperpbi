@@ -1,0 +1,205 @@
+{
+  "version": "2.0",
+  "title": "Dynamic GIS Analytics",
+  "theme": {
+    "mode": "light",
+    "density": "comfortable",
+    "primaryColor": "#0f766e",
+    "accentColor": "#0284c7",
+    "radius": 12,
+    "cardPadding": 14,
+    "gap": 14
+  },
+  "toolbar": [
+    {
+      "type": "markdown",
+      "id": "gis_intro",
+      "text": "# Water distribution · Houston\n\nSelect a pressure station to inspect its last 24 hours, measurements, and next maintenance action."
+    }
+  ],
+  "components": [
+    {
+      "type": "map",
+      "id": "sensor_map",
+      "title": "Pressure monitoring network",
+      "heightMode": "fill",
+      "minHeight": 420,
+      "basemap": {
+        "type": "none"
+      },
+      "view": {
+        "center": [
+          29.77,
+          -95.385
+        ],
+        "zoom": 12,
+        "fitMode": "none"
+      },
+      "featureDetails": {
+        "mode": "auto"
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "zoomIn": true,
+        "zoomOut": true
+      },
+      "layers": [
+        {
+          "id": "mains",
+          "name": "Illustrative distribution mains",
+          "source": {
+            "type": "geoJson",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        -95.427,
+                        29.766
+                      ],
+                      [
+                        -95.404,
+                        29.777
+                      ],
+                      [
+                        -95.382,
+                        29.79
+                      ],
+                      [
+                        -95.366,
+                        29.765
+                      ],
+                      [
+                        -95.34,
+                        29.752
+                      ]
+                    ]
+                  },
+                  "properties": {}
+                }
+              ]
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "outlineColor": "#438d9b",
+              "outlineWidth": 4
+            }
+          },
+          "popup": {
+            "mode": "none"
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "id": "sensors",
+          "name": "Pressure sensors",
+          "source": {
+            "type": "geoJson",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "id": "1024",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -95.382,
+                      29.79
+                    ]
+                  },
+                  "properties": {
+                    "name": "North pressure station",
+                    "zone": "North Loop",
+                    "site_id": "1024"
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "id": "1025",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -95.34,
+                      29.752
+                    ]
+                  },
+                  "properties": {
+                    "name": "River pressure station",
+                    "zone": "East River",
+                    "site_id": "1025"
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "id": "1026",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -95.427,
+                      29.766
+                    ]
+                  },
+                  "properties": {
+                    "name": "West pressure station",
+                    "zone": "West Loop",
+                    "site_id": "1026"
+                  }
+                }
+              ]
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "shape": "circle",
+              "fillColor": "#0f766e",
+              "size": 18,
+              "outlineColor": "#ffffff",
+              "outlineWidth": 3
+            }
+          },
+          "labels": {
+            "enabled": true,
+            "field": "name",
+            "fieldSource": "service",
+            "placement": "right",
+            "color": "#0f766e",
+            "size": 12
+          },
+          "tooltip": {
+            "enabled": true,
+            "template": "{{service.name}} · Click for pressure analytics"
+          },
+          "popup": {
+            "mode": "dynamic",
+            "title": "{{service.name}}",
+            "width": 540,
+            "maxHeight": 560,
+            "request": {
+              "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/sensor?id={{context.site_id}}",
+              "cacheTtlSeconds": 30,
+              "timeoutMs": 10000,
+              "fallbackMessage": "Station telemetry is temporarily unavailable."
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "externalMode": "none"
+          }
+        }
+      ]
+    }
+  ]
+}

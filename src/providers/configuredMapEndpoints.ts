@@ -10,7 +10,7 @@ const EXTERNAL_SOURCE_TYPES = new Set([
 ]);
 
 /**
- * Collect every external map endpoint authored in a dashboard.
+ * Collect every external map or Dynamic Content endpoint authored in a dashboard.
  *
  * Runtime provider endpoints live in Runtime Config and are checked separately.
  * This collector covers schema-owned custom basemaps and external map layers so
@@ -34,7 +34,9 @@ export function configuredMapEndpoints(specification: string): string[] {
         if (!value || typeof value !== "object") return;
 
         const entry = value as Record<string, unknown>;
-        if (entry.mode === "remote" && entry.remote && typeof entry.remote === "object") add((entry.remote as Record<string, unknown>).endpoint);
+        if ((entry.mode === "dynamic" || entry.type === "dynamicContent") && entry.request && typeof entry.request === "object") {
+            add((entry.request as Record<string, unknown>).endpoint);
+        }
         if (EXTERNAL_SOURCE_TYPES.has(String(entry.type))) add(entry.url);
         if (typeof entry.manifestUrl === "string") add(entry.manifestUrl);
 

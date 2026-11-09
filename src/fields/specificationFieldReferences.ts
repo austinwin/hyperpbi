@@ -1,10 +1,10 @@
 import { getComponentDescriptor } from "../catalog/componentDescriptors";
-import { visitSpecificationComponents } from "../catalog/componentTraversal";
+import { visitSpecificationComponents, type ComponentVisit } from "../catalog/componentTraversal";
 import type { DatasetSchemaEvaluation } from "../data/datasetSchema";
 import type { NormalizedData } from "../data/normalizeData";
 import { closestMatches, type Diagnostic } from "../schema/diagnostics";
 import { aggregationFieldPolicy, aggregationFieldRequirement } from "./aggregationFieldPolicy";
-import { dispatchComponentField } from "./componentFieldHandlers";
+import { dispatchComponentField, fragmentRequestFieldReferences } from "./componentFieldHandlers";
 import { FieldResolver } from "./fieldResolver";
 
 type Json = Record<string, unknown>;
@@ -82,11 +82,15 @@ function calculationReferences(specification: Json, result: FieldReferenceOccurr
 export function specificationFieldReferences(specification: unknown): FieldReferenceOccurrence[] {
     if (!object(specification)) return [];
     const result: FieldReferenceOccurrence[] = [];
+    const componentsById = new Map<string, ComponentVisit>();
+    const dynamicRegions: ComponentVisit[] = [];
     visitSpecificationComponents(specification, visit => {
         const type = typeof visit.component.type === "string" ? visit.component.type : "";
         const descriptor = getComponentDescriptor(type);
         if (!descriptor) return;
         const componentId = typeof visit.component.id === "string" ? visit.component.id : undefined;
+        if (componentId) componentsById.set(componentId, visit);
+        if (type === "dynamicContent") dynamicRegions.push(visit);
         for (const descriptorField of descriptor.fields) dispatchComponentField({
             component: visit.component,
             descriptorField,
@@ -96,6 +100,16 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
             emit: occurrence => result.push(occurrence),
         });
     });
+    for (const { component, path } of dynamicRegions) {
+        const trigger = component.trigger;
+        if (!object(trigger) || typeof trigger.source !== "string") continue;
+        const source = componentsById.get(trigger.source);
+        if (!source) continue;
+        const type = String(source.component.type);
+        const usesDataset = type === "table" || getComponentDescriptor(type)?.category === "Charts" && !source.component.drill;
+        if (usesDataset) fragmentRequestFieldReferences(component.request, `${path}/request/endpoint`, source.datasetName,
+            typeof component.id === "string" ? component.id : undefined, occurrence => result.push(occurrence));
+    }
     datasetReferences(specification, result);
     calculationReferences(specification, result);
     return result;

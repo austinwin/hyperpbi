@@ -6,9 +6,11 @@ import type { HyperPbiProject } from "@hyperpbi/playground/project";
 import { canonicalJson } from "@hyperpbi/playground/canonicalJson";
 import { HyperPbiRoot } from "@hyperpbi/render/HyperPbiRoot";
 import { defaultRuntimeSettings } from "@hyperpbi/runtime/runtimeSettings";
+import { createInstanceId } from "@hyperpbi/utils/ids";
 
 export function PlaygroundRenderer({ project, className = "" }: { project: HyperPbiProject; className?: string }) {
     const [hostMessage, setHostMessage] = useState("");
+    const [instanceId] = useState(createInstanceId);
     const bridge = useMemo(() => new BrowserHostBridge(diagnostic => {
         setHostMessage(diagnostic.message);
         globalThis.setTimeout(() => setHostMessage(""), 5000);
@@ -22,10 +24,10 @@ export function PlaygroundRenderer({ project, className = "" }: { project: Hyper
     if (prepared.errors.length || !prepared.specification || !prepared.config || !prepared.configuredData) {
         return <div class={`pg-render-error ${className}`} role="alert"><strong>The saved dashboard cannot enter Play Mode.</strong><ul>{prepared.errors.map(error => <li key={error}>{error}</li>)}</ul></div>;
     }
-    return <div class={`pg-play-runtime ${className}`} id="hyperpbi-playground-runtime">
+    return <div class={`pg-play-runtime ${className}`}>
         {hostMessage && <div class="pg-host-diagnostic" role="status">{hostMessage}<button aria-label="Dismiss host diagnostic" onClick={() => setHostMessage("")}>×</button></div>}
         <HyperPbiRoot
-            instanceId="hyperpbi-playground-runtime"
+            instanceId={instanceId}
             schema={prepared.specification}
             data={prepared.configuredData}
             dataWorkspace={project.dataWorkspace}

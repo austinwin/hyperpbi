@@ -57,7 +57,7 @@ Available patterns are `kpi-row`, `trend-and-breakdown`, `record-explorer`, and 
 
 ## Components
 
-Use the canonical component catalog included with the prompt. It contains 81 types in 12 categories, including first-class semantic charts, native `table` and `matrix`, `map`, declarative `svg`, sanitized `svgMarkup`, and `advancedChart`. Use only properties listed for that type.
+Use the canonical component catalog included with the prompt. It contains 82 types in 12 categories, including first-class semantic charts, native `table` and `matrix`, `map`, declarative `svg`, sanitized `svgMarkup`, and `advancedChart`. Use only properties listed for that type.
 
 Prefer first-class components over custom markup: `card` over a simulated card, `listGroup` over a hand-built list, `dataGrid`/`detailPanel` over manual detail HTML, semantic charts over `advancedChart`, and `svg` over `svgMarkup`.
 
@@ -129,8 +129,8 @@ In Standard mode, never emit user JavaScript, eval, executable functions, callba
 
 Dashboard schema 2.0 is the only active contract. Dashboard schema 1.0 is never migrated during visual loading, Edit Mode, AI import, preview, save, or rendering. Developers may convert a legacy JSON file explicitly with `npm run schema:migrate-v1 -- input.json output.json`; the temporary converter is not part of the PBIVIZ runtime. The Power BI package version and Runtime Config version are independent version numbers.
 
-## Remote HyperPBI Fragments
+## Dynamic Content and remote fragments
 
-Popup configuration requires `mode: "none" | "default" | "custom" | "remote"`; never emit popup.enabled. Remote mode uses `remote: { endpoint, timeoutMs?, cacheTtlSeconds?, fallback?, fallbackMessage?, width?, maxHeight? }`. Endpoints are literal HTTPS origins with encoded `{{service.site_id}}`, `{{powerbi.station_id}}` or `{{joined.asset_id}}` bindings in path/query values. Both MiniUp .app and .io apex/subdomain families are approved by default. Additional origins require build-time policy; Power BI also requires Maps WebAccess permission and CORS.
+Use `dynamicContent` in cards, modals, side panels, or dashboard regions. Set `request: { endpoint, timeoutMs?, cacheTtlSeconds?, fallbackMessage? }` and optionally `trigger: { source, event, refresh? }`. A table or map emits `click`, a chart emits `select`, a button emits `click`, and a filter emits `change`. Use `{{context.asset_id}}` for a scalar event value and `{{state.priority}}` to update when a control changes. Set `loadOnMount: true` for a request independent of event context. Use `popup.mode: "dynamic"` and the same `request` for a map feature popup. Other modes are `none`, `default`, and `custom`.
 
-API responses use `{ kind: "hyperpbi.fragment", version: "1.0", title?, datasets: { name: [scalarRows] }, components: [canonicalSchema2Components] }`. Bind components to their dataset names; use canonical registry properties. The host namespaces IDs and isolates state/data. No nested maps, remote sources, HTML/custom documents, global panels, overlays, model identities, scripts or permission expansion. Local tabs/state/steps and existing ECharts zoom/legend/brush behavior are supported. Limit responses to 1 MiB, 100 components, eight layout levels and 5000 total rows. See docs/remote-fragments.md and examples/remote-fragments for executable responses.
+The response is `{ kind: "hyperpbi.fragment", version: "1.0", title?, datasets: { name: [scalarRows] }, components: [canonicalSchema2Components] }`. IDs, state, and datasets are isolated. Use approved literal HTTPS origins, anonymous GET, and CORS. Power BI requires Maps WebAccess. Both MiniUp apex and subdomain families are approved by default. Responses have limits of 1 MiB, 100 components, eight levels, and 5,000 rows. Nested Dynamic Content, maps, remote sources, HTML/custom documents, overlays, and external model actions are restricted. See docs/remote-fragments.md for the live MiniUp endpoints.

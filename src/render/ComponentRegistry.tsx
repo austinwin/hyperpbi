@@ -1,7 +1,7 @@
 import { ComponentChildren, h } from "preact";
 import type {
     ChartComponent, ContainerComponent, ContentComponent, ControlComponent,
-    DashboardComponent, MapComponent, MatrixComponent,
+    DashboardComponent, DynamicContentComponent, MapComponent, MatrixComponent,
     SmallMultiplesComponent, TableComponent, TabsComponent, TimelineComponent,
     CardComponent, AccordionComponent, DropdownComponent, PopoverComponent,
     ListGroupComponent, DataGridComponent, EmptyStateComponent,
@@ -42,6 +42,7 @@ import { SvgMarkupBlock } from "../components/svg/SvgMarkupBlock";
 import { MermaidBlock } from "../components/mermaid/MermaidBlock";
 import type { MermaidDiagramComponent } from "../schema/mermaidDiagramSchema";
 import { SplitLayout } from "../components/layout/SplitLayout";
+import { DynamicContentBlock } from "../fragments/DynamicContentBlock";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
 
 type RenderChildren = (children: DashboardComponent[]) => ComponentChildren;
@@ -52,6 +53,7 @@ const dataTypes = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "prog
 const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "advancedChart", "networkGraph"]);
 
 const componentRenderers: Record<string, ComponentRenderer> = {
+    dynamicContent: c => h(DynamicContentBlock, { component: c as DynamicContentComponent }),
     table: c => h(TableBlock, { component: c as TableComponent }),
     matrix: c => h(MatrixBlock, { component: c as MatrixComponent }),
     map: c => h(MapBlock, { component: c as MapComponent }),

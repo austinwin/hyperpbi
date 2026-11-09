@@ -79,12 +79,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="content-section"><div className="page-shell"><span className="eyebrow">Remote HyperPBI Fragments</span><h2>Click a location. Explore its live analytics.</h2><p>Dynamic GIS popups render interactive charts, pressure KPIs and data tables through the existing HyperPBI engine. Connect a public MiniUp .app or .io endpoint, or an approved HTTPS API.</p><Link className="button button--primary" href="/examples/maps?example=remote-analytics">Try remote analytics <ArrowRight size={16} /></Link> <Link href="/docs/remote-fragments">Read the fragment contract</Link></div></section>
+      <section className="content-section"><div className="page-shell"><span className="eyebrow">Dynamic Content</span><h2>Explore live details as you work.</h2><p>Click a pressure station or an asset row to load interactive charts, KPIs, and work plans from a public MiniUp API.</p><Link className="button button--primary" href="/examples/dynamic-gis-analytics">Explore the pressure network <ArrowRight size={16} /></Link> <Link href="/examples/universal-dynamic-content">Open maintenance dispatch</Link> · <Link href="/docs/remote-fragments">Read the authoring guide</Link></div></section>
       <section className="home-stats">
         <div className="page-shell home-stats__grid">
           <div><strong>{componentCatalog.componentCount}</strong><span>governed components</span></div>
           <div><strong>{componentCatalog.categories.length}</strong><span>component families</span></div>
-          <div><strong>{exampleCount || "8"}</strong><span>complete dashboards</span></div>
+          <div><strong>{exampleCount}</strong><span>complete dashboards</span></div>
           <div><strong>2</strong><span>first-class hosts</span></div>
         </div>
       </section>

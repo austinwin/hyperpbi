@@ -211,7 +211,6 @@ For renderer, legend, selection, quick-filter, tool, performance, and security e
 [complete analytical map guide](maps.md) and the manifest-driven
 [`examples/map`](../examples/map/README.md) gallery.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Dynamic popup requests read feature fields via `{{context.field}}` in `popup.request.endpoint`. ArcGIS popup bindings are included in service query fields. The same approved-host, Power BI WebAccess, and CORS rules apply to a card or side panel. [Dynamic Content guide](remote-fragments.md).

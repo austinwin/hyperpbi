@@ -44,11 +44,13 @@ const manifest = JSON.parse(readFileSync(resolve(dashboardRoot, "manifest.json")
 const expectedSlugs = [
     "capital-project-controls",
     "digital-banking-overview",
+    "dynamic-gis-analytics",
     "industrial-network-telemetry",
     "media-web-performance",
     "patient-care-operations",
     "retail-sales-operations",
     "talent-acquisition",
+    "universal-dynamic-content",
     "urban-mobility-command-center",
 ];
 const fixedTimestamp = "2026-07-25T00:00:00.000Z";
@@ -193,7 +195,8 @@ describe("portable dashboard examples", () => {
             expect(example.expected.length).toBeGreaterThan(30);
             expect(example.limitations.length).toBeGreaterThan(20);
             expect(example.tags.length).toBeGreaterThanOrEqual(3);
-            expect(example.referenceImages.length).toBeGreaterThan(0);
+            if (example.tags.includes("live-api")) expect(example.powerBiPackage).toBe("maps");
+            else expect(example.referenceImages.length).toBeGreaterThan(0);
             expect(example.accent).toMatch(/^#[0-9a-f]{6}$/i);
 
             for (const path of ["specification", "runtime", "data", "project"] as const) {
@@ -291,7 +294,9 @@ describe("portable dashboard examples", () => {
             const parsedRuntime = parseConfig(runtimeText);
             expect(parsedRuntime.errors).toEqual([]);
             expect(parsedRuntime.config?.providers?.mode).toBe(example.powerBiPackage);
-            if (example.powerBiPackage === "maps") {
+            if (example.tags.includes("live-api")) {
+                expect(parsedRuntime.config?.providers?.basemap?.enabled).toBe(false);
+            } else if (example.powerBiPackage === "maps") {
                 expect(parsedRuntime.config?.providers?.basemap?.enabled).toBe(true);
                 expect(parsedRuntime.config?.providers?.privacyAcknowledged).toBe(true);
             } else {
@@ -509,7 +514,10 @@ describe("portable dashboard examples", () => {
             expect(readme).toContain("## Power BI");
             expect(readme).toContain("single **Values** field well");
             expect(readme).toContain(example.powerBiPackage === "maps" ? "HyperPBI Maps" : "HyperPBI Core");
-            if (example.powerBiPackage === "maps") {
+            if (example.tags.includes("live-api")) {
+                expect(readme).toContain("public MiniUp API");
+                expect(readme).toContain("runtime WebAccess permission");
+            } else if (example.powerBiPackage === "maps") {
                 expect(readme).toContain("fetches remote tiles");
                 expect(readme).toContain("network connection is required");
                 expect(readme).not.toContain("complete offline Playground project");

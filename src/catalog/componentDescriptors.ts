@@ -25785,6 +25785,28 @@ const descriptorFieldExtensions:Record<string,FieldReferenceDescriptor[]> = {
     { property: "chart", requirement: "any", handler: "nested-chart" }
   ]
 };
+componentDescriptors.push({
+  type: "dynamicContent", label: "Dynamic Content", category: "Advanced components", maturity: "beta", complexity: "advanced",
+  useWhen: "Render validated component JSON from an approved HTTPS endpoint in a dashboard region or overlay.",
+  capabilities: { fields: false, calculations: false, css: true, slots: false, interactions: false, externalSelection: false, customHtml: false },
+  interaction: { defaultEnabled: false, naturalTrigger: "click", autoExternalMode: "selection" },
+  schema: { required: ["type", "id", "request"], allowed: [...componentDescriptors.find(item => item.type === "text")!.schema.allowed.filter(property => !["text", "html", "slots", "field", "measure", "format"].includes(property)), "request", "trigger", "loadOnMount", "emptyText"] },
+  fields: [],
+  inspector: [
+    { property: "request", label: "Remote request", control: "json", group: "Data", help: "Use {{context.field}} or {{state.control_id}} in a literal HTTPS URL." },
+    { property: "trigger", label: "Source event", control: "json", group: "Interaction" },
+    { property: "loadOnMount", label: "Load before the first event", control: "checkbox", group: "Interaction" },
+    { property: "emptyText", label: "Waiting message", control: "text", group: "Content" },
+  ],
+  documentation: { summary: "Fetches and renders an isolated fragment on demand or when bound dashboard state changes.", relatedTypes: ["map", "table", "card", "modal", "offcanvas"] },
+  example: {
+    type: "dynamicContent", id: "workload",
+    request: { endpoint: "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}" },
+    interaction: { enabled: false, internalMode: "none", externalMode: "none" },
+  },
+  rendering: "direct", containers: [],
+});
+
 const sharedApplicationProperties:InspectorPropertyDescriptor[] = [
   {property:"order",label:"Base order",control:"number",group:"Layout",help:"Base visual order before responsive overrides."},
   {property:"responsive",label:"Responsive breakpoints",control:"json",group:"Layout",help:"Mobile-first xs, sm, md, lg, and xl span/order/visibility/layout overrides."},

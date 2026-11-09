@@ -23,16 +23,16 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
         setValue(next);
         dispatch({ type: "value", id, value: next });
         const rowIndices = interactionField ? resolveSourceRowIndicesForFilter(interactionField, operator, next, sourceRows, rows) : [];
-        executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }), context, { trigger: policy.trigger, multiSelect: multiple, event });
+        executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }), context, { trigger: policy.trigger, dynamicEvent: "change", contextValue: next, multiSelect: multiple, event });
     };
 
     useEffect(() => { setValue(state.values[id] ?? initial); }, [state.values[id]]);
 
-    if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" onClick={event => {
+    if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" disabled={component.disabled} onClick={event => {
         if (component.uiAction) {
             context.executeUiAction(component.uiAction, event);
         }
-        executeComponentInteraction(policy, createInteractionPayload(component, { value: component.interaction?.value }), context, { trigger: policy.trigger==="click"?"click":"change", event });
+        executeComponentInteraction(policy, createInteractionPayload(component, { value: component.interaction?.value }), context, { trigger: policy.trigger, dynamicEvent: "click", event });
     }}>{component.title ?? component.label ?? "Action"}</button>;
     if (component.type === "buttonGroup") return <div class="btn-group">{component.buttons?.map(button => <button type="button" class="btn btn-sm" onClick={event => changeValue(button.value ?? button.id, event)}>{button.label}</button>)}</div>;
     if (component.type === "filterChips") {

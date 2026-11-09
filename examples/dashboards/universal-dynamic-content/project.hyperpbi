@@ -1,0 +1,364 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_1jr8a5q",
+    "sources": {
+      "src_data_1jr8a5q": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "hours": 8.25
+            },
+            "count": 4,
+            "distinctCount": {
+              "asset": 4,
+              "assetid": 4,
+              "hours": 4,
+              "priority": 2,
+              "zone": 3
+            },
+            "first": {
+              "asset": "Intake pump 204",
+              "assetid": "P-204",
+              "hours": 14,
+              "priority": "High",
+              "zone": "North Loop"
+            },
+            "max": {
+              "hours": 14
+            },
+            "min": {
+              "hours": 4
+            },
+            "sum": {
+              "hours": 33
+            }
+          },
+          "fields": {
+            "asset": {
+              "dataType": "text",
+              "displayName": "asset",
+              "key": "asset",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "assetid": {
+              "dataType": "text",
+              "displayName": "assetid",
+              "key": "assetid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "hours": {
+              "dataType": "number",
+              "displayName": "hours",
+              "key": "hours",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "priority": {
+              "dataType": "text",
+              "displayName": "priority",
+              "key": "priority",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "zone": {
+              "dataType": "text",
+              "displayName": "zone",
+              "key": "zone",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 4,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 4,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 4,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 4,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "4 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_1gh98jg",
+            "row_q1y0li",
+            "row_1sd9c8",
+            "row_1thz3hg"
+          ],
+          "rows": [
+            {
+              "asset": "Intake pump 204",
+              "assetid": "P-204",
+              "hours": 14,
+              "priority": "High",
+              "zone": "North Loop"
+            },
+            {
+              "asset": "Isolation valve 118",
+              "assetid": "V-118",
+              "hours": 6,
+              "priority": "Normal",
+              "zone": "East River"
+            },
+            {
+              "asset": "Flow meter 307",
+              "assetid": "M-307",
+              "hours": 4,
+              "priority": "Normal",
+              "zone": "West Loop"
+            },
+            {
+              "asset": "Booster pump 209",
+              "assetid": "P-209",
+              "hours": 9,
+              "priority": "High",
+              "zone": "North Loop"
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_1jr8a5q",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-universal-dynamic-content",
+    "name": "Universal Dynamic Content",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 12,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "maps",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false,
+      "svgMode": "sanitized"
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "components": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "field": "priority",
+                "id": "priority",
+                "interaction": {
+                  "enabled": true,
+                  "externalMode": "none",
+                  "internalMode": "filter",
+                  "targets": [
+                    "assets"
+                  ]
+                },
+                "options": [
+                  "High",
+                  "Normal"
+                ],
+                "title": "Work priority",
+                "type": "select"
+              },
+              {
+                "id": "refresh_workload",
+                "title": "Refresh workload",
+                "type": "button"
+              }
+            ],
+            "gap": 12,
+            "id": "work_controls",
+            "type": "flex"
+          },
+          {
+            "columns": [
+              {
+                "field": "assetid",
+                "title": "Asset ID"
+              },
+              {
+                "field": "asset",
+                "title": "Equipment"
+              },
+              {
+                "field": "zone",
+                "title": "Zone"
+              },
+              {
+                "field": "priority",
+                "title": "Priority"
+              }
+            ],
+            "hover": true,
+            "id": "assets",
+            "interaction": {
+              "enabled": true,
+              "externalMode": "none",
+              "internalMode": "highlight",
+              "internalScope": "self"
+            },
+            "title": "Assets",
+            "type": "table"
+          }
+        ],
+        "header": {
+          "title": "Scheduled work orders"
+        },
+        "id": "work_queue",
+        "type": "card"
+      },
+      {
+        "children": [
+          {
+            "id": "workload",
+            "loadOnMount": true,
+            "request": {
+              "cacheTtlSeconds": 30,
+              "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}"
+            },
+            "title": "Workload",
+            "trigger": {
+              "event": "click",
+              "refresh": true,
+              "source": "refresh_workload"
+            },
+            "type": "dynamicContent"
+          }
+        ],
+        "header": {
+          "title": "Dispatch workload"
+        },
+        "id": "dispatch",
+        "type": "card"
+      }
+    ],
+    "rightPanel": [
+      {
+        "children": [
+          {
+            "emptyText": "Select a work order to see its assignment and scheduled tasks.",
+            "id": "asset_details",
+            "request": {
+              "cacheTtlSeconds": 30,
+              "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/asset?id={{context.assetid}}"
+            },
+            "title": "Asset details",
+            "trigger": {
+              "event": "click",
+              "source": "assets"
+            },
+            "type": "dynamicContent"
+          }
+        ],
+        "header": {
+          "title": "Asset work plan"
+        },
+        "id": "asset_panel",
+        "type": "card"
+      }
+    ],
+    "theme": {
+      "accentColor": "#0d9488",
+      "cardPadding": 14,
+      "density": "comfortable",
+      "gap": 14,
+      "mode": "light",
+      "primaryColor": "#3156a8",
+      "radius": 12
+    },
+    "title": "Universal Dynamic Content",
+    "toolbar": [
+      {
+        "id": "work_intro",
+        "text": "# Utility maintenance · Dispatch\n\nSelect an asset for its live work plan. Change the priority or refresh the workload to query the dispatch API.",
+        "type": "markdown"
+      }
+    ],
+    "version": "2.0"
+  }
+}

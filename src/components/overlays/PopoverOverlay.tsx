@@ -4,10 +4,12 @@ import type { OverlayAnchor } from "../../render/stateStore";
 import { useRenderContext } from "../../render/RenderContext";
 import { DashboardRenderer } from "../../render/DashboardRenderer";
 import { useOverlayDismiss } from "./useOverlayDismiss";
+import { useOverlayRuntime } from "./overlayRuntime";
 import { useOverlayFocus } from "./useOverlayFocus";
 import { useAnchoredOverlayPosition } from "./useAnchoredOverlayPosition";
 
 export function PopoverOverlay({ component, anchor }: { component: PopoverComponent; anchor?: OverlayAnchor }) {
+    const overlayRuntime = useOverlayRuntime();
     const context = useRenderContext(); const panelRef = useRef<HTMLDivElement>(null); const id = component.id!;
     const close = useCallback(() => context.dispatch({ type: "closeOverlay", id }), [context.dispatch, id]);
     const position = useAnchoredOverlayPosition(id, anchor, panelRef, component.placement ?? "bottom-start");
@@ -16,7 +18,7 @@ export function PopoverOverlay({ component, anchor }: { component: PopoverCompon
     return (
         <div
             ref={panelRef}
-            id={`${id}-panel`}
+            id={overlayRuntime.domId(id, "panel")}
             class="hp-popover-panel"
             data-placement={position?.placement}
             role="dialog"

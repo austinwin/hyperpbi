@@ -56,7 +56,6 @@ Core has no WebAccess. Maps declares only specific HTTPS host families, includin
 
 The [metadata audit](advanced-authoring-audit.json) covers all 83 active registered components and their canonical examples. This work adds zero component types and preserves the remaining registry and schema version.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Place `dynamicContent` inside authored cards, tabs, or overlays. Bind its request to a component event or a scalar dashboard state value. Stable response component IDs retain local chart view on same-URL refresh. [Dynamic Content guide](remote-fragments.md).

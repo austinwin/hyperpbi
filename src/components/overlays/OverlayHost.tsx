@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useLayoutEffect, useRef } from "preact/hooks";
 import { useRenderContext } from "../../render/RenderContext";
 import type { OffcanvasComponent } from "../../schema/hyperpbiSchema";
 import { collectOverlayComponents, normalizeOffcanvas, type OverlayComponent } from "./overlayTypes";
-import { overlayRuntime } from "./overlayRuntime";
+import { useOverlayRuntime } from "./overlayRuntime";
 import { ModalOverlay } from "./ModalOverlay";
 import { OffcanvasOverlay } from "./OffcanvasOverlay";
 import { DropdownOverlay } from "./DropdownOverlay";
@@ -10,6 +10,7 @@ import { PopoverOverlay } from "./PopoverOverlay";
 
 export function OverlayHost() {
     const context = useRenderContext();
+    const overlayRuntime = useOverlayRuntime();
     const conditions = useRef(new Map<string, boolean>());
     const overlays = collectOverlayComponents(context.schema);
     overlayRuntime.definitions.forEach((component, id) => overlays.set(id, component));
@@ -31,7 +32,10 @@ export function OverlayHost() {
     }, [context.schema, context.state.selectedRows.length, context.state.values, context.dispatch]);
 
     const active = context.state.openOverlays.map(id => overlays.get(id)).filter((component): component is OverlayComponent => Boolean(component));
-    overlayRuntime.stack = active.map(component => component.id!);
+    useLayoutEffect(() => {
+        overlayRuntime.stack = active.map(component => component.id!);
+        return () => { overlayRuntime.stack = []; };
+    });
     if (!active.length) return null;
     return (
         <div class="hp-overlay-host" aria-live="polite">

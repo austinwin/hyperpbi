@@ -28,24 +28,11 @@ export function resolvedFeatureValue(
 export function mergedFeatureAttributes(
     feature: ResolvedMapFeature
 ): Record<string, unknown> {
-    const merged: Record<string, unknown> = {};
+    return { ...feature.serviceAttributes, ...feature.powerBiAttributes, ...feature.joinedAttributes };
+}
 
-    // Base layer: service attributes
-    for (const [key, value] of Object.entries(feature.serviceAttributes)) {
-        merged[key] = value;
-    }
-
-    // Overlay: Power BI attributes
-    for (const [key, value] of Object.entries(feature.powerBiAttributes)) {
-        merged[key] = value;
-    }
-
-    // Top overlay: joined/computed attributes
-    for (const [key, value] of Object.entries(feature.joinedAttributes)) {
-        merged[key] = value;
-    }
-
-    return merged;
+export function mapFeatureDynamicContext(feature: ResolvedMapFeature) {
+    return { ...mergedFeatureAttributes(feature), $featureId: feature.id, $layerId: feature.layerId };
 }
 
 const INTERNAL_IDENTITY_PATTERN = /(?:^|[\[{,])\s*"?identityIndex"?\s*:/i;

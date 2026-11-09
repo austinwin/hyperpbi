@@ -1,7 +1,7 @@
 {
   "generated": true,
   "version": 1,
-  "componentCount": 83,
+  "componentCount": 84,
   "categories": [
     "Layout",
     "Controls",
@@ -9675,6 +9675,88 @@
               "showSymbol": false
             }
           ]
+        }
+      }
+    },
+    {
+      "type": "dynamicContent",
+      "label": "Dynamic Content",
+      "category": "Advanced components",
+      "maturity": "beta",
+      "complexity": "advanced",
+      "useWhen": "Render validated component JSON from an approved HTTPS endpoint in a dashboard region or overlay.",
+      "summary": "Fetches and renders an isolated fragment on demand or when bound dashboard state changes.",
+      "accessibility": [],
+      "relatedTypes": [
+        "map",
+        "table",
+        "card",
+        "modal",
+        "offcanvas"
+      ],
+      "capabilities": {
+        "fields": false,
+        "calculations": false,
+        "css": true,
+        "slots": false,
+        "interactions": false,
+        "externalSelection": false,
+        "customHtml": false
+      },
+      "interaction": {
+        "defaultEnabled": false,
+        "naturalTrigger": "click",
+        "autoExternalMode": "selection"
+      },
+      "required": [
+        "type",
+        "id",
+        "request"
+      ],
+      "allowed": [
+        "ariaLabel",
+        "aspectRatio",
+        "className",
+        "css",
+        "data",
+        "dataset",
+        "disabled",
+        "emptyText",
+        "heightMode",
+        "hidden",
+        "icon",
+        "id",
+        "interaction",
+        "interactions",
+        "loadOnMount",
+        "minHeight",
+        "order",
+        "props",
+        "repeat",
+        "request",
+        "responsive",
+        "size",
+        "span",
+        "style",
+        "subtitle",
+        "title",
+        "tooltip",
+        "trigger",
+        "type",
+        "uiAction",
+        "variant",
+        "visibility"
+      ],
+      "example": {
+        "type": "dynamicContent",
+        "id": "workload",
+        "request": {
+          "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}"
+        },
+        "interaction": {
+          "enabled": false,
+          "internalMode": "none",
+          "externalMode": "none"
         }
       }
     },

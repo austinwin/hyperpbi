@@ -1,3 +1,4 @@
+import { fragmentBindingFields } from "../../fragments/fragmentBindings";
 import type { ArcGisFeatureLayerSource, MapLayerDefinition, MapRendererDefinition } from "../../schema/mapSchema";
 import { defaultAttributeSource, type MapAttributePurpose, type MapAttributeSource } from "../attributes/mapFeatureAttributes";
 
@@ -40,7 +41,9 @@ export function collectArcGisQueryFields(layer: MapLayerDefinition, source: ArcG
     if (layer.tooltip?.template && tooltipTemplateSource === "service") templateFields(layer.tooltip.template, fields);
     const popupTemplateSource = effectiveSource(layer, layer.popup?.defaultFieldSource, "popup");
     if (layer.popup?.title) templateFields(layer.popup.title, fields, popupTemplateSource);
-    if (layer.popup?.remote?.endpoint) templateFields(layer.popup.remote.endpoint, fields, "service");
+    if (layer.popup?.request?.endpoint) for (const field of fragmentBindingFields(layer.popup.request.endpoint, "context")) {
+        if (!field.startsWith("$")) fields.add(field);
+    }
     if (layer.popup?.html) templateFields(layer.popup.html, fields, popupTemplateSource);
     const visitContent = (value: unknown, inheritedSource: string): void => {
         if (Array.isArray(value)) { value.forEach(item => visitContent(item, inheritedSource)); return; }

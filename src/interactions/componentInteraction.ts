@@ -3,6 +3,7 @@ import type { RenderContextValue } from "../render/RenderContext";
 import type { FilterOperator } from "../schema/hyperpbiSchema";
 import { claimInteractionEvent, payloadValueIsEmpty } from "./interactionPayload";
 import type { InteractionExecutionResult, InteractionModifiers, InteractionPayload, InteractionSelectionMode, ResolvedInteractionPolicy } from "./interactionTypes";
+import { dynamicEventKey } from "../fragments/fragmentTypes";
 
 export function resolveInteractionSelection<T>(current: T[], matching: T[], mode: InteractionSelectionMode = "replace", modifier = false): T[] {
     const selected = new Set(current); const matches = Array.from(new Set(matching));
@@ -34,16 +35,24 @@ function details(payload: InteractionPayload, externalMode?:"filter"|"selection"
     return { componentId: payload.componentId, componentType: payload.componentType, field: payload.field, value: payload.value, filterOperator: payload.operator, matchedRowCount: payload.rowIndices.length,externalMode };
 }
 
-export function componentRows(componentId: string, context: Pick<RenderContextValue, "state">): number[] {
-    const rows=new Set<number>();
-    for(const [origin,selected] of Object.entries(context.state.componentSelectedRows)){
-        if(context.state.componentSelectionModes[origin]!=="highlight")continue;
-        const scope=context.state.componentSelectionScopes[origin]??"self";
-        const targets=context.state.componentSelectionTargets[origin];
+function highlighted<T>(componentId: string, { state }: Pick<RenderContextValue, "state">, selections: Record<string, T[]>): T[] {
+    const rows=new Set<T>();
+    for(const [origin,selected] of Object.entries(selections)){
+        if(state.componentSelectionModes[origin]!=="highlight")continue;
+        const scope=state.componentSelectionScopes[origin]??"self";
+        const targets=state.componentSelectionTargets[origin];
         const applies=targets?.length?targets.includes(componentId):origin===componentId?scope!=="others":scope!=="self";
         if(applies)selected.forEach(index=>rows.add(index));
     }
     return Array.from(rows);
+}
+
+export function componentRows(componentId: string, context: Pick<RenderContextValue, "state">): number[] {
+    return highlighted(componentId, context, context.state.componentSelectedRows);
+}
+
+export function componentRowKeys(componentId: string, context: Pick<RenderContextValue, "state">): string[] {
+    return highlighted(componentId, context, context.state.componentSelectedRowKeys);
 }
 
 export function clearComponentInteraction(policy: ResolvedInteractionPolicy, componentId: string, context: RenderContextValue): InteractionExecutionResult {
@@ -100,9 +109,21 @@ function normalizeDatasetInteraction(
 }
 
 export function executeComponentInteraction(inputPolicy: ResolvedInteractionPolicy, inputPayload: InteractionPayload, inputContext: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
-    if (!inputPolicy.enabled) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "interaction disabled" };
-    if (inputPolicy.trigger !== modifiers.trigger) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "trigger mismatch" };
-    if (!claimInteractionEvent(modifiers.event)) return { executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason: "interaction event already handled" };
+    const skipped = (reason: string): InteractionExecutionResult => ({ executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason });
+    const dynamicEvent = modifiers.dynamicEvent ?? modifiers.trigger;
+    const observed = dynamicEvent && inputContext.dynamicEventKeys?.has(dynamicEventKey(inputPayload.componentId, dynamicEvent));
+    const skipReason = !inputPolicy.enabled ? "interaction disabled" : inputPolicy.trigger !== modifiers.trigger ? "trigger mismatch" : undefined;
+    if (skipReason && !observed) return skipped(skipReason);
+    if (!claimInteractionEvent(modifiers.event)) return skipped("interaction event already handled");
+    if (observed && dynamicEvent) {
+        const rows = inputPayload.contextRows ?? inputPayload.rowIndices.map(index => inputContext.sourceRows[index]).filter(Boolean);
+        const sharedFields = Object.entries(rows[0] ?? {}).filter(([field, value]) => rows.every(row => Object.is(row[field], value)));
+        inputContext.emitDynamicEvent?.(inputPayload.componentId, dynamicEvent, {
+            ...Object.fromEntries(sharedFields), $field: inputPayload.field,
+            $value: Object.hasOwn(modifiers, "contextValue") ? modifiers.contextValue : inputPayload.value,
+        });
+    }
+    if (skipReason) return skipped(skipReason);
     const normalized = normalizeDatasetInteraction(inputPolicy, inputPayload, inputContext);
     const { policy, payload, context } = normalized;
     let effectivePayload: InteractionPayload = {

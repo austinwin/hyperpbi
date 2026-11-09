@@ -12,7 +12,8 @@ import { useRenderContext, type RenderContextValue, type ResolvedDatasetView } f
 import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 import { EChartRenderer, type EChartDataEvent, type EChartSelectionRef } from "./EChartRenderer";
-import { componentRows as selectedSourceRows, executeComponentInteraction } from "../../interactions/componentInteraction";
+import { componentRowKeys, componentRows as selectedSourceRows, executeComponentInteraction } from "../../interactions/componentInteraction";
+import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { getChartAdapter } from "./adapters/registry";
@@ -131,10 +132,13 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     const result = useMemo(() => adapter.build(adapterComponent, currentRows, buildContext), [adapter, adapterComponent, currentRows, buildContext]);
     const sourceStatus=chartDataState(context.getDatasetView?.(effectiveComponent.dataset,id)?.name??effectiveComponent.dataset,context.schema.data?.datasets,context.remoteSources);
     const option = useMemo(() => applyChartStyle(enableDeclarativeChartEvents(result.option, component.events), component.chartStyle), [result.option, component.events, component.chartStyle]);
-    const selectedRows = useMemo(() => new Set([
-        ...selectedSourceRows(id, { state: context.state }),
-        ...(context.state.componentSelectedRows[id] ?? []),
-    ]), [context.state, id]);
+    const selectedRows = useMemo(() => {
+        if (context.executionMode === "fragment") {
+            const keys = new Set([...componentRowKeys(id, context), ...(context.state.componentSelectedRowKeys[id] ?? [])]);
+            return new Set(powerBiRowKeys.flatMap((key, index) => keys.has(key) ? [index] : []));
+        }
+        return new Set([...selectedSourceRows(id, context), ...(context.state.componentSelectedRows[id] ?? [])]);
+    }, [context.state, context.executionMode, id, powerBiRowKeys]);
     const selectionRefs = useMemo<EChartSelectionRef[]>(() => result.bindings
         .filter(binding => binding.sourceRowIndices.some(index => selectedRows.has(index)))
         .map(binding => ({ seriesIndex: binding.seriesIndex, dataIndex: binding.dataIndex, dataType: binding.dataType })), [result.bindings, selectedRows]);
@@ -167,7 +171,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
             sourceRowKeys: powerBiRowKeys,
             field: sourceField,
             value: values?.length === 1 ? values[0] : values,
-        }), { ...interactionContext, interactionUsesSourceIdentity: true }, { trigger: "click" });
+        }), { ...interactionContext, interactionUsesSourceIdentity: true }, { trigger: "click", dynamicEvent: false });
     };
 
     const drillFromEvent = (event: EChartDataEvent) => {
@@ -194,15 +198,21 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     };
 
     const onDataPoint = (event: EChartDataEvent) => {
-        if (component.drill?.trigger === "click" && drillFromEvent(event)) return;
         const binding = bindingForEvent(result.bindings, event);
         if (!binding) return;
-        executeComponentInteraction(resolveInteractionPolicy(effectiveComponent, context.config), createInteractionPayload(effectiveComponent, {
+        const drills = component.drill?.trigger === "click" && drillFromEvent(event);
+        const policy = resolveInteractionPolicy(effectiveComponent, context.config);
+        const observed = context.dynamicEventKeys?.has(dynamicEventKey(id, "select"));
+        const indices = observed ? new Set(binding.sourceRowIndices) : undefined;
+        const contextRows = indices ? currentRows.filter(row =>
+            (!binding.field || sameValue(row[binding.field], binding.value)) && lineageForRow(row).some(index => indices.has(index))) : undefined;
+        executeComponentInteraction(drills ? { ...policy, enabled: false } : policy, createInteractionPayload(effectiveComponent, {
             rowIndices: binding.sourceRowIndices,
             sourceRowKeys: powerBiRowKeys,
             field: binding.field,
             value: binding.value,
-        }), interactionContext, { trigger: "click", multiSelect: event.multiSelect, event: event.event });
+            contextRows,
+        }), interactionContext, { trigger: "click", dynamicEvent: "select", contextValue: binding.value, multiSelect: event.multiSelect, event: event.event });
     };
 
     const onZoom = (zoom: EChartZoomEvent) => {

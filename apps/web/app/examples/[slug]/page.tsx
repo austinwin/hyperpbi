@@ -71,7 +71,7 @@ export default async function ExamplePage({
           <dl>
             <div><dt>Host parity</dt><dd><CheckCircle2 size={15} /> Playground + Power BI</dd></div>
             <div><dt>Package</dt><dd><PackageCheck size={15} /> {example.powerBiPackage}</dd></div>
-            <div><dt>Files</dt><dd>Specification · Runtime · CSV · Project</dd></div>
+            <div><dt>Files</dt><dd><a href={`https://github.com/austinwin/hyperpbi/tree/main/examples/dashboards/${example.folder}`}>Specification · Runtime · CSV · Project</a></dd></div>
           </dl>
         </header>
       </div>

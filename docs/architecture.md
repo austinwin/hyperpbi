@@ -90,13 +90,14 @@ npm run web:sites:build
 
 `npm run dev` builds the browser runtime island and starts Next.js on `http://localhost:4178`. `npm run build` performs the root and web type checks, rebuilds the island, and creates the production Next.js output.
 
+The production Vercel project builds `main` using the GitHub integration and `vercel.json`. Release verification also builds the OpenNext Worker and stages the repository's website distribution archive.
+
 
 
 ## Future services
 
 `SpecificationAuthoringService` is the future AI integration seam. A provider adapter will receive an `AuthoringContext` and return a candidate `HyperPbiSchema`; it must never save or render before the shared validator accepts it. A future publishing service should sit beside `ProjectStorage`, persist projects/specifications to an authenticated backend, and deploy the same web host. Neither service should fork the schema, editor, renderer, or security pipeline.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+`HyperPbiRoot` tracks the latest event for configured source IDs and events. Interaction payloads carry table rows, chart selections, and filter values. Leaflet supplies feature attributes. `RemoteFragmentHost` resolves the URL, checks network permission, cancels stale requests, and prepares the returned tree with the shared schema and registry. Fragment roots own their data and state. Dashboard roots own overlay definitions, focus, and stack state. [Dynamic Content guide](remote-fragments.md).

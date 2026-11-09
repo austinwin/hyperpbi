@@ -22,6 +22,7 @@ interface ExampleDefinition {
     powerBiPackage: "core" | "maps";
     expected: string;
     limitations: string;
+    liveApi?: string;
     headers: string[];
     rows: Row[];
     specification: Specification;
@@ -726,6 +727,96 @@ function industrialTelemetry(): ExampleDefinition {
     };
 }
 
+const demoApi = "https://functions.miniup.app/hyperpbi-dynamic-demo";
+const demoRuntime: HyperPbiConfig = { ...lightRuntime, providers: { ...lightRuntime.providers, mode: "maps" } };
+const liveLimitations = "The local CSV is synthetic. Live details require HTTPS access to the public MiniUp Function. In Power BI, the Maps package and runtime WebAccess permission are required.";
+const demoTheme = { mode: "light", density: "comfortable", primaryColor: "#0f766e", accentColor: "#0284c7", radius: 12, cardPadding: 14, gap: 14 };
+const header = (id: string, title: string, instructions: string) => ({ type: "markdown", id, text: `# ${title}\n\n${instructions}` });
+
+function dynamicGisAnalytics(): ExampleDefinition {
+    const rows = [
+        { siteid: "1024", name: "North pressure station", zone: "North Loop", latitude: 29.79, longitude: -95.382 },
+        { siteid: "1025", name: "River pressure station", zone: "East River", latitude: 29.752, longitude: -95.34 },
+        { siteid: "1026", name: "West pressure station", zone: "West Loop", latitude: 29.766, longitude: -95.427 },
+    ];
+    const features = rows.map(({ siteid, latitude, longitude, ...properties }) => ({
+        type: "Feature", id: siteid, geometry: { type: "Point", coordinates: [longitude, latitude] }, properties: { ...properties, site_id: siteid },
+    }));
+    const specification = {
+        version: "2.0", title: "Dynamic GIS Analytics", theme: demoTheme,
+        toolbar: [header("gis_intro", "Water distribution · Houston", "Select a pressure station to inspect its last 24 hours, measurements, and next maintenance action.")],
+        components: [
+            { type: "map", id: "sensor_map", title: "Pressure monitoring network", heightMode: "fill", minHeight: 420, basemap: { type: "none" },
+                view: { center: [29.77, -95.385], zoom: 12, fitMode: "none" }, featureDetails: { mode: "auto" },
+                toolbar: { visible: true, home: true, zoomIn: true, zoomOut: true }, layers: [
+                    { id: "mains", name: "Illustrative distribution mains", source: { type: "geoJson", data: { type: "FeatureCollection", features: [
+                        { type: "Feature", geometry: { type: "LineString", coordinates: [[-95.427, 29.766], [-95.404, 29.777], [-95.382, 29.79], [-95.366, 29.765], [-95.34, 29.752]] }, properties: {} },
+                    ] } }, renderer: { type: "simple", symbol: { outlineColor: "#438d9b", outlineWidth: 4 } }, popup: { mode: "none" }, interaction: disabledInteraction },
+                    { id: "sensors", name: "Pressure sensors", source: { type: "geoJson", data: { type: "FeatureCollection", features } },
+                        renderer: { type: "simple", symbol: { shape: "circle", fillColor: "#0f766e", size: 18, outlineColor: "#ffffff", outlineWidth: 3 } },
+                        labels: { enabled: true, field: "name", fieldSource: "service", placement: "right", color: "#0f766e", size: 12 },
+                        tooltip: { enabled: true, template: "{{service.name}} · Click for pressure analytics" },
+                        popup: { mode: "dynamic", title: "{{service.name}}", width: 540, maxHeight: 560,
+                            request: { endpoint: `${demoApi}/sensor?id={{context.site_id}}`, cacheTtlSeconds: 30, timeoutMs: 10000, fallbackMessage: "Station telemetry is temporarily unavailable." } },
+                        interaction: { enabled: true, externalMode: "none" } },
+                ] },
+        ],
+    };
+    return {
+        id: "dynamic-gis-analytics", title: "Dynamic GIS Analytics", useCase: "Water utility pressure monitoring",
+        summary: "Three Houston pressure stations open interactive, live API analytics in map popups.",
+        description: "A synthetic water distribution network pairs inline station geometry with on-demand pressure telemetry, operating assignments, and maintenance notes.",
+        theme: "light", accent: "#0f766e", tags: ["GIS", "utilities", "live-api"], referenceImages: [], powerBiPackage: "maps",
+        expected: "Click each station to load different pressure readings. Hover or zoom its chart, expand the popup, page through the measurements, or refresh the station data.",
+        limitations: liveLimitations, liveApi: `${demoApi}/sensor?id=1024`,
+        headers: Object.keys(rows[0]), rows, specification, runtime: demoRuntime,
+    };
+}
+
+function universalDynamicContent(): ExampleDefinition {
+    const rows = [
+        { assetid: "P-204", asset: "Intake pump 204", zone: "North Loop", priority: "High", hours: 14 },
+        { assetid: "V-118", asset: "Isolation valve 118", zone: "East River", priority: "Normal", hours: 6 },
+        { assetid: "M-307", asset: "Flow meter 307", zone: "West Loop", priority: "Normal", hours: 4 },
+        { assetid: "P-209", asset: "Booster pump 209", zone: "North Loop", priority: "High", hours: 9 },
+    ];
+    const specification = {
+        version: "2.0", title: "Universal Dynamic Content", theme: { ...demoTheme, primaryColor: "#3156a8", accentColor: "#0d9488" },
+        toolbar: [header("work_intro", "Utility maintenance · Dispatch", "Select an asset for its live work plan. Change the priority or refresh the workload to query the dispatch API.")],
+        components: [
+            { type: "card", id: "work_queue", header: { title: "Scheduled work orders" }, children: [
+                { type: "flex", id: "work_controls", gap: 12, children: [
+                    { type: "select", id: "priority", title: "Work priority", field: "priority", options: ["High", "Normal"],
+                        interaction: { enabled: true, internalMode: "filter", targets: ["assets"], externalMode: "none" } },
+                    { type: "button", id: "refresh_workload", title: "Refresh workload" },
+                ] },
+                { type: "table", id: "assets", title: "Assets", columns: [{ field: "assetid", title: "Asset ID" }, { field: "asset", title: "Equipment" }, { field: "zone", title: "Zone" }, { field: "priority", title: "Priority" }],
+                    hover: true, interaction: { enabled: true, internalMode: "highlight", internalScope: "self", externalMode: "none" } },
+            ] },
+            { type: "card", id: "dispatch", header: { title: "Dispatch workload" }, children: [
+                { type: "dynamicContent", id: "workload", title: "Workload", loadOnMount: true,
+                    trigger: { source: "refresh_workload", event: "click", refresh: true },
+                    request: { endpoint: `${demoApi}/backlog?priority={{state.priority}}`, cacheTtlSeconds: 30 } },
+            ] },
+        ],
+        rightPanel: [
+            { type: "card", id: "asset_panel", header: { title: "Asset work plan" }, children: [
+                { type: "dynamicContent", id: "asset_details", title: "Asset details", emptyText: "Select a work order to see its assignment and scheduled tasks.",
+                    trigger: { source: "assets", event: "click" }, request: { endpoint: `${demoApi}/asset?id={{context.assetid}}`, cacheTtlSeconds: 30 } },
+            ] },
+        ],
+    };
+    return {
+        id: "universal-dynamic-content", title: "Universal Dynamic Content", useCase: "Maintenance dispatch and asset work orders",
+        summary: "Select a work order to open its live details, and query workload independently by priority.",
+        description: "A maintenance dispatcher browses a local asset queue while a responsive side panel and workload card fetch their component trees from MiniUp.",
+        theme: "light", accent: "#3156a8", tags: ["maintenance", "work-orders", "live-api"], referenceImages: [], powerBiPackage: "maps",
+        expected: "Select P-204 or another asset to load its work plan in the side panel. Select High under Work priority to query the filtered workload, then click Refresh workload to repeat the live request.",
+        limitations: liveLimitations, liveApi: `${demoApi}/asset?id=P-204`,
+        headers: Object.keys(rows[0]), rows, specification, runtime: demoRuntime,
+    };
+}
+
 const examples: ExampleDefinition[] = [
     talentAcquisition(),
     capitalProjectControls(),
@@ -735,16 +826,24 @@ const examples: ExampleDefinition[] = [
     digitalBanking(),
     mediaWebPerformance(),
     industrialTelemetry(),
+    dynamicGisAnalytics(),
+    universalDynamicContent(),
 ];
 
 function readme(example: ExampleDefinition): string {
-    const packageInstruction = example.powerBiPackage === "maps"
+    const packageInstruction = example.liveApi
+        ? "Import the HyperPBI Maps PBIVIZ package with WebAccess for `https://functions.miniup.app`. Allow the origin in Power BI."
+        : example.powerBiPackage === "maps"
         ? "Import the HyperPBI Maps PBIVIZ package. The package must include the OpenStreetMap WebAccess declaration."
         : "Import the HyperPBI Core PBIVIZ package.";
-    const projectDescription = example.powerBiPackage === "maps"
+    const projectDescription = example.liveApi
+        ? "complete Playground project with the local synthetic records and live MiniUp bindings."
+        : example.powerBiPackage === "maps"
         ? "complete Playground project with embedded synthetic rows, stable row keys, and an OpenStreetMap basemap configuration."
         : "complete offline Playground project with normalized rows and stable row keys.";
-    const playgroundDataDescription = example.powerBiPackage === "maps"
+    const playgroundDataDescription = example.liveApi
+        ? `The preview calls the [public MiniUp API](${example.liveApi}) when triggered. The bundle embeds the local CSV and contains no credentials. See the [live preview and Open in Playground action](https://hyperpbi.com/examples/${example.id}) and the [Function source](../dynamic-content-api.mjs).`
+        : example.powerBiPackage === "maps"
         ? "The synthetic dataset is embedded locally and the bundle contains no credentials. The configured OpenStreetMap basemap fetches remote tiles, so a network connection is required to display the basemap."
         : "The bundle is local-first and contains no credentials or remote data.";
     return `# ${example.title}

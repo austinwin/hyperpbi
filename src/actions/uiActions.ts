@@ -2,7 +2,6 @@ import type { DashboardAction } from "../render/stateStore";
 import type { RenderContextValue } from "../render/RenderContext";
 import type { UiAction, UiActionResult } from "./uiActionTypes";
 import { collectOverlayComponents, getOverlayAnchor, overlayKind } from "../components/overlays/overlayTypes";
-import { overlayRuntime } from "../components/overlays/overlayRuntime";
 
 // ── Safe UI Action Executor ───────────────────────────────────────────
 // Never executes strings as code. Never uses eval or new Function.
@@ -72,7 +71,8 @@ export function executeUiAction(
             const overlayType = getOverlayType(action.target, context);
             const anchor = getOverlayAnchor(event);
             const eventElement = typeof HTMLElement !== "undefined" && event?.currentTarget instanceof HTMLElement ? event.currentTarget : undefined;
-            if (eventElement) {
+            const overlayRuntime = context.overlayRuntime;
+            if (eventElement && overlayRuntime) {
                 const containingOverlay = Array.from(overlayRuntime.panels.entries()).find(([, panel]) => panel.contains(eventElement));
                 overlayRuntime.triggers.set(action.target, containingOverlay ? overlayRuntime.triggers.get(containingOverlay[0]) ?? eventElement : eventElement);
             }
@@ -207,6 +207,6 @@ function getOverlayType(
     id: string,
     context: RenderContextValue
 ): "modal" | "dropdown" | "popover" | "offcanvas" | "unknown" {
-    const component = collectOverlayComponents(context.schema).get(id) ?? overlayRuntime.definitions.get(id);
+    const component = collectOverlayComponents(context.schema).get(id) ?? context.overlayRuntime?.definitions.get(id);
     return overlayKind(component);
 }

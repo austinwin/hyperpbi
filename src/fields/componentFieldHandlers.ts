@@ -1,6 +1,7 @@
 import type { FieldReferenceDescriptor, FieldTraversalHandler } from "../catalog/componentDescriptors";
 import { aggregationFieldPolicy } from "./aggregationFieldPolicy";
 import type { FieldReferenceOccurrence, FieldReferenceSource } from "./specificationFieldReferences";
+import { fragmentBindingFields, replaceFragmentContextField } from "../fragments/fragmentBindings";
 
 type Json = Record<string, unknown>;
 type Requirement = FieldReferenceOccurrence["requirement"];
@@ -72,6 +73,15 @@ function templateValue(context: ComponentFieldHandlerContext, value: unknown, pa
     for (const [childKey, child] of Object.entries(value)) templateValue(context, child, `${path}/${pointer(childKey)}`, value, childKey);
 }
 
+export function fragmentRequestFieldReferences(request: unknown, path: string, datasetName: string, componentId: string | undefined, emit: ComponentFieldHandlerContext["emit"]): void {
+    if (!object(request) || typeof request.endpoint !== "string") return;
+    for (const reference of new Set(fragmentBindingFields(request.endpoint, "context"))) {
+        if (reference.startsWith("$")) continue;
+        emit({ reference, path, componentId, datasetName, requirement: "any", source: datasetName === "powerbi" ? "powerbi" : "dataset",
+            set: next => { request.endpoint = replaceFragmentContextField(String(request.endpoint), reference, next); } });
+    }
+}
+
 function action(context: ComponentFieldHandlerContext, value: unknown, path: string): void {
     if (Array.isArray(value)) { value.forEach((item, index) => action(context, item, `${path}/${index}`)); return; }
     if (!object(value)) return;
@@ -114,7 +124,9 @@ function mapLayers(context: ComponentFieldHandlerContext): void {
             if (Array.isArray(sectionValue.fields)) sectionValue.fields.forEach((item, itemIndex) => { if (object(item)) emitValue(layerContext, item, "field", `${path}/${section}/fields/${itemIndex}/field`, "any", (item.fieldSource ?? defaultSource) as FieldReferenceSource); });
             const templateSource = (sectionValue.defaultFieldSource ?? defaultSource) as FieldReferenceSource;
             for (const key of ["html", "template", "title"]) templateString(layerContext, sectionValue, key, `${path}/${section}/${key}`, templateSource);
-            if (section === "popup" && object(sectionValue.remote)) templateString(layerContext, sectionValue.remote, "endpoint", `${path}/popup/remote/endpoint`, templateSource);
+            if (section === "popup" && sourceType === "powerbi") {
+                fragmentRequestFieldReferences(sectionValue.request, `${path}/popup/request/endpoint`, layerContext.effectiveDataset, layerContext.componentId, layerContext.emit);
+            }
             const visitPopupContent = (value: unknown, at: string, inherited: FieldReferenceSource): void => {
                 if (Array.isArray(value)) { value.forEach((item, index) => visitPopupContent(item, `${at}/${index}`, inherited)); return; }
                 if (!object(value)) return;

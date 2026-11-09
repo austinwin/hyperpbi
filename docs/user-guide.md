@@ -14,7 +14,7 @@ For local development, run `npm install` and `npm run dev` from the repository r
 
 For web builds that use `rest.get`, set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of trusted HTTPS origins or subdomain wildcard origins before the build. If unset, HyperPBI approves the miniup.app and miniup.io apex/subdomain families plus the HyperPBI demonstration origin. This setting is part of the web build/deployment boundary; dashboard JSON may select an allowed origin but cannot add a new trusted host.
 
-The eight dashboards in [`examples/dashboards`](../examples/dashboards) are the fastest starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. See the [dashboard example guide](dashboard-examples.md) for the folder list, package profiles, and exact import workflow.
+The ten dashboards in [`examples/dashboards`](../examples/dashboards) are a starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. See the [dashboard example guide](dashboard-examples.md) for the folder list, package profiles, and exact import workflow.
 
 ## Install and bind data
 
@@ -208,7 +208,6 @@ Dashboard schema 2.0 is the only version accepted by HyperPBI authoring and rend
 
 Developers can convert a supported legacy JSON file outside the visual with `npm run schema:migrate-v1 -- input.json output.json`. Review and validate the converted fields, interactions, and map bindings before use. The PBIVIZ package version and Runtime Config version are separate version numbers.
 
+## Dynamic Content
 
-## Remote fragments and dynamic GIS popups
-
-Map popups use one canonical `mode`: `none`, `default`, `custom` or `remote`. Remote mode fetches `hyperpbi.fragment` 1.0 JSON containing canonical component definitions and independent datasets, then uses the existing runtime with isolated state and restricted actions. Both MiniUp .app and .io apex/subdomain families are approved by default. Power BI requires Maps package WebAccess declarations, host permission and endpoint CORS; browser connectivity alone does not prove tenant access. See [Remote HyperPBI Fragments](remote-fragments.md) for the executable contract, component restrictions and authoring workflow.
+Use a map feature, table row, chart selection, or control to load live details. Start with [Dynamic GIS Analytics](https://hyperpbi.com/examples/dynamic-gis-analytics) or [Universal Dynamic Content](https://hyperpbi.com/examples/universal-dynamic-content), then select **Open in Playground** to edit your copy. [Dynamic Content guide](remote-fragments.md).

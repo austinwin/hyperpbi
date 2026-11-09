@@ -294,11 +294,12 @@
     },
     {
       "id": "remote-analytics",
-      "group": "30. Remote analytics",
-      "title": "Dynamic GIS Popup \u2014 Remote Analytics",
+      "group": "30. Dynamic Content",
+      "title": "Dynamic GIS Analytics",
       "summary": "Click a water-pressure sensor to fetch KPIs, a zoomable chart and measurements through the shared runtime.",
-      "spec": "remote-analytics/spec.json",
-      "data": "data/pressure-sensors.json",
+      "spec": "../dashboards/dynamic-gis-analytics/specification.json",
+      "data": "../dashboards/dynamic-gis-analytics/data.csv",
+      "dashboard": "dynamic-gis-analytics",
       "expected": "Three clickable monitoring stations load validated remote HyperPBI fragments. Expand, zoom, refresh and switch sensors.",
       "limitations": "Deterministic synthetic data. The public HTTPS API requires CORS and approved WebAccess when used from Power BI.",
       "powerBi": "Maps package required. Fragment data stays local and never cross-filters the Power BI model."

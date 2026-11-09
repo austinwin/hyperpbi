@@ -514,8 +514,10 @@ export interface MapLabelDefinition {
 // ── Popup ─────────────────────────────────────────────────────────────
 
 export interface MapPopupDefinition {
-    mode: "none" | "default" | "custom" | "remote";
-    remote?: import("../fragments/fragmentTypes").RemoteFragmentRequest;
+    mode: "none" | "default" | "custom" | "dynamic";
+    request?: import("../fragments/fragmentTypes").RemoteFragmentRequest;
+    width?: number;
+    maxHeight?: number;
     content?: import("../maps/popup/mapPopupContent").MapPopupContentBlock[];
     /** Namespace used by title and safe HTML template tokens. */
     defaultFieldSource?: "powerbi" | "service" | "joined";

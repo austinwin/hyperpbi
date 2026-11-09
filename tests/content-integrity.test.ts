@@ -4,6 +4,7 @@ import { resolve, dirname } from "node:path";
 import { describe, expect, it } from "vitest";
 import { componentDefinitions } from "../src/catalog/componentDefinitions";
 import { prepareRemoteFragment } from "../src/fragments/prepareRemoteFragment";
+import demo from "../examples/dashboards/dynamic-content-api.mjs";
 import catalog from "../apps/web/generated/component-catalog.json";
 
 const read = (file: string) => readFileSync(file, "utf8");
@@ -31,8 +32,12 @@ describe("published documentation and examples", () => {
         }
     });
 
-    it("publishes executable API responses with the canonical contract", () => {
-        for (const file of readdirSync("examples/remote-fragments").filter(file => file.endsWith(".json"))) expect(prepareRemoteFragment(JSON.parse(read(`examples/remote-fragments/${file}`)), "example").schema.components.length).toBeGreaterThan(0);
+    it("runs all demo Function routes through canonical preparation", async () => {
+        for (const route of ["sensor?id=1024", "sensor?id=1025", "sensor?id=1026", "asset?id=P-204", "backlog?priority=High"]) {
+            const response = await demo.fetch(new Request("https://functions.miniup.app/hyperpbi-dynamic-demo/" + route));
+            expect(response.status).toBe(200);
+            expect(prepareRemoteFragment(await response.json(), "example").schema.components.length).toBeGreaterThan(0);
+        }
     });
 
     it("does not contradict current source host and popup support", () => {
@@ -42,6 +47,6 @@ describe("published documentation and examples", () => {
         expect(content).not.toMatch(/"popup"\s*:\s*\{\s*"enabled"/);
         const guide = read("docs/remote-fragments.md");
         for (const host of ["https://miniup.app", "https://*.miniup.app", "https://miniup.io", "https://*.miniup.io"]) expect(guide).toContain(host);
-        expect(guide).toContain("does not override CORS");
+        expect(guide).toContain("CORS still applies after WebAccess approval");
     });
 });

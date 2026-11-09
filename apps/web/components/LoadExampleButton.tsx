@@ -23,7 +23,7 @@ export function LoadExampleButton({ bundle }: { bundle: string }) {
   return (
     <button className="button button--primary" type="button" onClick={() => void load()} disabled={status === "loading"}>
       <Download size={16} aria-hidden="true" />
-      {status === "loading" ? "Adding to Playground…" : status === "error" ? "Try loading again" : "Load in Playground"}
+      {status === "loading" ? "Adding to Playground…" : status === "error" ? "Try loading again" : "Open in Playground"}
     </button>
   );
 }

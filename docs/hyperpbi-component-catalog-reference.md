@@ -3,7 +3,7 @@
 
 **Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
 
-HyperPBI currently defines **83 component types across 12 categories**. This file is generated from canonical component descriptors and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
+HyperPBI currently defines **84 component types across 12 categories**. This file is generated from canonical component descriptors and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
 
 For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
 
@@ -13,7 +13,7 @@ Every 2.0 component requires `type` and a globally unique stable `id` matching `
 
 Allowed shared properties:
 
-`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
 The three behavior systems are independent: `uiAction` changes interface state; `interaction` controls universal internal/Power BI data behavior; `interactions` maps safe component-specific events to allowlisted payloads. None is mandatory on every component.
 
@@ -5492,7 +5492,7 @@ _5 components_
 
 ## Advanced components
 
-_3 components_
+_4 components_
 
 ### `svgMarkup` — Sanitized SVG markup
 
@@ -5695,6 +5695,41 @@ _3 components_
         "showSymbol": false
       }
     ]
+  }
+}
+```
+
+### `dynamicContent` — Dynamic Content
+
+**Status:** beta
+
+**Level:** advanced
+
+**Recommended use:** Render validated component JSON from an approved HTTPS endpoint in a dashboard region or overlay.
+
+**Required properties:** `type`, `id`, `request`
+
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `repeat`, `request`, `trigger`, `loadOnMount`, `emptyText`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataset`, `disabled`, `emptyText`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `loadOnMount`, `minHeight`, `order`, `props`, `repeat`, `request`, `responsive`, `size`, `span`, `style`, `subtitle`, `title`, `tooltip`, `trigger`, `type`, `uiAction`, `variant`, `visibility`
+
+**Capabilities:** fields No; calculations No; scoped CSS Yes; slots No; interactions No; identity selection No; custom HTML No.
+
+**Data interaction:** No. **UI action:** Yes.
+
+**Related:** `map`, `table`, `card`, `modal`, `offcanvas`
+
+```json
+{
+  "type": "dynamicContent",
+  "id": "workload",
+  "request": {
+    "endpoint": "https://functions.miniup.app/hyperpbi-dynamic-demo/backlog?priority={{state.priority}}"
+  },
+  "interaction": {
+    "enabled": false,
+    "internalMode": "none",
+    "externalMode": "none"
   }
 }
 ```

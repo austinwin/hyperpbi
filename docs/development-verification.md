@@ -9,7 +9,7 @@ Changed paths include the merge-base diff against `origin/main`, tracked working
 | Change | Fast | PR | Full |
 |---|---|---|---|
 | TypeScript runtime | Incremental typecheck, changed-file lint, dependency-related unit tests | Runtime/web/Playground types, lint, related tests | All types/lint/unit tests |
-| Shared renderer, schema, data, security or network | Related unit tests and one remote-fragment chart/expansion browser smoke | All unit tests and essential renderer/map browser smoke | Every runtime and Playground browser test |
+| Shared renderer, schema, data, security or network | Related unit tests and one live MiniUp chart and popup browser smoke | All unit tests and essential renderer, map, and Dynamic Content browser checks | Every runtime and Playground browser test |
 | Map runtime or Map Studio | Related tests and one remote popup smoke | Map runtime and popup integration smoke | Complete browser suites |
 | Documentation, examples, metadata | Generated-doc check, links/counts/host claims, executable examples | Same checks plus affected website build | Same checks |
 | Website / runtime island | Relevant types/lint/unit tests | Website build and Playground save/reload smoke | One OpenNext website build and Worker staging |

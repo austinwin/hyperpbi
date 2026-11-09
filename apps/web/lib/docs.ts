@@ -40,7 +40,7 @@ const summaries: Record<string, string> = {
   "svg-visuals": "Declarative diagrams, schematics, gauges, and motion.",
   maps: "Build analytical maps from Power BI and service data.",
   "map-services": "Provider access, ArcGIS behavior, and package profiles.",
-  "remote-fragments": "Remote component JSON, dynamic GIS popups, MiniUp, and request permissions.",
+  "remote-fragments": "Event bindings, remote component trees, live MiniUp examples, and request permissions.",
   security: "Sanitization, provider boundaries, and safe authoring.",
   "calculations-dsl": "Derived fields and metrics with the bounded expression DSL.",
   "repair-workflow": "Diagnose and repair invalid dashboards without losing work.",

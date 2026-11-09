@@ -4,10 +4,12 @@ import type { OverlayAnchor } from "../../render/stateStore";
 import { useRenderContext } from "../../render/RenderContext";
 import { MenuList } from "./MenuList";
 import { useOverlayDismiss } from "./useOverlayDismiss";
+import { useOverlayRuntime } from "./overlayRuntime";
 import { useOverlayFocus } from "./useOverlayFocus";
 import { useAnchoredOverlayPosition } from "./useAnchoredOverlayPosition";
 
 export function DropdownOverlay({ component, anchor }: { component: DropdownComponent; anchor?: OverlayAnchor }) {
+    const overlayRuntime = useOverlayRuntime();
     const context = useRenderContext(); const panelRef = useRef<HTMLDivElement>(null); const id = component.id!;
     const close = useCallback(() => context.dispatch({ type: "closeOverlay", id }), [context.dispatch, id]);
     const position = useAnchoredOverlayPosition(id, anchor, panelRef, component.placement ?? "bottom-start");
@@ -16,7 +18,7 @@ export function DropdownOverlay({ component, anchor }: { component: DropdownComp
     return (
         <div
             ref={panelRef}
-            id={`${id}-panel`}
+            id={overlayRuntime.domId(id, "panel")}
             class="hp-dropdown-panel"
             data-placement={position?.placement}
             style={{ position: "fixed", top: position?.top ?? 0, left: position?.left ?? 0, maxHeight: position?.maxHeight, visibility: position ? "visible" : "hidden" }}
