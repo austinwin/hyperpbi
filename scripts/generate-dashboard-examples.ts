@@ -1158,7 +1158,7 @@ function scene3dAnimationStudio(): ExampleDefinition {
         tags: ["3D", "animation", "SCADA", "Three.js"],
         expected: "Normal duty spins three fans, Peak demand spins all four and pulses the P-103 warning beacon, and Maintenance stops P-102 so its status beacon blinks. Edit any object's Animations section to adjust RPM, axis, period and data fields.",
         limitations: "Scenario values and readings are synthetic. Animations are local rendering only, not SCADA control commands. Requires WebGL 2 and respects reduced motion and runtime animation budgets.",
-        previewImage: undefined,
+        previewImage: "/images/pump-station-monitoring.webp",
         specification,
     };
 }
