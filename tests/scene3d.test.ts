@@ -57,6 +57,26 @@ describe("scene3d schema and data", () => {
         expect(resolveSceneObjects(spec, invalidColor, invalidColor)[0].color).toBe("#e8a936");
     });
 
+    it("clamps tank levels and reads pipe flow without changing the pipe's color or selection", () => {
+        const tank = { asset: "T-1", level: 108, rate: 12 };
+        const pump = { asset: "P-1", rate: -24, color: "#ff0000" };
+        const spec: Scene3dComponent = {
+            ...scene, levelField: "level", flowField: "rate",
+            objects: [{ id: "tank", kind: "tank", dataKey: "T-1" }, { id: "pipe", kind: "pipe", flowKey: "P-1", color: "#3481bd" }],
+        };
+        const source = [tank, pump];
+        expect(resolveSceneObjects(spec, source, source)).toEqual([
+            expect.objectContaining({ level: 100, indices: [0], selectable: true }),
+            expect.objectContaining({ flow: -24, color: "#3481bd", indices: [], selectable: false }),
+        ]);
+        expect(resolveSceneObjects(spec, source, [tank])[1].flow).toBeUndefined();
+        const zero = [{ ...tank, level: 0 }, { ...pump, rate: 0 }];
+        expect(resolveSceneObjects(spec, zero, zero)).toEqual([
+            expect.objectContaining({ level: 0 }), expect.objectContaining({ flow: 0 }),
+        ]);
+        expect(validateSchema({ version: "2.0", components: [{ ...spec, objects: [{ id: "wrong", kind: "pump", flowKey: "P-1" }] }] }).valid).toBe(false);
+    });
+
     it("uses alias-aware field traversal and selects contributing original Power BI rows from a logical dataset", () => {
         const data = parseCsvText("Asset,Status,Pressure\nP-1,Alarm,63\nP-2,Running,67\nP-1,Alarm,64", "station.csv").data;
         const specification = {

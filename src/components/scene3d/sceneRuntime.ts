@@ -31,6 +31,10 @@ interface Entry {
     selected: boolean;
     color?: string;
     appearance?: string;
+    setLevel?: (level?: number) => void;
+    pipeFlow?: ReturnType<ReturnType<typeof createSceneMeshes>["addPipeFlow"]>;
+    phase: number;
+    speed: number;
 }
 
 const floorThemes = {
@@ -70,7 +74,7 @@ function updateFinish(entry: Entry) {
     finish.roughness = definition.roughness ?? 0.44;
     finish.emissive.set(selected ? "#3076b7" : "#000000");
     finish.emissiveIntensity = 0.25;
-    finish.opacity = definition.opacity ?? 1;
+    finish.opacity = definition.opacity ?? (entry.setLevel ? 0.35 : 1);
     finish.transparent = finish.opacity < 1;
     finish.depthWrite = !finish.transparent;
     for (const source of originalColors) {
@@ -123,6 +127,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     ringGeometry.rotateX(-Math.PI / 2);
     const ringMaterial = new MeshBasicMaterial({ color: "#2589ed", transparent: true, opacity: 0.83, depthWrite: false });
     const entries = new Map<string, Entry>();
+    const flowing = new Set<Entry>();
     const roots = new Map<Object3D, string>();
     const bounds = new Box3();
     const projected = new Vector3();
@@ -131,6 +136,8 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     let width = 0;
     let height = 0;
     let frame = 0;
+    let viewDirty = false;
+    let lastFlowDraw = 0;
     let disposed = false;
     let active = true;
     let labels = true;
@@ -142,19 +149,38 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     let press: { id: number; x: number; y: number; button: number; dragging: boolean } | undefined;
     let pendingPick: string | undefined;
 
-    function draw() {
+    function draw(now: number) {
         frame = 0;
         if (!active || disposed || !width || !height) return;
-        renderer.render(scene, camera);
-        for (const [id, entry] of entries) {
-            projected.copy(entry.anchor).project(camera);
-            const inside = entry.group.visible && labels && Math.abs(projected.x) < 0.98 && Math.abs(projected.y) < 0.92 && Math.abs(projected.z) < 1;
-            callbacks.labels(id, inside ? { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2 } : undefined);
+        if (!viewDirty && now - lastFlowDraw < 32) {
+            if (flowing.size) scheduleFrame();
+            return;
         }
+        const elapsed = lastFlowDraw ? Math.min((now - lastFlowDraw) / 1000, 0.05) : 0;
+        for (const entry of flowing) {
+            entry.phase = (entry.phase + entry.speed * elapsed + 1) % 1;
+            entry.pipeFlow?.move(entry.phase, entry.definition.size?.[1] ?? 1);
+        }
+        lastFlowDraw = flowing.size ? now : 0;
+        renderer.render(scene, camera);
+        if (viewDirty) {
+            viewDirty = false;
+            for (const [id, entry] of entries) {
+                projected.copy(entry.anchor).project(camera);
+                const inside = entry.group.visible && labels && Math.abs(projected.x) < 0.98 && Math.abs(projected.y) < 0.92 && Math.abs(projected.z) < 1;
+                callbacks.labels(id, inside ? { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2 } : undefined);
+            }
+        }
+        if (flowing.size) scheduleFrame();
+    }
+
+    function scheduleFrame() {
+        if (!frame && active && !disposed) frame = requestAnimationFrame(draw);
     }
 
     function invalidate() {
-        if (!frame && active && !disposed) frame = requestAnimationFrame(draw);
+        viewDirty = true;
+        scheduleFrame();
     }
 
     function fit(preset: View) {
@@ -300,10 +326,12 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     }
 
     function remove(entry: Entry) {
+        flowing.delete(entry);
         roots.delete(entry.group);
         entry.group.removeFromParent();
         entry.selection.removeFromParent();
         entry.finish.dispose();
+        entry.pipeFlow?.bands.dispose();
         if (entry.model) releaseModel(entry.model);
     }
 
@@ -317,9 +345,12 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         }
         for (const definition of component.objects) {
             let entry = entries.get(definition.id);
+            const gauge = definition.kind === "tank" && Boolean(component.levelField) && definition.dataKey !== undefined;
+            const animate = definition.kind === "pipe" && Boolean(component.flowField) &&
+                (definition.flowKey !== undefined || definition.dataKey !== undefined);
             if (entry && (entry.definition.kind !== definition.kind || entry.definition.model?.data !== definition.model?.data ||
                 entry.definition.model?.format !== definition.model?.format || entry.definition.metalness !== definition.metalness ||
-                entry.definition.roughness !== definition.roughness)) {
+                entry.definition.roughness !== definition.roughness || Boolean(entry.setLevel) !== gauge || Boolean(entry.pipeFlow) !== animate)) {
                 remove(entry);
                 entry = undefined;
             }
@@ -328,7 +359,11 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 const group = kits.build(definition.kind === "model" ? "box" : definition.kind, finish);
                 const selection = new Mesh(ringGeometry, ringMaterial);
                 selection.visible = false;
-                entry = { definition, group, finish, selection, anchor: new Vector3(), originalColors: [], selected: false };
+                const setLevel = gauge ? kits.addTankGauge(group) : undefined;
+                setLevel?.();
+                const pipeFlow = animate ? kits.addPipeFlow(group) : undefined;
+                entry = { definition, group, finish, selection, anchor: new Vector3(), originalColors: [], selected: false,
+                    setLevel, pipeFlow, phase: 0.12, speed: 0 };
                 scene.add(group, selection);
                 entries.set(definition.id, entry);
                 roots.set(group, definition.id);
@@ -349,8 +384,9 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         fit(component.view ?? "isometric");
     }
 
-    function update(objects: SceneObjectState[], selected: ReadonlySet<string>, showLabels: boolean) {
+    function update(objects: SceneObjectState[], selected: ReadonlySet<string>, showLabels: boolean, flowBudget: number) {
         labels = showLabels;
+        flowing.clear();
         for (const state of objects) {
             const entry = entries.get(state.object.id);
             if (!entry) continue;
@@ -359,6 +395,17 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.selected = state.visible && selected.has(state.object.id);
             entry.color = state.color;
             updateFinish(entry);
+            entry.setLevel?.(state.level);
+            if (entry.pipeFlow) {
+                const rate = state.flow ?? 0;
+                const moving = state.visible && rate !== 0 && flowing.size < flowBudget;
+                entry.pipeFlow.bands.visible = moving;
+                if (moving) {
+                    const length = Math.max(1, entry.definition.size?.[1] ?? 1);
+                    entry.speed = Math.sign(rate) * (0.22 + 0.7 * Math.min(1, Math.abs(rate) / 1200)) / Math.sqrt(length);
+                    flowing.add(entry);
+                }
+            }
         }
         invalidate();
     }
@@ -451,7 +498,14 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
 
     return {
         configure, update, fit, invalidate,
-        setActive(value: boolean) { active = value; if (active) invalidate(); },
+        setActive(value: boolean) {
+            active = value;
+            if (active) invalidate();
+            else {
+                cancelAnimationFrame(frame);
+                frame = lastFlowDraw = 0;
+            }
+        },
         dispose() {
             disposed = true;
             cancelAnimationFrame(frame);

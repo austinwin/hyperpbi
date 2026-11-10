@@ -6,7 +6,7 @@ type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json => value !== null && typeof value === "object" && !Array.isArray(value);
 const text = (value: unknown) => typeof value === "string" && value.trim().length > 0 && value.length <= 160;
 const inRange = (value: unknown, min: number, max: number) => typeof value === "number" && value >= min && value <= max;
-const objectKeys = new Set(["id", "kind", "label", "dataKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model"]);
+const objectKeys = new Set(["id", "kind", "label", "dataKey", "flowKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model"]);
 
 export function validateScene3dComponents(specification: unknown): Diagnostic[] {
     const diagnostics: Diagnostic[] = [];
@@ -21,7 +21,7 @@ export function validateScene3dComponents(specification: unknown): Diagnostic[] 
             error("type", `A dashboard can contain up to ${scene3dLimits.scenes} 3D scenes.`);
             return;
         }
-        for (const key of ["objectIdField", "statusField", "colorField", "visibleField"]) {
+        for (const key of ["objectIdField", "statusField", "colorField", "visibleField", "levelField", "flowField"]) {
             if (component[key] !== undefined && !text(component[key])) error(key, "Choose a field name.");
         }
         for (const key of ["hideUnmatched", "showLabels", "showObjectList", "shadows", "grid", "frameless"]) {
@@ -68,6 +68,9 @@ export function validateScene3dComponents(specification: unknown): Diagnostic[] 
             if (!(scene3dKinds as readonly unknown[]).includes(item.kind)) error(`${base}/kind`, `Choose ${scene3dKinds.join(", ")}.`, "INVALID_ENUM_VALUE");
             if (item.label !== undefined && !text(item.label)) error(`${base}/label`, "Use a nonblank label of up to 160 characters.");
             if (item.dataKey !== undefined && (!isScene3dKey(item.dataKey) || !text(component.objectIdField))) error(`${base}/dataKey`, "Bind a string, number, or Boolean to the scene's object key field.");
+            if (item.flowKey !== undefined && (item.kind !== "pipe" || !isScene3dKey(item.flowKey) || !text(component.objectIdField))) {
+                error(`${base}/flowKey`, "A pipe flow key must be a string, number, or Boolean matched against the scene's object key field.");
+            }
             for (const [key, min, max] of [["position", -100, 100], ["size", 0.02, 100], ["rotation", -360, 360]] as const) {
                 const value = item[key];
                 if (value !== undefined && (!Array.isArray(value) || value.length !== 3 || !value.every(part => inRange(part, min, max)))) {

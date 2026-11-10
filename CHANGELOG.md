@@ -2,6 +2,8 @@
 
 ## Interactive 3D scenes
 
+- Show data-bound water levels on selectable tanks and add signed pipe flow animation with pause and reduced-motion controls. The groundwater dashboard links its Clearwell gauge to a level KPI and trend and colors running pumps green and stopped pumps red.
+
 - Keep the camera idle during selection and release drag state when the pointer is lifted. Add a Groundwater Supply & Distribution dashboard with local and remote wells, a treatment plant, and three residential service points.
 
 - Add a locally bundled Three.js component and visual Scene editor to Core, Maps, and the Playground.

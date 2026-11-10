@@ -1,190 +1,217 @@
-readingid,assetid,asset,stage,scenario,status,recordtype,sampleorder,hour,flowgpm,wellsactive,rawgpm,deliveredgpm,mainpsi
-0-W-01-snapshot,W-01,Local well,Groundwater abstraction,Normal flow,Running,Snapshot,100,Snapshot,620,2,1060,1028,61
-0-W-01-0,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,0,06:00,589,2,1060,1028,61
-0-W-01-1,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,1,07:00,609,2,1060,1028,61
-0-W-01-2,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,2,08:00,622,2,1060,1028,61
-0-W-01-3,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,3,09:00,626,2,1060,1028,61
-0-W-01-4,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,4,10:00,618,2,1060,1028,61
-0-W-01-5,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,5,11:00,601,2,1060,1028,61
-0-W-01-6,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,6,12:00,581,2,1060,1028,61
-0-W-01-7,W-01,Local well,Groundwater abstraction,Normal flow,Running,Trend,7,13:00,563,2,1060,1028,61
-0-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Snapshot,100,Snapshot,440,2,1060,1028,61
-0-W-02-0,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,0,06:00,418,2,1060,1028,61
-0-W-02-1,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,1,07:00,432,2,1060,1028,61
-0-W-02-2,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,2,08:00,442,2,1060,1028,61
-0-W-02-3,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,3,09:00,444,2,1060,1028,61
-0-W-02-4,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,4,10:00,439,2,1060,1028,61
-0-W-02-5,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,5,11:00,427,2,1060,1028,61
-0-W-02-6,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,6,12:00,412,2,1060,1028,61
-0-W-02-7,W-02,Remote well,Groundwater abstraction,Normal flow,Running,Trend,7,13:00,399,2,1060,1028,61
-0-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Snapshot,100,Snapshot,1060,2,1060,1028,61
-0-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,0,06:00,1007,2,1060,1028,61
-0-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,1,07:00,1041,2,1060,1028,61
-0-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,2,08:00,1064,2,1060,1028,61
-0-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,3,09:00,1070,2,1060,1028,61
-0-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,4,10:00,1057,2,1060,1028,61
-0-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,5,11:00,1028,2,1060,1028,61
-0-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,6,12:00,993,2,1060,1028,61
-0-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,Trend,7,13:00,962,2,1060,1028,61
-0-P-01-snapshot,P-01,Distribution pump,High-service pumping,Normal flow,Running,Snapshot,100,Snapshot,1028,2,1060,1028,61
-0-P-01-0,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,0,06:00,977,2,1060,1028,61
-0-P-01-1,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,1,07:00,1009,2,1060,1028,61
-0-P-01-2,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,2,08:00,1032,2,1060,1028,61
-0-P-01-3,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,3,09:00,1038,2,1060,1028,61
-0-P-01-4,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,4,10:00,1025,2,1060,1028,61
-0-P-01-5,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,5,11:00,997,2,1060,1028,61
-0-P-01-6,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,6,12:00,963,2,1060,1028,61
-0-P-01-7,P-01,Distribution pump,High-service pumping,Normal flow,Running,Trend,7,13:00,933,2,1060,1028,61
-0-R-01-snapshot,R-01,Maple Court,Residential delivery,Normal flow,Running,Snapshot,100,Snapshot,360,2,1060,1028,61
-0-R-01-0,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,0,06:00,342,2,1060,1028,61
-0-R-01-1,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,1,07:00,353,2,1060,1028,61
-0-R-01-2,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,2,08:00,361,2,1060,1028,61
-0-R-01-3,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,3,09:00,363,2,1060,1028,61
-0-R-01-4,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,4,10:00,359,2,1060,1028,61
-0-R-01-5,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,5,11:00,349,2,1060,1028,61
-0-R-01-6,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,6,12:00,337,2,1060,1028,61
-0-R-01-7,R-01,Maple Court,Residential delivery,Normal flow,Running,Trend,7,13:00,327,2,1060,1028,61
-0-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Snapshot,100,Snapshot,350,2,1060,1028,61
-0-R-02-0,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,0,06:00,333,2,1060,1028,61
-0-R-02-1,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,1,07:00,344,2,1060,1028,61
-0-R-02-2,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,2,08:00,351,2,1060,1028,61
-0-R-02-3,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,3,09:00,353,2,1060,1028,61
-0-R-02-4,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,4,10:00,349,2,1060,1028,61
-0-R-02-5,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,5,11:00,340,2,1060,1028,61
-0-R-02-6,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,6,12:00,328,2,1060,1028,61
-0-R-02-7,R-02,Cedar Lane,Residential delivery,Normal flow,Running,Trend,7,13:00,318,2,1060,1028,61
-0-R-03-snapshot,R-03,Birch Grove,Residential delivery,Normal flow,Running,Snapshot,100,Snapshot,318,2,1060,1028,61
-0-R-03-0,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,0,06:00,302,2,1060,1028,61
-0-R-03-1,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,1,07:00,312,2,1060,1028,61
-0-R-03-2,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,2,08:00,319,2,1060,1028,61
-0-R-03-3,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,3,09:00,321,2,1060,1028,61
-0-R-03-4,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,4,10:00,317,2,1060,1028,61
-0-R-03-5,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,5,11:00,308,2,1060,1028,61
-0-R-03-6,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,6,12:00,298,2,1060,1028,61
-0-R-03-7,R-03,Birch Grove,Residential delivery,Normal flow,Running,Trend,7,13:00,289,2,1060,1028,61
-1-W-01-snapshot,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Snapshot,99,Snapshot,650,1,650,631,47
-1-W-01-0,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,0,06:00,618,1,650,631,47
-1-W-01-1,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,1,07:00,638,1,650,631,47
-1-W-01-2,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,2,08:00,653,1,650,631,47
-1-W-01-3,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,3,09:00,656,1,650,631,47
-1-W-01-4,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,4,10:00,648,1,650,631,47
-1-W-01-5,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,5,11:00,631,1,650,631,47
-1-W-01-6,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,6,12:00,609,1,650,631,47
-1-W-01-7,W-01,Local well,Groundwater abstraction,Remote well offline,Running,Trend,7,13:00,590,1,650,631,47
-1-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Snapshot,99,Snapshot,0,1,650,631,47
-1-W-02-0,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,0,06:00,0,1,650,631,47
-1-W-02-1,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,1,07:00,0,1,650,631,47
-1-W-02-2,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,2,08:00,0,1,650,631,47
-1-W-02-3,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,3,09:00,0,1,650,631,47
-1-W-02-4,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,4,10:00,0,1,650,631,47
-1-W-02-5,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,5,11:00,0,1,650,631,47
-1-W-02-6,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,6,12:00,0,1,650,631,47
-1-W-02-7,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,Trend,7,13:00,0,1,650,631,47
-1-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Snapshot,99,Snapshot,650,1,650,631,47
-1-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,0,06:00,618,1,650,631,47
-1-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,1,07:00,638,1,650,631,47
-1-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,2,08:00,653,1,650,631,47
-1-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,3,09:00,656,1,650,631,47
-1-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,4,10:00,648,1,650,631,47
-1-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,5,11:00,631,1,650,631,47
-1-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,6,12:00,609,1,650,631,47
-1-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,Trend,7,13:00,590,1,650,631,47
-1-P-01-snapshot,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Snapshot,99,Snapshot,631,1,650,631,47
-1-P-01-0,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,0,06:00,599,1,650,631,47
-1-P-01-1,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,1,07:00,620,1,650,631,47
-1-P-01-2,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,2,08:00,634,1,650,631,47
-1-P-01-3,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,3,09:00,637,1,650,631,47
-1-P-01-4,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,4,10:00,629,1,650,631,47
-1-P-01-5,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,5,11:00,612,1,650,631,47
-1-P-01-6,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,6,12:00,591,1,650,631,47
-1-P-01-7,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,Trend,7,13:00,573,1,650,631,47
-1-R-01-snapshot,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Snapshot,99,Snapshot,221,1,650,631,47
-1-R-01-0,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,0,06:00,210,1,650,631,47
-1-R-01-1,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,1,07:00,217,1,650,631,47
-1-R-01-2,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,2,08:00,222,1,650,631,47
-1-R-01-3,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,3,09:00,223,1,650,631,47
-1-R-01-4,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,4,10:00,220,1,650,631,47
-1-R-01-5,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,5,11:00,214,1,650,631,47
-1-R-01-6,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,6,12:00,207,1,650,631,47
-1-R-01-7,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,Trend,7,13:00,201,1,650,631,47
-1-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Snapshot,99,Snapshot,215,1,650,631,47
-1-R-02-0,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,0,06:00,204,1,650,631,47
-1-R-02-1,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,1,07:00,211,1,650,631,47
-1-R-02-2,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,2,08:00,216,1,650,631,47
-1-R-02-3,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,3,09:00,217,1,650,631,47
-1-R-02-4,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,4,10:00,214,1,650,631,47
-1-R-02-5,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,5,11:00,209,1,650,631,47
-1-R-02-6,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,6,12:00,201,1,650,631,47
-1-R-02-7,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,Trend,7,13:00,195,1,650,631,47
-1-R-03-snapshot,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Snapshot,99,Snapshot,195,1,650,631,47
-1-R-03-0,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,0,06:00,185,1,650,631,47
-1-R-03-1,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,1,07:00,191,1,650,631,47
-1-R-03-2,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,2,08:00,196,1,650,631,47
-1-R-03-3,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,3,09:00,197,1,650,631,47
-1-R-03-4,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,4,10:00,194,1,650,631,47
-1-R-03-5,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,5,11:00,189,1,650,631,47
-1-R-03-6,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,6,12:00,183,1,650,631,47
-1-R-03-7,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,Trend,7,13:00,177,1,650,631,47
-2-W-01-snapshot,W-01,Local well,Groundwater abstraction,Peak demand,Running,Snapshot,98,Snapshot,780,2,1350,1310,57
-2-W-01-0,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,0,06:00,741,2,1350,1310,57
-2-W-01-1,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,1,07:00,766,2,1350,1310,57
-2-W-01-2,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,2,08:00,783,2,1350,1310,57
-2-W-01-3,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,3,09:00,788,2,1350,1310,57
-2-W-01-4,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,4,10:00,778,2,1350,1310,57
-2-W-01-5,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,5,11:00,757,2,1350,1310,57
-2-W-01-6,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,6,12:00,731,2,1350,1310,57
-2-W-01-7,W-01,Local well,Groundwater abstraction,Peak demand,Running,Trend,7,13:00,708,2,1350,1310,57
-2-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Snapshot,98,Snapshot,570,2,1350,1310,57
-2-W-02-0,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,0,06:00,542,2,1350,1310,57
-2-W-02-1,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,1,07:00,560,2,1350,1310,57
-2-W-02-2,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,2,08:00,572,2,1350,1310,57
-2-W-02-3,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,3,09:00,575,2,1350,1310,57
-2-W-02-4,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,4,10:00,568,2,1350,1310,57
-2-W-02-5,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,5,11:00,553,2,1350,1310,57
-2-W-02-6,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,6,12:00,534,2,1350,1310,57
-2-W-02-7,W-02,Remote well,Groundwater abstraction,Peak demand,Running,Trend,7,13:00,517,2,1350,1310,57
-2-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Snapshot,98,Snapshot,1350,2,1350,1310,57
-2-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,0,06:00,1283,2,1350,1310,57
-2-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,1,07:00,1326,2,1350,1310,57
-2-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,2,08:00,1355,2,1350,1310,57
-2-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,3,09:00,1363,2,1350,1310,57
-2-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,4,10:00,1346,2,1350,1310,57
-2-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,5,11:00,1310,2,1350,1310,57
-2-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,6,12:00,1265,2,1350,1310,57
-2-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,Trend,7,13:00,1226,2,1350,1310,57
-2-P-01-snapshot,P-01,Distribution pump,High-service pumping,Peak demand,Running,Snapshot,98,Snapshot,1310,2,1350,1310,57
-2-P-01-0,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,0,06:00,1245,2,1350,1310,57
-2-P-01-1,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,1,07:00,1286,2,1350,1310,57
-2-P-01-2,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,2,08:00,1315,2,1350,1310,57
-2-P-01-3,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,3,09:00,1323,2,1350,1310,57
-2-P-01-4,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,4,10:00,1306,2,1350,1310,57
-2-P-01-5,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,5,11:00,1271,2,1350,1310,57
-2-P-01-6,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,6,12:00,1227,2,1350,1310,57
-2-P-01-7,P-01,Distribution pump,High-service pumping,Peak demand,Running,Trend,7,13:00,1189,2,1350,1310,57
-2-R-01-snapshot,R-01,Maple Court,Residential delivery,Peak demand,Running,Snapshot,98,Snapshot,458,2,1350,1310,57
-2-R-01-0,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,0,06:00,435,2,1350,1310,57
-2-R-01-1,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,1,07:00,450,2,1350,1310,57
-2-R-01-2,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,2,08:00,460,2,1350,1310,57
-2-R-01-3,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,3,09:00,462,2,1350,1310,57
-2-R-01-4,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,4,10:00,457,2,1350,1310,57
-2-R-01-5,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,5,11:00,444,2,1350,1310,57
-2-R-01-6,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,6,12:00,429,2,1350,1310,57
-2-R-01-7,R-01,Maple Court,Residential delivery,Peak demand,Running,Trend,7,13:00,416,2,1350,1310,57
-2-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Snapshot,98,Snapshot,445,2,1350,1310,57
-2-R-02-0,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,0,06:00,423,2,1350,1310,57
-2-R-02-1,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,1,07:00,437,2,1350,1310,57
-2-R-02-2,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,2,08:00,447,2,1350,1310,57
-2-R-02-3,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,3,09:00,449,2,1350,1310,57
-2-R-02-4,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,4,10:00,444,2,1350,1310,57
-2-R-02-5,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,5,11:00,432,2,1350,1310,57
-2-R-02-6,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,6,12:00,417,2,1350,1310,57
-2-R-02-7,R-02,Cedar Lane,Residential delivery,Peak demand,Running,Trend,7,13:00,404,2,1350,1310,57
-2-R-03-snapshot,R-03,Birch Grove,Residential delivery,Peak demand,Running,Snapshot,98,Snapshot,407,2,1350,1310,57
-2-R-03-0,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,0,06:00,387,2,1350,1310,57
-2-R-03-1,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,1,07:00,400,2,1350,1310,57
-2-R-03-2,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,2,08:00,409,2,1350,1310,57
-2-R-03-3,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,3,09:00,411,2,1350,1310,57
-2-R-03-4,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,4,10:00,406,2,1350,1310,57
-2-R-03-5,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,5,11:00,395,2,1350,1310,57
-2-R-03-6,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,6,12:00,381,2,1350,1310,57
-2-R-03-7,R-03,Birch Grove,Residential delivery,Peak demand,Running,Trend,7,13:00,370,2,1350,1310,57
+readingid,assetid,asset,stage,scenario,status,equipmentcolor,recordtype,sampleorder,hour,flowgpm,wellsactive,rawgpm,deliveredgpm,mainpsi,levelpct
+0-W-01-snapshot,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Snapshot,100,Snapshot,620,2,1060,1028,61,
+0-W-01-0,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,0,06:00,589,2,1060,1028,61,
+0-W-01-1,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,3,07:00,609,2,1060,1028,61,
+0-W-01-2,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,6,08:00,622,2,1060,1028,61,
+0-W-01-3,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,9,09:00,626,2,1060,1028,61,
+0-W-01-4,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,12,10:00,618,2,1060,1028,61,
+0-W-01-5,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,15,11:00,601,2,1060,1028,61,
+0-W-01-6,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,18,12:00,581,2,1060,1028,61,
+0-W-01-7,W-01,Local well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,21,13:00,563,2,1060,1028,61,
+0-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Snapshot,100,Snapshot,440,2,1060,1028,61,
+0-W-02-0,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,0,06:00,418,2,1060,1028,61,
+0-W-02-1,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,3,07:00,432,2,1060,1028,61,
+0-W-02-2,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,6,08:00,442,2,1060,1028,61,
+0-W-02-3,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,9,09:00,444,2,1060,1028,61,
+0-W-02-4,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,12,10:00,439,2,1060,1028,61,
+0-W-02-5,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,15,11:00,427,2,1060,1028,61,
+0-W-02-6,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,18,12:00,412,2,1060,1028,61,
+0-W-02-7,W-02,Remote well,Groundwater abstraction,Normal flow,Running,#26a66a,Trend,21,13:00,399,2,1060,1028,61,
+0-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Snapshot,100,Snapshot,1060,2,1060,1028,61,
+0-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,0,06:00,1007,2,1060,1028,61,
+0-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,3,07:00,1041,2,1060,1028,61,
+0-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,6,08:00,1064,2,1060,1028,61,
+0-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,9,09:00,1070,2,1060,1028,61,
+0-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,12,10:00,1057,2,1060,1028,61,
+0-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,15,11:00,1028,2,1060,1028,61,
+0-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,18,12:00,993,2,1060,1028,61,
+0-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Normal flow,Running,,Trend,21,13:00,962,2,1060,1028,61,
+0-P-01-snapshot,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Snapshot,100,Snapshot,1028,2,1060,1028,61,
+0-P-01-0,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,0,06:00,977,2,1060,1028,61,
+0-P-01-1,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,3,07:00,1009,2,1060,1028,61,
+0-P-01-2,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,6,08:00,1032,2,1060,1028,61,
+0-P-01-3,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,9,09:00,1038,2,1060,1028,61,
+0-P-01-4,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,12,10:00,1025,2,1060,1028,61,
+0-P-01-5,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,15,11:00,997,2,1060,1028,61,
+0-P-01-6,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,18,12:00,963,2,1060,1028,61,
+0-P-01-7,P-01,Distribution pump,High-service pumping,Normal flow,Running,#26a66a,Trend,21,13:00,933,2,1060,1028,61,
+0-R-01-snapshot,R-01,Maple Court,Residential delivery,Normal flow,Running,,Snapshot,100,Snapshot,360,2,1060,1028,61,
+0-R-01-0,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,0,06:00,342,2,1060,1028,61,
+0-R-01-1,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,3,07:00,353,2,1060,1028,61,
+0-R-01-2,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,6,08:00,361,2,1060,1028,61,
+0-R-01-3,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,9,09:00,363,2,1060,1028,61,
+0-R-01-4,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,12,10:00,359,2,1060,1028,61,
+0-R-01-5,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,15,11:00,349,2,1060,1028,61,
+0-R-01-6,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,18,12:00,337,2,1060,1028,61,
+0-R-01-7,R-01,Maple Court,Residential delivery,Normal flow,Running,,Trend,21,13:00,327,2,1060,1028,61,
+0-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Snapshot,100,Snapshot,350,2,1060,1028,61,
+0-R-02-0,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,0,06:00,333,2,1060,1028,61,
+0-R-02-1,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,3,07:00,344,2,1060,1028,61,
+0-R-02-2,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,6,08:00,351,2,1060,1028,61,
+0-R-02-3,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,9,09:00,353,2,1060,1028,61,
+0-R-02-4,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,12,10:00,349,2,1060,1028,61,
+0-R-02-5,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,15,11:00,340,2,1060,1028,61,
+0-R-02-6,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,18,12:00,328,2,1060,1028,61,
+0-R-02-7,R-02,Cedar Lane,Residential delivery,Normal flow,Running,,Trend,21,13:00,318,2,1060,1028,61,
+0-R-03-snapshot,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Snapshot,100,Snapshot,318,2,1060,1028,61,
+0-R-03-0,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,0,06:00,302,2,1060,1028,61,
+0-R-03-1,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,3,07:00,312,2,1060,1028,61,
+0-R-03-2,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,6,08:00,319,2,1060,1028,61,
+0-R-03-3,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,9,09:00,321,2,1060,1028,61,
+0-R-03-4,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,12,10:00,317,2,1060,1028,61,
+0-R-03-5,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,15,11:00,308,2,1060,1028,61,
+0-R-03-6,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,18,12:00,298,2,1060,1028,61,
+0-R-03-7,R-03,Birch Grove,Residential delivery,Normal flow,Running,,Trend,21,13:00,289,2,1060,1028,61,
+0-CW-01-snapshot,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Snapshot,100,Snapshot,1028,2,1060,1028,61,78
+0-CW-01-0,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,0,06:00,977,2,1060,1028,61,64
+0-CW-01-1,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,3,07:00,1009,2,1060,1028,61,66
+0-CW-01-2,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,6,08:00,1032,2,1060,1028,61,68
+0-CW-01-3,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,9,09:00,1038,2,1060,1028,61,70
+0-CW-01-4,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,12,10:00,1025,2,1060,1028,61,72
+0-CW-01-5,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,15,11:00,997,2,1060,1028,61,74
+0-CW-01-6,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,18,12:00,963,2,1060,1028,61,76
+0-CW-01-7,CW-01,Clearwell,Treated water storage,Normal flow,Storage,,Trend,21,13:00,933,2,1060,1028,61,78
+1-W-01-snapshot,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Snapshot,99,Snapshot,650,1,650,631,47,
+1-W-01-0,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,1,06:00,618,1,650,631,47,
+1-W-01-1,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,4,07:00,638,1,650,631,47,
+1-W-01-2,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,7,08:00,653,1,650,631,47,
+1-W-01-3,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,10,09:00,656,1,650,631,47,
+1-W-01-4,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,13,10:00,648,1,650,631,47,
+1-W-01-5,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,16,11:00,631,1,650,631,47,
+1-W-01-6,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,19,12:00,609,1,650,631,47,
+1-W-01-7,W-01,Local well,Groundwater abstraction,Remote well offline,Running,#26a66a,Trend,22,13:00,590,1,650,631,47,
+1-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Snapshot,99,Snapshot,0,1,650,631,47,
+1-W-02-0,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,1,06:00,0,1,650,631,47,
+1-W-02-1,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,4,07:00,0,1,650,631,47,
+1-W-02-2,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,7,08:00,0,1,650,631,47,
+1-W-02-3,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,10,09:00,0,1,650,631,47,
+1-W-02-4,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,13,10:00,0,1,650,631,47,
+1-W-02-5,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,16,11:00,0,1,650,631,47,
+1-W-02-6,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,19,12:00,0,1,650,631,47,
+1-W-02-7,W-02,Remote well,Groundwater abstraction,Remote well offline,Offline,#d9484b,Trend,22,13:00,0,1,650,631,47,
+1-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Snapshot,99,Snapshot,650,1,650,631,47,
+1-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,1,06:00,618,1,650,631,47,
+1-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,4,07:00,638,1,650,631,47,
+1-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,7,08:00,653,1,650,631,47,
+1-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,10,09:00,656,1,650,631,47,
+1-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,13,10:00,648,1,650,631,47,
+1-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,16,11:00,631,1,650,631,47,
+1-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,19,12:00,609,1,650,631,47,
+1-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Remote well offline,Running,,Trend,22,13:00,590,1,650,631,47,
+1-P-01-snapshot,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Snapshot,99,Snapshot,631,1,650,631,47,
+1-P-01-0,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,1,06:00,599,1,650,631,47,
+1-P-01-1,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,4,07:00,620,1,650,631,47,
+1-P-01-2,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,7,08:00,634,1,650,631,47,
+1-P-01-3,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,10,09:00,637,1,650,631,47,
+1-P-01-4,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,13,10:00,629,1,650,631,47,
+1-P-01-5,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,16,11:00,612,1,650,631,47,
+1-P-01-6,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,19,12:00,591,1,650,631,47,
+1-P-01-7,P-01,Distribution pump,High-service pumping,Remote well offline,Reduced flow,#26a66a,Trend,22,13:00,573,1,650,631,47,
+1-R-01-snapshot,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Snapshot,99,Snapshot,221,1,650,631,47,
+1-R-01-0,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,1,06:00,210,1,650,631,47,
+1-R-01-1,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,4,07:00,217,1,650,631,47,
+1-R-01-2,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,7,08:00,222,1,650,631,47,
+1-R-01-3,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,10,09:00,223,1,650,631,47,
+1-R-01-4,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,13,10:00,220,1,650,631,47,
+1-R-01-5,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,16,11:00,214,1,650,631,47,
+1-R-01-6,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,19,12:00,207,1,650,631,47,
+1-R-01-7,R-01,Maple Court,Residential delivery,Remote well offline,Reduced flow,,Trend,22,13:00,201,1,650,631,47,
+1-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Snapshot,99,Snapshot,215,1,650,631,47,
+1-R-02-0,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,1,06:00,204,1,650,631,47,
+1-R-02-1,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,4,07:00,211,1,650,631,47,
+1-R-02-2,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,7,08:00,216,1,650,631,47,
+1-R-02-3,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,10,09:00,217,1,650,631,47,
+1-R-02-4,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,13,10:00,214,1,650,631,47,
+1-R-02-5,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,16,11:00,209,1,650,631,47,
+1-R-02-6,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,19,12:00,201,1,650,631,47,
+1-R-02-7,R-02,Cedar Lane,Residential delivery,Remote well offline,Reduced flow,,Trend,22,13:00,195,1,650,631,47,
+1-R-03-snapshot,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Snapshot,99,Snapshot,195,1,650,631,47,
+1-R-03-0,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,1,06:00,185,1,650,631,47,
+1-R-03-1,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,4,07:00,191,1,650,631,47,
+1-R-03-2,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,7,08:00,196,1,650,631,47,
+1-R-03-3,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,10,09:00,197,1,650,631,47,
+1-R-03-4,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,13,10:00,194,1,650,631,47,
+1-R-03-5,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,16,11:00,189,1,650,631,47,
+1-R-03-6,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,19,12:00,183,1,650,631,47,
+1-R-03-7,R-03,Birch Grove,Residential delivery,Remote well offline,Reduced flow,,Trend,22,13:00,177,1,650,631,47,
+1-CW-01-snapshot,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Snapshot,99,Snapshot,631,1,650,631,47,43
+1-CW-01-0,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,1,06:00,599,1,650,631,47,71
+1-CW-01-1,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,4,07:00,620,1,650,631,47,67
+1-CW-01-2,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,7,08:00,634,1,650,631,47,63
+1-CW-01-3,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,10,09:00,637,1,650,631,47,59
+1-CW-01-4,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,13,10:00,629,1,650,631,47,55
+1-CW-01-5,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,16,11:00,612,1,650,631,47,51
+1-CW-01-6,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,19,12:00,591,1,650,631,47,47
+1-CW-01-7,CW-01,Clearwell,Treated water storage,Remote well offline,Storage,,Trend,22,13:00,573,1,650,631,47,43
+2-W-01-snapshot,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Snapshot,98,Snapshot,780,2,1350,1310,57,
+2-W-01-0,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,2,06:00,741,2,1350,1310,57,
+2-W-01-1,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,5,07:00,766,2,1350,1310,57,
+2-W-01-2,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,8,08:00,783,2,1350,1310,57,
+2-W-01-3,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,11,09:00,788,2,1350,1310,57,
+2-W-01-4,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,14,10:00,778,2,1350,1310,57,
+2-W-01-5,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,17,11:00,757,2,1350,1310,57,
+2-W-01-6,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,20,12:00,731,2,1350,1310,57,
+2-W-01-7,W-01,Local well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,23,13:00,708,2,1350,1310,57,
+2-W-02-snapshot,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Snapshot,98,Snapshot,570,2,1350,1310,57,
+2-W-02-0,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,2,06:00,542,2,1350,1310,57,
+2-W-02-1,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,5,07:00,560,2,1350,1310,57,
+2-W-02-2,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,8,08:00,572,2,1350,1310,57,
+2-W-02-3,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,11,09:00,575,2,1350,1310,57,
+2-W-02-4,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,14,10:00,568,2,1350,1310,57,
+2-W-02-5,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,17,11:00,553,2,1350,1310,57,
+2-W-02-6,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,20,12:00,534,2,1350,1310,57,
+2-W-02-7,W-02,Remote well,Groundwater abstraction,Peak demand,Running,#26a66a,Trend,23,13:00,517,2,1350,1310,57,
+2-TP-01-snapshot,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Snapshot,98,Snapshot,1350,2,1350,1310,57,
+2-TP-01-0,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,2,06:00,1283,2,1350,1310,57,
+2-TP-01-1,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,5,07:00,1326,2,1350,1310,57,
+2-TP-01-2,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,8,08:00,1355,2,1350,1310,57,
+2-TP-01-3,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,11,09:00,1363,2,1350,1310,57,
+2-TP-01-4,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,14,10:00,1346,2,1350,1310,57,
+2-TP-01-5,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,17,11:00,1310,2,1350,1310,57,
+2-TP-01-6,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,20,12:00,1265,2,1350,1310,57,
+2-TP-01-7,TP-01,Groundwater plant,Treatment and storage,Peak demand,Running,,Trend,23,13:00,1226,2,1350,1310,57,
+2-P-01-snapshot,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Snapshot,98,Snapshot,1310,2,1350,1310,57,
+2-P-01-0,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,2,06:00,1245,2,1350,1310,57,
+2-P-01-1,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,5,07:00,1286,2,1350,1310,57,
+2-P-01-2,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,8,08:00,1315,2,1350,1310,57,
+2-P-01-3,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,11,09:00,1323,2,1350,1310,57,
+2-P-01-4,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,14,10:00,1306,2,1350,1310,57,
+2-P-01-5,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,17,11:00,1271,2,1350,1310,57,
+2-P-01-6,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,20,12:00,1227,2,1350,1310,57,
+2-P-01-7,P-01,Distribution pump,High-service pumping,Peak demand,Running,#26a66a,Trend,23,13:00,1189,2,1350,1310,57,
+2-R-01-snapshot,R-01,Maple Court,Residential delivery,Peak demand,Running,,Snapshot,98,Snapshot,458,2,1350,1310,57,
+2-R-01-0,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,2,06:00,435,2,1350,1310,57,
+2-R-01-1,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,5,07:00,450,2,1350,1310,57,
+2-R-01-2,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,8,08:00,460,2,1350,1310,57,
+2-R-01-3,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,11,09:00,462,2,1350,1310,57,
+2-R-01-4,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,14,10:00,457,2,1350,1310,57,
+2-R-01-5,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,17,11:00,444,2,1350,1310,57,
+2-R-01-6,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,20,12:00,429,2,1350,1310,57,
+2-R-01-7,R-01,Maple Court,Residential delivery,Peak demand,Running,,Trend,23,13:00,416,2,1350,1310,57,
+2-R-02-snapshot,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Snapshot,98,Snapshot,445,2,1350,1310,57,
+2-R-02-0,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,2,06:00,423,2,1350,1310,57,
+2-R-02-1,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,5,07:00,437,2,1350,1310,57,
+2-R-02-2,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,8,08:00,447,2,1350,1310,57,
+2-R-02-3,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,11,09:00,449,2,1350,1310,57,
+2-R-02-4,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,14,10:00,444,2,1350,1310,57,
+2-R-02-5,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,17,11:00,432,2,1350,1310,57,
+2-R-02-6,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,20,12:00,417,2,1350,1310,57,
+2-R-02-7,R-02,Cedar Lane,Residential delivery,Peak demand,Running,,Trend,23,13:00,404,2,1350,1310,57,
+2-R-03-snapshot,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Snapshot,98,Snapshot,407,2,1350,1310,57,
+2-R-03-0,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,2,06:00,387,2,1350,1310,57,
+2-R-03-1,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,5,07:00,400,2,1350,1310,57,
+2-R-03-2,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,8,08:00,409,2,1350,1310,57,
+2-R-03-3,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,11,09:00,411,2,1350,1310,57,
+2-R-03-4,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,14,10:00,406,2,1350,1310,57,
+2-R-03-5,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,17,11:00,395,2,1350,1310,57,
+2-R-03-6,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,20,12:00,381,2,1350,1310,57,
+2-R-03-7,R-03,Birch Grove,Residential delivery,Peak demand,Running,,Trend,23,13:00,370,2,1350,1310,57,
+2-CW-01-snapshot,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Snapshot,98,Snapshot,1310,2,1350,1310,57,61
+2-CW-01-0,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,2,06:00,1245,2,1350,1310,57,72
+2-CW-01-1,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,5,07:00,1286,2,1350,1310,57,70
+2-CW-01-2,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,8,08:00,1315,2,1350,1310,57,69
+2-CW-01-3,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,11,09:00,1323,2,1350,1310,57,67
+2-CW-01-4,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,14,10:00,1306,2,1350,1310,57,66
+2-CW-01-5,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,17,11:00,1271,2,1350,1310,57,64
+2-CW-01-6,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,20,12:00,1227,2,1350,1310,57,63
+2-CW-01-7,CW-01,Clearwell,Treated water storage,Peak demand,Storage,,Trend,23,13:00,1189,2,1350,1310,57,61

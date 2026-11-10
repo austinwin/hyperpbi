@@ -36,6 +36,6 @@
   "motion": {
     "enabled": true,
     "reducedMotion": "respect-system",
-    "maxConcurrentAnimations": 8
+    "maxConcurrentAnimations": 16
   }
 }

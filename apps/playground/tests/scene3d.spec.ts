@@ -126,9 +126,53 @@ test("traces the remote well through treatment and into residential distribution
     await expect(register.getByRole("row")).toHaveCount(1);
     await expect(register.getByRole("row")).toContainText("Remote well");
     await scene.getByRole("button", { name: "Clear selection" }).click();
-    await expect(register.getByRole("row")).toHaveCount(7);
+    await expect(register.getByRole("row")).toHaveCount(8);
     await register.getByRole("row").filter({ hasText: "Maple Court" }).click();
     await expect(assets.getByRole("button", { name: "Maple Court Reduced flow" })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("selects the tank and updates its level, pump colors, and flow with the scenario", async ({ page }) => {
+    await page.goto("/examples/groundwater-supply-distribution");
+    const scene = page.locator(".hp-scene3d");
+    const canvas = scene.locator("canvas");
+    await expect(canvas).toBeVisible({ timeout: 45_000 });
+    const level = page.locator("[data-hp-id=groundwater_level] .hp-metric-value");
+    const trend = page.locator("[data-hp-id=groundwater_level_history] [_echarts_instance_]");
+    const tank = scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: /Clearwell/ });
+    const pump = scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: /Remote well/ });
+    const label = scene.locator(".hp-scene3d-labels").getByRole("button", { name: /Clearwell/ });
+    await expect(level).toHaveText("78");
+    await expect(label).toHaveText("Clearwell · 78%");
+    await expect(pump.locator("i")).toHaveCSS("background-color", "rgb(38, 166, 106)");
+
+    const viewBefore = await label.evaluate(element => element.style.transform);
+    await scene.getByRole("button", { name: "Top view" }).click();
+    await expect.poll(() => label.evaluate(element => element.style.transform)).not.toBe(viewBefore);
+    const tag = (await label.boundingBox())!;
+    await page.mouse.click(tag.x + tag.width / 2, tag.y + tag.height + 5);
+    await expect(tank).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-hp-id=groundwater_assets] tbody tr")).toHaveCount(3);
+    await expect(page.locator("[data-hp-id=groundwater_assets] tbody")).toContainText("Clearwell");
+
+    await scene.getByRole("button", { name: "Clear selection" }).click();
+    await page.getByRole("button", { name: "Remote well offline", exact: true }).click();
+    await expect(level).toHaveText("43");
+    await expect(label).toHaveText("Clearwell · 43%");
+    await expect(pump.locator("i")).toHaveCSS("background-color", "rgb(217, 72, 75)");
+    await expect(trend).toBeVisible();
+    await canvas.scrollIntoViewIfNeeded();
+    const frame = await canvas.screenshot();
+    await expect.poll(async () => (await canvas.screenshot()).equals(frame)).toBe(false);
+    await scene.getByRole("button", { name: "Pause flow" }).click();
+    await expect(scene.getByRole("button", { name: "Play flow" })).toBeVisible();
+    const paused = await canvas.screenshot();
+    expect((await canvas.screenshot()).equals(paused)).toBe(true);
+
+    await page.getByRole("button", { name: "Peak demand", exact: true }).click();
+    await expect(level).toHaveText("61");
+    await expect(label).toHaveText("Clearwell · 61%");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(scene.getByRole("button", { name: "Play flow" })).toHaveCount(0);
 });
 
 test("authors scene objects and embeds a local glTF through the Inspector", async ({ page }) => {

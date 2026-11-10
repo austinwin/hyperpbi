@@ -159,7 +159,10 @@ export function Scene3dEditor({ component, fields, onChange }: {
                     <label>Object label<TextInput label="Object label" value={selected.label ?? ""}
                         onChange={label => update(selected.id, { label: label || undefined })} /></label>
                     {selected.kind === "model" ? filePicker("Replace model", selected.id) : <label>Object kind<select class="form-select form-select-sm" value={selected.kind}
-                        onChange={event => update(selected.id, { kind: event.currentTarget.value as Scene3dKind })}>
+                        onChange={event => {
+                            const kind = event.currentTarget.value as Scene3dKind;
+                            update(selected.id, { kind, flowKey: kind === "pipe" ? selected.flowKey : undefined });
+                        }}>
                         {scene3dKinds.filter(kind => kind !== "model").map(kind => <option key={kind} value={kind}>{kinds[kind]}</option>)}
                     </select></label>}
                     {(["position", "size", "rotation"] as const).map(property => {
@@ -191,6 +194,8 @@ export function Scene3dEditor({ component, fields, onChange }: {
                         <label class="hp-scene3d-check"><input type="checkbox" checked={selected.selectable ?? selected.dataKey !== undefined} onChange={event => update(selected.id, { selectable: event.currentTarget.checked })} />Selectable</label>
                         {component.objectIdField ? <TypedKeyInput label="Match object key" value={selected.dataKey} onChange={dataKey => update(selected.id, { dataKey })} />
                             : <small>Choose an Object key field under Data to link this object to rows.</small>}
+                        {selected.kind === "pipe" && component.objectIdField && component.flowField &&
+                            <TypedKeyInput label="Match pipe flow key" value={selected.flowKey} onChange={flowKey => update(selected.id, { flowKey })} />}
                     </fieldset>
                 </div>
             </>}

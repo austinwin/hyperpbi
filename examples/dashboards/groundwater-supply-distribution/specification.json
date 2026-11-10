@@ -70,6 +70,22 @@
             "direction": "ascending"
           }
         ]
+      },
+      "storage_snapshot": {
+        "source": "snapshots",
+        "filter": {
+          "field": "assetid",
+          "operator": "=",
+          "value": "CW-01"
+        }
+      },
+      "storage_history": {
+        "source": "flow_history",
+        "filter": {
+          "field": "assetid",
+          "operator": "=",
+          "value": "CW-01"
+        }
       }
     }
   },
@@ -95,9 +111,11 @@
           "groundwater_raw",
           "groundwater_delivered",
           "groundwater_pressure",
+          "groundwater_level",
           "groundwater_flow",
           "groundwater_by_asset",
-          "groundwater_assets"
+          "groundwater_assets",
+          "groundwater_level_history"
         ],
         "externalMode": "none"
       }
@@ -114,7 +132,7 @@
           "field": "wellsactive",
           "dataset": "snapshots",
           "aggregation": "first",
-          "span": 3
+          "span": 2
         },
         {
           "type": "kpi",
@@ -123,7 +141,7 @@
           "field": "rawgpm",
           "dataset": "snapshots",
           "aggregation": "first",
-          "span": 3
+          "span": 2
         },
         {
           "type": "kpi",
@@ -132,7 +150,7 @@
           "field": "deliveredgpm",
           "dataset": "snapshots",
           "aggregation": "first",
-          "span": 3
+          "span": 2
         },
         {
           "type": "kpi",
@@ -142,13 +160,22 @@
           "dataset": "snapshots",
           "aggregation": "first",
           "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "groundwater_level",
+          "title": "Clearwell level (%)",
+          "field": "levelpct",
+          "dataset": "storage_snapshot",
+          "aggregation": "first",
+          "span": 3
         }
       ]
     },
     {
       "type": "text",
       "id": "groundwater_legend",
-      "text": "Teal pipes carry raw groundwater. Blue pipes carry treated water. Select a well, plant, pump, or house to trace its readings."
+      "text": "Teal pipes carry raw groundwater. Blue pipes carry treated water. Green pumps are running and red pumps are stopped. Select the Clearwell tank to inspect its water level."
     },
     {
       "type": "scene3d",
@@ -159,6 +186,9 @@
       "theme": "light",
       "objectIdField": "assetid",
       "statusField": "status",
+      "colorField": "equipmentcolor",
+      "levelField": "levelpct",
+      "flowField": "flowgpm",
       "objects": [
         {
           "id": "well_pad_0",
@@ -224,8 +254,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "W-01"
         },
         {
           "id": "well_direction_0",
@@ -311,8 +342,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "W-02"
         },
         {
           "id": "well_direction_1",
@@ -335,16 +367,16 @@
           ]
         },
         {
-          "id": "well_collection",
+          "id": "local_collection",
           "kind": "pipe",
           "position": [
             -3.53,
             0.66,
-            -0.05
+            -0.91
           ],
           "size": [
             0.22,
-            4.7,
+            2.98,
             0.22
           ],
           "color": "#179587",
@@ -352,7 +384,29 @@
             90,
             0,
             0
-          ]
+          ],
+          "flowKey": "W-01"
+        },
+        {
+          "id": "remote_collection",
+          "kind": "pipe",
+          "position": [
+            -3.53,
+            0.66,
+            1.44
+          ],
+          "size": [
+            0.22,
+            1.72,
+            0.22
+          ],
+          "color": "#179587",
+          "rotation": [
+            -90,
+            0,
+            0
+          ],
+          "flowKey": "W-02"
         },
         {
           "id": "plant_inlet",
@@ -371,8 +425,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "TP-01"
         },
         {
           "id": "plant_slab",
@@ -455,28 +510,30 @@
           "id": "clearwell",
           "kind": "tank",
           "position": [
-            0.38,
+            2.25,
             0,
-            -2.15
+            -2.4
           ],
           "size": [
-            0.75,
-            0.68,
-            0.75
+            0.88,
+            0.92,
+            0.88
           ],
-          "color": "#a4bfcb"
+          "color": "#a4bfcb",
+          "dataKey": "CW-01",
+          "label": "Clearwell"
         },
         {
-          "id": "clearwell_connection",
+          "id": "clearwell_outlet",
           "kind": "pipe",
           "position": [
-            0.38,
+            2.25,
             0.74,
-            -0.52
+            -1.43
           ],
           "size": [
             0.22,
-            2.2,
+            0.56,
             0.22
           ],
           "color": "#317bc5",
@@ -484,7 +541,50 @@
             90,
             0,
             0
-          ]
+          ],
+          "flowKey": "CW-01"
+        },
+        {
+          "id": "clearwell_return",
+          "kind": "pipe",
+          "position": [
+            1.315,
+            0.74,
+            -1.15
+          ],
+          "size": [
+            0.22,
+            1.87,
+            0.22
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ],
+          "flowKey": "CW-01"
+        },
+        {
+          "id": "clearwell_connection",
+          "kind": "pipe",
+          "position": [
+            0.38,
+            0.74,
+            -0.285
+          ],
+          "size": [
+            0.22,
+            1.73,
+            0.22
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "flowKey": "CW-01"
         },
         {
           "id": "plant_outlet",
@@ -503,8 +603,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "P-01"
         },
         {
           "id": "high_service_pump",
@@ -540,8 +641,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "P-01"
         },
         {
           "id": "distribution_direction",
@@ -564,16 +666,37 @@
           ]
         },
         {
-          "id": "neighborhood_header",
+          "id": "north_neighborhood_header",
           "kind": "pipe",
           "position": [
             5.38,
             0.74,
-            0.24
+            -0.93
           ],
           "size": [
             0.22,
-            5.36,
+            3.02,
+            0.22
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            -90,
+            0,
+            0
+          ],
+          "flowKey": "R-01"
+        },
+        {
+          "id": "south_neighborhood_header",
+          "kind": "pipe",
+          "position": [
+            5.38,
+            0.74,
+            1.745
+          ],
+          "size": [
+            0.22,
+            2.33,
             0.22
           ],
           "color": "#317bc5",
@@ -581,7 +704,8 @@
             90,
             0,
             0
-          ]
+          ],
+          "flowKey": "R-03"
         },
         {
           "id": "house_lot_0",
@@ -702,8 +826,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "R-01"
         },
         {
           "id": "house_lot_1",
@@ -824,8 +949,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "R-02"
         },
         {
           "id": "house_lot_2",
@@ -946,8 +1072,9 @@
           "rotation": [
             0,
             0,
-            90
-          ]
+            -90
+          ],
+          "flowKey": "R-03"
         }
       ],
       "statusColors": [
@@ -1001,7 +1128,7 @@
           "category": "hour",
           "measure": "flowgpm",
           "aggregation": "avg",
-          "span": 7,
+          "span": 4,
           "height": 270,
           "options": {
             "color": [
@@ -1055,7 +1182,7 @@
           "category": "assetid",
           "measure": "flowgpm",
           "aggregation": "first",
-          "span": 5,
+          "span": 4,
           "height": 270,
           "options": {
             "color": [
@@ -1110,6 +1237,75 @@
               "groundwater_scene"
             ]
           }
+        },
+        {
+          "type": "lineChart",
+          "id": "groundwater_level_history",
+          "title": "Clearwell water level · %",
+          "dataset": "storage_history",
+          "category": "hour",
+          "measure": "levelpct",
+          "aggregation": "first",
+          "span": 4,
+          "height": 270,
+          "options": {
+            "color": [
+              "#62dafa"
+            ],
+            "textStyle": {
+              "color": "#dce8f8"
+            },
+            "legend": {
+              "textStyle": {
+                "color": "#8fa3bc"
+              }
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#1c2b40"
+                }
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            }
+          },
+          "chartStyle": {
+            "yAxis": [
+              {
+                "domain": "fixed",
+                "min": 0,
+                "max": 100,
+                "suffix": "%"
+              }
+            ],
+            "series": [
+              {
+                "smooth": true
+              }
+            ]
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
         }
       ]
     },
@@ -1118,7 +1314,7 @@
       "id": "groundwater_assets",
       "title": "Source-to-tap asset register",
       "dataset": "snapshots",
-      "maxRows": 21,
+      "maxRows": 24,
       "columns": [
         {
           "field": "assetid",
@@ -1143,6 +1339,10 @@
         {
           "field": "flowgpm",
           "title": "Flow (GPM)"
+        },
+        {
+          "field": "levelpct",
+          "title": "Tank level (%)"
         }
       ],
       "interaction": {

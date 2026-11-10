@@ -5802,9 +5802,9 @@ _5 components_
 
 **Required properties:** `type`, `id`, `objects`
 
-**Key properties:** `title`, `subtitle`, `span`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `className`, `hidden`, `style`, `css`, `slots`, `ariaLabel`, `disabled`, `tooltip`, `interaction`, `dataset`, `objects`, `objectIdField`, `statusField`, `statusColors`, `colorField`, `visibleField`, `tooltipFields`, `hideUnmatched`, `showLabels`, `showObjectList`, `shadows`, `grid`, `view`, `theme`, `height`, `frameless`
+**Key properties:** `title`, `subtitle`, `span`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `className`, `hidden`, `style`, `css`, `slots`, `ariaLabel`, `disabled`, `tooltip`, `interaction`, `dataset`, `objects`, `objectIdField`, `statusField`, `statusColors`, `colorField`, `visibleField`, `levelField`, `flowField`, `tooltipFields`, `hideUnmatched`, `showLabels`, `showObjectList`, `shadows`, `grid`, `view`, `theme`, `height`, `frameless`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `colorField`, `css`, `dataset`, `disabled`, `frameless`, `grid`, `height`, `heightMode`, `hidden`, `hideUnmatched`, `id`, `interaction`, `minHeight`, `objectIdField`, `objects`, `order`, `responsive`, `shadows`, `showLabels`, `showObjectList`, `slots`, `span`, `statusColors`, `statusField`, `style`, `subtitle`, `theme`, `title`, `tooltip`, `tooltipFields`, `type`, `view`, `visibleField`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `colorField`, `css`, `dataset`, `disabled`, `flowField`, `frameless`, `grid`, `height`, `heightMode`, `hidden`, `hideUnmatched`, `id`, `interaction`, `levelField`, `minHeight`, `objectIdField`, `objects`, `order`, `responsive`, `shadows`, `showLabels`, `showObjectList`, `slots`, `span`, `statusColors`, `statusField`, `style`, `subtitle`, `theme`, `title`, `tooltip`, `tooltipFields`, `type`, `view`, `visibleField`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 

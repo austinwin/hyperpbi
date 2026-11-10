@@ -16,6 +16,14 @@ Click an object to select it. Hold the pointer down and drag to orbit, shift-dra
 
 The Groundwater Supply & Distribution example uses teal pipes for raw water and blue pipes for treated water. Switch to **Remote well offline** to see how reduced source flow affects residential delivery. [Groundwater Supply & Distribution](https://hyperpbi.com/examples/groundwater-supply-distribution)
 
+## Show tank level and pipe flow
+
+Choose a numeric **Tank level field (%)** and bind a tank to its dataset row. The scene shows the water surface inside the tank, a side gauge, and a percentage in its label. Values are clamped to 0–100. A missing reading leaves the gauge empty and omits the percentage.
+
+Choose a numeric **Pipe flow field**, then match each pipe to a row with **Match pipe flow key** or its ordinary object key. A separate flow key drives motion while the pipe keeps its authored color and selection behavior. Positive flow moves along the pipe's local +Y axis, negative flow reverses direction, and zero stops the markers. Pipe motion respects the runtime motion budget, the system reduced-motion setting, and **Pause flow**.
+
+Use the same level field in a KPI and a line chart. The groundwater example pairs a snapshot KPI with an hourly level trend. Its Normal flow, Remote well offline, and Peak demand scenarios set the tank to 78%, 43%, and 61%, respectively. Pump motor colors follow the operating status independently of the pipe colors.
+
 ## Bind objects to data
 
 Match keys by exact type and value. A string such as `"101"` is distinct from the number `101`. Static objects may omit `dataKey`; set `selectable: true` to let viewers mark them locally.

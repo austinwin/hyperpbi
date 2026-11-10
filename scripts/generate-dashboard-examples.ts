@@ -955,28 +955,33 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
         ["R-01", "Maple Court", "Residential delivery"],
         ["R-02", "Cedar Lane", "Residential delivery"],
         ["R-03", "Birch Grove", "Residential delivery"],
+        ["CW-01", "Clearwell", "Treated water storage"],
     ];
     const scenarios = [
-        { name: "Normal flow", local: 620, remote: 440, pressure: 61 },
-        { name: "Remote well offline", local: 650, remote: 0, pressure: 47 },
-        { name: "Peak demand", local: 780, remote: 570, pressure: 57 },
+        { name: "Normal flow", local: 620, remote: 440, pressure: 61, level: 78, hourlyChange: 2 },
+        { name: "Remote well offline", local: 650, remote: 0, pressure: 47, level: 43, hourlyChange: -4 },
+        { name: "Peak demand", local: 780, remote: 570, pressure: 57, level: 61, hourlyChange: -1.5 },
     ];
     const rows: Row[] = scenarios.flatMap((scenario, index) => {
         const raw = scenario.local + scenario.remote;
         const delivered = Math.round(raw * 0.97);
         const maple = Math.round(delivered * 0.35);
         const cedar = Math.round(delivered * 0.34);
-        const flows = [scenario.local, scenario.remote, raw, delivered, maple, cedar, delivered - maple - cedar];
+        const flows = [scenario.local, scenario.remote, raw, delivered, maple, cedar, delivered - maple - cedar, delivered];
         return assets.flatMap(([assetid, asset, stage], i) => {
-            const status = flows[i] === 0 ? "Offline" : index === 1 && i >= 3 ? "Reduced flow" : "Running";
-            const row = { assetid, asset, stage, scenario: scenario.name, status, flowgpm: flows[i],
+            const tank = assetid === "CW-01";
+            const pump = i === 0 || i === 1 || i === 3;
+            const status = tank ? "Storage" : flows[i] === 0 ? "Offline" : index === 1 && i >= 3 ? "Reduced flow" : "Running";
+            const equipmentcolor = pump ? flows[i] > 0 ? "#26a66a" : "#d9484b" : null;
+            const row = { assetid, asset, stage, scenario: scenario.name, status, equipmentcolor, flowgpm: flows[i], levelpct: tank ? scenario.level : null,
                 wellsactive: scenario.remote ? 2 : 1, rawgpm: raw, deliveredgpm: delivered, mainpsi: scenario.pressure };
             return [
                 { ...row, readingid: `${index}-${assetid}-snapshot`, recordtype: "Snapshot", sampleorder: 100 - index, hour: "Snapshot" },
                 ...Array.from({ length: 8 }, (_value, hour) => ({
-                    ...row, readingid: `${index}-${assetid}-${hour}`, recordtype: "Trend", sampleorder: hour,
+                    ...row, readingid: `${index}-${assetid}-${hour}`, recordtype: "Trend", sampleorder: hour * scenarios.length + index,
                     hour: `${String(hour + 6).padStart(2, "0")}:00`,
                     flowgpm: Math.round(row.flowgpm * (0.95 + 0.06 * Math.sin(hour * 0.56))),
+                    levelpct: tank ? Math.round(scenario.level - (7 - hour) * scenario.hourlyChange) : null,
                 })),
             ];
         });
@@ -989,8 +994,10 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
         rotation?: Scene3dVector, asset?: typeof assets[number]) => {
         objects.push({ id, kind, position, size, color, rotation, ...(asset ? { dataKey: asset[0], label: asset[1] } : {}) });
     };
-    const pipe = (id: string, x: number, y: number, z: number, length: number, axis: "x" | "y" | "z", color: string, width = 0.22) => {
-        shape(id, "pipe", [x, y, z], [width, length, width], color, axis === "x" ? [0, 0, 90] : axis === "z" ? [90, 0, 0] : undefined);
+    const pipeRotation: Record<"x" | "-x" | "z" | "-z", Scene3dVector> = { x: [0, 0, -90], "-x": [0, 0, 90], z: [90, 0, 0], "-z": [-90, 0, 0] };
+    const pipe = (id: string, x: number, y: number, z: number, length: number, axis: keyof typeof pipeRotation, color: string, flowKey: string, width = 0.22) => {
+        const rotation = pipeRotation[axis];
+        objects.push({ id, kind: "pipe", position: [x, y, z], size: [width, length, width], color, rotation, flowKey });
     };
     const arrow = (id: string, x: number, y: number, z: number, color: string) => {
         shape(id, "cone", [x, y, z], [0.36, 0.48, 0.36], color, [0, 0, -90]);
@@ -999,24 +1006,28 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
         shape(`well_pad_${index}`, "box", [-6.65, 0.08, z], [2.15, 0.16, 1.58], index ? "#b6aa96" : "#a9b7c4");
         shape(`well_casing_${index}`, "cylinder", [-7.25, 0.39, z - 0.48], [0.45, 0.63, 0.45], "#6d899c");
         shape(`well_pump_${index}`, "pump", [-6.56, 0.16, z], [0.84, 0.82, 0.85], rawPipe, undefined, assets[index]);
-        pipe(`well_lateral_${index}`, -4.71, 0.66, z, 2.35, "x", rawPipe);
+        pipe(`well_lateral_${index}`, -4.71, 0.66, z, 2.35, "x", rawPipe, assets[index][0]);
         arrow(`well_direction_${index}`, -4.68, 0.66, z, "#57cebb");
     }
-    pipe("well_collection", -3.53, 0.66, -0.05, 4.7, "z", rawPipe);
-    pipe("plant_inlet", -3.05, 0.66, 0.58, 1.05, "x", rawPipe, 0.25);
+    pipe("local_collection", -3.53, 0.66, -0.91, 2.98, "z", rawPipe, "W-01");
+    pipe("remote_collection", -3.53, 0.66, 1.44, 1.72, "-z", rawPipe, "W-02");
+    pipe("plant_inlet", -3.05, 0.66, 0.58, 1.05, "x", rawPipe, "TP-01", 0.25);
 
     shape("plant_slab", "box", [-1.41, 0.09, -0.04], [2.85, 0.18, 2.6], "#9caebe");
     shape("plant", "box", [-1.41, 0.79, -0.04], [2.4, 1.22, 1.97], "#b9d1d9", undefined, assets[2]);
     shape("plant_roof", "box", [-1.41, 1.43, -0.04], [2.58, 0.17, 2.13], "#3e647e");
     shape("plant_door", "box", [-1.53, 0.56, 0.96], [0.54, 0.76, 0.06], "#254966");
     shape("plant_window", "box", [-0.72, 0.94, 0.96], [0.58, 0.3, 0.07], "#365e76");
-    shape("clearwell", "tank", [0.38, 0, -2.15], [0.75, 0.68, 0.75], "#a4bfcb");
-    pipe("clearwell_connection", 0.38, 0.74, -0.52, 2.2, "z", treatedPipe);
-    pipe("plant_outlet", 0.02, 0.74, 0.58, 0.66, "x", treatedPipe, 0.26);
+    shape("clearwell", "tank", [2.25, 0, -2.4], [0.88, 0.92, 0.88], "#a4bfcb", undefined, assets[7]);
+    pipe("clearwell_outlet", 2.25, 0.74, -1.43, 0.56, "z", treatedPipe, "CW-01");
+    pipe("clearwell_return", 1.315, 0.74, -1.15, 1.87, "-x", treatedPipe, "CW-01");
+    pipe("clearwell_connection", 0.38, 0.74, -0.285, 1.73, "z", treatedPipe, "CW-01");
+    pipe("plant_outlet", 0.02, 0.74, 0.58, 0.66, "x", treatedPipe, "P-01", 0.26);
     shape("high_service_pump", "pump", [1.22, 0, 0.58], [1.02, 1, 1.02], treatedPipe, undefined, assets[3]);
-    pipe("distribution_main", 3.72, 0.74, 0.58, 3.35, "x", treatedPipe, 0.29);
+    pipe("distribution_main", 3.72, 0.74, 0.58, 3.35, "x", treatedPipe, "P-01", 0.29);
     arrow("distribution_direction", 3.6, 0.74, 0.58, "#8bcaff");
-    pipe("neighborhood_header", 5.38, 0.74, 0.24, 5.36, "z", treatedPipe);
+    pipe("north_neighborhood_header", 5.38, 0.74, -0.93, 3.02, "-z", treatedPipe, "R-01");
+    pipe("south_neighborhood_header", 5.38, 0.74, 1.745, 2.33, "z", treatedPipe, "R-03");
 
     for (const [index, z] of [-2.44, 0.23, 2.91].entries()) {
         const x = 6.78;
@@ -1027,17 +1038,18 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
             [x, 1.27, z + side * 0.3], [1.55, 0.11, 0.78], roof, [side * 25, 0, 0]);
         shape(`house_door_${index}`, "box", [x - 0.27, 0.4, z + 0.61], [0.25, 0.55, 0.05], "#314a63");
         shape(`house_window_${index}`, "box", [x + 0.29, 0.78, z + 0.61], [0.35, 0.23, 0.05], "#e1ecf5");
-        pipe(`house_service_${index}`, 5.77, 0.74, z, 0.78, "x", treatedPipe, 0.15);
+        pipe(`house_service_${index}`, 5.77, 0.74, z, 0.78, "x", treatedPipe, assets[index + 4][0], 0.15);
     }
     const linked = ["groundwater_flow", "groundwater_by_asset", "groundwater_assets"];
-    const station = ["groundwater_wells", "groundwater_raw", "groundwater_delivered", "groundwater_pressure"];
     const kpis = [
         ["groundwater_wells", "Active source wells", "wellsactive"], ["groundwater_raw", "Plant intake (GPM)", "rawgpm"],
         ["groundwater_delivered", "Residential delivery (GPM)", "deliveredgpm"], ["groundwater_pressure", "Distribution main (PSI)", "mainpsi"],
+        ["groundwater_level", "Clearwell level (%)", "levelpct"],
     ];
     const scene: Scene3dComponent = {
         type: "scene3d", id: "groundwater_scene", title: "Source to tap · hydraulic schematic", dataset: "asset_readings",
-        height: 455, theme: "light", objectIdField: "assetid", statusField: "status", objects,
+        height: 455, theme: "light", objectIdField: "assetid", statusField: "status", colorField: "equipmentcolor",
+        levelField: "levelpct", flowField: "flowgpm", objects,
         statusColors: [{ value: "Reduced flow", color: "#db9a39" }, { value: "Offline", color: "#7b8798" }],
         tooltipFields: [{ field: "stage", label: "Stage" }, { field: "flowgpm", label: "Flow (GPM)" }],
         interaction: { ...selectionInteraction("assetid"), internalMode: "filter", targets: linked },
@@ -1056,37 +1068,42 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
             asset_readings: { source: "powerbi", sort: [{ field: "sampleorder", direction: "descending" }] },
             snapshots: { source: "asset_readings", filter: { field: "recordtype", operator: "=", value: "Snapshot" } },
             flow_history: { source: "powerbi", filter: { field: "recordtype", operator: "=", value: "Trend" }, sort: [{ field: "sampleorder", direction: "ascending" }] },
+            storage_snapshot: { source: "snapshots", filter: { field: "assetid", operator: "=", value: "CW-01" } },
+            storage_history: { source: "flow_history", filter: { field: "assetid", operator: "=", value: "CW-01" } },
         } },
         styles: { globalCss: baseDarkCss },
         components: [
             { type: "segmentedControl", id: "groundwater_scenario", label: "Operating scenario", field: "scenario", options: scenarios.map(item => item.name),
-                interaction: { internalMode: "filter", targets: ["groundwater_scene", ...station, ...linked], externalMode: "none" } },
-            { type: "grid", id: "groundwater_kpis", columns: 12, children: kpis.map(([id, title, field]) =>
-                ({ type: "kpi", id, title, field, dataset: "snapshots", aggregation: "first", span: 3 })) },
-            { type: "text", id: "groundwater_legend", text: "Teal pipes carry raw groundwater. Blue pipes carry treated water. Select a well, plant, pump, or house to trace its readings." },
+                interaction: { internalMode: "filter", targets: ["groundwater_scene", ...kpis.map(([id]) => id), ...linked, "groundwater_level_history"], externalMode: "none" } },
+            { type: "grid", id: "groundwater_kpis", columns: 12, children: kpis.map(([id, title, field], index) =>
+                ({ type: "kpi", id, title, field, dataset: field === "levelpct" ? "storage_snapshot" : "snapshots", aggregation: "first", span: index < 3 ? 2 : 3 })) },
+            { type: "text", id: "groundwater_legend", text: "Teal pipes carry raw groundwater. Blue pipes carry treated water. Green pumps are running and red pumps are stopped. Select the Clearwell tank to inspect its water level." },
             scene,
             { type: "grid", id: "groundwater_charts", columns: 12, children: [
                 { type: "lineChart", id: "groundwater_flow", title: "Mean flow profile · GPM", dataset: "flow_history", category: "hour", measure: "flowgpm",
-                    aggregation: "avg", span: 7, height: 270, options: darkChartOptions(["#6eb5ff"]), interaction: disabledInteraction },
+                    aggregation: "avg", span: 4, height: 270, options: darkChartOptions(["#6eb5ff"]), interaction: disabledInteraction },
                 { type: "barChart", id: "groundwater_by_asset", title: "Snapshot flow by asset · GPM", dataset: "snapshots", category: "assetid", measure: "flowgpm",
-                    aggregation: "first", span: 5, height: 270, options: darkChartOptions(["#57cebb"]), interaction: { ...selectionInteraction("assetid"), targets: ["groundwater_scene"] } },
+                    aggregation: "first", span: 4, height: 270, options: darkChartOptions(["#57cebb"]), interaction: { ...selectionInteraction("assetid"), targets: ["groundwater_scene"] } },
+                { type: "lineChart", id: "groundwater_level_history", title: "Clearwell water level · %", dataset: "storage_history", category: "hour", measure: "levelpct",
+                    aggregation: "first", span: 4, height: 270, options: darkChartOptions(["#62dafa"]),
+                    chartStyle: { yAxis: [{ domain: "fixed", min: 0, max: 100, suffix: "%" }], series: [{ smooth: true }] }, interaction: disabledInteraction },
             ] },
-            { type: "table", id: "groundwater_assets", title: "Source-to-tap asset register", dataset: "snapshots", maxRows: 21,
+            { type: "table", id: "groundwater_assets", title: "Source-to-tap asset register", dataset: "snapshots", maxRows: 24,
                 columns: [{ field: "assetid", title: "ID" }, { field: "asset", title: "Asset" }, { field: "stage", title: "Stage" },
-                    { field: "scenario", title: "Scenario" }, { field: "status", title: "Status" }, { field: "flowgpm", title: "Flow (GPM)" }],
+                    { field: "scenario", title: "Scenario" }, { field: "status", title: "Status" }, { field: "flowgpm", title: "Flow (GPM)" }, { field: "levelpct", title: "Tank level (%)" }],
                 interaction: { ...selectionInteraction("assetid"), targets: ["groundwater_scene"] } },
         ],
     };
     return {
         id: "groundwater-supply-distribution", title, useCase: "Groundwater treatment and residential water distribution",
         summary: "Follow water from two wells through treatment and high-service pumping to three residential delivery points.",
-        description: "Ridgeway Water's fictional network collects raw groundwater from a local well and a remote well, treats it at the groundwater plant, and pumps it through a distribution main to Maple Court, Cedar Lane, and Birch Grove. The scene uses distinct pipe colors and direction markers, with operating readings for all seven selectable assets.",
+        description: "Ridgeway Water's fictional network collects groundwater from two wells, treats it, and pumps it through a distribution main to three residential areas. Select the Clearwell tank to inspect its water level, or change operating scenarios to watch its waterline and pipe flow update.",
         theme: "dark", accent: "#6eb5ff", tags: ["3D", "groundwater", "distribution"], referenceImages: [],
         previewImage: "/images/groundwater-supply-distribution.webp", powerBiPackage: "core",
-        expected: "Choose Remote well offline to see the source shut down and residential deliveries drop. Choose Peak demand to see the two wells support higher delivery. Select equipment or a house to filter the charts and asset register. Select a bar or register row to highlight its asset. All uses the latest snapshot for the station KPIs and averages the flow history across available readings.",
-        limitations: "The site is a synthetic schematic and pipe geometry indicates direction. Readings are illustrative and do not simulate a hydraulic model. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.",
-        headers: ["readingid", "assetid", "asset", "stage", "scenario", "status", "recordtype", "sampleorder", "hour", "flowgpm", "wellsactive", "rawgpm", "deliveredgpm", "mainpsi"],
-        rows, specification, runtime: darkRuntime,
+        expected: "Choose Remote well offline to turn its pump red and stop its pipe animation. The Clearwell level drops from 78% to 43% in the tank, KPI, and trend. Peak demand sets the level to 61%. Select the tank or another asset to filter the flow views and register. Use Pause flow to stop the moving markers. All uses the Normal flow snapshot and level trend and averages the flow history across scenarios.",
+        limitations: "The scene illustrates precomputed operating scenarios and flow direction. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.",
+        headers: ["readingid", "assetid", "asset", "stage", "scenario", "status", "equipmentcolor", "recordtype", "sampleorder", "hour", "flowgpm", "wellsactive", "rawgpm", "deliveredgpm", "mainpsi", "levelpct"],
+        rows, specification, runtime: { ...darkRuntime, motion: { ...darkRuntime.motion, maxConcurrentAnimations: 16 } },
     };
 }
 

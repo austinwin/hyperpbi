@@ -1,6 +1,6 @@
 # Groundwater Supply & Distribution
 
-Ridgeway Water's fictional network collects raw groundwater from a local well and a remote well, treats it at the groundwater plant, and pumps it through a distribution main to Maple Court, Cedar Lane, and Birch Grove. The scene uses distinct pipe colors and direction markers, with operating readings for all seven selectable assets.
+Ridgeway Water's fictional network collects groundwater from two wells, treats it, and pumps it through a distribution main to three residential areas. Select the Clearwell tank to inspect its water level, or change operating scenarios to watch its waterline and pipe flow update.
 
 ## Files
 
@@ -21,7 +21,7 @@ Load this example from the Dashboard Examples gallery, or import `project.hyperp
 4. Paste `runtime.json` into Runtime Configuration.
 5. Paste `specification.json` into Advanced JSON, validate, preview, and save.
 
-All logical datasets use the portable `powerbi` source alias. The CSV has 14 fields, below the visual's 50-field limit, and 189 rows, below the 30,000-row Power BI window.
+All logical datasets use the portable `powerbi` source alias. The CSV has 16 fields, below the visual's 50-field limit, and 216 rows, below the 30,000-row Power BI window.
 
 ## Source fields
 
@@ -31,6 +31,7 @@ All logical datasets use the portable `powerbi` source alias. The CSV has 14 fie
 - `stage`
 - `scenario`
 - `status`
+- `equipmentcolor`
 - `recordtype`
 - `sampleorder`
 - `hour`
@@ -39,13 +40,14 @@ All logical datasets use the portable `powerbi` source alias. The CSV has 14 fie
 - `rawgpm`
 - `deliveredgpm`
 - `mainpsi`
+- `levelpct`
 
 ## Expected behavior
 
-Choose Remote well offline to see the source shut down and residential deliveries drop. Choose Peak demand to see the two wells support higher delivery. Select equipment or a house to filter the charts and asset register. Select a bar or register row to highlight its asset. All uses the latest snapshot for the station KPIs and averages the flow history across available readings.
+Choose Remote well offline to turn its pump red and stop its pipe animation. The Clearwell level drops from 78% to 43% in the tank, KPI, and trend. Peak demand sets the level to 61%. Select the tank or another asset to filter the flow views and register. Use Pause flow to stop the moving markers. All uses the Normal flow snapshot and level trend and averages the flow history across scenarios.
 
 ## Limitations
 
-The site is a synthetic schematic and pipe geometry indicates direction. Readings are illustrative and do not simulate a hydraulic model. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.
+The scene illustrates precomputed operating scenarios and flow direction. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.
 
 All names, organizations, accounts, assets, and events are synthetic and provided only for product demonstration.

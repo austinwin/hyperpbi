@@ -21,6 +21,8 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     const [notice, setNotice] = useState<string>();
     const [ready, setReady] = useState(false);
     const [showLabels, setShowLabels] = useState(component.showLabels !== false);
+    const [flowPaused, setFlowPaused] = useState(false);
+    const [reducedMotion, setReducedMotion] = useState(() => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
     const [hovered, setHovered] = useState<string>();
     const [focused, setFocused] = useState<string>();
     const [staticSelection, setStaticSelection] = useState<string>();
@@ -41,6 +43,18 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     const equipment = objects.filter(state => state.visible && state.selectable);
     const detail = objects.find(state => state.visible && state.object.id === (hovered ?? focused)) ?? own.find(state => state.visible);
     const tooltips = component.tooltipFields ?? [];
+    const motion = context.config.motion;
+    const flowAllowed = Boolean(component.flowField) && motion?.enabled !== false && motion?.reducedMotion !== "always-reduce" &&
+        (motion?.reducedMotion === "never-reduce" || !reducedMotion) && (motion?.maxConcurrentAnimations ?? 12) > 0;
+    const flowBudget = flowAllowed && !flowPaused ? Math.min(24, motion?.maxConcurrentAnimations ?? 12) : 0;
+    useEffect(() => {
+        if (!component.flowField || typeof matchMedia !== "function") return;
+        const query = matchMedia("(prefers-reduced-motion: reduce)");
+        const sync = () => setReducedMotion(query.matches);
+        sync();
+        query.addEventListener("change", sync);
+        return () => query.removeEventListener("change", sync);
+    }, [component.flowField]);
 
     function activate(state: SceneObjectState, event: Event) {
         if (component.disabled || !state.visible || !state.selectable) return;
@@ -58,8 +72,8 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
         }
     }
 
-    const current = useRef({ component, dark, objects, selected, showLabels, activate });
-    current.current = { component, dark, objects, selected, showLabels, activate };
+    const current = useRef({ component, dark, objects, selected, showLabels, flowBudget, activate });
+    current.current = { component, dark, objects, selected, showLabels, flowBudget, activate };
     const hasObjects = objects.length > 0;
     useEffect(() => {
         const host = hostRef.current;
@@ -105,7 +119,7 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
                 runtimeRef.current = runtime;
                 const state = current.current;
                 runtime.configure(state.component, state.dark);
-                runtime.update(state.objects, state.selected, state.showLabels);
+                runtime.update(state.objects, state.selected, state.showLabels, state.flowBudget);
                 runtime.setActive(visible);
                 setReady(true);
             } catch {
@@ -131,13 +145,16 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     useEffect(() => setShowLabels(component.showLabels !== false), [component.showLabels]);
     useLayoutEffect(() => {
         runtimeRef.current?.configure(component, dark);
-    }, [component.objects, component.grid, component.shadows, component.view, dark]);
+    }, [component.objects, component.grid, component.shadows, component.view, component.levelField, component.flowField, dark]);
     useLayoutEffect(() => {
-        runtimeRef.current?.update(objects, selected, showLabels);
+        runtimeRef.current?.update(objects, selected, showLabels, flowBudget);
     });
 
-    const status = (state: SceneObjectState) => state.status != null ? formatValue(state.status)
-        : state.object.dataKey !== undefined && !state.row ? "No data" : undefined;
+    const level = (state: SceneObjectState) => state.level === undefined ? undefined : `${formatValue(state.level)}%`;
+    const status = (state: SceneObjectState) => [
+        state.status != null ? formatValue(state.status) : state.object.dataKey !== undefined && !state.row ? "No data" : undefined,
+        state.level === undefined ? undefined : `Water level ${level(state)}`,
+    ].filter(Boolean).join(" · ");
     const controlProps = (state: SceneObjectState) => ({
         "aria-pressed": selected.has(state.object.id),
         "aria-describedby": detail === state && (status(state) || state.row && tooltips.length) ? detailId : undefined,
@@ -168,6 +185,7 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
                     <button type="button" onClick={() => runtimeRef.current?.fit("top")}>Top view</button>
                     <button type="button" onClick={() => runtimeRef.current?.fit(component.view ?? "isometric")}>Reset view</button>
                     <button type="button" aria-pressed={showLabels} onClick={() => setShowLabels(!showLabels)}>Labels</button>
+                    {flowAllowed && <button type="button" onClick={() => setFlowPaused(!flowPaused)}>{flowPaused ? "Play flow" : "Pause flow"}</button>}
                 </div>
                 <div class="hp-scene3d-labels">
                     {objects.filter(state => showLabels && state.visible && (state.object.label || state.selectable)).map(state => {
@@ -175,7 +193,7 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
                             if (element) labels.current.set(state.object.id, element);
                             else labels.current.delete(state.object.id);
                         };
-                        const tag = <><i style={{ backgroundColor: state.color }} />{state.label}</>;
+                        const tag = <><i style={{ backgroundColor: state.color }} />{state.label}{state.level !== undefined && ` · ${level(state)}`}</>;
                         return state.selectable
                             ? <button type="button" key={state.object.id} ref={ref} {...controlProps(state)}>{tag}</button>
                             : <span key={state.object.id} ref={ref}>{tag}</span>;

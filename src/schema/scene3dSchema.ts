@@ -19,6 +19,8 @@ export interface Scene3dObject {
     kind: Scene3dKind;
     label?: string;
     dataKey?: Scene3dKey;
+    /** Optional separate row key for pipe flow. */
+    flowKey?: Scene3dKey;
     position?: Scene3dVector;
     size?: Scene3dVector;
     /** Euler angles in degrees, in XYZ order. */
@@ -41,6 +43,10 @@ export interface Scene3dComponent extends ComponentBase {
     statusColors?: Array<{ value: Scene3dKey; color: string }>;
     colorField?: string;
     visibleField?: string;
+    /** A numeric field containing tank fill as 0–100 percent. */
+    levelField?: string;
+    /** A signed numeric field for pipe flow along the pipe's local Y axis. */
+    flowField?: string;
     tooltipFields?: Array<string | { field: string; label?: string }>;
     hideUnmatched?: boolean;
     showLabels?: boolean;

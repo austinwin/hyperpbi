@@ -1,5 +1,5 @@
 import {
-    BoxGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial, SphereGeometry, TorusGeometry,
+    BoxGeometry, CylinderGeometry, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, SphereGeometry, TorusGeometry,
     type BufferGeometry,
 } from "three";
 import type { Scene3dKind } from "../../schema/scene3dSchema";
@@ -10,10 +10,62 @@ export function createSceneMeshes() {
     const sphere = new SphereGeometry(0.5, 24, 16);
     const cone = new CylinderGeometry(0, 0.5, 1, 24);
     const torus = new TorusGeometry(0.5, 0.028, 8, 32);
+    const flowBand = torus.clone().rotateX(Math.PI / 2);
     const steel = new MeshStandardMaterial({ color: "#546d81", metalness: 0.5, roughness: 0.36 });
     const trim = new MeshStandardMaterial({ color: "#b4c9d5", metalness: 0.33, roughness: 0.42 });
     const base = new MeshStandardMaterial({ color: "#8298aa", metalness: 0.16, roughness: 0.68 });
     const dark = new MeshStandardMaterial({ color: "#23374b", metalness: 0.25, roughness: 0.58 });
+    const water = new MeshStandardMaterial({ color: "#229cdb", metalness: 0.06, roughness: 0.24 });
+    const waterline = new MeshBasicMaterial({ color: "#9eeaff", toneMapped: false });
+    const matrix = new Matrix4();
+
+    function addTankGauge(group: Group) {
+        const bottom = 0.22;
+        const range = 1.93;
+        const column = new Mesh(cylinder, water);
+        column.scale.set(1.9, 0, 1.9);
+        const surface = new Mesh(torus, waterline);
+        surface.rotation.x = Math.PI / 2;
+        surface.scale.set(1.92, 1.92, 0.7);
+        const plate = new Mesh(box, dark);
+        plate.position.set(0.23, bottom + range / 2, 0.995);
+        plate.scale.set(0.27, range + 0.1, 0.095);
+        const indicator = new Mesh(box, waterline);
+        indicator.position.set(0.21, bottom, 1.05);
+        indicator.scale.set(0.11, 0, 0.025);
+        group.add(column, surface, plate, indicator);
+        for (let tick = 0; tick <= 4; tick++) {
+            const mark = new Mesh(box, trim);
+            mark.position.set(0.325, bottom + range * tick / 4, 1.047);
+            mark.scale.set(0.08, 0.025, 0.03);
+            group.add(mark);
+        }
+        return (level?: number) => {
+            const height = (level ?? 0) / 100 * range;
+            column.visible = surface.visible = indicator.visible = height > 0;
+            column.position.y = indicator.position.y = bottom + height / 2;
+            column.scale.y = indicator.scale.y = height;
+            surface.position.y = bottom + height;
+        };
+    }
+
+    function addPipeFlow(group: Group) {
+        const bands = new InstancedMesh(flowBand, waterline, 4);
+        bands.frustumCulled = false;
+        bands.raycast = () => {};
+        bands.visible = false;
+        group.add(bands);
+        const move = (phase: number, length: number) => {
+            for (let index = 0; index < bands.count; index++) {
+                const position = (phase + index / bands.count) % 1;
+                matrix.makeScale(1.06, Math.min(1, 0.95 / length), 1.06).setPosition(0, position - 0.5, 0);
+                bands.setMatrixAt(index, matrix);
+            }
+            bands.instanceMatrix.needsUpdate = true;
+        };
+        move(0.12, 1);
+        return { bands, move };
+    }
 
     function build(kind: Scene3dKind, finish: MeshStandardMaterial): Group {
         const group = new Group();
@@ -60,8 +112,10 @@ export function createSceneMeshes() {
 
     return {
         build,
+        addTankGauge,
+        addPipeFlow,
         dispose() {
-            [box, cylinder, sphere, cone, torus, steel, trim, base, dark].forEach(resource => resource.dispose());
+            [box, cylinder, sphere, cone, torus, flowBand, steel, trim, base, dark, water, waterline].forEach(resource => resource.dispose());
         },
     };
 }
