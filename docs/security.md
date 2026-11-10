@@ -51,6 +51,10 @@ Declarative `svg` passes a strict element/property/binding/animation schema. Sta
 
 Scripts, handlers, style, foreignObject, link/image/use, audio/video/canvas, external resources, animation elements, unsafe transforms, unknown references, and field-injected path data are blocked. Exact limits are in [SVG visuals](svg-visuals.md).
 
+## Embedded 3D models
+
+`scene3d` loads bounded, self-contained glTF 2.0 files from bytes embedded in the specification. It checks buffers, texture headers, node hierarchy, and geometry budgets before passing bytes to the local loader. The loader accepts validated embedded resources and its own temporary blob URLs. A dashboard cannot supply a model URL, decoder, script, or callback. See the [model limits](scene3d.md#import-models).
+
 ## URL restrictions
 
 `safeUrl` rejects JavaScript, VBScript, file URLs, and all data URLs except explicitly enabled base64 PNG/GIF/JPEG/WebP images. HTTP(S) requires an explicit allow-external option. Fragment/root/relative URLs are the safe default.

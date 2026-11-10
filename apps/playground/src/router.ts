@@ -1,6 +1,7 @@
 export type PlaygroundRoute =
     | { page: "home" }
     | { page: "mapGallery" }
+    | { page: "example"; slug: string }
     | { page: "project"; projectId: string }
     | { page: "play"; projectId: string };
 
@@ -30,7 +31,9 @@ export function currentRoute(pathname = globalThis.location?.pathname ?? "/"): P
         : pathname === basePath
             ? "/"
             : pathname;
-    if (/^\/components\/map\/?$/.test(localPath)) return { page: "mapGallery" };
+    if (/^\/(?:components\/map|examples\/maps)\/?$/.test(localPath)) return { page: "mapGallery" };
+    const example = localPath.match(/^\/examples\/([a-z0-9-]+)\/?$/);
+    if (example) return { page: "example", slug: example[1] };
     const match = localPath.match(/^\/project\/([^/]+)(?:\/(play))?\/?$/);
     if (!match) return { page: "home" };
     return { page: match[2] ? "play" : "project", projectId: decodeURIComponent(match[1]) };

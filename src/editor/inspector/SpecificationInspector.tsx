@@ -34,6 +34,8 @@ import { StudioCheckbox } from "../ui/StudioCheckbox";
 import { StudioSection } from "../ui/StudioSection";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
 import { ChartConfigurationPanel } from "./ChartConfigurationPanel";
+import { Scene3dEditor } from "./Scene3dEditor";
+import type { Scene3dComponent } from "../../schema/scene3dSchema";
 import { InteractionQuickSetup } from "./InteractionQuickSetup";
 import { externalFilterTargetFor } from "../../powerbi/externalFilters";
 import "../../styles/hyperpbi-chart-authoring.css";
@@ -517,7 +519,7 @@ export function SpecificationInspector({
           <StudioCheckbox
             label={control.label}
             help={control.help}
-            checked={value === true}
+            checked={value === undefined ? control.defaultChecked === true : value === true}
             disabled={control.readOnly}
             onChange={(checked) => change(control.property, checked)}
           />
@@ -1073,6 +1075,10 @@ export function SpecificationInspector({
               <div class="hp-inspector-property-groups">
                 <label>Search properties<input type="search" aria-label="Search properties" value={propertySearch} onInput={event=>setPropertySearch(event.currentTarget.value)} /></label>
                 {descriptor?.category === "Charts" && descriptor.schema.allowed.includes("chartStyle") && <ChartConfigurationPanel key={String(item.id)} item={item} fields={Object.keys(scopeFields).length?scopeFields:effectiveData.fields} onChange={change} onReplace={changes=>commit(updateComponent(parsed,selectedComponentId,changes))} dataControls={(controlsByGroup.get("Data")??[]).map(renderControl)} />}
+                {item.type === "scene3d" && Array.isArray(item.objects) && item.objects.every(object) && <Scene3dEditor
+                  key={String(item.id)} component={item as unknown as Scene3dComponent} onChange={change}
+                  fields={Object.values(scopeFields).map(field => ({ key: datasetName === "powerbi" ? aliasByKey.get(field.key)?.alias ?? field.key : field.key, label: field.displayName }))}
+                />}
                 <InteractionQuickSetup
                   component={item}
                   components={tree.map(entry => ({ id: entry.id, type: entry.type }))}

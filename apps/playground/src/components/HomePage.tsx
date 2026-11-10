@@ -11,7 +11,7 @@ export interface PlaygroundExampleLink {
     useCase?: string;
     theme?: "light" | "dark";
     accent?: string;
-    bundle?: string;
+    bundle?: string | (() => Promise<string>);
 }
 
 export function HomePage({
@@ -71,13 +71,16 @@ export function HomePage({
         setError("");
         setLoadingExample(example.slug);
         try {
-            const result = importProjectBundle(example.bundle);
+            const bundle = typeof example.bundle === "function" ? await example.bundle() : example.bundle;
+            const result = importProjectBundle(bundle);
             if (!result.project) {
                 setError(result.errors.join("\n"));
                 return;
             }
             await storage.saveProject(result.project);
             navigate(`/project/${encodeURIComponent(result.project.metadata.id)}`);
+        } catch {
+            setError("This example could not be loaded.");
         } finally {
             setLoadingExample("");
         }

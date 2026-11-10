@@ -7,7 +7,7 @@ import { matchesHttpsHost } from "../security/networkHostPolicy";
 import { FRAGMENT_LIMITS, type RemoteFragment } from "./fragmentTypes";
 
 const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
-const restricted = new Set(["dynamicContent", "map", "modal", "offcanvas", "dropdown", "popover", "html", "custom", "mermaidDiagram", "leftPanel", "rightPanel"]);
+const restricted = new Set(["dynamicContent", "map", "modal", "offcanvas", "dropdown", "popover", "html", "custom", "mermaidDiagram", "scene3d", "leftPanel", "rightPanel"]);
 export const fragmentComponentTypes = Object.freeze(componentDescriptors.map(item => item.type).filter(type => !restricted.has(type)).sort());
 const supported = new Set(fragmentComponentTypes);
 const localActions = new Set(["setTab", "setState", "toggleState", "clearFilters", "setStep", "nextStep", "previousStep"]);

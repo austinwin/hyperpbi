@@ -30,6 +30,7 @@ export interface InspectorPropertyDescriptor {
     order?: number;
     advanced?: boolean;
     help?: string;
+    defaultChecked?: boolean;
     visibleWhen?: InspectorVisibleWhen;
     readOnly?: boolean;
 }

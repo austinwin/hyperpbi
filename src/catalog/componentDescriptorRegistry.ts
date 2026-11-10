@@ -5,6 +5,7 @@ import {
 } from "./componentDescriptors";
 import { networkGraphDescriptor } from "./networkGraphDescriptor";
 import { mermaidDiagramDescriptor } from "./mermaidDiagramDescriptor";
+import { scene3dDescriptor } from "./scene3dDescriptor";
 
 const chartDescriptorTypes = new Set([
     "barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart",
@@ -38,6 +39,10 @@ if (!generatingLegacyCatalog && !componentDescriptorsByType.has(networkGraphDesc
 if (!generatingLegacyCatalog && !componentDescriptorsByType.has(mermaidDiagramDescriptor.type)) {
     componentDescriptors.push(mermaidDiagramDescriptor);
     componentDescriptorsByType.set(mermaidDiagramDescriptor.type, mermaidDiagramDescriptor);
+}
+if (!generatingLegacyCatalog) {
+    componentDescriptors.push(scene3dDescriptor);
+    componentDescriptorsByType.set(scene3dDescriptor.type, scene3dDescriptor);
 }
 
 export {

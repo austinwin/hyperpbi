@@ -14,7 +14,7 @@ For local development, run `npm install` and `npm run dev` from the repository r
 
 For web builds that use `rest.get`, set `HYPERPBI_WEB_REST_HOSTS` to a comma-separated list of trusted HTTPS origins or subdomain wildcard origins before the build. If unset, HyperPBI approves the miniup.app and miniup.io apex/subdomain families plus the HyperPBI demonstration origin. This setting is part of the web build/deployment boundary; dashboard JSON may select an allowed origin but cannot add a new trusted host.
 
-The ten dashboards in [`examples/dashboards`](../examples/dashboards) are a starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. See the [dashboard example guide](dashboard-examples.md) for the folder list, package profiles, and exact import workflow.
+The dashboards in [`examples/dashboards`](../examples/dashboards) are a starting point for a real project. Each includes a specification, Runtime Configuration, synthetic CSV, complete `.hyperpbi` project, and Power BI instructions. For equipment layouts, start with [Pump Station Monitoring](../examples/dashboards/pump-station-monitoring/README.md) and edit its objects in the [Scene editor](scene3d.md). See the [dashboard example guide](dashboard-examples.md) for package profiles and import steps.
 
 ## Install and bind data
 

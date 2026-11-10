@@ -1,7 +1,7 @@
 {
   "generated": true,
   "version": 1,
-  "componentCount": 84,
+  "componentCount": 85,
   "categories": [
     "Layout",
     "Controls",
@@ -10031,6 +10031,118 @@
           "externalMode": "selection",
           "selectionMode": "replace",
           "clearOnSecondClick": true
+        }
+      }
+    },
+    {
+      "type": "scene3d",
+      "label": "3D scene",
+      "category": "Advanced components",
+      "maturity": "stable",
+      "complexity": "standard",
+      "useWhen": "Show interactive equipment, facility layouts, or physical assets tied to data",
+      "summary": "An interactive Three.js scene with primitives, equipment assemblies, and embedded glTF models. Bind objects to typed dataset keys for status, tooltips, and row-identity selection.",
+      "accessibility": [
+        "Select objects with the keyboard-accessible object list or projected labels. The list works when WebGL is unavailable."
+      ],
+      "relatedTypes": [
+        "detailPanel",
+        "table",
+        "svg"
+      ],
+      "capabilities": {
+        "fields": true,
+        "calculations": true,
+        "css": true,
+        "slots": true,
+        "interactions": true,
+        "externalSelection": true,
+        "customHtml": false
+      },
+      "interaction": {
+        "defaultEnabled": true,
+        "naturalTrigger": "click",
+        "autoExternalMode": "selection"
+      },
+      "required": [
+        "type",
+        "id",
+        "objects"
+      ],
+      "allowed": [
+        "ariaLabel",
+        "aspectRatio",
+        "className",
+        "colorField",
+        "css",
+        "dataset",
+        "disabled",
+        "frameless",
+        "grid",
+        "height",
+        "heightMode",
+        "hidden",
+        "hideUnmatched",
+        "id",
+        "interaction",
+        "minHeight",
+        "objectIdField",
+        "objects",
+        "order",
+        "responsive",
+        "shadows",
+        "showLabels",
+        "showObjectList",
+        "slots",
+        "span",
+        "statusColors",
+        "statusField",
+        "style",
+        "subtitle",
+        "theme",
+        "title",
+        "tooltip",
+        "tooltipFields",
+        "type",
+        "view",
+        "visibleField"
+      ],
+      "example": {
+        "type": "scene3d",
+        "id": "equipment_scene",
+        "title": "Booster station",
+        "objects": [
+          {
+            "id": "pump_1",
+            "kind": "pump",
+            "label": "P-101",
+            "position": [
+              -1.1,
+              0,
+              0
+            ],
+            "color": "#1b9b82",
+            "selectable": true
+          },
+          {
+            "id": "pump_2",
+            "kind": "pump",
+            "label": "P-102",
+            "position": [
+              1.1,
+              0,
+              0
+            ],
+            "color": "#eaa53b",
+            "selectable": true
+          }
+        ],
+        "height": 400,
+        "interaction": {
+          "enabled": true,
+          "trigger": "click",
+          "internalMode": "none",
+          "externalMode": "none"
         }
       }
     }

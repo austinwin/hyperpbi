@@ -41,6 +41,8 @@ import { SvgBlock } from "../components/svg/SvgBlock";
 import { SvgMarkupBlock } from "../components/svg/SvgMarkupBlock";
 import { MermaidBlock } from "../components/mermaid/MermaidBlock";
 import type { MermaidDiagramComponent } from "../schema/mermaidDiagramSchema";
+import { Scene3dBlock } from "../components/scene3d/Scene3dBlock";
+import type { Scene3dComponent } from "../schema/scene3dSchema";
 import { SplitLayout } from "../components/layout/SplitLayout";
 import { DynamicContentBlock } from "../fragments/DynamicContentBlock";
 import { componentListRequestsFill } from "../components/layout/responsiveLayout";
@@ -67,6 +69,7 @@ const componentRenderers: Record<string, ComponentRenderer> = {
     svg: c => h(SvgBlock, { component: c as SvgComponent }),
     svgMarkup: c => h(SvgMarkupBlock, { component: c as SvgMarkupComponent }),
     mermaidDiagram: c => h(MermaidBlock, { component: c as MermaidDiagramComponent }),
+    scene3d: c => h(Scene3dBlock, { component: c as Scene3dComponent }),
     divider: () => h(Divider, {}),
     spacer: () => h(Spacer, {}),
     grid: (c, rc) => { const comp = c as ContainerComponent; const children=comp.children??[];return h(GridLayout, { columns: comp.columns, gap: comp.gap, fill:componentListRequestsFill(children) }, rc(children)); },

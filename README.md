@@ -41,7 +41,7 @@ See [architecture](docs/architecture.md) for host contracts, persistence, portab
 
 ## Dashboard examples
 
-The `/examples` gallery loads ten complete dashboards from [`examples/dashboards`](examples/dashboards). Every folder contains `specification.json`, `runtime.json`, `data.csv`, a complete `project.hyperpbi` Playground bundle, and host-specific instructions in `README.md`.
+The `/examples` gallery loads complete dashboards from [`examples/dashboards`](examples/dashboards). Every folder contains `specification.json`, `runtime.json`, `data.csv`, a complete `project.hyperpbi` Playground bundle, and host-specific instructions in `README.md`.
 
 | Dashboard | Folder | Power BI package |
 |---|---|---|
@@ -55,17 +55,22 @@ The `/examples` gallery loads ten complete dashboards from [`examples/dashboards
 | Industrial Network Telemetry | [`industrial-network-telemetry`](examples/dashboards/industrial-network-telemetry) | Core |
 | Dynamic GIS Analytics | [`dynamic-gis-analytics`](examples/dashboards/dynamic-gis-analytics) | Maps |
 | Universal Dynamic Content | [`universal-dynamic-content`](examples/dashboards/universal-dynamic-content) | Maps |
+| Pump Station Monitoring | [`pump-station-monitoring`](examples/dashboards/pump-station-monitoring) | Core |
 
 Open an example to preview the project, inspect its JSON, or open a copy in `/playground`. For Power BI, import `data.csv` as one table, add its columns to HyperPBI's single **Values** field well, paste `runtime.json` into Runtime Configuration, and paste `specification.json` into Advanced JSON. Use the package shown in the table. Urban Mobility requests OpenStreetMap tiles, and the two Dynamic Content examples request MiniUp data. Import the `.hyperpbi` bundle in Playground.
 
 See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, package-profile, and portability details.
+
+## Interactive 3D scenes
+
+Add **3D scene** from the Visual Inspector catalog to build an equipment layout from primitives, pump and tank assemblies, or embedded GLB and glTF models. The Scene editor provides object transforms, material controls, and dataset bindings. Select an asset to link charts, tables, and Power BI visuals by source row identity. Three.js ships locally in both Core and Maps. [3D scene guide](docs/scene3d.md) · [Pump Station Monitoring](https://hyperpbi.com/examples/pump-station-monitoring)
 
 ## Current status and schema versions
 
 - HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.
 - Dashboard schema 1.0 and missing versions are rejected by visual loading, Edit Mode, AI import, preview, save, and rendering. Legacy JSON can be converted explicitly with the development-only `npm run schema:migrate-v1 -- input.json output.json` utility; runtime migration is intentionally unsupported.
 <!-- component-summary:start -->
-- The canonical implementation defines **84 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
+- The canonical implementation defines **85 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
 - The Power BI visual package is version `1.0.2.0`. Dashboard specifications use their own schema version.
 

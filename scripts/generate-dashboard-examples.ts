@@ -4,6 +4,7 @@ import { defaultConfig, type HyperPbiConfig } from "../src/config/hyperpbiConfig
 import { instantiateDashboardExample } from "../src/playground/dashboardExample";
 import { canonicalJson } from "../src/playground/canonicalJson";
 import { exportProjectBundle } from "../src/playground/projectBundle";
+import type { Scene3dComponent, Scene3dObject, Scene3dVector } from "../src/schema/scene3dSchema";
 
 type Row = Record<string, string | number | boolean | null>;
 type Specification = Record<string, unknown>;
@@ -19,6 +20,7 @@ interface ExampleDefinition {
     accent: string;
     tags: string[];
     referenceImages: number[];
+    previewImage?: string;
     powerBiPackage: "core" | "maps";
     expected: string;
     limitations: string;
@@ -817,6 +819,132 @@ function universalDynamicContent(): ExampleDefinition {
     };
 }
 
+function pumpStationMonitoring(): ExampleDefinition {
+    const title = "Pump Station Monitoring";
+    const pumps = [
+        { id: "P-101", name: "Booster 01", x: -3.3, flow: 1280, pressure: 68.4, load: 72 },
+        { id: "P-102", name: "Booster 02", x: -1.1, flow: 1150, pressure: 65.8, load: 67 },
+        { id: "P-103", name: "Booster 03", x: 1.1, flow: 1010, pressure: 62.0, load: 82 },
+        { id: "P-104", name: "Standby 04", x: 3.3, flow: 980, pressure: 64.3, load: 65 },
+    ];
+    const scenarios = ["Normal duty", "Peak demand", "Maintenance"];
+    const palette = [
+        { value: "Running", color: "#29b99a" }, { value: "Warning", color: "#efaa49" }, { value: "Stopped", color: "#8298ae" },
+    ];
+    const rows: Row[] = scenarios.flatMap((scenario, mode) => {
+        const assets = pumps.map((pump, index) => {
+            const stopped = mode === 0 && index === 3 || mode === 2 && index === 1;
+            const warning = mode === 1 && index === 2;
+            return {
+                equipmentid: pump.id, equipment: pump.name, scenario,
+                status: stopped ? "Stopped" : warning ? "Warning" : "Running",
+                flowgpm: stopped ? 0 : Math.round(pump.flow * (mode === 1 ? 1.14 : 1)),
+                pressurepsi: stopped ? 0 : number(pump.pressure + (warning ? -6.1 : mode === 1 ? 2.4 : 0), 1),
+                motorloadpct: stopped ? 0 : warning ? 94 : pump.load + (mode === 1 ? 9 : 0),
+            };
+        });
+        const stationflow = assets.reduce((sum, asset) => sum + asset.flowgpm, 0);
+        const online = assets.filter(asset => asset.status !== "Stopped");
+        const stationpressure = number(online.reduce((sum, asset) => sum + asset.pressurepsi, 0) / online.length, 1);
+        const stationalerts = assets.filter(asset => asset.status === "Warning").length;
+        return assets.flatMap((asset, index) => {
+            const base = { ...asset, stationflow, stationpressure, stationalerts, stationonline: online.length };
+            const snapshot = { ...base, readingid: `${mode}-${asset.equipmentid}-snapshot`, recordtype: "Snapshot", sampleorder: 100 - mode, hour: "Snapshot" };
+            const trend = Array.from({ length: 10 }, (_value, hour) => ({
+                ...base, readingid: `${mode}-${asset.equipmentid}-${hour}`, recordtype: "Trend", sampleorder: hour,
+                hour: `${String(hour + 7).padStart(2, "0")}:00`,
+                pressurepsi: asset.pressurepsi ? number(asset.pressurepsi + Math.sin(hour * 0.62 + index * 0.8) * 1.4 + Math.cos(hour * 0.28) * 0.75, 1) : 0,
+            }));
+            return [snapshot, ...trend];
+        });
+    });
+    const objects: Scene3dObject[] = pumps.map(pump => ({
+        id: pump.id, kind: "pump", label: pump.id, dataKey: pump.id, position: [pump.x, 0, 0.55],
+    }));
+    const pipe = (id: string, position: Scene3dVector, length: number, axis: "x" | "y" | "z", diameter = 0.24, color = "#3b94bb") => {
+        const rotation: Scene3dVector = axis === "x" ? [0, 0, 90] : axis === "z" ? [90, 0, 0] : [0, 0, 0];
+        objects.push({ id, kind: "pipe", position, rotation, size: [diameter, length, diameter], color, metalness: 0.33 });
+    };
+    for (const [index, x] of [-2.55, 2.55].entries()) {
+        objects.push({ id: `vessel_${index}`, kind: "tank", label: `V-20${index + 1}`, position: [x, 0, -2.35], size: [1.05, 0.94, 1.05] });
+        pipe(`vessel_inlet_${index}`, [x, 0.46, -1.17], 0.76, "z", 0.31);
+    }
+    pipe("inlet_header", [0, 0.46, -0.92], 8.7, "x", 0.34);
+    pipe("inlet_feed", [-4.35, 0.46, -2.04], 2.3, "z", 0.34);
+    pipe("outlet_header", [0, 1.39, 2.2], 9.3, "x", 0.33, "#477fae");
+    pipe("outlet_feed", [4.57, 1.39, 3], 1.58, "z", 0.33, "#477fae");
+    for (const [index, pump] of pumps.entries()) {
+        pipe(`suction_${index}`, [pump.x - 0.75, 0.46, -0.31], 1.24, "z", 0.23);
+        pipe(`riser_${index}`, [pump.x - 0.59, 1.41, 0.55], 0.27, "y", 0.22);
+        pipe(`discharge_${index}`, [pump.x - 0.59, 1.39, 1.39], 1.65, "z", 0.21, "#477fae");
+        pipe(`flange_${index}`, [pump.x - 0.59, 1.39, 1.77], 0.12, "z", 0.35, "#90aabc");
+    }
+    for (const [index, x] of [-4.6, 0, 4.6].entries()) {
+        objects.push({ id: `header_support_${index}`, kind: "box", position: [x, 0.61, 2.2], size: [0.14, 1.22, 0.16], color: "#66829a" });
+    }
+    const targetIds = ["station_scene", "station_online", "station_flow", "station_pressure", "station_alerts", "pressure_trend", "motor_load", "asset_register"];
+    const scene: Scene3dComponent = {
+        type: "scene3d", id: "station_scene", title: "Booster gallery · spatial overview", dataset: "equipment_readings",
+        objectIdField: "equipmentid", statusField: "status", statusColors: palette,
+        tooltipFields: [{ field: "equipment", label: "Equipment" }, { field: "flowgpm", label: "Flow (GPM)" },
+            { field: "pressurepsi", label: "Pressure (PSI)" }, { field: "motorloadpct", label: "Motor load (%)" }],
+        objects, height: 410, theme: "dark",
+        interaction: { ...selectionInteraction("equipmentid"), internalMode: "filter", targets: ["pressure_trend", "motor_load", "asset_register"] },
+    };
+    const specification: Specification = {
+        version: "2.0", title,
+        theme: { mode: "dark", density: "compact", primaryColor: "#54bcff", accentColor: "#29b99a", surfaceColor: "#101e2e", textColor: "#e7f1ff", borderColor: "#2b4159", successColor: "#29b99a", warningColor: "#efaa49", radius: 12, gap: 10 },
+        app: {
+            enabled: true, layout: "horizontal", container: "fluid", density: "compact",
+            brand: { title: "Northbank Water", shortTitle: "NW", subtitle: "Operations", icon: "dashboard" },
+            navbar: { visible: true },
+            pageHeader: {
+                visible: true, title: "Booster Station 07", subtitle: "Pump station monitoring · Distribution operations",
+                meta: [{ label: "Telemetry", value: "Simulated", intent: "info" }],
+            },
+        },
+        data: { datasets: {
+            equipment_readings: { source: "powerbi", sort: [{ field: "sampleorder", direction: "descending" }] },
+            snapshots: { source: "equipment_readings", filter: { field: "recordtype", operator: "=", value: "Snapshot" } },
+            pressure_history: { source: "powerbi", filter: { field: "recordtype", operator: "=", value: "Trend" }, sort: [{ field: "sampleorder", direction: "ascending" }] },
+        } },
+        styles: { globalCss: baseDarkCss },
+        components: [
+            { type: "segmentedControl", id: "operating_scenario", label: "Operating scenario", field: "scenario", options: scenarios, interaction: { internalMode: "filter", targets: targetIds, externalMode: "none" } },
+            { type: "grid", id: "station_kpis", columns: 12, children: [
+                { type: "kpi", id: "station_online", title: "Pumps online", dataset: "snapshots", field: "stationonline", aggregation: "first", span: 3, intent: "success" },
+                { type: "kpi", id: "station_flow", title: "Station flow (GPM)", dataset: "snapshots", field: "stationflow", aggregation: "first", span: 3 },
+                { type: "kpi", id: "station_pressure", title: "Discharge pressure (PSI)", dataset: "snapshots", field: "stationpressure", aggregation: "first", span: 3 },
+                { type: "kpi", id: "station_alerts", title: "Active alerts", dataset: "snapshots", field: "stationalerts", aggregation: "first", span: 3, intent: "warning" },
+            ] },
+            scene,
+            { type: "grid", id: "station_trends", columns: 12, children: [
+                { type: "lineChart", id: "pressure_trend", title: "Discharge pressure · PSI", dataset: "pressure_history", category: "hour", measure: "pressurepsi", aggregation: "avg",
+                    span: 7, height: 270, options: darkChartOptions(["#58bcf4"]), interaction: disabledInteraction },
+                { type: "barChart", id: "motor_load", title: "Motor utilization · %", dataset: "snapshots", category: "equipmentid", measure: "motorloadpct", aggregation: "first",
+                    span: 5, height: 270, options: darkChartOptions(["#36c3ae"]), interaction: { ...selectionInteraction("equipmentid"), targets: ["station_scene"] } },
+            ] },
+            { type: "table", id: "asset_register", title: "Snapshot register", dataset: "snapshots", maxRows: 12,
+                columns: [
+                    { field: "equipmentid", title: "Asset" }, { field: "equipment", title: "Equipment" }, { field: "scenario", title: "Scenario" },
+                    { field: "status", title: "Status" }, { field: "flowgpm", title: "Flow (GPM)" },
+                    { field: "pressurepsi", title: "Pressure (PSI)" }, { field: "motorloadpct", title: "Motor load (%)" },
+                ], interaction: { ...selectionInteraction("equipmentid"), targets: ["station_scene"] } },
+        ],
+    };
+    return {
+        id: "pump-station-monitoring", title, useCase: "Water utility operations and equipment telemetry",
+        summary: "Explore a 3D booster station, rehearse changing duty conditions, and trace each pump to its operating history.",
+        description: "Northbank Water's fictional booster station pairs four selectable centrifugal pump assemblies with pressure vessels, suction and discharge manifolds, and synthetic operating records. The spatial view, station KPIs, pressure trend, motor-load chart, and snapshot register all use the same source data.",
+        theme: "dark", accent: "#54bcff", tags: ["3D", "utilities", "SCADA"], referenceImages: [],
+        previewImage: "/images/pump-station-monitoring.webp", powerBiPackage: "core",
+        expected: "Choose Peak demand to flag P-103 and start the standby pump, or Maintenance to stop P-102. Select equipment in the scene or its keyboard-accessible list to filter the trend, motor-load chart, and register. Select a motor-load bar or snapshot row to highlight its pump. Select the same asset again or clear the scene selection to restore the linked views. All uses the newest snapshot for station KPIs and asset status and averages pressure across the available scenarios.",
+        limitations: "The three operating scenarios are precomputed snapshots. The project works offline and uses procedural equipment geometry. In Power BI, include readingid as a categorical column and set numeric fields to Don't summarize to preserve distinct reading rows. Configure Power BI visual interactions to test the selected rows against a second visual.",
+        headers: ["readingid", "equipmentid", "equipment", "scenario", "status", "recordtype", "sampleorder", "hour", "flowgpm", "pressurepsi", "motorloadpct", "stationflow", "stationpressure", "stationalerts", "stationonline"],
+        rows, specification, runtime: darkRuntime,
+    };
+}
+
 const examples: ExampleDefinition[] = [
     talentAcquisition(),
     capitalProjectControls(),
@@ -828,6 +956,7 @@ const examples: ExampleDefinition[] = [
     industrialTelemetry(),
     dynamicGisAnalytics(),
     universalDynamicContent(),
+    pumpStationMonitoring(),
 ];
 
 function readme(example: ExampleDefinition): string {
@@ -925,6 +1054,7 @@ for (const example of examples) {
         accent: example.accent,
         tags: example.tags,
         referenceImages: example.referenceImages,
+        ...(example.previewImage ? { previewImage: example.previewImage } : {}),
         folder: example.id,
         specification: `${example.id}/specification.json`,
         runtime: `${example.id}/runtime.json`,

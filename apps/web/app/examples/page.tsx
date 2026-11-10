@@ -1,6 +1,7 @@
 import mapManifest from "../../../../examples/map/manifest.json";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Map } from "lucide-react";
 import { listDashboardExamples } from "@/lib/examples";
 
@@ -31,7 +32,8 @@ export default function ExamplesPage() {
             key={example.slug}
             style={{ "--example-accent": example.accent } as React.CSSProperties}
           >
-            <DashboardThumbnail theme={example.theme} />
+            {example.previewImage ? <Image className="dashboard-thumbnail dashboard-thumbnail--image" src={example.previewImage}
+              alt="" width={980} height={420} unoptimized /> : <DashboardThumbnail theme={example.theme} />}
             <div className="example-card__body">
               <span>{example.useCase}</span>
               <h2>{example.title}</h2>

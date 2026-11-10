@@ -5,6 +5,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "../../../../src/styles/tabler-overrides.css";
 import "../../../../src/styles/hyperpbi.css";
+import "../../../../src/styles/hyperpbi-scene3d.css";
 import "../../../../src/styles/hyperpbi-studio.css";
 import "../../../../src/styles/hyperpbi-map-studio.css";
 import "../../../../src/styles/hyperpbi-inspector.css";

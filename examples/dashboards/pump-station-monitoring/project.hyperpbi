@@ -1,0 +1,3679 @@
+{
+  "dataWorkspace": {
+    "defaultSourceId": "src_data_41rfct",
+    "sources": {
+      "src_data_41rfct": {
+        "data": {
+          "aggregates": {
+            "avg": {
+              "flowgpm": 979,
+              "motorloadpct": 63.75,
+              "pressurepsi": 54.490151515151524,
+              "sampleorder": 13.090909090909092,
+              "stationalerts": 0.3333333333333333,
+              "stationflow": 3916,
+              "stationonline": 3.3333333333333335,
+              "stationpressure": 65.23333333333318
+            },
+            "count": 132,
+            "distinctCount": {
+              "equipment": 4,
+              "equipmentid": 4,
+              "flowgpm": 9,
+              "hour": 11,
+              "motorloadpct": 9,
+              "pressurepsi": 68,
+              "readingid": 132,
+              "recordtype": 2,
+              "sampleorder": 13,
+              "scenario": 3,
+              "stationalerts": 2,
+              "stationflow": 3,
+              "stationonline": 2,
+              "stationpressure": 2,
+              "status": 3
+            },
+            "first": {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "Snapshot",
+              "motorloadpct": 72,
+              "pressurepsi": 68.4,
+              "readingid": "0-P-101-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 100,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            "max": {
+              "flowgpm": 1459,
+              "motorloadpct": 94,
+              "pressurepsi": 72.8,
+              "sampleorder": 100,
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4
+            },
+            "min": {
+              "flowgpm": 0,
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "sampleorder": 0,
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9
+            },
+            "sum": {
+              "flowgpm": 129228,
+              "motorloadpct": 8415,
+              "pressurepsi": 7192.700000000001,
+              "sampleorder": 1728,
+              "stationalerts": 44,
+              "stationflow": 516912,
+              "stationonline": 440,
+              "stationpressure": 8610.79999999998
+            }
+          },
+          "fields": {
+            "equipment": {
+              "dataType": "text",
+              "displayName": "equipment",
+              "key": "equipment",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "equipmentid": {
+              "dataType": "text",
+              "displayName": "equipmentid",
+              "key": "equipmentid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "flowgpm": {
+              "dataType": "number",
+              "displayName": "flowgpm",
+              "key": "flowgpm",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "hour": {
+              "dataType": "text",
+              "displayName": "hour",
+              "key": "hour",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "motorloadpct": {
+              "dataType": "number",
+              "displayName": "motorloadpct",
+              "key": "motorloadpct",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "pressurepsi": {
+              "dataType": "number",
+              "displayName": "pressurepsi",
+              "key": "pressurepsi",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "readingid": {
+              "dataType": "text",
+              "displayName": "readingid",
+              "key": "readingid",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "recordtype": {
+              "dataType": "text",
+              "displayName": "recordtype",
+              "key": "recordtype",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "sampleorder": {
+              "dataType": "number",
+              "displayName": "sampleorder",
+              "key": "sampleorder",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "scenario": {
+              "dataType": "text",
+              "displayName": "scenario",
+              "key": "scenario",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            },
+            "stationalerts": {
+              "dataType": "number",
+              "displayName": "stationalerts",
+              "key": "stationalerts",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "stationflow": {
+              "dataType": "number",
+              "displayName": "stationflow",
+              "key": "stationflow",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "stationonline": {
+              "dataType": "number",
+              "displayName": "stationonline",
+              "key": "stationonline",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "stationpressure": {
+              "dataType": "number",
+              "displayName": "stationpressure",
+              "key": "stationpressure",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "measure"
+            },
+            "status": {
+              "dataType": "text",
+              "displayName": "status",
+              "key": "status",
+              "kind": "column",
+              "origin": "uploaded-column",
+              "roles": [],
+              "type": "dimension"
+            }
+          },
+          "loadStatus": {
+            "fetchInProgress": false,
+            "loadedRowCount": 132,
+            "moreRowsAvailable": false
+          },
+          "map": {
+            "bindings": {
+              "details": [],
+              "tooltip": []
+            },
+            "coordinateCounts": {
+              "dataViewRowCount": 132,
+              "incompletePairCount": 0,
+              "invalidPairCount": 0,
+              "nonNumericPairCount": 0,
+              "outOfRangePairCount": 0,
+              "validPairCount": 0
+            },
+            "diagnostics": [],
+            "hasAddress": false,
+            "hasGeometry": false,
+            "hasLatLon": false,
+            "hasXY": false,
+            "invalidFeatureCount": 132,
+            "layers": [],
+            "locationCounts": {
+              "filteredRowCount": 0,
+              "geometryParseFailureCount": 0,
+              "incompletePairCount": 0,
+              "nonNumericCount": 0,
+              "outOfRangeCount": 0,
+              "totalInputRows": 132,
+              "validFeatureCount": 0
+            },
+            "mode": "none",
+            "warnings": [
+              "Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.",
+              "132 row(s) have invalid or missing map locations."
+            ]
+          },
+          "rowKeys": [
+            "row_18xo1w7",
+            "row_1cp5wzj",
+            "row_1kaylkp",
+            "row_axna3d",
+            "row_f08d7z",
+            "row_1ylec7k",
+            "row_vwcbqk",
+            "row_1rjl5xc",
+            "row_czrl4q",
+            "row_997qlh",
+            "row_1lrkrn3",
+            "row_14k3c23",
+            "row_3cg9yw",
+            "row_6l29ae",
+            "row_1cjjb91",
+            "row_1llcm0w",
+            "row_17zjlho",
+            "row_2zvr9u",
+            "row_uqhl2b",
+            "row_1switvb",
+            "row_ce5u7i",
+            "row_106exel",
+            "row_6rwv7r",
+            "row_my7t4p",
+            "row_aja0ig",
+            "row_tqxc5m",
+            "row_1n8b9hx",
+            "row_1863ofk",
+            "row_rpt0e3",
+            "row_1qxevj3",
+            "row_1nsx7x",
+            "row_nwkx7t",
+            "row_1pjh8k7",
+            "row_kjws17",
+            "row_ewavui",
+            "row_c37v67",
+            "row_l8wzro",
+            "row_118n79w",
+            "row_1sw7p8f",
+            "row_10h42aa",
+            "row_195c3vh",
+            "row_14i9ujs",
+            "row_1gvks4r",
+            "row_f3qvye",
+            "row_7ocbdw",
+            "row_12qqcrt",
+            "row_17zef9c",
+            "row_icmcvc",
+            "row_19vntnq",
+            "row_1blv7f3",
+            "row_ekxxol",
+            "row_1x3huxj",
+            "row_zuvoy",
+            "row_winw3j",
+            "row_1edgs7v",
+            "row_1gwjoh1",
+            "row_j0vx4c",
+            "row_167qkis",
+            "row_cpevz7",
+            "row_1eukcdf",
+            "row_p3h4a1",
+            "row_1ryxjnm",
+            "row_127r9up",
+            "row_w6utm5",
+            "row_19eltbj",
+            "row_19raidf",
+            "row_179d1y4",
+            "row_1s6blik",
+            "row_1ty59y5",
+            "row_y5ac6z",
+            "row_jwouyc",
+            "row_1usmmkd",
+            "row_1umtqtc",
+            "row_tce3um",
+            "row_1oqahho",
+            "row_12q9n7y",
+            "row_1n7bii4",
+            "row_e75zwj",
+            "row_271iva",
+            "row_28jxhy",
+            "row_jlo4wj",
+            "row_1391ocw",
+            "row_ivkago",
+            "row_1a106ul",
+            "row_e7xmyd",
+            "row_xdlavj",
+            "row_18alp3f",
+            "row_2hpwj8",
+            "row_jqhpj8",
+            "row_gixzro",
+            "row_2ot6si",
+            "row_1cewfhq",
+            "row_4atcrs",
+            "row_1l42zmf",
+            "row_zdxhf3",
+            "row_q41nbz",
+            "row_v8lkjx",
+            "row_tuphy2",
+            "row_se5ogo",
+            "row_1j00uvb",
+            "row_11hfz2w",
+            "row_11aeeol",
+            "row_kfixg2",
+            "row_1hmyhu6",
+            "row_15l3iex",
+            "row_1ox6ozw",
+            "row_f5hp7r",
+            "row_10z392q",
+            "row_13ujnct",
+            "row_18h9e4g",
+            "row_1ovv55c",
+            "row_17vruva",
+            "row_f7z9ir",
+            "row_2xc0q1",
+            "row_c80kry",
+            "row_1wu3ucf",
+            "row_dedqk",
+            "row_lmcdb0",
+            "row_1dlkrjy",
+            "row_68l29q",
+            "row_18f1ikg",
+            "row_avk2ln",
+            "row_numvrv",
+            "row_20bcnj",
+            "row_nszhk4",
+            "row_1ilzijb",
+            "row_gxtoqh",
+            "row_1l5j2ca",
+            "row_1ecszti",
+            "row_1a4vskz",
+            "row_jwfkki",
+            "row_19s5hf3"
+          ],
+          "rows": [
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "Snapshot",
+              "motorloadpct": 72,
+              "pressurepsi": 68.4,
+              "readingid": "0-P-101-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 100,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "07:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.2,
+              "readingid": "0-P-101-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "08:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.9,
+              "readingid": "0-P-101-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "09:00",
+              "motorloadpct": 72,
+              "pressurepsi": 70.4,
+              "readingid": "0-P-101-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "10:00",
+              "motorloadpct": 72,
+              "pressurepsi": 70.2,
+              "readingid": "0-P-101-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "11:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.6,
+              "readingid": "0-P-101-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "12:00",
+              "motorloadpct": 72,
+              "pressurepsi": 68.6,
+              "readingid": "0-P-101-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "13:00",
+              "motorloadpct": 72,
+              "pressurepsi": 67.6,
+              "readingid": "0-P-101-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "14:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.8,
+              "readingid": "0-P-101-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "15:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.6,
+              "readingid": "0-P-101-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "16:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.9,
+              "readingid": "0-P-101-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "Snapshot",
+              "motorloadpct": 67,
+              "pressurepsi": 65.8,
+              "readingid": "0-P-102-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 100,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "07:00",
+              "motorloadpct": 67,
+              "pressurepsi": 67.6,
+              "readingid": "0-P-102-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "08:00",
+              "motorloadpct": 67,
+              "pressurepsi": 67.9,
+              "readingid": "0-P-102-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "09:00",
+              "motorloadpct": 67,
+              "pressurepsi": 67.7,
+              "readingid": "0-P-102-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "10:00",
+              "motorloadpct": 67,
+              "pressurepsi": 66.9,
+              "readingid": "0-P-102-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "11:00",
+              "motorloadpct": 67,
+              "pressurepsi": 65.9,
+              "readingid": "0-P-102-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "12:00",
+              "motorloadpct": 67,
+              "pressurepsi": 65,
+              "readingid": "0-P-102-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "13:00",
+              "motorloadpct": 67,
+              "pressurepsi": 64.3,
+              "readingid": "0-P-102-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "14:00",
+              "motorloadpct": 67,
+              "pressurepsi": 64.2,
+              "readingid": "0-P-102-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "15:00",
+              "motorloadpct": 67,
+              "pressurepsi": 64.6,
+              "readingid": "0-P-102-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1150,
+              "hour": "16:00",
+              "motorloadpct": 67,
+              "pressurepsi": 65.3,
+              "readingid": "0-P-102-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "Snapshot",
+              "motorloadpct": 82,
+              "pressurepsi": 62,
+              "readingid": "0-P-103-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 100,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "07:00",
+              "motorloadpct": 82,
+              "pressurepsi": 64.1,
+              "readingid": "0-P-103-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "08:00",
+              "motorloadpct": 82,
+              "pressurepsi": 63.8,
+              "readingid": "0-P-103-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "09:00",
+              "motorloadpct": 82,
+              "pressurepsi": 63.1,
+              "readingid": "0-P-103-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "10:00",
+              "motorloadpct": 82,
+              "pressurepsi": 62.1,
+              "readingid": "0-P-103-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "11:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.2,
+              "readingid": "0-P-103-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "12:00",
+              "motorloadpct": 82,
+              "pressurepsi": 60.7,
+              "readingid": "0-P-103-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "13:00",
+              "motorloadpct": 82,
+              "pressurepsi": 60.8,
+              "readingid": "0-P-103-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "14:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.2,
+              "readingid": "0-P-103-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "15:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.9,
+              "readingid": "0-P-103-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "16:00",
+              "motorloadpct": 82,
+              "pressurepsi": 62.5,
+              "readingid": "0-P-103-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "Snapshot",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 100,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "07:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "08:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "09:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "10:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "11:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "12:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "13:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "14:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "15:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 0,
+              "hour": "16:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "0-P-104-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Normal duty",
+              "stationalerts": 0,
+              "stationflow": 3440,
+              "stationonline": 3,
+              "stationpressure": 65.4,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "Snapshot",
+              "motorloadpct": 81,
+              "pressurepsi": 70.8,
+              "readingid": "1-P-101-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 99,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "07:00",
+              "motorloadpct": 81,
+              "pressurepsi": 71.6,
+              "readingid": "1-P-101-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "08:00",
+              "motorloadpct": 81,
+              "pressurepsi": 72.3,
+              "readingid": "1-P-101-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "09:00",
+              "motorloadpct": 81,
+              "pressurepsi": 72.8,
+              "readingid": "1-P-101-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "10:00",
+              "motorloadpct": 81,
+              "pressurepsi": 72.6,
+              "readingid": "1-P-101-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "11:00",
+              "motorloadpct": 81,
+              "pressurepsi": 72,
+              "readingid": "1-P-101-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "12:00",
+              "motorloadpct": 81,
+              "pressurepsi": 71,
+              "readingid": "1-P-101-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "13:00",
+              "motorloadpct": 81,
+              "pressurepsi": 70,
+              "readingid": "1-P-101-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "14:00",
+              "motorloadpct": 81,
+              "pressurepsi": 69.2,
+              "readingid": "1-P-101-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "15:00",
+              "motorloadpct": 81,
+              "pressurepsi": 69,
+              "readingid": "1-P-101-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1459,
+              "hour": "16:00",
+              "motorloadpct": 81,
+              "pressurepsi": 69.3,
+              "readingid": "1-P-101-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "Snapshot",
+              "motorloadpct": 76,
+              "pressurepsi": 68.2,
+              "readingid": "1-P-102-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 99,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "07:00",
+              "motorloadpct": 76,
+              "pressurepsi": 70,
+              "readingid": "1-P-102-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "08:00",
+              "motorloadpct": 76,
+              "pressurepsi": 70.3,
+              "readingid": "1-P-102-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "09:00",
+              "motorloadpct": 76,
+              "pressurepsi": 70.1,
+              "readingid": "1-P-102-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "10:00",
+              "motorloadpct": 76,
+              "pressurepsi": 69.3,
+              "readingid": "1-P-102-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "11:00",
+              "motorloadpct": 76,
+              "pressurepsi": 68.3,
+              "readingid": "1-P-102-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "12:00",
+              "motorloadpct": 76,
+              "pressurepsi": 67.4,
+              "readingid": "1-P-102-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "13:00",
+              "motorloadpct": 76,
+              "pressurepsi": 66.7,
+              "readingid": "1-P-102-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "14:00",
+              "motorloadpct": 76,
+              "pressurepsi": 66.6,
+              "readingid": "1-P-102-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "15:00",
+              "motorloadpct": 76,
+              "pressurepsi": 67,
+              "readingid": "1-P-102-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 1311,
+              "hour": "16:00",
+              "motorloadpct": 76,
+              "pressurepsi": 67.7,
+              "readingid": "1-P-102-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "Snapshot",
+              "motorloadpct": 94,
+              "pressurepsi": 55.9,
+              "readingid": "1-P-103-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 99,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "07:00",
+              "motorloadpct": 94,
+              "pressurepsi": 58,
+              "readingid": "1-P-103-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "08:00",
+              "motorloadpct": 94,
+              "pressurepsi": 57.7,
+              "readingid": "1-P-103-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "09:00",
+              "motorloadpct": 94,
+              "pressurepsi": 57,
+              "readingid": "1-P-103-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "10:00",
+              "motorloadpct": 94,
+              "pressurepsi": 56,
+              "readingid": "1-P-103-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "11:00",
+              "motorloadpct": 94,
+              "pressurepsi": 55.1,
+              "readingid": "1-P-103-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "12:00",
+              "motorloadpct": 94,
+              "pressurepsi": 54.6,
+              "readingid": "1-P-103-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "13:00",
+              "motorloadpct": 94,
+              "pressurepsi": 54.7,
+              "readingid": "1-P-103-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "14:00",
+              "motorloadpct": 94,
+              "pressurepsi": 55.1,
+              "readingid": "1-P-103-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "15:00",
+              "motorloadpct": 94,
+              "pressurepsi": 55.8,
+              "readingid": "1-P-103-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1151,
+              "hour": "16:00",
+              "motorloadpct": 94,
+              "pressurepsi": 56.4,
+              "readingid": "1-P-103-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Warning"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "Snapshot",
+              "motorloadpct": 74,
+              "pressurepsi": 66.7,
+              "readingid": "1-P-104-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 99,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "07:00",
+              "motorloadpct": 74,
+              "pressurepsi": 68.4,
+              "readingid": "1-P-104-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "08:00",
+              "motorloadpct": 74,
+              "pressurepsi": 67.6,
+              "readingid": "1-P-104-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "09:00",
+              "motorloadpct": 74,
+              "pressurepsi": 66.7,
+              "readingid": "1-P-104-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "10:00",
+              "motorloadpct": 74,
+              "pressurepsi": 65.9,
+              "readingid": "1-P-104-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "11:00",
+              "motorloadpct": 74,
+              "pressurepsi": 65.6,
+              "readingid": "1-P-104-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "12:00",
+              "motorloadpct": 74,
+              "pressurepsi": 65.8,
+              "readingid": "1-P-104-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "13:00",
+              "motorloadpct": 74,
+              "pressurepsi": 66.4,
+              "readingid": "1-P-104-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "14:00",
+              "motorloadpct": 74,
+              "pressurepsi": 67,
+              "readingid": "1-P-104-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "15:00",
+              "motorloadpct": 74,
+              "pressurepsi": 67.5,
+              "readingid": "1-P-104-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 1117,
+              "hour": "16:00",
+              "motorloadpct": 74,
+              "pressurepsi": 67.5,
+              "readingid": "1-P-104-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Peak demand",
+              "stationalerts": 1,
+              "stationflow": 5038,
+              "stationonline": 4,
+              "stationpressure": 65.4,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "Snapshot",
+              "motorloadpct": 72,
+              "pressurepsi": 68.4,
+              "readingid": "2-P-101-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 98,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "07:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.2,
+              "readingid": "2-P-101-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "08:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.9,
+              "readingid": "2-P-101-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "09:00",
+              "motorloadpct": 72,
+              "pressurepsi": 70.4,
+              "readingid": "2-P-101-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "10:00",
+              "motorloadpct": 72,
+              "pressurepsi": 70.2,
+              "readingid": "2-P-101-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "11:00",
+              "motorloadpct": 72,
+              "pressurepsi": 69.6,
+              "readingid": "2-P-101-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "12:00",
+              "motorloadpct": 72,
+              "pressurepsi": 68.6,
+              "readingid": "2-P-101-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "13:00",
+              "motorloadpct": 72,
+              "pressurepsi": 67.6,
+              "readingid": "2-P-101-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "14:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.8,
+              "readingid": "2-P-101-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "15:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.6,
+              "readingid": "2-P-101-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 01",
+              "equipmentid": "P-101",
+              "flowgpm": 1280,
+              "hour": "16:00",
+              "motorloadpct": 72,
+              "pressurepsi": 66.9,
+              "readingid": "2-P-101-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "Snapshot",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 98,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "07:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "08:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "09:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "10:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "11:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "12:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "13:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "14:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "15:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 02",
+              "equipmentid": "P-102",
+              "flowgpm": 0,
+              "hour": "16:00",
+              "motorloadpct": 0,
+              "pressurepsi": 0,
+              "readingid": "2-P-102-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Stopped"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "Snapshot",
+              "motorloadpct": 82,
+              "pressurepsi": 62,
+              "readingid": "2-P-103-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 98,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "07:00",
+              "motorloadpct": 82,
+              "pressurepsi": 64.1,
+              "readingid": "2-P-103-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "08:00",
+              "motorloadpct": 82,
+              "pressurepsi": 63.8,
+              "readingid": "2-P-103-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "09:00",
+              "motorloadpct": 82,
+              "pressurepsi": 63.1,
+              "readingid": "2-P-103-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "10:00",
+              "motorloadpct": 82,
+              "pressurepsi": 62.1,
+              "readingid": "2-P-103-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "11:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.2,
+              "readingid": "2-P-103-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "12:00",
+              "motorloadpct": 82,
+              "pressurepsi": 60.7,
+              "readingid": "2-P-103-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "13:00",
+              "motorloadpct": 82,
+              "pressurepsi": 60.8,
+              "readingid": "2-P-103-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "14:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.2,
+              "readingid": "2-P-103-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "15:00",
+              "motorloadpct": 82,
+              "pressurepsi": 61.9,
+              "readingid": "2-P-103-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Booster 03",
+              "equipmentid": "P-103",
+              "flowgpm": 1010,
+              "hour": "16:00",
+              "motorloadpct": 82,
+              "pressurepsi": 62.5,
+              "readingid": "2-P-103-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "Snapshot",
+              "motorloadpct": 65,
+              "pressurepsi": 64.3,
+              "readingid": "2-P-104-snapshot",
+              "recordtype": "Snapshot",
+              "sampleorder": 98,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "07:00",
+              "motorloadpct": 65,
+              "pressurepsi": 66,
+              "readingid": "2-P-104-0",
+              "recordtype": "Trend",
+              "sampleorder": 0,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "08:00",
+              "motorloadpct": 65,
+              "pressurepsi": 65.2,
+              "readingid": "2-P-104-1",
+              "recordtype": "Trend",
+              "sampleorder": 1,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "09:00",
+              "motorloadpct": 65,
+              "pressurepsi": 64.3,
+              "readingid": "2-P-104-2",
+              "recordtype": "Trend",
+              "sampleorder": 2,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "10:00",
+              "motorloadpct": 65,
+              "pressurepsi": 63.5,
+              "readingid": "2-P-104-3",
+              "recordtype": "Trend",
+              "sampleorder": 3,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "11:00",
+              "motorloadpct": 65,
+              "pressurepsi": 63.2,
+              "readingid": "2-P-104-4",
+              "recordtype": "Trend",
+              "sampleorder": 4,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "12:00",
+              "motorloadpct": 65,
+              "pressurepsi": 63.4,
+              "readingid": "2-P-104-5",
+              "recordtype": "Trend",
+              "sampleorder": 5,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "13:00",
+              "motorloadpct": 65,
+              "pressurepsi": 64,
+              "readingid": "2-P-104-6",
+              "recordtype": "Trend",
+              "sampleorder": 6,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "14:00",
+              "motorloadpct": 65,
+              "pressurepsi": 64.6,
+              "readingid": "2-P-104-7",
+              "recordtype": "Trend",
+              "sampleorder": 7,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "15:00",
+              "motorloadpct": 65,
+              "pressurepsi": 65.1,
+              "readingid": "2-P-104-8",
+              "recordtype": "Trend",
+              "sampleorder": 8,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            },
+            {
+              "equipment": "Standby 04",
+              "equipmentid": "P-104",
+              "flowgpm": 980,
+              "hour": "16:00",
+              "motorloadpct": 65,
+              "pressurepsi": 65.1,
+              "readingid": "2-P-104-9",
+              "recordtype": "Trend",
+              "sampleorder": 9,
+              "scenario": "Maintenance",
+              "stationalerts": 0,
+              "stationflow": 3270,
+              "stationonline": 3,
+              "stationpressure": 64.9,
+              "status": "Running"
+            }
+          ]
+        },
+        "fileName": "data.csv",
+        "id": "src_data_41rfct",
+        "kind": "csv",
+        "name": "data"
+      }
+    }
+  },
+  "editorState": {
+    "studioLayout": "{\"editorPercent\":38,\"bottomHeight\":210,\"bottomOpen\":true,\"advanced\":false}"
+  },
+  "format": "hyperpbi-playground-project",
+  "formatVersion": 1,
+  "metadata": {
+    "createdAt": "2026-07-25T00:00:00.000Z",
+    "id": "example-pump-station-monitoring",
+    "name": "Pump Station Monitoring",
+    "updatedAt": "2026-07-25T00:00:00.000Z"
+  },
+  "runtimeConfiguration": {
+    "bindings": {
+      "map": {}
+    },
+    "fields": {
+      "aliases": {}
+    },
+    "interactions": {
+      "crossFilter": true,
+      "externalMode": "auto",
+      "multiSelect": true
+    },
+    "motion": {
+      "enabled": true,
+      "maxConcurrentAnimations": 8,
+      "reducedMotion": "respect-system"
+    },
+    "providers": {
+      "basemap": {
+        "enabled": false,
+        "provider": "none"
+      },
+      "geocoder": {
+        "autocomplete": false,
+        "cache": true,
+        "enabled": false,
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
+      },
+      "mode": "core",
+      "privacyAcknowledged": false
+    },
+    "renderer": {
+      "showHeader": false,
+      "showRowCount": false,
+      "showStudioButton": true
+    },
+    "security": {
+      "cssMode": "scoped",
+      "htmlMode": "sanitized",
+      "showSanitizerWarnings": false,
+      "svgMode": "sanitized"
+    },
+    "version": "1.0"
+  },
+  "specification": {
+    "app": {
+      "brand": {
+        "icon": "dashboard",
+        "shortTitle": "NW",
+        "subtitle": "Operations",
+        "title": "Northbank Water"
+      },
+      "container": "fluid",
+      "density": "compact",
+      "enabled": true,
+      "layout": "horizontal",
+      "navbar": {
+        "visible": true
+      },
+      "pageHeader": {
+        "meta": [
+          {
+            "intent": "info",
+            "label": "Telemetry",
+            "value": "Simulated"
+          }
+        ],
+        "subtitle": "Pump station monitoring · Distribution operations",
+        "title": "Booster Station 07",
+        "visible": true
+      }
+    },
+    "components": [
+      {
+        "field": "scenario",
+        "id": "operating_scenario",
+        "interaction": {
+          "externalMode": "none",
+          "internalMode": "filter",
+          "targets": [
+            "station_scene",
+            "station_online",
+            "station_flow",
+            "station_pressure",
+            "station_alerts",
+            "pressure_trend",
+            "motor_load",
+            "asset_register"
+          ]
+        },
+        "label": "Operating scenario",
+        "options": [
+          "Normal duty",
+          "Peak demand",
+          "Maintenance"
+        ],
+        "type": "segmentedControl"
+      },
+      {
+        "children": [
+          {
+            "aggregation": "first",
+            "dataset": "snapshots",
+            "field": "stationonline",
+            "id": "station_online",
+            "intent": "success",
+            "span": 3,
+            "title": "Pumps online",
+            "type": "kpi"
+          },
+          {
+            "aggregation": "first",
+            "dataset": "snapshots",
+            "field": "stationflow",
+            "id": "station_flow",
+            "span": 3,
+            "title": "Station flow (GPM)",
+            "type": "kpi"
+          },
+          {
+            "aggregation": "first",
+            "dataset": "snapshots",
+            "field": "stationpressure",
+            "id": "station_pressure",
+            "span": 3,
+            "title": "Discharge pressure (PSI)",
+            "type": "kpi"
+          },
+          {
+            "aggregation": "first",
+            "dataset": "snapshots",
+            "field": "stationalerts",
+            "id": "station_alerts",
+            "intent": "warning",
+            "span": 3,
+            "title": "Active alerts",
+            "type": "kpi"
+          }
+        ],
+        "columns": 12,
+        "id": "station_kpis",
+        "type": "grid"
+      },
+      {
+        "dataset": "equipment_readings",
+        "height": 410,
+        "id": "station_scene",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "equipmentid",
+          "internalMode": "filter",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "targets": [
+            "pressure_trend",
+            "motor_load",
+            "asset_register"
+          ],
+          "trigger": "click"
+        },
+        "objectIdField": "equipmentid",
+        "objects": [
+          {
+            "dataKey": "P-101",
+            "id": "P-101",
+            "kind": "pump",
+            "label": "P-101",
+            "position": [
+              -3.3,
+              0,
+              0.55
+            ]
+          },
+          {
+            "dataKey": "P-102",
+            "id": "P-102",
+            "kind": "pump",
+            "label": "P-102",
+            "position": [
+              -1.1,
+              0,
+              0.55
+            ]
+          },
+          {
+            "dataKey": "P-103",
+            "id": "P-103",
+            "kind": "pump",
+            "label": "P-103",
+            "position": [
+              1.1,
+              0,
+              0.55
+            ]
+          },
+          {
+            "dataKey": "P-104",
+            "id": "P-104",
+            "kind": "pump",
+            "label": "P-104",
+            "position": [
+              3.3,
+              0,
+              0.55
+            ]
+          },
+          {
+            "id": "vessel_0",
+            "kind": "tank",
+            "label": "V-201",
+            "position": [
+              -2.55,
+              0,
+              -2.35
+            ],
+            "size": [
+              1.05,
+              0.94,
+              1.05
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "vessel_inlet_0",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -2.55,
+              0.46,
+              -1.17
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.31,
+              0.76,
+              0.31
+            ]
+          },
+          {
+            "id": "vessel_1",
+            "kind": "tank",
+            "label": "V-202",
+            "position": [
+              2.55,
+              0,
+              -2.35
+            ],
+            "size": [
+              1.05,
+              0.94,
+              1.05
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "vessel_inlet_1",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              2.55,
+              0.46,
+              -1.17
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.31,
+              0.76,
+              0.31
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "inlet_header",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0,
+              0.46,
+              -0.92
+            ],
+            "rotation": [
+              0,
+              0,
+              90
+            ],
+            "size": [
+              0.34,
+              8.7,
+              0.34
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "inlet_feed",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -4.35,
+              0.46,
+              -2.04
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.34,
+              2.3,
+              0.34
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "outlet_header",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0,
+              1.39,
+              2.2
+            ],
+            "rotation": [
+              0,
+              0,
+              90
+            ],
+            "size": [
+              0.33,
+              9.3,
+              0.33
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "outlet_feed",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              4.57,
+              1.39,
+              3
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.33,
+              1.58,
+              0.33
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "suction_0",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -4.05,
+              0.46,
+              -0.31
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.23,
+              1.24,
+              0.23
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "riser_0",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -3.8899999999999997,
+              1.41,
+              0.55
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              0.22,
+              0.27,
+              0.22
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "discharge_0",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -3.8899999999999997,
+              1.39,
+              1.39
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.21,
+              1.65,
+              0.21
+            ]
+          },
+          {
+            "color": "#90aabc",
+            "id": "flange_0",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -3.8899999999999997,
+              1.39,
+              1.77
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.35,
+              0.12,
+              0.35
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "suction_1",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -1.85,
+              0.46,
+              -0.31
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.23,
+              1.24,
+              0.23
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "riser_1",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -1.69,
+              1.41,
+              0.55
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              0.22,
+              0.27,
+              0.22
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "discharge_1",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -1.69,
+              1.39,
+              1.39
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.21,
+              1.65,
+              0.21
+            ]
+          },
+          {
+            "color": "#90aabc",
+            "id": "flange_1",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              -1.69,
+              1.39,
+              1.77
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.35,
+              0.12,
+              0.35
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "suction_2",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0.3500000000000001,
+              0.46,
+              -0.31
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.23,
+              1.24,
+              0.23
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "riser_2",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0.5100000000000001,
+              1.41,
+              0.55
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              0.22,
+              0.27,
+              0.22
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "discharge_2",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0.5100000000000001,
+              1.39,
+              1.39
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.21,
+              1.65,
+              0.21
+            ]
+          },
+          {
+            "color": "#90aabc",
+            "id": "flange_2",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              0.5100000000000001,
+              1.39,
+              1.77
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.35,
+              0.12,
+              0.35
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "suction_3",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              2.55,
+              0.46,
+              -0.31
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.23,
+              1.24,
+              0.23
+            ]
+          },
+          {
+            "color": "#3b94bb",
+            "id": "riser_3",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              2.71,
+              1.41,
+              0.55
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              0.22,
+              0.27,
+              0.22
+            ]
+          },
+          {
+            "color": "#477fae",
+            "id": "discharge_3",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              2.71,
+              1.39,
+              1.39
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.21,
+              1.65,
+              0.21
+            ]
+          },
+          {
+            "color": "#90aabc",
+            "id": "flange_3",
+            "kind": "pipe",
+            "metalness": 0.33,
+            "position": [
+              2.71,
+              1.39,
+              1.77
+            ],
+            "rotation": [
+              90,
+              0,
+              0
+            ],
+            "size": [
+              0.35,
+              0.12,
+              0.35
+            ]
+          },
+          {
+            "color": "#66829a",
+            "id": "header_support_0",
+            "kind": "box",
+            "position": [
+              -4.6,
+              0.61,
+              2.2
+            ],
+            "size": [
+              0.14,
+              1.22,
+              0.16
+            ]
+          },
+          {
+            "color": "#66829a",
+            "id": "header_support_1",
+            "kind": "box",
+            "position": [
+              0,
+              0.61,
+              2.2
+            ],
+            "size": [
+              0.14,
+              1.22,
+              0.16
+            ]
+          },
+          {
+            "color": "#66829a",
+            "id": "header_support_2",
+            "kind": "box",
+            "position": [
+              4.6,
+              0.61,
+              2.2
+            ],
+            "size": [
+              0.14,
+              1.22,
+              0.16
+            ]
+          }
+        ],
+        "statusColors": [
+          {
+            "color": "#29b99a",
+            "value": "Running"
+          },
+          {
+            "color": "#efaa49",
+            "value": "Warning"
+          },
+          {
+            "color": "#8298ae",
+            "value": "Stopped"
+          }
+        ],
+        "statusField": "status",
+        "theme": "dark",
+        "title": "Booster gallery · spatial overview",
+        "tooltipFields": [
+          {
+            "field": "equipment",
+            "label": "Equipment"
+          },
+          {
+            "field": "flowgpm",
+            "label": "Flow (GPM)"
+          },
+          {
+            "field": "pressurepsi",
+            "label": "Pressure (PSI)"
+          },
+          {
+            "field": "motorloadpct",
+            "label": "Motor load (%)"
+          }
+        ],
+        "type": "scene3d"
+      },
+      {
+        "children": [
+          {
+            "aggregation": "avg",
+            "category": "hour",
+            "dataset": "pressure_history",
+            "height": 270,
+            "id": "pressure_trend",
+            "interaction": {
+              "enabled": false,
+              "externalMode": "none",
+              "internalMode": "none"
+            },
+            "measure": "pressurepsi",
+            "options": {
+              "color": [
+                "#58bcf4"
+              ],
+              "legend": {
+                "textStyle": {
+                  "color": "#8fa3bc"
+                }
+              },
+              "textStyle": {
+                "color": "#dce8f8"
+              },
+              "xAxis": {
+                "axisLabel": {
+                  "color": "#758aa5"
+                },
+                "axisLine": {
+                  "lineStyle": {
+                    "color": "#263852"
+                  }
+                }
+              },
+              "yAxis": {
+                "axisLabel": {
+                  "color": "#758aa5"
+                },
+                "axisLine": {
+                  "lineStyle": {
+                    "color": "#263852"
+                  }
+                },
+                "splitLine": {
+                  "lineStyle": {
+                    "color": "#1c2b40"
+                  }
+                }
+              }
+            },
+            "span": 7,
+            "title": "Discharge pressure · PSI",
+            "type": "lineChart"
+          },
+          {
+            "aggregation": "first",
+            "category": "equipmentid",
+            "dataset": "snapshots",
+            "height": 270,
+            "id": "motor_load",
+            "interaction": {
+              "clearOnSecondClick": true,
+              "enabled": true,
+              "externalMode": "selection",
+              "field": "equipmentid",
+              "internalMode": "highlight",
+              "internalScope": "others",
+              "multiSelect": true,
+              "selectionMode": "replace",
+              "showSelector": false,
+              "targets": [
+                "station_scene"
+              ],
+              "trigger": "click"
+            },
+            "measure": "motorloadpct",
+            "options": {
+              "color": [
+                "#36c3ae"
+              ],
+              "legend": {
+                "textStyle": {
+                  "color": "#8fa3bc"
+                }
+              },
+              "textStyle": {
+                "color": "#dce8f8"
+              },
+              "xAxis": {
+                "axisLabel": {
+                  "color": "#758aa5"
+                },
+                "axisLine": {
+                  "lineStyle": {
+                    "color": "#263852"
+                  }
+                }
+              },
+              "yAxis": {
+                "axisLabel": {
+                  "color": "#758aa5"
+                },
+                "axisLine": {
+                  "lineStyle": {
+                    "color": "#263852"
+                  }
+                },
+                "splitLine": {
+                  "lineStyle": {
+                    "color": "#1c2b40"
+                  }
+                }
+              }
+            },
+            "span": 5,
+            "title": "Motor utilization · %",
+            "type": "barChart"
+          }
+        ],
+        "columns": 12,
+        "id": "station_trends",
+        "type": "grid"
+      },
+      {
+        "columns": [
+          {
+            "field": "equipmentid",
+            "title": "Asset"
+          },
+          {
+            "field": "equipment",
+            "title": "Equipment"
+          },
+          {
+            "field": "scenario",
+            "title": "Scenario"
+          },
+          {
+            "field": "status",
+            "title": "Status"
+          },
+          {
+            "field": "flowgpm",
+            "title": "Flow (GPM)"
+          },
+          {
+            "field": "pressurepsi",
+            "title": "Pressure (PSI)"
+          },
+          {
+            "field": "motorloadpct",
+            "title": "Motor load (%)"
+          }
+        ],
+        "dataset": "snapshots",
+        "id": "asset_register",
+        "interaction": {
+          "clearOnSecondClick": true,
+          "enabled": true,
+          "externalMode": "selection",
+          "field": "equipmentid",
+          "internalMode": "highlight",
+          "internalScope": "others",
+          "multiSelect": true,
+          "selectionMode": "replace",
+          "showSelector": false,
+          "targets": [
+            "station_scene"
+          ],
+          "trigger": "click"
+        },
+        "maxRows": 12,
+        "title": "Snapshot register",
+        "type": "table"
+      }
+    ],
+    "data": {
+      "datasets": {
+        "equipment_readings": {
+          "sort": [
+            {
+              "direction": "descending",
+              "field": "sampleorder"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "pressure_history": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Trend"
+          },
+          "sort": [
+            {
+              "direction": "ascending",
+              "field": "sampleorder"
+            }
+          ],
+          "source": "powerbi"
+        },
+        "snapshots": {
+          "filter": {
+            "field": "recordtype",
+            "operator": "=",
+            "value": "Snapshot"
+          },
+          "source": "equipment_readings"
+        }
+      }
+    },
+    "styles": {
+      "globalCss": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n"
+    },
+    "theme": {
+      "accentColor": "#29b99a",
+      "borderColor": "#2b4159",
+      "density": "compact",
+      "gap": 10,
+      "mode": "dark",
+      "primaryColor": "#54bcff",
+      "radius": 12,
+      "successColor": "#29b99a",
+      "surfaceColor": "#101e2e",
+      "textColor": "#e7f1ff",
+      "warningColor": "#efaa49"
+    },
+    "title": "Pump Station Monitoring",
+    "version": "2.0"
+  }
+}

@@ -1,0 +1,104 @@
+import { expect, test } from "@playwright/test";
+
+test.use({ launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } });
+
+test("renders the station, changes operating status, and links equipment and the register", async ({ page }) => {
+    await page.goto("/examples/pump-station-monitoring");
+    const scene = page.locator(".hp-scene3d");
+    const equipment = scene.getByRole("complementary", { name: "Scene objects" });
+    const canvas = scene.locator("canvas");
+    await expect(canvas).toBeVisible({ timeout: 45_000 });
+    const label = scene.locator(".hp-scene3d-labels").getByRole("button", { name: "P-103", exact: true });
+    await expect(label).toBeVisible();
+    await page.getByRole("button", { name: "Peak demand", exact: true }).click();
+    await expect(equipment.getByRole("button", { name: "P-103 Warning" })).toBeVisible();
+    await expect(page.locator("[data-hp-id=station_alerts] .hp-metric-value")).toHaveText("1");
+    await expect(page.locator("[data-hp-id=station_online] .hp-metric-value")).toHaveText("4");
+
+    await scene.getByRole("button", { name: "Top view" }).click();
+    await expect(label).toBeVisible();
+    const tag = await label.boundingBox();
+    expect(tag).toBeTruthy();
+    // A projected tag ends just above the pump anchor. In top view the mesh occupies the pixels underneath.
+    await page.mouse.click(tag!.x + tag!.width / 2, tag!.y + tag!.height + 5);
+    await expect(equipment.getByRole("button", { name: "P-103 Warning" })).toHaveAttribute("aria-pressed", "true");
+    const register = page.locator("[data-hp-id=asset_register] tbody");
+    await expect(register.getByRole("row")).toHaveCount(1);
+    await expect(register.getByRole("row")).toContainText("P-103");
+    await scene.getByRole("button", { name: "Clear selection" }).click();
+    await expect(register.getByRole("row")).toHaveCount(4);
+    await register.getByRole("row").filter({ hasText: "P-104" }).click();
+    await expect(equipment.getByRole("button", { name: "P-104 Running" })).toHaveAttribute("aria-pressed", "true");
+    await scene.getByRole("button", { name: "Labels", exact: true }).click();
+    await expect(label).toHaveCount(0);
+    await page.getByRole("button", { name: "Maintenance", exact: true }).click();
+    await expect(equipment.getByRole("button", { name: "P-102 Stopped" })).toBeVisible();
+});
+
+test("keeps linked keyboard selection available after WebGL context loss", async ({ page }) => {
+    await page.setViewportSize({ width: 510, height: 780 });
+    await page.goto("/examples/pump-station-monitoring");
+    const scene = page.locator(".hp-scene3d");
+    const canvas = scene.locator("canvas");
+    await expect(canvas).toBeVisible({ timeout: 45_000 });
+    await canvas.evaluate(element => {
+        (element as HTMLCanvasElement).getContext("webgl2")!.getExtension("WEBGL_lose_context")!.loseContext();
+    });
+    await expect(scene.getByText("The 3D graphics context was lost.")).toBeVisible();
+    await expect(canvas).toHaveCount(0);
+    const pump = scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: "P-101 Running" });
+    await pump.focus();
+    await page.keyboard.press("Enter");
+    await expect(pump).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-hp-id=asset_register] tbody tr")).toHaveCount(3);
+    await scene.getByRole("button", { name: "Retry 3D view" }).click();
+    await expect(canvas).toBeVisible();
+});
+
+test("authors scene objects and embeds a local glTF through the Inspector", async ({ page }) => {
+    await page.goto("/");
+    const card = page.locator(".pg-example-card").filter({ hasText: "Pump Station Monitoring" });
+    await card.getByRole("button", { name: "Load example" }).click({ timeout: 45_000 });
+    await expect(page).toHaveURL(/\/project\/[^/]+$/);
+    await expect(page.locator(".hp-studio")).toBeVisible({ timeout: 30_000 });
+    const advanced = page.getByRole("button", { name: /^Advanced( controls)?$/ });
+    if (await advanced.isVisible()) await advanced.click();
+    const select = page.locator(".hp-studio-workspace-select select");
+    if (await select.isVisible()) await select.selectOption("inspector");
+    else {
+        const navigation = page.getByRole("navigation", { name: "Builder workspace" });
+        await navigation.getByRole("button", { name: /^Create(?::|$)/ }).click();
+        await navigation.getByRole("menuitem", { name: /^Visual Inspector/ }).click();
+    }
+    await page.locator("[data-tree-id=station_scene]").click();
+    const editor = page.locator(".hp-scene3d-editor").first();
+    await editor.getByLabel("Shape or equipment").selectOption("box");
+    await editor.getByRole("button", { name: "Add object", exact: true }).click();
+    await editor.getByLabel("Object label", { exact: true }).fill("Control cabinet");
+    await editor.getByLabel("Object label", { exact: true }).press("Tab");
+    await expect(editor.getByLabel("Edit object").locator("option:checked")).toContainText("Control cabinet");
+    const position = editor.getByRole("spinbutton", { name: "Position X", exact: true });
+    await position.fill("-2");
+    await position.press("Tab");
+    await expect(position).toHaveValue("-2");
+    await expect(editor.getByLabel("Edit object")).toHaveValue("box_1");
+
+    const positions = Buffer.from(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 1]).buffer);
+    const model = {
+        asset: { version: "2.0" }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0 }],
+        meshes: [{ primitives: [{ attributes: { POSITION: 0 } }] }],
+        accessors: [{ bufferView: 0, componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] }],
+        bufferViews: [{ buffer: 0, byteLength: positions.length }],
+        buffers: [{ byteLength: positions.length, uri: `data:application/octet-stream;base64,${positions.toString("base64")}` }],
+    };
+    const importer = editor.getByLabel("Import model", { exact: true });
+    await importer.setInputFiles({ name: "intake.gltf", mimeType: "model/gltf+json", buffer: Buffer.from(JSON.stringify(model)) });
+    await expect(editor.getByLabel("Edit object")).toHaveValue("model_1");
+    await page.getByRole("button", { name: "Save & return" }).click();
+    await page.getByRole("button", { name: "Play Mode", exact: true }).click();
+    const scene = page.locator(".hp-scene3d");
+    await expect(scene.locator("canvas")).toBeVisible({ timeout: 45_000 });
+    await expect(scene.locator(".hp-scene3d-labels").getByRole("button", { name: "GLB / glTF model 1", exact: true })).toBeVisible();
+    await expect(scene.locator(".hp-scene3d-model-error")).toHaveCount(0);
+    await expect(scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: "Control cabinet" })).toBeVisible();
+});

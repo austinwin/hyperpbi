@@ -13,6 +13,7 @@ import type {
 import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
 import type { NetworkGraphComponent } from "./networkGraphSchema";
 import type { MermaidDiagramComponent } from "./mermaidDiagramSchema";
+import type { Scene3dComponent } from "./scene3dSchema";
 
 // Re-export map types
 export type { MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition };
@@ -758,7 +759,8 @@ export type DashboardComponent =
     | AvatarGroupComponent
     | SvgComponent
     | SvgMarkupComponent
-    | MermaidDiagramComponent;
+    | MermaidDiagramComponent
+    | Scene3dComponent;
 
 export interface HyperPbiSchema {
     version: "2.0";

@@ -1,6 +1,6 @@
 # Dashboard examples
 
-HyperPBI includes ten complete dashboards that run through the same schema, data, and rendering pipeline on the website, in the Playground, and in Power BI. Browse live previews at `/examples`. [Dashboard manifest](../examples/dashboards/manifest.json)
+The dashboard examples use the same schema, data, and rendering pipeline on the website, in the Playground, and in Power BI. Browse live previews at `/examples`. [Dashboard manifest](../examples/dashboards/manifest.json)
 
 ## Included dashboards
 
@@ -16,6 +16,7 @@ HyperPBI includes ten complete dashboards that run through the same schema, data
 | Industrial network monitoring | [`industrial-network-telemetry`](../examples/dashboards/industrial-network-telemetry) | Core | Throughput, latency, uptime, alerts, site ranking, and telemetry |
 | Water distribution | [`dynamic-gis-analytics`](../examples/dashboards/dynamic-gis-analytics) | Maps | Pressure telemetry, map popups, and station operations |
 | Maintenance dispatch | [`universal-dynamic-content`](../examples/dashboards/universal-dynamic-content) | Maps | Asset work plans in a side panel and live workload |
+| Pump station operations | [`pump-station-monitoring`](../examples/dashboards/pump-station-monitoring) | Core | 3D pump selection, operating scenarios, pressure and motor-load charts |
 
 Each folder is self-contained:
 

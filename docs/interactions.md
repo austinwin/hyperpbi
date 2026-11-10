@@ -88,6 +88,8 @@ Exact enums:
 
 Selection uses exact Power BI identities for source row indices. For a logical dataset, each output row carries source lineage; selecting a grouped/distinct row can select every contributing base identity. Selection is unavailable when the host/data view supplied no identities.
 
+In a 3D scene, `objectIdField` names the dataset field and each object's `dataKey` supplies its typed match value. An object click passes all currently visible matching rows to the interaction engine. The first matching row supplies its status, visibility, color, and tooltip values. Use a sorted logical dataset when the first row should represent the latest reading. For a scene that filters a chart of historical readings, include those readings in the scene's dataset so the shared lineage reaches both components. [3D scene bindings and interaction example](scene3d.md#bind-objects-to-data)
+
 ### External filtering
 
 Filtering constructs a Power BI basic or advanced JSON filter:

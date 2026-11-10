@@ -259,6 +259,31 @@
       "theme": "light",
       "title": "Universal Dynamic Content",
       "useCase": "Maintenance dispatch and asset work orders"
+    },
+    {
+      "accent": "#54bcff",
+      "data": "pump-station-monitoring/data.csv",
+      "description": "Northbank Water's fictional booster station pairs four selectable centrifugal pump assemblies with pressure vessels, suction and discharge manifolds, and synthetic operating records. The spatial view, station KPIs, pressure trend, motor-load chart, and snapshot register all use the same source data.",
+      "expected": "Choose Peak demand to flag P-103 and start the standby pump, or Maintenance to stop P-102. Select equipment in the scene or its keyboard-accessible list to filter the trend, motor-load chart, and register. Select a motor-load bar or snapshot row to highlight its pump. Select the same asset again or clear the scene selection to restore the linked views. All uses the newest snapshot for station KPIs and asset status and averages pressure across the available scenarios.",
+      "folder": "pump-station-monitoring",
+      "id": "pump-station-monitoring",
+      "limitations": "The three operating scenarios are precomputed snapshots. The project works offline and uses procedural equipment geometry. In Power BI, include readingid as a categorical column and set numeric fields to Don't summarize to preserve distinct reading rows. Configure Power BI visual interactions to test the selected rows against a second visual.",
+      "powerBiPackage": "core",
+      "previewImage": "/images/pump-station-monitoring.webp",
+      "project": "pump-station-monitoring/project.hyperpbi",
+      "referenceImages": [],
+      "runtime": "pump-station-monitoring/runtime.json",
+      "slug": "pump-station-monitoring",
+      "specification": "pump-station-monitoring/specification.json",
+      "summary": "Explore a 3D booster station, rehearse changing duty conditions, and trace each pump to its operating history.",
+      "tags": [
+        "3D",
+        "utilities",
+        "SCADA"
+      ],
+      "theme": "dark",
+      "title": "Pump Station Monitoring",
+      "useCase": "Water utility operations and equipment telemetry"
     }
   ],
   "version": "1.0"

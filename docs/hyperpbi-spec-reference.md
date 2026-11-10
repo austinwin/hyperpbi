@@ -38,6 +38,8 @@ Version 2.0 rejects unknown root, component, dataset-definition, and nested map 
 
 The package version in `pbiviz.json` is unrelated to this schema version.
 
+The [3D scene reference](scene3d.md) covers object transforms, data bindings, and the embedded model format.
+
 ## Theme and style system
 
 `theme` accepts:

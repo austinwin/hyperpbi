@@ -13,6 +13,7 @@ export interface DashboardExample {
   accent: string;
   tags: string[];
   referenceImages: number[];
+  previewImage?: string;
   folder: string;
   specification: string;
   runtime: string;

@@ -1,5 +1,11 @@
 # Changelog
 
+## Interactive 3D scenes
+
+- Add a locally bundled Three.js component and visual Scene editor to Core, Maps, and the Playground.
+- Bind scene objects to dataset rows for status, tooltips, visibility, and linked selection. Import bounded, self-contained GLB and glTF files.
+- Add the portable Pump Station Monitoring dashboard with scenario controls, synthetic readings, and linked equipment, KPIs, charts, and records.
+
 ## Dynamic Content
 
 - Add event-driven dashboard regions and overlays. Map popups use the same request and fragment renderer.

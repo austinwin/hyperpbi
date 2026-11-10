@@ -26,6 +26,7 @@ interface DashboardExampleManifestEntry {
     accent: string;
     tags: string[];
     referenceImages: number[];
+    previewImage?: string;
     folder: string;
     specification: string;
     runtime: string;
@@ -48,6 +49,7 @@ const expectedSlugs = [
     "industrial-network-telemetry",
     "media-web-performance",
     "patient-care-operations",
+    "pump-station-monitoring",
     "retail-sales-operations",
     "talent-acquisition",
     "universal-dynamic-content",
@@ -196,6 +198,7 @@ describe("portable dashboard examples", () => {
             expect(example.limitations.length).toBeGreaterThan(20);
             expect(example.tags.length).toBeGreaterThanOrEqual(3);
             if (example.tags.includes("live-api")) expect(example.powerBiPackage).toBe("maps");
+            else if (example.previewImage) expect(existsSync(resolve(process.cwd(), `apps/web/public${example.previewImage}`))).toBe(true);
             else expect(example.referenceImages.length).toBeGreaterThan(0);
             expect(example.accent).toMatch(/^#[0-9a-f]{6}$/i);
 

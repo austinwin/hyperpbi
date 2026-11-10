@@ -3,7 +3,7 @@
 
 **Project:** [hyperpbi.com](https://hyperpbi.com) · **Source:** [austinwin/hyperpbi](https://github.com/austinwin/hyperpbi)
 
-HyperPBI currently defines **84 component types across 12 categories**. This file is generated from canonical component descriptors and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
+HyperPBI currently defines **85 component types across 12 categories**. This file is generated from canonical component descriptors and `patternRegistry.ts`; strict schema 2.0 validator maps are derived from those descriptors.
 
 For the complete authoring model, see the [specification reference](hyperpbi-spec-reference.md), [data model](data-model.md), [interactions](interactions.md), and [SVG reference](svg-visuals.md).
 
@@ -13,7 +13,7 @@ Every 2.0 component requires `type` and a globally unique stable `id` matching `
 
 Allowed shared properties:
 
-`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+`type`, `id`, `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `style`, `css`, `interaction`, `ariaLabel`, `disabled`, `tooltip`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
 The three behavior systems are independent: `uiAction` changes interface state; `interaction` controls universal internal/Power BI data behavior; `interactions` maps safe component-specific events to allowlisted payloads. None is mandatory on every component.
 
@@ -5492,7 +5492,7 @@ _5 components_
 
 ## Advanced components
 
-_4 components_
+_5 components_
 
 ### `svgMarkup` — Sanitized SVG markup
 
@@ -5788,6 +5788,69 @@ _4 components_
     "externalMode": "selection",
     "selectionMode": "replace",
     "clearOnSecondClick": true
+  }
+}
+```
+
+### `scene3d` — 3D scene
+
+**Status:** stable
+
+**Level:** standard
+
+**Recommended use:** Show interactive equipment, facility layouts, or physical assets tied to data
+
+**Required properties:** `type`, `id`, `objects`
+
+**Key properties:** `title`, `subtitle`, `span`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `className`, `hidden`, `style`, `css`, `slots`, `ariaLabel`, `disabled`, `tooltip`, `interaction`, `dataset`, `objects`, `objectIdField`, `statusField`, `statusColors`, `colorField`, `visibleField`, `tooltipFields`, `hideUnmatched`, `showLabels`, `showObjectList`, `shadows`, `grid`, `view`, `theme`, `height`, `frameless`
+
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `colorField`, `css`, `dataset`, `disabled`, `frameless`, `grid`, `height`, `heightMode`, `hidden`, `hideUnmatched`, `id`, `interaction`, `minHeight`, `objectIdField`, `objects`, `order`, `responsive`, `shadows`, `showLabels`, `showObjectList`, `slots`, `span`, `statusColors`, `statusField`, `style`, `subtitle`, `theme`, `title`, `tooltip`, `tooltipFields`, `type`, `view`, `visibleField`
+
+**Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
+
+**Data interaction:** Yes. **UI action:** No.
+
+**Accessibility:** Select objects with the keyboard-accessible object list or projected labels. The list works when WebGL is unavailable.
+
+**Related:** `detailPanel`, `table`, `svg`
+
+```json
+{
+  "type": "scene3d",
+  "id": "equipment_scene",
+  "title": "Booster station",
+  "objects": [
+    {
+      "id": "pump_1",
+      "kind": "pump",
+      "label": "P-101",
+      "position": [
+        -1.1,
+        0,
+        0
+      ],
+      "color": "#1b9b82",
+      "selectable": true
+    },
+    {
+      "id": "pump_2",
+      "kind": "pump",
+      "label": "P-102",
+      "position": [
+        1.1,
+        0,
+        0
+      ],
+      "color": "#eaa53b",
+      "selectable": true
+    }
+  ],
+  "height": 400,
+  "interaction": {
+    "enabled": true,
+    "trigger": "click",
+    "internalMode": "none",
+    "externalMode": "none"
   }
 }
 ```
