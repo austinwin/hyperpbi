@@ -67,6 +67,7 @@ const $=id=>document.getElementById(id), number=v=>Number(v).toLocaleString('en-
 const colors={Running:0x13b68b,Warning:0xe7a646,Stopped:0x8592a4};
 const hex={Running:'#14b68b',Warning:'#e7a646',Stopped:'#8592a4'};
 const interactions=[];
+let syncSelection=()=>{};
 function setEvent(type,rec){const event={source:'scene3d',type,objectId:rec.id,keyField:'equipmentId',value:rec.id,matchedRows:1,externalPowerBI:'not connected in prototype'};interactions.unshift(event);$('interactionPayload').textContent=JSON.stringify(event,null,2);}
 function drawSpark(rec){
  const c=$('spark'),ctx=c.getContext('2d');if(!ctx)return;
@@ -159,7 +160,7 @@ if(renderer){
  pipe([-2.7,.45,1.2],[2.7,.45,1.2],.16,accent);
  for(let i=0;i<5;i++){place(scene,new THREE.BoxGeometry(.1,1.4,.1),steel,-5.4,.7,-3.5+i*1.6);place(scene,new THREE.BoxGeometry(.1,1.4,.1),steel,5.4,.7,-3.5+i*1.6)}
  let selectionRing;
- function syncSelection(){
+ syncSelection=()=>{
    if(selectionRing){scene.remove(selectionRing);selectionRing.geometry.dispose();selectionRing.material.dispose();}
    const g=pumpGroups.get(state.selected)?.group;if(!g)return;
    selectionRing=new THREE.Mesh(new THREE.RingGeometry(.88,1.03,48),new THREE.MeshBasicMaterial({color:0x1769e0,transparent:true,opacity:.86,side:THREE.DoubleSide,depthWrite:false}));
