@@ -5,7 +5,7 @@ import { StudioSection } from "../ui/StudioSection";
 
 const kinds: Record<Scene3dKind, string> = {
     box: "Box", cylinder: "Cylinder", sphere: "Sphere", cone: "Cone",
-    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", model: "GLB / glTF model",
+    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", fan: "Fan rotor", model: "GLB / glTF model",
 };
 const materialDefaults = { metalness: 0.22, roughness: 0.44, opacity: 1 } as const;
 type FieldOption = { key: string; label: string };
