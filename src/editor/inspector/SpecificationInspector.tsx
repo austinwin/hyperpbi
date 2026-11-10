@@ -1076,10 +1076,12 @@ export function SpecificationInspector({
                 <InteractionQuickSetup
                   component={item}
                   components={tree.map(entry => ({ id: entry.id, type: entry.type }))}
-                  fields={Object.values(scopeFields).map(field => {
-                    const key = datasetName === "powerbi" ? (aliasByKey.get(field.key)?.alias ?? field.key) : field.key;
+                  fields={Object.values(scopeFields).flatMap(field => {
+                    const alias = datasetName === "powerbi" ? (aliasByKey.get(field.key)?.alias ?? field.key) : field.key;
                     const target = externalFilterTargetFor(field);
-                    return { key, label: field.displayName, powerBiTarget: target ? target.table + "." + target.column : undefined };
+                    const powerBiTarget = target ? target.table + "." + target.column : undefined;
+                    const primary = { key: alias, label: field.displayName, powerBiTarget };
+                    return alias === field.key ? [primary] : [primary, { key: field.key, label: field.displayName + " (canonical key)", powerBiTarget }];
                   })}
                   onChange={next => change("interaction", next)}
                 />
