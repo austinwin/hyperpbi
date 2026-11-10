@@ -1107,6 +1107,62 @@ function groundwaterSupplyDistribution(): ExampleDefinition {
     };
 }
 
+/** Demonstrates the animation editor with live row bindings and the same portable Power BI dataset. */
+function scene3dAnimationStudio(): ExampleDefinition {
+    const original = pumpStationMonitoring();
+    const specification = structuredClone(original.specification);
+    const components = specification.components as Array<Record<string, unknown>>;
+    const scene = components.find(component => component.type === "scene3d") as unknown as Scene3dComponent;
+    if (!scene) throw new Error("The pump-station demo must contain a 3D scene.");
+    scene.title = "Animated equipment · rotation, translation, pulse and visibility";
+    scene.height = 490;
+    const fans = [
+        { id: "P-101", x: -3.3 }, { id: "P-102", x: -1.1 },
+        { id: "P-103", x: 1.1 }, { id: "P-104", x: 3.3 },
+    ];
+    for (const fan of fans) {
+        scene.objects.push(
+            { id: `fan_stand_${fan.id.replace("-", "_")}`, kind: "box", position: [fan.x, 1.65, 1.4], size: [0.12, 0.75, 0.14], color: "#738da8" },
+            { id: `fan_${fan.id.replace("-", "_")}`, kind: "fan", label: `Cooling fan ${fan.id}`,
+                dataKey: fan.id, position: [fan.x, 2.12, 1.4], size: [0.88, 0.88, 0.88], color: "#5fc6ed",
+                animations: [{ kind: "rotate", axis: "z", rpm: 75, rpmField: "motorloadpct", enabledField: "flowgpm" }] },
+        );
+    }
+    scene.objects.push(
+        { id: "motion_alert", kind: "sphere", label: "Warning pulse", dataKey: "P-103",
+            position: [1.1, 3.35, 1.4], size: [0.25, 0.25, 0.25], color: "#ffac4b",
+            animations: [{ kind: "pulse", amplitude: 0.65, period: 1.1, enabledField: "status", enabledValue: "Warning" }] },
+        { id: "motion_actuator", kind: "box", label: "Reciprocating actuator", dataKey: "P-101",
+            position: [-3.3, 1.18, 1.45], size: [0.34, 0.3, 0.3], color: "#7ed7a7",
+            animations: [{ kind: "translate", axis: "x", amplitude: 0.25, period: 2.4, enabledField: "flowgpm" }] },
+        { id: "motion_indicator", kind: "sphere", label: "Status beacon", dataKey: "P-102",
+            position: [-1.1, 3.3, 1.4], size: [0.2, 0.2, 0.2], color: "#f7d45b",
+            animations: [{ kind: "blink", period: 1.2, enabledField: "status", enabledValue: "Stopped" }] },
+        { id: "motion_expansion", kind: "box", label: "Expansion test", dataKey: "P-104",
+            position: [3.3, 3.35, 1.4], size: [0.3, 0.3, 0.3], color: "#a9a0f4",
+            animations: [{ kind: "scale", axis: "y", amplitude: 0.45, period: 1.6, enabledField: "flowgpm" }] },
+    );
+    specification.title = "3D Animation Studio";
+    const app = specification.app as { pageHeader: { title: string; subtitle: string } };
+    app.pageHeader.title = "Interactive 3D Animation Studio";
+    app.pageHeader.subtitle = "Rotating cooling fans, reciprocating actuator, status beacons and live data bindings";
+    components.splice(1, 0, { type: "text", id: "motion_guide",
+        text: "Choose an operating scenario, then watch motor-driven fans spin, a warning light pulse, and a stopped pump's beacon blink. Select any 3D asset to filter the linked charts. Open Visual Inspector to edit or add animations without writing code." });
+    return {
+        ...original,
+        id: "scene3d-animation-studio",
+        title: "3D Animation Studio",
+        useCase: "Interactive equipment animations and industrial digital twins",
+        summary: "Explore fan rotation, moving actuators, animated alarms, data-driven speed and Power BI selection.",
+        description: "A hands-on Three.js motion laboratory using synthetic booster-station readings. Configure RPM-driven cooling fans, moving actuators, alert pulses, scaling indicators and visibility animation in the Visual Inspector. Every object can be selected and linked to charts and tables.",
+        tags: ["3D", "animation", "SCADA", "Three.js"],
+        expected: "Normal duty spins three fans, Peak demand spins all four and pulses the P-103 warning beacon, and Maintenance stops P-102 so its status beacon blinks. Edit any object's Animations section to adjust RPM, axis, period and data fields.",
+        limitations: "Scenario values and readings are synthetic. Animations are local rendering only, not SCADA control commands. Requires WebGL 2 and respects reduced motion and runtime animation budgets.",
+        previewImage: undefined,
+        specification,
+    };
+}
+
 const examples: ExampleDefinition[] = [
     talentAcquisition(),
     capitalProjectControls(),
@@ -1120,6 +1176,7 @@ const examples: ExampleDefinition[] = [
     universalDynamicContent(),
     pumpStationMonitoring(),
     groundwaterSupplyDistribution(),
+    scene3dAnimationStudio(),
 ];
 
 function readme(example: ExampleDefinition): string {
