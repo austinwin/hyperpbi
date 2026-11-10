@@ -91,6 +91,28 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
         const componentId = typeof visit.component.id === "string" ? visit.component.id : undefined;
         if (componentId) componentsById.set(componentId, visit);
         if (type === "dynamicContent") dynamicRegions.push(visit);
+        // Scene3D animation fields live on nested objects, so the ordinary top-level
+        // component descriptor traversal cannot discover or canonicalize them.
+        if (type === "scene3d" && Array.isArray(visit.component.objects)) {
+            visit.component.objects.forEach((sceneObject, objectIndex) => {
+                if (!object(sceneObject) || !Array.isArray(sceneObject.animations)) return;
+                sceneObject.animations.forEach((motion, motionIndex) => {
+                    if (!object(motion)) return;
+                    for (const field of ["enabledField", "rpmField"] as const) {
+                        if (typeof motion[field] !== "string") continue;
+                        result.push({
+                            reference: motion[field] as string,
+                            path: `${visit.path}/objects/${objectIndex}/animations/${motionIndex}/${field}`,
+                            componentId,
+                            datasetName: visit.datasetName,
+                            requirement: field === "rpmField" ? "numeric" : "any",
+                            source: "dataset",
+                            set: next => { motion[field] = next; },
+                        });
+                    }
+                });
+            });
+        }
         for (const descriptorField of descriptor.fields) dispatchComponentField({
             component: visit.component,
             descriptorField,
