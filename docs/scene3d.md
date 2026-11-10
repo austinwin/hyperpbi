@@ -12,7 +12,9 @@ Use `scene3d` for equipment layouts, facilities, or objects with a physical rela
 
 The stage uses X and Z for the floor and Y for height. Primitives and imported models are centered on their position. Pump and tank assemblies sit on their base. Size gives the dimensions of a primitive or a normalized model, and scales an assembly on each axis. Pipes are cylinders whose local length is along Y. Rotation uses degrees in XYZ order.
 
-Drag to orbit, shift-drag or right-drag to pan, and scroll or pinch to zoom. Choose **Top view**, **Isometric**, or **Reset view** to reframe the scene. Select through the canvas, projected labels, or keyboard-accessible equipment list. The equipment list continues to work when graphics are unavailable. Leave it enabled if viewers need keyboard selection or a fallback.
+Click an object to select it. Hold the pointer down and drag to orbit, shift-drag or right-drag to pan, and scroll or pinch to zoom. Choose **Top view**, **Isometric**, or **Reset view** to reframe the scene. Select through the canvas, projected labels, or keyboard-accessible equipment list. The equipment list continues to work when graphics are unavailable. Leave it enabled if viewers need keyboard selection or a fallback.
+
+The Groundwater Supply & Distribution example uses teal pipes for raw water and blue pipes for treated water. Switch to **Remote well offline** to see how reduced source flow affects residential delivery. [Groundwater Supply & Distribution](https://hyperpbi.com/examples/groundwater-supply-distribution)
 
 ## Bind objects to data
 

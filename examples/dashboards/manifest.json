@@ -284,6 +284,31 @@
       "theme": "dark",
       "title": "Pump Station Monitoring",
       "useCase": "Water utility operations and equipment telemetry"
+    },
+    {
+      "accent": "#6eb5ff",
+      "data": "groundwater-supply-distribution/data.csv",
+      "description": "Ridgeway Water's fictional network collects raw groundwater from a local well and a remote well, treats it at the groundwater plant, and pumps it through a distribution main to Maple Court, Cedar Lane, and Birch Grove. The scene uses distinct pipe colors and direction markers, with operating readings for all seven selectable assets.",
+      "expected": "Choose Remote well offline to see the source shut down and residential deliveries drop. Choose Peak demand to see the two wells support higher delivery. Select equipment or a house to filter the charts and asset register. Select a bar or register row to highlight its asset. All uses the latest snapshot for the station KPIs and averages the flow history across available readings.",
+      "folder": "groundwater-supply-distribution",
+      "id": "groundwater-supply-distribution",
+      "limitations": "The site is a synthetic schematic and pipe geometry indicates direction. Readings are illustrative and do not simulate a hydraulic model. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.",
+      "powerBiPackage": "core",
+      "previewImage": "/images/groundwater-supply-distribution.webp",
+      "project": "groundwater-supply-distribution/project.hyperpbi",
+      "referenceImages": [],
+      "runtime": "groundwater-supply-distribution/runtime.json",
+      "slug": "groundwater-supply-distribution",
+      "specification": "groundwater-supply-distribution/specification.json",
+      "summary": "Follow water from two wells through treatment and high-service pumping to three residential delivery points.",
+      "tags": [
+        "3D",
+        "groundwater",
+        "distribution"
+      ],
+      "theme": "dark",
+      "title": "Groundwater Supply & Distribution",
+      "useCase": "Groundwater treatment and residential water distribution"
     }
   ],
   "version": "1.0"

@@ -17,6 +17,7 @@ The dashboard examples use the same schema, data, and rendering pipeline on the 
 | Water distribution | [`dynamic-gis-analytics`](../examples/dashboards/dynamic-gis-analytics) | Maps | Pressure telemetry, map popups, and station operations |
 | Maintenance dispatch | [`universal-dynamic-content`](../examples/dashboards/universal-dynamic-content) | Maps | Asset work plans in a side panel and live workload |
 | Pump station operations | [`pump-station-monitoring`](../examples/dashboards/pump-station-monitoring) | Core | 3D pump selection, operating scenarios, pressure and motor-load charts |
+| Groundwater treatment and delivery | [`groundwater-supply-distribution`](../examples/dashboards/groundwater-supply-distribution) | Core | 3D source-to-tap network, remote well outage, and residential delivery |
 
 Each folder is self-contained:
 

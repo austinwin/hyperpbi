@@ -14,7 +14,7 @@ type View = NonNullable<Scene3dComponent["view"]>;
 type LabelPositions = (id: string, point?: { x: number; y: number }) => void;
 interface Callbacks {
     labels: LabelPositions;
-    pick: (id: string, event: PointerEvent) => void;
+    pick: (id: string, event: MouseEvent) => void;
     hover: (id?: string) => void;
     modelError: (id: string, message?: string) => void;
     lost: () => void;
@@ -37,6 +37,7 @@ const floorThemes = {
     light: { slab: "#dce5ee", major: "#bacadc", minor: "#c9d8e5" },
     dark: { slab: "#263a50", major: "#3d586e", minor: "#33495e" },
 };
+const dragThreshold = 5;
 
 function releaseModel(root: Object3D) {
     const geometries = new Set<Mesh["geometry"]>();
@@ -99,6 +100,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     const scene = new Scene();
     const camera = new PerspectiveCamera(40, 1, 0.05, 1400);
     const controls = new OrbitControls(camera, canvas);
+    canvas.style.removeProperty("cursor");
     controls.maxPolarAngle = Math.PI * 0.499;
     controls.zoomSpeed = 0.85;
     const hemisphere = new HemisphereLight("#f6fbff", "#8095b0", 2.05);
@@ -137,7 +139,8 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     let showGrid = true;
     let view: View = "isometric";
     let viewInitialized = false;
-    let start: { id: number; x: number; y: number; moved: boolean } | undefined;
+    let press: { id: number; x: number; y: number; button: number; dragging: boolean } | undefined;
+    let pendingPick: string | undefined;
 
     function draw() {
         frame = 0;
@@ -364,6 +367,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         const rect = canvas.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0 || event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return;
         pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2);
+        camera.updateMatrixWorld();
         raycaster.setFromCamera(pointer, camera);
         const hit = raycaster.intersectObjects([...roots.keys()].filter(group => group.visible), true)[0];
         for (let object: Object3D | null | undefined = hit?.object; object; object = object.parent) {
@@ -376,38 +380,68 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         if (id === lastHover) return;
         lastHover = id;
         const definition = id ? entries.get(id)?.definition : undefined;
-        canvas.style.cursor = definition && (definition.selectable ?? definition.dataKey !== undefined) ? "pointer" : "grab";
+        canvas.classList.toggle("is-pickable", Boolean(definition && (definition.selectable ?? definition.dataKey !== undefined)));
         callbacks.hover(id);
     }
 
-    const down = (event: PointerEvent) => {
-        start = event.isPrimary && event.button === 0 ? { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false } : undefined;
-        hover();
-    };
     let hoverFrame = 0;
+    let hoverEvent: PointerEvent | undefined;
+    const clearHoverFrame = () => {
+        if (hoverFrame) cancelAnimationFrame(hoverFrame);
+        hoverFrame = 0;
+        hoverEvent = undefined;
+    };
+    const down = (event: PointerEvent) => {
+        pendingPick = undefined;
+        press = event.isPrimary && event.button >= 0 && event.button <= 2
+            ? { id: event.pointerId, x: event.clientX, y: event.clientY, button: event.button, dragging: false }
+            : undefined;
+        clearHoverFrame();
+    };
     const move = (event: PointerEvent) => {
-        if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) start.moved = true;
-        if (!event.buttons && event.pointerType !== "touch" && !hoverFrame) {
-            hoverFrame = requestAnimationFrame(() => { hoverFrame = 0; hover(pick(event)); });
+        if (press?.id === event.pointerId && event.buttons && !press.dragging) {
+            if (Math.hypot(event.clientX - press.x, event.clientY - press.y) < dragThreshold) {
+                // OrbitControls listens on the document. Ignore the small movement of a click.
+                event.stopPropagation();
+                return;
+            }
+            press.dragging = true;
+            canvas.classList.add("is-dragging");
+            hover();
+        }
+        if (!event.buttons && event.pointerType !== "touch") {
+            hoverEvent = event;
+            if (!hoverFrame) hoverFrame = requestAnimationFrame(() => {
+                hoverFrame = 0;
+                if (hoverEvent) hover(pick(hoverEvent));
+                hoverEvent = undefined;
+            });
         }
     };
     const up = (event: PointerEvent) => {
-        if (start?.id === event.pointerId && !start.moved) {
-            const id = pick(event);
-            if (id) callbacks.pick(id, event);
-        }
-        start = undefined;
+        const id = pick(event);
+        pendingPick = press?.id === event.pointerId && press.button === 0 && event.button === 0 && !press.dragging &&
+            Math.hypot(event.clientX - press.x, event.clientY - press.y) < dragThreshold ? id : undefined;
+        press = undefined;
+        canvas.classList.remove("is-dragging");
+        if (event.pointerType !== "touch") hover(id);
+    };
+    const click = (event: MouseEvent) => {
+        // Let pointerup bubble to OrbitControls before the interaction engine claims the click.
+        const id = pendingPick;
+        pendingPick = undefined;
+        if (id) callbacks.pick(id, event);
     };
     const leave = () => {
-        if (hoverFrame) cancelAnimationFrame(hoverFrame);
-        hoverFrame = 0;
+        clearHoverFrame();
         hover();
     };
-    const cancel = () => { start = undefined; leave(); };
+    const captureLost = () => { press = undefined; canvas.classList.remove("is-dragging"); };
+    const cancel = () => { pendingPick = undefined; captureLost(); leave(); };
     const lost = (event: Event) => { event.preventDefault(); callbacks.lost(); };
     const listeners = [
-        ["pointerdown", down], ["pointermove", move], ["pointerup", up], ["pointercancel", cancel],
-        ["pointerleave", leave], ["webglcontextlost", lost],
+        ["pointerdown", down], ["pointermove", move], ["pointerup", up], ["click", click],
+        ["pointercancel", cancel], ["lostpointercapture", captureLost], ["pointerleave", leave], ["webglcontextlost", lost],
     ] as const;
     for (const [event, listener] of listeners) canvas.addEventListener(event, listener as EventListener);
     controls.addEventListener("change", invalidate);
@@ -421,7 +455,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         dispose() {
             disposed = true;
             cancelAnimationFrame(frame);
-            cancelAnimationFrame(hoverFrame);
+            clearHoverFrame();
             observer.disconnect();
             controls.dispose();
             for (const [event, listener] of listeners) canvas.removeEventListener(event, listener as EventListener);

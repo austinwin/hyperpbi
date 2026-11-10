@@ -55,6 +55,82 @@ test("keeps linked keyboard selection available after WebGL context loss", async
     await expect(canvas).toBeVisible();
 });
 
+test("clicks leave the camera idle and only held drags orbit or pan", async ({ page }) => {
+    await page.goto("/examples/pump-station-monitoring");
+    const scene = page.locator(".hp-scene3d");
+    const canvas = scene.locator("canvas");
+    await expect(canvas).toBeVisible({ timeout: 45_000 });
+    const label = scene.locator(".hp-scene3d-labels").getByRole("button", { name: "P-103", exact: true });
+    const pump = scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: "P-103 Running" });
+    await expect(label).toBeVisible();
+    const pose = () => label.evaluate(element => element.style.transform);
+    const initial = await pose();
+    await scene.getByRole("button", { name: "Top view" }).click();
+    await expect.poll(pose).not.toBe(initial);
+    const top = await pose();
+    const tag = (await label.boundingBox())!;
+    const x = tag.x + tag.width / 2;
+    const y = tag.y + tag.height + 5;
+
+    await page.mouse.move(x, y);
+    await expect(canvas).toHaveCSS("cursor", "pointer");
+    await page.mouse.down();
+    await page.mouse.move(x + 2, y + 1);
+    await expect(canvas).toHaveCSS("cursor", "pointer");
+    await page.mouse.up();
+    await expect(pump).toHaveAttribute("aria-pressed", "true");
+    await expect(canvas).toHaveCSS("cursor", "pointer");
+    await page.mouse.move(x, y);
+    await expect(canvas).toHaveCSS("cursor", "pointer");
+    expect(await pose()).toBe(top);
+
+    await page.mouse.click(x, y);
+    await expect(pump).toHaveAttribute("aria-pressed", "false");
+    await page.mouse.move(x + 2, y + 2);
+    await expect(canvas).toHaveCSS("cursor", "pointer");
+    expect(await pose()).toBe(top);
+
+    await page.mouse.down();
+    await page.mouse.move(x + 45, y + 25, { steps: 4 });
+    await expect(canvas).toHaveCSS("cursor", "grabbing");
+    await expect.poll(pose).not.toBe(top);
+    await page.mouse.up();
+    await expect(canvas).not.toHaveCSS("cursor", "grabbing");
+    await expect(pump).toHaveAttribute("aria-pressed", "false");
+    const orbited = await pose();
+
+    await page.mouse.down({ button: "right" });
+    await page.mouse.move(x + 72, y + 48, { steps: 4 });
+    await expect(canvas).toHaveCSS("cursor", "grabbing");
+    await expect.poll(pose).not.toBe(orbited);
+    await page.mouse.up({ button: "right" });
+    await expect(canvas).not.toHaveCSS("cursor", "grabbing");
+    await expect(pump).toHaveAttribute("aria-pressed", "false");
+    const panned = await pose();
+    await page.mouse.wheel(0, -120);
+    await expect.poll(pose).not.toBe(panned);
+});
+
+test("traces the remote well through treatment and into residential distribution", async ({ page }) => {
+    await page.goto("/examples/groundwater-supply-distribution");
+    const scene = page.locator(".hp-scene3d");
+    await expect(scene.locator("canvas")).toBeVisible({ timeout: 45_000 });
+    const assets = scene.getByRole("complementary", { name: "Scene objects" });
+    const remote = assets.getByRole("button", { name: "Remote well Running" });
+    await expect(remote).toBeVisible();
+    await page.getByRole("button", { name: "Remote well offline", exact: true }).click();
+    await expect(assets.getByRole("button", { name: "Remote well Offline" })).toBeVisible();
+    await expect(page.locator("[data-hp-id=groundwater_wells] .hp-metric-value")).toHaveText("1");
+    await assets.getByRole("button", { name: "Remote well Offline" }).click();
+    const register = page.locator("[data-hp-id=groundwater_assets] tbody");
+    await expect(register.getByRole("row")).toHaveCount(1);
+    await expect(register.getByRole("row")).toContainText("Remote well");
+    await scene.getByRole("button", { name: "Clear selection" }).click();
+    await expect(register.getByRole("row")).toHaveCount(7);
+    await register.getByRole("row").filter({ hasText: "Maple Court" }).click();
+    await expect(assets.getByRole("button", { name: "Maple Court Reduced flow" })).toHaveAttribute("aria-pressed", "true");
+});
+
 test("authors scene objects and embeds a local glTF through the Inspector", async ({ page }) => {
     await page.goto("/");
     const card = page.locator(".pg-example-card").filter({ hasText: "Pump Station Monitoring" });

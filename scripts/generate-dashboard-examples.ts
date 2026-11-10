@@ -945,6 +945,151 @@ function pumpStationMonitoring(): ExampleDefinition {
     };
 }
 
+function groundwaterSupplyDistribution(): ExampleDefinition {
+    const title = "Groundwater Supply & Distribution";
+    const assets = [
+        ["W-01", "Local well", "Groundwater abstraction"],
+        ["W-02", "Remote well", "Groundwater abstraction"],
+        ["TP-01", "Groundwater plant", "Treatment and storage"],
+        ["P-01", "Distribution pump", "High-service pumping"],
+        ["R-01", "Maple Court", "Residential delivery"],
+        ["R-02", "Cedar Lane", "Residential delivery"],
+        ["R-03", "Birch Grove", "Residential delivery"],
+    ];
+    const scenarios = [
+        { name: "Normal flow", local: 620, remote: 440, pressure: 61 },
+        { name: "Remote well offline", local: 650, remote: 0, pressure: 47 },
+        { name: "Peak demand", local: 780, remote: 570, pressure: 57 },
+    ];
+    const rows: Row[] = scenarios.flatMap((scenario, index) => {
+        const raw = scenario.local + scenario.remote;
+        const delivered = Math.round(raw * 0.97);
+        const maple = Math.round(delivered * 0.35);
+        const cedar = Math.round(delivered * 0.34);
+        const flows = [scenario.local, scenario.remote, raw, delivered, maple, cedar, delivered - maple - cedar];
+        return assets.flatMap(([assetid, asset, stage], i) => {
+            const status = flows[i] === 0 ? "Offline" : index === 1 && i >= 3 ? "Reduced flow" : "Running";
+            const row = { assetid, asset, stage, scenario: scenario.name, status, flowgpm: flows[i],
+                wellsactive: scenario.remote ? 2 : 1, rawgpm: raw, deliveredgpm: delivered, mainpsi: scenario.pressure };
+            return [
+                { ...row, readingid: `${index}-${assetid}-snapshot`, recordtype: "Snapshot", sampleorder: 100 - index, hour: "Snapshot" },
+                ...Array.from({ length: 8 }, (_value, hour) => ({
+                    ...row, readingid: `${index}-${assetid}-${hour}`, recordtype: "Trend", sampleorder: hour,
+                    hour: `${String(hour + 6).padStart(2, "0")}:00`,
+                    flowgpm: Math.round(row.flowgpm * (0.95 + 0.06 * Math.sin(hour * 0.56))),
+                })),
+            ];
+        });
+    });
+
+    const objects: Scene3dObject[] = [];
+    const rawPipe = "#179587";
+    const treatedPipe = "#317bc5";
+    const shape = (id: string, kind: Scene3dObject["kind"], position: Scene3dVector, size: Scene3dVector, color: string,
+        rotation?: Scene3dVector, asset?: typeof assets[number]) => {
+        objects.push({ id, kind, position, size, color, rotation, ...(asset ? { dataKey: asset[0], label: asset[1] } : {}) });
+    };
+    const pipe = (id: string, x: number, y: number, z: number, length: number, axis: "x" | "y" | "z", color: string, width = 0.22) => {
+        shape(id, "pipe", [x, y, z], [width, length, width], color, axis === "x" ? [0, 0, 90] : axis === "z" ? [90, 0, 0] : undefined);
+    };
+    const arrow = (id: string, x: number, y: number, z: number, color: string) => {
+        shape(id, "cone", [x, y, z], [0.36, 0.48, 0.36], color, [0, 0, -90]);
+    };
+    for (const [index, z] of [-2.4, 2.3].entries()) {
+        shape(`well_pad_${index}`, "box", [-6.65, 0.08, z], [2.15, 0.16, 1.58], index ? "#b6aa96" : "#a9b7c4");
+        shape(`well_casing_${index}`, "cylinder", [-7.25, 0.39, z - 0.48], [0.45, 0.63, 0.45], "#6d899c");
+        shape(`well_pump_${index}`, "pump", [-6.56, 0.16, z], [0.84, 0.82, 0.85], rawPipe, undefined, assets[index]);
+        pipe(`well_lateral_${index}`, -4.71, 0.66, z, 2.35, "x", rawPipe);
+        arrow(`well_direction_${index}`, -4.68, 0.66, z, "#57cebb");
+    }
+    pipe("well_collection", -3.53, 0.66, -0.05, 4.7, "z", rawPipe);
+    pipe("plant_inlet", -3.05, 0.66, 0.58, 1.05, "x", rawPipe, 0.25);
+
+    shape("plant_slab", "box", [-1.41, 0.09, -0.04], [2.85, 0.18, 2.6], "#9caebe");
+    shape("plant", "box", [-1.41, 0.79, -0.04], [2.4, 1.22, 1.97], "#b9d1d9", undefined, assets[2]);
+    shape("plant_roof", "box", [-1.41, 1.43, -0.04], [2.58, 0.17, 2.13], "#3e647e");
+    shape("plant_door", "box", [-1.53, 0.56, 0.96], [0.54, 0.76, 0.06], "#254966");
+    shape("plant_window", "box", [-0.72, 0.94, 0.96], [0.58, 0.3, 0.07], "#365e76");
+    shape("clearwell", "tank", [0.38, 0, -2.15], [0.75, 0.68, 0.75], "#a4bfcb");
+    pipe("clearwell_connection", 0.38, 0.74, -0.52, 2.2, "z", treatedPipe);
+    pipe("plant_outlet", 0.02, 0.74, 0.58, 0.66, "x", treatedPipe, 0.26);
+    shape("high_service_pump", "pump", [1.22, 0, 0.58], [1.02, 1, 1.02], treatedPipe, undefined, assets[3]);
+    pipe("distribution_main", 3.72, 0.74, 0.58, 3.35, "x", treatedPipe, 0.29);
+    arrow("distribution_direction", 3.6, 0.74, 0.58, "#8bcaff");
+    pipe("neighborhood_header", 5.38, 0.74, 0.24, 5.36, "z", treatedPipe);
+
+    for (const [index, z] of [-2.44, 0.23, 2.91].entries()) {
+        const x = 6.78;
+        shape(`house_lot_${index}`, "box", [x, 0.06, z], [2.24, 0.12, 1.94], "#a5b8a8");
+        shape(`house_${index}`, "box", [x, 0.62, z], [1.32, 1, 1.19], "#c2d3db", undefined, assets[index + 4]);
+        const roof = ["#476887", "#5b6286", "#486e72"][index];
+        for (const side of [-1, 1]) shape(`house_roof_${index}_${side === 1 ? "south" : "north"}`, "box",
+            [x, 1.27, z + side * 0.3], [1.55, 0.11, 0.78], roof, [side * 25, 0, 0]);
+        shape(`house_door_${index}`, "box", [x - 0.27, 0.4, z + 0.61], [0.25, 0.55, 0.05], "#314a63");
+        shape(`house_window_${index}`, "box", [x + 0.29, 0.78, z + 0.61], [0.35, 0.23, 0.05], "#e1ecf5");
+        pipe(`house_service_${index}`, 5.77, 0.74, z, 0.78, "x", treatedPipe, 0.15);
+    }
+    const linked = ["groundwater_flow", "groundwater_by_asset", "groundwater_assets"];
+    const station = ["groundwater_wells", "groundwater_raw", "groundwater_delivered", "groundwater_pressure"];
+    const kpis = [
+        ["groundwater_wells", "Active source wells", "wellsactive"], ["groundwater_raw", "Plant intake (GPM)", "rawgpm"],
+        ["groundwater_delivered", "Residential delivery (GPM)", "deliveredgpm"], ["groundwater_pressure", "Distribution main (PSI)", "mainpsi"],
+    ];
+    const scene: Scene3dComponent = {
+        type: "scene3d", id: "groundwater_scene", title: "Source to tap · hydraulic schematic", dataset: "asset_readings",
+        height: 455, theme: "light", objectIdField: "assetid", statusField: "status", objects,
+        statusColors: [{ value: "Reduced flow", color: "#db9a39" }, { value: "Offline", color: "#7b8798" }],
+        tooltipFields: [{ field: "stage", label: "Stage" }, { field: "flowgpm", label: "Flow (GPM)" }],
+        interaction: { ...selectionInteraction("assetid"), internalMode: "filter", targets: linked },
+    };
+    const specification: Specification = {
+        version: "2.0", title,
+        theme: { mode: "dark", density: "compact", primaryColor: "#6eb5ff", surfaceColor: "#101e2e", textColor: "#e7f1ff", borderColor: "#2b4159", radius: 12, gap: 10 },
+        app: {
+            enabled: true, layout: "horizontal", container: "fluid", density: "compact",
+            brand: { title: "Ridgeway Water", shortTitle: "RW", subtitle: "Groundwater operations", icon: "dashboard" },
+            navbar: { visible: true },
+            pageHeader: { visible: true, title, subtitle: "Local well and remote well → treatment → distribution pump → residential service",
+                meta: [{ label: "Telemetry", value: "Simulated", intent: "info" }] },
+        },
+        data: { datasets: {
+            asset_readings: { source: "powerbi", sort: [{ field: "sampleorder", direction: "descending" }] },
+            snapshots: { source: "asset_readings", filter: { field: "recordtype", operator: "=", value: "Snapshot" } },
+            flow_history: { source: "powerbi", filter: { field: "recordtype", operator: "=", value: "Trend" }, sort: [{ field: "sampleorder", direction: "ascending" }] },
+        } },
+        styles: { globalCss: baseDarkCss },
+        components: [
+            { type: "segmentedControl", id: "groundwater_scenario", label: "Operating scenario", field: "scenario", options: scenarios.map(item => item.name),
+                interaction: { internalMode: "filter", targets: ["groundwater_scene", ...station, ...linked], externalMode: "none" } },
+            { type: "grid", id: "groundwater_kpis", columns: 12, children: kpis.map(([id, title, field]) =>
+                ({ type: "kpi", id, title, field, dataset: "snapshots", aggregation: "first", span: 3 })) },
+            { type: "text", id: "groundwater_legend", text: "Teal pipes carry raw groundwater. Blue pipes carry treated water. Select a well, plant, pump, or house to trace its readings." },
+            scene,
+            { type: "grid", id: "groundwater_charts", columns: 12, children: [
+                { type: "lineChart", id: "groundwater_flow", title: "Mean flow profile · GPM", dataset: "flow_history", category: "hour", measure: "flowgpm",
+                    aggregation: "avg", span: 7, height: 270, options: darkChartOptions(["#6eb5ff"]), interaction: disabledInteraction },
+                { type: "barChart", id: "groundwater_by_asset", title: "Snapshot flow by asset · GPM", dataset: "snapshots", category: "assetid", measure: "flowgpm",
+                    aggregation: "first", span: 5, height: 270, options: darkChartOptions(["#57cebb"]), interaction: { ...selectionInteraction("assetid"), targets: ["groundwater_scene"] } },
+            ] },
+            { type: "table", id: "groundwater_assets", title: "Source-to-tap asset register", dataset: "snapshots", maxRows: 21,
+                columns: [{ field: "assetid", title: "ID" }, { field: "asset", title: "Asset" }, { field: "stage", title: "Stage" },
+                    { field: "scenario", title: "Scenario" }, { field: "status", title: "Status" }, { field: "flowgpm", title: "Flow (GPM)" }],
+                interaction: { ...selectionInteraction("assetid"), targets: ["groundwater_scene"] } },
+        ],
+    };
+    return {
+        id: "groundwater-supply-distribution", title, useCase: "Groundwater treatment and residential water distribution",
+        summary: "Follow water from two wells through treatment and high-service pumping to three residential delivery points.",
+        description: "Ridgeway Water's fictional network collects raw groundwater from a local well and a remote well, treats it at the groundwater plant, and pumps it through a distribution main to Maple Court, Cedar Lane, and Birch Grove. The scene uses distinct pipe colors and direction markers, with operating readings for all seven selectable assets.",
+        theme: "dark", accent: "#6eb5ff", tags: ["3D", "groundwater", "distribution"], referenceImages: [],
+        previewImage: "/images/groundwater-supply-distribution.webp", powerBiPackage: "core",
+        expected: "Choose Remote well offline to see the source shut down and residential deliveries drop. Choose Peak demand to see the two wells support higher delivery. Select equipment or a house to filter the charts and asset register. Select a bar or register row to highlight its asset. All uses the latest snapshot for the station KPIs and averages the flow history across available readings.",
+        limitations: "The site is a synthetic schematic and pipe geometry indicates direction. Readings are illustrative and do not simulate a hydraulic model. Import readingid in Power BI and set numeric columns to Don't summarize to preserve row identities.",
+        headers: ["readingid", "assetid", "asset", "stage", "scenario", "status", "recordtype", "sampleorder", "hour", "flowgpm", "wellsactive", "rawgpm", "deliveredgpm", "mainpsi"],
+        rows, specification, runtime: darkRuntime,
+    };
+}
+
 const examples: ExampleDefinition[] = [
     talentAcquisition(),
     capitalProjectControls(),
@@ -957,6 +1102,7 @@ const examples: ExampleDefinition[] = [
     dynamicGisAnalytics(),
     universalDynamicContent(),
     pumpStationMonitoring(),
+    groundwaterSupplyDistribution(),
 ];
 
 function readme(example: ExampleDefinition): string {

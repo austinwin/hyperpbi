@@ -56,6 +56,7 @@ The `/examples` gallery loads complete dashboards from [`examples/dashboards`](e
 | Dynamic GIS Analytics | [`dynamic-gis-analytics`](examples/dashboards/dynamic-gis-analytics) | Maps |
 | Universal Dynamic Content | [`universal-dynamic-content`](examples/dashboards/universal-dynamic-content) | Maps |
 | Pump Station Monitoring | [`pump-station-monitoring`](examples/dashboards/pump-station-monitoring) | Core |
+| Groundwater Supply & Distribution | [`groundwater-supply-distribution`](examples/dashboards/groundwater-supply-distribution) | Core |
 
 Open an example to preview the project, inspect its JSON, or open a copy in `/playground`. For Power BI, import `data.csv` as one table, add its columns to HyperPBI's single **Values** field well, paste `runtime.json` into Runtime Configuration, and paste `specification.json` into Advanced JSON. Use the package shown in the table. Urban Mobility requests OpenStreetMap tiles, and the two Dynamic Content examples request MiniUp data. Import the `.hyperpbi` bundle in Playground.
 

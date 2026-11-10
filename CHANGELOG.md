@@ -2,6 +2,8 @@
 
 ## Interactive 3D scenes
 
+- Keep the camera idle during selection and release drag state when the pointer is lifted. Add a Groundwater Supply & Distribution dashboard with local and remote wells, a treatment plant, and three residential service points.
+
 - Add a locally bundled Three.js component and visual Scene editor to Core, Maps, and the Playground.
 - Bind scene objects to dataset rows for status, tooltips, visibility, and linked selection. Import bounded, self-contained GLB and glTF files.
 - Add the portable Pump Station Monitoring dashboard with scenario controls, synthetic readings, and linked equipment, KPIs, charts, and records.

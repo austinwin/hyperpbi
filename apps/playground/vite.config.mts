@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
     root: fileURLToPath(new URL(".", import.meta.url)),
+    cacheDir: "node_modules/.vite",
     plugins: [preact()],
     define: { "__HYPERPBI_WEB_REST_HOSTS__": JSON.stringify(parseMapHostPatterns(process.env.HYPERPBI_WEB_REST_HOSTS ?? "")) },
     resolve: {
@@ -13,6 +14,10 @@ export default defineConfig({
         }
     },
     worker: { format: "es" },
+    // Prebundle lazy scene dependencies so the first model import keeps the current dev session.
+    optimizeDeps: {
+        include: ["three", "three/examples/jsm/controls/OrbitControls.js", "three/examples/jsm/loaders/GLTFLoader.js"]
+    },
     build: {
         outDir: "dist",
         emptyOutDir: true,

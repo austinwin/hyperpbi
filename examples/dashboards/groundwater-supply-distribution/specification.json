@@ -1,0 +1,1165 @@
+{
+  "version": "2.0",
+  "title": "Groundwater Supply & Distribution",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#6eb5ff",
+    "surfaceColor": "#101e2e",
+    "textColor": "#e7f1ff",
+    "borderColor": "#2b4159",
+    "radius": 12,
+    "gap": 10
+  },
+  "app": {
+    "enabled": true,
+    "layout": "horizontal",
+    "container": "fluid",
+    "density": "compact",
+    "brand": {
+      "title": "Ridgeway Water",
+      "shortTitle": "RW",
+      "subtitle": "Groundwater operations",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Groundwater Supply & Distribution",
+      "subtitle": "Local well and remote well → treatment → distribution pump → residential service",
+      "meta": [
+        {
+          "label": "Telemetry",
+          "value": "Simulated",
+          "intent": "info"
+        }
+      ]
+    }
+  },
+  "data": {
+    "datasets": {
+      "asset_readings": {
+        "source": "powerbi",
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "descending"
+          }
+        ]
+      },
+      "snapshots": {
+        "source": "asset_readings",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Snapshot"
+        }
+      },
+      "flow_history": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Trend"
+        },
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "ascending"
+          }
+        ]
+      }
+    }
+  },
+  "styles": {
+    "globalCss": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n"
+  },
+  "components": [
+    {
+      "type": "segmentedControl",
+      "id": "groundwater_scenario",
+      "label": "Operating scenario",
+      "field": "scenario",
+      "options": [
+        "Normal flow",
+        "Remote well offline",
+        "Peak demand"
+      ],
+      "interaction": {
+        "internalMode": "filter",
+        "targets": [
+          "groundwater_scene",
+          "groundwater_wells",
+          "groundwater_raw",
+          "groundwater_delivered",
+          "groundwater_pressure",
+          "groundwater_flow",
+          "groundwater_by_asset",
+          "groundwater_assets"
+        ],
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "grid",
+      "id": "groundwater_kpis",
+      "columns": 12,
+      "children": [
+        {
+          "type": "kpi",
+          "id": "groundwater_wells",
+          "title": "Active source wells",
+          "field": "wellsactive",
+          "dataset": "snapshots",
+          "aggregation": "first",
+          "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "groundwater_raw",
+          "title": "Plant intake (GPM)",
+          "field": "rawgpm",
+          "dataset": "snapshots",
+          "aggregation": "first",
+          "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "groundwater_delivered",
+          "title": "Residential delivery (GPM)",
+          "field": "deliveredgpm",
+          "dataset": "snapshots",
+          "aggregation": "first",
+          "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "groundwater_pressure",
+          "title": "Distribution main (PSI)",
+          "field": "mainpsi",
+          "dataset": "snapshots",
+          "aggregation": "first",
+          "span": 3
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "groundwater_legend",
+      "text": "Teal pipes carry raw groundwater. Blue pipes carry treated water. Select a well, plant, pump, or house to trace its readings."
+    },
+    {
+      "type": "scene3d",
+      "id": "groundwater_scene",
+      "title": "Source to tap · hydraulic schematic",
+      "dataset": "asset_readings",
+      "height": 455,
+      "theme": "light",
+      "objectIdField": "assetid",
+      "statusField": "status",
+      "objects": [
+        {
+          "id": "well_pad_0",
+          "kind": "box",
+          "position": [
+            -6.65,
+            0.08,
+            -2.4
+          ],
+          "size": [
+            2.15,
+            0.16,
+            1.58
+          ],
+          "color": "#a9b7c4"
+        },
+        {
+          "id": "well_casing_0",
+          "kind": "cylinder",
+          "position": [
+            -7.25,
+            0.39,
+            -2.88
+          ],
+          "size": [
+            0.45,
+            0.63,
+            0.45
+          ],
+          "color": "#6d899c"
+        },
+        {
+          "id": "well_pump_0",
+          "kind": "pump",
+          "position": [
+            -6.56,
+            0.16,
+            -2.4
+          ],
+          "size": [
+            0.84,
+            0.82,
+            0.85
+          ],
+          "color": "#179587",
+          "dataKey": "W-01",
+          "label": "Local well"
+        },
+        {
+          "id": "well_lateral_0",
+          "kind": "pipe",
+          "position": [
+            -4.71,
+            0.66,
+            -2.4
+          ],
+          "size": [
+            0.22,
+            2.35,
+            0.22
+          ],
+          "color": "#179587",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "well_direction_0",
+          "kind": "cone",
+          "position": [
+            -4.68,
+            0.66,
+            -2.4
+          ],
+          "size": [
+            0.36,
+            0.48,
+            0.36
+          ],
+          "color": "#57cebb",
+          "rotation": [
+            0,
+            0,
+            -90
+          ]
+        },
+        {
+          "id": "well_pad_1",
+          "kind": "box",
+          "position": [
+            -6.65,
+            0.08,
+            2.3
+          ],
+          "size": [
+            2.15,
+            0.16,
+            1.58
+          ],
+          "color": "#b6aa96"
+        },
+        {
+          "id": "well_casing_1",
+          "kind": "cylinder",
+          "position": [
+            -7.25,
+            0.39,
+            1.8199999999999998
+          ],
+          "size": [
+            0.45,
+            0.63,
+            0.45
+          ],
+          "color": "#6d899c"
+        },
+        {
+          "id": "well_pump_1",
+          "kind": "pump",
+          "position": [
+            -6.56,
+            0.16,
+            2.3
+          ],
+          "size": [
+            0.84,
+            0.82,
+            0.85
+          ],
+          "color": "#179587",
+          "dataKey": "W-02",
+          "label": "Remote well"
+        },
+        {
+          "id": "well_lateral_1",
+          "kind": "pipe",
+          "position": [
+            -4.71,
+            0.66,
+            2.3
+          ],
+          "size": [
+            0.22,
+            2.35,
+            0.22
+          ],
+          "color": "#179587",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "well_direction_1",
+          "kind": "cone",
+          "position": [
+            -4.68,
+            0.66,
+            2.3
+          ],
+          "size": [
+            0.36,
+            0.48,
+            0.36
+          ],
+          "color": "#57cebb",
+          "rotation": [
+            0,
+            0,
+            -90
+          ]
+        },
+        {
+          "id": "well_collection",
+          "kind": "pipe",
+          "position": [
+            -3.53,
+            0.66,
+            -0.05
+          ],
+          "size": [
+            0.22,
+            4.7,
+            0.22
+          ],
+          "color": "#179587",
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "plant_inlet",
+          "kind": "pipe",
+          "position": [
+            -3.05,
+            0.66,
+            0.58
+          ],
+          "size": [
+            0.25,
+            1.05,
+            0.25
+          ],
+          "color": "#179587",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "plant_slab",
+          "kind": "box",
+          "position": [
+            -1.41,
+            0.09,
+            -0.04
+          ],
+          "size": [
+            2.85,
+            0.18,
+            2.6
+          ],
+          "color": "#9caebe"
+        },
+        {
+          "id": "plant",
+          "kind": "box",
+          "position": [
+            -1.41,
+            0.79,
+            -0.04
+          ],
+          "size": [
+            2.4,
+            1.22,
+            1.97
+          ],
+          "color": "#b9d1d9",
+          "dataKey": "TP-01",
+          "label": "Groundwater plant"
+        },
+        {
+          "id": "plant_roof",
+          "kind": "box",
+          "position": [
+            -1.41,
+            1.43,
+            -0.04
+          ],
+          "size": [
+            2.58,
+            0.17,
+            2.13
+          ],
+          "color": "#3e647e"
+        },
+        {
+          "id": "plant_door",
+          "kind": "box",
+          "position": [
+            -1.53,
+            0.56,
+            0.96
+          ],
+          "size": [
+            0.54,
+            0.76,
+            0.06
+          ],
+          "color": "#254966"
+        },
+        {
+          "id": "plant_window",
+          "kind": "box",
+          "position": [
+            -0.72,
+            0.94,
+            0.96
+          ],
+          "size": [
+            0.58,
+            0.3,
+            0.07
+          ],
+          "color": "#365e76"
+        },
+        {
+          "id": "clearwell",
+          "kind": "tank",
+          "position": [
+            0.38,
+            0,
+            -2.15
+          ],
+          "size": [
+            0.75,
+            0.68,
+            0.75
+          ],
+          "color": "#a4bfcb"
+        },
+        {
+          "id": "clearwell_connection",
+          "kind": "pipe",
+          "position": [
+            0.38,
+            0.74,
+            -0.52
+          ],
+          "size": [
+            0.22,
+            2.2,
+            0.22
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "plant_outlet",
+          "kind": "pipe",
+          "position": [
+            0.02,
+            0.74,
+            0.58
+          ],
+          "size": [
+            0.26,
+            0.66,
+            0.26
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "high_service_pump",
+          "kind": "pump",
+          "position": [
+            1.22,
+            0,
+            0.58
+          ],
+          "size": [
+            1.02,
+            1,
+            1.02
+          ],
+          "color": "#317bc5",
+          "dataKey": "P-01",
+          "label": "Distribution pump"
+        },
+        {
+          "id": "distribution_main",
+          "kind": "pipe",
+          "position": [
+            3.72,
+            0.74,
+            0.58
+          ],
+          "size": [
+            0.29,
+            3.35,
+            0.29
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "distribution_direction",
+          "kind": "cone",
+          "position": [
+            3.6,
+            0.74,
+            0.58
+          ],
+          "size": [
+            0.36,
+            0.48,
+            0.36
+          ],
+          "color": "#8bcaff",
+          "rotation": [
+            0,
+            0,
+            -90
+          ]
+        },
+        {
+          "id": "neighborhood_header",
+          "kind": "pipe",
+          "position": [
+            5.38,
+            0.74,
+            0.24
+          ],
+          "size": [
+            0.22,
+            5.36,
+            0.22
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_lot_0",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.06,
+            -2.44
+          ],
+          "size": [
+            2.24,
+            0.12,
+            1.94
+          ],
+          "color": "#a5b8a8"
+        },
+        {
+          "id": "house_0",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.62,
+            -2.44
+          ],
+          "size": [
+            1.32,
+            1,
+            1.19
+          ],
+          "color": "#c2d3db",
+          "dataKey": "R-01",
+          "label": "Maple Court"
+        },
+        {
+          "id": "house_roof_0_north",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            -2.7399999999999998
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#476887",
+          "rotation": [
+            -25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_roof_0_south",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            -2.14
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#476887",
+          "rotation": [
+            25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_door_0",
+          "kind": "box",
+          "position": [
+            6.51,
+            0.4,
+            -1.83
+          ],
+          "size": [
+            0.25,
+            0.55,
+            0.05
+          ],
+          "color": "#314a63"
+        },
+        {
+          "id": "house_window_0",
+          "kind": "box",
+          "position": [
+            7.07,
+            0.78,
+            -1.83
+          ],
+          "size": [
+            0.35,
+            0.23,
+            0.05
+          ],
+          "color": "#e1ecf5"
+        },
+        {
+          "id": "house_service_0",
+          "kind": "pipe",
+          "position": [
+            5.77,
+            0.74,
+            -2.44
+          ],
+          "size": [
+            0.15,
+            0.78,
+            0.15
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "house_lot_1",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.06,
+            0.23
+          ],
+          "size": [
+            2.24,
+            0.12,
+            1.94
+          ],
+          "color": "#a5b8a8"
+        },
+        {
+          "id": "house_1",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.62,
+            0.23
+          ],
+          "size": [
+            1.32,
+            1,
+            1.19
+          ],
+          "color": "#c2d3db",
+          "dataKey": "R-02",
+          "label": "Cedar Lane"
+        },
+        {
+          "id": "house_roof_1_north",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            -0.06999999999999998
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#5b6286",
+          "rotation": [
+            -25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_roof_1_south",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            0.53
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#5b6286",
+          "rotation": [
+            25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_door_1",
+          "kind": "box",
+          "position": [
+            6.51,
+            0.4,
+            0.84
+          ],
+          "size": [
+            0.25,
+            0.55,
+            0.05
+          ],
+          "color": "#314a63"
+        },
+        {
+          "id": "house_window_1",
+          "kind": "box",
+          "position": [
+            7.07,
+            0.78,
+            0.84
+          ],
+          "size": [
+            0.35,
+            0.23,
+            0.05
+          ],
+          "color": "#e1ecf5"
+        },
+        {
+          "id": "house_service_1",
+          "kind": "pipe",
+          "position": [
+            5.77,
+            0.74,
+            0.23
+          ],
+          "size": [
+            0.15,
+            0.78,
+            0.15
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        },
+        {
+          "id": "house_lot_2",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.06,
+            2.91
+          ],
+          "size": [
+            2.24,
+            0.12,
+            1.94
+          ],
+          "color": "#a5b8a8"
+        },
+        {
+          "id": "house_2",
+          "kind": "box",
+          "position": [
+            6.78,
+            0.62,
+            2.91
+          ],
+          "size": [
+            1.32,
+            1,
+            1.19
+          ],
+          "color": "#c2d3db",
+          "dataKey": "R-03",
+          "label": "Birch Grove"
+        },
+        {
+          "id": "house_roof_2_north",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            2.6100000000000003
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#486e72",
+          "rotation": [
+            -25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_roof_2_south",
+          "kind": "box",
+          "position": [
+            6.78,
+            1.27,
+            3.21
+          ],
+          "size": [
+            1.55,
+            0.11,
+            0.78
+          ],
+          "color": "#486e72",
+          "rotation": [
+            25,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "house_door_2",
+          "kind": "box",
+          "position": [
+            6.51,
+            0.4,
+            3.52
+          ],
+          "size": [
+            0.25,
+            0.55,
+            0.05
+          ],
+          "color": "#314a63"
+        },
+        {
+          "id": "house_window_2",
+          "kind": "box",
+          "position": [
+            7.07,
+            0.78,
+            3.52
+          ],
+          "size": [
+            0.35,
+            0.23,
+            0.05
+          ],
+          "color": "#e1ecf5"
+        },
+        {
+          "id": "house_service_2",
+          "kind": "pipe",
+          "position": [
+            5.77,
+            0.74,
+            2.91
+          ],
+          "size": [
+            0.15,
+            0.78,
+            0.15
+          ],
+          "color": "#317bc5",
+          "rotation": [
+            0,
+            0,
+            90
+          ]
+        }
+      ],
+      "statusColors": [
+        {
+          "value": "Reduced flow",
+          "color": "#db9a39"
+        },
+        {
+          "value": "Offline",
+          "color": "#7b8798"
+        }
+      ],
+      "tooltipFields": [
+        {
+          "field": "stage",
+          "label": "Stage"
+        },
+        {
+          "field": "flowgpm",
+          "label": "Flow (GPM)"
+        }
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "filter",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "assetid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "targets": [
+          "groundwater_flow",
+          "groundwater_by_asset",
+          "groundwater_assets"
+        ]
+      }
+    },
+    {
+      "type": "grid",
+      "id": "groundwater_charts",
+      "columns": 12,
+      "children": [
+        {
+          "type": "lineChart",
+          "id": "groundwater_flow",
+          "title": "Mean flow profile · GPM",
+          "dataset": "flow_history",
+          "category": "hour",
+          "measure": "flowgpm",
+          "aggregation": "avg",
+          "span": 7,
+          "height": 270,
+          "options": {
+            "color": [
+              "#6eb5ff"
+            ],
+            "textStyle": {
+              "color": "#dce8f8"
+            },
+            "legend": {
+              "textStyle": {
+                "color": "#8fa3bc"
+              }
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#1c2b40"
+                }
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "type": "barChart",
+          "id": "groundwater_by_asset",
+          "title": "Snapshot flow by asset · GPM",
+          "dataset": "snapshots",
+          "category": "assetid",
+          "measure": "flowgpm",
+          "aggregation": "first",
+          "span": 5,
+          "height": 270,
+          "options": {
+            "color": [
+              "#57cebb"
+            ],
+            "textStyle": {
+              "color": "#dce8f8"
+            },
+            "legend": {
+              "textStyle": {
+                "color": "#8fa3bc"
+              }
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#1c2b40"
+                }
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "internalScope": "others",
+            "externalMode": "selection",
+            "field": "assetid",
+            "selectionMode": "replace",
+            "multiSelect": true,
+            "showSelector": false,
+            "clearOnSecondClick": true,
+            "targets": [
+              "groundwater_scene"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "groundwater_assets",
+      "title": "Source-to-tap asset register",
+      "dataset": "snapshots",
+      "maxRows": 21,
+      "columns": [
+        {
+          "field": "assetid",
+          "title": "ID"
+        },
+        {
+          "field": "asset",
+          "title": "Asset"
+        },
+        {
+          "field": "stage",
+          "title": "Stage"
+        },
+        {
+          "field": "scenario",
+          "title": "Scenario"
+        },
+        {
+          "field": "status",
+          "title": "Status"
+        },
+        {
+          "field": "flowgpm",
+          "title": "Flow (GPM)"
+        }
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "assetid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "targets": [
+          "groundwater_scene"
+        ]
+      }
+    }
+  ]
+}

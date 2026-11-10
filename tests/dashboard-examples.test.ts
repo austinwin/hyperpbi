@@ -46,6 +46,7 @@ const expectedSlugs = [
     "capital-project-controls",
     "digital-banking-overview",
     "dynamic-gis-analytics",
+    "groundwater-supply-distribution",
     "industrial-network-telemetry",
     "media-web-performance",
     "patient-care-operations",
