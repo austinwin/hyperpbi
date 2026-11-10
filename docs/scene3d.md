@@ -69,11 +69,47 @@ All currently available rows with the same key contribute to selection. For a gr
 }
 ```
 
+## Animate equipment and imported models
+
+Select an object in **Visual Inspector → Scene editor → Animations**, then choose **Add animation**. Each object may have up to four declarative behaviors:
+
+- **Rotate:** spin around the local X, Y, or Z axis at fixed RPM or bind RPM to a numeric data field. Negative RPM reverses direction.
+- **Translate:** oscillate along one axis by an amplitude in scene units, over a cycle specified in seconds.
+- **Scale / Pulse:** animate one scale axis or the entire object without changing the saved dimensions.
+- **Visibility / blink:** alternate visibility every half-cycle, useful for status beacons.
+- **Imported glTF clip:** play a rigid-node transform clip included in a self-contained GLB/glTF model. Choose a named clip or leave blank for the first clip; set a playback-rate multiplier.
+
+Use **Run when data field** to gate any behavior on the object's matching data row. A Boolean true or positive numeric value runs the motion. For status strings such as `Running`, set **Run when equals** to the exact typed value. When a row is filtered out or changes to stopped, its motion resets to the authored pose. The Power BI model is never controlled or modified.
+
+```json
+{
+  "id": "fan_p101",
+  "kind": "fan",
+  "label": "P-101 cooling fan",
+  "dataKey": "P-101",
+  "position": [0, 2, 1],
+  "animations": [
+    {
+      "kind": "rotate",
+      "axis": "z",
+      "rpm": 75,
+      "rpmField": "motorloadpct",
+      "enabledField": "status",
+      "enabledValue": "Running"
+    }
+  ]
+}
+```
+
+Up to four behaviors are configured per object, sharing the scene's existing motion budget. Global motion settings, system reduced-motion preferences, offscreen pausing, and WebGL availability apply. A bound object requires a matching `objectIdField` and `dataKey`. The engine renders only a bounded set of animated assets at a time. [Explore the interactive animation studio](https://hyperpbi.com/examples/scene3d-animation-studio).
+
+Imported clips are restricted to **at most four** GLB/glTF clips, with up to 24 rigid-node transform channels per clip and 2,048 keyframes per channel. Only LINEAR or STEP interpolation for translation, rotation, or scale is supported. Skinned animation, morph targets, external resources, and embedded scripts remain prohibited. Each model must still satisfy the size and geometry budgets below.
+
 ## Import models
 
-The Inspector embeds the file bytes in `model: { "format": "glb", "data": "<base64 bytes>" }`. For a self-contained JSON glTF file, use `"format": "gltf"`. In either case, the model travels with the specification. Export a single static glTF 2.0 scene with triangle meshes and embedded buffers. PNG and JPEG textures may be embedded. The component accepts core glTF plus unlit materials and texture transforms. Model normalization fits the imported geometry to the specified dimensions, so set all three axes to preserve the proportions you want.
+The Inspector embeds the file bytes in `model: { "format": "glb", "data": "<base64 bytes>" }`. For a self-contained JSON glTF file, use `"format": "gltf"`. In either case, the model travels with the specification. Export a self-contained glTF 2.0 scene with triangle meshes and embedded buffers. It may include bounded rigid-node transform clips. PNG and JPEG textures may be embedded. The component accepts core glTF plus unlit materials and texture transforms. Model normalization fits the imported geometry to the specified dimensions, so set all three axes to preserve the proportions you want.
 
-Each dashboard supports up to eight scenes. A scene accepts up to 80 objects and four model files. Each file is limited to 768 KiB, 96 primitive draw calls, 80,000 triangles, and textures up to 1,024 × 1,024 pixels with at most two megapixels total. External URIs, Draco and other compressed formats, animations, skins, cameras, and scripts are rejected. Three.js and its loaders ship locally. Scenes use WebGL 2 and pause rendering when idle or offscreen. For a dense dashboard, use fewer objects, keep textures small, and turn off shadows where they add little. [Security boundaries](security.md)
+Each dashboard supports up to eight scenes. A scene accepts up to 80 objects and four model files. Each file is limited to 768 KiB, 96 primitive draw calls, 80,000 triangles, and textures up to 1,024 × 1,024 pixels with at most two megapixels total. External URIs, Draco and other compressed formats, skinned animations, morph targets, cameras, and scripts are rejected. Bounded rigid-node glTF transform clips are supported. Three.js and its loaders ship locally. Scenes use WebGL 2 and pause rendering when idle or offscreen. For a dense dashboard, use fewer objects, keep textures small, and turn off shadows where they add little. [Security boundaries](security.md)
 
 ## Verify Power BI behavior
 
