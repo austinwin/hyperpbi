@@ -44,17 +44,17 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     const detail = objects.find(state => state.visible && state.object.id === (hovered ?? focused)) ?? own.find(state => state.visible);
     const tooltips = component.tooltipFields ?? [];
     const motion = context.config.motion;
-    const flowAllowed = Boolean(component.flowField) && motion?.enabled !== false && motion?.reducedMotion !== "always-reduce" &&
+    const flowAllowed = Boolean(component.flowField || component.objects.some(object => object.animations?.length)) && motion?.enabled !== false && motion?.reducedMotion !== "always-reduce" &&
         (motion?.reducedMotion === "never-reduce" || !reducedMotion) && (motion?.maxConcurrentAnimations ?? 12) > 0;
     const flowBudget = flowAllowed && !flowPaused ? Math.min(24, motion?.maxConcurrentAnimations ?? 12) : 0;
     useEffect(() => {
-        if (!component.flowField || typeof matchMedia !== "function") return;
+        if (!(component.flowField || component.objects.some(object => object.animations?.length)) || typeof matchMedia !== "function") return;
         const query = matchMedia("(prefers-reduced-motion: reduce)");
         const sync = () => setReducedMotion(query.matches);
         sync();
         query.addEventListener("change", sync);
         return () => query.removeEventListener("change", sync);
-    }, [component.flowField]);
+    }, [component.flowField, component.objects]);
 
     function activate(state: SceneObjectState, event: Event) {
         if (component.disabled || !state.visible || !state.selectable) return;
