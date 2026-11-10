@@ -6,6 +6,7 @@ import { validateSchema } from "../src/schema/validateSchema";
 import type { Scene3dComponent } from "../src/schema/scene3dSchema";
 import { inspectModelAsset, openModelAsset } from "../src/components/scene3d/modelAsset";
 import { resolveSceneObjects } from "../src/components/scene3d/sceneData";
+import { resolveActiveSceneMotions, sceneMotionPose } from "../src/components/scene3d/sceneMotion";
 import { HyperPbiRoot } from "../src/render/HyperPbiRoot";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
 
@@ -128,5 +129,49 @@ describe("embedded glTF asset policy", () => {
         expect(() => inspectModelAsset("gltf", encode({ ...triangle, extensionsUsed: ["KHR_draco_mesh_compression"] }))).toThrow(/extension/);
         expect(() => inspectModelAsset("gltf", encode({ ...triangle, accessors: [{ ...triangle.accessors[0], sparse: {} }] }))).toThrow(/sparse/);
         expect(() => inspectModelAsset("gltf", encode({ ...triangle, nodes: [{ mesh: 0, children: [0] }] }))).toThrow(/cyclic/);
+    });
+});
+
+describe("Scene3D declarative animations", () => {
+    it("drives fan RPM from a matching row and pauses when the flow stops", () => {
+        const fan = { id: "fan", kind: "fan" as const, dataKey: "P-1", position: [1, 2, 3] as [number, number, number],
+            animations: [{ kind: "rotate" as const, axis: "z" as const, rpm: 45, rpmField: "rpm", enabledField: "flow" }] };
+        const motions = resolveActiveSceneMotions(fan, { flow: 1200, rpm: 90 });
+        expect(motions).toHaveLength(1);
+        expect(motions[0].rpm).toBe(90);
+        expect(sceneMotionPose(fan, motions, 1).rotation).toEqual([0, 0, 180]);
+        expect(resolveActiveSceneMotions(fan, { flow: 0, rpm: 90 })).toHaveLength(0);
+        expect(sceneMotionPose(fan, [], 4).rotation).toEqual([0, 0, 0]);
+    });
+
+    it("combines translation, pulsing and blinking without editing base transforms", () => {
+        const rotor = { id: "test", kind: "box" as const, size: [2, 3, 4] as [number, number, number], animations: [
+            { kind: "translate" as const, axis: "x" as const, amplitude: 2, period: 4 },
+            { kind: "pulse" as const, amplitude: 0.5, period: 4 },
+            { kind: "blink" as const, period: 4 },
+        ] };
+        const motions = resolveActiveSceneMotions(rotor);
+        const first = sceneMotionPose(rotor, motions, 1);
+        expect(first.position[0]).toBeCloseTo(2);
+        expect(first.size).toEqual([3, 4.5, 6]);
+        expect(first.visible).toBe(true);
+        expect(sceneMotionPose(rotor, motions, 3).visible).toBe(false);
+        expect(rotor.size).toEqual([2, 3, 4]);
+    });
+
+    it("validates animation properties, imported clip restrictions and object binding", () => {
+        const result = validateSchema({ version: "2.0", components: [{
+            type: "scene3d", id: "animations",
+            objects: [{ id: "fan", kind: "fan", animations: [
+                { kind: "rotate", rpm: 2600 }, { kind: "clip", clipName: "Rotor" },
+                { kind: "pulse", enabledField: "status", enabledValue: "Running" },
+            ] }],
+        }] });
+        expect(result.valid).toBe(false);
+        expect(result.diagnostics?.map(item => item.path)).toEqual(expect.arrayContaining([
+            "/components/0/objects/0/animations/0/rpm",
+            "/components/0/objects/0/animations/1/kind",
+            "/components/0/objects/0/animations/2/enabledField",
+        ]));
     });
 });
