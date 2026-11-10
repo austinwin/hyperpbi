@@ -5,10 +5,36 @@ export type Scene3dKind = typeof scene3dKinds[number];
 export type Scene3dVector = [number, number, number];
 export type Scene3dKey = string | number | boolean;
 
+export const scene3dAnimationKinds = ["rotate", "translate", "scale", "pulse", "blink", "clip"] as const;
+export type Scene3dAnimationKind = typeof scene3dAnimationKinds[number];
+
+/** Declarative, bounded equipment motion. No user-authored JavaScript is executed. */
+export interface Scene3dAnimation {
+    kind: Scene3dAnimationKind;
+    axis?: "x" | "y" | "z";
+    /** Rotation speed in revolutions per minute; negative values reverse direction. */
+    rpm?: number;
+    /** Numeric field on the object's matching data row, overriding rpm. */
+    rpmField?: string;
+    /** Translation in scene units or relative scale change for scale/pulse. */
+    amplitude?: number;
+    /** Oscillation or blink cycle duration in seconds. */
+    period?: number;
+    /** Animation plays only when the matching data value satisfies enabledValue or is true/positive. */
+    enabledField?: string;
+    enabledValue?: Scene3dKey;
+    /** Optional imported glTF clip name; when omitted, play the first clip. */
+    clipName?: string;
+    /** glTF clip playback-rate multiplier. */
+    rate?: number;
+}
+
 export const scene3dLimits = {
     scenes: 8,
     objects: 80,
     models: 4,
+    animationsPerObject: 4,
+    clipsPerModel: 4,
     modelBytes: 768 * 1024,
     statusColors: 12,
     tooltipFields: 8,
@@ -33,6 +59,7 @@ export interface Scene3dObject {
     selectable?: boolean;
     /** Base64 bytes of a self-contained glTF 2.0 file. */
     model?: { format: "glb" | "gltf"; data: string };
+    animations?: Scene3dAnimation[];
 }
 
 export interface Scene3dComponent extends ComponentBase {
