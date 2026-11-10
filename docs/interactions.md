@@ -4,6 +4,21 @@ Root calculated fields can participate in internal filtering/highlighting and re
 
 HyperPBI has three independent declarative systems. A component may use none, one, or more of them; an interaction object is not required on every component.
 
+## Quick setup and the two keys
+
+In **Visual Inspector → Connect components**, choose **Connect to other components (recommended)** and then edit:
+
+1. **Within HyperPBI:** none, highlight, or filter.
+2. **Linked components:** all others or chosen receiving component IDs.
+3. **Other Power BI visuals:** automatic, selection by identity, filter by model column, or none.
+4. **Interaction field key:** selected Field Manifest alias or automatic field/category value when available.
+
+No extra global interaction key is required. A component's unique `id` determines the source and the optional receiver list (`interaction.targets`). `interaction.field` identifies the source data attribute. For **external filter**, the field must also have valid Power BI table/column metadata. For **external selection**, the host needs selection identities; ordinary text keys do not create them.
+
+The guided editor writes only existing `interaction` properties, validates the whole dashboard, preserves stable IDs, and supports Undo/Redo. It defaults internal linking to `internalScope: "others"` so the source does not disappear when filtering recipients. Choose explicit targets for selective linking; those targets do not restrict external Power BI interactions.
+
+See the complete [README interaction example](../README.md#connect-hyperpbi-components-and-power-bi-visuals). When troubleshooting, test local interactions in Playground, then verify external behavior **inside Power BI** with actual Values bindings and Edit interactions. The editor reports when the filter field lacks a direct model-column target or when selection requires Power BI row identities. A "request sent" status means the host accepted an interaction request, not that every other visual necessarily responded.
+
 ## 1. UI actions
 
 `uiAction` changes interface state and never directly sends a Power BI selection/filter:
