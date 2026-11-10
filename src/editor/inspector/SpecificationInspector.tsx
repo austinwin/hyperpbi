@@ -34,6 +34,8 @@ import { StudioCheckbox } from "../ui/StudioCheckbox";
 import { StudioSection } from "../ui/StudioSection";
 import { StudioStatusChip } from "../ui/StudioStatusChip";
 import { ChartConfigurationPanel } from "./ChartConfigurationPanel";
+import { InteractionQuickSetup } from "./InteractionQuickSetup";
+import { externalFilterTargetFor } from "../../powerbi/externalFilters";
 import "../../styles/hyperpbi-chart-authoring.css";
 import { createBoundComponent } from "./createBoundComponent";
 
@@ -1071,6 +1073,16 @@ export function SpecificationInspector({
               <div class="hp-inspector-property-groups">
                 <label>Search properties<input type="search" aria-label="Search properties" value={propertySearch} onInput={event=>setPropertySearch(event.currentTarget.value)} /></label>
                 {descriptor?.category === "Charts" && descriptor.schema.allowed.includes("chartStyle") && <ChartConfigurationPanel key={String(item.id)} item={item} fields={Object.keys(scopeFields).length?scopeFields:effectiveData.fields} onChange={change} onReplace={changes=>commit(updateComponent(parsed,selectedComponentId,changes))} dataControls={(controlsByGroup.get("Data")??[]).map(renderControl)} />}
+                <InteractionQuickSetup
+                  component={item}
+                  components={tree.map(entry => ({ id: entry.id, type: entry.type }))}
+                  fields={Object.values(scopeFields).map(field => {
+                    const key = datasetName === "powerbi" ? (aliasByKey.get(field.key)?.alias ?? field.key) : field.key;
+                    const target = externalFilterTargetFor(field);
+                    return { key, label: field.displayName, powerBiTarget: target ? target.table + "." + target.column : undefined };
+                  })}
+                  onChange={next => change("interaction", next)}
+                />
                 {propertyGroups.map((group) => {
                   if(group === "Data" && descriptor?.category === "Charts" && descriptor.schema.allowed.includes("chartStyle")) return null;
                   const controls = controlsByGroup.get(group) ?? [];
