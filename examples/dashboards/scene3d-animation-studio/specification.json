@@ -1,0 +1,1245 @@
+{
+  "version": "2.0",
+  "title": "3D Animation Studio",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#54bcff",
+    "accentColor": "#29b99a",
+    "surfaceColor": "#101e2e",
+    "textColor": "#e7f1ff",
+    "borderColor": "#2b4159",
+    "successColor": "#29b99a",
+    "warningColor": "#efaa49",
+    "radius": 12,
+    "gap": 10
+  },
+  "app": {
+    "enabled": true,
+    "layout": "horizontal",
+    "container": "fluid",
+    "density": "compact",
+    "brand": {
+      "title": "Northbank Water",
+      "shortTitle": "NW",
+      "subtitle": "Operations",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Interactive 3D Animation Studio",
+      "subtitle": "Rotating cooling fans, reciprocating actuator, status beacons and live data bindings",
+      "meta": [
+        {
+          "label": "Telemetry",
+          "value": "Simulated",
+          "intent": "info"
+        }
+      ]
+    }
+  },
+  "data": {
+    "datasets": {
+      "equipment_readings": {
+        "source": "powerbi",
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "descending"
+          }
+        ]
+      },
+      "snapshots": {
+        "source": "equipment_readings",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Snapshot"
+        }
+      },
+      "pressure_history": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Trend"
+        },
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "ascending"
+          }
+        ]
+      }
+    }
+  },
+  "styles": {
+    "globalCss": "\n.hp-app-main,.hp-grid { background:#08111f; }\n.hp-navbar,.hp-sidebar-app,.hp-page-header,.hp-app-footer { background:#0b1525; border-color:#1c2a3d; }\n.hp-card,.hp-metric,.hp-custom-body,.hp-table-wrap { background:#0e1929; border-color:#203047; box-shadow:0 12px 30px rgb(0 0 0 / 22%); }\n.hp-card-header { border-color:#203047; }\n.hp-metric { border:1px solid #203047; border-left:0; }\n.hp-metric-label { color:#8596ad; text-transform:none; letter-spacing:0; }\n.hp-metric-value { color:#f5f8ff; font-size:23px; }\n.hp-table th { background:#111e30; color:#9fb0c7; }\n.hp-table td { border-color:#1b2a3d; }\n.hp-app-footer { border-top:1px solid #1c2a3d; }\n"
+  },
+  "components": [
+    {
+      "type": "segmentedControl",
+      "id": "operating_scenario",
+      "label": "Operating scenario",
+      "field": "scenario",
+      "options": [
+        "Normal duty",
+        "Peak demand",
+        "Maintenance"
+      ],
+      "interaction": {
+        "internalMode": "filter",
+        "targets": [
+          "station_scene",
+          "station_online",
+          "station_flow",
+          "station_pressure",
+          "station_alerts",
+          "pressure_trend",
+          "motor_load",
+          "asset_register"
+        ],
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "text",
+      "id": "motion_guide",
+      "text": "Choose an operating scenario, then watch motor-driven fans spin, a warning light pulse, and a stopped pump's beacon blink. Select any 3D asset to filter the linked charts. Open Visual Inspector to edit or add animations without writing code."
+    },
+    {
+      "type": "grid",
+      "id": "station_kpis",
+      "columns": 12,
+      "children": [
+        {
+          "type": "kpi",
+          "id": "station_online",
+          "title": "Pumps online",
+          "dataset": "snapshots",
+          "field": "stationonline",
+          "aggregation": "first",
+          "span": 3,
+          "intent": "success"
+        },
+        {
+          "type": "kpi",
+          "id": "station_flow",
+          "title": "Station flow (GPM)",
+          "dataset": "snapshots",
+          "field": "stationflow",
+          "aggregation": "first",
+          "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "station_pressure",
+          "title": "Discharge pressure (PSI)",
+          "dataset": "snapshots",
+          "field": "stationpressure",
+          "aggregation": "first",
+          "span": 3
+        },
+        {
+          "type": "kpi",
+          "id": "station_alerts",
+          "title": "Active alerts",
+          "dataset": "snapshots",
+          "field": "stationalerts",
+          "aggregation": "first",
+          "span": 3,
+          "intent": "warning"
+        }
+      ]
+    },
+    {
+      "type": "scene3d",
+      "id": "station_scene",
+      "title": "Animated equipment · rotation, translation, pulse and visibility",
+      "dataset": "equipment_readings",
+      "objectIdField": "equipmentid",
+      "statusField": "status",
+      "statusColors": [
+        {
+          "value": "Running",
+          "color": "#29b99a"
+        },
+        {
+          "value": "Warning",
+          "color": "#efaa49"
+        },
+        {
+          "value": "Stopped",
+          "color": "#8298ae"
+        }
+      ],
+      "tooltipFields": [
+        {
+          "field": "equipment",
+          "label": "Equipment"
+        },
+        {
+          "field": "flowgpm",
+          "label": "Flow (GPM)"
+        },
+        {
+          "field": "pressurepsi",
+          "label": "Pressure (PSI)"
+        },
+        {
+          "field": "motorloadpct",
+          "label": "Motor load (%)"
+        }
+      ],
+      "objects": [
+        {
+          "id": "P-101",
+          "kind": "pump",
+          "label": "P-101",
+          "dataKey": "P-101",
+          "position": [
+            -3.3,
+            0,
+            0.55
+          ]
+        },
+        {
+          "id": "P-102",
+          "kind": "pump",
+          "label": "P-102",
+          "dataKey": "P-102",
+          "position": [
+            -1.1,
+            0,
+            0.55
+          ]
+        },
+        {
+          "id": "P-103",
+          "kind": "pump",
+          "label": "P-103",
+          "dataKey": "P-103",
+          "position": [
+            1.1,
+            0,
+            0.55
+          ]
+        },
+        {
+          "id": "P-104",
+          "kind": "pump",
+          "label": "P-104",
+          "dataKey": "P-104",
+          "position": [
+            3.3,
+            0,
+            0.55
+          ]
+        },
+        {
+          "id": "vessel_0",
+          "kind": "tank",
+          "label": "V-201",
+          "position": [
+            -2.55,
+            0,
+            -2.35
+          ],
+          "size": [
+            1.05,
+            0.94,
+            1.05
+          ]
+        },
+        {
+          "id": "vessel_inlet_0",
+          "kind": "pipe",
+          "position": [
+            -2.55,
+            0.46,
+            -1.17
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.31,
+            0.76,
+            0.31
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "vessel_1",
+          "kind": "tank",
+          "label": "V-202",
+          "position": [
+            2.55,
+            0,
+            -2.35
+          ],
+          "size": [
+            1.05,
+            0.94,
+            1.05
+          ]
+        },
+        {
+          "id": "vessel_inlet_1",
+          "kind": "pipe",
+          "position": [
+            2.55,
+            0.46,
+            -1.17
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.31,
+            0.76,
+            0.31
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "inlet_header",
+          "kind": "pipe",
+          "position": [
+            0,
+            0.46,
+            -0.92
+          ],
+          "rotation": [
+            0,
+            0,
+            90
+          ],
+          "size": [
+            0.34,
+            8.7,
+            0.34
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "inlet_feed",
+          "kind": "pipe",
+          "position": [
+            -4.35,
+            0.46,
+            -2.04
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.34,
+            2.3,
+            0.34
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "outlet_header",
+          "kind": "pipe",
+          "position": [
+            0,
+            1.39,
+            2.2
+          ],
+          "rotation": [
+            0,
+            0,
+            90
+          ],
+          "size": [
+            0.33,
+            9.3,
+            0.33
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "outlet_feed",
+          "kind": "pipe",
+          "position": [
+            4.57,
+            1.39,
+            3
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.33,
+            1.58,
+            0.33
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "suction_0",
+          "kind": "pipe",
+          "position": [
+            -4.05,
+            0.46,
+            -0.31
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.23,
+            1.24,
+            0.23
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "riser_0",
+          "kind": "pipe",
+          "position": [
+            -3.8899999999999997,
+            1.41,
+            0.55
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            0.22,
+            0.27,
+            0.22
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "discharge_0",
+          "kind": "pipe",
+          "position": [
+            -3.8899999999999997,
+            1.39,
+            1.39
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.21,
+            1.65,
+            0.21
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "flange_0",
+          "kind": "pipe",
+          "position": [
+            -3.8899999999999997,
+            1.39,
+            1.77
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.35,
+            0.12,
+            0.35
+          ],
+          "color": "#90aabc",
+          "metalness": 0.33
+        },
+        {
+          "id": "suction_1",
+          "kind": "pipe",
+          "position": [
+            -1.85,
+            0.46,
+            -0.31
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.23,
+            1.24,
+            0.23
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "riser_1",
+          "kind": "pipe",
+          "position": [
+            -1.69,
+            1.41,
+            0.55
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            0.22,
+            0.27,
+            0.22
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "discharge_1",
+          "kind": "pipe",
+          "position": [
+            -1.69,
+            1.39,
+            1.39
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.21,
+            1.65,
+            0.21
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "flange_1",
+          "kind": "pipe",
+          "position": [
+            -1.69,
+            1.39,
+            1.77
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.35,
+            0.12,
+            0.35
+          ],
+          "color": "#90aabc",
+          "metalness": 0.33
+        },
+        {
+          "id": "suction_2",
+          "kind": "pipe",
+          "position": [
+            0.3500000000000001,
+            0.46,
+            -0.31
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.23,
+            1.24,
+            0.23
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "riser_2",
+          "kind": "pipe",
+          "position": [
+            0.5100000000000001,
+            1.41,
+            0.55
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            0.22,
+            0.27,
+            0.22
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "discharge_2",
+          "kind": "pipe",
+          "position": [
+            0.5100000000000001,
+            1.39,
+            1.39
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.21,
+            1.65,
+            0.21
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "flange_2",
+          "kind": "pipe",
+          "position": [
+            0.5100000000000001,
+            1.39,
+            1.77
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.35,
+            0.12,
+            0.35
+          ],
+          "color": "#90aabc",
+          "metalness": 0.33
+        },
+        {
+          "id": "suction_3",
+          "kind": "pipe",
+          "position": [
+            2.55,
+            0.46,
+            -0.31
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.23,
+            1.24,
+            0.23
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "riser_3",
+          "kind": "pipe",
+          "position": [
+            2.71,
+            1.41,
+            0.55
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            0.22,
+            0.27,
+            0.22
+          ],
+          "color": "#3b94bb",
+          "metalness": 0.33
+        },
+        {
+          "id": "discharge_3",
+          "kind": "pipe",
+          "position": [
+            2.71,
+            1.39,
+            1.39
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.21,
+            1.65,
+            0.21
+          ],
+          "color": "#477fae",
+          "metalness": 0.33
+        },
+        {
+          "id": "flange_3",
+          "kind": "pipe",
+          "position": [
+            2.71,
+            1.39,
+            1.77
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "size": [
+            0.35,
+            0.12,
+            0.35
+          ],
+          "color": "#90aabc",
+          "metalness": 0.33
+        },
+        {
+          "id": "header_support_0",
+          "kind": "box",
+          "position": [
+            -4.6,
+            0.61,
+            2.2
+          ],
+          "size": [
+            0.14,
+            1.22,
+            0.16
+          ],
+          "color": "#66829a"
+        },
+        {
+          "id": "header_support_1",
+          "kind": "box",
+          "position": [
+            0,
+            0.61,
+            2.2
+          ],
+          "size": [
+            0.14,
+            1.22,
+            0.16
+          ],
+          "color": "#66829a"
+        },
+        {
+          "id": "header_support_2",
+          "kind": "box",
+          "position": [
+            4.6,
+            0.61,
+            2.2
+          ],
+          "size": [
+            0.14,
+            1.22,
+            0.16
+          ],
+          "color": "#66829a"
+        },
+        {
+          "id": "fan_stand_P_101",
+          "kind": "box",
+          "position": [
+            -3.3,
+            1.65,
+            1.4
+          ],
+          "size": [
+            0.12,
+            0.75,
+            0.14
+          ],
+          "color": "#738da8"
+        },
+        {
+          "id": "fan_P_101",
+          "kind": "fan",
+          "label": "Cooling fan P-101",
+          "dataKey": "P-101",
+          "position": [
+            -3.3,
+            2.12,
+            1.4
+          ],
+          "size": [
+            0.88,
+            0.88,
+            0.88
+          ],
+          "color": "#5fc6ed",
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 75,
+              "rpmField": "motorloadpct",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "fan_stand_P_102",
+          "kind": "box",
+          "position": [
+            -1.1,
+            1.65,
+            1.4
+          ],
+          "size": [
+            0.12,
+            0.75,
+            0.14
+          ],
+          "color": "#738da8"
+        },
+        {
+          "id": "fan_P_102",
+          "kind": "fan",
+          "label": "Cooling fan P-102",
+          "dataKey": "P-102",
+          "position": [
+            -1.1,
+            2.12,
+            1.4
+          ],
+          "size": [
+            0.88,
+            0.88,
+            0.88
+          ],
+          "color": "#5fc6ed",
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 75,
+              "rpmField": "motorloadpct",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "fan_stand_P_103",
+          "kind": "box",
+          "position": [
+            1.1,
+            1.65,
+            1.4
+          ],
+          "size": [
+            0.12,
+            0.75,
+            0.14
+          ],
+          "color": "#738da8"
+        },
+        {
+          "id": "fan_P_103",
+          "kind": "fan",
+          "label": "Cooling fan P-103",
+          "dataKey": "P-103",
+          "position": [
+            1.1,
+            2.12,
+            1.4
+          ],
+          "size": [
+            0.88,
+            0.88,
+            0.88
+          ],
+          "color": "#5fc6ed",
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 75,
+              "rpmField": "motorloadpct",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "fan_stand_P_104",
+          "kind": "box",
+          "position": [
+            3.3,
+            1.65,
+            1.4
+          ],
+          "size": [
+            0.12,
+            0.75,
+            0.14
+          ],
+          "color": "#738da8"
+        },
+        {
+          "id": "fan_P_104",
+          "kind": "fan",
+          "label": "Cooling fan P-104",
+          "dataKey": "P-104",
+          "position": [
+            3.3,
+            2.12,
+            1.4
+          ],
+          "size": [
+            0.88,
+            0.88,
+            0.88
+          ],
+          "color": "#5fc6ed",
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 75,
+              "rpmField": "motorloadpct",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "motion_alert",
+          "kind": "sphere",
+          "label": "Warning pulse",
+          "dataKey": "P-103",
+          "position": [
+            1.1,
+            3.35,
+            1.4
+          ],
+          "size": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "color": "#ffac4b",
+          "animations": [
+            {
+              "kind": "pulse",
+              "amplitude": 0.65,
+              "period": 1.1,
+              "enabledField": "status",
+              "enabledValue": "Warning"
+            }
+          ]
+        },
+        {
+          "id": "motion_actuator",
+          "kind": "box",
+          "label": "Reciprocating actuator",
+          "dataKey": "P-101",
+          "position": [
+            -3.3,
+            1.18,
+            1.45
+          ],
+          "size": [
+            0.34,
+            0.3,
+            0.3
+          ],
+          "color": "#7ed7a7",
+          "animations": [
+            {
+              "kind": "translate",
+              "axis": "x",
+              "amplitude": 0.25,
+              "period": 2.4,
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "motion_indicator",
+          "kind": "sphere",
+          "label": "Status beacon",
+          "dataKey": "P-102",
+          "position": [
+            -1.1,
+            3.3,
+            1.4
+          ],
+          "size": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "color": "#f7d45b",
+          "animations": [
+            {
+              "kind": "blink",
+              "period": 1.2,
+              "enabledField": "status",
+              "enabledValue": "Stopped"
+            }
+          ]
+        },
+        {
+          "id": "motion_expansion",
+          "kind": "box",
+          "label": "Expansion test",
+          "dataKey": "P-104",
+          "position": [
+            3.3,
+            3.35,
+            1.4
+          ],
+          "size": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "color": "#a9a0f4",
+          "animations": [
+            {
+              "kind": "scale",
+              "axis": "y",
+              "amplitude": 0.45,
+              "period": 1.6,
+              "enabledField": "flowgpm"
+            }
+          ]
+        }
+      ],
+      "height": 490,
+      "theme": "dark",
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "filter",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "equipmentid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "targets": [
+          "pressure_trend",
+          "motor_load",
+          "asset_register"
+        ]
+      }
+    },
+    {
+      "type": "grid",
+      "id": "station_trends",
+      "columns": 12,
+      "children": [
+        {
+          "type": "lineChart",
+          "id": "pressure_trend",
+          "title": "Discharge pressure · PSI",
+          "dataset": "pressure_history",
+          "category": "hour",
+          "measure": "pressurepsi",
+          "aggregation": "avg",
+          "span": 7,
+          "height": 270,
+          "options": {
+            "color": [
+              "#58bcf4"
+            ],
+            "textStyle": {
+              "color": "#dce8f8"
+            },
+            "legend": {
+              "textStyle": {
+                "color": "#8fa3bc"
+              }
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#1c2b40"
+                }
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "type": "barChart",
+          "id": "motor_load",
+          "title": "Motor utilization · %",
+          "dataset": "snapshots",
+          "category": "equipmentid",
+          "measure": "motorloadpct",
+          "aggregation": "first",
+          "span": 5,
+          "height": 270,
+          "options": {
+            "color": [
+              "#36c3ae"
+            ],
+            "textStyle": {
+              "color": "#dce8f8"
+            },
+            "legend": {
+              "textStyle": {
+                "color": "#8fa3bc"
+              }
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#758aa5"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#1c2b40"
+                }
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#263852"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "internalScope": "others",
+            "externalMode": "selection",
+            "field": "equipmentid",
+            "selectionMode": "replace",
+            "multiSelect": true,
+            "showSelector": false,
+            "clearOnSecondClick": true,
+            "targets": [
+              "station_scene"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "asset_register",
+      "title": "Snapshot register",
+      "dataset": "snapshots",
+      "maxRows": 12,
+      "columns": [
+        {
+          "field": "equipmentid",
+          "title": "Asset"
+        },
+        {
+          "field": "equipment",
+          "title": "Equipment"
+        },
+        {
+          "field": "scenario",
+          "title": "Scenario"
+        },
+        {
+          "field": "status",
+          "title": "Status"
+        },
+        {
+          "field": "flowgpm",
+          "title": "Flow (GPM)"
+        },
+        {
+          "field": "pressurepsi",
+          "title": "Pressure (PSI)"
+        },
+        {
+          "field": "motorloadpct",
+          "title": "Motor load (%)"
+        }
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "equipmentid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "targets": [
+          "station_scene"
+        ]
+      }
+    }
+  ]
+}
