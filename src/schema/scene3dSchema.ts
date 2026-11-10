@@ -1,6 +1,6 @@
 import type { ComponentBase } from "./hyperpbiSchema";
 
-export const scene3dKinds = ["box", "cylinder", "sphere", "cone", "pipe", "pump", "tank", "model"] as const;
+export const scene3dKinds = ["box", "cylinder", "sphere", "cone", "pipe", "pump", "tank", "fan", "model"] as const;
 export type Scene3dKind = typeof scene3dKinds[number];
 export type Scene3dVector = [number, number, number];
 export type Scene3dKey = string | number | boolean;
