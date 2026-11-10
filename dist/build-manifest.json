@@ -2,89 +2,111 @@
   "schemaVersion": 1,
   "releaseVersion": "1.0.2",
   "powerBiVersion": "1.0.2.0",
-  "activeComponents": 84,
-  "sourceRevision": "999e59219a1946b0c33dc8eb7fda787866a8e93d",
-  "baselineRevision": "eea636061b347822ac5940ba3cb23853f8a422db",
-  "builtAt": "2026-11-10T03:08:08.034784+00:00",
+  "activeComponents": 85,
+  "sourceRevision": "a6438edb4aea092a9ebce6b396f49148143dfb46",
+  "baselineRevision": "a4288c08bcfa22e9d19348b2df1115332dac6bbc",
+  "builtAt": "2026-11-10T04:24:09.321Z",
   "verification": {
-    "unitTests": 869,
+    "unitTests": 875,
     "runtimeBrowserTests": 61,
-    "playgroundBrowserTests": 4,
+    "playgroundBrowserTests": 7,
     "packageCapabilities": "passed",
     "steps": [
       {
         "name": "types:runtime",
-        "seconds": 23.96,
+        "seconds": 47.51,
         "exitCode": 0
       },
       {
         "name": "types:web",
-        "seconds": 32.57,
+        "seconds": 70.3,
         "exitCode": 0
       },
       {
         "name": "types:playground",
-        "seconds": 10.06,
+        "seconds": 15.9,
         "exitCode": 0
       },
       {
         "name": "lint",
-        "seconds": 14.33,
+        "seconds": 33.38,
         "exitCode": 0
       },
       {
         "name": "unit",
-        "seconds": 108.72,
+        "seconds": 137.64,
         "exitCode": 0
       },
       {
         "name": "docs",
-        "seconds": 1.35,
+        "seconds": 2.66,
         "exitCode": 0
       },
       {
         "name": "content",
-        "seconds": 3.42,
+        "seconds": 4.72,
         "exitCode": 0
       },
       {
+        "exitCode": 0,
         "name": "browser:runtime",
-        "seconds": 118.3,
-        "exitCode": 0
+        "seconds": 297.96
       },
       {
+        "exitCode": 0,
         "name": "browser:playground",
-        "seconds": 38.17,
-        "exitCode": 0
+        "seconds": 171.51
       },
       {
-        "name": "build:playground",
-        "seconds": 32.6,
-        "exitCode": 0
+        "seconds": 96.62,
+        "exitCode": 0,
+        "name": "build:playground"
       },
       {
-        "name": "build:website-worker",
-        "seconds": 161.08,
-        "exitCode": 0
+        "seconds": 582.57,
+        "exitCode": 0,
+        "name": "build:website-worker"
       },
       {
         "name": "package:core",
-        "seconds": 127.27,
-        "exitCode": 0
+        "exitCode": 0,
+        "seconds": 342.01
       },
       {
         "name": "package:maps",
-        "seconds": 98.68,
-        "exitCode": 0
+        "exitCode": 0,
+        "seconds": 153.35
       },
       {
         "name": "package:capabilities",
-        "seconds": 0.9,
-        "exitCode": 0
+        "exitCode": 0,
+        "seconds": 2.02
       }
     ]
   },
+  "packageSizes": {
+    "core": {
+      "before": 2082611,
+      "after": 2259766,
+      "increase": 177155
+    },
+    "maps": {
+      "before": 2083599,
+      "after": 2260443,
+      "increase": 176844
+    }
+  },
   "artifacts": [
+    {
+      "path": "apps/playground/dist/assets/GLTFLoader-DZNcsf5X.js",
+      "bytes": 47171,
+      "sha256": "6f9cfd9e7f1cced557c490599163b9f3e70768fec33ba8857fcbd2477cbbf1a2"
+    },
+    {
+      "path": "apps/playground/dist/assets/GLTFLoader-DZNcsf5X.js.map",
+      "bytes": 251630,
+      "sha256": "193b28c85b96a7428398894d99d7cf2d8b250a414005502be557505d5a6e4414"
+    },
     {
       "path": "apps/playground/dist/assets/charts-DtYNkKxi.js",
       "bytes": 1083831,
@@ -106,19 +128,19 @@
       "sha256": "a642bf756576cfd296af9873663d1216b5aa9e4244bce6f314e197218771024b"
     },
     {
-      "path": "apps/playground/dist/assets/index-Dgx4ziM0.js",
-      "bytes": 2136333,
-      "sha256": "837d8eabc4b68fb5e7ad3e241c9bae03067543a165344f5e50d139d1f20565d3"
+      "path": "apps/playground/dist/assets/index-Bhzt43yh.css",
+      "bytes": 832157,
+      "sha256": "6773f3f9c2dfbd1ddd87edfb5cb9f75ca8ab37272c64e92c44db87fe5c6156be"
     },
     {
-      "path": "apps/playground/dist/assets/index-Dgx4ziM0.js.map",
-      "bytes": 7197896,
-      "sha256": "6a18068a6f236666501f40e87c8d86c57986e608eeccff9b0c0f29f55888369d"
+      "path": "apps/playground/dist/assets/index-jsZUIgY0.js",
+      "bytes": 2171233,
+      "sha256": "d17c00ad9e30372a8c0b48497a3ff8cb5a4a881d89627257a39c76908b727bfd"
     },
     {
-      "path": "apps/playground/dist/assets/index-ZjrDWXRD.css",
-      "bytes": 826097,
-      "sha256": "cfb07ad2ddc92779ffa577d97241cb09c1110408f12ed7cb829df459737944c8"
+      "path": "apps/playground/dist/assets/index-jsZUIgY0.js.map",
+      "bytes": 7303993,
+      "sha256": "cf1e5aed1131a97c82fd7103409175c2089172657f75154048d2f7990f35550f"
     },
     {
       "path": "apps/playground/dist/assets/maps-DMH1-Xw5.js",
@@ -141,6 +163,26 @@
       "sha256": "2b4c1765c649d4a3355b14bee3eed738e80efde74c3268f69ece586de5221b34"
     },
     {
+      "path": "apps/playground/dist/assets/project-Dh0NBT3m.js",
+      "bytes": 111101,
+      "sha256": "ab48cf17cfa0152a3a4d08f2ce303cc5e528320459cad910c1c414db476c032e"
+    },
+    {
+      "path": "apps/playground/dist/assets/project-Dh0NBT3m.js.map",
+      "bytes": 162035,
+      "sha256": "b466a267322529191d94dde8e80e30cc5852e93d3aff4e25faf5b667fcc3b8ba"
+    },
+    {
+      "path": "apps/playground/dist/assets/sceneRuntime-BS0poMWm.js",
+      "bytes": 616872,
+      "sha256": "0db231d31a9eddabf75b076047a05a9af2ef55ad56046c25c776ef80fb60bea5"
+    },
+    {
+      "path": "apps/playground/dist/assets/sceneRuntime-BS0poMWm.js.map",
+      "bytes": 3037721,
+      "sha256": "a77155fa0467d801cadd44845d315b9514ae683a78aa9c77251052ece3f4623e"
+    },
+    {
       "path": "apps/playground/dist/assets/spreadsheet-BW32yMZ9.js",
       "bytes": 365830,
       "sha256": "df337e2c4522d6dc275bff5a2c6da82131dc6fbbf47646defa049625759c9767"
@@ -153,7 +195,17 @@
     {
       "path": "apps/playground/dist/index.html",
       "bytes": 816,
-      "sha256": "f194fee5b088f45b9db1c9c1e69fb64252c341944ee7a3f94396ee0171e201d2"
+      "sha256": "c05ca3a0f07979b28754604d2b068e61a21a2e9be86e4a764ec44523c706bc71"
+    },
+    {
+      "path": "apps/web/public/images/pump-station-monitoring.webp",
+      "bytes": 23214,
+      "sha256": "c1cf56216f29b670b29a255b7a8a1aca7db172d4dc058dfcc2d6a16ebb5de4d7"
+    },
+    {
+      "path": "apps/web/public/runtime/GLTFLoader-ij-zgK5M.mjs",
+      "bytes": 69208,
+      "sha256": "55ac93eaad6004f8386bb200b7e6db8b515913737e3c1cda9875aa2af71e1c33"
     },
     {
       "path": "apps/web/public/runtime/assets/fileParser.worker-DlgPI3_3.js",
@@ -167,13 +219,18 @@
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.css",
-      "bytes": 1025150,
-      "sha256": "5b3a6574061610d84bd1b04e4aa70011377ccd14bfd2ce25ed5b1a3b56cad4ae"
+      "bytes": 1032662,
+      "sha256": "31c24d46cbc2ef8f95b6034433f6746e5989741737e46e336043131d02fb2587"
     },
     {
       "path": "apps/web/public/runtime/hyperpbi-island.js",
-      "bytes": 3053970,
-      "sha256": "43b34dd84f684dd936818b61d2687c2c25fe4cb56f8b2f35b15d559541f647e3"
+      "bytes": 168,
+      "sha256": "b9580239e72e1045fa8f17e52896aebe282d5a2d0bad6165dbe3ab31e4dce1a4"
+    },
+    {
+      "path": "apps/web/public/runtime/index-BVJ5Dye9.mjs",
+      "bytes": 3099060,
+      "sha256": "1680d24da33d308f021af7a2fab59342f3debe5197c91080301009d24f652706"
     },
     {
       "path": "apps/web/public/runtime/maps-CWfhSxLk.mjs",
@@ -186,29 +243,34 @@
       "sha256": "4ee12373a3033519316fdd445a2ac618906e75a9af183ef71a6594e5c970fd1d"
     },
     {
+      "path": "apps/web/public/runtime/sceneRuntime-CJjX4U4l.mjs",
+      "bytes": 1030589,
+      "sha256": "53595a6a506f330fd6494399cb06df24de6b1e2cafdd40312bba3430acad3a09"
+    },
+    {
       "path": "apps/web/public/runtime/spreadsheet-BHMLTf8C.mjs",
       "bytes": 598474,
       "sha256": "9820aaa80c99b6df8b0329f3a814523fbbc3a2038a6138d28e1dbf44f9a64b9e"
     },
     {
-      "path": "dist/hyperpbi-web-sites.zip",
-      "bytes": 23069113,
-      "sha256": "cfc2d6a7b7d294db6ca73c994b4b9d2bce36aafada6f0e9d2d754cc25e73a54e"
-    },
-    {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-core.pbiviz",
-      "bytes": 2082611,
-      "sha256": "00664e9a3ae72a0b48222cc9d68e1ee879a664066b4f29f842552481036076d0"
+      "bytes": 2259766,
+      "sha256": "f64c05b5863c46826777c67fef2eaa5dbd25208fd6a7ac82433b8055c02fb249"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0-maps.pbiviz",
-      "bytes": 2083599,
-      "sha256": "10aae03d4a950b03aa82faa4da3f3826686167ef48b15a0454abefa12935f826"
+      "bytes": 2260443,
+      "sha256": "304c9f3486881bc1fb049e1bca0e9133ecb4fc5e557bd198bb301c7fba002881"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.2.0.pbiviz",
-      "bytes": 2083599,
-      "sha256": "10aae03d4a950b03aa82faa4da3f3826686167ef48b15a0454abefa12935f826"
+      "bytes": 2260443,
+      "sha256": "304c9f3486881bc1fb049e1bca0e9133ecb4fc5e557bd198bb301c7fba002881"
+    },
+    {
+      "path": "dist/hyperpbi-web-sites.zip",
+      "bytes": 24298996,
+      "sha256": "a2ee677ba8fe49b50b72f58cd61b5d71f6247eb74a494acfa09d967258d4e23b"
     },
     {
       "path": "dist/package-capability-profiles.json",
