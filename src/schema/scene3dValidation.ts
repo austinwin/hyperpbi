@@ -1,12 +1,12 @@
 import { visitSpecificationComponents } from "../catalog/componentTraversal";
-import { isScene3dColor, isScene3dKey, scene3dKinds, scene3dLimits } from "./scene3dSchema";
+import { isScene3dColor, isScene3dKey, scene3dAnimationKinds, scene3dKinds, scene3dLimits } from "./scene3dSchema";
 import type { Diagnostic } from "./diagnostics";
 
 type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json => value !== null && typeof value === "object" && !Array.isArray(value);
 const text = (value: unknown) => typeof value === "string" && value.trim().length > 0 && value.length <= 160;
 const inRange = (value: unknown, min: number, max: number) => typeof value === "number" && value >= min && value <= max;
-const objectKeys = new Set(["id", "kind", "label", "dataKey", "flowKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model"]);
+const objectKeys = new Set(["id", "kind", "label", "dataKey", "flowKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model", "animations"]);
 
 export function validateScene3dComponents(specification: unknown): Diagnostic[] {
     const diagnostics: Diagnostic[] = [];
@@ -84,6 +84,40 @@ export function validateScene3dComponents(specification: unknown): Diagnostic[] 
                 if (item[key] !== undefined && typeof item[key] !== "boolean") error(`${base}/${key}`, "Expected a Boolean.");
             }
             if (item.color !== undefined && !isScene3dColor(item.color)) error(`${base}/color`, "Use a six-digit hex color such as #168b79.");
+            if (item.animations !== undefined) {
+                if (!Array.isArray(item.animations) || item.animations.length > scene3dLimits.animationsPerObject) {
+                    error(`${base}/animations`, `Use up to ${scene3dLimits.animationsPerObject} animations per object.`);
+                } else item.animations.forEach((animation, motionIndex) => {
+                    const motionPath = `${base}/animations/${motionIndex}`;
+                    if (!object(animation)) { error(motionPath, "Expected an animation object."); return; }
+                    const allowed = new Set(["kind", "axis", "rpm", "rpmField", "amplitude", "period", "enabledField", "enabledValue", "clipName", "rate"]);
+                    for (const property of Object.keys(animation)) if (!allowed.has(property)) {
+                        error(`${motionPath}/${property.replaceAll("~", "~0").replaceAll("/", "~1")}`, "Unsupported animation property.", "UNKNOWN_PROPERTY");
+                    }
+                    if (!(scene3dAnimationKinds as readonly unknown[]).includes(animation.kind)) {
+                        error(`${motionPath}/kind`, "Unknown animation kind.", "INVALID_ENUM_VALUE");
+                    }
+                    if (animation.axis !== undefined && !["x", "y", "z"].includes(String(animation.axis))) {
+                        error(`${motionPath}/axis`, "Choose X, Y, or Z.", "INVALID_ENUM_VALUE");
+                    }
+                    if (animation.rpm !== undefined && !inRange(animation.rpm, -1800, 1800)) error(`${motionPath}/rpm`, "RPM must be from -1800 to 1800.");
+                    if (animation.amplitude !== undefined && !inRange(animation.amplitude, 0, 5)) error(`${motionPath}/amplitude`, "Amplitude must be from 0 to 5.");
+                    if (animation.period !== undefined && !inRange(animation.period, 0.15, 60)) error(`${motionPath}/period`, "Period must be from 0.15 to 60 seconds.");
+                    if (animation.rate !== undefined && !inRange(animation.rate, 0, 4)) error(`${motionPath}/rate`, "Clip playback rate must be from 0 to 4.");
+                    for (const field of ["rpmField", "enabledField"]) {
+                        if (animation[field] !== undefined && (!text(animation[field]) || item.dataKey === undefined || !text(component.objectIdField))) {
+                            error(`${motionPath}/${field}`, "Bind an animation field to a data-linked scene object.");
+                        }
+                    }
+                    if (animation.enabledValue !== undefined && (!isScene3dKey(animation.enabledValue) || !text(animation.enabledField))) {
+                        error(`${motionPath}/enabledValue`, "A matching value requires an enabled field.");
+                    }
+                    if (animation.clipName !== undefined && !text(animation.clipName)) error(`${motionPath}/clipName`, "Use a nonblank clip name.");
+                    if (animation.kind === "clip" && item.kind !== "model") error(`${motionPath}/kind`, "A glTF clip requires a model object.");
+                    if (animation.kind !== "clip" && (animation.clipName !== undefined || animation.rate !== undefined)) error(`${motionPath}/clipName`, "Clip controls require the clip animation kind.");
+                    if (animation.kind !== "rotate" && (animation.rpm !== undefined || animation.rpmField !== undefined)) error(`${motionPath}/rpm`, "RPM is supported only for rotation.");
+                });
+            }
             if (item.kind === "model") {
                 if (++models > scene3dLimits.models) error(`${base}/kind`, `Use up to ${scene3dLimits.models} models per scene.`);
                 const model = item.model;
