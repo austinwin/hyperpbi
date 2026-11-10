@@ -319,6 +319,7 @@
       "id": "scene3d-animation-studio",
       "limitations": "Scenario values and readings are synthetic. Animations are local rendering only, not SCADA control commands. Requires WebGL 2 and respects reduced motion and runtime animation budgets.",
       "powerBiPackage": "core",
+      "previewImage": "/images/pump-station-monitoring.webp",
       "project": "scene3d-animation-studio/project.hyperpbi",
       "referenceImages": [],
       "runtime": "scene3d-animation-studio/runtime.json",
