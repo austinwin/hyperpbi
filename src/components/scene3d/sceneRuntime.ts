@@ -1,5 +1,5 @@
 import {
-    ACESFilmicToneMapping, Box3, BoxGeometry, Color, DirectionalLight, GridHelper, Group,
+    ACESFilmicToneMapping, AnimationClip, AnimationMixer, Box3, BoxGeometry, Color, DirectionalLight, GridHelper, Group,
     HemisphereLight, LoadingManager, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFShadowMap,
     PerspectiveCamera, Raycaster, RingGeometry, Scene, Texture, Vector2, Vector3, WebGLRenderer,
     type Material, type Object3D,
@@ -9,6 +9,7 @@ import type { Scene3dComponent, Scene3dObject } from "../../schema/scene3dSchema
 import type { SceneObjectState } from "./sceneData";
 import { createSceneMeshes } from "./sceneMeshes";
 import { openModelAsset } from "./modelAsset";
+import { resolveActiveSceneMotions, sceneMotionPose, type ActiveSceneMotion } from "./sceneMotion";
 
 type View = NonNullable<Scene3dComponent["view"]>;
 type LabelPositions = (id: string, point?: { x: number; y: number }) => void;
@@ -35,6 +36,12 @@ interface Entry {
     pipeFlow?: ReturnType<ReturnType<typeof createSceneMeshes>["addPipeFlow"]>;
     phase: number;
     speed: number;
+    motions: ActiveSceneMotion[];
+    motionTime: number;
+    baseVisible: boolean;
+    mixer?: AnimationMixer;
+    clips?: AnimationClip[];
+    activeClip?: AnimationClip;
 }
 
 const floorThemes = {
@@ -128,6 +135,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
     const ringMaterial = new MeshBasicMaterial({ color: "#2589ed", transparent: true, opacity: 0.83, depthWrite: false });
     const entries = new Map<string, Entry>();
     const flowing = new Set<Entry>();
+    const moving = new Set<Entry>();
     const roots = new Map<Object3D, string>();
     const bounds = new Box3();
     const projected = new Vector3();
@@ -153,7 +161,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         frame = 0;
         if (!active || disposed || !width || !height) return;
         if (!viewDirty && now - lastFlowDraw < 32) {
-            if (flowing.size) scheduleFrame();
+            if (flowing.size || moving.size) scheduleFrame();
             return;
         }
         const elapsed = lastFlowDraw ? Math.min((now - lastFlowDraw) / 1000, 0.05) : 0;
@@ -161,7 +169,29 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.phase = (entry.phase + entry.speed * elapsed + 1) % 1;
             entry.pipeFlow?.move(entry.phase, entry.definition.size?.[1] ?? 1);
         }
-        lastFlowDraw = flowing.size ? now : 0;
+        for (const entry of moving) {
+            entry.motionTime += elapsed;
+            const pose = sceneMotionPose(entry.definition, entry.motions, entry.motionTime);
+            entry.group.position.fromArray(pose.position);
+            entry.group.scale.fromArray(pose.size);
+            const [rx, ry, rz] = pose.rotation;
+            entry.group.rotation.set(rx * Math.PI / 180, ry * Math.PI / 180, rz * Math.PI / 180);
+            entry.group.visible = entry.baseVisible && pose.visible;
+            const clipMotion = entry.motions.find(motion => motion.animation.kind === "clip");
+            const clip = clipMotion && (entry.clips?.find(item => item.name === clipMotion.animation.clipName) ??
+                (!clipMotion.animation.clipName ? entry.clips?.[0] : undefined));
+            if (entry.mixer && clip !== entry.activeClip) {
+                entry.mixer.stopAllAction();
+                entry.activeClip = clip;
+                if (clip) entry.mixer.clipAction(clip).reset().play();
+            }
+            if (entry.mixer && clip) entry.mixer.update(elapsed * (clipMotion?.animation.rate ?? 1));
+        }
+        if (moving.size) {
+            viewDirty = true;
+            renderer.shadowMap.needsUpdate = true;
+        }
+        lastFlowDraw = flowing.size || moving.size ? now : 0;
         renderer.render(scene, camera);
         if (viewDirty) {
             viewDirty = false;
@@ -171,7 +201,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 callbacks.labels(id, inside ? { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2 } : undefined);
             }
         }
-        if (flowing.size) scheduleFrame();
+        if (flowing.size || moving.size) scheduleFrame();
     }
 
     function scheduleFrame() {
@@ -287,7 +317,8 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 if (uris.has(url) || url.startsWith("blob:")) return url;
                 throw new Error("External model resources are blocked.");
             });
-            loaded = (await new GLTFLoader(manager).parseAsync(input, "")).scene;
+            const asset = await new GLTFLoader(manager).parseAsync(input, "");
+            loaded = asset.scene;
             if (!current()) { releaseModel(loaded); return; }
             const box = new Box3().setFromObject(loaded, true);
             const size = box.getSize(new Vector3());
@@ -309,6 +340,8 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 }
             });
             entry.model = loaded;
+            entry.clips = asset.animations;
+            entry.mixer = asset.animations.length ? new AnimationMixer(loaded) : undefined;
             entry.originalColors = [...materials].map(material => ({
                 material, color: material.color.clone(), opacity: material.opacity, transparent: material.transparent, depthWrite: material.depthWrite,
             }));
@@ -327,6 +360,9 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
 
     function remove(entry: Entry) {
         flowing.delete(entry);
+        moving.delete(entry);
+        entry.mixer?.stopAllAction();
+        if (entry.mixer && entry.model) entry.mixer.uncacheRoot(entry.model);
         roots.delete(entry.group);
         entry.group.removeFromParent();
         entry.selection.removeFromParent();
@@ -363,7 +399,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 setLevel?.();
                 const pipeFlow = animate ? kits.addPipeFlow(group) : undefined;
                 entry = { definition, group, finish, selection, anchor: new Vector3(), originalColors: [], selected: false,
-                    setLevel, pipeFlow, phase: 0.12, speed: 0 };
+                    setLevel, pipeFlow, phase: 0.12, speed: 0, motions: [], motionTime: 0, baseVisible: true };
                 scene.add(group, selection);
                 entries.set(definition.id, entry);
                 roots.set(group, definition.id);
@@ -384,13 +420,29 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         fit(component.view ?? "isometric");
     }
 
+    const movingCount = () => moving.size;
+
     function update(objects: SceneObjectState[], selected: ReadonlySet<string>, showLabels: boolean, flowBudget: number) {
         labels = showLabels;
         flowing.clear();
+        moving.clear();
         for (const state of objects) {
             const entry = entries.get(state.object.id);
             if (!entry) continue;
             if (entry.group.visible !== state.visible) renderer.shadowMap.needsUpdate = true;
+            entry.baseVisible = state.visible;
+            entry.motions = state.visible ? resolveActiveSceneMotions(state.object, state.row) : [];
+            const activeMotion = entry.motions.length > 0 && moving.size + flowing.size < flowBudget;
+            if (activeMotion) moving.add(entry);
+            else {
+                const pose = sceneMotionPose(entry.definition, [], 0);
+                entry.group.position.fromArray(pose.position);
+                entry.group.scale.fromArray(pose.size);
+                const [rx, ry, rz] = pose.rotation;
+                entry.group.rotation.set(rx * Math.PI / 180, ry * Math.PI / 180, rz * Math.PI / 180);
+                entry.mixer?.stopAllAction();
+                entry.activeClip = undefined;
+            }
             entry.group.visible = state.visible;
             entry.selected = state.visible && selected.has(state.object.id);
             entry.color = state.color;
@@ -398,7 +450,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.setLevel?.(state.level);
             if (entry.pipeFlow) {
                 const rate = state.flow ?? 0;
-                const moving = state.visible && rate !== 0 && flowing.size < flowBudget;
+                const moving = state.visible && rate !== 0 && flowing.size + movingCount() < flowBudget;
                 entry.pipeFlow.bands.visible = moving;
                 if (moving) {
                     const length = Math.max(1, entry.definition.size?.[1] ?? 1);
