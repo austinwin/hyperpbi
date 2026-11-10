@@ -6,7 +6,8 @@ const yesNo=(input:boolean)=>input?"Yes":"No";
 
 export function InteractionsPanel({ diagnostics, compact=false }: { diagnostics: InteractionDiagnostics; compact?: boolean }) {
     const sent=diagnostics.externalMode==="filter"?diagnostics.filterSent:diagnostics.selectionSent;
-    return <div class={`hp-interactions-panel ${compact?"hp-interactions-compact":""}`}><header><div><h3>Interaction status</h3><p>Slicer controls use Power BI filters; data-point clicks use Power BI selection.</p></div><span class={sent?"is-ok":"is-muted"}>{sent?`${diagnostics.externalMode??"External"} sent`:"Not sent"}</span></header><dl>
+    const tested=Boolean(diagnostics.lastClickedComponentId);
+    return <div class={`hp-interactions-panel ${compact?"hp-interactions-compact":""}`}><header><div><h3>Interaction status</h3><p>Use Visual Inspector → Connect components to configure local links and Power BI behavior. Test by clicking the source component.</p></div><span class={sent?"is-ok":"is-muted"}>{!tested?"Not tested":sent?"Request sent":"Not sent"}</span></header><p>Local HyperPBI links use receiving component IDs and dataset fields. Power BI uses model columns for filters or actual row identities for selections. A request sent to Power BI does not prove that another visual responded; check report Edit interactions and model relationships.</p><dl>
         <div><dt>enableInteractions setting</dt><dd>{yesNo(diagnostics.externalInteractionEnabled)}</dd></div>
         <div><dt>hostAllowsInteractions</dt><dd>{yesNo(diagnostics.hostAllowsInteractions)}</dd></div>
         <div><dt>selectionIdentityCount</dt><dd>{diagnostics.selectionIdentityCount.toLocaleString()}</dd></div>
