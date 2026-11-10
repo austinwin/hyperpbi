@@ -96,6 +96,18 @@ export function createSceneMeshes() {
             for (const x of [-0.72, 0.72]) {
                 for (const z of [-0.43, 0.43]) place(cylinder, trim, x, 0.22, z, 0.12, 0.06, 0.12);
             }
+        } else if (kind === "fan") {
+            // A single selectable rotor. A separate static stand/housing can sit behind it.
+            for (let index = 0; index < 5; index++) {
+                const angle = index * Math.PI * 2 / 5;
+                const blade = new Mesh(box, finish);
+                blade.position.set(Math.sin(angle) * 0.39, Math.cos(angle) * 0.39, 0);
+                blade.scale.set(0.26, 0.64, 0.09);
+                blade.rotation.z = -angle + Math.PI / 5;
+                blade.castShadow = blade.receiveShadow = true;
+                group.add(blade);
+            }
+            place(cylinder, steel, 0, 0, 0.05, 0.28, 0.16, 0.28, 0, Math.PI / 2);
         } else if (kind === "tank") {
             place(cylinder, base, 0, 0.11, 0, 2.22, 0.22, 2.22);
             place(cylinder, finish, 0, 1.19, 0, 2, 1.98, 2);

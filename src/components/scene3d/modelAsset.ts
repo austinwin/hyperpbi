@@ -94,7 +94,7 @@ export function inspectModelAsset(format: EmbeddedModel["format"], bytes: Uint8A
         const value = document[property];
         requireAsset(value === undefined || Array.isArray(value) && value.every(extension => allowedExtensions.has(extension)), "The model uses an unsupported glTF extension or compression.");
     }
-    for (const property of ["animations", "skins", "cameras"]) {
+    for (const property of ["skins", "cameras"]) {
         const value = document[property];
         requireAsset(value === undefined || Array.isArray(value) && value.length === 0, "Import a static model without animations, skins, or cameras.");
     }
@@ -217,6 +217,49 @@ export function inspectModelAsset(format: EmbeddedModel["format"], bytes: Uint8A
         (document.scene === undefined || document.scene === 0), "Import a model with a single glTF scene.");
     for (const node of scenes[0].nodes) visit(node, 1);
     requireAsset(draws > 0 && claimed.size === nodes.length, "The model must contain rendered geometry and all nodes must belong to its scene.");
+    // Only bounded, rigid-node transform clips are allowed. No skins, morph targets,
+    // external resources, scripts, or compressed animation buffers are accepted.
+    const animations = items("animations", scene3dLimits.clipsPerModel);
+    for (const animation of animations) {
+        const samplers = animation.samplers;
+        const channels = animation.channels;
+        requireAsset(Array.isArray(samplers) && samplers.length <= 24 && samplers.every(jsonObject) &&
+            Array.isArray(channels) && channels.length <= 24 && channels.every(jsonObject),
+            "A glTF clip may contain at most 24 samplers and transform channels.");
+        for (const { sampler, target } of channels) {
+            requireAsset(whole(sampler, 0, samplers.length - 1) && jsonObject(target) &&
+                whole(target.node, 0, nodes.length - 1) && claimed.has(target.node) &&
+                ["rotation", "translation", "scale"].includes(String(target.path)),
+                "Animation channels must target scene node transforms.");
+            const source = samplers[sampler];
+            requireAsset(whole(source.input, 0, accessors.length - 1) &&
+                whole(source.output, 0, accessors.length - 1) &&
+                (source.interpolation === undefined || ["LINEAR", "STEP"].includes(String(source.interpolation))),
+                "Use supported LINEAR or STEP keyframe interpolation.");
+            const times = accessors[source.input];
+            const values = accessors[source.output];
+            requireAsset(times.type === "SCALAR" && times.componentType === 5126 &&
+                times.count >= 1 && times.count <= 2048 && values.count === times.count &&
+                values.componentType === 5126 && values.type === (target.path === "rotation" ? "VEC4" : "VEC3"),
+                "Invalid animation keyframe types or counts.");
+            const timeView = new DataView(times.data.buffer, times.data.byteOffset, times.data.byteLength);
+            let previous = -1;
+            for (let frame = 0; frame < times.count; frame++) {
+                const value = timeView.getFloat32(times.byteOffset + frame * times.stride, true);
+                requireAsset(Number.isFinite(value) && value >= 0 && value <= 120 && value > previous,
+                    "Animation keyframe times must increase within 120 seconds.");
+                previous = value;
+            }
+            const valueView = new DataView(values.data.buffer, values.data.byteOffset, values.data.byteLength);
+            for (let frame = 0; frame < values.count; frame++) {
+                for (let part = 0; part < (target.path === "rotation" ? 4 : 3); part++) {
+                    const value = valueView.getFloat32(values.byteOffset + frame * values.stride + part * 4, true);
+                    requireAsset(Number.isFinite(value) && Math.abs(value) < 100_000,
+                        "Invalid or unbounded animation keyframe value.");
+                }
+            }
+        }
+    }
     return { uris, input: format === "glb" ? bytes.slice().buffer : source };
 }
 

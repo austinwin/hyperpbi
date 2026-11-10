@@ -52,6 +52,7 @@ const expectedSlugs = [
     "patient-care-operations",
     "pump-station-monitoring",
     "retail-sales-operations",
+    "scene3d-animation-studio",
     "talent-acquisition",
     "universal-dynamic-content",
     "urban-mobility-command-center",

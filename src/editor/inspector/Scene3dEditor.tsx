@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { importModelFile } from "../../components/scene3d/modelAsset";
-import { isScene3dKey, scene3dKinds, scene3dLimits, type Scene3dComponent, type Scene3dKey, type Scene3dKind, type Scene3dObject, type Scene3dVector } from "../../schema/scene3dSchema";
+import { isScene3dKey, scene3dAnimationKinds, scene3dKinds, scene3dLimits, type Scene3dAnimation, type Scene3dComponent, type Scene3dKey, type Scene3dKind, type Scene3dObject, type Scene3dVector } from "../../schema/scene3dSchema";
 import { StudioSection } from "../ui/StudioSection";
 
 const kinds: Record<Scene3dKind, string> = {
     box: "Box", cylinder: "Cylinder", sphere: "Sphere", cone: "Cone",
-    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", model: "GLB / glTF model",
+    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", fan: "Fan rotor", model: "GLB / glTF model",
 };
 const materialDefaults = { metalness: 0.22, roughness: 0.44, opacity: 1 } as const;
 type FieldOption = { key: string; label: string };
@@ -120,6 +120,10 @@ export function Scene3dEditor({ component, fields, onChange }: {
     const tooltips = (component.tooltipFields ?? []).map(item => typeof item === "string" ? { field: item, label: undefined } : item);
     const availableFields = fields.filter(field => !tooltips.some(item => item.field === field.key));
     const disabled = objects.length >= scene3dLimits.objects;
+    const animations = selected?.animations ?? [];
+    const changeAnimation = (index: number, patch: Partial<Scene3dAnimation>) => {
+        if (selected) update(selected.id, { animations: animations.map((animation, at) => at === index ? { ...animation, ...patch } : animation) });
+    };
     const filePicker = (label: string, replaceId?: string) => <label>{label}<input type="file" class="form-control form-control-sm"
         accept=".glb,.gltf" disabled={importing || !replaceId && (disabled || modelCount >= scene3dLimits.models)} onChange={event => {
             const input = event.currentTarget;
@@ -188,6 +192,60 @@ export function Scene3dEditor({ component, fields, onChange }: {
                         <div class="hp-scene3d-editor-grid">{(Object.keys(materialDefaults) as Array<keyof typeof materialDefaults>).map(property => <NumericInput key={property}
                             label={property[0].toUpperCase() + property.slice(1)} value={selected[property] ?? materialDefaults[property]}
                             min={property === "opacity" ? 0.1 : 0} max={1} step={0.05} onChange={value => update(selected.id, { [property]: value })} />)}</div>
+                    </fieldset>
+                    <fieldset><legend>Animations ({animations.length})</legend>
+                        <p class="text-secondary m-0">Create local motion without JavaScript. Animation is paused when motion is disabled or reduced-motion is requested.</p>
+                        {animations.map((animation, index) => <fieldset key={index}>
+                            <legend>Behavior {index + 1}</legend>
+                            <div class="hp-scene3d-editor-row">
+                                <label>Animation type<select aria-label={`Animation type ${index + 1}`} class="form-select form-select-sm" value={animation.kind}
+                                    onChange={event => changeAnimation(index, { kind: event.currentTarget.value as Scene3dAnimation["kind"], rpm: undefined, rpmField: undefined, clipName: undefined, rate: undefined })}>
+                                    {scene3dAnimationKinds.filter(kind => kind !== "clip" || selected.kind === "model").map(kind =>
+                                        <option key={kind} value={kind}>{kind === "blink" ? "Visibility / blink" : kind === "clip" ? "Imported glTF clip" : kind[0].toUpperCase() + kind.slice(1)}</option>)}
+                                </select></label>
+                                <button type="button" class="btn btn-sm align-self-end" aria-label={`Remove animation ${index + 1}`}
+                                    onClick={() => update(selected.id, { animations: animations.filter((_item, at) => at !== index) })}>Remove</button>
+                            </div>
+                            {["rotate", "translate", "scale"].includes(animation.kind) && <label>Axis<select class="form-select form-select-sm"
+                                aria-label={`Animation axis ${index + 1}`} value={animation.axis ?? "y"}
+                                onChange={event => changeAnimation(index, { axis: event.currentTarget.value as "x" | "y" | "z" })}>
+                                <option value="x">X</option><option value="y">Y</option><option value="z">Z</option>
+                            </select></label>}
+                            {animation.kind === "rotate" && <>
+                                <NumericInput label={`Rotation RPM ${index + 1}`} value={animation.rpm ?? 60} min={-1800} max={1800} step={10}
+                                    onChange={rpm => changeAnimation(index, { rpm })} />
+                                {selected.dataKey !== undefined && <label>RPM data field<select class="form-select form-select-sm"
+                                    aria-label={`RPM field ${index + 1}`} value={animation.rpmField ?? ""}
+                                    onChange={event => changeAnimation(index, { rpmField: event.currentTarget.value || undefined })}>
+                                    <option value="">Use fixed RPM</option>{fields.map(field => <option key={field.key} value={field.key}>{field.label}</option>)}
+                                </select></label>}
+                            </>}
+                            {["translate", "scale", "pulse"].includes(animation.kind) &&
+                                <NumericInput label={`Amplitude ${index + 1}`} value={animation.amplitude ?? 0.2}
+                                    min={0} max={5} step={0.05} onChange={amplitude => changeAnimation(index, { amplitude })} />}
+                            {["translate", "scale", "pulse", "blink"].includes(animation.kind) &&
+                                <NumericInput label={`Cycle seconds ${index + 1}`} value={animation.period ?? 2}
+                                    min={0.15} max={60} step={0.1} onChange={period => changeAnimation(index, { period })} />}
+                            {animation.kind === "clip" && <>
+                                <label>Clip name (optional)<TextInput label={`Clip name ${index + 1}`} value={animation.clipName ?? ""}
+                                    placeholder="First clip if blank" onChange={clipName => changeAnimation(index, { clipName: clipName || undefined })} /></label>
+                                <NumericInput label={`Clip playback rate ${index + 1}`} value={animation.rate ?? 1}
+                                    min={0} max={4} step={0.1} onChange={rate => changeAnimation(index, { rate })} />
+                            </>}
+                            {selected.dataKey !== undefined ? <>
+                                <label>Run when data field<select class="form-select form-select-sm"
+                                    aria-label={`Animation enabled field ${index + 1}`} value={animation.enabledField ?? ""}
+                                    onChange={event => changeAnimation(index, { enabledField: event.currentTarget.value || undefined, enabledValue: undefined })}>
+                                    <option value="">Always (when motion enabled)</option>{fields.map(field =>
+                                        <option key={field.key} value={field.key}>{field.label}</option>)}
+                                </select></label>
+                                {animation.enabledField && <TypedKeyInput label={`Run when equals (optional) ${index + 1}`} value={animation.enabledValue}
+                                    onChange={enabledValue => changeAnimation(index, { enabledValue })} />}
+                            </> : <small>Assign a matching object key under Object behavior to drive animation from a data row.</small>}
+                        </fieldset>)}
+                        <button type="button" class="btn btn-sm" disabled={animations.length >= scene3dLimits.animationsPerObject}
+                            onClick={() => update(selected.id, { animations: [...animations, selected.kind === "model" ?
+                                { kind: "clip", rate: 1 } : { kind: "rotate", axis: "y", rpm: 60 }] })}>Add animation</button>
                     </fieldset>
                     <fieldset><legend>Object behavior</legend>
                         <label class="hp-scene3d-check"><input type="checkbox" checked={selected.visible !== false} onChange={event => update(selected.id, { visible: event.currentTarget.checked })} />Visible</label>

@@ -18,6 +18,7 @@ The dashboard examples use the same schema, data, and rendering pipeline on the 
 | Maintenance dispatch | [`universal-dynamic-content`](../examples/dashboards/universal-dynamic-content) | Maps | Asset work plans in a side panel and live workload |
 | Pump station operations | [`pump-station-monitoring`](../examples/dashboards/pump-station-monitoring) | Core | 3D pump selection, operating scenarios, pressure and motor-load charts |
 | Groundwater treatment and delivery | [`groundwater-supply-distribution`](../examples/dashboards/groundwater-supply-distribution) | Core | 3D source-to-tap network, remote well outage, and residential delivery |
+| Interactive equipment animation | [`scene3d-animation-studio`](../examples/dashboards/scene3d-animation-studio) | Core | Editable fan rotation, actuator motion, pulsing alarms, blink, and data-driven animation |
 
 Each folder is self-contained:
 

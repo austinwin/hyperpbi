@@ -309,6 +309,32 @@
       "theme": "dark",
       "title": "Groundwater Supply & Distribution",
       "useCase": "Groundwater treatment and residential water distribution"
+    },
+    {
+      "accent": "#54bcff",
+      "data": "scene3d-animation-studio/data.csv",
+      "description": "A hands-on Three.js motion laboratory using synthetic booster-station readings. Configure RPM-driven cooling fans, moving actuators, alert pulses, scaling indicators and visibility animation in the Visual Inspector. Every object can be selected and linked to charts and tables.",
+      "expected": "Normal duty spins three fans, Peak demand spins all four and pulses the P-103 warning beacon, and Maintenance stops P-102 so its status beacon blinks. Edit any object's Animations section to adjust RPM, axis, period and data fields.",
+      "folder": "scene3d-animation-studio",
+      "id": "scene3d-animation-studio",
+      "limitations": "Scenario values and readings are synthetic. Animations are local rendering only, not SCADA control commands. Requires WebGL 2 and respects reduced motion and runtime animation budgets.",
+      "powerBiPackage": "core",
+      "previewImage": "/images/pump-station-monitoring.webp",
+      "project": "scene3d-animation-studio/project.hyperpbi",
+      "referenceImages": [],
+      "runtime": "scene3d-animation-studio/runtime.json",
+      "slug": "scene3d-animation-studio",
+      "specification": "scene3d-animation-studio/specification.json",
+      "summary": "Explore fan rotation, moving actuators, animated alarms, data-driven speed and Power BI selection.",
+      "tags": [
+        "3D",
+        "animation",
+        "SCADA",
+        "Three.js"
+      ],
+      "theme": "dark",
+      "title": "3D Animation Studio",
+      "useCase": "Interactive equipment animations and industrial digital twins"
     }
   ],
   "version": "1.0"

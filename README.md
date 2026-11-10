@@ -64,7 +64,7 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 
 ## Interactive 3D scenes
 
-Add **3D scene** from the Visual Inspector catalog to build an equipment layout from primitives, pump and tank assemblies, or embedded GLB and glTF models. The Scene editor provides object transforms, material controls, and dataset bindings. Select an asset to link charts, tables, and Power BI visuals by source row identity. Three.js ships locally in both Core and Maps. [3D scene guide](docs/scene3d.md) · [Pump Station Monitoring](https://hyperpbi.com/examples/pump-station-monitoring)
+Add **3D scene** from the Visual Inspector catalog to build an equipment layout from primitives, pump and tank assemblies, or embedded GLB and glTF models. The Scene editor provides object transforms, material controls, and dataset bindings. Select an asset to link charts, tables, and Power BI visuals by source row identity. Configure per-object rotation (including RPM fields), translation, scale, pulse, blink, and bounded GLB/glTF rigid-transform clip playback in the visual editor. Motion obeys reduced-motion and runtime budgets. [Animation Studio](https://hyperpbi.com/examples/scene3d-animation-studio). Three.js ships locally in both Core and Maps. [3D scene guide](docs/scene3d.md) · [Pump Station Monitoring](https://hyperpbi.com/examples/pump-station-monitoring)
 
 ## Current status and schema versions
 

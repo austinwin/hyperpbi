@@ -222,3 +222,15 @@ test("authors scene objects and embeds a local glTF through the Inspector", asyn
     await expect(scene.locator(".hp-scene3d-model-error")).toHaveCount(0);
     await expect(scene.getByRole("complementary", { name: "Scene objects" }).getByRole("button", { name: "Control cabinet" })).toBeVisible();
 });
+
+test("animation studio gallery links data-driven fans and scenarios", async ({ page }) => {
+    await page.goto("/examples/scene3d-animation-studio");
+    const scene = page.locator(".hp-scene3d");
+    await expect(scene.locator("canvas")).toBeVisible({ timeout: 45_000 });
+    const equipment = scene.getByRole("complementary", { name: "Scene objects" });
+    await expect(equipment.getByRole("button", { name: /Cooling fan P-101/ })).toBeVisible();
+    await page.getByRole("button", { name: "Peak demand", exact: true }).click();
+    await expect(equipment.getByRole("button", { name: /Cooling fan P-103 Warning/ })).toBeVisible();
+    await page.getByRole("button", { name: "Maintenance", exact: true }).click();
+    await expect(equipment.getByRole("button", { name: /Cooling fan P-102 Stopped/ })).toBeVisible();
+});
