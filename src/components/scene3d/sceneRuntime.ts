@@ -420,19 +420,20 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         fit(component.view ?? "isometric");
     }
 
-    const movingCount = () => moving.size;
-
     function update(objects: SceneObjectState[], selected: ReadonlySet<string>, showLabels: boolean, flowBudget: number) {
         labels = showLabels;
         flowing.clear();
         moving.clear();
+        // Reserve slots for configured equipment motion before allocating leftover slots to pipe flow.
+        const animatedIds = new Set(objects.filter(state => state.visible &&
+            resolveActiveSceneMotions(state.object, state.row).length > 0).slice(0, flowBudget).map(state => state.object.id));
         for (const state of objects) {
             const entry = entries.get(state.object.id);
             if (!entry) continue;
             if (entry.group.visible !== state.visible) renderer.shadowMap.needsUpdate = true;
             entry.baseVisible = state.visible;
             entry.motions = state.visible ? resolveActiveSceneMotions(state.object, state.row) : [];
-            const activeMotion = entry.motions.length > 0 && moving.size + flowing.size < flowBudget;
+            const activeMotion = entry.motions.length > 0 && animatedIds.has(state.object.id);
             if (activeMotion) moving.add(entry);
             else {
                 const pose = sceneMotionPose(entry.definition, [], 0);
@@ -450,7 +451,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.setLevel?.(state.level);
             if (entry.pipeFlow) {
                 const rate = state.flow ?? 0;
-                const moving = state.visible && rate !== 0 && flowing.size + movingCount() < flowBudget;
+                const moving = state.visible && rate !== 0 && flowing.size < flowBudget - animatedIds.size;
                 entry.pipeFlow.bands.visible = moving;
                 if (moving) {
                     const length = Math.max(1, entry.definition.size?.[1] ?? 1);
