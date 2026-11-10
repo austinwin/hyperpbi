@@ -18,6 +18,7 @@ const dynamicBundles: Record<string, PlaygroundExampleLink["bundle"]> = {
     "universal-dynamic-content": assetBundle,
     "pump-station-monitoring": () => import("../../../examples/dashboards/pump-station-monitoring/project.hyperpbi?raw").then(module => module.default),
     "groundwater-supply-distribution": () => import("../../../examples/dashboards/groundwater-supply-distribution/project.hyperpbi?raw").then(module => module.default),
+    "scene3d-animation-studio": () => import("../../../examples/dashboards/scene3d-animation-studio/project.hyperpbi?raw").then(module => module.default),
 };
 const liveExamples = dashboardManifest.examples.filter(example => dynamicBundles[example.slug]).map(example => ({ ...example, bundle: dynamicBundles[example.slug] })) as PlaygroundExampleLink[];
 

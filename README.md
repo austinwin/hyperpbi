@@ -73,7 +73,7 @@ Add **3D scene** from the Visual Inspector catalog to build an equipment layout 
 <!-- component-summary:start -->
 - The canonical implementation defines **85 component types in 12 categories**. The count and catalog are generated from source metadata; see the [component catalog](docs/hyperpbi-component-catalog-reference.md).
 <!-- component-summary:end -->
-- The Power BI visual package is version `1.0.2.0`. Dashboard specifications use their own schema version.
+- The Power BI visual package is version `1.0.3.0`. Dashboard specifications use their own schema version.
 
 ## Power BI workflow
 

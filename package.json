@@ -1,7 +1,7 @@
 {
   "name": "hyperpbi",
   "description": "AI-native analytics runtime and portable dashboard specification for Power BI and the web",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "engines": {
     "node": "^20.19.0 || >=22.13.0"
