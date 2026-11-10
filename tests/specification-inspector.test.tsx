@@ -100,6 +100,35 @@ describe("SpecificationInspector", () => {
     expect(host.querySelector('[role="alert"]')).not.toBeNull();
   });
 
+  it("creates linked interactions through Visual Inspector without editing JSON", () => {
+    const onChange = vi.fn();
+    const host = document.createElement("div");
+    act(() => render(h(SpecificationInspector, {
+      json: JSON.stringify({
+        version: "2.0",
+        components: [
+          { type: "select", id: "status_filter", label: "Status", field: "status" },
+          { type: "table", id: "records", columns: ["status"] },
+        ],
+      }),
+      data,
+      onChange,
+      selectedComponentId: "status_filter",
+    }), host));
+
+    const action = host.querySelector<HTMLButtonElement>(".hp-inspector-interaction-setup button")!;
+    expect(action.textContent).toContain("recommended");
+    act(() => action.click());
+    expect(onChange).toHaveBeenCalled();
+    const next = JSON.parse(onChange.mock.lastCall![0] as string);
+    expect(next.components[0].interaction).toMatchObject({
+      internalMode: "filter",
+      internalScope: "others",
+      externalMode: "auto",
+      field: "status",
+    });
+  });
+
   it("keeps component actions in the metadata header and confirms deletion inline", () => {
     const host = document.createElement("div");
     act(() =>
