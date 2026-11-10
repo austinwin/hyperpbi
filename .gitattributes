@@ -2,4 +2,3 @@
 apps/playground/dist/** -text -diff
 apps/web/public/runtime/** -text -diff
 dist/** -text -diff
-dist/Open[[:space:]]Orders[[:space:]]Analysis[[:space:]]-[[:space:]]Internal[[:space:]]-[[:space:]]DWO.pbix filter=lfs diff=lfs merge=lfs -text
