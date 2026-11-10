@@ -10,6 +10,7 @@ Maintained dashboards use schema 2.0.
 - [Dynamic GIS Analytics](dashboards/dynamic-gis-analytics/README.md) and [Universal Dynamic Content](dashboards/universal-dynamic-content/README.md), with live MiniUp requests and complete Playground projects
 - [Pump Station Monitoring](dashboards/pump-station-monitoring/README.md), with an offline 3D booster station, synthetic operating scenarios, and linked charts and equipment records
 - [Groundwater Supply & Distribution](dashboards/groundwater-supply-distribution/README.md), with two source wells, treatment, high-service pumping, and residential distribution
+- [3D Animation Studio](dashboards/scene3d-animation-studio/README.md), with visual fan rotation, translation, pulse, blink, and animations driven by synthetic equipment data
 
 Use these as the starting point for new authoring. Confirm every alias against the current Field Manifest; aliases depend on the bound Power BI fields.
 
