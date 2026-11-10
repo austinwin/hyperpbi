@@ -83,6 +83,65 @@ The default guided mode keeps the main workflow and help visible. Select **Advan
 
 The permanent Visual Inspector can select a rendered component, locate its canonical authoring JSON (including generated runtime ownership), edit that fragment, and preserve stable IDs. It provides searchable keyboard navigation, dataset-aware controls, descriptor-validated add/insert/move/duplicate/delete operations, responsive **Tree** and **Properties** panes, and bounded transaction undo/redo. Wide layouts support keyboard-accessible resizing. Compact layouts show one Inspector pane at a time, move a tree selection into Properties, and provide **Back to hierarchy**. Empty, no-match, and invalid-JSON states explain the next safe action. Every candidate is prepared and validated as a complete dashboard; invalid input remains a local draft and never replaces the last valid specification or preview.
 
+## Connect HyperPBI components and Power BI visuals
+
+**Recommended: use Visual Inspector → Connect components.** Select a chart, table, or filter control; choose **Connect to other components (recommended)**, then choose **Filter** or **Highlight**, the receiving component IDs (or all other components), the Power BI behavior, and an optional interaction field. Changes use the existing schema 2.0 `interaction` object. Advanced JSON remains available.
+
+There is **no separate interaction key to invent**:
+
+- `id` is the unique component identifier. `interaction.targets` is a list of component **IDs**, used only for **internal** HyperPBI links. Leave targets unset to affect all components in the chosen internal scope.
+- `field` is the data field key from the **Field Manifest** (for example `zone`). The field must exist in the component's selected dataset. If the component already provides a field/category payload, the interaction field can be inferred.
+- `externalMode: "selection"` sends **actual Power BI row identities**; a text key alone does not create identities.
+- `externalMode: "filter"` sends a model-column filter. The field must resolve to a **real Power BI column** with source table and column metadata. Calculated fields, true measures, and remote-only fields cannot target Power BI's model filter.
+- The browser Playground can test internal interactions but cannot emulate cross-highlighting another Power BI report visual. Power BI **Edit interactions**, host permissions, model relationships, and the **Values** field binding still control the external result.
+
+**Complete example:** bind the `zone` column and `flow` field/measure in HyperPBI's Power BI **Values** well. Use the *actual aliases* shown by your Field Manifest, not display names copied blindly.
+
+```json
+{
+  "version": "2.0",
+  "title": "Zone monitoring",
+  "components": [
+    {
+      "type": "select",
+      "id": "zone_filter",
+      "label": "Zone",
+      "field": "zone",
+      "interaction": {
+        "enabled": true,
+        "internalMode": "filter",
+        "internalScope": "others",
+        "externalMode": "filter",
+        "field": "zone"
+      }
+    },
+    {
+      "type": "barChart",
+      "id": "zone_flow_chart",
+      "title": "Flow by zone",
+      "category": "zone",
+      "measure": "flow",
+      "interaction": {
+        "internalMode": "highlight",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "clearOnSecondClick": true
+      }
+    },
+    {
+      "type": "table",
+      "id": "zone_details",
+      "columns": ["zone", "flow"],
+      "pageSize": 10
+    }
+  ]
+}
+```
+
+**Expected behavior:** changing `zone_filter` filters the HyperPBI chart/table and requests a report-level filter on the underlying Power BI zone column. Clicking a chart bar highlights matching HyperPBI rows and requests selection of the contributing Power BI row identities. To target **only** the table instead, add `"targets": ["zone_details"]` to that chart's `interaction`. External selection/filtering still operates at the report level, not just the listed internal targets.
+
+**Troubleshooting:** In Advanced controls → Test → Interaction testing, click the source and inspect the last field/value, actual model target, selected identity count, result, and suggested fix. If internal interaction works but the report does not respond, verify the **Values** bindings, real column vs measure, Power BI **Format → Edit interactions**, and semantic model relationships. If using independent uploaded/remote datasets, matching string keys do **not** automatically join them; prepare a shared keyed dataset or a relationship in the model first. For full details see [Interactions](docs/interactions.md).
+
 ## HyperPBI 2.0 authoring model
 
 The minimal contract is:
