@@ -668,6 +668,92 @@
   margin: 0 0 4px;
 }
 
+
+/* Guided dashboard + Power BI interaction wiring, using existing theme tokens. */
+.hp-inspector-interaction-setup {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--hp-inspector-border);
+  border-radius: 8px;
+  background: var(--hp-studio-panel-bg, #fff);
+}
+
+.hp-inspector-interaction-setup h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.hp-inspector-interaction-setup p,
+.hp-inspector-interaction-setup small {
+  margin: 0;
+  color: var(--hp-inspector-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.hp-inspector-interaction-setup > button {
+  justify-self: start;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--hp-inspector-border);
+  border-radius: 6px;
+  background: var(--hp-inspector-selected);
+  color: var(--hp-inspector-selected-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.hp-inspector-interaction-setup .hp-inspector-control-grid > label {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.hp-inspector-interaction-setup .hp-inspector-control-grid select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 34px;
+}
+
+.hp-inspector-interaction-setup fieldset {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px 14px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--hp-inspector-border);
+  border-radius: 6px;
+}
+
+.hp-inspector-interaction-setup fieldset legend {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hp-inspector-interaction-setup fieldset label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.hp-inspector-interaction-setup [role="status"] {
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--hp-inspector-subtle);
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
 @container hp-inspector (max-width: 680px) {
   .hp-inspector-toolbar {
     grid-template-columns: minmax(0, 1fr) auto;
