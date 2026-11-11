@@ -34,9 +34,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 0-DIST-6,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,6,13:00,15884,62.8,0,0,0,16100,64,4,0,14782,76
 0-DIST-7,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,7,14:00,15392,62.6,0,0,0,16100,64,4,0,14782,76
 0-DIST-8,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,8,15:00,14855,63.1,0,0,0,16100,64,4,0,14782,76
-0-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,1,0,0,0,0,16100,64,4,0,14782,76
-0-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,1,0,0,0,0,16100,64,4,0,14782,76
-0-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Normal supply,Standby,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Normal supply,Standby,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
 1-RW01-snapshot,RW01,Remote well 1,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,504,0,0,0,0,23400,67,6,0,17616,68
 1-RW02-snapshot,RW02,Remote well 2,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,548,0,0,0,0,23400,67,6,0,17616,68
 1-RW03-snapshot,RW03,Remote well 3,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,591,0,0,0,0,23400,67,6,0,17616,68
@@ -72,9 +73,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 1-DIST-6,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,6,13:00,23086,65.8,0,0,0,23400,67,6,0,17616,68
 1-DIST-7,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,7,14:00,22371,66.5,0,0,0,23400,67,6,0,17616,68
 1-DIST-8,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,8,15:00,21590,67.4,0,0,0,23400,67,6,0,17616,68
-1-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,1,0,0,0,0,23400,67,6,0,17616,68
-1-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,1,0,0,0,0,23400,67,6,0,17616,68
-1-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Peak demand,Standby,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Peak demand,Standby,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
 2-RW01-snapshot,RW01,Remote well 1,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
 2-RW02-snapshot,RW02,Remote well 2,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
 2-RW03-snapshot,RW03,Remote well 3,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
@@ -110,9 +112,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 2-DIST-6,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,6,13:00,12727,56.9,0,0,0,12900,57,4,1,12743,56
 2-DIST-7,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,7,14:00,12333,57.8,0,0,0,12900,57,4,1,12743,56
 2-DIST-8,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,8,15:00,11902,58.4,0,0,0,12900,57,4,1,12743,56
-2-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,1,0,0,0,0,12900,57,4,1,12743,56
-2-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,1,0,0,0,0,12900,57,4,1,12743,56
-2-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Remote wells offline,Warning,#ffa94d,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Remote wells offline,Warning,#ffa94d,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
 3-RW01-snapshot,RW01,Remote well 1,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,448,0,0,0,0,11700,55,4,1,5354,59
 3-RW02-snapshot,RW02,Remote well 2,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,487,0,0,0,0,11700,55,4,1,5354,59
 3-RW03-snapshot,RW03,Remote well 3,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,526,0,0,0,0,11700,55,4,1,5354,59
@@ -148,9 +151,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 3-DIST-6,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,6,13:00,11543,56.1,0,0,0,11700,55,4,1,5354,59
 3-DIST-7,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,7,14:00,11185,56.4,0,0,0,11700,55,4,1,5354,59
 3-DIST-8,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,8,15:00,10795,56,0,0,0,11700,55,4,1,5354,59
-3-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,1,0,0,0,0,11700,55,4,1,5354,59
+3-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
 3-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Surface inlet unavailable,Standby,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Surface inlet unavailable,Warning,#ffa94d,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Surface inlet unavailable,Warning,#ffa94d,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
 4-RW01-snapshot,RW01,Remote well 1,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,427,0,0,0,0,15600,62,4,0,14782,70
 4-RW02-snapshot,RW02,Remote well 2,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,464,0,0,0,0,15600,62,4,0,14782,70
 4-RW03-snapshot,RW03,Remote well 3,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,501,0,0,0,0,15600,62,4,0,14782,70
@@ -186,9 +190,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 4-DIST-6,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,6,13:00,15391,63.3,0,0,0,15600,62,4,0,14782,70
 4-DIST-7,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,7,14:00,14914,62.7,0,0,0,15600,62,4,0,14782,70
 4-DIST-8,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,8,15:00,14394,61.8,0,0,0,15600,62,4,0,14782,70
-4-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,1,0,0,0,0,15600,62,4,0,14782,70
-4-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,1,0,0,0,0,15600,62,4,0,14782,70
-4-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Booster maintenance,Standby,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Booster maintenance,Standby,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
 5-RW01-snapshot,RW01,Remote well 1,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,363,0,0,0,0,9700,50,3,2,12667,26
 5-RW02-snapshot,RW02,Remote well 2,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,394,0,0,0,0,9700,50,3,2,12667,26
 5-RW03-snapshot,RW03,Remote well 3,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,426,0,0,0,0,9700,50,3,2,12667,26
@@ -224,9 +229,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 5-DIST-6,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,6,13:00,9570,50.3,0,0,0,9700,50,3,2,12667,26
 5-DIST-7,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,7,14:00,9273,49.4,0,0,0,9700,50,3,2,12667,26
 5-DIST-8,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,8,15:00,8950,48.7,0,0,0,9700,50,3,2,12667,26
-5-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,1,0,0,0,0,9700,50,3,2,12667,26
-5-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,1,0,0,0,0,9700,50,3,2,12667,26
-5-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
 6-RW01-snapshot,RW01,Remote well 1,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,192,0,0,0,0,8600,51,2,1,10688,61
 6-RW02-snapshot,RW02,Remote well 2,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,209,0,0,0,0,8600,51,2,1,10688,61
 6-RW03-snapshot,RW03,Remote well 3,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,225,0,0,0,0,8600,51,2,1,10688,61
@@ -262,9 +268,10 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 6-DIST-6,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,6,13:00,8485,50,0,0,0,8600,51,2,1,10688,61
 6-DIST-7,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,7,14:00,8222,49.6,0,0,0,8600,51,2,1,10688,61
 6-DIST-8,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,8,15:00,7935,49.8,0,0,0,8600,51,2,1,10688,61
-6-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1,0,0,0,0,8600,51,2,1,10688,61
-6-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1,0,0,0,0,8600,51,2,1,10688,61
-6-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Limited power,Warning,#ffa94d,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Limited power,Warning,#ffa94d,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
 7-RW01-snapshot,RW01,Remote well 1,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,427,0,0,0,0,8200,43,2,2,14782,64
 7-RW02-snapshot,RW02,Remote well 2,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,464,0,0,0,0,8200,43,2,2,14782,64
 7-RW03-snapshot,RW03,Remote well 3,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,501,0,0,0,0,8200,43,2,2,14782,64
@@ -300,6 +307,7 @@ readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,s
 7-DIST-6,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,6,13:00,8090,41.6,0,0,0,8200,43,2,2,14782,64
 7-DIST-7,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,7,14:00,7839,42.1,0,0,0,8200,43,2,2,14782,64
 7-DIST-8,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,8,15:00,7566,43,0,0,0,8200,43,2,2,14782,64
-7-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1,0,0,0,0,8200,43,2,2,14782,64
-7-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1,0,0,0,0,8200,43,2,2,14782,64
-7-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
