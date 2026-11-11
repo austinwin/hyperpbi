@@ -8051,21 +8051,597 @@
         "objectIdField": "assetid",
         "objects": [
           {
-            "color": "#279bb9",
-            "dataKey": "RW01",
-            "id": "well_head_RW01",
-            "kind": "cylinder",
-            "label": "Remote source 1",
+            "color": "#4b94cd",
+            "flowKey": "DIST",
+            "id": "distribution_delivery",
+            "kind": "pipe",
+            "metalness": 0.48,
             "position": [
-              -8.2,
-              0.25,
-              -4.25
+              8.62,
+              0.58,
+              0
             ],
-            "selectable": true,
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
             "size": [
-              0.38,
-              0.42,
-              0.38
+              0.34,
+              2.78,
+              0.34
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP01",
+            "id": "booster_discharge_1",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              -4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP02",
+            "id": "booster_discharge_2",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              -2.4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP03",
+            "id": "booster_discharge_3",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              -0.8
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP04",
+            "id": "booster_discharge_4",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              0.8
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP05",
+            "id": "booster_discharge_5",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              2.4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP06",
+            "id": "booster_discharge_6",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              6.21,
+              0.58,
+              4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.02,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP01",
+            "id": "booster_suction_1",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              -4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP02",
+            "id": "booster_suction_2",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              -2.4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP03",
+            "id": "booster_suction_3",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              -0.8
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP04",
+            "id": "booster_suction_4",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              0.8
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP05",
+            "id": "booster_suction_5",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              2.4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "BP06",
+            "id": "booster_suction_6",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              4.26,
+              0.54,
+              4
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              1.92,
+              0.2
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "GST1",
+            "id": "tank_outlet_1",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              1.88,
+              0.53,
+              -4.1
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.85,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "GST2",
+            "id": "tank_outlet_2",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              1.88,
+              0.53,
+              -2.05
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.85,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "GST3",
+            "id": "tank_outlet_3",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              1.88,
+              0.53,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.85,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "GST4",
+            "id": "tank_outlet_4",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              1.88,
+              0.53,
+              2.05
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.85,
+              0.21
+            ]
+          },
+          {
+            "color": "#4b94cd",
+            "flowKey": "GST5",
+            "id": "tank_outlet_5",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              1.88,
+              0.53,
+              4.1
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.21,
+              2.85,
+              0.21
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "source_transfer",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -3.55,
+              0.52,
+              0.25
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.28,
+              3.7,
+              0.28
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SW1",
+            "id": "surface_supply_1",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -6.8,
+              0.52,
+              3.82
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              2.8,
+              0.2
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SW2",
+            "id": "surface_supply_2",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -6.8,
+              0.52,
+              4.75
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.2,
+              2.8,
+              0.2
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "LW01",
+            "id": "local_source_flow",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -6.8,
+              0.52,
+              2.63
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.16,
+              2.8,
+              0.16
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "tank_inlet_1",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -0.68,
+              0.52,
+              -4.1
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.19,
+              2.05,
+              0.19
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "tank_inlet_2",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -0.68,
+              0.52,
+              -2.05
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.19,
+              2.05,
+              0.19
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "tank_inlet_3",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -0.68,
+              0.52,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.19,
+              2.05,
+              0.19
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "tank_inlet_4",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -0.68,
+              0.52,
+              2.05
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.19,
+              2.05,
+              0.19
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "flowKey": "SOURCE",
+            "id": "tank_inlet_5",
+            "kind": "pipe",
+            "metalness": 0.48,
+            "position": [
+              -0.68,
+              0.52,
+              4.1
+            ],
+            "rotation": [
+              0,
+              0,
+              -90
+            ],
+            "size": [
+              0.19,
+              2.05,
+              0.19
             ]
           },
           {
@@ -8092,24 +8668,6 @@
           },
           {
             "color": "#279bb9",
-            "dataKey": "RW02",
-            "id": "well_head_RW02",
-            "kind": "cylinder",
-            "label": "Remote source 2",
-            "position": [
-              -8.2,
-              0.25,
-              -3.45
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
-            ]
-          },
-          {
-            "color": "#279bb9",
             "flowKey": "RW02",
             "id": "well_flow_RW02",
             "kind": "pipe",
@@ -8128,24 +8686,6 @@
               0.14,
               2.8,
               0.14
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "dataKey": "RW03",
-            "id": "well_head_RW03",
-            "kind": "cylinder",
-            "label": "Remote source 3",
-            "position": [
-              -8.2,
-              0.25,
-              -2.65
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
             ]
           },
           {
@@ -8172,24 +8712,6 @@
           },
           {
             "color": "#279bb9",
-            "dataKey": "RW04",
-            "id": "well_head_RW04",
-            "kind": "cylinder",
-            "label": "Remote source 4",
-            "position": [
-              -8.2,
-              0.25,
-              -1.8499999999999996
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
-            ]
-          },
-          {
-            "color": "#279bb9",
             "flowKey": "RW04",
             "id": "well_flow_RW04",
             "kind": "pipe",
@@ -8208,24 +8730,6 @@
               0.14,
               2.8,
               0.14
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "dataKey": "RW05",
-            "id": "well_head_RW05",
-            "kind": "cylinder",
-            "label": "Remote source 5",
-            "position": [
-              -8.2,
-              0.25,
-              -1.0499999999999998
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
             ]
           },
           {
@@ -8252,24 +8756,6 @@
           },
           {
             "color": "#279bb9",
-            "dataKey": "RW06",
-            "id": "well_head_RW06",
-            "kind": "cylinder",
-            "label": "Remote source 6",
-            "position": [
-              -8.2,
-              0.25,
-              -0.25
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
-            ]
-          },
-          {
-            "color": "#279bb9",
             "flowKey": "RW06",
             "id": "well_flow_RW06",
             "kind": "pipe",
@@ -8288,24 +8774,6 @@
               0.14,
               2.8,
               0.14
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "dataKey": "RW07",
-            "id": "well_head_RW07",
-            "kind": "cylinder",
-            "label": "Remote source 7",
-            "position": [
-              -8.2,
-              0.25,
-              0.5500000000000007
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
             ]
           },
           {
@@ -8332,24 +8800,6 @@
           },
           {
             "color": "#279bb9",
-            "dataKey": "RW08",
-            "id": "well_head_RW08",
-            "kind": "cylinder",
-            "label": "Remote source 8",
-            "position": [
-              -8.2,
-              0.25,
-              1.3500000000000005
-            ],
-            "selectable": true,
-            "size": [
-              0.38,
-              0.42,
-              0.38
-            ]
-          },
-          {
-            "color": "#279bb9",
             "flowKey": "RW08",
             "id": "well_flow_RW08",
             "kind": "pipe",
@@ -8371,6 +8821,150 @@
             ]
           },
           {
+            "color": "#279bb9",
+            "dataKey": "RW01",
+            "id": "well_head_RW01",
+            "kind": "cylinder",
+            "label": "Remote source 1",
+            "position": [
+              -8.2,
+              0.25,
+              -4.25
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW02",
+            "id": "well_head_RW02",
+            "kind": "cylinder",
+            "label": "Remote source 2",
+            "position": [
+              -8.2,
+              0.25,
+              -3.45
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW03",
+            "id": "well_head_RW03",
+            "kind": "cylinder",
+            "label": "Remote source 3",
+            "position": [
+              -8.2,
+              0.25,
+              -2.65
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW04",
+            "id": "well_head_RW04",
+            "kind": "cylinder",
+            "label": "Remote source 4",
+            "position": [
+              -8.2,
+              0.25,
+              -1.8499999999999996
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW05",
+            "id": "well_head_RW05",
+            "kind": "cylinder",
+            "label": "Remote source 5",
+            "position": [
+              -8.2,
+              0.25,
+              -1.0499999999999998
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW06",
+            "id": "well_head_RW06",
+            "kind": "cylinder",
+            "label": "Remote source 6",
+            "position": [
+              -8.2,
+              0.25,
+              -0.25
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW07",
+            "id": "well_head_RW07",
+            "kind": "cylinder",
+            "label": "Remote source 7",
+            "position": [
+              -8.2,
+              0.25,
+              0.5500000000000007
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
+            "color": "#279bb9",
+            "dataKey": "RW08",
+            "id": "well_head_RW08",
+            "kind": "cylinder",
+            "label": "Remote source 8",
+            "position": [
+              -8.2,
+              0.25,
+              1.3500000000000005
+            ],
+            "selectable": true,
+            "size": [
+              0.38,
+              0.42,
+              0.38
+            ]
+          },
+          {
             "dataKey": "LW01",
             "id": "local_source",
             "kind": "pump",
@@ -8385,28 +8979,6 @@
               0.54,
               0.58,
               0.54
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "LW01",
-            "id": "local_source_flow",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -6.8,
-              0.52,
-              2.63
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.16,
-              2.8,
-              0.16
             ]
           },
           {
@@ -8425,28 +8997,6 @@
               0.5,
               0.52,
               0.45
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SW1",
-            "id": "surface_supply_1",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -6.8,
-              0.52,
-              3.82
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              2.8,
-              0.2
             ]
           },
           {
@@ -8481,28 +9031,6 @@
               0.5,
               0.52,
               0.45
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SW2",
-            "id": "surface_supply_2",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -6.8,
-              0.52,
-              4.75
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              2.8,
-              0.2
             ]
           },
           {
@@ -8544,28 +9072,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "source_transfer",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -3.55,
-              0.52,
-              0.25
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.28,
-              3.7,
-              0.28
-            ]
-          },
-          {
-            "color": "#279bb9",
             "id": "storage_inlet_header",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8583,28 +9089,6 @@
               0.29,
               8.8,
               0.29
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "tank_inlet_1",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -0.68,
-              0.52,
-              -4.1
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.19,
-              2.05,
-              0.19
             ]
           },
           {
@@ -8626,50 +9110,6 @@
             ]
           },
           {
-            "color": "#4b94cd",
-            "flowKey": "GST1",
-            "id": "tank_outlet_1",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              1.88,
-              0.53,
-              -4.1
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.85,
-              0.21
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "tank_inlet_2",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -0.68,
-              0.52,
-              -2.05
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.19,
-              2.05,
-              0.19
-            ]
-          },
-          {
             "color": "#81b5cb",
             "dataKey": "GST2",
             "id": "tank_2",
@@ -8685,50 +9125,6 @@
               1.02,
               1.14,
               1.02
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "GST2",
-            "id": "tank_outlet_2",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              1.88,
-              0.53,
-              -2.05
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.85,
-              0.21
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "tank_inlet_3",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -0.68,
-              0.52,
-              0
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.19,
-              2.05,
-              0.19
             ]
           },
           {
@@ -8750,50 +9146,6 @@
             ]
           },
           {
-            "color": "#4b94cd",
-            "flowKey": "GST3",
-            "id": "tank_outlet_3",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              1.88,
-              0.53,
-              0
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.85,
-              0.21
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "tank_inlet_4",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -0.68,
-              0.52,
-              2.05
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.19,
-              2.05,
-              0.19
-            ]
-          },
-          {
             "color": "#81b5cb",
             "dataKey": "GST4",
             "id": "tank_4",
@@ -8809,50 +9161,6 @@
               1.02,
               1.14,
               1.02
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "GST4",
-            "id": "tank_outlet_4",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              1.88,
-              0.53,
-              2.05
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.85,
-              0.21
-            ]
-          },
-          {
-            "color": "#279bb9",
-            "flowKey": "SOURCE",
-            "id": "tank_inlet_5",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              -0.68,
-              0.52,
-              4.1
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.19,
-              2.05,
-              0.19
             ]
           },
           {
@@ -8875,28 +9183,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "GST5",
-            "id": "tank_outlet_5",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              1.88,
-              0.53,
-              4.1
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.85,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
             "id": "suction_header",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8914,28 +9200,6 @@
               0.32,
               9,
               0.32
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP01",
-            "id": "booster_suction_1",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              -4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
             ]
           },
           {
@@ -8983,50 +9247,6 @@
             ]
           },
           {
-            "color": "#4b94cd",
-            "flowKey": "BP01",
-            "id": "booster_discharge_1",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              -4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP02",
-            "id": "booster_suction_2",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              -2.4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
-            ]
-          },
-          {
             "dataKey": "BP02",
             "id": "booster_2",
             "kind": "pump",
@@ -9068,50 +9288,6 @@
               0.45,
               0.45,
               0.45
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP02",
-            "id": "booster_discharge_2",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              -2.4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP03",
-            "id": "booster_suction_3",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              -0.8
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
             ]
           },
           {
@@ -9159,50 +9335,6 @@
             ]
           },
           {
-            "color": "#4b94cd",
-            "flowKey": "BP03",
-            "id": "booster_discharge_3",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              -0.8
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP04",
-            "id": "booster_suction_4",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              0.8
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
-            ]
-          },
-          {
             "dataKey": "BP04",
             "id": "booster_4",
             "kind": "pump",
@@ -9247,50 +9379,6 @@
             ]
           },
           {
-            "color": "#4b94cd",
-            "flowKey": "BP04",
-            "id": "booster_discharge_4",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              0.8
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP05",
-            "id": "booster_suction_5",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              2.4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
-            ]
-          },
-          {
             "dataKey": "BP05",
             "id": "booster_5",
             "kind": "pump",
@@ -9332,50 +9420,6 @@
               0.45,
               0.45,
               0.45
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP05",
-            "id": "booster_discharge_5",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              2.4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "BP06",
-            "id": "booster_suction_6",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              4.26,
-              0.54,
-              4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.2,
-              1.92,
-              0.2
             ]
           },
           {
@@ -9424,28 +9468,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP06",
-            "id": "booster_discharge_6",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              6.21,
-              0.58,
-              4
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.21,
-              2.02,
-              0.21
-            ]
-          },
-          {
-            "color": "#4b94cd",
             "id": "discharge_header",
             "kind": "pipe",
             "metalness": 0.48,
@@ -9463,28 +9485,6 @@
               0.32,
               9,
               0.32
-            ]
-          },
-          {
-            "color": "#4b94cd",
-            "flowKey": "DIST",
-            "id": "distribution_delivery",
-            "kind": "pipe",
-            "metalness": 0.48,
-            "position": [
-              8.62,
-              0.58,
-              0
-            ],
-            "rotation": [
-              0,
-              0,
-              -90
-            ],
-            "size": [
-              0.34,
-              2.78,
-              0.34
             ]
           },
           {
