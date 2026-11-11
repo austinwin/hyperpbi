@@ -1,5 +1,5 @@
 import type { HyperPbiConfig } from "../../src/config/hyperpbiConfig";
-import type { Scene3dComponent, Scene3dObject, Scene3dVector } from "../../src/schema/scene3dSchema";
+import { scene3dLimits, type Scene3dComponent, type Scene3dObject, type Scene3dVector } from "../../src/schema/scene3dSchema";
 
 type Row = Record<string, string | number | boolean | null>;
 const round = (value: number, digits = 0) => Number(value.toFixed(digits));
@@ -143,102 +143,106 @@ function exampleRows(): Row[] {
 
 function sceneObjects(): Scene3dObject[] {
     const objects: Scene3dObject[] = [];
-    const sea = "#279bb9", clean = "#4b94cd", gold = "#dfa36a";
-    const pipe = (id: string, x: number, y: number, z: number, length: number,
-        direction: "x" | "z", color: string, flowKey?: string, diameter = 0.18) => {
-        const rotation: Scene3dVector = direction === "x" ? [0, 0, -90] : [90, 0, 0];
-        objects.push({ id, kind: "pipe", position: [x, y, z], size: [diameter, length, diameter],
-            rotation, color, metalness: 0.48, ...(flowKey ? { flowKey } : {}) });
+    const raw = "#2bbfb9", surface = "#47add8", treated = "#458ccb";
+    const chlorine = "#efb451", ammonia = "#aa8fe8", instrument = "#8ed9e6";
+    const pipe = (id: string, path: Scene3dVector[], color: string, flowKey?: string, diameter = 0.19) => {
+        objects.push({ id, kind: "pipe", path, diameter, color, metalness: 0.44,
+            ...(flowKey ? { flowKey } : {}), selectable: false });
     };
-    for (let well = 1; well <= 8; well++) {
-        const z = -4.25 + (well - 1) * 0.8;
-        const id = "RW" + String(well).padStart(2, "0");
-        objects.push({ id: "well_head_" + id, kind: "cylinder", label: "Remote source " + well,
-            dataKey: id, position: [-8.2, 0.25, z], size: [0.38, 0.42, 0.38],
-            color: sea, selectable: true });
-        pipe("well_flow_" + id, -6.8, 0.52, z, 2.8, "x", sea, id, 0.14);
+    const remoteWells = ["W01A", "W03A", "W03SB", "W04A", "W05A", "W08", "W11", "W10"];
+    remoteWells.forEach((id, index) => {
+        const z = -5.6 + index * 0.95;
+        objects.push({ id: "well_" + id, kind: "well", label: "Remote " + id,
+            dataKey: id, position: [-11.2, 0, z], size: [0.64, 0.7, 0.64],
+            color: raw, valueField: "flowgpm", valueUnit: "GPM" });
+        objects.push({ id: "meter_" + id, kind: "flowmeter", label: "FM · " + id,
+            dataKey: "FM-" + id, position: [-9.45, 0, z], size: [0.66, 0.68, 0.66],
+            color: instrument, valueField: "flowgpm", valueUnit: "GPM" });
+        pipe("remote_branch_" + id, [[-10.9, 0.52, z], [-7.2, 0.52, z]], raw, id, 0.16);
+    });
+    pipe("remote_collector", [[-7.2, 0.52, -5.6], [-7.2, 0.52, 1.05]], raw, "REMOTE", 0.29);
+    pipe("remote_transfer", [[-7.2, 0.52, 1.05], [-2.4, 0.52, 1.05]], raw, "REMOTE", 0.27);
+    for (const [id, x] of [["CL2-R1", -6.2], ["CL2-R2", -5.0]] as const) {
+        objects.push({ id: "skid_" + id, kind: "injector", label: id + " · chlorine",
+            dataKey: id, position: [x, 0.04, 1.76], size: [0.60, 0.67, 0.60],
+            color: chlorine, valueField: "dosemgL", valueUnit: "mg/L" });
     }
-    objects.push({ id: "local_source", kind: "pump", label: "On-site well", dataKey: "LW01",
-        position: [-8.2, 0.04, 2.63], size: [0.54, 0.58, 0.54], selectable: true });
-    pipe("local_source_flow", -6.8, 0.52, 2.63, 2.8, "x", sea, "LW01", 0.16);
+    objects.push({ id: "well_W09", kind: "well", label: "On-site W09",
+        dataKey: "W09", position: [-11.2, 0, 3.0], size: [0.64, 0.7, 0.64],
+        color: raw, valueField: "flowgpm", valueUnit: "GPM" });
+    objects.push({ id: "meter_W09", kind: "flowmeter", label: "FM · W09",
+        dataKey: "FM-W09", position: [-9.45, 0, 3.0], size: [0.66, 0.68, 0.66],
+        color: instrument, valueField: "flowgpm", valueUnit: "GPM" });
+    pipe("onsite_inlet", [[-10.9, 0.52, 3], [-2.4, 0.52, 3]], raw, "W09", 0.2);
+    objects.push({ id: "skid_CL2W09", kind: "injector", label: "W09 chlorine injection",
+        dataKey: "CL2-W09", position: [-6.15, 0.04, 3.72], size: [0.6, 0.67, 0.6],
+        color: chlorine, valueField: "dosemgL", valueUnit: "mg/L" });
+    objects.push({ id: "skid_NH3W09", kind: "injector", label: "W09 ammonia injection",
+        dataKey: "NH3-W09", position: [-4.9, 0.04, 3.72], size: [0.6, 0.67, 0.6],
+        color: ammonia, valueField: "dosemgL", valueUnit: "mg/L" });
     for (let source = 1; source <= 2; source++) {
-        const z = source === 1 ? 3.82 : 4.75;
-        const id = "SW" + source;
-        objects.push({ id: "surface_valve_" + source, kind: "box", label: "Surface source valve " + source,
-            dataKey: id, position: [-8.3, 0.47, z], size: [0.5, 0.52, 0.45],
-            color: "#d5a15d", selectable: true });
-        pipe("surface_supply_" + source, -6.8, 0.52, z, 2.8, "x", sea, id, 0.2);
-        objects.push({ id: "surface_meter_" + source, kind: "sphere", position: [-6.65, 0.52, z],
-            size: [0.25, 0.25, 0.25], color: "#b8d8e9", selectable: false });
+        const z = source === 1 ? 5.4 : 7.35, id = "SW" + source;
+        objects.push({ id: "valve_" + id, kind: "valve", label: id + " inlet valve",
+            dataKey: id, position: [-10.55, 0, z], size: [0.7, 0.7, 0.7],
+            color: surface, openingField: "valveopenpct",
+            valueField: "flowgpm", valueUnit: "GPM" });
+        objects.push({ id: "meter_" + id, kind: "flowmeter", label: "FM · " + id,
+            dataKey: "FM-" + id, position: [-9.18, 0, z], size: [0.69, 0.69, 0.69],
+            color: instrument, valueField: "flowgpm", valueUnit: "GPM" });
+        objects.push({ id: "analyzer_" + id, kind: "analyzer", label: id + " chlorine analyzer",
+            dataKey: "AN-" + id, position: [-7.75, 0.03, z + 0.8],
+            size: [0.55, 0.6, 0.55], color: instrument,
+            valueField: "cl2mgL", valueUnit: "mg/L" });
+        objects.push({ id: "skid_CL2_" + id, kind: "injector", label: id + " chlorine injection",
+            dataKey: "CL2-" + id, position: [-6.1, 0.04, z + 0.72],
+            size: [0.55, 0.64, 0.55], color: chlorine,
+            valueField: "dosemgL", valueUnit: "mg/L" });
+        objects.push({ id: "skid_NH3_" + id, kind: "injector", label: id + " ammonia injection",
+            dataKey: "NH3-" + id, position: [-4.9, 0.04, z + 0.72],
+            size: [0.55, 0.64, 0.55], color: ammonia,
+            valueField: "dosemgL", valueUnit: "mg/L" });
+        pipe("surface_inlet_" + id, [[-11.05, 0.52, z], [-2.4, 0.52, z]], surface, id, 0.25);
     }
-    pipe("source_collector", -5.4, 0.52, 0.25, 9.1, "z", sea, undefined, 0.28);
-    pipe("source_transfer", -3.55, 0.52, 0.25, 3.7, "x", sea, "SOURCE", 0.28);
-    pipe("storage_inlet_header", -1.7, 0.52, 0, 8.8, "z", sea, undefined, 0.29);
-    const tankZ = [-4.1, -2.05, 0, 2.05, 4.1];
-    for (let i = 1; i <= 5; i++) {
-        const z = tankZ[i - 1], id = "GST" + i;
-        pipe("tank_inlet_" + i, -0.68, 0.52, z, 2.05, "x", sea, "SOURCE", 0.19);
-        objects.push({ id: "tank_" + i, kind: "tank", label: "Ground storage " + i,
-            dataKey: id, position: [0.45, 0, z], size: [1.02, 1.14, 1.02],
-            color: "#81b5cb", selectable: true });
-        pipe("tank_outlet_" + i, 1.88, 0.53, z, 2.85, "x", clean, id, 0.21);
+    // Shared tank inlet is physically separate from the storage suction header.
+    pipe("tank_fill_header", [[-2.4, 0.52, -5.3], [-2.4, 0.52, 7.35]], raw, undefined, 0.35);
+    for (let tank = 1; tank <= 5; tank++) {
+        const z = [-5.3, -2.65, 0, 2.65, 5.3][tank - 1];
+        pipe("gst_fill_" + tank, [[-2.4, 0.52, z], [-0.94, 0.52, z]], raw, "IN-GST" + tank, 0.23);
+        objects.push({ id: "tank_" + tank, kind: "tank", label: "GST-" + tank,
+            dataKey: "GST" + tank, position: [0, 0, z], size: [0.96, 0.98, 0.96],
+            color: "#7fb9cb", valueField: "levelpct", valueUnit: "%" });
+        pipe("gst_draw_" + tank, [[0.94, 0.52, z], [2.4, 0.52, z]], treated, "OUT-GST" + tank, 0.23);
     }
-    pipe("suction_header", 3.3, 0.53, 0, 9.0, "z", clean, undefined, 0.32);
-    const boosterZ = [-4, -2.4, -0.8, 0.8, 2.4, 4];
-    for (let i = 1; i <= 6; i++) {
-        const z = boosterZ[i - 1];
-        const id = "BP" + String(i).padStart(2, "0");
-        pipe("booster_suction_" + i, 4.26, 0.54, z, 1.92, "x", clean, id, 0.2);
-        objects.push({ id: "booster_" + i, kind: "pump", label: "Booster " + i, dataKey: id,
-            position: [5.22, 0.06, z], size: [0.75, 0.8, 0.8], selectable: true });
-        objects.push({ id: "motor_fan_" + i, kind: "fan", label: "Pump motor cooling fan " + i,
-            dataKey: id, position: [5.22, 1.16, z], size: [0.45, 0.45, 0.45],
-            color: "#65b8f4", selectable: true,
-            animations: [{ kind: "rotate", axis: "z", rpm: 900, rpmField: "rpm", enabledField: "flowgpm" }] });
-        pipe("booster_discharge_" + i, 6.21, 0.58, z, 2.02, "x", clean, id, 0.21);
+    pipe("suction_header", [[2.4, 0.52, -5.6], [2.4, 0.52, 5.6]], treated, undefined, 0.36);
+    for (let pump = 1; pump <= 6; pump++) {
+        const z = [-5.6, -3.36, -1.12, 1.12, 3.36, 5.6][pump - 1];
+        const id = "BP" + String(pump).padStart(2, "0");
+        pipe("booster_suction_" + id, [[2.4, 0.52, z], [4.60, 0.52, z]], treated, id, 0.26);
+        objects.push({ id: "pump_" + id, kind: "pump", label: "Booster " + id,
+            dataKey: id, position: [5.30, 0, z], size: [0.9, 0.82, 0.9],
+            color: "#6b9fb8", valueField: "flowgpm", valueUnit: "GPM",
+            motorRpmField: "rpm" });
+        pipe("booster_discharge_" + id, [[5.99, 0.62, z], [8.35, 0.62, z]], treated, id, 0.26);
     }
-    pipe("discharge_header", 7.23, 0.58, 0, 9.0, "z", clean, undefined, 0.32);
-    pipe("distribution_delivery", 8.62, 0.58, 0, 2.78, "x", clean, "DIST", 0.34);
-    objects.push({ id: "distribution_meter", kind: "sphere", label: "Distribution meter",
-        dataKey: "DIST", position: [9.35, 0.59, 0], size: [0.34, 0.34, 0.34],
-        color: "#b9def5", selectable: true });
-    for (const item of [
-        { id: "CHEM1", x: -5.15, z: -0.9, label: "Source treatment injection" },
-        { id: "CHEM2", x: -5.15, z: 3.9, label: "Surface treatment injection" },
-    ]) objects.push({ id: item.id, kind: "sphere", label: item.label, dataKey: item.id,
-        position: [item.x, 1.15, item.z], size: [0.27, 0.27, 0.27], color: gold, selectable: true,
-        animations: [{ kind: "pulse", amplitude: 0.22, period: 1.35, enabledField: "status", enabledValue: "Running" }] });
-    objects.push({ id: "quality_monitor", kind: "box", label: "Distribution residual monitor",
-        dataKey: "QUALITY", position: [9.35, 1.43, 0.9], size: [0.42, 0.45, 0.28],
-        color: "#b4d5dc", selectable: true });
-    objects.push({ id: "alarm_beacon", kind: "sphere", label: "Station alarm indicator",
-        dataKey: "ALARM", position: [8.6, 1.58, 0.9], size: [0.22, 0.22, 0.22],
-        color: "#f5b556", selectable: true,
-        animations: [{ kind: "pulse", amplitude: 0.3, period: 1.4, enabledField: "status", enabledValue: "Warning" }] });
-    // All pipes remain connected geometrically; omit redundant flow effects
-    // on parallel secondary branches to keep primary flow paths responsive.
-    for (const object of objects) {
-        if (object.kind === "pipe" && /^(well_flow_|tank_inlet_|booster_suction_|local_source_flow)/.test(object.id)) {
-            delete object.flowKey;
-        }
-    }
-    if (objects.length > 80) throw new Error("Scene exceeds 80 objects: " + objects.length);
-    // The runtime allocates motion slots in scene-object order. Animate the
-    // hydraulically meaningful discharge, booster branches, and storage outlet
-    // before decorative source branches when the Power BI motion budget fills.
-    const priority = (object: Scene3dObject) => {
-        const id = object.id;
-        if (id === "distribution_delivery") return 0;
-        if (id.startsWith("booster_discharge_")) return 1;
-        if (id.startsWith("booster_suction_")) return 2;
-        if (id.startsWith("tank_outlet_")) return 3;
-        if (id === "source_transfer") return 4;
-        if (id.startsWith("surface_supply_")) return 5;
-        if (id === "local_source_flow") return 6;
-        if (id.startsWith("tank_inlet_")) return 7;
-        if (id.startsWith("well_flow_")) return 8;
-        return 9;
-    };
+    pipe("discharge_header", [[8.35, 0.62, -5.6], [8.35, 0.62, 5.6]], treated, undefined, 0.42);
+    pipe("distribution_delivery", [[8.35, 0.62, 0], [11.2, 0.62, 0]], treated, "DIST", 0.39);
+    pipe("distribution_sample", [[10.15, 0.62, 0], [10.15, 0.78, 1.1]], "#8aaeb9", undefined, 0.09);
+    objects.push({ id: "analyzer_distribution", kind: "analyzer",
+        label: "Distribution Cl2 / NH3 analyzer", dataKey: "AN-DIST",
+        position: [10.15, 0.04, 1.42], size: [0.65, 0.68, 0.65],
+        color: instrument, valueField: "cl2mgL", valueUnit: "mg/L" });
+    // Prefer flow animation on outlet/booster lines before secondary well branches,
+    // without changing their real upstream-to-downstream geometry.
+    const priority = (object: Scene3dObject) =>
+        object.id === "distribution_delivery" ? 0 :
+        object.id.startsWith("booster_discharge_") ? 1 :
+        object.id.startsWith("booster_suction_") ? 2 :
+        object.id.startsWith("gst_draw_") ? 3 :
+        object.id.startsWith("gst_fill_") ? 4 :
+        object.id.startsWith("surface_inlet_") ? 5 :
+        object.id === "onsite_inlet" ? 6 :
+        object.id.startsWith("remote_") ? 7 : 8;
+    if (objects.length > scene3dLimits.objects) throw new Error("Too many equipment objects: " + objects.length);
     return objects.sort((a, b) => priority(a) - priority(b));
 }
 
