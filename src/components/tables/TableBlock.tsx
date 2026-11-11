@@ -8,7 +8,7 @@ import { Card } from "../layout/LayoutBlocks";
 import { EmptyState } from "../system/EmptyState";
 import { SlotRenderer } from "../custom/slotRenderer";
 import { clearComponentInteraction, executeComponentInteraction } from "../../interactions/componentInteraction";
-import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { createInteractionPayload, payloadValueIsEmpty } from "../../interactions/interactionPayload";
 import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { downloadTableExport, rowsForTableExport, tableExportColumns } from "./tableExport";
@@ -87,6 +87,8 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const id = component.id ?? "table";
     const dynamicTrigger = !component.disabled && context.dynamicEventKeys?.has(dynamicEventKey(id, "click"));
     const policy = resolveInteractionPolicy(component, context.config, "dataPoint");
+    const sharedField = policy.enabled && policy.stateKey ? policy.field : undefined;
+    const sharedValue = policy.stateKey ? state.values[policy.stateKey] : undefined;
     const rows = getRowsForComponent(id);
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>();
@@ -233,8 +235,8 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                     {visible.map((row, visibleIndex) => {
                         const preparedIndex = (paginate ? (page - 1) * pageSize : range.start) + visibleIndex;
                         const index = sourceIndices.get(row) ?? -1;
-                        const selected = selectedRowSet.has(index);
-                        const highlighted = highlightedRowSet.has(index);
+                        const selected = sharedField ? !payloadValueIsEmpty(sharedValue) && row[sharedField] === sharedValue : selectedRowSet.has(index);
+                        const highlighted = sharedField ? selected : highlightedRowSet.has(index);
                         const activate = (event: MouseEvent | KeyboardEvent) => {
                             const field = policy.field;
                             executeComponentInteraction(policy, createInteractionPayload(component, {
@@ -246,8 +248,9 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                             }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
                         };
                         return <tr key={rowKey(row, preparedIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2}
-                            tabIndex={dynamicTrigger ? 0 : undefined} onClick={activate}
-                            onKeyDown={dynamicTrigger ? event => {
+                            tabIndex={dynamicTrigger || sharedField ? 0 : undefined} onClick={activate}
+                            aria-selected={sharedField ? selected : undefined}
+                            onKeyDown={dynamicTrigger || sharedField ? event => {
                                 if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
                                     event.preventDefault();
                                     activate(event);

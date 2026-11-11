@@ -10,8 +10,8 @@ export const scene3dDescriptor: ComponentDescriptor = {
     capabilities: { fields: true, calculations: true, css: true, slots: true, interactions: true, externalSelection: true, customHtml: false },
     interaction: { defaultEnabled: true, naturalTrigger: "click", autoExternalMode: "selection" },
     schema: {
-        required: ["type", "id", "objects"],
-        allowed: ["type", "id", "title", "subtitle", "span", "order", "responsive", "heightMode", "minHeight", "aspectRatio", "className", "hidden", "style", "css", "slots", "ariaLabel", "disabled", "tooltip", "interaction", "dataset", "objects", "objectIdField", "statusField", "statusColors", "colorField", "visibleField", "levelField", "flowField", "tooltipFields", "hideUnmatched", "showLabels", "showObjectList", "shadows", "grid", "view", "theme", "height", "frameless"],
+        required: ["type", "id"],
+        allowed: ["type", "id", "title", "subtitle", "span", "order", "responsive", "heightMode", "minHeight", "aspectRatio", "className", "hidden", "style", "css", "slots", "ariaLabel", "disabled", "tooltip", "interaction", "dataset", "objects", "sceneBinding", "objectIdField", "statusField", "statusColors", "colorField", "visibleField", "levelField", "flowField", "tooltipFields", "hideUnmatched", "showLabels", "showObjectList", "shadows", "grid", "view", "theme", "height", "frameless"],
     },
     fields: [
         ...["objectIdField", "statusField", "colorField", "visibleField"].map(property => ({ property, requirement: "any", handler: "scalar" } as const)),
@@ -36,7 +36,7 @@ export const scene3dDescriptor: ComponentDescriptor = {
         { property: "frameless", label: "Frameless", control: "checkbox", group: "Appearance", order: 70 },
     ],
     documentation: {
-        summary: "An interactive Three.js scene with equipment assemblies, tank gauges, animated pipe flow, and embedded glTF models. Bind objects to typed dataset keys for status, tooltips, and row-identity selection.",
+        summary: "Author up to 128 objects in Direct JSON or load a selected station from a SceneJSON text column. Bind equipment to typed dataset keys for status, tank levels, flow, tooltips, and row-identity selection.",
         accessibility: ["Select objects with the keyboard-accessible object list or projected labels. The list works when WebGL is unavailable."],
         relatedTypes: ["detailPanel", "table", "svg"],
     },

@@ -31,7 +31,7 @@ export interface Scene3dAnimation {
 
 export const scene3dLimits = {
     scenes: 8,
-    objects: 80,
+    objects: 128,
     models: 4,
     animationsPerObject: 4,
     clipsPerModel: 4,
@@ -62,8 +62,7 @@ export interface Scene3dObject {
     animations?: Scene3dAnimation[];
 }
 
-export interface Scene3dComponent extends ComponentBase {
-    type: "scene3d";
+export interface Scene3dDefinition {
     objects: Scene3dObject[];
     objectIdField?: string;
     statusField?: string;
@@ -82,6 +81,20 @@ export interface Scene3dComponent extends ComponentBase {
     grid?: boolean;
     view?: "isometric" | "top";
     theme?: "auto" | "light" | "dark";
+}
+
+export interface Scene3dBinding {
+    mode: "data";
+    /** Logical dataset for the station registry, defaulting to powerbi. */
+    dataset?: string;
+    keyField: string;
+    sceneField: string;
+    selectedKeyState: string;
+}
+
+export interface Scene3dComponent extends ComponentBase, Partial<Scene3dDefinition> {
+    type: "scene3d";
+    sceneBinding?: Scene3dBinding;
     height?: number;
     frameless?: boolean;
 }

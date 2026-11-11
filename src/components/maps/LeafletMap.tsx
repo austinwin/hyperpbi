@@ -40,7 +40,7 @@ import {
   heatPointsFromFeatures,
   LeafletHeatCanvasLayer,
 } from "./LeafletHeatCanvasLayer";
-import { featureAttribute } from "../../maps/attributes/mapFeatureAttributes";
+import { featureAttribute, resolvedDefaultAttributeSource } from "../../maps/attributes/mapFeatureAttributes";
 import { formatFeatureValue, mapFeatureDynamicContext } from "../../maps/model/mapFeatureValue";
 import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { normalizeFitPadding } from "../../maps/view/mapFitPadding";
@@ -117,6 +117,7 @@ interface MountedFeatureLayer {
 export function LeafletMap({
   component,
   resolvedLayers,
+  sharedFeatureKeys,
   onViewportChange,
   onControllerReady,
   onLayerRuntimeStateChange,
@@ -129,6 +130,7 @@ export function LeafletMap({
 }: {
   component: MapComponent;
   resolvedLayers: ResolvedMapLayer[];
+  sharedFeatureKeys?: string[];
   onViewportChange?: (viewport: MapViewportState) => void;
   onControllerReady?: (controller: LeafletMapController) => void;
   onLayerRuntimeStateChange?: (
@@ -224,9 +226,9 @@ export function LeafletMap({
 
   resolvedLayersRef.current = resolvedLayers;
   componentRef.current = component;
-  selectedRowKeysRef.current = new Set(context.state.componentSelectedRowKeys[id] ?? []);
+  selectedRowKeysRef.current = new Set(sharedFeatureKeys ? [] : context.state.componentSelectedRowKeys[id] ?? []);
   selectedMapIdsRef.current = new Set(
-    context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+    sharedFeatureKeys ?? context.state.mapInteractionState[id]?.selectedFeatureKeys ??
       context.state.mapSelectedFeatureIds[id] ??
       [],
   );
@@ -1388,15 +1390,13 @@ export function LeafletMap({
             },
             multiSelect,
           });
-          if (
-            currentFeature.powerBiRowIndices.length > 0 &&
-            currentFeature.powerBiRowKeys.length > 0
-          ) {
+          const hasIdentity = currentFeature.powerBiRowIndices.length > 0 && currentFeature.powerBiRowKeys.length > 0;
+          const definition = currentLayer.interaction ?? componentRef.current.interaction;
+          if (hasIdentity || definition?.stateKey) {
             const interactionPolicy = resolveInteractionPolicy(
               {
                 ...componentRef.current,
-                interaction:
-                  currentLayer.interaction ?? componentRef.current.interaction,
+                interaction: definition,
               },
               runtimeConfigRef.current,
               "dataPoint",
@@ -1418,7 +1418,8 @@ export function LeafletMap({
 const interactionResult = executeComponentInteraction(
   {
     ...interactionPolicy,
-    selectionMode: multiSelect ? "toggle" : "replace",
+    selectionMode: multiSelect && !interactionPolicy.stateKey ? "toggle" : "replace",
+    externalMode: hasIdentity ? interactionPolicy.externalMode : "none",
   },
   createInteractionPayload(componentRef.current, {
     rowIndices: currentFeature.powerBiRowIndices,
@@ -1429,7 +1430,7 @@ const interactionResult = executeComponentInteraction(
       ? featureAttribute(
           currentFeature,
           field,
-          currentLayer.interaction?.fieldSource ??
+          definition?.fieldSource ??
             resolvedDefaultAttributeSource(currentLayer),
         )
       : undefined,
@@ -1438,7 +1439,7 @@ const interactionResult = executeComponentInteraction(
     mapFeatureId: mounted.featureId,
   }),
   interactionContext,
-  { trigger: "click", multiSelect, event: event.originalEvent, dynamicEvent: false },
+  { trigger: "click", multiSelect: multiSelect && !interactionPolicy.stateKey, event: event.originalEvent, dynamicEvent: false },
 );
 
 if (interactionResult.cleared) {
@@ -1642,9 +1643,9 @@ if (interactionResult.cleared) {
   // ── Transient selection and opacity synchronization ──────────────
   useEffect(() => {
     const mapState = context.state.mapLayerState[id];
-    const selectedRowKeySet = new Set(context.state.componentSelectedRowKeys[id] ?? []);
+    const selectedRowKeySet = new Set(sharedFeatureKeys ? [] : context.state.componentSelectedRowKeys[id] ?? []);
     const selectedFeatureKeySet = new Set(
-      context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+      sharedFeatureKeys ?? context.state.mapInteractionState[id]?.selectedFeatureKeys ??
         context.state.mapSelectedFeatureIds[id] ?? [],
     );
     const hoveredFeatureKeySet = new Set([
@@ -1755,6 +1756,7 @@ if (interactionResult.cleared) {
   }, [
     renderedLayers,
     rendererDomains,
+    sharedFeatureKeys,
     context.state.componentSelectedRowKeys[id],
     context.state.mapSelectedFeatureIds[id],
     context.state.mapInteractionState[id],
@@ -2043,18 +2045,6 @@ function applyMountedStyle(
   opacity: number,
 ): void {
   updateLeafletPointLayerStyle(layer, style, opacity);
-}
-
-function resolvedDefaultAttributeSource(
-  layer: ResolvedMapLayer,
-): "powerbi" | "service" | "joined" {
-  if (layer.sourceType === "powerbi") return "powerbi";
-  if (
-    layer.sourceType === "arcgisFeature" &&
-    layer.features.some((feature) => feature.powerBiRowIndices.length > 0)
-  )
-    return "joined";
-  return "service";
 }
 
 function escapeClusterLabel(value: string): string {

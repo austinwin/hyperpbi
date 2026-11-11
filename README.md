@@ -66,6 +66,8 @@ See the [dashboard example guide](docs/dashboard-examples.md) for regeneration, 
 
 Add **3D scene** from the Visual Inspector catalog to build an equipment layout from primitives, pump and tank assemblies, or embedded GLB and glTF models. The Scene editor provides object transforms, material controls, and dataset bindings. Select an asset to link charts, tables, and Power BI visuals by source row identity. Configure per-object rotation (including RPM fields), translation, scale, pulse, blink, and bounded GLB/glTF rigid-transform clip playback in the visual editor. Motion obeys reduced-motion and runtime budgets. [Animation Studio](https://hyperpbi.com/examples/scene3d-animation-studio). Three.js ships locally in both Core and Maps. [3D scene guide](docs/scene3d.md) · [Pump Station Monitoring](https://hyperpbi.com/examples/pump-station-monitoring)
 
+Author up to 128 objects per scene in Direct JSON, the default mode. To reuse one viewer across facilities, opt into a Power BI **SceneJSON** text column and select the station from a dropdown, table, or map. [SceneJSON setup](docs/scene3d.md#load-a-station-from-a-scenejson-column) · [Multi-Station 3D Explorer](https://hyperpbi.com/examples/multi-station-3d-explorer)
+
 ## Current status and schema versions
 
 - HyperPBI dashboard schema **2.0 is the only active authoring and rendering contract**: stable IDs, Field Manifest aliases, strict unknown-property diagnostics, named datasets, reusable definitions, application patterns, and structured repair.

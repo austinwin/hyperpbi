@@ -49,6 +49,7 @@ const expectedSlugs = [
     "groundwater-supply-distribution",
     "industrial-network-telemetry",
     "media-web-performance",
+    "multi-station-3d-explorer",
     "patient-care-operations",
     "pump-station-monitoring",
     "retail-sales-operations",

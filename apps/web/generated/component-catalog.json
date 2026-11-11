@@ -10041,7 +10041,7 @@
       "maturity": "stable",
       "complexity": "standard",
       "useWhen": "Show interactive equipment, facility layouts, or physical assets tied to data",
-      "summary": "An interactive Three.js scene with equipment assemblies, tank gauges, animated pipe flow, and embedded glTF models. Bind objects to typed dataset keys for status, tooltips, and row-identity selection.",
+      "summary": "Author up to 128 objects in Direct JSON or load a selected station from a SceneJSON text column. Bind equipment to typed dataset keys for status, tank levels, flow, tooltips, and row-identity selection.",
       "accessibility": [
         "Select objects with the keyboard-accessible object list or projected labels. The list works when WebGL is unavailable."
       ],
@@ -10066,8 +10066,7 @@
       },
       "required": [
         "type",
-        "id",
-        "objects"
+        "id"
       ],
       "allowed": [
         "ariaLabel",
@@ -10092,6 +10091,7 @@
         "objects",
         "order",
         "responsive",
+        "sceneBinding",
         "shadows",
         "showLabels",
         "showObjectList",

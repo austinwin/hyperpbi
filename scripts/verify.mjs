@@ -22,7 +22,7 @@ const impact = {
 };
 console.log(`Verification: ${level}; ${files.length} changed files; impact ${JSON.stringify(impact)}`);
 const plan = [];
-const add = (name, entry, args = []) => plan.push({ name, command: process.execPath, args: [entry, ...args] });
+const add = (name, entry, args = [], env) => plan.push({ name, command: process.execPath, args: [entry, ...args], env });
 const npm = (name, script) => plan.push({ name, command: process.platform === "win32" ? "npm.cmd" : "npm", args: ["run", script], shell: process.platform === "win32" });
 const code = files.filter(file => /\.(?:ts|tsx|mjs|cjs)$/.test(file) && existsSync(file));
 if (full || code.length || impact.build) add("types:runtime", "node_modules/typescript/bin/tsc", ["--noEmit", "--incremental", "--tsBuildInfoFile", ".tmp/verify-runtime.tsbuildinfo"]);
@@ -55,6 +55,7 @@ if (full) {
     npm("package:core", "package:core");
     npm("package:maps", "package:maps");
     npm("package:capabilities", "package:verify");
+    add("browser:packaged-scenes", "node_modules/@playwright/test/cli.js", ["test", "tests/browser/scene3d-package.spec.ts", "--workers", "1"], { HYPERPBI_TEST_PACKAGES: "1" });
 }
 if (process.argv.includes("--dry-run")) { console.log(JSON.stringify(plan, null, 2)); process.exit(0); }
 mkdirSync(".verification", { recursive: true });
@@ -62,7 +63,7 @@ const measurements = [];
 for (const step of plan) {
     console.log(`\n[${level}] ${step.name}`);
     const start = performance.now();
-    const result = spawnSync(step.command, step.args, { stdio: "inherit", shell: step.shell ?? false, env: { ...process.env, NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max-old-space-size=4096" } });
+    const result = spawnSync(step.command, step.args, { stdio: "inherit", shell: step.shell ?? false, env: { ...process.env, ...step.env, NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max-old-space-size=4096" } });
     measurements.push({ name: step.name, seconds: +((performance.now() - start) / 1000).toFixed(2), exitCode: result.status ?? 1 });
     writeFileSync(resolve(`.verification/${level}-timings.json`), JSON.stringify({ level, base, files, measurements }, null, 2));
     if (result.error) console.error(result.error);

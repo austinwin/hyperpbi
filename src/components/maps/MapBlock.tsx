@@ -61,6 +61,7 @@ import {
   attributeSourceAvailable,
   defaultAttributeSource,
   featureAttribute,
+  resolvedDefaultAttributeSource,
 } from "../../maps/attributes/mapFeatureAttributes";
 import { matchesFilter } from "../../data/filtering";
 import type { Primitive } from "../../data/normalizeData";
@@ -83,8 +84,8 @@ import {
   DEFAULT_ARCGIS_CACHE_MINUTES,
   DEFAULT_ARCGIS_FEATURE_MAX_FEATURES,
 } from "../../maps/performance/mapPerformanceDefaults";
-import { executeComponentInteraction } from "../../interactions/componentInteraction";
-import { createInteractionPayload } from "../../interactions/interactionPayload";
+import { clearSharedInteractionState, executeComponentInteraction } from "../../interactions/componentInteraction";
+import { createInteractionPayload, payloadValueIsEmpty } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { type MapSelectionTool, type MapSpatialSelectionResult } from "../../maps/interactions/mapSpatialSelection";
 import {
@@ -977,7 +978,16 @@ export function MapBlock({ component }: { component: MapComponent }) {
       ),
     });
   }, [id, runtimeLayers]);
-  const selectedFeatureKeys = context.state.mapInteractionState[id]?.selectedFeatureKeys ??
+  const sharedStateKey = !component.disabled && component.interaction?.enabled !== false ? component.interaction?.stateKey : undefined;
+  const sharedField = sharedStateKey ? component.interaction?.field : undefined;
+  const sharedValue = sharedStateKey ? context.state.values[sharedStateKey] : undefined;
+  const sharedFeatureKeys = useMemo(() => sharedField
+    ? runtimeLayers.flatMap(layer => layer.features.flatMap(feature =>
+        feature.featureKey && !payloadValueIsEmpty(sharedValue) &&
+        featureAttribute(feature, sharedField, component.interaction?.fieldSource ?? resolvedDefaultAttributeSource(layer)) === sharedValue
+          ? [feature.featureKey] : []))
+    : undefined, [sharedField, sharedValue, runtimeLayers, component.interaction?.fieldSource]);
+  const selectedFeatureKeys = sharedFeatureKeys ?? context.state.mapInteractionState[id]?.selectedFeatureKeys ??
     context.state.mapSelectedFeatureIds[id] ??
     [];
   const selectedFeatureKeySet = useMemo(
@@ -1199,6 +1209,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
   }, [context.mapCommands, authoredComponentId, detailsLayers, studioActiveFeature]);
   useEffect(() => () => context.mapCommands?.publishFeature(authoredComponentId, undefined), [context.mapCommands, authoredComponentId]);
   const clearMapSelection = useCallback(() => {
+    if (sharedStateKey) clearSharedInteractionState(sharedStateKey, context);
     context.dispatch({ type: "clearMapFeatures", mapId: id });
     context.dispatch({ type: "selectComponentRows", id, rows: [] });
     context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
@@ -1215,7 +1226,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
     }
     context.dispatch({ type: "closeMapFeatureDetails", mapId: id });
     setSelectionStatus(undefined);
-  }, [context, id]);
+  }, [context, id, sharedStateKey]);
 
   useEffect(() => context.mapCommands?.subscribe((mapId, command) => {
     if (mapId !== id && mapId !== authoredComponentId) return;
@@ -1428,6 +1439,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
             <LeafletMap
               component={component}
               resolvedLayers={analyticalLayers}
+              sharedFeatureKeys={sharedFeatureKeys}
               onViewportChange={handleViewportChange}
               onControllerReady={handleControllerReady}
               onLayerRuntimeStateChange={handleLayerRuntimeStateChange}
@@ -1466,6 +1478,7 @@ export function MapBlock({ component }: { component: MapComponent }) {
                 });
 if (clearSelection) {
   setSelectionStatus(undefined);
+  if (sharedStateKey) clearSharedInteractionState(sharedStateKey, context);
   context.dispatch({ type: "selectComponentRows", id, rows: [] });
   context.dispatch({ type: "selectComponentRowKeys", id, keys: [] });
   context.dispatch({ type: "componentSelectionScope", id });

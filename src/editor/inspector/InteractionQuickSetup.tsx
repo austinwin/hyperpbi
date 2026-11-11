@@ -87,6 +87,13 @@ export function InteractionQuickSetup({
         Connect to other components (recommended)
       </button>
       <div class="hp-inspector-control-grid">
+        {["select", "table", "map"].includes(String(component.type)) && <label>
+          <span>Shared state key</span>
+          <input aria-label="Shared state key" value={definition.stateKey ?? ""} onBlur={event => {
+            const stateKey = event.currentTarget.value.trim() || undefined;
+            if (stateKey !== definition.stateKey) update({ stateKey });
+          }} onKeyDown={event => { if (event.key === "Enter") event.currentTarget.blur(); }} />
+        </label>}
         <label>
           <span>Within HyperPBI</span>
           <select

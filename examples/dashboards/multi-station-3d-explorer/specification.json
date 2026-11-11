@@ -1,0 +1,432 @@
+{
+  "version": "2.0",
+  "title": "Multi-Station 3D Explorer",
+  "theme": {
+    "mode": "dark",
+    "accentColor": "#72c9e8",
+    "gap": 14,
+    "radius": 12,
+    "cardPadding": 16
+  },
+  "data": {
+    "datasets": {
+      "scenes": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Scene"
+        },
+        "select": [
+          "stationid",
+          "scenejson"
+        ]
+      },
+      "stations": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Scene"
+        },
+        "select": [
+          "stationid",
+          "stationname",
+          "stationtype",
+          "location",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "daily": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Daily"
+        },
+        "sort": [
+          {
+            "field": "day",
+            "direction": "asc"
+          }
+        ]
+      },
+      "history": {
+        "source": "daily",
+        "filter": {
+          "field": "availability",
+          "operator": "=",
+          "value": "Synthetic daily reading"
+        }
+      },
+      "equipment": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Equipment"
+        },
+        "select": [
+          "stationid",
+          "day",
+          "assetid",
+          "equipmentstatus",
+          "rpm",
+          "levelpct",
+          "flowgpm"
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "markdown",
+      "id": "station_intro",
+      "text": "# Multi-Station 3D Explorer\nAlder Basin Water · Synthetic facility layouts and operating data"
+    },
+    {
+      "type": "select",
+      "id": "station_picker",
+      "dataset": "stations",
+      "label": "Station",
+      "field": "stationid",
+      "defaultValue": "GW-001",
+      "span": 6,
+      "options": [
+        {
+          "label": "Groundwater Station 01",
+          "value": "GW-001"
+        },
+        {
+          "label": "Groundwater Station 02",
+          "value": "GW-002"
+        },
+        {
+          "label": "Repump Station 01",
+          "value": "RP-001"
+        }
+      ],
+      "interaction": {
+        "field": "stationid",
+        "stateKey": "selectedStationId",
+        "internalMode": "filter",
+        "externalMode": "none",
+        "multiSelect": false,
+        "targets": [
+          "station_profile",
+          "station_scene",
+          "daily_pumpage",
+          "daily_availability",
+          "station_history"
+        ]
+      }
+    },
+    {
+      "type": "slider",
+      "id": "reporting_day",
+      "label": "October 2026 · reporting day",
+      "field": "day",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "defaultValue": 8,
+      "span": 6,
+      "interaction": {
+        "field": "day",
+        "stateKey": "reportingDay",
+        "internalMode": "filter",
+        "externalMode": "none",
+        "targets": [
+          "daily_pumpage",
+          "daily_availability",
+          "station_scene"
+        ]
+      }
+    },
+    {
+      "type": "statList",
+      "id": "station_profile",
+      "dataset": "stations",
+      "title": "Facility profile",
+      "span": 6,
+      "items": [
+        {
+          "label": "Station",
+          "field": "stationname"
+        },
+        {
+          "label": "Process",
+          "field": "stationtype"
+        },
+        {
+          "label": "District",
+          "field": "location"
+        }
+      ]
+    },
+    {
+      "type": "kpi",
+      "id": "daily_pumpage",
+      "dataset": "daily",
+      "title": "Daily pumpage · MGD",
+      "field": "pumpagemgd",
+      "span": 3
+    },
+    {
+      "type": "statList",
+      "id": "daily_availability",
+      "dataset": "daily",
+      "title": "Daily reading",
+      "span": 3,
+      "items": [
+        {
+          "label": "Availability",
+          "field": "availability"
+        },
+        {
+          "label": "Date",
+          "field": "reportdate"
+        }
+      ]
+    },
+    {
+      "type": "scene3d",
+      "id": "station_scene",
+      "title": "Process layout",
+      "dataset": "equipment",
+      "height": 510,
+      "span": 8,
+      "showLabels": true,
+      "showObjectList": true,
+      "sceneBinding": {
+        "mode": "data",
+        "dataset": "scenes",
+        "keyField": "stationid",
+        "sceneField": "scenejson",
+        "selectedKeyState": "selectedStationId"
+      },
+      "interaction": {
+        "internalMode": "none",
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "map",
+      "id": "station_map",
+      "title": "Alder Basin · station locations",
+      "height": 510,
+      "span": 4,
+      "basemap": {
+        "type": "none"
+      },
+      "css": ".hp-leaflet-container,.hp-map-viewport-clip { background-color: #152b3d }",
+      "view": {
+        "center": [
+          44.14,
+          -134.054
+        ],
+        "zoom": 12,
+        "fitMode": "none"
+      },
+      "toolbar": {
+        "visible": true,
+        "home": true,
+        "zoomIn": true,
+        "zoomOut": true
+      },
+      "interaction": {
+        "field": "stationid",
+        "stateKey": "selectedStationId",
+        "internalMode": "filter",
+        "externalMode": "none",
+        "multiSelect": false,
+        "targets": [
+          "station_profile",
+          "station_scene",
+          "daily_pumpage",
+          "daily_availability",
+          "station_history"
+        ]
+      },
+      "layers": [
+        {
+          "id": "district",
+          "name": "Fictional service area",
+          "source": {
+            "type": "geoJson",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "properties": {},
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -134.112,
+                          44.154
+                        ],
+                        [
+                          -134.084,
+                          44.187
+                        ],
+                        [
+                          -134.004,
+                          44.168
+                        ],
+                        [
+                          -133.995,
+                          44.126
+                        ],
+                        [
+                          -134.038,
+                          44.092
+                        ],
+                        [
+                          -134.096,
+                          44.109
+                        ],
+                        [
+                          -134.112,
+                          44.154
+                        ]
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "fillColor": "#52758c",
+              "fillOpacity": 0.22,
+              "outlineColor": "#62859a",
+              "outlineWidth": 1
+            }
+          },
+          "popup": {
+            "mode": "none"
+          },
+          "interaction": {
+            "enabled": false,
+            "externalMode": "none"
+          }
+        },
+        {
+          "id": "facilities",
+          "name": "Stations",
+          "dataset": "stations",
+          "source": {
+            "type": "powerbi",
+            "bindings": {
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          },
+          "renderer": {
+            "type": "simple",
+            "symbol": {
+              "shape": "circle",
+              "fillColor": "#62aee9",
+              "fillOpacity": 0.85,
+              "outlineColor": "#e5f3fa",
+              "outlineWidth": 2,
+              "size": 16
+            }
+          },
+          "labels": {
+            "enabled": true,
+            "field": "stationid",
+            "placement": "right",
+            "size": 12,
+            "color": "#d7eaf4"
+          },
+          "tooltip": {
+            "enabled": true,
+            "template": "{{powerbi.stationname}} · {{powerbi.location}}"
+          },
+          "popup": {
+            "mode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "station_register",
+      "dataset": "stations",
+      "title": "Find a station",
+      "ariaLabel": "Searchable station register",
+      "span": 5,
+      "search": true,
+      "pagination": false,
+      "maxRows": 10,
+      "interaction": {
+        "field": "stationid",
+        "stateKey": "selectedStationId",
+        "internalMode": "filter",
+        "externalMode": "none",
+        "multiSelect": false,
+        "targets": [
+          "station_profile",
+          "station_scene",
+          "daily_pumpage",
+          "daily_availability",
+          "station_history"
+        ]
+      },
+      "columns": [
+        {
+          "field": "stationname",
+          "title": "Station"
+        },
+        {
+          "field": "location",
+          "title": "District"
+        }
+      ]
+    },
+    {
+      "type": "lineChart",
+      "id": "station_history",
+      "dataset": "history",
+      "title": "Daily pumpage history · available days · MGD",
+      "span": 7,
+      "height": 260,
+      "category": "reportdate",
+      "measure": "pumpagemgd",
+      "aggregation": "first",
+      "options": {
+        "color": [
+          "#72c9e8"
+        ],
+        "series": [
+          {
+            "connectNulls": false,
+            "symbolSize": 7,
+            "lineStyle": {
+              "width": 3
+            },
+            "areaStyle": {
+              "opacity": 0.13
+            }
+          }
+        ]
+      },
+      "interaction": {
+        "enabled": false,
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "text",
+      "id": "station_legend",
+      "text": "Teal pipes carry raw water. Blue pipes carry treated water. Amber and violet lines mark chlorine and ammonia injection. Moving bands show flow from the simulated equipment readings."
+    }
+  ]
+}

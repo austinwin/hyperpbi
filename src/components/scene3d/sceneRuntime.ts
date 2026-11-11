@@ -5,13 +5,13 @@ import {
     type Material, type Object3D,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { Scene3dComponent, Scene3dObject } from "../../schema/scene3dSchema";
+import { scene3dLimits, type Scene3dDefinition, type Scene3dObject } from "../../schema/scene3dSchema";
 import type { SceneObjectState } from "./sceneData";
 import { createSceneMeshes } from "./sceneMeshes";
 import { openModelAsset } from "./modelAsset";
 import { resolveActiveSceneMotions, sceneMotionPose, type ActiveSceneMotion } from "./sceneMotion";
 
-type View = NonNullable<Scene3dComponent["view"]>;
+type View = NonNullable<Scene3dDefinition["view"]>;
 type LabelPositions = (id: string, point?: { x: number; y: number }) => void;
 interface Callbacks {
     labels: LabelPositions;
@@ -371,9 +371,11 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         if (entry.model) releaseModel(entry.model);
     }
 
-    function configure(component: Scene3dComponent, dark: boolean) {
+    function configure(component: Scene3dDefinition, dark: boolean) {
+        if (component.objects.length > scene3dLimits.objects) throw new Error(`A scene supports up to ${scene3dLimits.objects} objects.`);
+        const nextIds = new Set(component.objects.map(object => object.id));
         for (const [id, entry] of entries) {
-            if (!component.objects.some(object => object.id === id)) {
+            if (!nextIds.has(id)) {
                 remove(entry);
                 entries.delete(id);
                 callbacks.modelError(id);
@@ -385,8 +387,9 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             const animate = definition.kind === "pipe" && Boolean(component.flowField) &&
                 (definition.flowKey !== undefined || definition.dataKey !== undefined);
             if (entry && (entry.definition.kind !== definition.kind || entry.definition.model?.data !== definition.model?.data ||
-                entry.definition.model?.format !== definition.model?.format || entry.definition.metalness !== definition.metalness ||
-                entry.definition.roughness !== definition.roughness || Boolean(entry.setLevel) !== gauge || Boolean(entry.pipeFlow) !== animate)) {
+                entry.definition.model?.format !== definition.model?.format ||
+                definition.kind === "model" && (entry.definition.metalness !== definition.metalness || entry.definition.roughness !== definition.roughness) ||
+                Boolean(entry.setLevel) !== gauge || Boolean(entry.pipeFlow) !== animate)) {
                 remove(entry);
                 entry = undefined;
             }
@@ -425,17 +428,18 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
         flowing.clear();
         moving.clear();
         // Reserve slots for configured equipment motion before allocating leftover slots to pipe flow.
-        const animatedIds = new Set(objects.filter(state => state.visible &&
-            resolveActiveSceneMotions(state.object, state.row).length > 0).slice(0, flowBudget).map(state => state.object.id));
+        for (const state of objects) {
+            const entry = entries.get(state.object.id);
+            if (!entry) continue;
+            entry.motions = state.visible && moving.size < flowBudget ? resolveActiveSceneMotions(state.object, state.row) : [];
+            if (entry.motions.length) moving.add(entry);
+        }
         for (const state of objects) {
             const entry = entries.get(state.object.id);
             if (!entry) continue;
             if (entry.group.visible !== state.visible) renderer.shadowMap.needsUpdate = true;
             entry.baseVisible = state.visible;
-            entry.motions = state.visible ? resolveActiveSceneMotions(state.object, state.row) : [];
-            const activeMotion = entry.motions.length > 0 && animatedIds.has(state.object.id);
-            if (activeMotion) moving.add(entry);
-            else {
+            if (!moving.has(entry)) {
                 const pose = sceneMotionPose(entry.definition, [], 0);
                 entry.group.position.fromArray(pose.position);
                 entry.group.scale.fromArray(pose.size);
@@ -451,9 +455,9 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.setLevel?.(state.level);
             if (entry.pipeFlow) {
                 const rate = state.flow ?? 0;
-                const moving = state.visible && rate !== 0 && flowing.size < flowBudget - animatedIds.size;
-                entry.pipeFlow.bands.visible = moving;
-                if (moving) {
+                const flowingNow = state.visible && rate !== 0 && flowing.size < flowBudget - moving.size;
+                entry.pipeFlow.bands.visible = flowingNow;
+                if (flowingNow) {
                     const length = Math.max(1, entry.definition.size?.[1] ?? 1);
                     entry.speed = Math.sign(rate) * (0.22 + 0.7 * Math.min(1, Math.abs(rate) / 1200)) / Math.sqrt(length);
                     flowing.add(entry);
@@ -551,11 +555,22 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
 
     return {
         configure, update, fit, invalidate,
+        resetInteraction() {
+            cancel();
+            for (const entry of entries.values()) {
+                entry.motionTime = 0;
+                entry.phase = 0.12;
+                entry.mixer?.stopAllAction();
+                entry.activeClip = undefined;
+            }
+        },
         setActive(value: boolean) {
+            if (active === value) return;
             active = value;
             if (active) invalidate();
             else {
                 cancelAnimationFrame(frame);
+                clearHoverFrame();
                 frame = lastFlowDraw = 0;
             }
         },

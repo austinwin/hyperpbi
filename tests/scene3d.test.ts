@@ -9,6 +9,9 @@ import { resolveSceneObjects } from "../src/components/scene3d/sceneData";
 import { resolveActiveSceneMotions, sceneMotionPose } from "../src/components/scene3d/sceneMotion";
 import { HyperPbiRoot } from "../src/render/HyperPbiRoot";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
+import { createSceneJsonCache, createSceneTelemetryResolver, maxSceneJsonLength, resolveBoundScene } from "../src/components/scene3d/sceneBinding";
+import { parseDataView } from "../src/data/parseDataView";
+import { denseScene3d, nearPowerBiTextLimit } from "./fixtures/denseScene3d";
 
 const scene: Scene3dComponent = {
     type: "scene3d", id: "scene", objectIdField: "asset", statusField: "status",
@@ -28,6 +31,65 @@ const triangle = {
 const encode = (asset: unknown) => new TextEncoder().encode(JSON.stringify(asset));
 
 describe("scene3d schema and data", () => {
+    it("accepts 128 direct objects and rejects 129 without changing the direct JSON contract", () => {
+        const direct = { type: "scene3d", id: "dense", ...denseScene3d() };
+        const spec = { version: "2.0", components: [direct] };
+        expect(validateSchema(spec).schema).toEqual(spec);
+        expect(validateSchema({ ...spec, components: [{ ...direct, ...denseScene3d(129) }] }).errors.join(" ")).toContain("128 objects");
+        expect(validateSchema({ ...spec, components: [{ type: "scene3d", id: "empty" }] }).valid).toBe(false);
+    });
+
+    it("validates data-only scenes and resolves the exact matching row with an exact-content cache", () => {
+        const binding = { mode: "data" as const, keyField: "stationid", sceneField: "scenejson", selectedKeyState: "station" };
+        const parsed = parseCsvText("stationid,scenejson\nA,example", "registry.csv").data;
+        const authored = { type: "scene3d", id: "viewer", sceneBinding: binding };
+        expect(prepareSpecification({ version: "2.0", components: [authored] }, parsed).errors).toEqual([]);
+        const dense = nearPowerBiTextLimit();
+        const other = '{"objects":[{"id":"tank","kind":"tank"}]}';
+        const data = { ...parsed, rows: [{ stationid: "1", scenejson: dense }, { stationid: 1, scenejson: other }] };
+        const parse = createSceneJsonCache();
+        const first = resolveBoundScene(binding, data, "1", parse);
+        expect(first).toMatchObject({ definition: JSON.parse(dense) });
+        expect(resolveBoundScene(binding, data, 1, parse)).toMatchObject({ definition: JSON.parse(other) });
+        expect(resolveBoundScene(binding, data, "1", parse)).toBe(first);
+        expect(resolveBoundScene(binding, data, "missing", parse)).toMatchObject({ message: expect.stringContaining("No scene row") });
+        expect(resolveBoundScene(binding, data, undefined, parse)).toMatchObject({ message: expect.stringContaining("Select a station") });
+        expect(resolveBoundScene(binding, { ...data, rows: [data.rows[0], data.rows[0]] }, "1", parse)).toMatchObject({ message: expect.stringContaining("More than one") });
+    });
+
+    it("reports missing, truncated, oversized, unsupported and over-limit content", () => {
+        const parse = createSceneJsonCache();
+        expect(parse('{"objects":[')).toMatchObject({ message: expect.stringContaining("invalid or truncated") });
+        expect(parse(" ".repeat(maxSceneJsonLength + 1))).toMatchObject({ message: expect.stringContaining("too large") });
+        expect(parse('{"objects":[],"interaction":{"script":"x"}}')).toMatchObject({ message: expect.stringContaining("unsupported") });
+        expect(parse(JSON.stringify(denseScene3d(129)))).toMatchObject({ message: expect.stringContaining("128 objects") });
+        const binding = { mode: "data" as const, keyField: "stationid", sceneField: "scenejson", selectedKeyState: "station" };
+        const data = parseCsvText("stationid,scenejson\nA,", "registry.csv").data;
+        expect(resolveBoundScene(binding, data, "A", parse)).toMatchObject({ message: expect.stringContaining("missing for station") });
+    });
+
+    it("resolves portable equipment, tooltip, and motion aliases in Power BI row definitions", () => {
+        const columns = ["AssetID", "Status", "RPM"].map((name, index) => ({
+            displayName: name, index, queryName: `Equipment.${name}`,
+            type: name === "RPM" ? { numeric: true } : { text: true }, roles: { values: true },
+        }));
+        const data = parseDataView({ metadata: { columns }, table: { columns, rows: [["A", "Running", 240]] } });
+        const definition = {
+            objectIdField: "assetID", statusField: "status", tooltipFields: [{ field: "rPM", label: "Speed" }],
+            objects: [{ id: "fan", kind: "fan" as const, dataKey: "A",
+                animations: [{ kind: "rotate" as const, rpmField: "rPM", enabledField: "status", enabledValue: "Running" }] }],
+        };
+        const resolve = createSceneTelemetryResolver();
+        const resolved = resolve(definition, data);
+        expect(resolved.warning).toBeUndefined();
+        const [state] = resolveSceneObjects(resolved.definition, data.rows, data.rows);
+        expect(state.status).toBe("Running");
+        expect(resolveActiveSceneMotions(state.object, state.row)[0].rpm).toBe(240);
+        expect(resolved.definition.tooltipFields).toEqual([{ field: "equipment_rpm", label: "Speed" }]);
+        expect(resolve(definition, { ...data, fields: { ...data.fields }, rows: [] })).toBe(resolved);
+        expect(definition.objects[0].animations[0].rpmField).toBe("rPM");
+    });
+
     it("validates object ids, transforms, palette and the inline model boundary", () => {
         const result = validateSchema({ version: "2.0", components: [{
             ...scene, statusColors: [{ value: "Alarm", color: "var(--color)" }],

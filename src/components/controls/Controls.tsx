@@ -12,21 +12,35 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     const id = component.id ?? component.type;
     const policy = resolveInteractionPolicy(component, context.config, "control");
     const rows = getRowsForComponent(id);
-    const initial = state.values[id] ?? component.defaultValue ?? (component.type === "toggle" ? false : component.min ?? "");
+    const stateKey = policy.enabled && !component.disabled ? policy.stateKey : undefined;
+    const stored = state.values[stateKey ?? id];
+    const initial = stored ?? component.defaultValue ?? (component.type === "toggle" ? false : component.min ?? "");
     const [value, setValue] = useState<unknown>(initial);
-    const options = useMemo(() => component.options ?? (component.field ? Array.from(new Set(rows.map(row => row[component.field!]).filter(item => item != null))).map(String).sort() : []), [component.options, component.field, rows]);
+    const options = useMemo(() => component.options ?? (component.field ? Array.from(new Set(rows.map(row => row[component.field!]).filter(item => item != null))).map(item =>
+        stateKey && (typeof item === "number" || typeof item === "boolean") ? { label: String(item), value: item } : String(item)
+    ).sort((left, right) => {
+        const a = typeof left === "string" ? left : left.label;
+        const b = typeof right === "string" ? right : right.label;
+        return a < b ? -1 : a > b ? 1 : 0;
+    }) : []), [component.options, component.field, rows, stateKey]);
     const multiple = component.type === "multiSelect" || component.multiple === true;
     const operator = component.interaction?.operator ?? component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : component.type === "dateRange" ? "between" : "=");
     const interactionField=policy.field??component.field;
 
-    const changeValue = (next: unknown, event?: Event) => {
+    const changeValue = (next: unknown, event?: Event, initializing = false) => {
         setValue(next);
-        dispatch({ type: "value", id, value: next });
+        if (!stateKey || id !== stateKey) dispatch({ type: "value", id, value: next });
         const rowIndices = interactionField ? resolveSourceRowIndicesForFilter(interactionField, operator, next, sourceRows, rows) : [];
-        executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }), context, { trigger: policy.trigger, dynamicEvent: "change", contextValue: next, multiSelect: multiple, event });
+        executeComponentInteraction(initializing ? { ...policy, externalMode: "none" } : policy,
+            createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }),
+            context, { trigger: policy.trigger, dynamicEvent: initializing ? false : "change", contextValue: next, multiSelect: multiple, event });
     };
 
-    useEffect(() => { setValue(state.values[id] ?? initial); }, [state.values[id]]);
+    useEffect(() => { setValue(stored ?? initial); }, [stored, stateKey]);
+    useEffect(() => {
+        if (stateKey && stored === undefined && component.defaultValue !== undefined &&
+            (!interactionField || rows.some(row => row[interactionField] === component.defaultValue))) changeValue(component.defaultValue, undefined, true);
+    }, [stateKey, stored, component.defaultValue, rows]);
 
     if (component.type === "button") return <button class="btn btn-sm hp-button" type="button" disabled={component.disabled} onClick={event => {
         if (component.uiAction) {
@@ -43,6 +57,14 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
 
     const label = component.label ?? component.title;
     if (component.type === "toggle") return <label class="form-check form-switch hp-control"><input class="form-check-input" type="checkbox" checked={Boolean(value)} onChange={event => changeValue(event.currentTarget.checked, event)} /><span class="form-check-label">{label}</span></label>;
+    if (component.type === "select" && stateKey && !multiple) {
+        const items = options.map(option => typeof option === "string" ? { label: option, value: option } : option);
+        const index = items.findIndex(item => item.value === value);
+        return <label class="hp-control">{label && <span>{label}</span>}<select aria-label={label} class="form-select form-select-sm" disabled={component.disabled} value={index < 0 ? "" : String(index)} onChange={event => {
+            const selected = event.currentTarget.value;
+            changeValue(selected === "" ? "" : items[Number(selected)]?.value, event);
+        }}><option value="">Select…</option>{items.map((item, at) => <option key={at} value={String(at)}>{item.label}</option>)}</select></label>;
+    }
     if (component.type === "select" || component.type === "multiSelect") return <label class="hp-control">{label && <span>{label}</span>}<select class="form-select form-select-sm" multiple={multiple} value={multiple ? undefined : String(value ?? "")} onChange={event => changeValue(multiple ? Array.from(event.currentTarget.selectedOptions).map(option => option.value) : event.currentTarget.value, event)}><option value="">All</option>{options.map(option => { const item = typeof option === "string" ? { label: option, value: option } : option; return <option value={String(item.value)} selected={multiple && Array.isArray(value) && value.includes(String(item.value))}>{item.label}</option>; })}</select></label>;
     if (component.type === "slider") return <label class="hp-control">{label && <span>{label}: <strong>{String(value)}</strong></span>}<input class="form-range" type="range" min={component.min} max={component.max} step={component.step} value={Number(value)} onInput={event => changeValue(Number(event.currentTarget.value), event)} /></label>;
     if (component.type === "dateRange") return <div class="hp-control hp-date-range"><span>{label}</span><input class="form-control form-control-sm" type="date" onChange={event => changeValue([event.currentTarget.value, Array.isArray(value) ? value[1] : ""], event)} /><input class="form-control form-control-sm" type="date" onChange={event => changeValue([Array.isArray(value) ? value[0] : "", event.currentTarget.value], event)} /></div>;

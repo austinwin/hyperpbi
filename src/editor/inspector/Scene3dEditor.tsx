@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { importModelFile } from "../../components/scene3d/modelAsset";
-import { isScene3dKey, scene3dAnimationKinds, scene3dKinds, scene3dLimits, type Scene3dAnimation, type Scene3dComponent, type Scene3dKey, type Scene3dKind, type Scene3dObject, type Scene3dVector } from "../../schema/scene3dSchema";
+import { sceneBindingDiagnostic } from "../../components/scene3d/sceneBinding";
+import type { NormalizedData } from "../../data/normalizeData";
+import { isScene3dKey, scene3dAnimationKinds, scene3dKinds, scene3dLimits, type Scene3dAnimation, type Scene3dBinding, type Scene3dComponent, type Scene3dKey, type Scene3dKind, type Scene3dObject, type Scene3dVector } from "../../schema/scene3dSchema";
 import { StudioSection } from "../ui/StudioSection";
 
 const kinds: Record<Scene3dKind, string> = {
@@ -70,8 +72,13 @@ function uniqueObjectId(kind: Scene3dKind, objects: Scene3dObject[]) {
     return `${kind}_${index}`;
 }
 
-export function Scene3dEditor({ component, fields, onChange }: {
-    component: Scene3dComponent; fields: FieldOption[]; onChange: (property: string, value: unknown) => boolean;
+export function Scene3dEditor({ component, fields, sceneDatasets, sceneFields, onChange, onBindingChange }: {
+    component: Scene3dComponent;
+    fields: FieldOption[];
+    sceneDatasets: string[];
+    sceneFields?: NormalizedData["fields"];
+    onChange: (property: string, value: unknown) => boolean;
+    onBindingChange: (binding?: Scene3dBinding) => boolean;
 }) {
     const objects = component.objects ?? [];
     const [objectId, setObjectId] = useState(objects[0]?.id);
@@ -80,6 +87,16 @@ export function Scene3dEditor({ component, fields, onChange }: {
     const [importing, setImporting] = useState(false);
     const [tooltipField, setTooltipField] = useState("");
     const [open, setOpen] = useState(true);
+    const binding = component.sceneBinding;
+    const lastBinding = useRef(binding);
+    if (binding) lastBinding.current = binding;
+    const bindingFields = Object.values(sceneFields ?? {});
+    const bindingFieldSelect = (property: "keyField" | "sceneField", label: string) => binding && <label>{label}
+        <select class="form-select form-select-sm" value={binding[property]} onChange={event => onBindingChange({ ...binding, [property]: event.currentTarget.value })}>
+            {!bindingFields.some(field => field.key === binding[property]) && <option value={binding[property]}>{binding[property]} (unresolved)</option>}
+            {bindingFields.map(field => <option key={field.key} value={field.key}>{field.displayName} · {field.key}</option>)}
+        </select>
+    </label>;
     const selected = objects.find(object => object.id === objectId) ?? objects[0];
     const latest = useRef({ objects, onChange });
     latest.current = { objects, onChange };
@@ -134,7 +151,31 @@ export function Scene3dEditor({ component, fields, onChange }: {
 
     return <StudioSection title="Scene editor" open={open} onToggle={setOpen}>
         <div class="hp-scene3d-editor">
-            <p class="text-secondary m-0">Build the scene with equipment, shapes, or a self-contained model. Changes appear in the dashboard preview.</p>
+            <label>Scene source<select class="form-select form-select-sm" value={binding ? "data" : "direct"} onChange={event =>
+                onBindingChange(event.currentTarget.value === "data"
+                    ? lastBinding.current ?? { mode: "data", keyField: "stationid", sceneField: "scenejson", selectedKeyState: "selectedStationId" }
+                    : undefined)}>
+                <option value="direct">Direct JSON</option>
+                <option value="data">Power BI SceneJSON column</option>
+            </select></label>
+            {binding && <fieldset>
+                <legend>Scene data binding</legend>
+                <label>Scene dataset<select class="form-select form-select-sm" value={binding.dataset ?? "powerbi"}
+                    onChange={event => onBindingChange({ ...binding, dataset: event.currentTarget.value })}>
+                    {binding.dataset && !sceneDatasets.includes(binding.dataset) && <option value={binding.dataset}>{binding.dataset} (unavailable)</option>}
+                    {sceneDatasets.map(name => <option key={name} value={name}>{name}</option>)}
+                </select></label>
+                {bindingFieldSelect("keyField", "Station key field")}
+                {bindingFieldSelect("sceneField", "Scene JSON field")}
+                <label>Selected station state<TextInput label="Selected station state" value={binding.selectedKeyState}
+                    onChange={selectedKeyState => onBindingChange({ ...binding, selectedKeyState })} /></label>
+                <p class="text-secondary m-0" role="status">{sceneBindingDiagnostic(binding, sceneFields) ??
+                    "Fields are available. Select a station in the preview to validate its SceneJSON."}</p>
+                <p class="text-secondary m-0">Connect a select control, table, or map using the same shared state key. Edit data-driven geometry in the source text column.</p>
+            </fieldset>}
+            <p class="text-secondary m-0">{binding
+                ? "The Direct JSON objects below are saved with the component. Switch to Direct JSON to preview them."
+                : "Build the scene with equipment, shapes, or a self-contained model. Changes appear in the dashboard preview."}</p>
             <fieldset>
                 <legend>Add an object</legend>
                 <div class="hp-scene3d-editor-row">
@@ -149,7 +190,7 @@ export function Scene3dEditor({ component, fields, onChange }: {
             </fieldset>
             {selected && <>
                 <fieldset>
-                    <legend>Objects ({objects.length})</legend>
+                    <legend>Objects ({objects.length}/{scene3dLimits.objects})</legend>
                     <label>Edit object<select class="form-select form-select-sm" value={selected.id} onChange={event => setObjectId(event.currentTarget.value)}>
                         {objects.map(object => <option key={object.id} value={object.id}>{object.label ?? object.id} · {kinds[object.kind]}</option>)}
                     </select></label>

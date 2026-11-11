@@ -1,5 +1,5 @@
 import type { HyperPbiConfig } from "../../src/config/hyperpbiConfig";
-import type { Scene3dComponent, Scene3dObject, Scene3dVector } from "../../src/schema/scene3dSchema";
+import { scene3dLimits, type Scene3dComponent, type Scene3dObject, type Scene3dVector } from "../../src/schema/scene3dSchema";
 
 type Row = Record<string, string | number | boolean | null>;
 const round = (value: number, digits = 0) => Number(value.toFixed(digits));
@@ -181,7 +181,7 @@ function sceneObjects(): Scene3dObject[] {
             delete object.flowKey;
         }
     }
-    if (objects.length > 80) throw new Error("Scene exceeds 80 objects: " + objects.length);
+    if (objects.length > scene3dLimits.objects) throw new Error(`Scene exceeds ${scene3dLimits.objects} objects.`);
     // The runtime allocates motion slots in scene-object order. Animate the
     // hydraulically meaningful discharge, booster branches, and storage outlet
     // before decorative source branches when the Power BI motion budget fills.
@@ -327,7 +327,7 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
         previewImage: "/images/water-pump-station-digital-twin.svg",
         powerBiPackage: "core" as const,
         expected: "Switch between all eight scenarios: Normal supply, Peak demand, Remote wells offline, Surface inlet unavailable, Booster maintenance, Low storage, Limited power, and Low distribution pressure. Tank fill, pump availability, fan rotation, animated flow, pressure and intake KPIs, linked charts, and the asset register change with the scenario. Selecting an asset cross-highlights associated records.",
-        limitations: "Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to 80 objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.",
+        limitations: `Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to ${scene3dLimits.objects} objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.`,
         headers, rows, specification,
         runtime: { ...runtime, motion: { ...runtime.motion, maxConcurrentAnimations: 24 } },
     };

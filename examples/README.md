@@ -12,6 +12,7 @@ Maintained dashboards use schema 2.0.
 - [Groundwater Supply & Distribution](dashboards/groundwater-supply-distribution/README.md), with two source wells, treatment, high-service pumping, and residential distribution
 - [Water Pump Station | Process Digital Twin](dashboards/water-pump-station-digital-twin/README.md), with a fictionalized process layout, eight operating scenarios, five data-bound storage tanks, six boosters, and animated flow and equipment
 - [3D Animation Studio](dashboards/scene3d-animation-studio/README.md), with visual fan rotation, translation, pulse, blink, and animations driven by synthetic equipment data
+- [Multi-Station 3D Explorer](dashboards/multi-station-3d-explorer/README.md), with three station scenes loaded from table rows, an offline map, and independent reporting-day filters
 
 Use these as the starting point for new authoring. Confirm every alias against the current Field Manifest; aliases depend on the bound Power BI fields.
 

@@ -1,0 +1,190 @@
+recordtype,stationid,stationname,stationtype,location,latitude,longitude,scenejson,day,reportdate,pumpagemgd,availability,assetid,equipmentstatus,rpm,levelpct,flowgpm
+Scene,GW-001,Groundwater Station 01,Single well · disinfection,Alder Basin North,44.172,-134.086,"{""objects"":[{""id"":""distribution"",""kind"":""pipe"",""position"":[8.2,0.75,0],""size"":[0.21,6.4,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""distribution""},{""id"":""well0"",""kind"":""cylinder"",""position"":[-9.3,0.67,0],""size"":[0.78,1.34,0.78],""color"":""#4da996"",""label"":""Well 1"",""selectable"":true},{""id"":""wellFeed0"",""kind"":""pipe"",""position"":[-6.15,0.75,0],""size"":[0.21,5.5,0.21],""color"":""#4da996"",""rotation"":[0,0,-90],""flowKey"":""intake1""},{""id"":""chlorine"",""kind"":""cylinder"",""position"":[-6.8,0.62,1.65],""size"":[0.66,1.2,0.66],""color"":""#d5b363"",""label"":""Chlorine dosing"",""selectable"":true},{""id"":""chlorineskid"",""kind"":""box"",""position"":[-6.2,0.22,1.65],""size"":[0.42,0.42,0.46],""color"":""#506678""},{""id"":""chlorinedose"",""kind"":""pipe"",""position"":[-6.2,0.43,0.825],""size"":[0.09,1.65,0.09],""color"":""#d5b363"",""rotation"":[-90,0,0]},{""id"":""chlorineriser"",""kind"":""pipe"",""position"":[-6.2,0.59,0],""size"":[0.09,0.32,0.09],""color"":""#d5b363"",""rotation"":[0,0,0]},{""id"":""storageA"",""kind"":""tank"",""position"":[-2.4,0,0],""size"":[1.1,0.98,1.1],""color"":""#7996a7"",""label"":""Contact tank"",""dataKey"":""storageA""},{""id"":""storageOutlet"",""kind"":""pipe"",""position"":[-0.725,0.75,0],""size"":[0.21,1.45,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""inlet""},{""id"":""booster1suction"",""kind"":""pipe"",""position"":[0.57,0.75,0],""size"":[0.21,1.14,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1isolation"",""kind"":""sphere"",""position"":[0.5700000000000001,0.75,0],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster1isolationstem"",""kind"":""cylinder"",""position"":[0.5700000000000001,0.94,0],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster1isolationwheel"",""kind"":""cylinder"",""position"":[0.5700000000000001,1.13,0],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster1"",""kind"":""pump"",""position"":[2,0,0],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 1"",""dataKey"":""booster1""},{""id"":""booster1riser"",""kind"":""pipe"",""position"":[1.41,1.565,0],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster1""},{""id"":""booster1discharge"",""kind"":""pipe"",""position"":[3.205,1.8,0],""size"":[0.21,3.59,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1fan"",""kind"":""fan"",""position"":[2.74,0.75,0],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster1"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""outletDrop"",""kind"":""pipe"",""position"":[5,1.275,0],""size"":[0.21,1.05,0.21],""color"":""#469cdc"",""rotation"":[180,0,0],""flowKey"":""distribution""},{""id"":""outletValve"",""kind"":""sphere"",""position"":[9.5,0.75,0],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""outletValvestem"",""kind"":""cylinder"",""position"":[9.5,0.94,0],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""outletValvewheel"",""kind"":""cylinder"",""position"":[9.5,1.13,0],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""flowmeter"",""kind"":""cylinder"",""position"":[8.65,0.75,0],""size"":[0.43,0.5,0.43],""color"":""#a7b4be"",""rotation"":[0,0,90],""label"":""Distribution flowmeter"",""selectable"":true}],""objectIdField"":""assetid"",""levelField"":""levelpct"",""flowField"":""flowgpm"",""statusField"":""equipmentstatus"",""statusColors"":[{""value"":""Running"",""color"":""#4dbe9e""},{""value"":""Standby"",""color"":""#70849a""},{""value"":""Unknown"",""color"":""#96a4b3""}],""tooltipFields"":[{""field"":""flowgpm"",""label"":""Flow (gpm)""},{""field"":""rpm"",""label"":""Motor (rpm)""}],""view"":""isometric""}",,,,,,,,,
+Daily,GW-001,,,,,,,1,2026-10-01,1.261,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,1,,,,storageA,,,64,
+Equipment,GW-001,,,,,,,1,,,,booster1,Running,1128,,561
+Equipment,GW-001,,,,,,,1,,,,intake1,,,,561
+Equipment,GW-001,,,,,,,1,,,,inlet,,,,561
+Equipment,GW-001,,,,,,,1,,,,distribution,,,,561
+Daily,GW-001,,,,,,,2,2026-10-02,1.372,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,2,,,,storageA,,,67,
+Equipment,GW-001,,,,,,,2,,,,booster1,Running,1136,,572
+Equipment,GW-001,,,,,,,2,,,,intake1,,,,572
+Equipment,GW-001,,,,,,,2,,,,inlet,,,,572
+Equipment,GW-001,,,,,,,2,,,,distribution,,,,572
+Daily,GW-001,,,,,,,3,2026-10-03,1.483,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,3,,,,storageA,,,70,
+Equipment,GW-001,,,,,,,3,,,,booster1,Running,1144,,583
+Equipment,GW-001,,,,,,,3,,,,intake1,,,,583
+Equipment,GW-001,,,,,,,3,,,,inlet,,,,583
+Equipment,GW-001,,,,,,,3,,,,distribution,,,,583
+Daily,GW-001,,,,,,,4,2026-10-04,1.594,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,4,,,,storageA,,,73,
+Equipment,GW-001,,,,,,,4,,,,booster1,Running,1152,,594
+Equipment,GW-001,,,,,,,4,,,,intake1,,,,594
+Equipment,GW-001,,,,,,,4,,,,inlet,,,,594
+Equipment,GW-001,,,,,,,4,,,,distribution,,,,594
+Daily,GW-001,,,,,,,5,2026-10-05,1.706,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,5,,,,storageA,,,76,
+Equipment,GW-001,,,,,,,5,,,,booster1,Running,1160,,605
+Equipment,GW-001,,,,,,,5,,,,intake1,,,,605
+Equipment,GW-001,,,,,,,5,,,,inlet,,,,605
+Equipment,GW-001,,,,,,,5,,,,distribution,,,,605
+Daily,GW-001,,,,,,,6,2026-10-06,1.206,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,6,,,,storageA,,,79,
+Equipment,GW-001,,,,,,,6,,,,booster1,Running,1168,,616
+Equipment,GW-001,,,,,,,6,,,,intake1,,,,616
+Equipment,GW-001,,,,,,,6,,,,inlet,,,,616
+Equipment,GW-001,,,,,,,6,,,,distribution,,,,616
+Daily,GW-001,,,,,,,7,2026-10-07,1.317,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,7,,,,storageA,,,82,
+Equipment,GW-001,,,,,,,7,,,,booster1,Running,1176,,627
+Equipment,GW-001,,,,,,,7,,,,intake1,,,,627
+Equipment,GW-001,,,,,,,7,,,,inlet,,,,627
+Equipment,GW-001,,,,,,,7,,,,distribution,,,,627
+Daily,GW-001,,,,,,,8,2026-10-08,1.428,Synthetic daily reading,,,,,
+Equipment,GW-001,,,,,,,8,,,,storageA,,,63,
+Equipment,GW-001,,,,,,,8,,,,booster1,Running,1184,,638
+Equipment,GW-001,,,,,,,8,,,,intake1,,,,638
+Equipment,GW-001,,,,,,,8,,,,inlet,,,,638
+Equipment,GW-001,,,,,,,8,,,,distribution,,,,638
+Scene,GW-002,Groundwater Station 02,Twin wells · filtration,Juniper Bench,44.145,-134.022,"{""objects"":[{""id"":""distribution"",""kind"":""pipe"",""position"":[8.2,0.75,-1.9],""size"":[0.21,6.4,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""distribution""},{""id"":""well0"",""kind"":""cylinder"",""position"":[-9.3,0.67,-3.5],""size"":[0.78,1.34,0.78],""color"":""#4da996"",""label"":""Well 1"",""selectable"":true},{""id"":""wellFeed0"",""kind"":""pipe"",""position"":[-7.85,0.75,-3.5],""size"":[0.21,2.1,0.21],""color"":""#4da996"",""rotation"":[0,0,-90],""flowKey"":""intake1""},{""id"":""filter0"",""kind"":""cylinder"",""position"":[-6.5,0.83,-3.5],""size"":[0.95,1.66,0.95],""color"":""#57778d"",""label"":""Pressure filter 1"",""selectable"":true},{""id"":""filterOutlet0"",""kind"":""pipe"",""position"":[-5.3,0.75,-3.5],""size"":[0.21,1.6,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake1""},{""id"":""clearwellFeed0"",""kind"":""pipe"",""position"":[-4.5,0.75,-1.75],""size"":[0.21,3.5,0.21],""color"":""#469cdc"",""rotation"":[90,0,0],""flowKey"":""intake1""},{""id"":""well1"",""kind"":""cylinder"",""position"":[-9.3,0.67,3.5],""size"":[0.78,1.34,0.78],""color"":""#4da996"",""label"":""Well 2"",""selectable"":true},{""id"":""wellFeed1"",""kind"":""pipe"",""position"":[-7.85,0.75,3.5],""size"":[0.21,2.1,0.21],""color"":""#4da996"",""rotation"":[0,0,-90],""flowKey"":""intake2""},{""id"":""filter1"",""kind"":""cylinder"",""position"":[-6.5,0.83,3.5],""size"":[0.95,1.66,0.95],""color"":""#57778d"",""label"":""Pressure filter 2"",""selectable"":true},{""id"":""filterOutlet1"",""kind"":""pipe"",""position"":[-5.3,0.75,3.5],""size"":[0.21,1.6,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake2""},{""id"":""clearwellFeed1"",""kind"":""pipe"",""position"":[-4.5,0.75,1.75],""size"":[0.21,3.5,0.21],""color"":""#469cdc"",""rotation"":[-90,0,0],""flowKey"":""intake2""},{""id"":""treatedInlet"",""kind"":""pipe"",""position"":[-3.975,0.75,0],""size"":[0.21,1.05,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""inlet""},{""id"":""chlorine"",""kind"":""cylinder"",""position"":[-4.7,0.62,1.65],""size"":[0.66,1.2,0.66],""color"":""#d5b363"",""label"":""Chlorine dosing"",""selectable"":true},{""id"":""chlorineskid"",""kind"":""box"",""position"":[-4.1000000000000005,0.22,1.65],""size"":[0.42,0.42,0.46],""color"":""#506678""},{""id"":""chlorinedose"",""kind"":""pipe"",""position"":[-4.1,0.43,0.825],""size"":[0.09,1.65,0.09],""color"":""#d5b363"",""rotation"":[-90,0,0]},{""id"":""chlorineriser"",""kind"":""pipe"",""position"":[-4.1,0.59,0],""size"":[0.09,0.32,0.09],""color"":""#d5b363"",""rotation"":[0,0,0]},{""id"":""storageA"",""kind"":""tank"",""position"":[-2.4,0,0],""size"":[1.1,0.98,1.1],""color"":""#7996a7"",""label"":""Treated-water clearwell"",""dataKey"":""storageA""},{""id"":""storageOutlet"",""kind"":""pipe"",""position"":[-0.725,0.75,0],""size"":[0.21,1.45,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""inlet""},{""id"":""suctionHeader"",""kind"":""pipe"",""position"":[0,0.75,0],""size"":[0.21,5.6,0.21],""color"":""#469cdc"",""rotation"":[90,0,0]},{""id"":""booster1suction"",""kind"":""pipe"",""position"":[0.57,0.75,-1.9],""size"":[0.21,1.14,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1isolation"",""kind"":""sphere"",""position"":[0.5700000000000001,0.75,-1.9],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster1isolationstem"",""kind"":""cylinder"",""position"":[0.5700000000000001,0.94,-1.9],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster1isolationwheel"",""kind"":""cylinder"",""position"":[0.5700000000000001,1.13,-1.9],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster1"",""kind"":""pump"",""position"":[2,0,-1.9],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 1"",""dataKey"":""booster1""},{""id"":""booster1riser"",""kind"":""pipe"",""position"":[1.41,1.565,-1.9],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster1""},{""id"":""booster1discharge"",""kind"":""pipe"",""position"":[3.205,1.8,-1.9],""size"":[0.21,3.59,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1fan"",""kind"":""fan"",""position"":[2.74,0.75,-1.9],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster1"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""booster2suction"",""kind"":""pipe"",""position"":[0.57,0.75,1.9],""size"":[0.21,1.14,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster2""},{""id"":""booster2isolation"",""kind"":""sphere"",""position"":[0.5700000000000001,0.75,1.9],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster2isolationstem"",""kind"":""cylinder"",""position"":[0.5700000000000001,0.94,1.9],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster2isolationwheel"",""kind"":""cylinder"",""position"":[0.5700000000000001,1.13,1.9],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster2"",""kind"":""pump"",""position"":[2,0,1.9],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 2"",""dataKey"":""booster2""},{""id"":""booster2riser"",""kind"":""pipe"",""position"":[1.41,1.565,1.9],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster2""},{""id"":""booster2discharge"",""kind"":""pipe"",""position"":[3.205,1.8,1.9],""size"":[0.21,3.59,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster2""},{""id"":""booster2fan"",""kind"":""fan"",""position"":[2.74,0.75,1.9],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster2"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""dischargeHeader"",""kind"":""pipe"",""position"":[5,1.8,0],""size"":[0.21,3.8,0.21],""color"":""#469cdc"",""rotation"":[-90,0,0],""flowKey"":""distribution""},{""id"":""outletDrop"",""kind"":""pipe"",""position"":[5,1.275,-1.9],""size"":[0.21,1.05,0.21],""color"":""#469cdc"",""rotation"":[180,0,0],""flowKey"":""distribution""},{""id"":""outletValve"",""kind"":""sphere"",""position"":[9.5,0.75,-1.9],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""outletValvestem"",""kind"":""cylinder"",""position"":[9.5,0.94,-1.9],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""outletValvewheel"",""kind"":""cylinder"",""position"":[9.5,1.13,-1.9],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""flowmeter"",""kind"":""cylinder"",""position"":[8.65,0.75,-1.9],""size"":[0.43,0.5,0.43],""color"":""#a7b4be"",""rotation"":[0,0,90],""label"":""Distribution flowmeter"",""selectable"":true}],""objectIdField"":""assetid"",""levelField"":""levelpct"",""flowField"":""flowgpm"",""statusField"":""equipmentstatus"",""statusColors"":[{""value"":""Running"",""color"":""#4dbe9e""},{""value"":""Standby"",""color"":""#70849a""},{""value"":""Unknown"",""color"":""#96a4b3""}],""tooltipFields"":[{""field"":""flowgpm"",""label"":""Flow (gpm)""},{""field"":""rpm"",""label"":""Motor (rpm)""}],""view"":""top""}",,,,,,,,,
+Daily,GW-002,,,,,,,1,2026-10-01,3.57,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,1,,,,storageA,,,71,
+Equipment,GW-002,,,,,,,1,,,,booster1,Running,1128,,561
+Equipment,GW-002,,,,,,,1,,,,booster2,Standby,0,,0
+Equipment,GW-002,,,,,,,1,,,,intake1,,,,303
+Equipment,GW-002,,,,,,,1,,,,intake2,,,,258
+Equipment,GW-002,,,,,,,1,,,,inlet,,,,561
+Equipment,GW-002,,,,,,,1,,,,distribution,,,,561
+Daily,GW-002,,,,,,,2,2026-10-02,3.07,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,2,,,,storageA,,,74,
+Equipment,GW-002,,,,,,,2,,,,booster1,Running,1136,,572
+Equipment,GW-002,,,,,,,2,,,,booster2,Running,1136,,692
+Equipment,GW-002,,,,,,,2,,,,intake1,,,,683
+Equipment,GW-002,,,,,,,2,,,,intake2,,,,581
+Equipment,GW-002,,,,,,,2,,,,inlet,,,,1264
+Equipment,GW-002,,,,,,,2,,,,distribution,,,,1264
+Daily,GW-002,,,,,,,3,2026-10-03,3.181,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,3,,,,storageA,,,77,
+Equipment,GW-002,,,,,,,3,,,,booster1,Running,1144,,583
+Equipment,GW-002,,,,,,,3,,,,booster2,Running,1144,,703
+Equipment,GW-002,,,,,,,3,,,,intake1,,,,694
+Equipment,GW-002,,,,,,,3,,,,intake2,,,,592
+Equipment,GW-002,,,,,,,3,,,,inlet,,,,1286
+Equipment,GW-002,,,,,,,3,,,,distribution,,,,1286
+Daily,GW-002,,,,,,,4,2026-10-04,3.292,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,4,,,,storageA,,,80,
+Equipment,GW-002,,,,,,,4,,,,booster1,Running,1152,,594
+Equipment,GW-002,,,,,,,4,,,,booster2,Standby,0,,0
+Equipment,GW-002,,,,,,,4,,,,intake1,,,,321
+Equipment,GW-002,,,,,,,4,,,,intake2,,,,273
+Equipment,GW-002,,,,,,,4,,,,inlet,,,,594
+Equipment,GW-002,,,,,,,4,,,,distribution,,,,594
+Daily,GW-002,,,,,,,5,2026-10-05,3.403,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,5,,,,storageA,,,61,
+Equipment,GW-002,,,,,,,5,,,,booster1,Running,1160,,605
+Equipment,GW-002,,,,,,,5,,,,booster2,Running,1160,,725
+Equipment,GW-002,,,,,,,5,,,,intake1,,,,718
+Equipment,GW-002,,,,,,,5,,,,intake2,,,,612
+Equipment,GW-002,,,,,,,5,,,,inlet,,,,1330
+Equipment,GW-002,,,,,,,5,,,,distribution,,,,1330
+Daily,GW-002,,,,,,,6,2026-10-06,3.514,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,6,,,,storageA,,,64,
+Equipment,GW-002,,,,,,,6,,,,booster1,Running,1168,,616
+Equipment,GW-002,,,,,,,6,,,,booster2,Running,1168,,736
+Equipment,GW-002,,,,,,,6,,,,intake1,,,,730
+Equipment,GW-002,,,,,,,6,,,,intake2,,,,622
+Equipment,GW-002,,,,,,,6,,,,inlet,,,,1352
+Equipment,GW-002,,,,,,,6,,,,distribution,,,,1352
+Daily,GW-002,,,,,,,7,2026-10-07,,No data,,,,,
+Equipment,GW-002,,,,,,,7,,,,storageA,,,67,
+Daily,GW-002,,,,,,,8,2026-10-08,3.126,Synthetic daily reading,,,,,
+Equipment,GW-002,,,,,,,8,,,,storageA,,,70,
+Equipment,GW-002,,,,,,,8,,,,booster1,Running,1184,,638
+Equipment,GW-002,,,,,,,8,,,,booster2,Running,1184,,758
+Equipment,GW-002,,,,,,,8,,,,intake1,,,,754
+Equipment,GW-002,,,,,,,8,,,,intake2,,,,642
+Equipment,GW-002,,,,,,,8,,,,inlet,,,,1396
+Equipment,GW-002,,,,,,,8,,,,distribution,,,,1396
+Scene,RP-001,Repump Station 01,Storage · pressure boosting,Cedar Intertie,44.108,-134.056,"{""objects"":[{""id"":""distribution"",""kind"":""pipe"",""position"":[8.4,0.75,-3],""size"":[0.21,6,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""distribution""},{""id"":""storageA"",""kind"":""tank"",""position"":[-7.7,0,-3],""size"":[1.63,0.98,1.63],""color"":""#7996a7"",""label"":""Ground storage A"",""dataKey"":""storageA""},{""id"":""storageB"",""kind"":""tank"",""position"":[-7.7,0,3],""size"":[1.63,0.98,1.63],""color"":""#7996a7"",""label"":""Ground storage B"",""dataKey"":""storageB""},{""id"":""tankFeed0"",""kind"":""pipe"",""position"":[-10.1,0.75,-3],""size"":[0.21,1.8,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake1""},{""id"":""tankDraw0"",""kind"":""pipe"",""position"":[-4.45,0.75,-3],""size"":[0.21,3.5,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake1""},{""id"":""tankValve0"",""kind"":""sphere"",""position"":[-4.65,0.75,-3],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""tankValve0stem"",""kind"":""cylinder"",""position"":[-4.65,0.94,-3],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""tankValve0wheel"",""kind"":""cylinder"",""position"":[-4.65,1.13,-3],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""tankFeed1"",""kind"":""pipe"",""position"":[-10.1,0.75,3],""size"":[0.21,1.8,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake2""},{""id"":""tankDraw1"",""kind"":""pipe"",""position"":[-4.45,0.75,3],""size"":[0.21,3.5,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""intake2""},{""id"":""tankValve1"",""kind"":""sphere"",""position"":[-4.65,0.75,3],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""tankValve1stem"",""kind"":""cylinder"",""position"":[-4.65,0.94,3],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""tankValve1wheel"",""kind"":""cylinder"",""position"":[-4.65,1.13,3],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""suctionHeader"",""kind"":""pipe"",""position"":[-2.7,0.75,0.05],""size"":[0.21,8.7,0.21],""color"":""#469cdc"",""rotation"":[90,0,0]},{""id"":""booster1suction"",""kind"":""pipe"",""position"":[-1.655,0.75,-3],""size"":[0.21,2.09,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1isolation"",""kind"":""sphere"",""position"":[-1.655,0.75,-3],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster1isolationstem"",""kind"":""cylinder"",""position"":[-1.655,0.94,-3],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster1isolationwheel"",""kind"":""cylinder"",""position"":[-1.655,1.13,-3],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster1"",""kind"":""pump"",""position"":[0.25,0,-3],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 1"",""dataKey"":""booster1""},{""id"":""booster1riser"",""kind"":""pipe"",""position"":[-0.34,1.565,-3],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster1""},{""id"":""booster1discharge"",""kind"":""pipe"",""position"":[2.53,1.8,-3],""size"":[0.21,5.74,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster1""},{""id"":""booster1fan"",""kind"":""fan"",""position"":[0.99,0.75,-3],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster1"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""booster2suction"",""kind"":""pipe"",""position"":[-1.655,0.75,0],""size"":[0.21,2.09,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster2""},{""id"":""booster2isolation"",""kind"":""sphere"",""position"":[-1.655,0.75,0],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster2isolationstem"",""kind"":""cylinder"",""position"":[-1.655,0.94,0],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster2isolationwheel"",""kind"":""cylinder"",""position"":[-1.655,1.13,0],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster2"",""kind"":""pump"",""position"":[0.25,0,0],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 2"",""dataKey"":""booster2""},{""id"":""booster2riser"",""kind"":""pipe"",""position"":[-0.34,1.565,0],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster2""},{""id"":""booster2discharge"",""kind"":""pipe"",""position"":[2.53,1.8,0],""size"":[0.21,5.74,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster2""},{""id"":""booster2fan"",""kind"":""fan"",""position"":[0.99,0.75,0],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster2"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""booster3suction"",""kind"":""pipe"",""position"":[-1.655,0.75,3],""size"":[0.21,2.09,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster3""},{""id"":""booster3isolation"",""kind"":""sphere"",""position"":[-1.655,0.75,3],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""booster3isolationstem"",""kind"":""cylinder"",""position"":[-1.655,0.94,3],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""booster3isolationwheel"",""kind"":""cylinder"",""position"":[-1.655,1.13,3],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""booster3"",""kind"":""pump"",""position"":[0.25,0,3],""size"":[1,1,1],""color"":""#469cdc"",""label"":""Booster 3"",""dataKey"":""booster3""},{""id"":""booster3riser"",""kind"":""pipe"",""position"":[-0.34,1.565,3],""size"":[0.21,0.47,0.21],""color"":""#469cdc"",""rotation"":[0,0,0],""flowKey"":""booster3""},{""id"":""booster3discharge"",""kind"":""pipe"",""position"":[2.53,1.8,3],""size"":[0.21,5.74,0.21],""color"":""#469cdc"",""rotation"":[0,0,-90],""flowKey"":""booster3""},{""id"":""booster3fan"",""kind"":""fan"",""position"":[0.99,0.75,3],""size"":[0.58,0.58,0.58],""color"":""#a7b4be"",""rotation"":[0,90,0],""dataKey"":""booster3"",""selectable"":false,""animations"":[{""kind"":""rotate"",""axis"":""z"",""enabledField"":""equipmentstatus"",""enabledValue"":""Running"",""rpmField"":""rpm""}]},{""id"":""dischargeHeader"",""kind"":""pipe"",""position"":[5.4,1.8,0],""size"":[0.21,6,0.21],""color"":""#469cdc"",""rotation"":[-90,0,0],""flowKey"":""distribution""},{""id"":""outletDrop"",""kind"":""pipe"",""position"":[5.4,1.275,-3],""size"":[0.21,1.05,0.21],""color"":""#469cdc"",""rotation"":[180,0,0],""flowKey"":""distribution""},{""id"":""outletValve"",""kind"":""sphere"",""position"":[9.5,0.75,-3],""size"":[0.42,0.32,0.33],""color"":""#a7b4be""},{""id"":""outletValvestem"",""kind"":""cylinder"",""position"":[9.5,0.94,-3],""size"":[0.1,0.34,0.1],""color"":""#a7b4be""},{""id"":""outletValvewheel"",""kind"":""cylinder"",""position"":[9.5,1.13,-3],""size"":[0.36,0.06,0.36],""color"":""#dfa55a""},{""id"":""flowmeter"",""kind"":""cylinder"",""position"":[8.65,0.75,-3],""size"":[0.43,0.5,0.43],""color"":""#a7b4be"",""rotation"":[0,0,90],""label"":""Distribution flowmeter"",""selectable"":true},{""id"":""chlorine"",""kind"":""cylinder"",""position"":[5.65,0.62,-5.3],""size"":[0.66,1.2,0.66],""color"":""#d5b363"",""label"":""Chlorine injection"",""selectable"":true},{""id"":""chlorineskid"",""kind"":""box"",""position"":[6.25,0.22,-5.3],""size"":[0.42,0.42,0.46],""color"":""#506678""},{""id"":""chlorinedose"",""kind"":""pipe"",""position"":[6.25,0.43,-4.15],""size"":[0.09,2.3,0.09],""color"":""#d5b363"",""rotation"":[90,0,0]},{""id"":""chlorineriser"",""kind"":""pipe"",""position"":[6.25,0.59,-3],""size"":[0.09,0.32,0.09],""color"":""#d5b363"",""rotation"":[0,0,0]},{""id"":""ammonia"",""kind"":""cylinder"",""position"":[7.1,0.62,-5.3],""size"":[0.66,1.2,0.66],""color"":""#b998d6"",""label"":""Ammonia injection"",""selectable"":true},{""id"":""ammoniaskid"",""kind"":""box"",""position"":[7.699999999999999,0.22,-5.3],""size"":[0.42,0.42,0.46],""color"":""#506678""},{""id"":""ammoniadose"",""kind"":""pipe"",""position"":[7.7,0.43,-4.15],""size"":[0.09,2.3,0.09],""color"":""#b998d6"",""rotation"":[90,0,0]},{""id"":""ammoniariser"",""kind"":""pipe"",""position"":[7.7,0.59,-3],""size"":[0.09,0.32,0.09],""color"":""#b998d6"",""rotation"":[0,0,0]}],""objectIdField"":""assetid"",""levelField"":""levelpct"",""flowField"":""flowgpm"",""statusField"":""equipmentstatus"",""statusColors"":[{""value"":""Running"",""color"":""#4dbe9e""},{""value"":""Standby"",""color"":""#70849a""},{""value"":""Unknown"",""color"":""#96a4b3""}],""tooltipFields"":[{""field"":""flowgpm"",""label"":""Flow (gpm)""},{""field"":""rpm"",""label"":""Motor (rpm)""}],""view"":""isometric""}",,,,,,,,,
+Daily,RP-001,,,,,,,1,2026-10-01,5.268,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,1,,,,storageA,,,78,
+Equipment,RP-001,,,,,,,1,,,,storageB,,,56,
+Equipment,RP-001,,,,,,,1,,,,booster1,Running,1128,,561
+Equipment,RP-001,,,,,,,1,,,,booster2,Standby,0,,0
+Equipment,RP-001,,,,,,,1,,,,booster3,Running,1128,,801
+Equipment,RP-001,,,,,,,1,,,,intake1,,,,735
+Equipment,RP-001,,,,,,,1,,,,intake2,,,,627
+Equipment,RP-001,,,,,,,1,,,,inlet,,,,1362
+Equipment,RP-001,,,,,,,1,,,,distribution,,,,1362
+Daily,RP-001,,,,,,,2,2026-10-02,5.379,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,2,,,,storageA,,,81,
+Equipment,RP-001,,,,,,,2,,,,storageB,,,58,
+Equipment,RP-001,,,,,,,2,,,,booster1,Running,1136,,572
+Equipment,RP-001,,,,,,,2,,,,booster2,Running,1136,,692
+Equipment,RP-001,,,,,,,2,,,,booster3,Running,1136,,812
+Equipment,RP-001,,,,,,,2,,,,intake1,,,,1121
+Equipment,RP-001,,,,,,,2,,,,intake2,,,,955
+Equipment,RP-001,,,,,,,2,,,,inlet,,,,2076
+Equipment,RP-001,,,,,,,2,,,,distribution,,,,2076
+Daily,RP-001,,,,,,,3,2026-10-03,5.49,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,3,,,,storageA,,,62,
+Equipment,RP-001,,,,,,,3,,,,storageB,,,60,
+Equipment,RP-001,,,,,,,3,,,,booster1,Running,1144,,583
+Equipment,RP-001,,,,,,,3,,,,booster2,Running,1144,,703
+Equipment,RP-001,,,,,,,3,,,,booster3,Standby,0,,0
+Equipment,RP-001,,,,,,,3,,,,intake1,,,,694
+Equipment,RP-001,,,,,,,3,,,,intake2,,,,592
+Equipment,RP-001,,,,,,,3,,,,inlet,,,,1286
+Equipment,RP-001,,,,,,,3,,,,distribution,,,,1286
+Daily,RP-001,,,,,,,4,2026-10-04,4.99,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,4,,,,storageA,,,65,
+Equipment,RP-001,,,,,,,4,,,,storageB,,,62,
+Equipment,RP-001,,,,,,,4,,,,booster1,Running,1152,,594
+Equipment,RP-001,,,,,,,4,,,,booster2,Standby,0,,0
+Equipment,RP-001,,,,,,,4,,,,booster3,Running,1152,,834
+Equipment,RP-001,,,,,,,4,,,,intake1,,,,771
+Equipment,RP-001,,,,,,,4,,,,intake2,,,,657
+Equipment,RP-001,,,,,,,4,,,,inlet,,,,1428
+Equipment,RP-001,,,,,,,4,,,,distribution,,,,1428
+Daily,RP-001,,,,,,,5,2026-10-05,5.101,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,5,,,,storageA,,,68,
+Equipment,RP-001,,,,,,,5,,,,storageB,,,64,
+Equipment,RP-001,,,,,,,5,,,,booster1,Running,1160,,605
+Equipment,RP-001,,,,,,,5,,,,booster2,Running,1160,,725
+Equipment,RP-001,,,,,,,5,,,,booster3,Running,1160,,845
+Equipment,RP-001,,,,,,,5,,,,intake1,,,,1175
+Equipment,RP-001,,,,,,,5,,,,intake2,,,,1000
+Equipment,RP-001,,,,,,,5,,,,inlet,,,,2175
+Equipment,RP-001,,,,,,,5,,,,distribution,,,,2175
+Daily,RP-001,,,,,,,6,2026-10-06,5.212,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,6,,,,storageA,,,71,
+Equipment,RP-001,,,,,,,6,,,,storageB,,,66,
+Equipment,RP-001,,,,,,,6,,,,booster1,Running,1168,,616
+Equipment,RP-001,,,,,,,6,,,,booster2,Running,1168,,736
+Equipment,RP-001,,,,,,,6,,,,booster3,Standby,0,,0
+Equipment,RP-001,,,,,,,6,,,,intake1,,,,730
+Equipment,RP-001,,,,,,,6,,,,intake2,,,,622
+Equipment,RP-001,,,,,,,6,,,,inlet,,,,1352
+Equipment,RP-001,,,,,,,6,,,,distribution,,,,1352
+Daily,RP-001,,,,,,,7,2026-10-07,5.323,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,7,,,,storageA,,,74,
+Equipment,RP-001,,,,,,,7,,,,storageB,,,68,
+Equipment,RP-001,,,,,,,7,,,,booster1,Running,1176,,627
+Equipment,RP-001,,,,,,,7,,,,booster2,Standby,0,,0
+Equipment,RP-001,,,,,,,7,,,,booster3,Running,1176,,867
+Equipment,RP-001,,,,,,,7,,,,intake1,,,,807
+Equipment,RP-001,,,,,,,7,,,,intake2,,,,687
+Equipment,RP-001,,,,,,,7,,,,inlet,,,,1494
+Equipment,RP-001,,,,,,,7,,,,distribution,,,,1494
+Daily,RP-001,,,,,,,8,2026-10-08,5.434,Synthetic daily reading,,,,,
+Equipment,RP-001,,,,,,,8,,,,storageA,,,77,
+Equipment,RP-001,,,,,,,8,,,,storageB,,,70,
+Equipment,RP-001,,,,,,,8,,,,booster1,Running,1184,,638
+Equipment,RP-001,,,,,,,8,,,,booster2,Running,1184,,758
+Equipment,RP-001,,,,,,,8,,,,booster3,Running,1184,,878
+Equipment,RP-001,,,,,,,8,,,,intake1,,,,1228
+Equipment,RP-001,,,,,,,8,,,,intake2,,,,1046
+Equipment,RP-001,,,,,,,8,,,,inlet,,,,2274
+Equipment,RP-001,,,,,,,8,,,,distribution,,,,2274

@@ -16,6 +16,8 @@ export interface FieldReferenceOccurrence {
     datasetName: string;
     requirement: "any" | "numeric";
     source: FieldReferenceSource;
+    /** Runtime row bindings surface unavailable fields locally in the component. */
+    optionalAtRuntime?: boolean;
     set(nextReference: string): void;
 }
 
@@ -91,6 +93,22 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
         const componentId = typeof visit.component.id === "string" ? visit.component.id : undefined;
         if (componentId) componentsById.set(componentId, visit);
         if (type === "dynamicContent") dynamicRegions.push(visit);
+        if (type === "scene3d" && object(visit.component.sceneBinding) && visit.component.sceneBinding.mode === "data") {
+            const binding = visit.component.sceneBinding;
+            for (const property of ["keyField", "sceneField"]) {
+                if (typeof binding[property] !== "string") continue;
+                result.push({
+                    reference: binding[property] as string,
+                    path: `${visit.path}/sceneBinding/${property}`,
+                    componentId,
+                    datasetName: typeof binding.dataset === "string" ? binding.dataset : "powerbi",
+                    requirement: "any",
+                    source: "dataset",
+                    optionalAtRuntime: true,
+                    set: next => { binding[property] = next; },
+                });
+            }
+        }
         // Scene3D animation fields live on nested objects, so the ordinary top-level
         // component descriptor traversal cannot discover or canonicalize them.
         if (type === "scene3d" && Array.isArray(visit.component.objects)) {
@@ -147,7 +165,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
         if (!scope) {
             diagnostics.push({
                 code: occurrence.path.includes("/layers/") ? "MAP_LAYER_DATASET_NOT_FOUND" : "UNKNOWN_DATASET",
-                severity: "error",
+                severity: occurrence.optionalAtRuntime ? "warning" : "error",
                 path: occurrence.path.includes("/layers/") ? occurrence.path.replace(/\/(source|join|renderer|labels|popup|tooltip|filter|visibility|interaction).*$/, "/dataset") : occurrence.path,
                 componentId: occurrence.componentId,
                 message: `Dataset “${occurrence.datasetName}” is not available for this field reference.`,
@@ -168,7 +186,7 @@ export function canonicalizeSpecificationFieldReferences(specification: unknown,
             } else {
                 diagnostics.push({
                     code: resolved.status === "ambiguous" ? "AMBIGUOUS_FIELD" : occurrence.path.includes("/layers/") ? "MAP_LAYER_FIELD_NOT_FOUND" : occurrence.datasetName === "powerbi" ? "UNKNOWN_FIELD" : "UNKNOWN_DATASET_FIELD",
-                    severity: "error",
+                    severity: occurrence.optionalAtRuntime ? "warning" : "error",
                     path: occurrence.path,
                     componentId: occurrence.componentId,
                     message: resolved.status === "ambiguous" ? `Field “${occurrence.reference}” is ambiguous.` : `Field “${occurrence.reference}” is not available in dataset “${occurrence.datasetName}”.`,

@@ -1,5 +1,5 @@
 import type { MapLayerDefinition } from "../../schema/mapSchema";
-import type { ResolvedMapFeature } from "../model/resolvedMapTypes";
+import type { ResolvedMapFeature, ResolvedMapLayer } from "../model/resolvedMapTypes";
 
 export type MapAttributeSource = "powerbi" | "service" | "joined";
 export type MapAttributePurpose = "renderer" | "label" | "popup" | "tooltip" | "visibility" | "filter" | "interaction";
@@ -22,4 +22,16 @@ export function attributeSourceAvailable(layer: MapLayerDefinition, source: MapA
     if (layer.source.type !== "arcgisFeature") return false;
     if (layer.source.mode === "join") return true;
     return source === "service";
+}
+
+export function resolvedDefaultAttributeSource(
+  layer: ResolvedMapLayer,
+): "powerbi" | "service" | "joined" {
+  if (layer.sourceType === "powerbi") return "powerbi";
+  if (
+    layer.sourceType === "arcgisFeature" &&
+    layer.features.some((feature) => feature.powerBiRowIndices.length > 0)
+  )
+    return "joined";
+  return "service";
 }

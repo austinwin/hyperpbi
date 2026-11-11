@@ -18,6 +18,8 @@ export interface ComponentInteractionDefinition {
     externalMode?: ExternalInteractionMode;
     field?: string;
     fieldSource?: "powerbi" | "service" | "joined";
+    /** Write a single interaction value to shared dashboard state. */
+    stateKey?: string;
     operator?: FilterOperator;
     value?: unknown;
     selectionMode?: InteractionSelectionMode;
@@ -37,6 +39,7 @@ export interface ResolvedInteractionPolicy {
     internalScope: InternalInteractionScope;
     externalMode: ResolvedExternalInteractionMode;
     field?: string;
+    stateKey?: string;
     operator?: FilterOperator;
     value?: unknown;
     selectionMode: InteractionSelectionMode;
@@ -72,6 +75,7 @@ export interface InteractionModifiers {
 
 export interface InternalInteractionFilter {
     originComponentId: string;
+    sourceComponentId?: string;
     field: string;
     operator: FilterOperator;
     value: unknown;

@@ -1,5 +1,5 @@
 import type { DataRow } from "../../data/normalizeData";
-import { isScene3dColor, isScene3dKey, type Scene3dComponent, type Scene3dKey, type Scene3dObject } from "../../schema/scene3dSchema";
+import { isScene3dColor, isScene3dKey, type Scene3dDefinition, type Scene3dKey, type Scene3dObject } from "../../schema/scene3dSchema";
 
 export interface SceneObjectState {
     object: Scene3dObject;
@@ -14,7 +14,7 @@ export interface SceneObjectState {
     indices: number[];
 }
 
-export function resolveSceneObjects(component: Scene3dComponent, sourceRows: DataRow[], visibleRows: DataRow[]): SceneObjectState[] {
+export function resolveSceneObjects(component: Partial<Scene3dDefinition>, sourceRows: DataRow[], visibleRows: DataRow[]): SceneObjectState[] {
     const { objectIdField, statusField, colorField, visibleField, levelField, flowField } = component;
     const bindings = new Map<Scene3dKey, { row: DataRow; indices: number[] }>();
     if (objectIdField) {
@@ -29,7 +29,7 @@ export function resolveSceneObjects(component: Scene3dComponent, sourceRows: Dat
         });
     }
     const palette = new Map(component.statusColors?.map(rule => [rule.value, rule.color]));
-    return component.objects.map(object => {
+    return (component.objects ?? []).map(object => {
         const bound = object.dataKey !== undefined;
         const binding = bound ? bindings.get(object.dataKey!) : undefined;
         const row = binding?.row;

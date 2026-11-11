@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { monitorWebGl, verifyMultiStationExplorer } from "../../../tests/browser/support/scene3dBrowser";
 
 test.use({ launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } });
+
+test("switches stations from the Playground gallery and keeps reporting-day changes in place", async ({ page }) => {
+    await page.addInitScript(monitorWebGl);
+    await page.goto("/examples/multi-station-3d-explorer");
+    await verifyMultiStationExplorer(page);
+});
 
 test("renders the station, changes operating status, and links equipment and the register", async ({ page }) => {
     await page.goto("/examples/pump-station-monitoring");
@@ -202,6 +209,12 @@ test("authors scene objects and embeds a local glTF through the Inspector", asyn
     await position.press("Tab");
     await expect(position).toHaveValue("-2");
     await expect(editor.getByLabel("Edit object")).toHaveValue("box_1");
+    const source = editor.getByRole("combobox", { name: "Scene source" });
+    await source.selectOption("data");
+    await expect(editor.getByText(/Station key field.+missing/)).toBeVisible();
+    await expect(editor.getByLabel("Edit object")).toHaveValue("box_1");
+    await source.selectOption("direct");
+    await expect(editor.getByLabel("Edit object")).toHaveValue("box_1");
 
     const positions = Buffer.from(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 1]).buffer);
     const model = {
@@ -261,8 +274,8 @@ test("water pump station digital twin updates equipment and KPIs across every sc
     }
     await page.getByRole("button", { name: "Low storage", exact: true }).click();
     await expect(levels).toHaveText("26");
-    await expect(page.locator("[data-hp-id=booster_load]")).toBeVisible();
-    await expect(page.locator("[data-hp-id=storage_levels]")).toBeVisible();
+    await expect(page.locator(".hp-component[data-hp-id=booster_load]")).toBeVisible();
+    await expect(page.locator(".hp-component[data-hp-id=storage_levels]")).toBeVisible();
     await expect(page.locator("[data-hp-id=asset_register] tbody tr").first()).toBeVisible();
     await expect(scene.getByRole("button", { name: "Pause flow" })).toBeVisible();
 });

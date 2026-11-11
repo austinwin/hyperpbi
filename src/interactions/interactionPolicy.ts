@@ -48,6 +48,7 @@ export function resolveInteractionPolicy(component: ComponentBase, runtimeConfig
         internalScope: definition?.internalScope ?? "all",
         externalMode,
         field: definition?.field,
+        ...(definition?.stateKey ? { stateKey: definition.stateKey } : {}),
         operator: definition?.operator,
         value: definition?.value,
         selectionMode: definition?.selectionMode ?? "replace",

@@ -105,6 +105,8 @@ Open **Create → Visual Inspector**, or turn on **Inspect preview** and select 
 
 The searchable hierarchy supports keyboard navigation. Wide layouts show resizable **Tree** and **Properties** panes. At narrow widths those names become accessible pane tabs; selecting a tree item opens Properties and **Back to hierarchy** returns to the same tree context. A search with no result shows **No matching components** and a **Clear search** action. A valid dashboard with no components shows **No components yet**. Invalid root JSON shows an actionable **Inspector unavailable** state rather than an empty or broken tree.
 
+For a 3D scene, use **Scene editor → Scene source → Direct JSON** to edit objects, equipment, and imported models. To load a station from a table, choose **Power BI SceneJSON column** and set its dataset, key field, JSON field, and selected station state. The Inspector checks the field bindings and the preview reports errors for the selected row. Switching sources preserves the Direct JSON objects. [3D Scene editor and SceneJSON setup](scene3d.md)
+
 ## Application shell
 
 Configure the shell at root `app`, not `schema.app`. It can provide brand, navbar, sidebar, page header, footer, navigation, and actions. Use it for a sufficiently large app-style visual. Prefer offcanvas/modal/dropdown/popover components for narrow layouts.

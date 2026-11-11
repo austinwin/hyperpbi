@@ -55,17 +55,28 @@ export function componentRowKeys(componentId: string, context: Pick<RenderContex
     return highlighted(componentId, context, context.state.componentSelectedRowKeys);
 }
 
-export function clearComponentInteraction(policy: ResolvedInteractionPolicy, componentId: string, context: RenderContextValue): InteractionExecutionResult {
-    const previous = context.state.componentSelectedRows[componentId]??[];
+/** Clear this component's own selection without clearing another component's host selection. */
+export function clearLocalComponentSelection(componentId: string, context: RenderContextValue): void {
     context.dispatch({ type: "selectComponentRows", id: componentId, rows: [] });
     context.dispatch({ type: "selectComponentRowKeys", id: componentId, keys: [] });
     context.dispatch({ type: "componentSelectionScope", id: componentId });
     context.dispatch({ type: "componentSelectionMode", id: componentId });
     context.dispatch({ type: "componentSelectionTargets", id: componentId });
-    context.dispatch({ type: "selectRows", rows: [] });
-    context.dispatch({ type: "selectRowKeys", keys: [] });
     context.dispatch({ type: "clearInteractionFilter", id: componentId });
     context.dispatch({ type: "interactionSignature", id: componentId });
+}
+
+export function clearSharedInteractionState(stateKey: string, context: RenderContextValue): void {
+    context.dispatch({ type: "value", id: stateKey, value: "" });
+    context.dispatch({ type: "clearInteractionFilter", id: `@state:${stateKey}` });
+}
+
+export function clearComponentInteraction(policy: ResolvedInteractionPolicy, componentId: string, context: RenderContextValue): InteractionExecutionResult {
+    const previous = context.state.componentSelectedRows[componentId]??[];
+    clearLocalComponentSelection(componentId, context);
+    if (policy.stateKey) clearSharedInteractionState(policy.stateKey, context);
+    context.dispatch({ type: "selectRows", rows: [] });
+    context.dispatch({ type: "selectRowKeys", keys: [] });
     let externalSent = false;
     const interactionDetails = { componentId };
     if (context.config.interactions?.crossFilter !== false) {
@@ -133,7 +144,9 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
         operator: policy.operator ?? payload.operator
     };
     const nextSignature = signature(effectivePayload);
-    if (policy.clearOnSecondClick && context.state.interactionSignatures[payload.componentId] === nextSignature) return clearComponentInteraction(policy, payload.componentId, context);
+    if (policy.clearOnSecondClick && context.state.interactionSignatures[payload.componentId] === nextSignature &&
+        (!policy.stateKey || context.state.values[policy.stateKey] === effectivePayload.value)) return clearComponentInteraction(policy, payload.componentId, context);
+    const inputValue = effectivePayload.value;
 
     const hasSourceKeys = context.sourceRowKeys && context.sourceRowKeys.length > 0;
 
@@ -186,7 +199,24 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
     context.dispatch({ type: "interactionSignature", id: payload.componentId, value: nextSignature });
 
     let internalApplied = false;
-    if (policy.internalMode === "filter") {
+    const sharedValue = inputValue ?? effectivePayload.value;
+    if (policy.stateKey && (payloadValueIsEmpty(sharedValue) || typeof sharedValue === "string" ||
+        typeof sharedValue === "boolean" || typeof sharedValue === "number" && Number.isFinite(sharedValue))) {
+        const filterId = `@state:${policy.stateKey}`;
+        context.dispatch({ type: "value", id: policy.stateKey, value: payloadValueIsEmpty(sharedValue) ? "" : sharedValue });
+        if (!payloadValueIsEmpty(sharedValue) && policy.internalMode === "filter" && effectivePayload.field) {
+            context.dispatch({ type: "interactionFilter", filter: {
+                originComponentId: filterId,
+                sourceComponentId: payload.componentId,
+                field: effectivePayload.field,
+                operator: effectivePayload.operator,
+                value: sharedValue,
+                scope: policy.internalScope,
+                targets: policy.targets,
+            } });
+            internalApplied = true;
+        } else context.dispatch({ type: "clearInteractionFilter", id: filterId });
+    } else if (!policy.stateKey && policy.internalMode === "filter") {
         // A logical dataset may rename or aggregate fields. Fan linked filtering out by
         // original row identity while retaining the semantic field for an external filter.
         const useSourceIdentity = normalized.translated || context.interactionUsesSourceIdentity === true || !effectivePayload.field;
@@ -222,7 +252,8 @@ export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[],
         return context.datasetLineage?.[index] ?? [index];
     };
     return context.state.interactionFilters.reduce((rows, filter) => {
-        const applies = filter.targets?.length ? filter.targets.includes(componentId) : filter.scope === "all" || filter.scope === "self" && filter.originComponentId === componentId || filter.scope === "others" && filter.originComponentId !== componentId;
+        const origin = filter.sourceComponentId ?? filter.originComponentId;
+        const applies = filter.targets?.length ? filter.targets.includes(componentId) : filter.scope === "all" || filter.scope === "self" && origin === componentId || filter.scope === "others" && origin !== componentId;
         if (!applies) return rows;
         if (filter.field === "__source_row_key__") {
             const allowed = new Set(
