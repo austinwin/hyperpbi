@@ -44,11 +44,11 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     const detail = objects.find(state => state.visible && state.object.id === (hovered ?? focused)) ?? own.find(state => state.visible);
     const tooltips = component.tooltipFields ?? [];
     const motion = context.config.motion;
-    const flowAllowed = Boolean(component.flowField || component.objects.some(object => object.animations?.length)) && motion?.enabled !== false && motion?.reducedMotion !== "always-reduce" &&
+    const flowAllowed = Boolean(component.flowField || component.objects.some(object => object.animations?.length || object.motorRpmField || object.openingField)) && motion?.enabled !== false && motion?.reducedMotion !== "always-reduce" &&
         (motion?.reducedMotion === "never-reduce" || !reducedMotion) && (motion?.maxConcurrentAnimations ?? 12) > 0;
     const flowBudget = flowAllowed && !flowPaused ? Math.min(24, motion?.maxConcurrentAnimations ?? 12) : 0;
     useEffect(() => {
-        if (!(component.flowField || component.objects.some(object => object.animations?.length)) || typeof matchMedia !== "function") return;
+        if (!(component.flowField || component.objects.some(object => object.animations?.length || object.motorRpmField || object.openingField)) || typeof matchMedia !== "function") return;
         const query = matchMedia("(prefers-reduced-motion: reduce)");
         const sync = () => setReducedMotion(query.matches);
         sync();
@@ -151,9 +151,14 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
     });
 
     const level = (state: SceneObjectState) => state.level === undefined ? undefined : `${formatValue(state.level)}%`;
+    const reading = (state: SceneObjectState) => state.reading === undefined ? undefined :
+        `${formatValue(state.reading)}${state.object.valueUnit ? " " + state.object.valueUnit : ""}`;
     const status = (state: SceneObjectState) => [
         state.status != null ? formatValue(state.status) : state.object.dataKey !== undefined && !state.row ? "No data" : undefined,
         state.level === undefined ? undefined : `Water level ${level(state)}`,
+        reading(state),
+        state.opening === undefined ? undefined : `Valve ${formatValue(state.opening)}% open`,
+        state.motorRpm === undefined ? undefined : `Motor ${formatValue(state.motorRpm)} RPM`,
     ].filter(Boolean).join(" · ");
     const controlProps = (state: SceneObjectState) => ({
         "aria-pressed": selected.has(state.object.id),
@@ -193,7 +198,7 @@ export function Scene3dBlock({ component }: { component: Scene3dComponent }) {
                             if (element) labels.current.set(state.object.id, element);
                             else labels.current.delete(state.object.id);
                         };
-                        const tag = <><i style={{ backgroundColor: state.color }} />{state.label}{state.level !== undefined && ` · ${level(state)}`}</>;
+                        const tag = <><i style={{ backgroundColor: state.color }} />{state.label}{state.level !== undefined && ` · ${level(state)}`}{reading(state) && ` · ${reading(state)}`}</>;
                         return state.selectable
                             ? <button type="button" key={state.object.id} ref={ref} {...controlProps(state)}>{tag}</button>
                             : <span key={state.object.id} ref={ref}>{tag}</span>;
