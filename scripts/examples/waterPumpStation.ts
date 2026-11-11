@@ -301,7 +301,7 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
         description: "A fictionalized 3D water pump station with remote and local source wells, dual surface-water inlets, treatment indicators, five storage tanks, and six booster pumps. Eight simulated operating scenarios drive tank levels, pipe flow, cooling fans, alarms, linked trends, and equipment selection.",
         theme: "dark" as const, accent: "#63b6e5",
         tags: ["3D", "water", "engineering", "SCADA"], referenceImages: [] as number[],
-        previewImage: "/images/pump-station-monitoring.webp",
+        previewImage: "/images/water-pump-station-digital-twin.svg",
         powerBiPackage: "core" as const,
         expected: "Switch between all eight scenarios: Normal supply, Peak demand, Remote wells offline, Surface inlet unavailable, Booster maintenance, Low storage, Limited power, and Low distribution pressure. Tank fill, pump availability, fan rotation, animated flow, pressure and intake KPIs, linked charts, and the asset register change with the scenario. Selecting an asset cross-highlights associated records.",
         limitations: "Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to 80 objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.",
