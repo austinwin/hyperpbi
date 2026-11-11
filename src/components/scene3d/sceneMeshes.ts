@@ -1,8 +1,8 @@
 import {
-    BoxGeometry, CylinderGeometry, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, SphereGeometry, TorusGeometry,
+    BoxGeometry, CylinderGeometry, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, SphereGeometry, TorusGeometry, Vector3,
     type BufferGeometry,
 } from "three";
-import type { Scene3dKind } from "../../schema/scene3dSchema";
+import type { Scene3dKind, Scene3dVector } from "../../schema/scene3dSchema";
 
 export function createSceneMeshes() {
     const box = new BoxGeometry();
@@ -18,6 +18,10 @@ export function createSceneMeshes() {
     const water = new MeshStandardMaterial({ color: "#229cdb", metalness: 0.06, roughness: 0.24 });
     const waterline = new MeshBasicMaterial({ color: "#9eeaff", toneMapped: false });
     const matrix = new Matrix4();
+    const up = new Vector3(0, 1, 0);
+    const bronze = new MeshStandardMaterial({ color: "#d3a36a", metalness: 0.72, roughness: 0.31 });
+    const glass = new MeshStandardMaterial({ color: "#0d2e40", metalness: 0.12, roughness: 0.19 });
+    const signal = new MeshBasicMaterial({ color: "#57e8e5", toneMapped: false });
 
     function addTankGauge(group: Group) {
         const bottom = 0.22;
@@ -49,7 +53,37 @@ export function createSceneMeshes() {
         };
     }
 
-    function addPipeFlow(group: Group) {
+    function addPipeFlow(group: Group, path?: Scene3dVector[]) {
+        if (path && path.length > 1) {
+            const vertices = path.map(point => new Vector3(...point));
+            const segments = vertices.slice(1).map((point, index) => ({
+                start: vertices[index], end: point, length: point.distanceTo(vertices[index]),
+            }));
+            const total = segments.reduce((sum, segment) => sum + segment.length, 0);
+            const bands = new InstancedMesh(sphere, waterline, 5);
+            bands.frustumCulled = false;
+            bands.raycast = () => {};
+            bands.visible = false;
+            group.add(bands);
+            const move = (phase: number) => {
+                for (let index = 0; index < bands.count; index++) {
+                    let distance = ((phase + index / bands.count) % 1) * total;
+                    let point = vertices[vertices.length - 1];
+                    for (const segment of segments) {
+                        if (distance <= segment.length) {
+                            point = segment.start.clone().lerp(segment.end, segment.length ? distance / segment.length : 0);
+                            break;
+                        }
+                        distance -= segment.length;
+                    }
+                    matrix.makeScale(0.11, 0.11, 0.11).setPosition(point);
+                    bands.setMatrixAt(index, matrix);
+                }
+                bands.instanceMatrix.needsUpdate = true;
+            };
+            move(0.12);
+            return { bands, move };
+        }
         const bands = new InstancedMesh(flowBand, waterline, 4);
         bands.frustumCulled = false;
         bands.raycast = () => {};
@@ -67,7 +101,7 @@ export function createSceneMeshes() {
         return { bands, move };
     }
 
-    function build(kind: Scene3dKind, finish: MeshStandardMaterial): Group {
+    function build(kind: Scene3dKind, finish: MeshStandardMaterial, path?: Scene3dVector[], diameter = 0.2): Group {
         const group = new Group();
         const place = (geometry: BufferGeometry, material: MeshStandardMaterial, x: number, y: number, z: number,
             width: number, height: number, depth: number, rotateZ = 0, rotateX = 0) => {
@@ -78,7 +112,28 @@ export function createSceneMeshes() {
             mesh.castShadow = mesh.receiveShadow = true;
             group.add(mesh);
         };
-        if (kind === "pump") {
+        if (kind === "pipe" && path && path.length >= 2) {
+            // Straight centerline segments and steel elbow fittings. Flow markers follow
+            // the same ordered path, without floating through disconnected equipment.
+            for (let index = 1; index < path.length; index++) {
+                const from = new Vector3(...path[index - 1]);
+                const to = new Vector3(...path[index]);
+                const delta = to.clone().sub(from);
+                const segment = new Mesh(cylinder, finish);
+                segment.position.copy(from.add(to).multiplyScalar(0.5));
+                segment.quaternion.setFromUnitVectors(up, delta.clone().normalize());
+                segment.scale.set(diameter, delta.length() + 0.008, diameter);
+                segment.castShadow = segment.receiveShadow = true;
+                group.add(segment);
+            }
+            for (const vertex of path) {
+                const elbow = new Mesh(sphere, finish);
+                elbow.position.set(...vertex);
+                elbow.scale.setScalar(diameter * 1.035);
+                elbow.castShadow = elbow.receiveShadow = true;
+                group.add(elbow);
+            }
+        } else if (kind === "pump") {
             const horizontal = Math.PI / 2;
             place(box, base, 0, 0.1, 0, 1.8, 0.2, 1.23);
             place(box, dark, 0, 0.23, 0, 1.44, 0.09, 0.75);
@@ -127,7 +182,7 @@ export function createSceneMeshes() {
         addTankGauge,
         addPipeFlow,
         dispose() {
-            [box, cylinder, sphere, cone, torus, flowBand, steel, trim, base, dark, water, waterline].forEach(resource => resource.dispose());
+            [box, cylinder, sphere, cone, torus, flowBand, steel, trim, base, dark, water, waterline, bronze, glass, signal].forEach(resource => resource.dispose());
         },
     };
 }
