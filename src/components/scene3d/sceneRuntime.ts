@@ -187,6 +187,7 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 entry.opening += Math.sign(entry.targetOpening - entry.opening) * delta;
                 entry.valveDisc.rotation.y = entry.opening / 100 * Math.PI / 2;
             }
+            if (entry.motorRpm <= 0 && Math.abs(entry.opening - entry.targetOpening) <= 0.03) mechanical.delete(entry);
         }
         if (mechanical.size) {
             viewDirty = true;
