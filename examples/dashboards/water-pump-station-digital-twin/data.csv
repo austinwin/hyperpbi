@@ -1,0 +1,313 @@
+readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,sampleorder,hour,flowgpm,pressurepsi,levelpct,rpm,motorloadpct,stationflow,stationpressure,stationonline,stationalerts,sourceflow,averagelevel
+0-RW01-snapshot,RW01,Remote well 1,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,427,0,0,0,0,16100,64,4,0,14782,76
+0-RW02-snapshot,RW02,Remote well 2,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,464,0,0,0,0,16100,64,4,0,14782,76
+0-RW03-snapshot,RW03,Remote well 3,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,501,0,0,0,0,16100,64,4,0,14782,76
+0-RW04-snapshot,RW04,Remote well 4,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,538,0,0,0,0,16100,64,4,0,14782,76
+0-RW05-snapshot,RW05,Remote well 5,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,575,0,0,0,0,16100,64,4,0,14782,76
+0-RW06-snapshot,RW06,Remote well 6,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,612,0,0,0,0,16100,64,4,0,14782,76
+0-RW07-snapshot,RW07,Remote well 7,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,649,0,0,0,0,16100,64,4,0,14782,76
+0-RW08-snapshot,RW08,Remote well 8,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,686,0,0,0,0,16100,64,4,0,14782,76
+0-LW01-snapshot,LW01,On-site source well,Local well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,680,0,0,0,0,16100,64,4,0,14782,76
+0-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,4650,0,0,0,0,16100,64,4,0,14782,76
+0-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,5000,0,0,0,0,16100,64,4,0,14782,76
+0-GST1-snapshot,GST1,Storage tank 1,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,70,0,0,16100,64,4,0,14782,76
+0-GST2-snapshot,GST2,Storage tank 2,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,73,0,0,16100,64,4,0,14782,76
+0-GST3-snapshot,GST3,Storage tank 3,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,76,0,0,16100,64,4,0,14782,76
+0-GST4-snapshot,GST4,Storage tank 4,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,79,0,0,16100,64,4,0,14782,76
+0-GST5-snapshot,GST5,Storage tank 5,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,82,0,0,16100,64,4,0,14782,76
+0-BP01-snapshot,BP01,Booster pump 1,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,3985,64,0,1266,81,16100,64,4,0,14782,76
+0-BP02-snapshot,BP02,Booster pump 2,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,3786,64,0,1257,80,16100,64,4,0,14782,76
+0-BP03-snapshot,BP03,Booster pump 3,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,4224,64,0,1277,83,16100,64,4,0,14782,76
+0-BP04-snapshot,BP04,Booster pump 4,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,4105,64,0,1272,82,16100,64,4,0,14782,76
+0-BP05-snapshot,BP05,Booster pump 5,Booster,Normal supply,Standby,#7789a0,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-BP06-snapshot,BP06,Booster pump 6,Booster,Normal supply,Standby,#7789a0,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-SOURCE-snapshot,SOURCE,Source collection,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,14782,0,0,0,0,16100,64,4,0,14782,76
+0-SUCTION-snapshot,SUCTION,Storage suction header,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,18,0,0,0,16100,64,4,0,14782,76
+0-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,64,0,0,0,16100,64,4,0,14782,76
+0-DIST-snapshot,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,64,0,0,0,16100,64,4,0,14782,76
+0-DIST-0,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,0,07:00,15134,64,0,0,0,16100,64,4,0,14782,76
+0-DIST-1,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,1,08:00,15659,64.9,0,0,0,16100,64,4,0,14782,76
+0-DIST-2,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,2,09:00,16093,65.4,0,0,0,16100,64,4,0,14782,76
+0-DIST-3,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,3,10:00,16360,65.2,0,0,0,16100,64,4,0,14782,76
+0-DIST-4,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,4,11:00,16414,64.5,0,0,0,16100,64,4,0,14782,76
+0-DIST-5,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,5,12:00,16246,63.5,0,0,0,16100,64,4,0,14782,76
+0-DIST-6,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,6,13:00,15884,62.8,0,0,0,16100,64,4,0,14782,76
+0-DIST-7,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,7,14:00,15392,62.6,0,0,0,16100,64,4,0,14782,76
+0-DIST-8,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,8,15:00,14855,63.1,0,0,0,16100,64,4,0,14782,76
+0-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+0-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Normal supply,Standby,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
+1-RW01-snapshot,RW01,Remote well 1,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,504,0,0,0,0,23400,67,6,0,17616,68
+1-RW02-snapshot,RW02,Remote well 2,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,548,0,0,0,0,23400,67,6,0,17616,68
+1-RW03-snapshot,RW03,Remote well 3,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,591,0,0,0,0,23400,67,6,0,17616,68
+1-RW04-snapshot,RW04,Remote well 4,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,635,0,0,0,0,23400,67,6,0,17616,68
+1-RW05-snapshot,RW05,Remote well 5,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,679,0,0,0,0,23400,67,6,0,17616,68
+1-RW06-snapshot,RW06,Remote well 6,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,722,0,0,0,0,23400,67,6,0,17616,68
+1-RW07-snapshot,RW07,Remote well 7,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,766,0,0,0,0,23400,67,6,0,17616,68
+1-RW08-snapshot,RW08,Remote well 8,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,809,0,0,0,0,23400,67,6,0,17616,68
+1-LW01-snapshot,LW01,On-site source well,Local well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,782,0,0,0,0,23400,67,6,0,17616,68
+1-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,5580,0,0,0,0,23400,67,6,0,17616,68
+1-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,6000,0,0,0,0,23400,67,6,0,17616,68
+1-GST1-snapshot,GST1,Storage tank 1,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,62,0,0,23400,67,6,0,17616,68
+1-GST2-snapshot,GST2,Storage tank 2,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,65,0,0,23400,67,6,0,17616,68
+1-GST3-snapshot,GST3,Storage tank 3,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,68,0,0,23400,67,6,0,17616,68
+1-GST4-snapshot,GST4,Storage tank 4,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,71,0,0,23400,67,6,0,17616,68
+1-GST5-snapshot,GST5,Storage tank 5,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,74,0,0,23400,67,6,0,17616,68
+1-BP01-snapshot,BP01,Booster pump 1,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3836,67,0,1259,81,23400,67,6,0,17616,68
+1-BP02-snapshot,BP02,Booster pump 2,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3644,67,0,1250,79,23400,67,6,0,17616,68
+1-BP03-snapshot,BP03,Booster pump 3,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,4066,67,0,1270,82,23400,67,6,0,17616,68
+1-BP04-snapshot,BP04,Booster pump 4,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3951,67,0,1264,81,23400,67,6,0,17616,68
+1-BP05-snapshot,BP05,Booster pump 5,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3759,67,0,1255,80,23400,67,6,0,17616,68
+1-BP06-snapshot,BP06,Booster pump 6,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,4143,67,0,1273,82,23400,67,6,0,17616,68
+1-SOURCE-snapshot,SOURCE,Source collection,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,17616,0,0,0,0,23400,67,6,0,17616,68
+1-SUCTION-snapshot,SUCTION,Storage suction header,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,18,0,0,0,23400,67,6,0,17616,68
+1-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,67,0,0,0,23400,67,6,0,17616,68
+1-DIST-snapshot,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,67,0,0,0,23400,67,6,0,17616,68
+1-DIST-0,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,0,07:00,21996,68.2,0,0,0,23400,67,6,0,17616,68
+1-DIST-1,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,1,08:00,22759,68.4,0,0,0,23400,67,6,0,17616,68
+1-DIST-2,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,2,09:00,23390,67.9,0,0,0,23400,67,6,0,17616,68
+1-DIST-3,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,3,10:00,23778,67.1,0,0,0,23400,67,6,0,17616,68
+1-DIST-4,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,4,11:00,23857,66.1,0,0,0,23400,67,6,0,17616,68
+1-DIST-5,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,5,12:00,23612,65.6,0,0,0,23400,67,6,0,17616,68
+1-DIST-6,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,6,13:00,23086,65.8,0,0,0,23400,67,6,0,17616,68
+1-DIST-7,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,7,14:00,22371,66.5,0,0,0,23400,67,6,0,17616,68
+1-DIST-8,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,8,15:00,21590,67.4,0,0,0,23400,67,6,0,17616,68
+1-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+1-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Peak demand,Standby,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
+2-RW01-snapshot,RW01,Remote well 1,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW02-snapshot,RW02,Remote well 2,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW03-snapshot,RW03,Remote well 3,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW04-snapshot,RW04,Remote well 4,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW05-snapshot,RW05,Remote well 5,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW06-snapshot,RW06,Remote well 6,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW07-snapshot,RW07,Remote well 7,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-RW08-snapshot,RW08,Remote well 8,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-LW01-snapshot,LW01,On-site source well,Local well,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,680,0,0,0,0,12900,57,4,1,12743,56
+2-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,5813,0,0,0,0,12900,57,4,1,12743,56
+2-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,6250,0,0,0,0,12900,57,4,1,12743,56
+2-GST1-snapshot,GST1,Storage tank 1,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,50,0,0,12900,57,4,1,12743,56
+2-GST2-snapshot,GST2,Storage tank 2,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,53,0,0,12900,57,4,1,12743,56
+2-GST3-snapshot,GST3,Storage tank 3,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,56,0,0,12900,57,4,1,12743,56
+2-GST4-snapshot,GST4,Storage tank 4,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,59,0,0,12900,57,4,1,12743,56
+2-GST5-snapshot,GST5,Storage tank 5,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,62,0,0,12900,57,4,1,12743,56
+2-BP01-snapshot,BP01,Booster pump 1,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3258,57,0,1232,77,12900,57,4,1,12743,56
+2-BP02-snapshot,BP02,Booster pump 2,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3095,57,0,1224,76,12900,57,4,1,12743,56
+2-BP03-snapshot,BP03,Booster pump 3,Booster,Remote wells offline,Standby,#7789a0,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-BP04-snapshot,BP04,Booster pump 4,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3355,57,0,1237,78,12900,57,4,1,12743,56
+2-BP05-snapshot,BP05,Booster pump 5,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3192,57,0,1229,77,12900,57,4,1,12743,56
+2-BP06-snapshot,BP06,Booster pump 6,Booster,Remote wells offline,Standby,#7789a0,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-SOURCE-snapshot,SOURCE,Source collection,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12743,0,0,0,0,12900,57,4,1,12743,56
+2-SUCTION-snapshot,SUCTION,Storage suction header,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,18,0,0,0,12900,57,4,1,12743,56
+2-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,57,0,0,0,12900,57,4,1,12743,56
+2-DIST-snapshot,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,57,0,0,0,12900,57,4,1,12743,56
+2-DIST-0,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,0,07:00,12126,58.3,0,0,0,12900,57,4,1,12743,56
+2-DIST-1,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,1,08:00,12547,57.6,0,0,0,12900,57,4,1,12743,56
+2-DIST-2,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,2,09:00,12894,56.6,0,0,0,12900,57,4,1,12743,56
+2-DIST-3,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,3,10:00,13109,55.9,0,0,0,12900,57,4,1,12743,56
+2-DIST-4,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,4,11:00,13152,55.6,0,0,0,12900,57,4,1,12743,56
+2-DIST-5,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,5,12:00,13017,56,0,0,0,12900,57,4,1,12743,56
+2-DIST-6,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,6,13:00,12727,56.9,0,0,0,12900,57,4,1,12743,56
+2-DIST-7,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,7,14:00,12333,57.8,0,0,0,12900,57,4,1,12743,56
+2-DIST-8,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,8,15:00,11902,58.4,0,0,0,12900,57,4,1,12743,56
+2-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+2-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Remote wells offline,Warning,#ffa94d,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
+3-RW01-snapshot,RW01,Remote well 1,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,448,0,0,0,0,11700,55,4,1,5354,59
+3-RW02-snapshot,RW02,Remote well 2,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,487,0,0,0,0,11700,55,4,1,5354,59
+3-RW03-snapshot,RW03,Remote well 3,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,526,0,0,0,0,11700,55,4,1,5354,59
+3-RW04-snapshot,RW04,Remote well 4,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,565,0,0,0,0,11700,55,4,1,5354,59
+3-RW05-snapshot,RW05,Remote well 5,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,604,0,0,0,0,11700,55,4,1,5354,59
+3-RW06-snapshot,RW06,Remote well 6,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,643,0,0,0,0,11700,55,4,1,5354,59
+3-RW07-snapshot,RW07,Remote well 7,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,681,0,0,0,0,11700,55,4,1,5354,59
+3-RW08-snapshot,RW08,Remote well 8,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,720,0,0,0,0,11700,55,4,1,5354,59
+3-LW01-snapshot,LW01,On-site source well,Local well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,680,0,0,0,0,11700,55,4,1,5354,59
+3-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Surface inlet unavailable,Offline,#72849b,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Surface inlet unavailable,Offline,#72849b,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-GST1-snapshot,GST1,Storage tank 1,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,53,0,0,11700,55,4,1,5354,59
+3-GST2-snapshot,GST2,Storage tank 2,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,56,0,0,11700,55,4,1,5354,59
+3-GST3-snapshot,GST3,Storage tank 3,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,59,0,0,11700,55,4,1,5354,59
+3-GST4-snapshot,GST4,Storage tank 4,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,62,0,0,11700,55,4,1,5354,59
+3-GST5-snapshot,GST5,Storage tank 5,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,65,0,0,11700,55,4,1,5354,59
+3-BP01-snapshot,BP01,Booster pump 1,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2932,55,0,1217,75,11700,55,4,1,5354,59
+3-BP02-snapshot,BP02,Booster pump 2,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2786,55,0,1210,74,11700,55,4,1,5354,59
+3-BP03-snapshot,BP03,Booster pump 3,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,3108,55,0,1225,76,11700,55,4,1,5354,59
+3-BP04-snapshot,BP04,Booster pump 4,Booster,Surface inlet unavailable,Standby,#7789a0,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-BP05-snapshot,BP05,Booster pump 5,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2874,55,0,1214,75,11700,55,4,1,5354,59
+3-BP06-snapshot,BP06,Booster pump 6,Booster,Surface inlet unavailable,Standby,#7789a0,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-SOURCE-snapshot,SOURCE,Source collection,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,5354,0,0,0,0,11700,55,4,1,5354,59
+3-SUCTION-snapshot,SUCTION,Storage suction header,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,18,0,0,0,11700,55,4,1,5354,59
+3-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,55,0,0,0,11700,55,4,1,5354,59
+3-DIST-snapshot,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,55,0,0,0,11700,55,4,1,5354,59
+3-DIST-0,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,0,07:00,10998,55.2,0,0,0,11700,55,4,1,5354,59
+3-DIST-1,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,1,08:00,11380,54.3,0,0,0,11700,55,4,1,5354,59
+3-DIST-2,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,2,09:00,11695,53.7,0,0,0,11700,55,4,1,5354,59
+3-DIST-3,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,3,10:00,11889,53.7,0,0,0,11700,55,4,1,5354,59
+3-DIST-4,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,4,11:00,11928,54.3,0,0,0,11700,55,4,1,5354,59
+3-DIST-5,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,5,12:00,11806,55.3,0,0,0,11700,55,4,1,5354,59
+3-DIST-6,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,6,13:00,11543,56.1,0,0,0,11700,55,4,1,5354,59
+3-DIST-7,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,7,14:00,11185,56.4,0,0,0,11700,55,4,1,5354,59
+3-DIST-8,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,8,15:00,10795,56,0,0,0,11700,55,4,1,5354,59
+3-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Surface inlet unavailable,Standby,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+3-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Surface inlet unavailable,Warning,#ffa94d,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
+4-RW01-snapshot,RW01,Remote well 1,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,427,0,0,0,0,15600,62,4,0,14782,70
+4-RW02-snapshot,RW02,Remote well 2,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,464,0,0,0,0,15600,62,4,0,14782,70
+4-RW03-snapshot,RW03,Remote well 3,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,501,0,0,0,0,15600,62,4,0,14782,70
+4-RW04-snapshot,RW04,Remote well 4,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,538,0,0,0,0,15600,62,4,0,14782,70
+4-RW05-snapshot,RW05,Remote well 5,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,575,0,0,0,0,15600,62,4,0,14782,70
+4-RW06-snapshot,RW06,Remote well 6,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,612,0,0,0,0,15600,62,4,0,14782,70
+4-RW07-snapshot,RW07,Remote well 7,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,649,0,0,0,0,15600,62,4,0,14782,70
+4-RW08-snapshot,RW08,Remote well 8,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,686,0,0,0,0,15600,62,4,0,14782,70
+4-LW01-snapshot,LW01,On-site source well,Local well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,680,0,0,0,0,15600,62,4,0,14782,70
+4-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,4650,0,0,0,0,15600,62,4,0,14782,70
+4-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,5000,0,0,0,0,15600,62,4,0,14782,70
+4-GST1-snapshot,GST1,Storage tank 1,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,64,0,0,15600,62,4,0,14782,70
+4-GST2-snapshot,GST2,Storage tank 2,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,67,0,0,15600,62,4,0,14782,70
+4-GST3-snapshot,GST3,Storage tank 3,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,70,0,0,15600,62,4,0,14782,70
+4-GST4-snapshot,GST4,Storage tank 4,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,73,0,0,15600,62,4,0,14782,70
+4-GST5-snapshot,GST5,Storage tank 5,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,76,0,0,15600,62,4,0,14782,70
+4-BP01-snapshot,BP01,Booster pump 1,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3939,62,0,1264,81,15600,62,4,0,14782,70
+4-BP02-snapshot,BP02,Booster pump 2,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3742,62,0,1255,80,15600,62,4,0,14782,70
+4-BP03-snapshot,BP03,Booster pump 3,Booster,Booster maintenance,Standby,#7789a0,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-BP04-snapshot,BP04,Booster pump 4,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,4058,62,0,1269,82,15600,62,4,0,14782,70
+4-BP05-snapshot,BP05,Booster pump 5,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3861,62,0,1260,81,15600,62,4,0,14782,70
+4-BP06-snapshot,BP06,Booster pump 6,Booster,Booster maintenance,Standby,#7789a0,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-SOURCE-snapshot,SOURCE,Source collection,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,14782,0,0,0,0,15600,62,4,0,14782,70
+4-SUCTION-snapshot,SUCTION,Storage suction header,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,18,0,0,0,15600,62,4,0,14782,70
+4-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,62,0,0,0,15600,62,4,0,14782,70
+4-DIST-snapshot,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,62,0,0,0,15600,62,4,0,14782,70
+4-DIST-0,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,0,07:00,14664,60.9,0,0,0,15600,62,4,0,14782,70
+4-DIST-1,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,1,08:00,15173,60.6,0,0,0,15600,62,4,0,14782,70
+4-DIST-2,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,2,09:00,15593,60.9,0,0,0,15600,62,4,0,14782,70
+4-DIST-3,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,3,10:00,15852,61.7,0,0,0,15600,62,4,0,14782,70
+4-DIST-4,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,4,11:00,15905,62.7,0,0,0,15600,62,4,0,14782,70
+4-DIST-5,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,5,12:00,15741,63.3,0,0,0,15600,62,4,0,14782,70
+4-DIST-6,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,6,13:00,15391,63.3,0,0,0,15600,62,4,0,14782,70
+4-DIST-7,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,7,14:00,14914,62.7,0,0,0,15600,62,4,0,14782,70
+4-DIST-8,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,8,15:00,14394,61.8,0,0,0,15600,62,4,0,14782,70
+4-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+4-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Booster maintenance,Standby,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
+5-RW01-snapshot,RW01,Remote well 1,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,363,0,0,0,0,9700,50,3,2,12667,26
+5-RW02-snapshot,RW02,Remote well 2,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,394,0,0,0,0,9700,50,3,2,12667,26
+5-RW03-snapshot,RW03,Remote well 3,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,426,0,0,0,0,9700,50,3,2,12667,26
+5-RW04-snapshot,RW04,Remote well 4,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,457,0,0,0,0,9700,50,3,2,12667,26
+5-RW05-snapshot,RW05,Remote well 5,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,489,0,0,0,0,9700,50,3,2,12667,26
+5-RW06-snapshot,RW06,Remote well 6,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,520,0,0,0,0,9700,50,3,2,12667,26
+5-RW07-snapshot,RW07,Remote well 7,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,552,0,0,0,0,9700,50,3,2,12667,26
+5-RW08-snapshot,RW08,Remote well 8,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,583,0,0,0,0,9700,50,3,2,12667,26
+5-LW01-snapshot,LW01,On-site source well,Local well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,680,0,0,0,0,9700,50,3,2,12667,26
+5-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Low storage,Running,#35d4be,Snapshot,995,Snapshot,3953,0,0,0,0,9700,50,3,2,12667,26
+5-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Low storage,Running,#35d4be,Snapshot,995,Snapshot,4250,0,0,0,0,9700,50,3,2,12667,26
+5-GST1-snapshot,GST1,Storage tank 1,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,20,0,0,9700,50,3,2,12667,26
+5-GST2-snapshot,GST2,Storage tank 2,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,23,0,0,9700,50,3,2,12667,26
+5-GST3-snapshot,GST3,Storage tank 3,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,26,0,0,9700,50,3,2,12667,26
+5-GST4-snapshot,GST4,Storage tank 4,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,29,0,0,9700,50,3,2,12667,26
+5-GST5-snapshot,GST5,Storage tank 5,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,32,0,0,9700,50,3,2,12667,26
+5-BP01-snapshot,BP01,Booster pump 1,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3191,50,0,1229,77,9700,50,3,2,12667,26
+5-BP02-snapshot,BP02,Booster pump 2,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-BP03-snapshot,BP03,Booster pump 3,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3382,50,0,1238,78,9700,50,3,2,12667,26
+5-BP04-snapshot,BP04,Booster pump 4,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-BP05-snapshot,BP05,Booster pump 5,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3127,50,0,1226,76,9700,50,3,2,12667,26
+5-BP06-snapshot,BP06,Booster pump 6,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-SOURCE-snapshot,SOURCE,Source collection,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,12667,0,0,0,0,9700,50,3,2,12667,26
+5-SUCTION-snapshot,SUCTION,Storage suction header,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,18,0,0,0,9700,50,3,2,12667,26
+5-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,50,0,0,0,9700,50,3,2,12667,26
+5-DIST-snapshot,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,50,0,0,0,9700,50,3,2,12667,26
+5-DIST-0,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,0,07:00,9118,48.7,0,0,0,9700,50,3,2,12667,26
+5-DIST-1,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,1,08:00,9434,49.2,0,0,0,9700,50,3,2,12667,26
+5-DIST-2,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,2,09:00,9696,50.2,0,0,0,9700,50,3,2,12667,26
+5-DIST-3,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,3,10:00,9857,51,0,0,0,9700,50,3,2,12667,26
+5-DIST-4,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,4,11:00,9889,51.4,0,0,0,9700,50,3,2,12667,26
+5-DIST-5,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,5,12:00,9788,51.1,0,0,0,9700,50,3,2,12667,26
+5-DIST-6,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,6,13:00,9570,50.3,0,0,0,9700,50,3,2,12667,26
+5-DIST-7,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,7,14:00,9273,49.4,0,0,0,9700,50,3,2,12667,26
+5-DIST-8,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,8,15:00,8950,48.7,0,0,0,9700,50,3,2,12667,26
+5-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+5-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
+6-RW01-snapshot,RW01,Remote well 1,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,192,0,0,0,0,8600,51,2,1,10688,61
+6-RW02-snapshot,RW02,Remote well 2,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,209,0,0,0,0,8600,51,2,1,10688,61
+6-RW03-snapshot,RW03,Remote well 3,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,225,0,0,0,0,8600,51,2,1,10688,61
+6-RW04-snapshot,RW04,Remote well 4,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,242,0,0,0,0,8600,51,2,1,10688,61
+6-RW05-snapshot,RW05,Remote well 5,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,259,0,0,0,0,8600,51,2,1,10688,61
+6-RW06-snapshot,RW06,Remote well 6,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,275,0,0,0,0,8600,51,2,1,10688,61
+6-RW07-snapshot,RW07,Remote well 7,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,292,0,0,0,0,8600,51,2,1,10688,61
+6-RW08-snapshot,RW08,Remote well 8,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,309,0,0,0,0,8600,51,2,1,10688,61
+6-LW01-snapshot,LW01,On-site source well,Local well,Limited power,Offline,#72849b,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Limited power,Running,#35d4be,Snapshot,994,Snapshot,4185,0,0,0,0,8600,51,2,1,10688,61
+6-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Limited power,Running,#35d4be,Snapshot,994,Snapshot,4500,0,0,0,0,8600,51,2,1,10688,61
+6-GST1-snapshot,GST1,Storage tank 1,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,55,0,0,8600,51,2,1,10688,61
+6-GST2-snapshot,GST2,Storage tank 2,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,58,0,0,8600,51,2,1,10688,61
+6-GST3-snapshot,GST3,Storage tank 3,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,61,0,0,8600,51,2,1,10688,61
+6-GST4-snapshot,GST4,Storage tank 4,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,64,0,0,8600,51,2,1,10688,61
+6-GST5-snapshot,GST5,Storage tank 5,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,67,0,0,8600,51,2,1,10688,61
+6-BP01-snapshot,BP01,Booster pump 1,Booster,Limited power,Running,#31c8a4,Snapshot,994,Snapshot,4175,51,0,1275,83,8600,51,2,1,10688,61
+6-BP02-snapshot,BP02,Booster pump 2,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-BP03-snapshot,BP03,Booster pump 3,Booster,Limited power,Running,#31c8a4,Snapshot,994,Snapshot,4425,51,0,1287,84,8600,51,2,1,10688,61
+6-BP04-snapshot,BP04,Booster pump 4,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-BP05-snapshot,BP05,Booster pump 5,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-BP06-snapshot,BP06,Booster pump 6,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-SOURCE-snapshot,SOURCE,Source collection,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,10688,0,0,0,0,8600,51,2,1,10688,61
+6-SUCTION-snapshot,SUCTION,Storage suction header,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,18,0,0,0,8600,51,2,1,10688,61
+6-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,51,0,0,0,8600,51,2,1,10688,61
+6-DIST-snapshot,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,51,0,0,0,8600,51,2,1,10688,61
+6-DIST-0,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,0,07:00,8084,50.6,0,0,0,8600,51,2,1,10688,61
+6-DIST-1,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,1,08:00,8365,51.6,0,0,0,8600,51,2,1,10688,61
+6-DIST-2,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,2,09:00,8596,52.3,0,0,0,8600,51,2,1,10688,61
+6-DIST-3,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,3,10:00,8739,52.4,0,0,0,8600,51,2,1,10688,61
+6-DIST-4,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,4,11:00,8768,51.8,0,0,0,8600,51,2,1,10688,61
+6-DIST-5,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,5,12:00,8678,50.9,0,0,0,8600,51,2,1,10688,61
+6-DIST-6,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,6,13:00,8485,50,0,0,0,8600,51,2,1,10688,61
+6-DIST-7,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,7,14:00,8222,49.6,0,0,0,8600,51,2,1,10688,61
+6-DIST-8,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,8,15:00,7935,49.8,0,0,0,8600,51,2,1,10688,61
+6-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+6-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Limited power,Warning,#ffa94d,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
+7-RW01-snapshot,RW01,Remote well 1,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,427,0,0,0,0,8200,43,2,2,14782,64
+7-RW02-snapshot,RW02,Remote well 2,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,464,0,0,0,0,8200,43,2,2,14782,64
+7-RW03-snapshot,RW03,Remote well 3,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,501,0,0,0,0,8200,43,2,2,14782,64
+7-RW04-snapshot,RW04,Remote well 4,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,538,0,0,0,0,8200,43,2,2,14782,64
+7-RW05-snapshot,RW05,Remote well 5,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,575,0,0,0,0,8200,43,2,2,14782,64
+7-RW06-snapshot,RW06,Remote well 6,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,612,0,0,0,0,8200,43,2,2,14782,64
+7-RW07-snapshot,RW07,Remote well 7,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,649,0,0,0,0,8200,43,2,2,14782,64
+7-RW08-snapshot,RW08,Remote well 8,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,686,0,0,0,0,8200,43,2,2,14782,64
+7-LW01-snapshot,LW01,On-site source well,Local well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,680,0,0,0,0,8200,43,2,2,14782,64
+7-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,4650,0,0,0,0,8200,43,2,2,14782,64
+7-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,5000,0,0,0,0,8200,43,2,2,14782,64
+7-GST1-snapshot,GST1,Storage tank 1,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,58,0,0,8200,43,2,2,14782,64
+7-GST2-snapshot,GST2,Storage tank 2,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,61,0,0,8200,43,2,2,14782,64
+7-GST3-snapshot,GST3,Storage tank 3,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,64,0,0,8200,43,2,2,14782,64
+7-GST4-snapshot,GST4,Storage tank 4,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,67,0,0,8200,43,2,2,14782,64
+7-GST5-snapshot,GST5,Storage tank 5,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,70,0,0,8200,43,2,2,14782,64
+7-BP01-snapshot,BP01,Booster pump 1,Booster,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,4205,43,0,1276,83,8200,43,2,2,14782,64
+7-BP02-snapshot,BP02,Booster pump 2,Booster,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,3995,43,0,1266,82,8200,43,2,2,14782,64
+7-BP03-snapshot,BP03,Booster pump 3,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-BP04-snapshot,BP04,Booster pump 4,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-BP05-snapshot,BP05,Booster pump 5,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-BP06-snapshot,BP06,Booster pump 6,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-SOURCE-snapshot,SOURCE,Source collection,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,14782,0,0,0,0,8200,43,2,2,14782,64
+7-SUCTION-snapshot,SUCTION,Storage suction header,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,18,0,0,0,8200,43,2,2,14782,64
+7-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,43,0,0,0,8200,43,2,2,14782,64
+7-DIST-snapshot,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,43,0,0,0,8200,43,2,2,14782,64
+7-DIST-0,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,0,07:00,7708,43.9,0,0,0,8200,43,2,2,14782,64
+7-DIST-1,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,1,08:00,7975,44.4,0,0,0,8200,43,2,2,14782,64
+7-DIST-2,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,2,09:00,8196,44.2,0,0,0,8200,43,2,2,14782,64
+7-DIST-3,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,3,10:00,8333,43.4,0,0,0,8200,43,2,2,14782,64
+7-DIST-4,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,4,11:00,8360,42.5,0,0,0,8200,43,2,2,14782,64
+7-DIST-5,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,5,12:00,8274,41.8,0,0,0,8200,43,2,2,14782,64
+7-DIST-6,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,6,13:00,8090,41.6,0,0,0,8200,43,2,2,14782,64
+7-DIST-7,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,7,14:00,7839,42.1,0,0,0,8200,43,2,2,14782,64
+7-DIST-8,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,8,15:00,7566,43,0,0,0,8200,43,2,2,14782,64
+7-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+7-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64

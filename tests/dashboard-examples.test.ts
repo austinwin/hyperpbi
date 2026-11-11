@@ -56,6 +56,7 @@ const expectedSlugs = [
     "talent-acquisition",
     "universal-dynamic-content",
     "urban-mobility-command-center",
+    "water-pump-station-digital-twin",
 ];
 const fixedTimestamp = "2026-07-25T00:00:00.000Z";
 // `fitMode: "data"` is deliberate for the fleet point layer. The map validator
@@ -354,7 +355,10 @@ describe("portable dashboard examples", () => {
 
                 const expectedBundle = readFileSync(asset(example, "project"), "utf8").replace(/\r\n/g, "\n").trim();
                 const actualBundle = exportProjectBundle(instantiated.project);
-                if (actualBundle !== expectedBundle) failures.push(`${example.slug} project bundle is stale`);
+                if (actualBundle !== expectedBundle) {
+                    const offset = [...actualBundle].findIndex((char, index) => char !== expectedBundle[index]);
+                    failures.push(`${example.slug} project bundle is stale at offset ${offset}: actual ${JSON.stringify(actualBundle.slice(offset, offset + 130))} expected ${JSON.stringify(expectedBundle.slice(offset, offset + 130))}`);
+                }
 
                 const imported = importProjectBundle(expectedBundle);
                 for (const error of imported.errors) failures.push(`${example.slug} bundle import: ${error}`);
@@ -532,5 +536,65 @@ describe("portable dashboard examples", () => {
                 expect(readme).toContain("contains no credentials or remote data");
             }
         }
+    });
+});
+
+describe("water pump station digital twin example", () => {
+    it("matches its generic process design and uses eight coherent synthetic scenarios", () => {
+        const entry = manifest.examples.find(item => item.slug === "water-pump-station-digital-twin");
+        expect(entry).toBeDefined();
+        const specification = JSON.parse(readFileSync(asset(entry!, "specification"), "utf8")) as {
+            title: string;
+            components: Array<Record<string, unknown>>;
+        };
+        const scene = specification.components.find(component => component.type === "scene3d") as {
+            objects: Array<{ id: string; kind: string; dataKey?: string; flowKey?: string; animations?: unknown[] }>;
+            objectIdField: string; levelField: string; flowField: string;
+        };
+        expect(specification.title).toBe("Water Pump Station | Process Digital Twin");
+        expect(JSON.stringify(specification)).not.toMatch(/southwest repump/i);
+        expect(scene.objects.length).toBeLessThanOrEqual(80);
+        expect(scene.objectIdField).toBe("assetid");
+        expect(scene.levelField).toBe("levelpct");
+        expect(scene.flowField).toBe("flowgpm");
+        expect(scene.objects.filter(object => object.kind === "tank")).toHaveLength(5);
+        expect(scene.objects.filter(object => object.kind === "pump" && object.dataKey?.startsWith("BP"))).toHaveLength(6);
+        expect(scene.objects.filter(object => object.kind === "fan" && object.animations?.length)).toHaveLength(6);
+        expect(scene.objects.filter(object => object.kind === "pipe" && object.flowKey).length).toBeGreaterThanOrEqual(15);
+        const rows = parseCsvRows(readFileSync(asset(entry!, "data"), "utf8"));
+        const headers = rows[0];
+        const data = rows.slice(1).map(raw => Object.fromEntries(headers.map((key, index) => [key, raw[index]])));
+        const snapshots = data.filter(row => row.recordtype === "Snapshot");
+        const scenarioOrder = ["Normal supply", "Peak demand", "Remote wells offline",
+            "Surface inlet unavailable", "Booster maintenance", "Low storage",
+            "Limited power", "Low distribution pressure"];
+        const switcher = specification.components.find(component => component.id === "operating_scenario");
+        expect(switcher?.options).toEqual(scenarioOrder);
+        for (const scenario of scenarioOrder) {
+            const state = snapshots.filter(row => row.scenario === scenario);
+            const assets = new Map(state.map(row => [row.assetid, row]));
+            expect(assets.size).toBe(30);
+            expect(state.filter(row => row.category === "Storage")).toHaveLength(5);
+            const pumps = state.filter(row => row.category === "Booster");
+            expect(pumps).toHaveLength(6);
+            const runningFlow = pumps.reduce((sum, row) => sum + Number(row.flowgpm), 0);
+            expect(Math.abs(runningFlow - Number(assets.get("DIST")?.flowgpm))).toBeLessThanOrEqual(2);
+            expect(Number(assets.get("DISCHARGE")?.pressurepsi)).toBe(Number(assets.get("DIST")?.pressurepsi));
+            expect(state.filter(row => row.assetid.startsWith("RW"))).toHaveLength(8);
+            expect(state.filter(row => row.assetid.startsWith("SW"))).toHaveLength(2);
+            for (const fan of scene.objects.filter(object => object.kind === "fan")) {
+                expect(assets.has(fan.dataKey!)).toBe(true);
+            }
+        }
+        const scenario = (name: string) => snapshots.filter(row => row.scenario === name);
+        expect(scenario("Peak demand").filter(row => row.category === "Booster" && Number(row.flowgpm) > 0)).toHaveLength(6);
+        expect(scenario("Remote wells offline").filter(row => row.category === "Remote well" && Number(row.flowgpm) !== 0)).toHaveLength(0);
+        expect(scenario("Surface inlet unavailable").filter(row => row.category === "Surface inlet" && Number(row.flowgpm) !== 0)).toHaveLength(0);
+        expect(scenario("Booster maintenance").find(row => row.assetid === "BP03")?.status).toBe("Standby");
+        expect(scenario("Booster maintenance").find(row => row.assetid === "BP05")?.status).toBe("Running");
+        expect(scenario("Limited power").filter(row => row.category === "Booster" && Number(row.flowgpm) > 0)).toHaveLength(2);
+        expect(scenario("Low storage").filter(row => row.category === "Storage" && Number(row.levelpct) < 35)).toHaveLength(5);
+        expect(scenario("Low distribution pressure").find(row => row.assetid === "ALARM")?.status).toBe("Warning");
+        expect(scenario("Normal supply").find(row => row.assetid === "QUALITY")?.status).toBe("Running");
     });
 });
