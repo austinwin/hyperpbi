@@ -345,7 +345,7 @@
       "id": "water-pump-station-digital-twin",
       "limitations": "Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to 80 objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.",
       "powerBiPackage": "core",
-      "previewImage": "/images/pump-station-monitoring.webp",
+      "previewImage": "/images/water-pump-station-digital-twin.svg",
       "project": "water-pump-station-digital-twin/project.hyperpbi",
       "referenceImages": [],
       "runtime": "water-pump-station-digital-twin/runtime.json",
