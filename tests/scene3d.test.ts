@@ -175,3 +175,66 @@ describe("Scene3D declarative animations", () => {
         ]));
     });
 });
+
+describe("Scene3D engineering process primitives", () => {
+    it("binds magnetic meter readings, valve positions and pump motor speed", () => {
+        const items: Scene3dComponent = {
+            type: "scene3d", id: "instruments", objectIdField: "asset",
+            flowField: "flow",
+            objects: [
+                { id: "magmeter", kind: "flowmeter", dataKey: "FM1", valueField: "flow", valueUnit: "GPM" },
+                { id: "surface_valve", kind: "valve", dataKey: "SW1", openingField: "openpct" },
+                { id: "booster", kind: "pump", dataKey: "BP1", motorRpmField: "rpm" },
+                { id: "feed", kind: "pipe", flowKey: "FM1",
+                    path: [[-4, 0.5, -1], [0, 0.5, -1], [0, 0.5, 1]], diameter: 0.2 },
+            ],
+        };
+        const data = [
+            { asset: "FM1", flow: 890 },
+            { asset: "SW1", openpct: 38 },
+            { asset: "BP1", rpm: 1380 },
+        ];
+        const model = resolveSceneObjects(items, data, data);
+        expect(model[0]).toMatchObject({ reading: 890, selectable: true });
+        expect(model[1]).toMatchObject({ opening: 38, selectable: true });
+        expect(model[2]).toMatchObject({ motorRpm: 1380 });
+        expect(model[3]).toMatchObject({ flow: 890, selectable: false });
+        expect(validateSchema({ version: "2.0", components: [items] }).valid).toBe(true);
+    });
+
+    it("rejects physically invalid pipe centerlines and unrelated actuator bindings", () => {
+        const invalid = validateSchema({ version: "2.0", components: [{
+            type: "scene3d", id: "invalid", objectIdField: "asset",
+            objects: [
+                { id: "broken_pipe", kind: "pipe", path: [[0, 0, 0], [0, 0, 0]], diameter: 0.2 },
+                { id: "wrong_actuator", kind: "flowmeter", dataKey: "FM", openingField: "openpct" },
+                { id: "bad_unit", kind: "analyzer", dataKey: "A1", valueField: "cl2", valueUnit: "<script>" },
+            ],
+        }] });
+        expect(invalid.valid).toBe(false);
+        expect(invalid.diagnostics?.map(item => item.path)).toEqual(expect.arrayContaining([
+            "/components/0/objects/0/path/1",
+            "/components/0/objects/1/openingField",
+            "/components/0/objects/2/valueUnit",
+        ]));
+    });
+
+    it("uses the existing Field Manifest to resolve instrument-specific fields", () => {
+        const data = parseCsvText("Asset,Valve Opening,Flow GPM,Motor RPM\nSW1,60,1000,0\nBP1,0,1500,1320", "engineering.csv").data;
+        const specification = {
+            version: "2.0", components: [{
+                type: "scene3d", id: "process",
+                objectIdField: "asset",
+                objects: [
+                    { id: "v1", kind: "valve", dataKey: "SW1", openingField: "Valve Opening", valueField: "Flow GPM", valueUnit: "GPM" },
+                    { id: "p1", kind: "pump", dataKey: "BP1", motorRpmField: "Motor RPM" },
+                ],
+            }],
+        };
+        const result = prepareSpecification(specification, data, { repair: false });
+        expect(result.errors).toEqual([]);
+        const objects = (result.schema!.components[0] as Scene3dComponent).objects;
+        expect(objects[0]).toMatchObject({ openingField: "valve_opening", valueField: "flow_gpm" });
+        expect(objects[1]).toMatchObject({ motorRpmField: "motor_rpm" });
+    });
+});
