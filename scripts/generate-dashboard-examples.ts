@@ -5,6 +5,7 @@ import { instantiateDashboardExample } from "../src/playground/dashboardExample"
 import { canonicalJson } from "../src/playground/canonicalJson";
 import { exportProjectBundle } from "../src/playground/projectBundle";
 import type { Scene3dComponent, Scene3dObject, Scene3dVector } from "../src/schema/scene3dSchema";
+import { waterPumpStationExample } from "./examples/waterPumpStation";
 
 type Row = Record<string, string | number | boolean | null>;
 type Specification = Record<string, unknown>;
@@ -1177,6 +1178,7 @@ const examples: ExampleDefinition[] = [
     pumpStationMonitoring(),
     groundwaterSupplyDistribution(),
     scene3dAnimationStudio(),
+    waterPumpStationExample(darkRuntime),
 ];
 
 function readme(example: ExampleDefinition): string {
