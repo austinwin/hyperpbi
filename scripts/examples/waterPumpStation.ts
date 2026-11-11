@@ -274,28 +274,33 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
         yAxis: { axisLabel: { color: "#91a7bc" }, splitLine: { lineStyle: { color: "#273a50" } } },
     };
     const targets = ["water_scene", "flow_kpi", "pressure_kpi", "pumps_kpi", "storage_kpi",
-        "alerts_kpi", "source_kpi", "flow_history", "pressure_history",
-        "booster_load", "storage_levels", "asset_register"];
+        "alerts_kpi", "source_kpi", "storage_balance_kpi", "chlorine_kpi", "ammonia_kpi",
+        "flow_history", "pressure_history", "booster_load", "storage_levels",
+        "source_meter_chart", "quality_chart", "asset_register", "meter_register", "chemical_register"];
     const palette = [
         { value: "Running", color: "#31c8a4" }, { value: "Warning", color: "#f7ab50" },
         { value: "Standby", color: "#7789a0" }, { value: "Offline", color: "#d77378" },
+        { value: "Dosing", color: "#35cbb3" }, { value: "Fault", color: "#e96770" },
+        { value: "Closed", color: "#8292a5" }, { value: "No sample", color: "#8292a5" },
+        { value: "No flow", color: "#8292a5" },
     ];
     const scene: Scene3dComponent = {
         type: "scene3d", id: "water_scene", dataset: "snapshots",
-        title: "Process route | sources → storage → boosters → distribution",
+        title: "3D engineering process | wells → meters → injection → storage → boosters → distribution",
         objectIdField: "assetid", flowField: "flowgpm", levelField: "levelpct",
         statusField: "status", colorField: "equipmentcolor", statusColors: palette,
         tooltipFields: [{ field: "equipment", label: "Equipment" },
             { field: "status", label: "State" }, { field: "flowgpm", label: "Flow (GPM)" },
-            { field: "levelpct", label: "Level (%)" }, { field: "pressurepsi", label: "Pressure (PSI)" },
-            { field: "rpm", label: "RPM" }],
-        objects, height: 570, theme: "dark", grid: true, shadows: true, showLabels: false,
+            { field: "levelpct", label: "Level (%)" }, { field: "valveopenpct", label: "Valve open (%)" },
+            { field: "dosemgL", label: "Dose (mg/L)" }, { field: "cl2mgL", label: "Chlorine (mg/L)" },
+            { field: "nh3mgL", label: "Ammonia (mg/L)" }],
+        objects, height: 760, theme: "dark", grid: true, shadows: true, showLabels: false,
         showObjectList: true, view: "isometric",
         interaction: {
             enabled: true, trigger: "click", internalMode: "filter", internalScope: "others",
             externalMode: "selection", field: "assetid", selectionMode: "replace",
             multiSelect: true, showSelector: false, clearOnSecondClick: true,
-            targets: ["asset_register", "booster_load", "storage_levels"],
+            targets: ["asset_register", "meter_register", "chemical_register", "booster_load", "storage_levels", "source_meter_chart", "quality_chart"],
         },
     };
     const specification = {
@@ -312,7 +317,7 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
             navbar: { visible: true },
             pageHeader: {
                 visible: true, title: "Water Pump Station | Process Digital Twin",
-                subtitle: "Sources • treatment • five storage tanks • six booster pumps • distribution",
+                subtitle: "Well and surface metering • chlorine / ammonia dosing • 5 GSTs • 6 boosters • quality monitoring",
                 meta: [{ label: "Training model", value: "Synthetic scenarios", intent: "info" }],
             },
         },
@@ -321,6 +326,10 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
             snapshots: { source: "readings", filter: { field: "recordtype", operator: "=", value: "Snapshot" } },
             boosters: { source: "snapshots", filter: { field: "category", operator: "=", value: "Booster" } },
             storage: { source: "snapshots", filter: { field: "category", operator: "=", value: "Storage" } },
+            metering: { source: "snapshots", filter: { field: "category", operator: "=", value: "Flowmeter" } },
+            chemicals: { source: "snapshots", filter: { field: "category", operator: "=", value: "Chemical injection" } },
+            quality: { source: "snapshots", filter: { field: "category", operator: "=", value: "Analyzer" } },
+            distribution_quality: { source: "snapshots", filter: { field: "assetid", operator: "=", value: "AN-DIST" } },
             trends: { source: "powerbi", filter: { field: "recordtype", operator: "=", value: "Trend" },
                 sort: [{ field: "sampleorder", direction: "ascending" }] },
         } },
