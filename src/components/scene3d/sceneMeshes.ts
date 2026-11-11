@@ -65,7 +65,7 @@ export function createSceneMeshes() {
             bands.raycast = () => {};
             bands.visible = false;
             group.add(bands);
-            const move = (phase: number) => {
+            const move = (phase: number, _length = 1) => {
                 for (let index = 0; index < bands.count; index++) {
                     let distance = ((phase + index / bands.count) % 1) * total;
                     let point = vertices[vertices.length - 1];
