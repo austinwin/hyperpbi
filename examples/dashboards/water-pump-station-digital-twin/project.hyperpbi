@@ -7865,7 +7865,7 @@
     },
     "motion": {
       "enabled": true,
-      "maxConcurrentAnimations": 30,
+      "maxConcurrentAnimations": 24,
       "reducedMotion": "respect-system"
     },
     "providers": {
@@ -7874,8 +7874,12 @@
         "provider": "none"
       },
       "geocoder": {
+        "autocomplete": false,
+        "cache": true,
         "enabled": false,
-        "provider": "none"
+        "minScore": 80,
+        "provider": "none",
+        "userTriggeredOnly": true
       },
       "mode": "core",
       "privacyAcknowledged": false
@@ -7888,7 +7892,8 @@
     "security": {
       "cssMode": "scoped",
       "htmlMode": "sanitized",
-      "showSanitizerWarnings": false
+      "showSanitizerWarnings": false,
+      "svgMode": "sanitized"
     },
     "version": "1.0"
   },
@@ -8206,7 +8211,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP01",
             "id": "booster_suction_1",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8228,7 +8232,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP02",
             "id": "booster_suction_2",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8250,7 +8253,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP03",
             "id": "booster_suction_3",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8272,7 +8274,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP04",
             "id": "booster_suction_4",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8294,7 +8295,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP05",
             "id": "booster_suction_5",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8316,7 +8316,6 @@
           },
           {
             "color": "#4b94cd",
-            "flowKey": "BP06",
             "id": "booster_suction_6",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8514,7 +8513,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "LW01",
             "id": "local_source_flow",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8536,7 +8534,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
             "id": "tank_inlet_1",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8558,7 +8555,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
             "id": "tank_inlet_2",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8580,7 +8576,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
             "id": "tank_inlet_3",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8602,7 +8597,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
             "id": "tank_inlet_4",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8624,7 +8618,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "SOURCE",
             "id": "tank_inlet_5",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8646,7 +8639,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW01",
             "id": "well_flow_RW01",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8668,7 +8660,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW02",
             "id": "well_flow_RW02",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8690,7 +8681,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW03",
             "id": "well_flow_RW03",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8712,7 +8702,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW04",
             "id": "well_flow_RW04",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8734,7 +8723,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW05",
             "id": "well_flow_RW05",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8756,7 +8744,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW06",
             "id": "well_flow_RW06",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8778,7 +8765,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW07",
             "id": "well_flow_RW07",
             "kind": "pipe",
             "metalness": 0.48,
@@ -8800,7 +8786,6 @@
           },
           {
             "color": "#279bb9",
-            "flowKey": "RW08",
             "id": "well_flow_RW08",
             "kind": "pipe",
             "metalness": 0.48,
