@@ -421,20 +421,21 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
                 text: "Training demonstration only. Equipment labels reflect a source schematic, but values, opening percentages, chemical concentrations, capacities, scenarios and alarms are synthetic. This is a process-connectivity visualization, not a calibrated hydraulic model, chemical-treatment design, or an operating/control procedure. Mass balance uses Q(source) − Q(booster) = Q(net storage), with positive values indicating filling." },
         ],
     };
-    const headers = ["readingid", "assetid", "equipment", "category", "scenario", "status", "equipmentcolor",
+    const headers = ["readingid", "assetid", "equipment", "category", "medium", "scenario", "status", "equipmentcolor",
         "recordtype", "sampleorder", "hour", "flowgpm", "pressurepsi", "levelpct", "rpm", "motorloadpct",
-        "stationflow", "stationpressure", "stationonline", "stationalerts", "sourceflow", "averagelevel"];
+        "valveopenpct", "dosemgL", "cl2mgL", "nh3mgL", "stationflow", "stationpressure",
+        "stationonline", "stationalerts", "sourceflow", "netstoragegpm", "averagelevel"];
     return {
         id: "water-pump-station-digital-twin", title,
         useCase: "Water utility process visualization and engineering training",
         summary: "Trace source-water intake, chemical monitoring, five ground storage tanks, and six booster pumps in interactive 3D.",
-        description: "A fictionalized 3D water pump station with remote and local source wells, dual surface-water inlets, treatment indicators, five storage tanks, and six booster pumps. Eight simulated operating scenarios drive tank levels, pipe flow, cooling fans, alarms, linked trends, and equipment selection.",
+        description: "A fictionalized 3D water pump station with remote and local source wells, dual surface-water inlets, treatment indicators, five storage tanks, and six booster pumps. Ten simulated operating scenarios drive eleven inline flowmeters, chlorine and ammonia injection, three analyzers, valve opening, tank levels, motor fans and connected hydraulic paths.",
         theme: "dark" as const, accent: "#63b6e5",
         tags: ["3D", "water", "engineering", "SCADA"], referenceImages: [] as number[],
         previewImage: "/images/water-pump-station-digital-twin.svg",
         powerBiPackage: "core" as const,
-        expected: "Switch between all eight scenarios: Normal supply, Peak demand, Remote wells offline, Surface inlet unavailable, Booster maintenance, Low storage, Limited power, and Low distribution pressure. Tank fill, pump availability, fan rotation, animated flow, pressure and intake KPIs, linked charts, and the asset register change with the scenario. Selecting an asset cross-highlights associated records.",
-        limitations: "Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to 80 objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.",
+        expected: "Choose each of ten scenarios: Normal supply, Peak demand, Remote wells offline, Surface inlet unavailable, Booster maintenance, Low storage, Limited power, Low distribution pressure, Chlorine dosing fault, and Ammonia dosing fault. Eleven meters show individual GPM, two surface valves close when isolated, chemical skids stop on fault, analyzers update, tank levels change, pump fans rotate only with RPM, flow markers stop at zero flow, and the station KPIs and linked charts update. Selecting an asset highlights its associated records.",
+        limitations: "Training example follows the source schematic\'s general process topology but contains synthetic measurements, valve positions, dosing values, alarm thresholds, scenarios and pump performance. Valve flow is approximated by percentage opening; hydraulic heads, volume capacities and chemical kinetics are not solved. The 3D engine supports 104 objects and requires WebGL 2; motion honors user preferences. In Power BI, bind readingid as a categorical column and set numeric fields to Don\'t summarize.",
         headers, rows, specification,
         runtime: { ...runtime, motion: { ...runtime.motion, maxConcurrentAnimations: 24 } },
     };
