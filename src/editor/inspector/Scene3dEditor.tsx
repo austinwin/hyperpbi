@@ -270,15 +270,16 @@ export function Scene3dEditor({ component, fields, onChange }: {
                         {selected.kind === "pipe" && <>
                             <p class="text-secondary m-0">Connect pipe elbows with ordered local [x,y,z] centerline points. Positive flow follows the point order.</p>
                             <label>Pipe centerline points<textarea class="form-control form-control-sm" aria-label="Pipe centerline points"
-                                rows={4} value={JSON.stringify(selected.path ?? [[-1, 0, 0], [1, 0, 0]])}
-                                onChange={event => {
+                                rows={4} defaultValue={JSON.stringify(selected.path ?? [[-1, 0, 0], [1, 0, 0]])}
+                                onBlur={event => {
                                     try {
                                         const next = JSON.parse(event.currentTarget.value) as unknown;
                                         if (Array.isArray(next) && next.length >= 2 && next.length <= scene3dLimits.pipePathPoints &&
                                             next.every(point => Array.isArray(point) && point.length === 3 && point.every(n => typeof n === "number" && Number.isFinite(n) && Math.abs(n) <= 100))) {
+                                            setError("");
                                             update(selected.id, { path: next as Scene3dVector[] });
                                         }
-                                    } catch { /* Keep the last validated centerline until JSON is complete. */ }
+                                    } catch { setError("Pipe centerline must be a valid array of 2–16 [x,y,z] points."); }
                                 }} /></label>
                             {selected.path && <NumericInput label="Pipe diameter (scene units)" value={selected.diameter ?? 0.2}
                                 min={0.04} max={2} step={0.02} onChange={diameter => update(selected.id, { diameter })} />}
