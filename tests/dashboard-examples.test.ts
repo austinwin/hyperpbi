@@ -355,7 +355,10 @@ describe("portable dashboard examples", () => {
 
                 const expectedBundle = readFileSync(asset(example, "project"), "utf8").replace(/\r\n/g, "\n").trim();
                 const actualBundle = exportProjectBundle(instantiated.project);
-                if (actualBundle !== expectedBundle) failures.push(`${example.slug} project bundle is stale`);
+                if (actualBundle !== expectedBundle) {
+                    const offset = [...actualBundle].findIndex((char, index) => char !== expectedBundle[index]);
+                    failures.push(`${example.slug} project bundle is stale at offset ${offset}: actual ${JSON.stringify(actualBundle.slice(offset, offset + 130))} expected ${JSON.stringify(expectedBundle.slice(offset, offset + 130))}`);
+                }
 
                 const imported = importProjectBundle(expectedBundle);
                 for (const error of imported.errors) failures.push(`${example.slug} bundle import: ${error}`);
