@@ -73,8 +73,8 @@ function exampleRows(): Row[] {
             add(base("FM-" + id, "Surface inlet " + source + " electromagnetic flowmeter", "Flowmeter",
                 { flowgpm: flow, status: flow ? "Running" : "No flow" }));
             add(base("AN-" + id, "Surface inlet " + source + " chlorine analyzer", "Analyzer",
-                { cl2mgL: flow ? chlorineFault ? 0.24 : 1.45 + source * 0.13 : null,
-                    status: !flow ? "No sample" : chlorineFault ? "Warning" : "Running" }));
+                { cl2mgL: flow ? 1.45 + source * 0.13 : null,
+                    status: flow ? "Running" : "No sample" }));
             add(base("CL2-" + id, "Surface inlet " + source + " chlorine dosing", "Chemical injection",
                 { medium: "Cl2", dosemgL: flow && !chlorineFault ? 1.05 : 0,
                     status: flow ? chlorineFault ? "Fault" : "Dosing" : "Standby" }));
