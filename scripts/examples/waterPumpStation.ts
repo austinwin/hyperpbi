@@ -337,11 +337,11 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
             globalCss: "\n.hp-app-main,.hp-grid { background:#07121e; }\n.hp-navbar,.hp-page-header { background:#0a1828; border-color:#22384f; }\n.hp-card,.hp-metric,.hp-table-wrap { background:#102237; border-color:#2b4159; box-shadow:0 8px 28px rgb(0 0 0 / 20%); }\n.hp-metric { border:1px solid #29415b; border-left:0; }\n.hp-metric-label { color:#8da9c0; text-transform:none; }\n.hp-metric-value { color:#f0faff; font-size:23px; }\n.hp-table th { background:#122a42; color:#a8c1d3; }\n.hp-card-header { border-color:#2b4159; }\n",
         },
         components: [
-            { type: "segmentedControl", id: "operating_scenario", label: "Operating scenario",
+            { type: "select", id: "operating_scenario", label: "Operating scenario (choose one state)",
                 field: "scenario", options: scenarios.map(item => item.name),
                 interaction: { internalMode: "filter", targets, externalMode: "none" } },
             { type: "text", id: "process_legend",
-                text: "SOURCE NETWORK  →  GROUND STORAGE  →  BOOSTER ARRAY  →  DISTRIBUTION | Teal: raw/source flows • Blue: transfer/discharge • Green: running • Amber: warning. All values are simulated and are not operational guidance." },
+                text: "PROCESS: 8 remote wells + 1 on-site well + 2 surface inlets → Cl2 / NH3 injection and chlorine monitoring → 5 GSTs → 6 booster pumps → distribution Cl2 / NH3 analyzer. Teal: well water • Blue: surface/treated water • Gold: Cl2 • Violet: NH3. Flow markers follow signed GPM. Select one scenario before reading the KPIs: All combines unrelated training states." },
             { type: "grid", id: "station_kpis", columns: 12, children: [
                 { type: "kpi", id: "flow_kpi", title: "Discharge flow (GPM)", dataset: "snapshots", field: "stationflow", aggregation: "first", span: 2 },
                 { type: "kpi", id: "pressure_kpi", title: "Discharge (PSI)", dataset: "snapshots", field: "stationpressure", aggregation: "first", span: 2 },
@@ -349,6 +349,12 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
                 { type: "kpi", id: "storage_kpi", title: "Mean GST level (%)", dataset: "snapshots", field: "averagelevel", aggregation: "first", span: 2 },
                 { type: "kpi", id: "source_kpi", title: "Source intake (GPM)", dataset: "snapshots", field: "sourceflow", aggregation: "first", span: 2 },
                 { type: "kpi", id: "alerts_kpi", title: "Active alerts", dataset: "snapshots", field: "stationalerts", aggregation: "first", span: 2, intent: "warning" },
+                { type: "kpi", id: "storage_balance_kpi", title: "Storage net rate (GPM, + filling)", dataset: "snapshots",
+                    field: "netstoragegpm", aggregation: "first", span: 4 },
+                { type: "kpi", id: "chlorine_kpi", title: "Distribution Cl2 (mg/L)", dataset: "distribution_quality",
+                    field: "cl2mgL", aggregation: "first", span: 4 },
+                { type: "kpi", id: "ammonia_kpi", title: "Distribution NH3 (mg/L)", dataset: "distribution_quality",
+                    field: "nh3mgL", aggregation: "first", span: 4 },
             ] },
             scene,
             { type: "grid", id: "station_trends", columns: 12, children: [
