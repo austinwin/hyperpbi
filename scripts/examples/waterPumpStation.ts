@@ -108,6 +108,12 @@ function exampleRows(): Row[] {
             const level = Math.min(94, Math.max(8, Math.round(scenario.level + (tank - 3) * 2.2)));
             add(base("GST" + tank, "Ground storage tank " + tank, "Storage",
                 { levelpct: level, status: level < 32 ? "Warning" : "Running" }));
+            // Separate telemetry identities preserve conservation at each tank:
+            // fill and draw are not assumed equal while a tank is gaining or losing storage.
+            const fill = Math.floor(sourceflow / 5) + (tank === 5 ? sourceflow % 5 : 0);
+            const draw = Math.floor(stationflow / 5) + (tank === 5 ? stationflow % 5 : 0);
+            add(base("IN-GST" + tank, "Tank " + tank + " incoming feed", "Internal branch", { flowgpm: fill }));
+            add(base("OUT-GST" + tank, "Tank " + tank + " suction takeoff", "Internal branch", { flowgpm: draw }));
         }
         for (const [id, flow, psi] of [
             ["REMOTE", remoteFlow, null], ["SOURCE", sourceflow, null],
@@ -123,17 +129,28 @@ function exampleRows(): Row[] {
         const averagelevel = Math.round(levels.reduce((sum, item) => sum + Number(item.levelpct), 0) / levels.length);
         const stationonline = scenario.pumps.length;
         const stationalerts = scenario.alerts + (chlorineFault || ammoniaFault ? 1 : 0);
+        const color = (item: Row) => {
+            if (item.status === "Fault") return "#e96770";
+            if (item.status === "Warning") return "#f4af53";
+            if (["Offline", "Closed", "No flow", "No sample", "Standby"].includes(String(item.status))) return "#7b8fa2";
+            if (item.medium === "Cl2") return "#f0b652";
+            if (item.medium === "NH3") return "#af93ee";
+            if (item.category === "Flowmeter" || item.category === "Analyzer") return "#8ed9e6";
+            if (item.category === "Well") return "#39c6b4";
+            if (item.category === "Booster") return "#5ac2b8";
+            return "#78b7d1";
+        };
         const common = { scenario: scenario.name, stationflow, stationpressure: scenario.pressure,
             stationonline, stationalerts, sourceflow, averagelevel, netstoragegpm: sourceflow - stationflow };
         for (const item of entries) rows.push({
-            ...item, ...common, recordtype: "Snapshot", sampleorder: 1000 - caseIndex,
+            ...item, ...common, equipmentcolor: color(item), recordtype: "Snapshot", sampleorder: 1000 - caseIndex,
             readingid: String(caseIndex) + "-" + String(item.assetid) + "-snapshot", hour: "Snapshot",
         });
         for (let hour = 0; hour < 12; hour++) rows.push({
             ...base("DIST", "Distribution interface", "Trend", {
                 flowgpm: Math.round(target * (0.97 + 0.045 * Math.sin(hour * 0.7 + caseIndex))),
                 pressurepsi: round(scenario.pressure + Math.sin(hour * 0.63 + caseIndex) * 1.3, 1),
-            }), ...common, recordtype: "Trend", sampleorder: hour,
+            }), ...common, equipmentcolor: "#78b7d1", recordtype: "Trend", sampleorder: hour,
             readingid: String(caseIndex) + "-DIST-" + hour,
             hour: String(hour + 7).padStart(2, "0") + ":00",
         });
