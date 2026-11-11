@@ -56,6 +56,7 @@ const expectedSlugs = [
     "talent-acquisition",
     "universal-dynamic-content",
     "urban-mobility-command-center",
+    "water-pump-station-digital-twin",
 ];
 const fixedTimestamp = "2026-07-25T00:00:00.000Z";
 // `fitMode: "data"` is deliberate for the fleet point layer. The map validator
