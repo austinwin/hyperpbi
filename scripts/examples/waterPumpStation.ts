@@ -4,98 +4,139 @@ import type { Scene3dComponent, Scene3dObject, Scene3dVector } from "../../src/s
 type Row = Record<string, string | number | boolean | null>;
 const round = (value: number, digits = 0) => Number(value.toFixed(digits));
 const scenarios = [
-    { name: "Normal supply", demand: 16100, pressure: 64, remote: 1, local: 1, surface: 1, level: 76, pumps: [1, 2, 3, 4], alerts: 0 },
-    { name: "Peak demand", demand: 23400, pressure: 67, remote: 1.18, local: 1.15, surface: 1.2, level: 68, pumps: [1, 2, 3, 4, 5, 6], alerts: 0 },
-    { name: "Remote wells offline", demand: 12900, pressure: 57, remote: 0, local: 1, surface: 1.25, level: 56, pumps: [1, 2, 4, 5], alerts: 1 },
-    { name: "Surface inlet unavailable", demand: 11700, pressure: 55, remote: 1.05, local: 1, surface: 0, level: 59, pumps: [1, 2, 3, 5], alerts: 1 },
-    { name: "Booster maintenance", demand: 15600, pressure: 62, remote: 1, local: 1, surface: 1, level: 70, pumps: [1, 2, 4, 5], alerts: 0 },
-    { name: "Low storage", demand: 9700, pressure: 50, remote: 0.85, local: 1, surface: 0.85, level: 26, pumps: [1, 3, 5], alerts: 2 },
-    { name: "Limited power", demand: 8600, pressure: 51, remote: 0.45, local: 0, surface: 0.9, level: 61, pumps: [1, 3], alerts: 1 },
+    { name: "Normal supply", demand: 15100, pressure: 64, remote: 1, local: 1, surface: 1, level: 76, pumps: [1, 2, 3, 4], alerts: 0 },
+    { name: "Peak demand", demand: 21700, pressure: 67, remote: 1.08, local: 1.12, surface: 1.18, level: 68, pumps: [1, 2, 3, 4, 5, 6], alerts: 0 },
+    { name: "Remote wells offline", demand: 12300, pressure: 57, remote: 0, local: 1, surface: 1.14, level: 54, pumps: [1, 2, 4, 5], alerts: 1 },
+    { name: "Surface inlet unavailable", demand: 9300, pressure: 55, remote: 1.05, local: 1, surface: 0, level: 57, pumps: [1, 2, 3, 5], alerts: 1 },
+    { name: "Booster maintenance", demand: 14900, pressure: 62, remote: 1, local: 1, surface: 1, level: 70, pumps: [1, 2, 4, 5], alerts: 0 },
+    { name: "Low storage", demand: 9700, pressure: 51, remote: 0.85, local: 1, surface: 0.85, level: 25, pumps: [1, 3, 5], alerts: 2 },
+    { name: "Limited power", demand: 8100, pressure: 51, remote: 0.45, local: 0, surface: 0.75, level: 61, pumps: [1, 3], alerts: 1 },
     { name: "Low distribution pressure", demand: 8200, pressure: 43, remote: 1, local: 1, surface: 1, level: 64, pumps: [1, 2], alerts: 2 },
+    { name: "Chlorine dosing fault", demand: 14300, pressure: 63, remote: 1, local: 1, surface: 1, level: 72, pumps: [1, 2, 3, 4], alerts: 1, chlorineFault: true },
+    { name: "Ammonia dosing fault", demand: 14600, pressure: 63, remote: 1, local: 1, surface: 1, level: 72, pumps: [1, 2, 3, 4], alerts: 1, ammoniaFault: true },
 ] as const;
 
 function exampleRows(): Row[] {
     const rows: Row[] = [];
-    scenarios.forEach((mode, caseIndex) => {
-        const source: Array<{ assetid: string; equipment: string; category: string; flow: number }> = [];
-        for (let well = 1; well <= 8; well++) source.push({
-            assetid: "RW" + String(well).padStart(2, "0"),
-            equipment: "Remote well " + well, category: "Remote well",
-            flow: Math.round((390 + well * 37) * mode.remote),
+    const remoteWells = [
+        ["W01A", 530], ["W03A", 480], ["W03SB", 420], ["W04A", 510],
+        ["W05A", 610], ["W08", 490], ["W11", 575], ["W10", 525],
+    ] as const;
+    const pumpWeights = [1.02, 0.94, 1.08, 1.0, 0.98, 1.04];
+    scenarios.forEach((scenario, caseIndex) => {
+        const chlorineFault = "chlorineFault" in scenario && Boolean(scenario.chlorineFault);
+        const ammoniaFault = "ammoniaFault" in scenario && Boolean(scenario.ammoniaFault);
+        const intakeRecords: Row[] = [];
+        const entries: Row[] = [];
+        const base = (assetid: string, equipment: string, category: string, extra: Partial<Row> = {}): Row => ({
+            assetid, equipment, category, medium: "Water", status: "Running",
+            flowgpm: 0, pressurepsi: null, levelpct: null, rpm: null,
+            motorloadpct: null, valveopenpct: null, dosemgL: null,
+            cl2mgL: null, nh3mgL: null, ...extra,
         });
-        source.push({ assetid: "LW01", equipment: "On-site source well", category: "Local well", flow: Math.round(680 * mode.local) });
-        for (let surface = 1; surface <= 2; surface++) source.push({
-            assetid: "SW" + surface, equipment: "Surface inlet " + surface, category: "Surface inlet",
-            flow: Math.round((4300 + surface * 350) * mode.surface),
-        });
-        const intake = source.reduce((sum, item) => sum + item.flow, 0);
-        const online = mode.pumps.length;
-        const itemRows: Row[] = source.map(item => ({
-            assetid: item.assetid, equipment: item.equipment, category: item.category,
-            status: item.flow ? "Running" : "Offline", flowgpm: item.flow, pressurepsi: 0,
-            levelpct: 0, rpm: 0, motorloadpct: 0, equipmentcolor: item.flow ? "#35d4be" : "#72849b",
-        }));
-        for (let i = 1; i <= 5; i++) {
-            const level = Math.max(8, Math.min(95, mode.level + (i - 3) * 3));
-            itemRows.push({
-                assetid: "GST" + i, equipment: "Storage tank " + i, category: "Storage",
-                status: level < 35 ? "Warning" : "Running", flowgpm: Math.round(mode.demand / 5),
-                pressurepsi: 0, levelpct: level, rpm: 0, motorloadpct: 0,
-                equipmentcolor: level < 35 ? "#f7ac51" : "#76b6d2",
-            });
+        const add = (row: Row) => { entries.push(row); return row; };
+        for (const [id, baseFlow] of remoteWells) {
+            const flow = Math.round(baseFlow * scenario.remote);
+            intakeRecords.push(add(base(id, "Remote well " + id.slice(1), "Well",
+                { flowgpm: flow, status: flow ? "Running" : "Offline" })));
+            add(base("FM-" + id, "Well " + id.slice(1) + " electromagnetic flowmeter", "Flowmeter",
+                { flowgpm: flow, status: flow ? "Running" : "No flow" }));
         }
-        const pumpWeights = [1, 0.95, 1.06, 1.03, 0.98, 1.08];
-        const totalWeight = mode.pumps.reduce((sum, pump) => sum + pumpWeights[pump - 1], 0);
+        const remoteFlow = intakeRecords.reduce((sum, item) => sum + Number(item.flowgpm), 0);
+        const localFlow = Math.round(690 * scenario.local);
+        intakeRecords.push(add(base("W09", "On-site well 09", "Well",
+            { flowgpm: localFlow, status: localFlow ? "Running" : "Offline" })));
+        add(base("FM-W09", "On-site well flowmeter", "Flowmeter",
+            { flowgpm: localFlow, status: localFlow ? "Running" : "No flow" }));
+        const sourceDose = remoteFlow > 0 && !chlorineFault;
+        for (const [id, dose] of [["CL2-R1", 0.85], ["CL2-R2", 0.55]] as const) {
+            add(base(id, "Remote collection chlorine dosing", "Chemical injection",
+                { medium: "Cl2", dosemgL: sourceDose ? dose : 0,
+                    status: sourceDose ? "Dosing" : chlorineFault && remoteFlow > 0 ? "Fault" : "Standby" }));
+        }
+        add(base("CL2-W09", "On-site well chlorine dosing", "Chemical injection",
+            { medium: "Cl2", dosemgL: localFlow && !chlorineFault ? 1.2 : 0,
+                status: localFlow ? chlorineFault ? "Fault" : "Dosing" : "Standby" }));
+        add(base("NH3-W09", "On-site well ammonia dosing", "Chemical injection",
+            { medium: "NH3", dosemgL: localFlow && !ammoniaFault ? 0.35 : 0,
+                status: localFlow ? ammoniaFault ? "Fault" : "Dosing" : "Standby" }));
+        const surfaceFlows: number[] = [];
+        const valveOpenings = scenario.name === "Surface inlet unavailable" ? [0, 0] :
+            scenario.name === "Limited power" ? [70, 40] : [100, 100];
+        for (let source = 1; source <= 2; source++) {
+            const id = "SW" + source;
+            const open = valveOpenings[source - 1];
+            const flow = Math.round((source === 1 ? 5400 : 5000) * scenario.surface * open / 100);
+            surfaceFlows.push(flow);
+            intakeRecords.push(add(base(id, "Surface inlet " + source + " actuated valve", "Surface valve",
+                { flowgpm: flow, valveopenpct: open, status: open ? "Running" : "Closed" })));
+            add(base("FM-" + id, "Surface inlet " + source + " electromagnetic flowmeter", "Flowmeter",
+                { flowgpm: flow, status: flow ? "Running" : "No flow" }));
+            add(base("AN-" + id, "Surface inlet " + source + " chlorine analyzer", "Analyzer",
+                { cl2mgL: flow ? chlorineFault ? 0.24 : 1.45 + source * 0.13 : null,
+                    status: !flow ? "No sample" : chlorineFault ? "Warning" : "Running" }));
+            add(base("CL2-" + id, "Surface inlet " + source + " chlorine dosing", "Chemical injection",
+                { medium: "Cl2", dosemgL: flow && !chlorineFault ? 1.05 : 0,
+                    status: flow ? chlorineFault ? "Fault" : "Dosing" : "Standby" }));
+            add(base("NH3-" + id, "Surface inlet " + source + " ammonia dosing", "Chemical injection",
+                { medium: "NH3", dosemgL: flow && !ammoniaFault ? 0.32 : 0,
+                    status: flow ? ammoniaFault ? "Fault" : "Dosing" : "Standby" }));
+        }
+        const sourceflow = remoteFlow + localFlow + surfaceFlows.reduce((a, b) => a + b, 0);
+        const target = scenario.demand;
+        const runningWeights = scenario.pumps.reduce((sum, index) => sum + pumpWeights[index - 1], 0);
+        let allocated = 0;
+        let runningIndex = 0;
         for (let pump = 1; pump <= 6; pump++) {
-            const running = mode.pumps.includes(pump as never);
-            const flow = running ? Math.round(mode.demand * pumpWeights[pump - 1] / totalWeight) : 0;
-            const warning = running && (mode.pressure < 48 || mode.level < 30);
-            itemRows.push({
-                assetid: "BP" + String(pump).padStart(2, "0"), equipment: "Booster pump " + pump,
-                category: "Booster", status: warning ? "Warning" : running ? "Running" : "Standby",
-                flowgpm: flow, pressurepsi: running ? mode.pressure : 0,
-                levelpct: 0, rpm: running ? Math.round(1080 + 280 * flow / 6000) : 0,
-                motorloadpct: running ? Math.min(98, Math.round(58 + flow / 170)) : 0,
-                equipmentcolor: warning ? "#ffa94d" : running ? "#31c8a4" : "#7789a0",
-            });
-        }
-        for (const item of [
-            { assetid: "SOURCE", equipment: "Source collection", category: "Header", flowgpm: intake, pressurepsi: 0 },
-            { assetid: "SUCTION", equipment: "Storage suction header", category: "Header", flowgpm: mode.demand, pressurepsi: 18 },
-            { assetid: "DISCHARGE", equipment: "Booster discharge header", category: "Header", flowgpm: mode.demand, pressurepsi: mode.pressure },
-            { assetid: "DIST", equipment: "Distribution interface", category: "Distribution", flowgpm: mode.demand, pressurepsi: mode.pressure },
-            { assetid: "CHEM1", equipment: "Source chemical dosing", category: "Treatment", flowgpm: 0, pressurepsi: 0 },
-            { assetid: "CHEM2", equipment: "Surface chemical dosing", category: "Treatment", flowgpm: 0, pressurepsi: 0 },
-            { assetid: "QUALITY", equipment: "Residual analyzer", category: "Monitoring", flowgpm: 0, pressurepsi: 0 },
-            { assetid: "ALARM", equipment: "Station alarm indicator", category: "Monitoring", flowgpm: 0, pressurepsi: 0 },
-        ]) itemRows.push({
-            ...item, status: item.assetid === "ALARM" ? (mode.alerts ? "Warning" : "Standby") :
-                item.assetid === "CHEM1" ? (intake ? "Running" : "Standby") :
-                item.assetid === "CHEM2" ? (mode.surface ? "Running" : "Standby") :
-                item.assetid === "QUALITY" ? "Running" : item.flowgpm ? "Running" : "Standby",
-            levelpct: 0, rpm: 0, motorloadpct: 0,
-            equipmentcolor: item.assetid === "ALARM" && mode.alerts ? "#ffa94d" : "#76b6d2",
-        });
-        const tanks = itemRows.filter(item => item.category === "Storage");
-        const averageLevel = Math.round(tanks.reduce((sum, item) => sum + Number(item.levelpct), 0) / tanks.length);
-        for (const item of itemRows) {
-            const common: Row = {
-                ...item, scenario: mode.name,
-                stationflow: mode.demand, stationpressure: mode.pressure,
-                stationonline: online, stationalerts: mode.alerts,
-                sourceflow: intake, averagelevel: averageLevel,
-            };
-            rows.push({ ...common, readingid: String(caseIndex) + "-" + String(item.assetid) + "-snapshot",
-                recordtype: "Snapshot", sampleorder: 1000 - caseIndex, hour: "Snapshot" });
-            if (item.assetid === "DIST") {
-                for (let hour = 0; hour < 9; hour++) rows.push({
-                    ...common, recordtype: "Trend", readingid: String(caseIndex) + "-DIST-" + hour,
-                    sampleorder: hour, hour: String(hour + 7).padStart(2, "0") + ":00",
-                    pressurepsi: round(mode.pressure + Math.sin(hour * 0.7 + caseIndex) * 1.4, 1),
-                    flowgpm: Math.round(mode.demand * (0.94 + 0.08 * Math.sin(hour * 0.42))),
-                });
+            const enabled = (scenario.pumps as readonly number[]).includes(pump);
+            let flow = 0;
+            if (enabled) {
+                runningIndex++;
+                flow = runningIndex === scenario.pumps.length ?
+                    target - allocated : Math.round(target * pumpWeights[pump - 1] / runningWeights);
+                allocated += flow;
             }
+            const warning = enabled && scenario.pressure < 48;
+            add(base("BP" + String(pump).padStart(2, "0"), "Booster pump " + pump, "Booster",
+                { flowgpm: flow, pressurepsi: enabled ? scenario.pressure : null,
+                    rpm: enabled ? Math.round(970 + flow * 0.072) : 0,
+                    motorloadpct: enabled ? Math.round(Math.min(98, 48 + flow / 125)) : 0,
+                    status: warning ? "Warning" : enabled ? "Running" : "Standby" }));
         }
+        const stationflow = allocated;
+        for (let tank = 1; tank <= 5; tank++) {
+            const level = Math.min(94, Math.max(8, Math.round(scenario.level + (tank - 3) * 2.2)));
+            add(base("GST" + tank, "Ground storage tank " + tank, "Storage",
+                { levelpct: level, status: level < 32 ? "Warning" : "Running" }));
+        }
+        for (const [id, flow, psi] of [
+            ["REMOTE", remoteFlow, null], ["SOURCE", sourceflow, null],
+            ["SUCTION", stationflow, 17], ["DISCHARGE", stationflow, scenario.pressure],
+            ["DIST", stationflow, scenario.pressure],
+        ] as const) add(base(id, id === "DIST" ? "Distribution interface" : id + " header", "Header",
+            { flowgpm: flow, pressurepsi: psi, status: flow ? "Running" : "No flow" }));
+        const cl2mgL = chlorineFault ? 0.23 : scenario.name === "Low storage" ? 1.6 : 2.03;
+        const nh3mgL = ammoniaFault ? 0.04 : scenario.name === "Limited power" ? 0.29 : 0.43;
+        add(base("AN-DIST", "Distribution Cl2 and NH3 analyzer", "Analyzer",
+            { cl2mgL, nh3mgL, status: chlorineFault || ammoniaFault ? "Warning" : "Running" }));
+        const levels = entries.filter(item => item.category === "Storage");
+        const averagelevel = Math.round(levels.reduce((sum, item) => sum + Number(item.levelpct), 0) / levels.length);
+        const stationonline = scenario.pumps.length;
+        const stationalerts = scenario.alerts + (chlorineFault || ammoniaFault ? 1 : 0);
+        const common = { scenario: scenario.name, stationflow, stationpressure: scenario.pressure,
+            stationonline, stationalerts, sourceflow, averagelevel, netstoragegpm: sourceflow - stationflow };
+        for (const item of entries) rows.push({
+            ...item, ...common, recordtype: "Snapshot", sampleorder: 1000 - caseIndex,
+            readingid: String(caseIndex) + "-" + String(item.assetid) + "-snapshot", hour: "Snapshot",
+        });
+        for (let hour = 0; hour < 12; hour++) rows.push({
+            ...base("DIST", "Distribution interface", "Trend", {
+                flowgpm: Math.round(target * (0.97 + 0.045 * Math.sin(hour * 0.7 + caseIndex))),
+                pressurepsi: round(scenario.pressure + Math.sin(hour * 0.63 + caseIndex) * 1.3, 1),
+            }), ...common, recordtype: "Trend", sampleorder: hour,
+            readingid: String(caseIndex) + "-DIST-" + hour,
+            hour: String(hour + 7).padStart(2, "0") + ":00",
+        });
     });
     return rows;
 }
