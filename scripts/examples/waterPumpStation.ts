@@ -64,13 +64,17 @@ function exampleRows(): Row[] {
             { assetid: "SUCTION", equipment: "Storage suction header", category: "Header", flowgpm: mode.demand, pressurepsi: 18 },
             { assetid: "DISCHARGE", equipment: "Booster discharge header", category: "Header", flowgpm: mode.demand, pressurepsi: mode.pressure },
             { assetid: "DIST", equipment: "Distribution interface", category: "Distribution", flowgpm: mode.demand, pressurepsi: mode.pressure },
-            { assetid: "CHEM1", equipment: "Source chemical dosing", category: "Treatment", flowgpm: intake ? 1 : 0, pressurepsi: 0 },
-            { assetid: "CHEM2", equipment: "Surface chemical dosing", category: "Treatment", flowgpm: mode.surface ? 1 : 0, pressurepsi: 0 },
+            { assetid: "CHEM1", equipment: "Source chemical dosing", category: "Treatment", flowgpm: 0, pressurepsi: 0 },
+            { assetid: "CHEM2", equipment: "Surface chemical dosing", category: "Treatment", flowgpm: 0, pressurepsi: 0 },
             { assetid: "QUALITY", equipment: "Residual analyzer", category: "Monitoring", flowgpm: 0, pressurepsi: 0 },
+            { assetid: "ALARM", equipment: "Station alarm indicator", category: "Monitoring", flowgpm: 0, pressurepsi: 0 },
         ]) itemRows.push({
-            ...item, status: item.assetid === "QUALITY" && mode.alerts ? "Warning" : item.flowgpm ? "Running" : "Standby",
+            ...item, status: item.assetid === "ALARM" ? (mode.alerts ? "Warning" : "Standby") :
+                item.assetid === "CHEM1" ? (intake ? "Running" : "Standby") :
+                item.assetid === "CHEM2" ? (mode.surface ? "Running" : "Standby") :
+                item.assetid === "QUALITY" ? "Running" : item.flowgpm ? "Running" : "Standby",
             levelpct: 0, rpm: 0, motorloadpct: 0,
-            equipmentcolor: item.assetid === "QUALITY" && mode.alerts ? "#ffa94d" : "#76b6d2",
+            equipmentcolor: item.assetid === "ALARM" && mode.alerts ? "#ffa94d" : "#76b6d2",
         });
         const tanks = itemRows.filter(item => item.category === "Storage");
         const averageLevel = Math.round(tanks.reduce((sum, item) => sum + Number(item.levelpct), 0) / tanks.length);
@@ -162,11 +166,14 @@ function sceneObjects(): Scene3dObject[] {
         { id: "CHEM2", x: -5.15, z: 3.9, label: "Surface treatment injection" },
     ]) objects.push({ id: item.id, kind: "sphere", label: item.label, dataKey: item.id,
         position: [item.x, 1.15, item.z], size: [0.27, 0.27, 0.27], color: gold, selectable: true,
-        animations: [{ kind: "pulse", amplitude: 0.22, period: 1.35, enabledField: "flowgpm" }] });
+        animations: [{ kind: "pulse", amplitude: 0.22, period: 1.35, enabledField: "status", enabledValue: "Running" }] });
     objects.push({ id: "quality_monitor", kind: "box", label: "Distribution residual monitor",
-        dataKey: "QUALITY", position: [8.6, 1.52, 0.9], size: [0.42, 0.45, 0.28],
-        color: "#b4d5dc", selectable: true,
-        animations: [{ kind: "pulse", amplitude: 0.14, period: 1.7, enabledField: "status", enabledValue: "Warning" }] });
+        dataKey: "QUALITY", position: [9.35, 1.43, 0.9], size: [0.42, 0.45, 0.28],
+        color: "#b4d5dc", selectable: true });
+    objects.push({ id: "alarm_beacon", kind: "sphere", label: "Station alarm indicator",
+        dataKey: "ALARM", position: [8.6, 1.58, 0.9], size: [0.22, 0.22, 0.22],
+        color: "#f5b556", selectable: true,
+        animations: [{ kind: "pulse", amplitude: 0.3, period: 1.4, enabledField: "status", enabledValue: "Warning" }] });
     if (objects.length > 80) throw new Error("Scene exceeds 80 objects: " + objects.length);
     return objects;
 }
