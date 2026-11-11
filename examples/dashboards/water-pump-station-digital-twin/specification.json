@@ -1,0 +1,2084 @@
+{
+  "version": "2.0",
+  "title": "Water Pump Station | Process Digital Twin",
+  "theme": {
+    "mode": "dark",
+    "density": "compact",
+    "primaryColor": "#63b6e5",
+    "accentColor": "#2dd7bd",
+    "surfaceColor": "#0d1b2b",
+    "textColor": "#e9f4fb",
+    "borderColor": "#29415b",
+    "successColor": "#25bd9e",
+    "warningColor": "#efa84e",
+    "dangerColor": "#dc6873",
+    "radius": 12,
+    "gap": 10
+  },
+  "app": {
+    "enabled": true,
+    "layout": "horizontal",
+    "container": "fluid",
+    "density": "compact",
+    "brand": {
+      "title": "AquaGrid",
+      "shortTitle": "AG",
+      "subtitle": "Station engineering",
+      "icon": "dashboard"
+    },
+    "navbar": {
+      "visible": true
+    },
+    "pageHeader": {
+      "visible": true,
+      "title": "Water Pump Station | Process Digital Twin",
+      "subtitle": "Sources • treatment • five storage tanks • six booster pumps • distribution",
+      "meta": [
+        {
+          "label": "Training model",
+          "value": "Synthetic scenarios",
+          "intent": "info"
+        }
+      ]
+    }
+  },
+  "data": {
+    "datasets": {
+      "readings": {
+        "source": "powerbi",
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "descending"
+          }
+        ]
+      },
+      "snapshots": {
+        "source": "readings",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Snapshot"
+        }
+      },
+      "boosters": {
+        "source": "snapshots",
+        "filter": {
+          "field": "category",
+          "operator": "=",
+          "value": "Booster"
+        }
+      },
+      "storage": {
+        "source": "snapshots",
+        "filter": {
+          "field": "category",
+          "operator": "=",
+          "value": "Storage"
+        }
+      },
+      "trends": {
+        "source": "powerbi",
+        "filter": {
+          "field": "recordtype",
+          "operator": "=",
+          "value": "Trend"
+        },
+        "sort": [
+          {
+            "field": "sampleorder",
+            "direction": "ascending"
+          }
+        ]
+      }
+    }
+  },
+  "styles": {
+    "globalCss": "\n.hp-app-main,.hp-grid { background:#07121e; }\n.hp-navbar,.hp-page-header { background:#0a1828; border-color:#22384f; }\n.hp-card,.hp-metric,.hp-table-wrap { background:#102237; border-color:#2b4159; box-shadow:0 8px 28px rgb(0 0 0 / 20%); }\n.hp-metric { border:1px solid #29415b; border-left:0; }\n.hp-metric-label { color:#8da9c0; text-transform:none; }\n.hp-metric-value { color:#f0faff; font-size:23px; }\n.hp-table th { background:#122a42; color:#a8c1d3; }\n.hp-card-header { border-color:#2b4159; }\n"
+  },
+  "components": [
+    {
+      "type": "segmentedControl",
+      "id": "operating_scenario",
+      "label": "Operating scenario",
+      "field": "scenario",
+      "options": [
+        "Normal supply",
+        "Peak demand",
+        "Remote wells offline",
+        "Surface inlet unavailable",
+        "Booster maintenance",
+        "Low storage",
+        "Limited power",
+        "Low distribution pressure"
+      ],
+      "interaction": {
+        "internalMode": "filter",
+        "targets": [
+          "water_scene",
+          "flow_kpi",
+          "pressure_kpi",
+          "pumps_kpi",
+          "storage_kpi",
+          "alerts_kpi",
+          "source_kpi",
+          "flow_history",
+          "pressure_history",
+          "booster_load",
+          "storage_levels",
+          "asset_register"
+        ],
+        "externalMode": "none"
+      }
+    },
+    {
+      "type": "text",
+      "id": "process_legend",
+      "text": "SOURCE NETWORK  →  GROUND STORAGE  →  BOOSTER ARRAY  →  DISTRIBUTION | Teal: raw/source flows • Blue: transfer/discharge • Green: running • Amber: warning. All values are simulated and are not operational guidance."
+    },
+    {
+      "type": "grid",
+      "id": "station_kpis",
+      "columns": 12,
+      "children": [
+        {
+          "type": "kpi",
+          "id": "flow_kpi",
+          "title": "Discharge flow (GPM)",
+          "dataset": "snapshots",
+          "field": "stationflow",
+          "aggregation": "first",
+          "span": 2
+        },
+        {
+          "type": "kpi",
+          "id": "pressure_kpi",
+          "title": "Discharge (PSI)",
+          "dataset": "snapshots",
+          "field": "stationpressure",
+          "aggregation": "first",
+          "span": 2
+        },
+        {
+          "type": "kpi",
+          "id": "pumps_kpi",
+          "title": "Boosters online",
+          "dataset": "snapshots",
+          "field": "stationonline",
+          "aggregation": "first",
+          "span": 2,
+          "intent": "success"
+        },
+        {
+          "type": "kpi",
+          "id": "storage_kpi",
+          "title": "Mean GST level (%)",
+          "dataset": "snapshots",
+          "field": "averagelevel",
+          "aggregation": "first",
+          "span": 2
+        },
+        {
+          "type": "kpi",
+          "id": "source_kpi",
+          "title": "Source intake (GPM)",
+          "dataset": "snapshots",
+          "field": "sourceflow",
+          "aggregation": "first",
+          "span": 2
+        },
+        {
+          "type": "kpi",
+          "id": "alerts_kpi",
+          "title": "Active alerts",
+          "dataset": "snapshots",
+          "field": "stationalerts",
+          "aggregation": "first",
+          "span": 2,
+          "intent": "warning"
+        }
+      ]
+    },
+    {
+      "type": "scene3d",
+      "id": "water_scene",
+      "dataset": "snapshots",
+      "title": "Process route | sources → storage → boosters → distribution",
+      "objectIdField": "assetid",
+      "flowField": "flowgpm",
+      "levelField": "levelpct",
+      "statusField": "status",
+      "colorField": "equipmentcolor",
+      "statusColors": [
+        {
+          "value": "Running",
+          "color": "#31c8a4"
+        },
+        {
+          "value": "Warning",
+          "color": "#f7ab50"
+        },
+        {
+          "value": "Standby",
+          "color": "#7789a0"
+        },
+        {
+          "value": "Offline",
+          "color": "#d77378"
+        }
+      ],
+      "tooltipFields": [
+        {
+          "field": "equipment",
+          "label": "Equipment"
+        },
+        {
+          "field": "status",
+          "label": "State"
+        },
+        {
+          "field": "flowgpm",
+          "label": "Flow (GPM)"
+        },
+        {
+          "field": "levelpct",
+          "label": "Level (%)"
+        },
+        {
+          "field": "pressurepsi",
+          "label": "Pressure (PSI)"
+        },
+        {
+          "field": "rpm",
+          "label": "RPM"
+        }
+      ],
+      "objects": [
+        {
+          "id": "well_head_RW01",
+          "kind": "cylinder",
+          "label": "Remote source 1",
+          "dataKey": "RW01",
+          "position": [
+            -8.2,
+            0.25,
+            -4.25
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW01",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -4.25
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW01"
+        },
+        {
+          "id": "well_head_RW02",
+          "kind": "cylinder",
+          "label": "Remote source 2",
+          "dataKey": "RW02",
+          "position": [
+            -8.2,
+            0.25,
+            -3.45
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW02",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -3.45
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW02"
+        },
+        {
+          "id": "well_head_RW03",
+          "kind": "cylinder",
+          "label": "Remote source 3",
+          "dataKey": "RW03",
+          "position": [
+            -8.2,
+            0.25,
+            -2.65
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW03",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -2.65
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW03"
+        },
+        {
+          "id": "well_head_RW04",
+          "kind": "cylinder",
+          "label": "Remote source 4",
+          "dataKey": "RW04",
+          "position": [
+            -8.2,
+            0.25,
+            -1.8499999999999996
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW04",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -1.8499999999999996
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW04"
+        },
+        {
+          "id": "well_head_RW05",
+          "kind": "cylinder",
+          "label": "Remote source 5",
+          "dataKey": "RW05",
+          "position": [
+            -8.2,
+            0.25,
+            -1.0499999999999998
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW05",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -1.0499999999999998
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW05"
+        },
+        {
+          "id": "well_head_RW06",
+          "kind": "cylinder",
+          "label": "Remote source 6",
+          "dataKey": "RW06",
+          "position": [
+            -8.2,
+            0.25,
+            -0.25
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW06",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            -0.25
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW06"
+        },
+        {
+          "id": "well_head_RW07",
+          "kind": "cylinder",
+          "label": "Remote source 7",
+          "dataKey": "RW07",
+          "position": [
+            -8.2,
+            0.25,
+            0.5500000000000007
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW07",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            0.5500000000000007
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW07"
+        },
+        {
+          "id": "well_head_RW08",
+          "kind": "cylinder",
+          "label": "Remote source 8",
+          "dataKey": "RW08",
+          "position": [
+            -8.2,
+            0.25,
+            1.3500000000000005
+          ],
+          "size": [
+            0.38,
+            0.42,
+            0.38
+          ],
+          "color": "#279bb9",
+          "selectable": true
+        },
+        {
+          "id": "well_flow_RW08",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            1.3500000000000005
+          ],
+          "size": [
+            0.14,
+            2.8,
+            0.14
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "RW08"
+        },
+        {
+          "id": "local_source",
+          "kind": "pump",
+          "label": "On-site well",
+          "dataKey": "LW01",
+          "position": [
+            -8.2,
+            0.04,
+            2.63
+          ],
+          "size": [
+            0.54,
+            0.58,
+            0.54
+          ],
+          "selectable": true
+        },
+        {
+          "id": "local_source_flow",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            2.63
+          ],
+          "size": [
+            0.16,
+            2.8,
+            0.16
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "LW01"
+        },
+        {
+          "id": "surface_valve_1",
+          "kind": "box",
+          "label": "Surface source valve 1",
+          "dataKey": "SW1",
+          "position": [
+            -8.3,
+            0.47,
+            3.82
+          ],
+          "size": [
+            0.5,
+            0.52,
+            0.45
+          ],
+          "color": "#d5a15d",
+          "selectable": true
+        },
+        {
+          "id": "surface_supply_1",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            3.82
+          ],
+          "size": [
+            0.2,
+            2.8,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SW1"
+        },
+        {
+          "id": "surface_meter_1",
+          "kind": "sphere",
+          "position": [
+            -6.65,
+            0.52,
+            3.82
+          ],
+          "size": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "color": "#b8d8e9",
+          "selectable": false
+        },
+        {
+          "id": "surface_valve_2",
+          "kind": "box",
+          "label": "Surface source valve 2",
+          "dataKey": "SW2",
+          "position": [
+            -8.3,
+            0.47,
+            4.75
+          ],
+          "size": [
+            0.5,
+            0.52,
+            0.45
+          ],
+          "color": "#d5a15d",
+          "selectable": true
+        },
+        {
+          "id": "surface_supply_2",
+          "kind": "pipe",
+          "position": [
+            -6.8,
+            0.52,
+            4.75
+          ],
+          "size": [
+            0.2,
+            2.8,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SW2"
+        },
+        {
+          "id": "surface_meter_2",
+          "kind": "sphere",
+          "position": [
+            -6.65,
+            0.52,
+            4.75
+          ],
+          "size": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "color": "#b8d8e9",
+          "selectable": false
+        },
+        {
+          "id": "source_collector",
+          "kind": "pipe",
+          "position": [
+            -5.4,
+            0.52,
+            0.25
+          ],
+          "size": [
+            0.28,
+            9.1,
+            0.28
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48
+        },
+        {
+          "id": "source_transfer",
+          "kind": "pipe",
+          "position": [
+            -3.55,
+            0.52,
+            0.25
+          ],
+          "size": [
+            0.28,
+            3.7,
+            0.28
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "storage_inlet_header",
+          "kind": "pipe",
+          "position": [
+            -1.7,
+            0.52,
+            0
+          ],
+          "size": [
+            0.29,
+            8.8,
+            0.29
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48
+        },
+        {
+          "id": "tank_inlet_1",
+          "kind": "pipe",
+          "position": [
+            -0.68,
+            0.52,
+            -4.1
+          ],
+          "size": [
+            0.19,
+            2.05,
+            0.19
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "tank_1",
+          "kind": "tank",
+          "label": "Ground storage 1",
+          "dataKey": "GST1",
+          "position": [
+            0.45,
+            0,
+            -4.1
+          ],
+          "size": [
+            1.02,
+            1.14,
+            1.02
+          ],
+          "color": "#81b5cb",
+          "selectable": true
+        },
+        {
+          "id": "tank_outlet_1",
+          "kind": "pipe",
+          "position": [
+            1.88,
+            0.53,
+            -4.1
+          ],
+          "size": [
+            0.21,
+            2.85,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "GST1"
+        },
+        {
+          "id": "tank_inlet_2",
+          "kind": "pipe",
+          "position": [
+            -0.68,
+            0.52,
+            -2.05
+          ],
+          "size": [
+            0.19,
+            2.05,
+            0.19
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "tank_2",
+          "kind": "tank",
+          "label": "Ground storage 2",
+          "dataKey": "GST2",
+          "position": [
+            0.45,
+            0,
+            -2.05
+          ],
+          "size": [
+            1.02,
+            1.14,
+            1.02
+          ],
+          "color": "#81b5cb",
+          "selectable": true
+        },
+        {
+          "id": "tank_outlet_2",
+          "kind": "pipe",
+          "position": [
+            1.88,
+            0.53,
+            -2.05
+          ],
+          "size": [
+            0.21,
+            2.85,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "GST2"
+        },
+        {
+          "id": "tank_inlet_3",
+          "kind": "pipe",
+          "position": [
+            -0.68,
+            0.52,
+            0
+          ],
+          "size": [
+            0.19,
+            2.05,
+            0.19
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "tank_3",
+          "kind": "tank",
+          "label": "Ground storage 3",
+          "dataKey": "GST3",
+          "position": [
+            0.45,
+            0,
+            0
+          ],
+          "size": [
+            1.02,
+            1.14,
+            1.02
+          ],
+          "color": "#81b5cb",
+          "selectable": true
+        },
+        {
+          "id": "tank_outlet_3",
+          "kind": "pipe",
+          "position": [
+            1.88,
+            0.53,
+            0
+          ],
+          "size": [
+            0.21,
+            2.85,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "GST3"
+        },
+        {
+          "id": "tank_inlet_4",
+          "kind": "pipe",
+          "position": [
+            -0.68,
+            0.52,
+            2.05
+          ],
+          "size": [
+            0.19,
+            2.05,
+            0.19
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "tank_4",
+          "kind": "tank",
+          "label": "Ground storage 4",
+          "dataKey": "GST4",
+          "position": [
+            0.45,
+            0,
+            2.05
+          ],
+          "size": [
+            1.02,
+            1.14,
+            1.02
+          ],
+          "color": "#81b5cb",
+          "selectable": true
+        },
+        {
+          "id": "tank_outlet_4",
+          "kind": "pipe",
+          "position": [
+            1.88,
+            0.53,
+            2.05
+          ],
+          "size": [
+            0.21,
+            2.85,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "GST4"
+        },
+        {
+          "id": "tank_inlet_5",
+          "kind": "pipe",
+          "position": [
+            -0.68,
+            0.52,
+            4.1
+          ],
+          "size": [
+            0.19,
+            2.05,
+            0.19
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#279bb9",
+          "metalness": 0.48,
+          "flowKey": "SOURCE"
+        },
+        {
+          "id": "tank_5",
+          "kind": "tank",
+          "label": "Ground storage 5",
+          "dataKey": "GST5",
+          "position": [
+            0.45,
+            0,
+            4.1
+          ],
+          "size": [
+            1.02,
+            1.14,
+            1.02
+          ],
+          "color": "#81b5cb",
+          "selectable": true
+        },
+        {
+          "id": "tank_outlet_5",
+          "kind": "pipe",
+          "position": [
+            1.88,
+            0.53,
+            4.1
+          ],
+          "size": [
+            0.21,
+            2.85,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "GST5"
+        },
+        {
+          "id": "suction_header",
+          "kind": "pipe",
+          "position": [
+            3.3,
+            0.53,
+            0
+          ],
+          "size": [
+            0.32,
+            9,
+            0.32
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48
+        },
+        {
+          "id": "booster_suction_1",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            -4
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP01"
+        },
+        {
+          "id": "booster_1",
+          "kind": "pump",
+          "label": "Booster 1",
+          "dataKey": "BP01",
+          "position": [
+            5.22,
+            0.06,
+            -4
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_1",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 1",
+          "dataKey": "BP01",
+          "position": [
+            5.22,
+            1.16,
+            -4
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_1",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            -4
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP01"
+        },
+        {
+          "id": "booster_suction_2",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            -2.4
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP02"
+        },
+        {
+          "id": "booster_2",
+          "kind": "pump",
+          "label": "Booster 2",
+          "dataKey": "BP02",
+          "position": [
+            5.22,
+            0.06,
+            -2.4
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_2",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 2",
+          "dataKey": "BP02",
+          "position": [
+            5.22,
+            1.16,
+            -2.4
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_2",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            -2.4
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP02"
+        },
+        {
+          "id": "booster_suction_3",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            -0.8
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP03"
+        },
+        {
+          "id": "booster_3",
+          "kind": "pump",
+          "label": "Booster 3",
+          "dataKey": "BP03",
+          "position": [
+            5.22,
+            0.06,
+            -0.8
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_3",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 3",
+          "dataKey": "BP03",
+          "position": [
+            5.22,
+            1.16,
+            -0.8
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_3",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            -0.8
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP03"
+        },
+        {
+          "id": "booster_suction_4",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            0.8
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP04"
+        },
+        {
+          "id": "booster_4",
+          "kind": "pump",
+          "label": "Booster 4",
+          "dataKey": "BP04",
+          "position": [
+            5.22,
+            0.06,
+            0.8
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_4",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 4",
+          "dataKey": "BP04",
+          "position": [
+            5.22,
+            1.16,
+            0.8
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_4",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            0.8
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP04"
+        },
+        {
+          "id": "booster_suction_5",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            2.4
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP05"
+        },
+        {
+          "id": "booster_5",
+          "kind": "pump",
+          "label": "Booster 5",
+          "dataKey": "BP05",
+          "position": [
+            5.22,
+            0.06,
+            2.4
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_5",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 5",
+          "dataKey": "BP05",
+          "position": [
+            5.22,
+            1.16,
+            2.4
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_5",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            2.4
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP05"
+        },
+        {
+          "id": "booster_suction_6",
+          "kind": "pipe",
+          "position": [
+            4.26,
+            0.54,
+            4
+          ],
+          "size": [
+            0.2,
+            1.92,
+            0.2
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP06"
+        },
+        {
+          "id": "booster_6",
+          "kind": "pump",
+          "label": "Booster 6",
+          "dataKey": "BP06",
+          "position": [
+            5.22,
+            0.06,
+            4
+          ],
+          "size": [
+            0.75,
+            0.8,
+            0.8
+          ],
+          "selectable": true
+        },
+        {
+          "id": "motor_fan_6",
+          "kind": "fan",
+          "label": "Pump motor cooling fan 6",
+          "dataKey": "BP06",
+          "position": [
+            5.22,
+            1.16,
+            4
+          ],
+          "size": [
+            0.45,
+            0.45,
+            0.45
+          ],
+          "color": "#65b8f4",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "rotate",
+              "axis": "z",
+              "rpm": 900,
+              "rpmField": "rpm",
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "booster_discharge_6",
+          "kind": "pipe",
+          "position": [
+            6.21,
+            0.58,
+            4
+          ],
+          "size": [
+            0.21,
+            2.02,
+            0.21
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "BP06"
+        },
+        {
+          "id": "discharge_header",
+          "kind": "pipe",
+          "position": [
+            7.23,
+            0.58,
+            0
+          ],
+          "size": [
+            0.32,
+            9,
+            0.32
+          ],
+          "rotation": [
+            90,
+            0,
+            0
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48
+        },
+        {
+          "id": "distribution_delivery",
+          "kind": "pipe",
+          "position": [
+            8.62,
+            0.58,
+            0
+          ],
+          "size": [
+            0.34,
+            2.78,
+            0.34
+          ],
+          "rotation": [
+            0,
+            0,
+            -90
+          ],
+          "color": "#4b94cd",
+          "metalness": 0.48,
+          "flowKey": "DIST"
+        },
+        {
+          "id": "distribution_meter",
+          "kind": "sphere",
+          "label": "Distribution meter",
+          "dataKey": "DIST",
+          "position": [
+            9.35,
+            0.59,
+            0
+          ],
+          "size": [
+            0.34,
+            0.34,
+            0.34
+          ],
+          "color": "#b9def5",
+          "selectable": true
+        },
+        {
+          "id": "CHEM1",
+          "kind": "sphere",
+          "label": "Source treatment injection",
+          "dataKey": "CHEM1",
+          "position": [
+            -5.15,
+            1.15,
+            -0.9
+          ],
+          "size": [
+            0.27,
+            0.27,
+            0.27
+          ],
+          "color": "#dfa36a",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "pulse",
+              "amplitude": 0.22,
+              "period": 1.35,
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "CHEM2",
+          "kind": "sphere",
+          "label": "Surface treatment injection",
+          "dataKey": "CHEM2",
+          "position": [
+            -5.15,
+            1.15,
+            3.9
+          ],
+          "size": [
+            0.27,
+            0.27,
+            0.27
+          ],
+          "color": "#dfa36a",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "pulse",
+              "amplitude": 0.22,
+              "period": 1.35,
+              "enabledField": "flowgpm"
+            }
+          ]
+        },
+        {
+          "id": "quality_monitor",
+          "kind": "box",
+          "label": "Distribution residual monitor",
+          "dataKey": "QUALITY",
+          "position": [
+            8.6,
+            1.52,
+            0.9
+          ],
+          "size": [
+            0.42,
+            0.45,
+            0.28
+          ],
+          "color": "#b4d5dc",
+          "selectable": true,
+          "animations": [
+            {
+              "kind": "pulse",
+              "amplitude": 0.14,
+              "period": 1.7,
+              "enabledField": "status",
+              "enabledValue": "Warning"
+            }
+          ]
+        }
+      ],
+      "height": 570,
+      "theme": "dark",
+      "grid": true,
+      "shadows": true,
+      "showLabels": false,
+      "showObjectList": true,
+      "view": "isometric",
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "filter",
+        "internalScope": "others",
+        "externalMode": "selection",
+        "field": "assetid",
+        "selectionMode": "replace",
+        "multiSelect": true,
+        "showSelector": false,
+        "clearOnSecondClick": true,
+        "targets": [
+          "asset_register",
+          "booster_load",
+          "storage_levels"
+        ]
+      }
+    },
+    {
+      "type": "grid",
+      "id": "station_trends",
+      "columns": 12,
+      "children": [
+        {
+          "type": "lineChart",
+          "id": "pressure_history",
+          "title": "Distribution pressure · PSI",
+          "dataset": "trends",
+          "category": "hour",
+          "measure": "pressurepsi",
+          "aggregation": "avg",
+          "span": 6,
+          "height": 250,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        },
+        {
+          "type": "lineChart",
+          "id": "flow_history",
+          "title": "Distribution flow · GPM",
+          "dataset": "trends",
+          "category": "hour",
+          "measure": "flowgpm",
+          "aggregation": "avg",
+          "span": 6,
+          "height": 250,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": false,
+            "internalMode": "none",
+            "externalMode": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "grid",
+      "id": "equipment_charts",
+      "columns": 12,
+      "children": [
+        {
+          "type": "barChart",
+          "id": "booster_load",
+          "title": "Motor utilization · %",
+          "dataset": "boosters",
+          "category": "assetid",
+          "measure": "motorloadpct",
+          "aggregation": "first",
+          "span": 7,
+          "height": 260,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene",
+              "asset_register"
+            ]
+          }
+        },
+        {
+          "type": "barChart",
+          "id": "storage_levels",
+          "title": "Ground storage levels · %",
+          "dataset": "storage",
+          "category": "assetid",
+          "measure": "levelpct",
+          "aggregation": "first",
+          "span": 5,
+          "height": 260,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene",
+              "asset_register"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": "asset_register",
+      "title": "Equipment | scenario snapshot",
+      "dataset": "snapshots",
+      "maxRows": 40,
+      "columns": [
+        {
+          "field": "assetid",
+          "title": "Asset"
+        },
+        {
+          "field": "equipment",
+          "title": "Equipment"
+        },
+        {
+          "field": "category",
+          "title": "Class"
+        },
+        {
+          "field": "status",
+          "title": "State"
+        },
+        {
+          "field": "flowgpm",
+          "title": "Flow (GPM)"
+        },
+        {
+          "field": "levelpct",
+          "title": "Level (%)"
+        },
+        {
+          "field": "pressurepsi",
+          "title": "PSI"
+        },
+        {
+          "field": "rpm",
+          "title": "RPM"
+        }
+      ],
+      "interaction": {
+        "enabled": true,
+        "trigger": "click",
+        "internalMode": "highlight",
+        "externalMode": "selection",
+        "field": "assetid",
+        "targets": [
+          "water_scene"
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "id": "engineering_note",
+      "text": "Engineering demonstration only. Fictional equipment IDs, modeled flow paths, scenario values, and alarm rules. Not a validated hydraulic model or operating procedure."
+    }
+  ]
+}
