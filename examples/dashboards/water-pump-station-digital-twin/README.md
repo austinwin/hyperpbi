@@ -21,7 +21,7 @@ Load this example from the Dashboard Examples gallery, or import `project.hyperp
 4. Paste `runtime.json` into Runtime Configuration.
 5. Paste `specification.json` into Advanced JSON, validate, preview, and save.
 
-All logical datasets use the portable `powerbi` source alias. The CSV has 21 fields, below the visual's 50-field limit, and 304 rows, below the 30,000-row Power BI window.
+All logical datasets use the portable `powerbi` source alias. The CSV has 21 fields, below the visual's 50-field limit, and 312 rows, below the 30,000-row Power BI window.
 
 ## Source fields
 
