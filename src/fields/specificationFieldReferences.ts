@@ -95,7 +95,20 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
         // component descriptor traversal cannot discover or canonicalize them.
         if (type === "scene3d" && Array.isArray(visit.component.objects)) {
             visit.component.objects.forEach((sceneObject, objectIndex) => {
-                if (!object(sceneObject) || !Array.isArray(sceneObject.animations)) return;
+                if (!object(sceneObject)) return;
+                for (const field of ["valueField", "openingField", "motorRpmField"] as const) {
+                    if (typeof sceneObject[field] !== "string") continue;
+                    result.push({
+                        reference: sceneObject[field] as string,
+                        path: `${visit.path}/objects/${objectIndex}/${field}`,
+                        componentId,
+                        datasetName: visit.datasetName,
+                        requirement: field === "valueField" ? "any" : "numeric",
+                        source: "dataset",
+                        set: next => { sceneObject[field] = next; },
+                    });
+                }
+                if (!Array.isArray(sceneObject.animations)) return;
                 sceneObject.animations.forEach((motion, motionIndex) => {
                     if (!object(motion)) return;
                     for (const field of ["enabledField", "rpmField"] as const) {
