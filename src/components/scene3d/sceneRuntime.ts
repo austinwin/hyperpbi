@@ -47,6 +47,11 @@ interface Entry {
     motorRpm: number;
     opening: number;
     targetOpening: number;
+    levelCurrent?: number;
+    levelTarget?: number;
+    dosingIndicator?: Object3D;
+    dosingActive: boolean;
+    dosingPhase: number;
 }
 
 const floorThemes = {
@@ -176,6 +181,19 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.pipeFlow?.move(entry.phase, entry.definition.size?.[1] ?? 1);
         }
         for (const entry of mechanical) {
+            if (entry.levelTarget !== undefined && entry.setLevel) {
+                const prior = entry.levelCurrent ?? entry.levelTarget;
+                const difference = entry.levelTarget - prior;
+                entry.levelCurrent = Math.abs(difference) < 0.04 ?
+                    entry.levelTarget : prior + Math.sign(difference) * Math.min(Math.abs(difference), 45 * elapsed);
+                entry.setLevel(entry.levelCurrent);
+            }
+            if (entry.dosingIndicator) {
+                if (entry.dosingActive) {
+                    entry.dosingPhase += elapsed * 5;
+                    entry.dosingIndicator.scale.setScalar(0.15 * (1 + 0.28 * Math.sin(entry.dosingPhase)));
+                } else entry.dosingIndicator.scale.setScalar(0.15);
+            }
             if (entry.motorFan && entry.motorRpm > 0) {
                 // Visual speed is capped to avoid aliasing at industrial RPM;
                 // the numeric RPM label continues to show the full measured value.
@@ -187,7 +205,11 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                 entry.opening += Math.sign(entry.targetOpening - entry.opening) * delta;
                 entry.valveDisc.rotation.y = entry.opening / 100 * Math.PI / 2;
             }
-            if (entry.motorRpm <= 0 && Math.abs(entry.opening - entry.targetOpening) <= 0.03) mechanical.delete(entry);
+            if (entry.motorRpm <= 0 && !entry.dosingActive &&
+                Math.abs(entry.opening - entry.targetOpening) <= 0.03 &&
+                (entry.levelTarget === undefined || Math.abs((entry.levelCurrent ?? entry.levelTarget) - entry.levelTarget) <= 0.04)) {
+                mechanical.delete(entry);
+            }
         }
         if (mechanical.size) {
             viewDirty = true;
@@ -429,7 +451,9 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
                     setLevel, pipeFlow, phase: 0.12, speed: 0, motions: [], motionTime: 0, baseVisible: true,
                     motorFan: group.getObjectByName("scene3d-motor-fan"),
                     valveDisc: group.getObjectByName("scene3d-valve-disc"),
-                    motorRpm: 0, opening: 100, targetOpening: 100 };
+                    motorRpm: 0, opening: 100, targetOpening: 100,
+                    dosingIndicator: group.getObjectByName("scene3d-dosing-indicator"),
+                    dosingActive: false, dosingPhase: 0 };
                 scene.add(group, selection);
                 entries.set(definition.id, entry);
                 roots.set(group, definition.id);
@@ -480,15 +504,23 @@ export function createSceneRuntime(host: HTMLElement, callbacks: Callbacks) {
             entry.color = state.color;
             entry.motorRpm = state.visible && flowBudget > 0 ? state.motorRpm ?? 0 : 0;
             entry.targetOpening = state.opening ?? 100;
+            entry.levelTarget = state.level;
+            if (entry.levelCurrent === undefined || !flowBudget) entry.levelCurrent = state.level;
+            entry.dosingActive = state.visible && flowBudget > 0 &&
+                entry.definition.kind === "injector" && typeof state.reading === "number" && state.reading > 0 &&
+                state.status === "Dosing";
             if (!flowBudget && entry.valveDisc) {
                 entry.opening = entry.targetOpening;
                 entry.valveDisc.rotation.y = entry.opening / 100 * Math.PI / 2;
             }
-            if (entry.motorRpm > 0 || entry.valveDisc && Math.abs(entry.opening - entry.targetOpening) > 0.03 && flowBudget > 0) {
+            if (entry.motorRpm > 0 || entry.dosingActive ||
+                entry.valveDisc && Math.abs(entry.opening - entry.targetOpening) > 0.03 && flowBudget > 0 ||
+                entry.setLevel && state.level !== undefined && entry.levelCurrent !== undefined &&
+                    Math.abs(state.level - entry.levelCurrent) > 0.04 && flowBudget > 0) {
                 mechanical.add(entry);
             }
             updateFinish(entry);
-            entry.setLevel?.(state.level);
+            entry.setLevel?.(entry.levelCurrent);
             if (entry.pipeFlow) {
                 const rate = state.flow ?? 0;
                 const moving = state.visible && rate !== 0 && flowing.size < Math.max(0, flowBudget - animatedIds.size);
