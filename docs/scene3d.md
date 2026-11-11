@@ -105,11 +105,36 @@ Up to four behaviors are configured per object, sharing the scene's existing mot
 
 Imported clips are restricted to **at most four** GLB/glTF clips, with up to 24 rigid-node transform channels per clip and 2,048 keyframes per channel. Only LINEAR or STEP interpolation for translation, rotation, or scale is supported. Skinned animation, morph targets, external resources, and embedded scripts remain prohibited. Each model must still satisfy the size and geometry budgets below.
 
+## Engineering process equipment and instrument telemetry
+
+Scene3D provides procedural **wellheads**, **flanged magnetic flowmeters**, **actuated butterfly valves**, **chemical injection skids**, **water-quality analyzers**, **pump/motor assemblies**, **tanks**, and connected **pipe centerlines**. These are low-poly training representations, not manufacturer equipment models or a hydraulic solver.
+
+For 3D centerlines, a pipe may use `path` (2–16 local [x,y,z] points) and `diameter` (0.04–2 scene units). Pipe geometry contains the straight runs and elbow fittings. Positive signed `flowField` readings animate downstream in point order; negative readings reverse, and zero readings stop. Do not fake reverse flow by reversing the physical geometry.
+
+Instrument objects can declare `dataKey`, `valueField`, and `valueUnit` to show measured readings in projected labels and the keyboard-accessible equipment list. Use `openingField` on valves to display and animate 0–100% valve opening; use `motorRpmField` on pumps to spin the internal motor-cooling fan without rotating the static pump casing. Moving fan visuals are intentionally capped to prevent high-RPM aliasing; displayed RPM remains the source value. Chemical injector indicators pulse only when an object's numeric dose is positive and status is `Dosing`. Tank level animation interpolates between received snapshots for visual clarity, not elapsed physical filling time.
+
+Example connected pipe:
+
+```json
+{
+  "id": "sample_header",
+  "kind": "pipe",
+  "path": [[-2.4, 0.52, 0], [0, 0.52, 0], [0, 0.52, 2]],
+  "diameter": 0.24,
+  "flowKey": "HEADER",
+  "color": "#4b94cd"
+}
+```
+
+The scene still uses strict object-count, GPU motion, and model budgets. A scene may contain up to **104 objects**, but linked instruments and pipes are subject to draw-call performance: fewer paths and a bounded active-flow budget improve large Power BI visuals. Animation stops when the scene is offscreen, paused, or subject to reduced-motion preferences. The renderer does not transmit SCADA commands.
+
+[Water Pump Station training digital twin](https://hyperpbi.com/examples/water-pump-station-digital-twin) demonstrates 11 source meters, chemical dosing, chlorine/ammonia monitoring, five storage tanks, six booster pumps and ten synthetic operating conditions.
+
 ## Import models
 
 The Inspector embeds the file bytes in `model: { "format": "glb", "data": "<base64 bytes>" }`. For a self-contained JSON glTF file, use `"format": "gltf"`. In either case, the model travels with the specification. Export a self-contained glTF 2.0 scene with triangle meshes and embedded buffers. It may include bounded rigid-node transform clips. PNG and JPEG textures may be embedded. The component accepts core glTF plus unlit materials and texture transforms. Model normalization fits the imported geometry to the specified dimensions, so set all three axes to preserve the proportions you want.
 
-Each dashboard supports up to eight scenes. A scene accepts up to 80 objects and four model files. Each file is limited to 768 KiB, 96 primitive draw calls, 80,000 triangles, and textures up to 1,024 × 1,024 pixels with at most two megapixels total. External URIs, Draco and other compressed formats, skinned animations, morph targets, cameras, and scripts are rejected. Bounded rigid-node glTF transform clips are supported. Three.js and its loaders ship locally. Scenes use WebGL 2 and pause rendering when idle or offscreen. For a dense dashboard, use fewer objects, keep textures small, and turn off shadows where they add little. [Security boundaries](security.md)
+Each dashboard supports up to eight scenes. A scene accepts up to 104 objects and four model files. Each file is limited to 768 KiB, 96 primitive draw calls, 80,000 triangles, and textures up to 1,024 × 1,024 pixels with at most two megapixels total. External URIs, Draco and other compressed formats, skinned animations, morph targets, cameras, and scripts are rejected. Bounded rigid-node glTF transform clips are supported. Three.js and its loaders ship locally. Scenes use WebGL 2 and pause rendering when idle or offscreen. For a dense dashboard, use fewer objects, keep textures small, and turn off shadows where they add little. [Security boundaries](security.md)
 
 ## Verify Power BI behavior
 
