@@ -148,9 +148,73 @@ export function createSceneMeshes() {
             place(box, dark, 0.13, 1.17, 0, 0.42, 0.19, 0.36);
             place(box, trim, 0.13, 1.27, 0, 0.45, 0.05, 0.39);
             place(cylinder, trim, -0.59, 1.25, 0, 0.31, 0.23, 0.31);
+            // Rotating motor fan remains an independent child of the static casing.
+            const motorFan = new Group();
+            motorFan.name = "scene3d-motor-fan";
+            motorFan.position.set(0.78, 0.75, 0);
+            for (let bladeIndex = 0; bladeIndex < 5; bladeIndex++) {
+                const angle = bladeIndex * Math.PI * 2 / 5;
+                const blade = new Mesh(box, trim);
+                blade.position.set(0, Math.cos(angle) * 0.22, Math.sin(angle) * 0.22);
+                blade.scale.set(0.035, 0.35, 0.17);
+                blade.rotation.x = angle + 0.32;
+                blade.castShadow = true;
+                motorFan.add(blade);
+            }
+            const hub = new Mesh(cylinder, steel);
+            hub.rotation.z = Math.PI / 2;
+            hub.scale.set(0.18, 0.12, 0.18);
+            motorFan.add(hub);
+            group.add(motorFan);
             for (const x of [-0.72, 0.72]) {
                 for (const z of [-0.43, 0.43]) place(cylinder, trim, x, 0.22, z, 0.12, 0.06, 0.12);
             }
+        } else if (kind === "well") {
+            place(cylinder, dark, 0, 0.15, 0, 0.78, 0.3, 0.78);
+            place(cylinder, steel, 0, 0.6, 0, 0.48, 0.92, 0.48);
+            place(cylinder, finish, 0, 1.08, 0, 0.67, 0.23, 0.67);
+            place(cylinder, trim, 0, 1.23, 0, 0.27, 0.13, 0.27);
+            place(box, dark, 0.22, 1.34, 0, 0.26, 0.19, 0.31);
+            place(cylinder, bronze, -0.43, 0.57, 0, 0.18, 0.37, 0.18, Math.PI / 2);
+        } else if (kind === "flowmeter") {
+            // Inline flanged magnetic meter: no fictional spinning impeller.
+            place(cylinder, finish, 0, 0.46, 0, 0.66, 1.16, 0.66, Math.PI / 2);
+            for (const x of [-0.56, 0.56]) place(cylinder, trim, x, 0.46, 0, 0.85, 0.10, 0.85, Math.PI / 2);
+            place(cylinder, steel, 0, 0.92, 0, 0.12, 0.38, 0.12);
+            place(box, dark, 0, 1.23, 0, 0.72, 0.47, 0.34);
+            place(box, glass, 0, 1.27, 0.182, 0.48, 0.22, 0.018);
+            place(box, signal, -0.18, 1.27, 0.194, 0.055, 0.07, 0.022);
+        } else if (kind === "valve") {
+            // Disc rotates within a flanged butterfly valve from closed to open.
+            place(cylinder, finish, 0, 0.52, 0, 0.74, 0.38, 0.74, Math.PI / 2);
+            for (const x of [-0.27, 0.27]) place(cylinder, trim, x, 0.52, 0, 0.94, 0.11, 0.94, Math.PI / 2);
+            const disc = new Group();
+            disc.name = "scene3d-valve-disc";
+            disc.position.set(0, 0.52, 0);
+            const leaf = new Mesh(cylinder, bronze);
+            leaf.rotation.z = Math.PI / 2;
+            leaf.scale.set(0.6, 0.08, 0.6);
+            disc.add(leaf);
+            group.add(disc);
+            place(cylinder, steel, 0, 0.94, 0, 0.14, 0.75, 0.14);
+            place(box, dark, 0, 1.39, 0, 0.64, 0.45, 0.5);
+            place(box, signal, 0, 1.47, 0.265, 0.26, 0.065, 0.02);
+        } else if (kind === "injector") {
+            // Chemical dosing skid, pump, reagent tank and injection lance.
+            place(box, dark, 0, 0.1, 0, 1.18, 0.2, 0.7);
+            place(cylinder, finish, -0.25, 0.56, 0, 0.42, 0.82, 0.42);
+            place(sphere, trim, -0.25, 0.99, 0, 0.43, 0.24, 0.43);
+            place(box, steel, 0.3, 0.35, 0, 0.38, 0.48, 0.45);
+            place(cylinder, bronze, 0.34, 0.73, 0, 0.13, 0.55, 0.13);
+            place(sphere, signal, 0.34, 1.02, 0, 0.15, 0.15, 0.15);
+        } else if (kind === "analyzer") {
+            // Side-stream analyzer cabinet with sample fittings and display.
+            place(box, steel, 0, 0.41, 0, 0.12, 0.8, 0.12);
+            place(box, finish, 0, 1.08, 0, 0.94, 0.92, 0.52);
+            place(box, dark, 0, 1.23, 0.272, 0.69, 0.38, 0.028);
+            place(box, glass, 0, 1.27, 0.295, 0.52, 0.20, 0.02);
+            for (const x of [-0.19, 0.0, 0.19]) place(box, signal, x, 1.04, 0.3, 0.075, 0.075, 0.022);
+            place(cylinder, trim, -0.42, 0.57, -0.1, 0.09, 0.48, 0.09);
         } else if (kind === "fan") {
             // A single selectable rotor. A separate static stand/housing can sit behind it.
             for (let index = 0; index < 5; index++) {
