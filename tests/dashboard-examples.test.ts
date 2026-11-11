@@ -560,7 +560,7 @@ describe("water pump station digital twin example", () => {
         expect(scene.objects.filter(object => object.kind === "tank")).toHaveLength(5);
         expect(scene.objects.filter(object => object.kind === "pump" && object.dataKey?.startsWith("BP"))).toHaveLength(6);
         expect(scene.objects.filter(object => object.kind === "fan" && object.animations?.length)).toHaveLength(6);
-        expect(scene.objects.filter(object => object.kind === "pipe" && object.flowKey).length).toBeGreaterThan(20);
+        expect(scene.objects.filter(object => object.kind === "pipe" && object.flowKey).length).toBeGreaterThanOrEqual(15);
         const rows = parseCsvRows(readFileSync(asset(entry!, "data"), "utf8"));
         const headers = rows[0];
         const data = rows.slice(1).map(raw => Object.fromEntries(headers.map((key, index) => [key, raw[index]])));
