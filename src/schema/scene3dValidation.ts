@@ -6,7 +6,7 @@ type Json = Record<string, unknown>;
 const object = (value: unknown): value is Json => value !== null && typeof value === "object" && !Array.isArray(value);
 const text = (value: unknown) => typeof value === "string" && value.trim().length > 0 && value.length <= 160;
 const inRange = (value: unknown, min: number, max: number) => typeof value === "number" && value >= min && value <= max;
-const objectKeys = new Set(["id", "kind", "label", "dataKey", "flowKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model", "animations"]);
+const objectKeys = new Set(["id", "kind", "label", "dataKey", "flowKey", "position", "size", "rotation", "color", "metalness", "roughness", "opacity", "visible", "selectable", "model", "animations", "path", "diameter", "valueField", "valueUnit", "openingField", "motorRpmField"]);
 
 export function validateScene3dComponents(specification: unknown): Diagnostic[] {
     const diagnostics: Diagnostic[] = [];
@@ -68,6 +68,36 @@ export function validateScene3dComponents(specification: unknown): Diagnostic[] 
             if (!(scene3dKinds as readonly unknown[]).includes(item.kind)) error(`${base}/kind`, `Choose ${scene3dKinds.join(", ")}.`, "INVALID_ENUM_VALUE");
             if (item.label !== undefined && !text(item.label)) error(`${base}/label`, "Use a nonblank label of up to 160 characters.");
             if (item.dataKey !== undefined && (!isScene3dKey(item.dataKey) || !text(component.objectIdField))) error(`${base}/dataKey`, "Bind a string, number, or Boolean to the scene's object key field.");
+            for (const field of ["valueField", "openingField", "motorRpmField"] as const) {
+                const value = item[field];
+                if (value !== undefined && (!text(value) || item.dataKey === undefined || !text(component.objectIdField))) {
+                    error(`${base}/${field}`, "Use a field on a data-linked equipment object.");
+                }
+            }
+            if (item.openingField !== undefined && item.kind !== "valve") error(`${base}/openingField`, "An opening field requires a valve.");
+            if (item.motorRpmField !== undefined && item.kind !== "pump") error(`${base}/motorRpmField`, "Motor RPM requires a pump.");
+            if (item.valueUnit !== undefined && (typeof item.valueUnit !== "string" || !/^[A-Za-z0-9°%/ ._-]{1,16}$/.test(item.valueUnit) || item.valueField === undefined)) {
+                error(`${base}/valueUnit`, "Choose a short engineering unit and its value field.");
+            }
+            if (item.path !== undefined) {
+                const points = item.path;
+                if (item.kind !== "pipe" || !Array.isArray(points) || points.length < 2 ||
+                    points.length > scene3dLimits.pipePathPoints || !points.every(point =>
+                        Array.isArray(point) && point.length === 3 && point.every(n => inRange(n, -100, 100)))) {
+                    error(`${base}/path`, "Pipe paths require 2–16 valid 3D points in local units.");
+                } else {
+                    for (let point = 1; point < points.length; point++) {
+                        const previous = points[point - 1] as number[];
+                        const next = points[point] as number[];
+                        if (Math.hypot(...next.map((value, axis) => value - previous[axis])) < 0.02) {
+                            error(`${base}/path/${point}`, "Consecutive pipe path points cannot overlap.");
+                        }
+                    }
+                }
+            }
+            if (item.diameter !== undefined && (item.kind !== "pipe" || item.path === undefined || !inRange(item.diameter, 0.04, 2))) {
+                error(`${base}/diameter`, "Pipe diameter must be 0.04–2 scene units and requires a path.");
+            }
             if (item.flowKey !== undefined && (item.kind !== "pipe" || !isScene3dKey(item.flowKey) || !text(component.objectIdField))) {
                 error(`${base}/flowKey`, "A pipe flow key must be a string, number, or Boolean matched against the scene's object key field.");
             }
