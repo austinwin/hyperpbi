@@ -427,8 +427,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP01"
+          "metalness": 0.48
         },
         {
           "id": "booster_suction_2",
@@ -449,8 +448,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP02"
+          "metalness": 0.48
         },
         {
           "id": "booster_suction_3",
@@ -471,8 +469,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP03"
+          "metalness": 0.48
         },
         {
           "id": "booster_suction_4",
@@ -493,8 +490,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP04"
+          "metalness": 0.48
         },
         {
           "id": "booster_suction_5",
@@ -515,8 +511,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP05"
+          "metalness": 0.48
         },
         {
           "id": "booster_suction_6",
@@ -537,8 +532,7 @@
             -90
           ],
           "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP06"
+          "metalness": 0.48
         },
         {
           "id": "tank_outlet_1",
@@ -735,8 +729,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "LW01"
+          "metalness": 0.48
         },
         {
           "id": "tank_inlet_1",
@@ -757,8 +750,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "metalness": 0.48
         },
         {
           "id": "tank_inlet_2",
@@ -779,8 +771,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "metalness": 0.48
         },
         {
           "id": "tank_inlet_3",
@@ -801,8 +792,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "metalness": 0.48
         },
         {
           "id": "tank_inlet_4",
@@ -823,8 +813,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "metalness": 0.48
         },
         {
           "id": "tank_inlet_5",
@@ -845,8 +834,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW01",
@@ -867,8 +855,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW01"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW02",
@@ -889,8 +876,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW02"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW03",
@@ -911,8 +897,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW03"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW04",
@@ -933,8 +918,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW04"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW05",
@@ -955,8 +939,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW05"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW06",
@@ -977,8 +960,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW06"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW07",
@@ -999,8 +981,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW07"
+          "metalness": 0.48
         },
         {
           "id": "well_flow_RW08",
@@ -1021,8 +1002,7 @@
             -90
           ],
           "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "RW08"
+          "metalness": 0.48
         },
         {
           "id": "well_head_RW01",
