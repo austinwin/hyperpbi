@@ -175,7 +175,23 @@ function sceneObjects(): Scene3dObject[] {
         color: "#f5b556", selectable: true,
         animations: [{ kind: "pulse", amplitude: 0.3, period: 1.4, enabledField: "status", enabledValue: "Warning" }] });
     if (objects.length > 80) throw new Error("Scene exceeds 80 objects: " + objects.length);
-    return objects;
+    // The runtime allocates motion slots in scene-object order. Animate the
+    // hydraulically meaningful discharge, booster branches, and storage outlet
+    // before decorative source branches when the Power BI motion budget fills.
+    const priority = (object: Scene3dObject) => {
+        const id = object.id;
+        if (id === "distribution_delivery") return 0;
+        if (id.startsWith("booster_discharge_")) return 1;
+        if (id.startsWith("booster_suction_")) return 2;
+        if (id.startsWith("tank_outlet_")) return 3;
+        if (id === "source_transfer") return 4;
+        if (id.startsWith("surface_supply_")) return 5;
+        if (id === "local_source_flow") return 6;
+        if (id.startsWith("tank_inlet_")) return 7;
+        if (id.startsWith("well_flow_")) return 8;
+        return 9;
+    };
+    return objects.sort((a, b) => priority(a) - priority(b));
 }
 
 export function waterPumpStationExample(runtime: HyperPbiConfig) {
