@@ -1,6 +1,6 @@
 import type { ComponentBase } from "./hyperpbiSchema";
 
-export const scene3dKinds = ["box", "cylinder", "sphere", "cone", "pipe", "pump", "tank", "fan", "model"] as const;
+export const scene3dKinds = ["box", "cylinder", "sphere", "cone", "pipe", "pump", "tank", "fan", "well", "flowmeter", "valve", "injector", "analyzer", "model"] as const;
 export type Scene3dKind = typeof scene3dKinds[number];
 export type Scene3dVector = [number, number, number];
 export type Scene3dKey = string | number | boolean;
@@ -38,6 +38,7 @@ export const scene3dLimits = {
     modelBytes: 768 * 1024,
     statusColors: 12,
     tooltipFields: 8,
+    pipePathPoints: 16,
 } as const;
 
 export interface Scene3dObject {
@@ -47,6 +48,20 @@ export interface Scene3dObject {
     dataKey?: Scene3dKey;
     /** Optional separate row key for pipe flow. */
     flowKey?: Scene3dKey;
+    /** Pipe centerline in local scene units, ordered from upstream to downstream.
+     * When defined, it replaces the default one-unit straight cylinder; flow is signed
+     * along the polyline and pipe geometry uses connected straight segments. */
+    path?: Scene3dVector[];
+    /** Pipe outside diameter in scene units, used with path. */
+    diameter?: number;
+    /** Per-instrument numeric or text readout from this object's matching row. */
+    valueField?: string;
+    /** Engineering unit appended to an instrument readout (e.g. GPM, mg/L). */
+    valueUnit?: string;
+    /** 0–100% butterfly valve opening, data-bound on valve objects. */
+    openingField?: string;
+    /** Motor RPM. Animates the internal pump fan without rotating the entire pump. */
+    motorRpmField?: string;
     position?: Scene3dVector;
     size?: Scene3dVector;
     /** Euler angles in degrees, in XYZ order. */
