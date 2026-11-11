@@ -1731,7 +1731,8 @@
               "kind": "pulse",
               "amplitude": 0.22,
               "period": 1.35,
-              "enabledField": "flowgpm"
+              "enabledField": "status",
+              "enabledValue": "Running"
             }
           ]
         },
@@ -1757,7 +1758,8 @@
               "kind": "pulse",
               "amplitude": 0.22,
               "period": 1.35,
-              "enabledField": "flowgpm"
+              "enabledField": "status",
+              "enabledValue": "Running"
             }
           ]
         },
@@ -1767,8 +1769,8 @@
           "label": "Distribution residual monitor",
           "dataKey": "QUALITY",
           "position": [
-            8.6,
-            1.52,
+            9.35,
+            1.43,
             0.9
           ],
           "size": [
@@ -1777,12 +1779,30 @@
             0.28
           ],
           "color": "#b4d5dc",
+          "selectable": true
+        },
+        {
+          "id": "alarm_beacon",
+          "kind": "sphere",
+          "label": "Station alarm indicator",
+          "dataKey": "ALARM",
+          "position": [
+            8.6,
+            1.58,
+            0.9
+          ],
+          "size": [
+            0.22,
+            0.22,
+            0.22
+          ],
+          "color": "#f5b556",
           "selectable": true,
           "animations": [
             {
               "kind": "pulse",
-              "amplitude": 0.14,
-              "period": 1.7,
+              "amplitude": 0.3,
+              "period": 1.4,
               "enabledField": "status",
               "enabledValue": "Warning"
             }
