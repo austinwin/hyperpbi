@@ -174,6 +174,13 @@ function sceneObjects(): Scene3dObject[] {
         dataKey: "ALARM", position: [8.6, 1.58, 0.9], size: [0.22, 0.22, 0.22],
         color: "#f5b556", selectable: true,
         animations: [{ kind: "pulse", amplitude: 0.3, period: 1.4, enabledField: "status", enabledValue: "Warning" }] });
+    // All pipes remain connected geometrically; omit redundant flow effects
+    // on parallel secondary branches to keep primary flow paths responsive.
+    for (const object of objects) {
+        if (object.kind === "pipe" && /^(well_flow_|tank_inlet_|booster_suction_|local_source_flow)/.test(object.id)) {
+            delete object.flowKey;
+        }
+    }
     if (objects.length > 80) throw new Error("Scene exceeds 80 objects: " + objects.length);
     // The runtime allocates motion slots in scene-object order. Animate the
     // hydraulically meaningful discharge, booster branches, and storage outlet
@@ -322,6 +329,6 @@ export function waterPumpStationExample(runtime: HyperPbiConfig) {
         expected: "Switch between all eight scenarios: Normal supply, Peak demand, Remote wells offline, Surface inlet unavailable, Booster maintenance, Low storage, Limited power, and Low distribution pressure. Tank fill, pump availability, fan rotation, animated flow, pressure and intake KPIs, linked charts, and the asset register change with the scenario. Selecting an asset cross-highlights associated records.",
         limitations: "Synthetic demonstration based on generalized process relationships, not a literal copy of a real infrastructure diagram. Operating values are invented and must never be used for live controls. The 3D engine supports up to 80 objects, respects reduced-motion preferences, and requires WebGL 2. In Power BI bind readingid as categorical and set numeric columns to Don't summarize.",
         headers, rows, specification,
-        runtime: { ...runtime, motion: { ...runtime.motion, maxConcurrentAnimations: 30 } },
+        runtime: { ...runtime, motion: { ...runtime.motion, maxConcurrentAnimations: 24 } },
     };
 }
