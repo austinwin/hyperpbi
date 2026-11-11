@@ -31,7 +31,7 @@ export interface Scene3dAnimation {
 
 export const scene3dLimits = {
     scenes: 8,
-    objects: 80,
+    objects: 104,
     models: 4,
     animationsPerObject: 4,
     clipsPerModel: 4,
