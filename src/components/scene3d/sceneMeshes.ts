@@ -206,7 +206,14 @@ export function createSceneMeshes() {
             place(sphere, trim, -0.25, 0.99, 0, 0.43, 0.24, 0.43);
             place(box, steel, 0.3, 0.35, 0, 0.38, 0.48, 0.45);
             place(cylinder, bronze, 0.34, 0.73, 0, 0.13, 0.55, 0.13);
-            place(sphere, signal, 0.34, 1.02, 0, 0.15, 0.15, 0.15);
+            // Inline lance points toward the process pipe when the skid sits
+            // approximately 0.7 scene units behind the pipe centerline.
+            place(cylinder, bronze, 0.34, 0.73, -0.34, 0.10, 0.65, 0.10, 0, Math.PI / 2);
+            const dosingLed = new Mesh(sphere, signal);
+            dosingLed.name = "scene3d-dosing-indicator";
+            dosingLed.position.set(0.34, 1.02, 0);
+            dosingLed.scale.setScalar(0.15);
+            group.add(dosingLed);
         } else if (kind === "analyzer") {
             // Side-stream analyzer cabinet with sample fittings and display.
             place(box, steel, 0, 0.41, 0, 0.12, 0.8, 0.12);
