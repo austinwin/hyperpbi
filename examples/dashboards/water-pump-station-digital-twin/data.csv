@@ -1,313 +1,711 @@
-readingid,assetid,equipment,category,scenario,status,equipmentcolor,recordtype,sampleorder,hour,flowgpm,pressurepsi,levelpct,rpm,motorloadpct,stationflow,stationpressure,stationonline,stationalerts,sourceflow,averagelevel
-0-RW01-snapshot,RW01,Remote well 1,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,427,0,0,0,0,16100,64,4,0,14782,76
-0-RW02-snapshot,RW02,Remote well 2,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,464,0,0,0,0,16100,64,4,0,14782,76
-0-RW03-snapshot,RW03,Remote well 3,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,501,0,0,0,0,16100,64,4,0,14782,76
-0-RW04-snapshot,RW04,Remote well 4,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,538,0,0,0,0,16100,64,4,0,14782,76
-0-RW05-snapshot,RW05,Remote well 5,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,575,0,0,0,0,16100,64,4,0,14782,76
-0-RW06-snapshot,RW06,Remote well 6,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,612,0,0,0,0,16100,64,4,0,14782,76
-0-RW07-snapshot,RW07,Remote well 7,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,649,0,0,0,0,16100,64,4,0,14782,76
-0-RW08-snapshot,RW08,Remote well 8,Remote well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,686,0,0,0,0,16100,64,4,0,14782,76
-0-LW01-snapshot,LW01,On-site source well,Local well,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,680,0,0,0,0,16100,64,4,0,14782,76
-0-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,4650,0,0,0,0,16100,64,4,0,14782,76
-0-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Normal supply,Running,#35d4be,Snapshot,1000,Snapshot,5000,0,0,0,0,16100,64,4,0,14782,76
-0-GST1-snapshot,GST1,Storage tank 1,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,70,0,0,16100,64,4,0,14782,76
-0-GST2-snapshot,GST2,Storage tank 2,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,73,0,0,16100,64,4,0,14782,76
-0-GST3-snapshot,GST3,Storage tank 3,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,76,0,0,16100,64,4,0,14782,76
-0-GST4-snapshot,GST4,Storage tank 4,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,79,0,0,16100,64,4,0,14782,76
-0-GST5-snapshot,GST5,Storage tank 5,Storage,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,3220,0,82,0,0,16100,64,4,0,14782,76
-0-BP01-snapshot,BP01,Booster pump 1,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,3985,64,0,1266,81,16100,64,4,0,14782,76
-0-BP02-snapshot,BP02,Booster pump 2,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,3786,64,0,1257,80,16100,64,4,0,14782,76
-0-BP03-snapshot,BP03,Booster pump 3,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,4224,64,0,1277,83,16100,64,4,0,14782,76
-0-BP04-snapshot,BP04,Booster pump 4,Booster,Normal supply,Running,#31c8a4,Snapshot,1000,Snapshot,4105,64,0,1272,82,16100,64,4,0,14782,76
-0-BP05-snapshot,BP05,Booster pump 5,Booster,Normal supply,Standby,#7789a0,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-0-BP06-snapshot,BP06,Booster pump 6,Booster,Normal supply,Standby,#7789a0,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-0-SOURCE-snapshot,SOURCE,Source collection,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,14782,0,0,0,0,16100,64,4,0,14782,76
-0-SUCTION-snapshot,SUCTION,Storage suction header,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,18,0,0,0,16100,64,4,0,14782,76
-0-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,64,0,0,0,16100,64,4,0,14782,76
-0-DIST-snapshot,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,16100,64,0,0,0,16100,64,4,0,14782,76
-0-DIST-0,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,0,07:00,15134,64,0,0,0,16100,64,4,0,14782,76
-0-DIST-1,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,1,08:00,15659,64.9,0,0,0,16100,64,4,0,14782,76
-0-DIST-2,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,2,09:00,16093,65.4,0,0,0,16100,64,4,0,14782,76
-0-DIST-3,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,3,10:00,16360,65.2,0,0,0,16100,64,4,0,14782,76
-0-DIST-4,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,4,11:00,16414,64.5,0,0,0,16100,64,4,0,14782,76
-0-DIST-5,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,5,12:00,16246,63.5,0,0,0,16100,64,4,0,14782,76
-0-DIST-6,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,6,13:00,15884,62.8,0,0,0,16100,64,4,0,14782,76
-0-DIST-7,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,7,14:00,15392,62.6,0,0,0,16100,64,4,0,14782,76
-0-DIST-8,DIST,Distribution interface,Distribution,Normal supply,Running,#76b6d2,Trend,8,15:00,14855,63.1,0,0,0,16100,64,4,0,14782,76
-0-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-0-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-0-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Normal supply,Running,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-0-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Normal supply,Standby,#76b6d2,Snapshot,1000,Snapshot,0,0,0,0,0,16100,64,4,0,14782,76
-1-RW01-snapshot,RW01,Remote well 1,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,504,0,0,0,0,23400,67,6,0,17616,68
-1-RW02-snapshot,RW02,Remote well 2,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,548,0,0,0,0,23400,67,6,0,17616,68
-1-RW03-snapshot,RW03,Remote well 3,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,591,0,0,0,0,23400,67,6,0,17616,68
-1-RW04-snapshot,RW04,Remote well 4,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,635,0,0,0,0,23400,67,6,0,17616,68
-1-RW05-snapshot,RW05,Remote well 5,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,679,0,0,0,0,23400,67,6,0,17616,68
-1-RW06-snapshot,RW06,Remote well 6,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,722,0,0,0,0,23400,67,6,0,17616,68
-1-RW07-snapshot,RW07,Remote well 7,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,766,0,0,0,0,23400,67,6,0,17616,68
-1-RW08-snapshot,RW08,Remote well 8,Remote well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,809,0,0,0,0,23400,67,6,0,17616,68
-1-LW01-snapshot,LW01,On-site source well,Local well,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,782,0,0,0,0,23400,67,6,0,17616,68
-1-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,5580,0,0,0,0,23400,67,6,0,17616,68
-1-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Peak demand,Running,#35d4be,Snapshot,999,Snapshot,6000,0,0,0,0,23400,67,6,0,17616,68
-1-GST1-snapshot,GST1,Storage tank 1,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,62,0,0,23400,67,6,0,17616,68
-1-GST2-snapshot,GST2,Storage tank 2,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,65,0,0,23400,67,6,0,17616,68
-1-GST3-snapshot,GST3,Storage tank 3,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,68,0,0,23400,67,6,0,17616,68
-1-GST4-snapshot,GST4,Storage tank 4,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,71,0,0,23400,67,6,0,17616,68
-1-GST5-snapshot,GST5,Storage tank 5,Storage,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,4680,0,74,0,0,23400,67,6,0,17616,68
-1-BP01-snapshot,BP01,Booster pump 1,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3836,67,0,1259,81,23400,67,6,0,17616,68
-1-BP02-snapshot,BP02,Booster pump 2,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3644,67,0,1250,79,23400,67,6,0,17616,68
-1-BP03-snapshot,BP03,Booster pump 3,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,4066,67,0,1270,82,23400,67,6,0,17616,68
-1-BP04-snapshot,BP04,Booster pump 4,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3951,67,0,1264,81,23400,67,6,0,17616,68
-1-BP05-snapshot,BP05,Booster pump 5,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,3759,67,0,1255,80,23400,67,6,0,17616,68
-1-BP06-snapshot,BP06,Booster pump 6,Booster,Peak demand,Running,#31c8a4,Snapshot,999,Snapshot,4143,67,0,1273,82,23400,67,6,0,17616,68
-1-SOURCE-snapshot,SOURCE,Source collection,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,17616,0,0,0,0,23400,67,6,0,17616,68
-1-SUCTION-snapshot,SUCTION,Storage suction header,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,18,0,0,0,23400,67,6,0,17616,68
-1-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,67,0,0,0,23400,67,6,0,17616,68
-1-DIST-snapshot,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,23400,67,0,0,0,23400,67,6,0,17616,68
-1-DIST-0,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,0,07:00,21996,68.2,0,0,0,23400,67,6,0,17616,68
-1-DIST-1,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,1,08:00,22759,68.4,0,0,0,23400,67,6,0,17616,68
-1-DIST-2,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,2,09:00,23390,67.9,0,0,0,23400,67,6,0,17616,68
-1-DIST-3,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,3,10:00,23778,67.1,0,0,0,23400,67,6,0,17616,68
-1-DIST-4,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,4,11:00,23857,66.1,0,0,0,23400,67,6,0,17616,68
-1-DIST-5,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,5,12:00,23612,65.6,0,0,0,23400,67,6,0,17616,68
-1-DIST-6,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,6,13:00,23086,65.8,0,0,0,23400,67,6,0,17616,68
-1-DIST-7,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,7,14:00,22371,66.5,0,0,0,23400,67,6,0,17616,68
-1-DIST-8,DIST,Distribution interface,Distribution,Peak demand,Running,#76b6d2,Trend,8,15:00,21590,67.4,0,0,0,23400,67,6,0,17616,68
-1-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
-1-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
-1-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Peak demand,Running,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
-1-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Peak demand,Standby,#76b6d2,Snapshot,999,Snapshot,0,0,0,0,0,23400,67,6,0,17616,68
-2-RW01-snapshot,RW01,Remote well 1,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW02-snapshot,RW02,Remote well 2,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW03-snapshot,RW03,Remote well 3,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW04-snapshot,RW04,Remote well 4,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW05-snapshot,RW05,Remote well 5,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW06-snapshot,RW06,Remote well 6,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW07-snapshot,RW07,Remote well 7,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-RW08-snapshot,RW08,Remote well 8,Remote well,Remote wells offline,Offline,#72849b,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-LW01-snapshot,LW01,On-site source well,Local well,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,680,0,0,0,0,12900,57,4,1,12743,56
-2-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,5813,0,0,0,0,12900,57,4,1,12743,56
-2-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Remote wells offline,Running,#35d4be,Snapshot,998,Snapshot,6250,0,0,0,0,12900,57,4,1,12743,56
-2-GST1-snapshot,GST1,Storage tank 1,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,50,0,0,12900,57,4,1,12743,56
-2-GST2-snapshot,GST2,Storage tank 2,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,53,0,0,12900,57,4,1,12743,56
-2-GST3-snapshot,GST3,Storage tank 3,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,56,0,0,12900,57,4,1,12743,56
-2-GST4-snapshot,GST4,Storage tank 4,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,59,0,0,12900,57,4,1,12743,56
-2-GST5-snapshot,GST5,Storage tank 5,Storage,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,2580,0,62,0,0,12900,57,4,1,12743,56
-2-BP01-snapshot,BP01,Booster pump 1,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3258,57,0,1232,77,12900,57,4,1,12743,56
-2-BP02-snapshot,BP02,Booster pump 2,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3095,57,0,1224,76,12900,57,4,1,12743,56
-2-BP03-snapshot,BP03,Booster pump 3,Booster,Remote wells offline,Standby,#7789a0,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-BP04-snapshot,BP04,Booster pump 4,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3355,57,0,1237,78,12900,57,4,1,12743,56
-2-BP05-snapshot,BP05,Booster pump 5,Booster,Remote wells offline,Running,#31c8a4,Snapshot,998,Snapshot,3192,57,0,1229,77,12900,57,4,1,12743,56
-2-BP06-snapshot,BP06,Booster pump 6,Booster,Remote wells offline,Standby,#7789a0,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-SOURCE-snapshot,SOURCE,Source collection,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12743,0,0,0,0,12900,57,4,1,12743,56
-2-SUCTION-snapshot,SUCTION,Storage suction header,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,18,0,0,0,12900,57,4,1,12743,56
-2-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,57,0,0,0,12900,57,4,1,12743,56
-2-DIST-snapshot,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,12900,57,0,0,0,12900,57,4,1,12743,56
-2-DIST-0,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,0,07:00,12126,58.3,0,0,0,12900,57,4,1,12743,56
-2-DIST-1,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,1,08:00,12547,57.6,0,0,0,12900,57,4,1,12743,56
-2-DIST-2,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,2,09:00,12894,56.6,0,0,0,12900,57,4,1,12743,56
-2-DIST-3,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,3,10:00,13109,55.9,0,0,0,12900,57,4,1,12743,56
-2-DIST-4,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,4,11:00,13152,55.6,0,0,0,12900,57,4,1,12743,56
-2-DIST-5,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,5,12:00,13017,56,0,0,0,12900,57,4,1,12743,56
-2-DIST-6,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,6,13:00,12727,56.9,0,0,0,12900,57,4,1,12743,56
-2-DIST-7,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,7,14:00,12333,57.8,0,0,0,12900,57,4,1,12743,56
-2-DIST-8,DIST,Distribution interface,Distribution,Remote wells offline,Running,#76b6d2,Trend,8,15:00,11902,58.4,0,0,0,12900,57,4,1,12743,56
-2-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Remote wells offline,Running,#76b6d2,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-2-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Remote wells offline,Warning,#ffa94d,Snapshot,998,Snapshot,0,0,0,0,0,12900,57,4,1,12743,56
-3-RW01-snapshot,RW01,Remote well 1,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,448,0,0,0,0,11700,55,4,1,5354,59
-3-RW02-snapshot,RW02,Remote well 2,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,487,0,0,0,0,11700,55,4,1,5354,59
-3-RW03-snapshot,RW03,Remote well 3,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,526,0,0,0,0,11700,55,4,1,5354,59
-3-RW04-snapshot,RW04,Remote well 4,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,565,0,0,0,0,11700,55,4,1,5354,59
-3-RW05-snapshot,RW05,Remote well 5,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,604,0,0,0,0,11700,55,4,1,5354,59
-3-RW06-snapshot,RW06,Remote well 6,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,643,0,0,0,0,11700,55,4,1,5354,59
-3-RW07-snapshot,RW07,Remote well 7,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,681,0,0,0,0,11700,55,4,1,5354,59
-3-RW08-snapshot,RW08,Remote well 8,Remote well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,720,0,0,0,0,11700,55,4,1,5354,59
-3-LW01-snapshot,LW01,On-site source well,Local well,Surface inlet unavailable,Running,#35d4be,Snapshot,997,Snapshot,680,0,0,0,0,11700,55,4,1,5354,59
-3-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Surface inlet unavailable,Offline,#72849b,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Surface inlet unavailable,Offline,#72849b,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-GST1-snapshot,GST1,Storage tank 1,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,53,0,0,11700,55,4,1,5354,59
-3-GST2-snapshot,GST2,Storage tank 2,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,56,0,0,11700,55,4,1,5354,59
-3-GST3-snapshot,GST3,Storage tank 3,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,59,0,0,11700,55,4,1,5354,59
-3-GST4-snapshot,GST4,Storage tank 4,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,62,0,0,11700,55,4,1,5354,59
-3-GST5-snapshot,GST5,Storage tank 5,Storage,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,2340,0,65,0,0,11700,55,4,1,5354,59
-3-BP01-snapshot,BP01,Booster pump 1,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2932,55,0,1217,75,11700,55,4,1,5354,59
-3-BP02-snapshot,BP02,Booster pump 2,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2786,55,0,1210,74,11700,55,4,1,5354,59
-3-BP03-snapshot,BP03,Booster pump 3,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,3108,55,0,1225,76,11700,55,4,1,5354,59
-3-BP04-snapshot,BP04,Booster pump 4,Booster,Surface inlet unavailable,Standby,#7789a0,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-BP05-snapshot,BP05,Booster pump 5,Booster,Surface inlet unavailable,Running,#31c8a4,Snapshot,997,Snapshot,2874,55,0,1214,75,11700,55,4,1,5354,59
-3-BP06-snapshot,BP06,Booster pump 6,Booster,Surface inlet unavailable,Standby,#7789a0,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-SOURCE-snapshot,SOURCE,Source collection,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,5354,0,0,0,0,11700,55,4,1,5354,59
-3-SUCTION-snapshot,SUCTION,Storage suction header,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,18,0,0,0,11700,55,4,1,5354,59
-3-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,55,0,0,0,11700,55,4,1,5354,59
-3-DIST-snapshot,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,11700,55,0,0,0,11700,55,4,1,5354,59
-3-DIST-0,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,0,07:00,10998,55.2,0,0,0,11700,55,4,1,5354,59
-3-DIST-1,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,1,08:00,11380,54.3,0,0,0,11700,55,4,1,5354,59
-3-DIST-2,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,2,09:00,11695,53.7,0,0,0,11700,55,4,1,5354,59
-3-DIST-3,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,3,10:00,11889,53.7,0,0,0,11700,55,4,1,5354,59
-3-DIST-4,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,4,11:00,11928,54.3,0,0,0,11700,55,4,1,5354,59
-3-DIST-5,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,5,12:00,11806,55.3,0,0,0,11700,55,4,1,5354,59
-3-DIST-6,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,6,13:00,11543,56.1,0,0,0,11700,55,4,1,5354,59
-3-DIST-7,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,7,14:00,11185,56.4,0,0,0,11700,55,4,1,5354,59
-3-DIST-8,DIST,Distribution interface,Distribution,Surface inlet unavailable,Running,#76b6d2,Trend,8,15:00,10795,56,0,0,0,11700,55,4,1,5354,59
-3-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Surface inlet unavailable,Standby,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Surface inlet unavailable,Running,#76b6d2,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-3-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Surface inlet unavailable,Warning,#ffa94d,Snapshot,997,Snapshot,0,0,0,0,0,11700,55,4,1,5354,59
-4-RW01-snapshot,RW01,Remote well 1,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,427,0,0,0,0,15600,62,4,0,14782,70
-4-RW02-snapshot,RW02,Remote well 2,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,464,0,0,0,0,15600,62,4,0,14782,70
-4-RW03-snapshot,RW03,Remote well 3,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,501,0,0,0,0,15600,62,4,0,14782,70
-4-RW04-snapshot,RW04,Remote well 4,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,538,0,0,0,0,15600,62,4,0,14782,70
-4-RW05-snapshot,RW05,Remote well 5,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,575,0,0,0,0,15600,62,4,0,14782,70
-4-RW06-snapshot,RW06,Remote well 6,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,612,0,0,0,0,15600,62,4,0,14782,70
-4-RW07-snapshot,RW07,Remote well 7,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,649,0,0,0,0,15600,62,4,0,14782,70
-4-RW08-snapshot,RW08,Remote well 8,Remote well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,686,0,0,0,0,15600,62,4,0,14782,70
-4-LW01-snapshot,LW01,On-site source well,Local well,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,680,0,0,0,0,15600,62,4,0,14782,70
-4-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,4650,0,0,0,0,15600,62,4,0,14782,70
-4-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Booster maintenance,Running,#35d4be,Snapshot,996,Snapshot,5000,0,0,0,0,15600,62,4,0,14782,70
-4-GST1-snapshot,GST1,Storage tank 1,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,64,0,0,15600,62,4,0,14782,70
-4-GST2-snapshot,GST2,Storage tank 2,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,67,0,0,15600,62,4,0,14782,70
-4-GST3-snapshot,GST3,Storage tank 3,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,70,0,0,15600,62,4,0,14782,70
-4-GST4-snapshot,GST4,Storage tank 4,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,73,0,0,15600,62,4,0,14782,70
-4-GST5-snapshot,GST5,Storage tank 5,Storage,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,3120,0,76,0,0,15600,62,4,0,14782,70
-4-BP01-snapshot,BP01,Booster pump 1,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3939,62,0,1264,81,15600,62,4,0,14782,70
-4-BP02-snapshot,BP02,Booster pump 2,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3742,62,0,1255,80,15600,62,4,0,14782,70
-4-BP03-snapshot,BP03,Booster pump 3,Booster,Booster maintenance,Standby,#7789a0,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-4-BP04-snapshot,BP04,Booster pump 4,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,4058,62,0,1269,82,15600,62,4,0,14782,70
-4-BP05-snapshot,BP05,Booster pump 5,Booster,Booster maintenance,Running,#31c8a4,Snapshot,996,Snapshot,3861,62,0,1260,81,15600,62,4,0,14782,70
-4-BP06-snapshot,BP06,Booster pump 6,Booster,Booster maintenance,Standby,#7789a0,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-4-SOURCE-snapshot,SOURCE,Source collection,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,14782,0,0,0,0,15600,62,4,0,14782,70
-4-SUCTION-snapshot,SUCTION,Storage suction header,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,18,0,0,0,15600,62,4,0,14782,70
-4-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,62,0,0,0,15600,62,4,0,14782,70
-4-DIST-snapshot,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,15600,62,0,0,0,15600,62,4,0,14782,70
-4-DIST-0,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,0,07:00,14664,60.9,0,0,0,15600,62,4,0,14782,70
-4-DIST-1,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,1,08:00,15173,60.6,0,0,0,15600,62,4,0,14782,70
-4-DIST-2,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,2,09:00,15593,60.9,0,0,0,15600,62,4,0,14782,70
-4-DIST-3,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,3,10:00,15852,61.7,0,0,0,15600,62,4,0,14782,70
-4-DIST-4,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,4,11:00,15905,62.7,0,0,0,15600,62,4,0,14782,70
-4-DIST-5,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,5,12:00,15741,63.3,0,0,0,15600,62,4,0,14782,70
-4-DIST-6,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,6,13:00,15391,63.3,0,0,0,15600,62,4,0,14782,70
-4-DIST-7,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,7,14:00,14914,62.7,0,0,0,15600,62,4,0,14782,70
-4-DIST-8,DIST,Distribution interface,Distribution,Booster maintenance,Running,#76b6d2,Trend,8,15:00,14394,61.8,0,0,0,15600,62,4,0,14782,70
-4-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-4-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-4-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Booster maintenance,Running,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-4-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Booster maintenance,Standby,#76b6d2,Snapshot,996,Snapshot,0,0,0,0,0,15600,62,4,0,14782,70
-5-RW01-snapshot,RW01,Remote well 1,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,363,0,0,0,0,9700,50,3,2,12667,26
-5-RW02-snapshot,RW02,Remote well 2,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,394,0,0,0,0,9700,50,3,2,12667,26
-5-RW03-snapshot,RW03,Remote well 3,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,426,0,0,0,0,9700,50,3,2,12667,26
-5-RW04-snapshot,RW04,Remote well 4,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,457,0,0,0,0,9700,50,3,2,12667,26
-5-RW05-snapshot,RW05,Remote well 5,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,489,0,0,0,0,9700,50,3,2,12667,26
-5-RW06-snapshot,RW06,Remote well 6,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,520,0,0,0,0,9700,50,3,2,12667,26
-5-RW07-snapshot,RW07,Remote well 7,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,552,0,0,0,0,9700,50,3,2,12667,26
-5-RW08-snapshot,RW08,Remote well 8,Remote well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,583,0,0,0,0,9700,50,3,2,12667,26
-5-LW01-snapshot,LW01,On-site source well,Local well,Low storage,Running,#35d4be,Snapshot,995,Snapshot,680,0,0,0,0,9700,50,3,2,12667,26
-5-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Low storage,Running,#35d4be,Snapshot,995,Snapshot,3953,0,0,0,0,9700,50,3,2,12667,26
-5-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Low storage,Running,#35d4be,Snapshot,995,Snapshot,4250,0,0,0,0,9700,50,3,2,12667,26
-5-GST1-snapshot,GST1,Storage tank 1,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,20,0,0,9700,50,3,2,12667,26
-5-GST2-snapshot,GST2,Storage tank 2,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,23,0,0,9700,50,3,2,12667,26
-5-GST3-snapshot,GST3,Storage tank 3,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,26,0,0,9700,50,3,2,12667,26
-5-GST4-snapshot,GST4,Storage tank 4,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,29,0,0,9700,50,3,2,12667,26
-5-GST5-snapshot,GST5,Storage tank 5,Storage,Low storage,Warning,#f7ac51,Snapshot,995,Snapshot,1940,0,32,0,0,9700,50,3,2,12667,26
-5-BP01-snapshot,BP01,Booster pump 1,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3191,50,0,1229,77,9700,50,3,2,12667,26
-5-BP02-snapshot,BP02,Booster pump 2,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-BP03-snapshot,BP03,Booster pump 3,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3382,50,0,1238,78,9700,50,3,2,12667,26
-5-BP04-snapshot,BP04,Booster pump 4,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-BP05-snapshot,BP05,Booster pump 5,Booster,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,3127,50,0,1226,76,9700,50,3,2,12667,26
-5-BP06-snapshot,BP06,Booster pump 6,Booster,Low storage,Standby,#7789a0,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-SOURCE-snapshot,SOURCE,Source collection,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,12667,0,0,0,0,9700,50,3,2,12667,26
-5-SUCTION-snapshot,SUCTION,Storage suction header,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,18,0,0,0,9700,50,3,2,12667,26
-5-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,50,0,0,0,9700,50,3,2,12667,26
-5-DIST-snapshot,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,9700,50,0,0,0,9700,50,3,2,12667,26
-5-DIST-0,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,0,07:00,9118,48.7,0,0,0,9700,50,3,2,12667,26
-5-DIST-1,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,1,08:00,9434,49.2,0,0,0,9700,50,3,2,12667,26
-5-DIST-2,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,2,09:00,9696,50.2,0,0,0,9700,50,3,2,12667,26
-5-DIST-3,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,3,10:00,9857,51,0,0,0,9700,50,3,2,12667,26
-5-DIST-4,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,4,11:00,9889,51.4,0,0,0,9700,50,3,2,12667,26
-5-DIST-5,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,5,12:00,9788,51.1,0,0,0,9700,50,3,2,12667,26
-5-DIST-6,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,6,13:00,9570,50.3,0,0,0,9700,50,3,2,12667,26
-5-DIST-7,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,7,14:00,9273,49.4,0,0,0,9700,50,3,2,12667,26
-5-DIST-8,DIST,Distribution interface,Distribution,Low storage,Running,#76b6d2,Trend,8,15:00,8950,48.7,0,0,0,9700,50,3,2,12667,26
-5-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low storage,Running,#76b6d2,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-5-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low storage,Warning,#ffa94d,Snapshot,995,Snapshot,0,0,0,0,0,9700,50,3,2,12667,26
-6-RW01-snapshot,RW01,Remote well 1,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,192,0,0,0,0,8600,51,2,1,10688,61
-6-RW02-snapshot,RW02,Remote well 2,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,209,0,0,0,0,8600,51,2,1,10688,61
-6-RW03-snapshot,RW03,Remote well 3,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,225,0,0,0,0,8600,51,2,1,10688,61
-6-RW04-snapshot,RW04,Remote well 4,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,242,0,0,0,0,8600,51,2,1,10688,61
-6-RW05-snapshot,RW05,Remote well 5,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,259,0,0,0,0,8600,51,2,1,10688,61
-6-RW06-snapshot,RW06,Remote well 6,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,275,0,0,0,0,8600,51,2,1,10688,61
-6-RW07-snapshot,RW07,Remote well 7,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,292,0,0,0,0,8600,51,2,1,10688,61
-6-RW08-snapshot,RW08,Remote well 8,Remote well,Limited power,Running,#35d4be,Snapshot,994,Snapshot,309,0,0,0,0,8600,51,2,1,10688,61
-6-LW01-snapshot,LW01,On-site source well,Local well,Limited power,Offline,#72849b,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Limited power,Running,#35d4be,Snapshot,994,Snapshot,4185,0,0,0,0,8600,51,2,1,10688,61
-6-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Limited power,Running,#35d4be,Snapshot,994,Snapshot,4500,0,0,0,0,8600,51,2,1,10688,61
-6-GST1-snapshot,GST1,Storage tank 1,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,55,0,0,8600,51,2,1,10688,61
-6-GST2-snapshot,GST2,Storage tank 2,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,58,0,0,8600,51,2,1,10688,61
-6-GST3-snapshot,GST3,Storage tank 3,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,61,0,0,8600,51,2,1,10688,61
-6-GST4-snapshot,GST4,Storage tank 4,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,64,0,0,8600,51,2,1,10688,61
-6-GST5-snapshot,GST5,Storage tank 5,Storage,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,1720,0,67,0,0,8600,51,2,1,10688,61
-6-BP01-snapshot,BP01,Booster pump 1,Booster,Limited power,Running,#31c8a4,Snapshot,994,Snapshot,4175,51,0,1275,83,8600,51,2,1,10688,61
-6-BP02-snapshot,BP02,Booster pump 2,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-BP03-snapshot,BP03,Booster pump 3,Booster,Limited power,Running,#31c8a4,Snapshot,994,Snapshot,4425,51,0,1287,84,8600,51,2,1,10688,61
-6-BP04-snapshot,BP04,Booster pump 4,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-BP05-snapshot,BP05,Booster pump 5,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-BP06-snapshot,BP06,Booster pump 6,Booster,Limited power,Standby,#7789a0,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-SOURCE-snapshot,SOURCE,Source collection,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,10688,0,0,0,0,8600,51,2,1,10688,61
-6-SUCTION-snapshot,SUCTION,Storage suction header,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,18,0,0,0,8600,51,2,1,10688,61
-6-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,51,0,0,0,8600,51,2,1,10688,61
-6-DIST-snapshot,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,8600,51,0,0,0,8600,51,2,1,10688,61
-6-DIST-0,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,0,07:00,8084,50.6,0,0,0,8600,51,2,1,10688,61
-6-DIST-1,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,1,08:00,8365,51.6,0,0,0,8600,51,2,1,10688,61
-6-DIST-2,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,2,09:00,8596,52.3,0,0,0,8600,51,2,1,10688,61
-6-DIST-3,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,3,10:00,8739,52.4,0,0,0,8600,51,2,1,10688,61
-6-DIST-4,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,4,11:00,8768,51.8,0,0,0,8600,51,2,1,10688,61
-6-DIST-5,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,5,12:00,8678,50.9,0,0,0,8600,51,2,1,10688,61
-6-DIST-6,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,6,13:00,8485,50,0,0,0,8600,51,2,1,10688,61
-6-DIST-7,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,7,14:00,8222,49.6,0,0,0,8600,51,2,1,10688,61
-6-DIST-8,DIST,Distribution interface,Distribution,Limited power,Running,#76b6d2,Trend,8,15:00,7935,49.8,0,0,0,8600,51,2,1,10688,61
-6-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Limited power,Running,#76b6d2,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-6-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Limited power,Warning,#ffa94d,Snapshot,994,Snapshot,0,0,0,0,0,8600,51,2,1,10688,61
-7-RW01-snapshot,RW01,Remote well 1,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,427,0,0,0,0,8200,43,2,2,14782,64
-7-RW02-snapshot,RW02,Remote well 2,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,464,0,0,0,0,8200,43,2,2,14782,64
-7-RW03-snapshot,RW03,Remote well 3,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,501,0,0,0,0,8200,43,2,2,14782,64
-7-RW04-snapshot,RW04,Remote well 4,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,538,0,0,0,0,8200,43,2,2,14782,64
-7-RW05-snapshot,RW05,Remote well 5,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,575,0,0,0,0,8200,43,2,2,14782,64
-7-RW06-snapshot,RW06,Remote well 6,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,612,0,0,0,0,8200,43,2,2,14782,64
-7-RW07-snapshot,RW07,Remote well 7,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,649,0,0,0,0,8200,43,2,2,14782,64
-7-RW08-snapshot,RW08,Remote well 8,Remote well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,686,0,0,0,0,8200,43,2,2,14782,64
-7-LW01-snapshot,LW01,On-site source well,Local well,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,680,0,0,0,0,8200,43,2,2,14782,64
-7-SW1-snapshot,SW1,Surface inlet 1,Surface inlet,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,4650,0,0,0,0,8200,43,2,2,14782,64
-7-SW2-snapshot,SW2,Surface inlet 2,Surface inlet,Low distribution pressure,Running,#35d4be,Snapshot,993,Snapshot,5000,0,0,0,0,8200,43,2,2,14782,64
-7-GST1-snapshot,GST1,Storage tank 1,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,58,0,0,8200,43,2,2,14782,64
-7-GST2-snapshot,GST2,Storage tank 2,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,61,0,0,8200,43,2,2,14782,64
-7-GST3-snapshot,GST3,Storage tank 3,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,64,0,0,8200,43,2,2,14782,64
-7-GST4-snapshot,GST4,Storage tank 4,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,67,0,0,8200,43,2,2,14782,64
-7-GST5-snapshot,GST5,Storage tank 5,Storage,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,1640,0,70,0,0,8200,43,2,2,14782,64
-7-BP01-snapshot,BP01,Booster pump 1,Booster,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,4205,43,0,1276,83,8200,43,2,2,14782,64
-7-BP02-snapshot,BP02,Booster pump 2,Booster,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,3995,43,0,1266,82,8200,43,2,2,14782,64
-7-BP03-snapshot,BP03,Booster pump 3,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-BP04-snapshot,BP04,Booster pump 4,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-BP05-snapshot,BP05,Booster pump 5,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-BP06-snapshot,BP06,Booster pump 6,Booster,Low distribution pressure,Standby,#7789a0,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-SOURCE-snapshot,SOURCE,Source collection,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,14782,0,0,0,0,8200,43,2,2,14782,64
-7-SUCTION-snapshot,SUCTION,Storage suction header,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,18,0,0,0,8200,43,2,2,14782,64
-7-DISCHARGE-snapshot,DISCHARGE,Booster discharge header,Header,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,43,0,0,0,8200,43,2,2,14782,64
-7-DIST-snapshot,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,8200,43,0,0,0,8200,43,2,2,14782,64
-7-DIST-0,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,0,07:00,7708,43.9,0,0,0,8200,43,2,2,14782,64
-7-DIST-1,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,1,08:00,7975,44.4,0,0,0,8200,43,2,2,14782,64
-7-DIST-2,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,2,09:00,8196,44.2,0,0,0,8200,43,2,2,14782,64
-7-DIST-3,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,3,10:00,8333,43.4,0,0,0,8200,43,2,2,14782,64
-7-DIST-4,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,4,11:00,8360,42.5,0,0,0,8200,43,2,2,14782,64
-7-DIST-5,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,5,12:00,8274,41.8,0,0,0,8200,43,2,2,14782,64
-7-DIST-6,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,6,13:00,8090,41.6,0,0,0,8200,43,2,2,14782,64
-7-DIST-7,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,7,14:00,7839,42.1,0,0,0,8200,43,2,2,14782,64
-7-DIST-8,DIST,Distribution interface,Distribution,Low distribution pressure,Running,#76b6d2,Trend,8,15:00,7566,43,0,0,0,8200,43,2,2,14782,64
-7-CHEM1-snapshot,CHEM1,Source chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-CHEM2-snapshot,CHEM2,Surface chemical dosing,Treatment,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-QUALITY-snapshot,QUALITY,Residual analyzer,Monitoring,Low distribution pressure,Running,#76b6d2,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
-7-ALARM-snapshot,ALARM,Station alarm indicator,Monitoring,Low distribution pressure,Warning,#ffa94d,Snapshot,993,Snapshot,0,0,0,0,0,8200,43,2,2,14782,64
+readingid,assetid,equipment,category,medium,scenario,status,equipmentcolor,recordtype,sampleorder,hour,flowgpm,pressurepsi,levelpct,rpm,motorloadpct,valveopenpct,dosemgL,cl2mgL,nh3mgL,stationflow,stationpressure,stationonline,stationalerts,sourceflow,netstoragegpm,averagelevel
+0-W01A-snapshot,W01A,Remote well 01A,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,530,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,530,,,,,,,,,15100,64,4,0,15230,130,76
+0-W03A-snapshot,W03A,Remote well 03A,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,480,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,480,,,,,,,,,15100,64,4,0,15230,130,76
+0-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,420,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,420,,,,,,,,,15100,64,4,0,15230,130,76
+0-W04A-snapshot,W04A,Remote well 04A,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,510,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,510,,,,,,,,,15100,64,4,0,15230,130,76
+0-W05A-snapshot,W05A,Remote well 05A,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,610,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,610,,,,,,,,,15100,64,4,0,15230,130,76
+0-W08-snapshot,W08,Remote well 08,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,490,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,490,,,,,,,,,15100,64,4,0,15230,130,76
+0-W11-snapshot,W11,Remote well 11,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,575,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,575,,,,,,,,,15100,64,4,0,15230,130,76
+0-W10-snapshot,W10,Remote well 10,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,525,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,525,,,,,,,,,15100,64,4,0,15230,130,76
+0-W09-snapshot,W09,On-site well 09,Well,Water,Normal supply,Running,#39c6b4,Snapshot,1000,Snapshot,690,,,,,,,,,15100,64,4,0,15230,130,76
+0-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,690,,,,,,,,,15100,64,4,0,15230,130,76
+0-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Normal supply,Dosing,#f0b652,Snapshot,1000,Snapshot,0,,,,,,0.85,,,15100,64,4,0,15230,130,76
+0-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Normal supply,Dosing,#f0b652,Snapshot,1000,Snapshot,0,,,,,,0.55,,,15100,64,4,0,15230,130,76
+0-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Normal supply,Dosing,#f0b652,Snapshot,1000,Snapshot,0,,,,,,1.2,,,15100,64,4,0,15230,130,76
+0-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Normal supply,Dosing,#af93ee,Snapshot,1000,Snapshot,0,,,,,,0.35,,,15100,64,4,0,15230,130,76
+0-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,5400,,,,,100,,,,15100,64,4,0,15230,130,76
+0-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,5400,,,,,,,,,15100,64,4,0,15230,130,76
+0-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,0,,,,,,,1.58,,15100,64,4,0,15230,130,76
+0-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Normal supply,Dosing,#f0b652,Snapshot,1000,Snapshot,0,,,,,,1.05,,,15100,64,4,0,15230,130,76
+0-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Normal supply,Dosing,#af93ee,Snapshot,1000,Snapshot,0,,,,,,0.32,,,15100,64,4,0,15230,130,76
+0-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,5000,,,,,100,,,,15100,64,4,0,15230,130,76
+0-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,5000,,,,,,,,,15100,64,4,0,15230,130,76
+0-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,0,,,,,,,1.71,,15100,64,4,0,15230,130,76
+0-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Normal supply,Dosing,#f0b652,Snapshot,1000,Snapshot,0,,,,,,1.05,,,15100,64,4,0,15230,130,76
+0-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Normal supply,Dosing,#af93ee,Snapshot,1000,Snapshot,0,,,,,,0.32,,,15100,64,4,0,15230,130,76
+0-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Normal supply,Running,#5ac2b8,Snapshot,1000,Snapshot,3812,64,,1244,78,,,,,15100,64,4,0,15230,130,76
+0-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Normal supply,Running,#5ac2b8,Snapshot,1000,Snapshot,3513,64,,1223,76,,,,,15100,64,4,0,15230,130,76
+0-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Normal supply,Running,#5ac2b8,Snapshot,1000,Snapshot,4037,64,,1261,80,,,,,15100,64,4,0,15230,130,76
+0-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Normal supply,Running,#5ac2b8,Snapshot,1000,Snapshot,3738,64,,1239,78,,,,,15100,64,4,0,15230,130,76
+0-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Normal supply,Standby,#7b8fa2,Snapshot,1000,Snapshot,0,,,0,0,,,,,15100,64,4,0,15230,130,76
+0-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Normal supply,Standby,#7b8fa2,Snapshot,1000,Snapshot,0,,,0,0,,,,,15100,64,4,0,15230,130,76
+0-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,0,,72,,,,,,,15100,64,4,0,15230,130,76
+0-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3046,,,,,,,,,15100,64,4,0,15230,130,76
+0-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3020,,,,,,,,,15100,64,4,0,15230,130,76
+0-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,0,,74,,,,,,,15100,64,4,0,15230,130,76
+0-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3046,,,,,,,,,15100,64,4,0,15230,130,76
+0-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3020,,,,,,,,,15100,64,4,0,15230,130,76
+0-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,0,,76,,,,,,,15100,64,4,0,15230,130,76
+0-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3046,,,,,,,,,15100,64,4,0,15230,130,76
+0-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3020,,,,,,,,,15100,64,4,0,15230,130,76
+0-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,0,,78,,,,,,,15100,64,4,0,15230,130,76
+0-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3046,,,,,,,,,15100,64,4,0,15230,130,76
+0-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3020,,,,,,,,,15100,64,4,0,15230,130,76
+0-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,0,,80,,,,,,,15100,64,4,0,15230,130,76
+0-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3046,,,,,,,,,15100,64,4,0,15230,130,76
+0-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,3020,,,,,,,,,15100,64,4,0,15230,130,76
+0-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,4140,,,,,,,,,15100,64,4,0,15230,130,76
+0-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,15230,,,,,,,,,15100,64,4,0,15230,130,76
+0-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,15100,17,,,,,,,,15100,64,4,0,15230,130,76
+0-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,15100,64,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-snapshot,DIST,Distribution interface,Header,Water,Normal supply,Running,#78b7d1,Snapshot,1000,Snapshot,15100,64,,,,,,,,15100,64,4,0,15230,130,76
+0-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Normal supply,Running,#8ed9e6,Snapshot,1000,Snapshot,0,,,,,,,2.03,0.43,15100,64,4,0,15230,130,76
+0-DIST-0,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,0,07:00,14647,64,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-1,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,1,08:00,15085,64.8,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-2,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,2,09:00,15317,65.2,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-3,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,3,10:00,15234,65.2,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-4,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,4,11:00,14875,64.8,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-5,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,5,12:00,14409,64,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-6,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,6,13:00,14055,63.2,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-7,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,7,14:00,13979,62.8,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-8,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,8,15:00,14218,62.8,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-9,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,9,16:00,14658,63.3,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-10,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,10,17:00,15093,64,,,,,,,,15100,64,4,0,15230,130,76
+0-DIST-11,DIST,Distribution interface,Trend,Water,Normal supply,Running,#78b7d1,Trend,11,18:00,15318,64.8,,,,,,,,15100,64,4,0,15230,130,76
+1-W01A-snapshot,W01A,Remote well 01A,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,572,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,572,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W03A-snapshot,W03A,Remote well 03A,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,518,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,518,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,454,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,454,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W04A-snapshot,W04A,Remote well 04A,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,551,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,551,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W05A-snapshot,W05A,Remote well 05A,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,659,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,659,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W08-snapshot,W08,Remote well 08,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,529,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,529,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W11-snapshot,W11,Remote well 11,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,621,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,621,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W10-snapshot,W10,Remote well 10,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,567,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,567,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-W09-snapshot,W09,On-site well 09,Well,Water,Peak demand,Running,#39c6b4,Snapshot,999,Snapshot,773,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,773,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Peak demand,Dosing,#f0b652,Snapshot,999,Snapshot,0,,,,,,0.85,,,21700,67,6,0,17516,-4184,68
+1-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Peak demand,Dosing,#f0b652,Snapshot,999,Snapshot,0,,,,,,0.55,,,21700,67,6,0,17516,-4184,68
+1-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Peak demand,Dosing,#f0b652,Snapshot,999,Snapshot,0,,,,,,1.2,,,21700,67,6,0,17516,-4184,68
+1-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Peak demand,Dosing,#af93ee,Snapshot,999,Snapshot,0,,,,,,0.35,,,21700,67,6,0,17516,-4184,68
+1-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,6372,,,,,100,,,,21700,67,6,0,17516,-4184,68
+1-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,6372,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,0,,,,,,,1.58,,21700,67,6,0,17516,-4184,68
+1-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Peak demand,Dosing,#f0b652,Snapshot,999,Snapshot,0,,,,,,1.05,,,21700,67,6,0,17516,-4184,68
+1-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Peak demand,Dosing,#af93ee,Snapshot,999,Snapshot,0,,,,,,0.32,,,21700,67,6,0,17516,-4184,68
+1-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,5900,,,,,100,,,,21700,67,6,0,17516,-4184,68
+1-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,5900,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,0,,,,,,,1.71,,21700,67,6,0,17516,-4184,68
+1-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Peak demand,Dosing,#f0b652,Snapshot,999,Snapshot,0,,,,,,1.05,,,21700,67,6,0,17516,-4184,68
+1-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Peak demand,Dosing,#af93ee,Snapshot,999,Snapshot,0,,,,,,0.32,,,21700,67,6,0,17516,-4184,68
+1-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3652,67,,1233,77,,,,,21700,67,6,0,17516,-4184,68
+1-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3366,67,,1212,75,,,,,21700,67,6,0,17516,-4184,68
+1-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3867,67,,1248,79,,,,,21700,67,6,0,17516,-4184,68
+1-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3581,67,,1228,77,,,,,21700,67,6,0,17516,-4184,68
+1-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3509,67,,1223,76,,,,,21700,67,6,0,17516,-4184,68
+1-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Peak demand,Running,#5ac2b8,Snapshot,999,Snapshot,3725,67,,1238,78,,,,,21700,67,6,0,17516,-4184,68
+1-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,0,,64,,,,,,,21700,67,6,0,17516,-4184,68
+1-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,3503,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4340,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,0,,66,,,,,,,21700,67,6,0,17516,-4184,68
+1-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,3503,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4340,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,0,,68,,,,,,,21700,67,6,0,17516,-4184,68
+1-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,3503,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4340,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,0,,70,,,,,,,21700,67,6,0,17516,-4184,68
+1-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,3503,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4340,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,0,,72,,,,,,,21700,67,6,0,17516,-4184,68
+1-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,3504,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4340,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,4471,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,17516,,,,,,,,,21700,67,6,0,17516,-4184,68
+1-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,21700,17,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,21700,67,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-snapshot,DIST,Distribution interface,Header,Water,Peak demand,Running,#78b7d1,Snapshot,999,Snapshot,21700,67,,,,,,,,21700,67,6,0,17516,-4184,68
+1-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Peak demand,Running,#8ed9e6,Snapshot,999,Snapshot,0,,,,,,,2.03,0.43,21700,67,6,0,17516,-4184,68
+1-DIST-0,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,0,07:00,21871,68.1,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-1,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,1,08:00,22017,68.3,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-2,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,2,09:00,21709,68,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-3,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,3,10:00,21090,67.3,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-4,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,4,11:00,20452,66.5,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-5,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,5,12:00,20094,65.9,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-6,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,6,13:00,20186,65.7,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-7,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,7,14:00,20684,66,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-8,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,8,15:00,21353,66.7,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-9,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,9,16:00,21879,67.5,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-10,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,10,17:00,22015,68.1,,,,,,,,21700,67,6,0,17516,-4184,68
+1-DIST-11,DIST,Distribution interface,Trend,Water,Peak demand,Running,#78b7d1,Trend,11,18:00,21696,68.3,,,,,,,,21700,67,6,0,17516,-4184,68
+2-W01A-snapshot,W01A,Remote well 01A,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W03A-snapshot,W03A,Remote well 03A,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W04A-snapshot,W04A,Remote well 04A,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W05A-snapshot,W05A,Remote well 05A,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W08-snapshot,W08,Remote well 08,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W11-snapshot,W11,Remote well 11,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W10-snapshot,W10,Remote well 10,Well,Water,Remote wells offline,Offline,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-W09-snapshot,W09,On-site well 09,Well,Water,Remote wells offline,Running,#39c6b4,Snapshot,998,Snapshot,690,,,,,,,,,12300,57,4,1,12546,246,54
+2-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,690,,,,,,,,,12300,57,4,1,12546,246,54
+2-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Remote wells offline,Standby,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,0,,,12300,57,4,1,12546,246,54
+2-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Remote wells offline,Standby,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,0,,,12300,57,4,1,12546,246,54
+2-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Remote wells offline,Dosing,#f0b652,Snapshot,998,Snapshot,0,,,,,,1.2,,,12300,57,4,1,12546,246,54
+2-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Remote wells offline,Dosing,#af93ee,Snapshot,998,Snapshot,0,,,,,,0.35,,,12300,57,4,1,12546,246,54
+2-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,6156,,,,,100,,,,12300,57,4,1,12546,246,54
+2-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,6156,,,,,,,,,12300,57,4,1,12546,246,54
+2-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,0,,,,,,,1.58,,12300,57,4,1,12546,246,54
+2-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Remote wells offline,Dosing,#f0b652,Snapshot,998,Snapshot,0,,,,,,1.05,,,12300,57,4,1,12546,246,54
+2-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Remote wells offline,Dosing,#af93ee,Snapshot,998,Snapshot,0,,,,,,0.32,,,12300,57,4,1,12546,246,54
+2-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,5700,,,,,100,,,,12300,57,4,1,12546,246,54
+2-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,5700,,,,,,,,,12300,57,4,1,12546,246,54
+2-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,0,,,,,,,1.71,,12300,57,4,1,12546,246,54
+2-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Remote wells offline,Dosing,#f0b652,Snapshot,998,Snapshot,0,,,,,,1.05,,,12300,57,4,1,12546,246,54
+2-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Remote wells offline,Dosing,#af93ee,Snapshot,998,Snapshot,0,,,,,,0.32,,,12300,57,4,1,12546,246,54
+2-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Remote wells offline,Running,#5ac2b8,Snapshot,998,Snapshot,3184,57,,1199,73,,,,,12300,57,4,1,12546,246,54
+2-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Remote wells offline,Running,#5ac2b8,Snapshot,998,Snapshot,2935,57,,1181,71,,,,,12300,57,4,1,12546,246,54
+2-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Remote wells offline,Standby,#7b8fa2,Snapshot,998,Snapshot,0,,,0,0,,,,,12300,57,4,1,12546,246,54
+2-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Remote wells offline,Running,#5ac2b8,Snapshot,998,Snapshot,3122,57,,1195,73,,,,,12300,57,4,1,12546,246,54
+2-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Remote wells offline,Running,#5ac2b8,Snapshot,998,Snapshot,3059,57,,1190,72,,,,,12300,57,4,1,12546,246,54
+2-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Remote wells offline,Standby,#7b8fa2,Snapshot,998,Snapshot,0,,,0,0,,,,,12300,57,4,1,12546,246,54
+2-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,0,,50,,,,,,,12300,57,4,1,12546,246,54
+2-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2509,,,,,,,,,12300,57,4,1,12546,246,54
+2-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2460,,,,,,,,,12300,57,4,1,12546,246,54
+2-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,0,,52,,,,,,,12300,57,4,1,12546,246,54
+2-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2509,,,,,,,,,12300,57,4,1,12546,246,54
+2-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2460,,,,,,,,,12300,57,4,1,12546,246,54
+2-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,0,,54,,,,,,,12300,57,4,1,12546,246,54
+2-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2509,,,,,,,,,12300,57,4,1,12546,246,54
+2-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2460,,,,,,,,,12300,57,4,1,12546,246,54
+2-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,0,,56,,,,,,,12300,57,4,1,12546,246,54
+2-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2509,,,,,,,,,12300,57,4,1,12546,246,54
+2-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2460,,,,,,,,,12300,57,4,1,12546,246,54
+2-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,0,,58,,,,,,,12300,57,4,1,12546,246,54
+2-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2510,,,,,,,,,12300,57,4,1,12546,246,54
+2-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,2460,,,,,,,,,12300,57,4,1,12546,246,54
+2-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Remote wells offline,No flow,#7b8fa2,Snapshot,998,Snapshot,0,,,,,,,,,12300,57,4,1,12546,246,54
+2-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,12546,,,,,,,,,12300,57,4,1,12546,246,54
+2-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,12300,17,,,,,,,,12300,57,4,1,12546,246,54
+2-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,12300,57,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-snapshot,DIST,Distribution interface,Header,Water,Remote wells offline,Running,#78b7d1,Snapshot,998,Snapshot,12300,57,,,,,,,,12300,57,4,1,12546,246,54
+2-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Remote wells offline,Running,#8ed9e6,Snapshot,998,Snapshot,0,,,,,,,2.03,0.43,12300,57,4,1,12546,246,54
+2-DIST-0,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,0,07:00,12434,58.2,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-1,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,1,08:00,12168,57.6,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-2,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,2,09:00,11790,56.8,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-3,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,3,10:00,11478,56.1,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-4,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,4,11:00,11380,55.7,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-5,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,5,12:00,11540,55.8,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-6,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,6,13:00,11885,56.4,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-7,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,7,14:00,12251,57.2,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-8,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,8,15:00,12467,57.9,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-9,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,9,16:00,12430,58.3,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-10,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,10,17:00,12159,58.2,,,,,,,,12300,57,4,1,12546,246,54
+2-DIST-11,DIST,Distribution interface,Trend,Water,Remote wells offline,Running,#78b7d1,Trend,11,18:00,11781,57.6,,,,,,,,12300,57,4,1,12546,246,54
+3-W01A-snapshot,W01A,Remote well 01A,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,557,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,557,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W03A-snapshot,W03A,Remote well 03A,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,504,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,504,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,441,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,441,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W04A-snapshot,W04A,Remote well 04A,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,536,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,536,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W05A-snapshot,W05A,Remote well 05A,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,641,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,641,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W08-snapshot,W08,Remote well 08,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,515,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,515,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W11-snapshot,W11,Remote well 11,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,604,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,604,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W10-snapshot,W10,Remote well 10,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,551,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,551,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-W09-snapshot,W09,On-site well 09,Well,Water,Surface inlet unavailable,Running,#39c6b4,Snapshot,997,Snapshot,690,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,690,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Surface inlet unavailable,Dosing,#f0b652,Snapshot,997,Snapshot,0,,,,,,0.85,,,9300,55,4,1,5039,-4261,57
+3-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Surface inlet unavailable,Dosing,#f0b652,Snapshot,997,Snapshot,0,,,,,,0.55,,,9300,55,4,1,5039,-4261,57
+3-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Surface inlet unavailable,Dosing,#f0b652,Snapshot,997,Snapshot,0,,,,,,1.2,,,9300,55,4,1,5039,-4261,57
+3-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Surface inlet unavailable,Dosing,#af93ee,Snapshot,997,Snapshot,0,,,,,,0.35,,,9300,55,4,1,5039,-4261,57
+3-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Surface inlet unavailable,Closed,#7b8fa2,Snapshot,997,Snapshot,0,,,,,0,,,,9300,55,4,1,5039,-4261,57
+3-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,No flow,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Surface inlet unavailable,No sample,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,0,,,9300,55,4,1,5039,-4261,57
+3-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,0,,,9300,55,4,1,5039,-4261,57
+3-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Surface inlet unavailable,Closed,#7b8fa2,Snapshot,997,Snapshot,0,,,,,0,,,,9300,55,4,1,5039,-4261,57
+3-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Surface inlet unavailable,No flow,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Surface inlet unavailable,No sample,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,0,,,9300,55,4,1,5039,-4261,57
+3-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,,,,0,,,9300,55,4,1,5039,-4261,57
+3-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Surface inlet unavailable,Running,#5ac2b8,Snapshot,997,Snapshot,2360,55,,1140,67,,,,,9300,55,4,1,5039,-4261,57
+3-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Surface inlet unavailable,Running,#5ac2b8,Snapshot,997,Snapshot,2175,55,,1127,65,,,,,9300,55,4,1,5039,-4261,57
+3-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Surface inlet unavailable,Running,#5ac2b8,Snapshot,997,Snapshot,2499,55,,1150,68,,,,,9300,55,4,1,5039,-4261,57
+3-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,0,0,,,,,9300,55,4,1,5039,-4261,57
+3-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Surface inlet unavailable,Running,#5ac2b8,Snapshot,997,Snapshot,2266,55,,1133,66,,,,,9300,55,4,1,5039,-4261,57
+3-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Surface inlet unavailable,Standby,#7b8fa2,Snapshot,997,Snapshot,0,,,0,0,,,,,9300,55,4,1,5039,-4261,57
+3-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,0,,53,,,,,,,9300,55,4,1,5039,-4261,57
+3-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1007,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1860,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,0,,55,,,,,,,9300,55,4,1,5039,-4261,57
+3-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1007,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1860,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,0,,57,,,,,,,9300,55,4,1,5039,-4261,57
+3-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1007,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1860,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,0,,59,,,,,,,9300,55,4,1,5039,-4261,57
+3-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1007,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1860,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,0,,61,,,,,,,9300,55,4,1,5039,-4261,57
+3-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1011,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,1860,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,4349,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,5039,,,,,,,,,9300,55,4,1,5039,-4261,57
+3-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,9300,17,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,9300,55,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-snapshot,DIST,Distribution interface,Header,Water,Surface inlet unavailable,Running,#78b7d1,Snapshot,997,Snapshot,9300,55,,,,,,,,9300,55,4,1,5039,-4261,57
+3-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Surface inlet unavailable,Running,#8ed9e6,Snapshot,997,Snapshot,0,,,,,,,2.03,0.43,9300,55,4,1,5039,-4261,57
+3-DIST-0,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,0,07:00,9080,55.2,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-1,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,1,08:00,8799,54.4,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-2,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,2,09:00,8623,53.8,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-3,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,3,10:00,8634,53.7,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-4,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,4,11:00,8827,54.1,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-5,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,5,12:00,9111,54.8,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-6,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,6,13:00,9353,55.6,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-7,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,7,14:00,9439,56.2,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-8,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,8,15:00,9328,56.3,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-9,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,9,16:00,9073,55.9,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-10,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,10,17:00,8793,55.2,,,,,,,,9300,55,4,1,5039,-4261,57
+3-DIST-11,DIST,Distribution interface,Trend,Water,Surface inlet unavailable,Running,#78b7d1,Trend,11,18:00,8621,54.4,,,,,,,,9300,55,4,1,5039,-4261,57
+4-W01A-snapshot,W01A,Remote well 01A,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,530,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,530,,,,,,,,,14900,62,4,0,15230,330,70
+4-W03A-snapshot,W03A,Remote well 03A,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,480,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,480,,,,,,,,,14900,62,4,0,15230,330,70
+4-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,420,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,420,,,,,,,,,14900,62,4,0,15230,330,70
+4-W04A-snapshot,W04A,Remote well 04A,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,510,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,510,,,,,,,,,14900,62,4,0,15230,330,70
+4-W05A-snapshot,W05A,Remote well 05A,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,610,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,610,,,,,,,,,14900,62,4,0,15230,330,70
+4-W08-snapshot,W08,Remote well 08,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,490,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,490,,,,,,,,,14900,62,4,0,15230,330,70
+4-W11-snapshot,W11,Remote well 11,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,575,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,575,,,,,,,,,14900,62,4,0,15230,330,70
+4-W10-snapshot,W10,Remote well 10,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,525,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,525,,,,,,,,,14900,62,4,0,15230,330,70
+4-W09-snapshot,W09,On-site well 09,Well,Water,Booster maintenance,Running,#39c6b4,Snapshot,996,Snapshot,690,,,,,,,,,14900,62,4,0,15230,330,70
+4-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,690,,,,,,,,,14900,62,4,0,15230,330,70
+4-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Booster maintenance,Dosing,#f0b652,Snapshot,996,Snapshot,0,,,,,,0.85,,,14900,62,4,0,15230,330,70
+4-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Booster maintenance,Dosing,#f0b652,Snapshot,996,Snapshot,0,,,,,,0.55,,,14900,62,4,0,15230,330,70
+4-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Booster maintenance,Dosing,#f0b652,Snapshot,996,Snapshot,0,,,,,,1.2,,,14900,62,4,0,15230,330,70
+4-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Booster maintenance,Dosing,#af93ee,Snapshot,996,Snapshot,0,,,,,,0.35,,,14900,62,4,0,15230,330,70
+4-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,5400,,,,,100,,,,14900,62,4,0,15230,330,70
+4-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,5400,,,,,,,,,14900,62,4,0,15230,330,70
+4-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,0,,,,,,,1.58,,14900,62,4,0,15230,330,70
+4-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Booster maintenance,Dosing,#f0b652,Snapshot,996,Snapshot,0,,,,,,1.05,,,14900,62,4,0,15230,330,70
+4-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Booster maintenance,Dosing,#af93ee,Snapshot,996,Snapshot,0,,,,,,0.32,,,14900,62,4,0,15230,330,70
+4-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,5000,,,,,100,,,,14900,62,4,0,15230,330,70
+4-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,5000,,,,,,,,,14900,62,4,0,15230,330,70
+4-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,0,,,,,,,1.71,,14900,62,4,0,15230,330,70
+4-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Booster maintenance,Dosing,#f0b652,Snapshot,996,Snapshot,0,,,,,,1.05,,,14900,62,4,0,15230,330,70
+4-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Booster maintenance,Dosing,#af93ee,Snapshot,996,Snapshot,0,,,,,,0.32,,,14900,62,4,0,15230,330,70
+4-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Booster maintenance,Running,#5ac2b8,Snapshot,996,Snapshot,3857,62,,1248,79,,,,,14900,62,4,0,15230,330,70
+4-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Booster maintenance,Running,#5ac2b8,Snapshot,996,Snapshot,3555,62,,1226,76,,,,,14900,62,4,0,15230,330,70
+4-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Booster maintenance,Standby,#7b8fa2,Snapshot,996,Snapshot,0,,,0,0,,,,,14900,62,4,0,15230,330,70
+4-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Booster maintenance,Running,#5ac2b8,Snapshot,996,Snapshot,3782,62,,1242,78,,,,,14900,62,4,0,15230,330,70
+4-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Booster maintenance,Running,#5ac2b8,Snapshot,996,Snapshot,3706,62,,1237,78,,,,,14900,62,4,0,15230,330,70
+4-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Booster maintenance,Standby,#7b8fa2,Snapshot,996,Snapshot,0,,,0,0,,,,,14900,62,4,0,15230,330,70
+4-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,0,,66,,,,,,,14900,62,4,0,15230,330,70
+4-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,3046,,,,,,,,,14900,62,4,0,15230,330,70
+4-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,2980,,,,,,,,,14900,62,4,0,15230,330,70
+4-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,0,,68,,,,,,,14900,62,4,0,15230,330,70
+4-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,3046,,,,,,,,,14900,62,4,0,15230,330,70
+4-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,2980,,,,,,,,,14900,62,4,0,15230,330,70
+4-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,0,,70,,,,,,,14900,62,4,0,15230,330,70
+4-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,3046,,,,,,,,,14900,62,4,0,15230,330,70
+4-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,2980,,,,,,,,,14900,62,4,0,15230,330,70
+4-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,0,,72,,,,,,,14900,62,4,0,15230,330,70
+4-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,3046,,,,,,,,,14900,62,4,0,15230,330,70
+4-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,2980,,,,,,,,,14900,62,4,0,15230,330,70
+4-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,0,,74,,,,,,,14900,62,4,0,15230,330,70
+4-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,3046,,,,,,,,,14900,62,4,0,15230,330,70
+4-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,2980,,,,,,,,,14900,62,4,0,15230,330,70
+4-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,4140,,,,,,,,,14900,62,4,0,15230,330,70
+4-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,15230,,,,,,,,,14900,62,4,0,15230,330,70
+4-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,14900,17,,,,,,,,14900,62,4,0,15230,330,70
+4-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,14900,62,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-snapshot,DIST,Distribution interface,Header,Water,Booster maintenance,Running,#78b7d1,Snapshot,996,Snapshot,14900,62,,,,,,,,14900,62,4,0,15230,330,70
+4-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Booster maintenance,Running,#8ed9e6,Snapshot,996,Snapshot,0,,,,,,,2.03,0.43,14900,62,4,0,15230,330,70
+4-DIST-0,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,0,07:00,13946,61,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-1,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,1,08:00,13783,60.7,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-2,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,2,09:00,13935,60.9,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-3,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,3,10:00,14331,61.5,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-4,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,4,11:00,14784,62.3,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-5,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,5,12:00,15082,63,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-6,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,6,13:00,15084,63.3,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-7,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,7,14:00,14789,63.1,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-8,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,8,15:00,14336,62.5,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-9,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,9,16:00,13938,61.7,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-10,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,10,17:00,13783,61,,,,,,,,14900,62,4,0,15230,330,70
+4-DIST-11,DIST,Distribution interface,Trend,Water,Booster maintenance,Running,#78b7d1,Trend,11,18:00,13942,60.7,,,,,,,,14900,62,4,0,15230,330,70
+5-W01A-snapshot,W01A,Remote well 01A,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,451,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,451,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W03A-snapshot,W03A,Remote well 03A,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,408,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,408,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,357,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,357,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W04A-snapshot,W04A,Remote well 04A,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,434,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,434,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W05A-snapshot,W05A,Remote well 05A,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,519,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,519,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W08-snapshot,W08,Remote well 08,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,417,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,417,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W11-snapshot,W11,Remote well 11,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,489,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,489,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W10-snapshot,W10,Remote well 10,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,446,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,446,,,,,,,,,9700,51,3,2,13051,3351,25
+5-W09-snapshot,W09,On-site well 09,Well,Water,Low storage,Running,#39c6b4,Snapshot,995,Snapshot,690,,,,,,,,,9700,51,3,2,13051,3351,25
+5-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,690,,,,,,,,,9700,51,3,2,13051,3351,25
+5-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Low storage,Dosing,#f0b652,Snapshot,995,Snapshot,0,,,,,,0.85,,,9700,51,3,2,13051,3351,25
+5-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Low storage,Dosing,#f0b652,Snapshot,995,Snapshot,0,,,,,,0.55,,,9700,51,3,2,13051,3351,25
+5-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Low storage,Dosing,#f0b652,Snapshot,995,Snapshot,0,,,,,,1.2,,,9700,51,3,2,13051,3351,25
+5-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Low storage,Dosing,#af93ee,Snapshot,995,Snapshot,0,,,,,,0.35,,,9700,51,3,2,13051,3351,25
+5-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,4590,,,,,100,,,,9700,51,3,2,13051,3351,25
+5-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,4590,,,,,,,,,9700,51,3,2,13051,3351,25
+5-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,0,,,,,,,1.58,,9700,51,3,2,13051,3351,25
+5-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Low storage,Dosing,#f0b652,Snapshot,995,Snapshot,0,,,,,,1.05,,,9700,51,3,2,13051,3351,25
+5-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Low storage,Dosing,#af93ee,Snapshot,995,Snapshot,0,,,,,,0.32,,,9700,51,3,2,13051,3351,25
+5-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,4250,,,,,100,,,,9700,51,3,2,13051,3351,25
+5-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,4250,,,,,,,,,9700,51,3,2,13051,3351,25
+5-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,0,,,,,,,1.71,,9700,51,3,2,13051,3351,25
+5-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Low storage,Dosing,#f0b652,Snapshot,995,Snapshot,0,,,,,,1.05,,,9700,51,3,2,13051,3351,25
+5-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Low storage,Dosing,#af93ee,Snapshot,995,Snapshot,0,,,,,,0.32,,,9700,51,3,2,13051,3351,25
+5-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Low storage,Running,#5ac2b8,Snapshot,995,Snapshot,3212,51,,1201,74,,,,,9700,51,3,2,13051,3351,25
+5-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Low storage,Standby,#7b8fa2,Snapshot,995,Snapshot,0,,,0,0,,,,,9700,51,3,2,13051,3351,25
+5-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Low storage,Running,#5ac2b8,Snapshot,995,Snapshot,3401,51,,1215,75,,,,,9700,51,3,2,13051,3351,25
+5-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Low storage,Standby,#7b8fa2,Snapshot,995,Snapshot,0,,,0,0,,,,,9700,51,3,2,13051,3351,25
+5-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Low storage,Running,#5ac2b8,Snapshot,995,Snapshot,3087,51,,1192,73,,,,,9700,51,3,2,13051,3351,25
+5-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Low storage,Standby,#7b8fa2,Snapshot,995,Snapshot,0,,,0,0,,,,,9700,51,3,2,13051,3351,25
+5-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Low storage,Warning,#f4af53,Snapshot,995,Snapshot,0,,21,,,,,,,9700,51,3,2,13051,3351,25
+5-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,2610,,,,,,,,,9700,51,3,2,13051,3351,25
+5-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,1940,,,,,,,,,9700,51,3,2,13051,3351,25
+5-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Low storage,Warning,#f4af53,Snapshot,995,Snapshot,0,,23,,,,,,,9700,51,3,2,13051,3351,25
+5-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,2610,,,,,,,,,9700,51,3,2,13051,3351,25
+5-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,1940,,,,,,,,,9700,51,3,2,13051,3351,25
+5-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Low storage,Warning,#f4af53,Snapshot,995,Snapshot,0,,25,,,,,,,9700,51,3,2,13051,3351,25
+5-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,2610,,,,,,,,,9700,51,3,2,13051,3351,25
+5-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,1940,,,,,,,,,9700,51,3,2,13051,3351,25
+5-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Low storage,Warning,#f4af53,Snapshot,995,Snapshot,0,,27,,,,,,,9700,51,3,2,13051,3351,25
+5-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,2610,,,,,,,,,9700,51,3,2,13051,3351,25
+5-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,1940,,,,,,,,,9700,51,3,2,13051,3351,25
+5-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Low storage,Warning,#f4af53,Snapshot,995,Snapshot,0,,29,,,,,,,9700,51,3,2,13051,3351,25
+5-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,2611,,,,,,,,,9700,51,3,2,13051,3351,25
+5-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,1940,,,,,,,,,9700,51,3,2,13051,3351,25
+5-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,3521,,,,,,,,,9700,51,3,2,13051,3351,25
+5-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,13051,,,,,,,,,9700,51,3,2,13051,3351,25
+5-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,9700,17,,,,,,,,9700,51,3,2,13051,3351,25
+5-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,9700,51,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-snapshot,DIST,Distribution interface,Header,Water,Low storage,Running,#78b7d1,Snapshot,995,Snapshot,9700,51,,,,,,,,9700,51,3,2,13051,3351,25
+5-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Low storage,Running,#8ed9e6,Snapshot,995,Snapshot,0,,,,,,,1.6,0.43,9700,51,3,2,13051,3351,25
+5-DIST-0,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,0,07:00,8990,49.8,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-1,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,1,08:00,9169,50.2,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-2,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,2,09:00,9460,51,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-3,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,3,10:00,9727,51.7,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-4,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,4,11:00,9845,52.2,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-5,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,5,12:00,9758,52.2,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-6,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,6,13:00,9506,51.8,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-7,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,7,14:00,9209,51,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-8,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,8,15:00,9006,50.2,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-9,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,9,16:00,8993,49.8,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-10,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,10,17:00,9175,49.8,,,,,,,,9700,51,3,2,13051,3351,25
+5-DIST-11,DIST,Distribution interface,Trend,Water,Low storage,Running,#78b7d1,Trend,11,18:00,9467,50.2,,,,,,,,9700,51,3,2,13051,3351,25
+6-W01A-snapshot,W01A,Remote well 01A,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,239,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,239,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W03A-snapshot,W03A,Remote well 03A,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,216,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,216,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,189,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,189,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W04A-snapshot,W04A,Remote well 04A,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,230,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,230,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W05A-snapshot,W05A,Remote well 05A,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,275,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,275,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W08-snapshot,W08,Remote well 08,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,221,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,221,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W11-snapshot,W11,Remote well 11,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,259,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,259,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W10-snapshot,W10,Remote well 10,Well,Water,Limited power,Running,#39c6b4,Snapshot,994,Snapshot,236,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,236,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-W09-snapshot,W09,On-site well 09,Well,Water,Limited power,Offline,#7b8fa2,Snapshot,994,Snapshot,0,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Limited power,No flow,#7b8fa2,Snapshot,994,Snapshot,0,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Limited power,Dosing,#f0b652,Snapshot,994,Snapshot,0,,,,,,0.85,,,8100,51,2,1,6200,-1900,61
+6-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Limited power,Dosing,#f0b652,Snapshot,994,Snapshot,0,,,,,,0.55,,,8100,51,2,1,6200,-1900,61
+6-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,,,,0,,,8100,51,2,1,6200,-1900,61
+6-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,,,,0,,,8100,51,2,1,6200,-1900,61
+6-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,2835,,,,,70,,,,8100,51,2,1,6200,-1900,61
+6-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,2835,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,0,,,,,,,1.58,,8100,51,2,1,6200,-1900,61
+6-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Limited power,Dosing,#f0b652,Snapshot,994,Snapshot,0,,,,,,1.05,,,8100,51,2,1,6200,-1900,61
+6-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Limited power,Dosing,#af93ee,Snapshot,994,Snapshot,0,,,,,,0.32,,,8100,51,2,1,6200,-1900,61
+6-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1500,,,,,40,,,,8100,51,2,1,6200,-1900,61
+6-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,1500,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,0,,,,,,,1.71,,8100,51,2,1,6200,-1900,61
+6-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Limited power,Dosing,#f0b652,Snapshot,994,Snapshot,0,,,,,,1.05,,,8100,51,2,1,6200,-1900,61
+6-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Limited power,Dosing,#af93ee,Snapshot,994,Snapshot,0,,,,,,0.32,,,8100,51,2,1,6200,-1900,61
+6-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Limited power,Running,#5ac2b8,Snapshot,994,Snapshot,3934,51,,1253,79,,,,,8100,51,2,1,6200,-1900,61
+6-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,0,0,,,,,8100,51,2,1,6200,-1900,61
+6-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Limited power,Running,#5ac2b8,Snapshot,994,Snapshot,4166,51,,1270,81,,,,,8100,51,2,1,6200,-1900,61
+6-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,0,0,,,,,8100,51,2,1,6200,-1900,61
+6-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,0,0,,,,,8100,51,2,1,6200,-1900,61
+6-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Limited power,Standby,#7b8fa2,Snapshot,994,Snapshot,0,,,0,0,,,,,8100,51,2,1,6200,-1900,61
+6-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,0,,57,,,,,,,8100,51,2,1,6200,-1900,61
+6-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1240,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1620,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,0,,59,,,,,,,8100,51,2,1,6200,-1900,61
+6-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1240,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1620,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,0,,61,,,,,,,8100,51,2,1,6200,-1900,61
+6-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1240,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1620,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,0,,63,,,,,,,8100,51,2,1,6200,-1900,61
+6-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1240,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1620,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,0,,65,,,,,,,8100,51,2,1,6200,-1900,61
+6-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1240,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1620,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,1865,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,6200,,,,,,,,,8100,51,2,1,6200,-1900,61
+6-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,8100,17,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,8100,51,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-snapshot,DIST,Distribution interface,Header,Water,Limited power,Running,#78b7d1,Snapshot,994,Snapshot,8100,51,,,,,,,,8100,51,2,1,6200,-1900,61
+6-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Limited power,Running,#8ed9e6,Snapshot,994,Snapshot,0,,,,,,,2.03,0.29,8100,51,2,1,6200,-1900,61
+6-DIST-0,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,0,07:00,7755,50.6,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-1,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,1,08:00,8005,51.4,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-2,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,2,09:00,8185,52.1,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-3,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,3,10:00,8211,52.3,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-4,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,4,11:00,8070,52,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-5,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,5,12:00,7830,51.4,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-6,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,6,13:00,7602,50.5,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-7,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,7,14:00,7494,49.9,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-8,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,8,15:00,7557,49.7,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-9,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,9,16:00,7761,50,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-10,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,10,17:00,8010,50.7,,,,,,,,8100,51,2,1,6200,-1900,61
+6-DIST-11,DIST,Distribution interface,Trend,Water,Limited power,Running,#78b7d1,Trend,11,18:00,8187,51.5,,,,,,,,8100,51,2,1,6200,-1900,61
+7-W01A-snapshot,W01A,Remote well 01A,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,530,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,530,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W03A-snapshot,W03A,Remote well 03A,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,480,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,480,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,420,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,420,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W04A-snapshot,W04A,Remote well 04A,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,510,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,510,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W05A-snapshot,W05A,Remote well 05A,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,610,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,610,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W08-snapshot,W08,Remote well 08,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,490,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,490,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W11-snapshot,W11,Remote well 11,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,575,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,575,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W10-snapshot,W10,Remote well 10,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,525,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,525,,,,,,,,,8200,43,2,2,15230,7030,64
+7-W09-snapshot,W09,On-site well 09,Well,Water,Low distribution pressure,Running,#39c6b4,Snapshot,993,Snapshot,690,,,,,,,,,8200,43,2,2,15230,7030,64
+7-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,690,,,,,,,,,8200,43,2,2,15230,7030,64
+7-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Low distribution pressure,Dosing,#f0b652,Snapshot,993,Snapshot,0,,,,,,0.85,,,8200,43,2,2,15230,7030,64
+7-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Low distribution pressure,Dosing,#f0b652,Snapshot,993,Snapshot,0,,,,,,0.55,,,8200,43,2,2,15230,7030,64
+7-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Low distribution pressure,Dosing,#f0b652,Snapshot,993,Snapshot,0,,,,,,1.2,,,8200,43,2,2,15230,7030,64
+7-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Low distribution pressure,Dosing,#af93ee,Snapshot,993,Snapshot,0,,,,,,0.35,,,8200,43,2,2,15230,7030,64
+7-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,5400,,,,,100,,,,8200,43,2,2,15230,7030,64
+7-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,5400,,,,,,,,,8200,43,2,2,15230,7030,64
+7-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,0,,,,,,,1.58,,8200,43,2,2,15230,7030,64
+7-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Low distribution pressure,Dosing,#f0b652,Snapshot,993,Snapshot,0,,,,,,1.05,,,8200,43,2,2,15230,7030,64
+7-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Low distribution pressure,Dosing,#af93ee,Snapshot,993,Snapshot,0,,,,,,0.32,,,8200,43,2,2,15230,7030,64
+7-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,5000,,,,,100,,,,8200,43,2,2,15230,7030,64
+7-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,5000,,,,,,,,,8200,43,2,2,15230,7030,64
+7-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,0,,,,,,,1.71,,8200,43,2,2,15230,7030,64
+7-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Low distribution pressure,Dosing,#f0b652,Snapshot,993,Snapshot,0,,,,,,1.05,,,8200,43,2,2,15230,7030,64
+7-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Low distribution pressure,Dosing,#af93ee,Snapshot,993,Snapshot,0,,,,,,0.32,,,8200,43,2,2,15230,7030,64
+7-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Low distribution pressure,Warning,#f4af53,Snapshot,993,Snapshot,4267,43,,1277,82,,,,,8200,43,2,2,15230,7030,64
+7-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Low distribution pressure,Warning,#f4af53,Snapshot,993,Snapshot,3933,43,,1253,79,,,,,8200,43,2,2,15230,7030,64
+7-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Low distribution pressure,Standby,#7b8fa2,Snapshot,993,Snapshot,0,,,0,0,,,,,8200,43,2,2,15230,7030,64
+7-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Low distribution pressure,Standby,#7b8fa2,Snapshot,993,Snapshot,0,,,0,0,,,,,8200,43,2,2,15230,7030,64
+7-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Low distribution pressure,Standby,#7b8fa2,Snapshot,993,Snapshot,0,,,0,0,,,,,8200,43,2,2,15230,7030,64
+7-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Low distribution pressure,Standby,#7b8fa2,Snapshot,993,Snapshot,0,,,0,0,,,,,8200,43,2,2,15230,7030,64
+7-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,0,,60,,,,,,,8200,43,2,2,15230,7030,64
+7-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,3046,,,,,,,,,8200,43,2,2,15230,7030,64
+7-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,1640,,,,,,,,,8200,43,2,2,15230,7030,64
+7-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,0,,62,,,,,,,8200,43,2,2,15230,7030,64
+7-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,3046,,,,,,,,,8200,43,2,2,15230,7030,64
+7-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,1640,,,,,,,,,8200,43,2,2,15230,7030,64
+7-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,0,,64,,,,,,,8200,43,2,2,15230,7030,64
+7-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,3046,,,,,,,,,8200,43,2,2,15230,7030,64
+7-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,1640,,,,,,,,,8200,43,2,2,15230,7030,64
+7-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,0,,66,,,,,,,8200,43,2,2,15230,7030,64
+7-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,3046,,,,,,,,,8200,43,2,2,15230,7030,64
+7-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,1640,,,,,,,,,8200,43,2,2,15230,7030,64
+7-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,0,,68,,,,,,,8200,43,2,2,15230,7030,64
+7-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,3046,,,,,,,,,8200,43,2,2,15230,7030,64
+7-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,1640,,,,,,,,,8200,43,2,2,15230,7030,64
+7-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,4140,,,,,,,,,8200,43,2,2,15230,7030,64
+7-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,15230,,,,,,,,,8200,43,2,2,15230,7030,64
+7-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,8200,17,,,,,,,,8200,43,2,2,15230,7030,64
+7-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,8200,43,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-snapshot,DIST,Distribution interface,Header,Water,Low distribution pressure,Running,#78b7d1,Snapshot,993,Snapshot,8200,43,,,,,,,,8200,43,2,2,15230,7030,64
+7-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Low distribution pressure,Running,#8ed9e6,Snapshot,993,Snapshot,0,,,,,,,2.03,0.43,8200,43,2,2,15230,7030,64
+7-DIST-0,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,0,07:00,8196,43.9,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-1,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,1,08:00,8319,44.3,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-2,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,2,09:00,8269,44.2,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-3,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,3,10:00,8072,43.7,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-4,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,4,11:00,7819,42.9,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-5,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,5,12:00,7629,42.1,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-6,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,6,13:00,7593,41.7,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-7,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,7,14:00,7726,41.8,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-8,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,8,15:00,7966,42.3,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-9,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,9,16:00,8201,43.1,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-10,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,10,17:00,8320,43.9,,,,,,,,8200,43,2,2,15230,7030,64
+7-DIST-11,DIST,Distribution interface,Trend,Water,Low distribution pressure,Running,#78b7d1,Trend,11,18:00,8266,44.3,,,,,,,,8200,43,2,2,15230,7030,64
+8-W01A-snapshot,W01A,Remote well 01A,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,530,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,530,,,,,,,,,14300,63,4,2,15230,930,72
+8-W03A-snapshot,W03A,Remote well 03A,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,480,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,480,,,,,,,,,14300,63,4,2,15230,930,72
+8-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,420,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,420,,,,,,,,,14300,63,4,2,15230,930,72
+8-W04A-snapshot,W04A,Remote well 04A,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,510,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,510,,,,,,,,,14300,63,4,2,15230,930,72
+8-W05A-snapshot,W05A,Remote well 05A,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,610,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,610,,,,,,,,,14300,63,4,2,15230,930,72
+8-W08-snapshot,W08,Remote well 08,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,490,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,490,,,,,,,,,14300,63,4,2,15230,930,72
+8-W11-snapshot,W11,Remote well 11,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,575,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,575,,,,,,,,,14300,63,4,2,15230,930,72
+8-W10-snapshot,W10,Remote well 10,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,525,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,525,,,,,,,,,14300,63,4,2,15230,930,72
+8-W09-snapshot,W09,On-site well 09,Well,Water,Chlorine dosing fault,Running,#39c6b4,Snapshot,992,Snapshot,690,,,,,,,,,14300,63,4,2,15230,930,72
+8-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,690,,,,,,,,,14300,63,4,2,15230,930,72
+8-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Chlorine dosing fault,Fault,#e96770,Snapshot,992,Snapshot,0,,,,,,0,,,14300,63,4,2,15230,930,72
+8-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Chlorine dosing fault,Fault,#e96770,Snapshot,992,Snapshot,0,,,,,,0,,,14300,63,4,2,15230,930,72
+8-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Chlorine dosing fault,Fault,#e96770,Snapshot,992,Snapshot,0,,,,,,0,,,14300,63,4,2,15230,930,72
+8-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Chlorine dosing fault,Dosing,#af93ee,Snapshot,992,Snapshot,0,,,,,,0.35,,,14300,63,4,2,15230,930,72
+8-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,5400,,,,,100,,,,14300,63,4,2,15230,930,72
+8-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,5400,,,,,,,,,14300,63,4,2,15230,930,72
+8-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,0,,,,,,,1.58,,14300,63,4,2,15230,930,72
+8-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Chlorine dosing fault,Fault,#e96770,Snapshot,992,Snapshot,0,,,,,,0,,,14300,63,4,2,15230,930,72
+8-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Chlorine dosing fault,Dosing,#af93ee,Snapshot,992,Snapshot,0,,,,,,0.32,,,14300,63,4,2,15230,930,72
+8-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,5000,,,,,100,,,,14300,63,4,2,15230,930,72
+8-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,5000,,,,,,,,,14300,63,4,2,15230,930,72
+8-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Chlorine dosing fault,Running,#8ed9e6,Snapshot,992,Snapshot,0,,,,,,,1.71,,14300,63,4,2,15230,930,72
+8-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Chlorine dosing fault,Fault,#e96770,Snapshot,992,Snapshot,0,,,,,,0,,,14300,63,4,2,15230,930,72
+8-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Chlorine dosing fault,Dosing,#af93ee,Snapshot,992,Snapshot,0,,,,,,0.32,,,14300,63,4,2,15230,930,72
+8-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Chlorine dosing fault,Running,#5ac2b8,Snapshot,992,Snapshot,3610,63,,1230,77,,,,,14300,63,4,2,15230,930,72
+8-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Chlorine dosing fault,Running,#5ac2b8,Snapshot,992,Snapshot,3327,63,,1210,75,,,,,14300,63,4,2,15230,930,72
+8-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Chlorine dosing fault,Running,#5ac2b8,Snapshot,992,Snapshot,3823,63,,1245,79,,,,,14300,63,4,2,15230,930,72
+8-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Chlorine dosing fault,Running,#5ac2b8,Snapshot,992,Snapshot,3540,63,,1225,76,,,,,14300,63,4,2,15230,930,72
+8-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Chlorine dosing fault,Standby,#7b8fa2,Snapshot,992,Snapshot,0,,,0,0,,,,,14300,63,4,2,15230,930,72
+8-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Chlorine dosing fault,Standby,#7b8fa2,Snapshot,992,Snapshot,0,,,0,0,,,,,14300,63,4,2,15230,930,72
+8-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,0,,68,,,,,,,14300,63,4,2,15230,930,72
+8-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,3046,,,,,,,,,14300,63,4,2,15230,930,72
+8-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,2860,,,,,,,,,14300,63,4,2,15230,930,72
+8-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,0,,70,,,,,,,14300,63,4,2,15230,930,72
+8-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,3046,,,,,,,,,14300,63,4,2,15230,930,72
+8-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,2860,,,,,,,,,14300,63,4,2,15230,930,72
+8-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,0,,72,,,,,,,14300,63,4,2,15230,930,72
+8-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,3046,,,,,,,,,14300,63,4,2,15230,930,72
+8-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,2860,,,,,,,,,14300,63,4,2,15230,930,72
+8-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,0,,74,,,,,,,14300,63,4,2,15230,930,72
+8-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,3046,,,,,,,,,14300,63,4,2,15230,930,72
+8-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,2860,,,,,,,,,14300,63,4,2,15230,930,72
+8-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,0,,76,,,,,,,14300,63,4,2,15230,930,72
+8-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,3046,,,,,,,,,14300,63,4,2,15230,930,72
+8-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,2860,,,,,,,,,14300,63,4,2,15230,930,72
+8-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,4140,,,,,,,,,14300,63,4,2,15230,930,72
+8-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,15230,,,,,,,,,14300,63,4,2,15230,930,72
+8-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,14300,17,,,,,,,,14300,63,4,2,15230,930,72
+8-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,14300,63,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-snapshot,DIST,Distribution interface,Header,Water,Chlorine dosing fault,Running,#78b7d1,Snapshot,992,Snapshot,14300,63,,,,,,,,14300,63,4,2,15230,930,72
+8-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Chlorine dosing fault,Warning,#f4af53,Snapshot,992,Snapshot,0,,,,,,,0.23,0.43,14300,63,4,2,15230,930,72
+8-DIST-0,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,0,07:00,14508,64.3,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-1,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,1,08:00,14298,63.9,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-2,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,2,09:00,13887,63.2,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-3,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,3,10:00,13469,62.4,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-4,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,4,11:00,13240,61.8,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-5,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,5,12:00,13308,61.7,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-6,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,6,13:00,13640,62.1,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-7,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,7,14:00,14082,62.8,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-8,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,8,15:00,14424,63.6,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-9,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,9,16:00,14506,64.2,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-10,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,10,17:00,14289,64.3,,,,,,,,14300,63,4,2,15230,930,72
+8-DIST-11,DIST,Distribution interface,Trend,Water,Chlorine dosing fault,Running,#78b7d1,Trend,11,18:00,13876,63.9,,,,,,,,14300,63,4,2,15230,930,72
+9-W01A-snapshot,W01A,Remote well 01A,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,530,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W01A-snapshot,FM-W01A,Well 01A electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,530,,,,,,,,,14600,63,4,2,15230,630,72
+9-W03A-snapshot,W03A,Remote well 03A,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,480,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W03A-snapshot,FM-W03A,Well 03A electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,480,,,,,,,,,14600,63,4,2,15230,630,72
+9-W03SB-snapshot,W03SB,Remote well 03SB,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,420,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W03SB-snapshot,FM-W03SB,Well 03SB electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,420,,,,,,,,,14600,63,4,2,15230,630,72
+9-W04A-snapshot,W04A,Remote well 04A,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,510,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W04A-snapshot,FM-W04A,Well 04A electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,510,,,,,,,,,14600,63,4,2,15230,630,72
+9-W05A-snapshot,W05A,Remote well 05A,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,610,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W05A-snapshot,FM-W05A,Well 05A electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,610,,,,,,,,,14600,63,4,2,15230,630,72
+9-W08-snapshot,W08,Remote well 08,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,490,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W08-snapshot,FM-W08,Well 08 electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,490,,,,,,,,,14600,63,4,2,15230,630,72
+9-W11-snapshot,W11,Remote well 11,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,575,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W11-snapshot,FM-W11,Well 11 electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,575,,,,,,,,,14600,63,4,2,15230,630,72
+9-W10-snapshot,W10,Remote well 10,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,525,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W10-snapshot,FM-W10,Well 10 electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,525,,,,,,,,,14600,63,4,2,15230,630,72
+9-W09-snapshot,W09,On-site well 09,Well,Water,Ammonia dosing fault,Running,#39c6b4,Snapshot,991,Snapshot,690,,,,,,,,,14600,63,4,2,15230,630,72
+9-FM-W09-snapshot,FM-W09,On-site well flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,690,,,,,,,,,14600,63,4,2,15230,630,72
+9-CL2-R1-snapshot,CL2-R1,Remote collection chlorine dosing,Chemical injection,Cl2,Ammonia dosing fault,Dosing,#f0b652,Snapshot,991,Snapshot,0,,,,,,0.85,,,14600,63,4,2,15230,630,72
+9-CL2-R2-snapshot,CL2-R2,Remote collection chlorine dosing,Chemical injection,Cl2,Ammonia dosing fault,Dosing,#f0b652,Snapshot,991,Snapshot,0,,,,,,0.55,,,14600,63,4,2,15230,630,72
+9-CL2-W09-snapshot,CL2-W09,On-site well chlorine dosing,Chemical injection,Cl2,Ammonia dosing fault,Dosing,#f0b652,Snapshot,991,Snapshot,0,,,,,,1.2,,,14600,63,4,2,15230,630,72
+9-NH3-W09-snapshot,NH3-W09,On-site well ammonia dosing,Chemical injection,NH3,Ammonia dosing fault,Fault,#e96770,Snapshot,991,Snapshot,0,,,,,,0,,,14600,63,4,2,15230,630,72
+9-SW1-snapshot,SW1,Surface inlet 1 actuated valve,Surface valve,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,5400,,,,,100,,,,14600,63,4,2,15230,630,72
+9-FM-SW1-snapshot,FM-SW1,Surface inlet 1 electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,5400,,,,,,,,,14600,63,4,2,15230,630,72
+9-AN-SW1-snapshot,AN-SW1,Surface inlet 1 chlorine analyzer,Analyzer,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,0,,,,,,,1.58,,14600,63,4,2,15230,630,72
+9-CL2-SW1-snapshot,CL2-SW1,Surface inlet 1 chlorine dosing,Chemical injection,Cl2,Ammonia dosing fault,Dosing,#f0b652,Snapshot,991,Snapshot,0,,,,,,1.05,,,14600,63,4,2,15230,630,72
+9-NH3-SW1-snapshot,NH3-SW1,Surface inlet 1 ammonia dosing,Chemical injection,NH3,Ammonia dosing fault,Fault,#e96770,Snapshot,991,Snapshot,0,,,,,,0,,,14600,63,4,2,15230,630,72
+9-SW2-snapshot,SW2,Surface inlet 2 actuated valve,Surface valve,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,5000,,,,,100,,,,14600,63,4,2,15230,630,72
+9-FM-SW2-snapshot,FM-SW2,Surface inlet 2 electromagnetic flowmeter,Flowmeter,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,5000,,,,,,,,,14600,63,4,2,15230,630,72
+9-AN-SW2-snapshot,AN-SW2,Surface inlet 2 chlorine analyzer,Analyzer,Water,Ammonia dosing fault,Running,#8ed9e6,Snapshot,991,Snapshot,0,,,,,,,1.71,,14600,63,4,2,15230,630,72
+9-CL2-SW2-snapshot,CL2-SW2,Surface inlet 2 chlorine dosing,Chemical injection,Cl2,Ammonia dosing fault,Dosing,#f0b652,Snapshot,991,Snapshot,0,,,,,,1.05,,,14600,63,4,2,15230,630,72
+9-NH3-SW2-snapshot,NH3-SW2,Surface inlet 2 ammonia dosing,Chemical injection,NH3,Ammonia dosing fault,Fault,#e96770,Snapshot,991,Snapshot,0,,,,,,0,,,14600,63,4,2,15230,630,72
+9-BP01-snapshot,BP01,Booster pump 1,Booster,Water,Ammonia dosing fault,Running,#5ac2b8,Snapshot,991,Snapshot,3686,63,,1235,77,,,,,14600,63,4,2,15230,630,72
+9-BP02-snapshot,BP02,Booster pump 2,Booster,Water,Ammonia dosing fault,Running,#5ac2b8,Snapshot,991,Snapshot,3397,63,,1215,75,,,,,14600,63,4,2,15230,630,72
+9-BP03-snapshot,BP03,Booster pump 3,Booster,Water,Ammonia dosing fault,Running,#5ac2b8,Snapshot,991,Snapshot,3903,63,,1251,79,,,,,14600,63,4,2,15230,630,72
+9-BP04-snapshot,BP04,Booster pump 4,Booster,Water,Ammonia dosing fault,Running,#5ac2b8,Snapshot,991,Snapshot,3614,63,,1230,77,,,,,14600,63,4,2,15230,630,72
+9-BP05-snapshot,BP05,Booster pump 5,Booster,Water,Ammonia dosing fault,Standby,#7b8fa2,Snapshot,991,Snapshot,0,,,0,0,,,,,14600,63,4,2,15230,630,72
+9-BP06-snapshot,BP06,Booster pump 6,Booster,Water,Ammonia dosing fault,Standby,#7b8fa2,Snapshot,991,Snapshot,0,,,0,0,,,,,14600,63,4,2,15230,630,72
+9-GST1-snapshot,GST1,Ground storage tank 1,Storage,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,0,,68,,,,,,,14600,63,4,2,15230,630,72
+9-IN-GST1-snapshot,IN-GST1,Tank 1 incoming feed,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,3046,,,,,,,,,14600,63,4,2,15230,630,72
+9-OUT-GST1-snapshot,OUT-GST1,Tank 1 suction takeoff,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,2920,,,,,,,,,14600,63,4,2,15230,630,72
+9-GST2-snapshot,GST2,Ground storage tank 2,Storage,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,0,,70,,,,,,,14600,63,4,2,15230,630,72
+9-IN-GST2-snapshot,IN-GST2,Tank 2 incoming feed,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,3046,,,,,,,,,14600,63,4,2,15230,630,72
+9-OUT-GST2-snapshot,OUT-GST2,Tank 2 suction takeoff,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,2920,,,,,,,,,14600,63,4,2,15230,630,72
+9-GST3-snapshot,GST3,Ground storage tank 3,Storage,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,0,,72,,,,,,,14600,63,4,2,15230,630,72
+9-IN-GST3-snapshot,IN-GST3,Tank 3 incoming feed,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,3046,,,,,,,,,14600,63,4,2,15230,630,72
+9-OUT-GST3-snapshot,OUT-GST3,Tank 3 suction takeoff,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,2920,,,,,,,,,14600,63,4,2,15230,630,72
+9-GST4-snapshot,GST4,Ground storage tank 4,Storage,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,0,,74,,,,,,,14600,63,4,2,15230,630,72
+9-IN-GST4-snapshot,IN-GST4,Tank 4 incoming feed,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,3046,,,,,,,,,14600,63,4,2,15230,630,72
+9-OUT-GST4-snapshot,OUT-GST4,Tank 4 suction takeoff,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,2920,,,,,,,,,14600,63,4,2,15230,630,72
+9-GST5-snapshot,GST5,Ground storage tank 5,Storage,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,0,,76,,,,,,,14600,63,4,2,15230,630,72
+9-IN-GST5-snapshot,IN-GST5,Tank 5 incoming feed,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,3046,,,,,,,,,14600,63,4,2,15230,630,72
+9-OUT-GST5-snapshot,OUT-GST5,Tank 5 suction takeoff,Internal branch,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,2920,,,,,,,,,14600,63,4,2,15230,630,72
+9-REMOTE-snapshot,REMOTE,REMOTE header,Header,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,4140,,,,,,,,,14600,63,4,2,15230,630,72
+9-SOURCE-snapshot,SOURCE,SOURCE header,Header,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,15230,,,,,,,,,14600,63,4,2,15230,630,72
+9-SUCTION-snapshot,SUCTION,SUCTION header,Header,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,14600,17,,,,,,,,14600,63,4,2,15230,630,72
+9-DISCHARGE-snapshot,DISCHARGE,DISCHARGE header,Header,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,14600,63,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-snapshot,DIST,Distribution interface,Header,Water,Ammonia dosing fault,Running,#78b7d1,Snapshot,991,Snapshot,14600,63,,,,,,,,14600,63,4,2,15230,630,72
+9-AN-DIST-snapshot,AN-DIST,Distribution Cl2 and NH3 analyzer,Analyzer,Water,Ammonia dosing fault,Warning,#f4af53,Snapshot,991,Snapshot,0,,,,,,,2.03,0.04,14600,63,4,2,15230,630,72
+9-DIST-0,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,0,07:00,14433,63.5,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-1,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,1,08:00,13983,62.7,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-2,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,2,09:00,13618,62,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-3,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,3,10:00,13509,61.7,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-4,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,4,11:00,13706,61.9,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-5,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,5,12:00,14118,62.5,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-6,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,6,13:00,14551,63.3,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-7,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,7,14:00,14801,64,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-8,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,8,15:00,14750,64.3,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-9,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,9,16:00,14423,64.1,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-10,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,10,17:00,13973,63.5,,,,,,,,14600,63,4,2,15230,630,72
+9-DIST-11,DIST,Distribution interface,Trend,Water,Ammonia dosing fault,Running,#78b7d1,Trend,11,18:00,13612,62.7,,,,,,,,14600,63,4,2,15230,630,72

@@ -5,7 +5,9 @@ import { StudioSection } from "../ui/StudioSection";
 
 const kinds: Record<Scene3dKind, string> = {
     box: "Box", cylinder: "Cylinder", sphere: "Sphere", cone: "Cone",
-    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", fan: "Fan rotor", model: "GLB / glTF model",
+    pipe: "Pipe", pump: "Pump assembly", tank: "Tank assembly", fan: "Fan rotor",
+    well: "Wellhead", flowmeter: "Flowmeter (inline)", valve: "Actuated valve",
+    injector: "Chemical injection skid", analyzer: "Water-quality analyzer", model: "GLB / glTF model",
 };
 const materialDefaults = { metalness: 0.22, roughness: 0.44, opacity: 1 } as const;
 type FieldOption = { key: string; label: string };
@@ -116,6 +118,12 @@ export function Scene3dEditor({ component, fields, onChange }: {
         }
     }
 
+    const fieldPicker = (label: string, field: "valueField" | "openingField" | "motorRpmField") =>
+        <label>{label}<select aria-label={label} class="form-select form-select-sm" value={selected?.[field] ?? ""}
+            onChange={event => selected && update(selected.id, { [field]: event.currentTarget.value || undefined })}>
+            <option value="">No data binding</option>
+            {fields.map(option => <option key={option.key} value={option.key}>{option.label}</option>)}
+        </select></label>;
     const palette = component.statusColors ?? [];
     const tooltips = (component.tooltipFields ?? []).map(item => typeof item === "string" ? { field: item, label: undefined } : item);
     const availableFields = fields.filter(field => !tooltips.some(item => item.field === field.key));
@@ -165,7 +173,13 @@ export function Scene3dEditor({ component, fields, onChange }: {
                     {selected.kind === "model" ? filePicker("Replace model", selected.id) : <label>Object kind<select class="form-select form-select-sm" value={selected.kind}
                         onChange={event => {
                             const kind = event.currentTarget.value as Scene3dKind;
-                            update(selected.id, { kind, flowKey: kind === "pipe" ? selected.flowKey : undefined });
+                            update(selected.id, {
+                                kind, flowKey: kind === "pipe" ? selected.flowKey : undefined,
+                                path: kind === "pipe" ? selected.path : undefined,
+                                diameter: kind === "pipe" ? selected.diameter : undefined,
+                                openingField: kind === "valve" ? selected.openingField : undefined,
+                                motorRpmField: kind === "pump" ? selected.motorRpmField : undefined,
+                            });
                         }}>
                         {scene3dKinds.filter(kind => kind !== "model").map(kind => <option key={kind} value={kind}>{kinds[kind]}</option>)}
                     </select></label>}
@@ -246,6 +260,30 @@ export function Scene3dEditor({ component, fields, onChange }: {
                         <button type="button" class="btn btn-sm" disabled={animations.length >= scene3dLimits.animationsPerObject}
                             onClick={() => update(selected.id, { animations: [...animations, selected.kind === "model" ?
                                 { kind: "clip", rate: 1 } : { kind: "rotate", axis: "y", rpm: 60 }] })}>Add animation</button>
+                    </fieldset>
+                    <fieldset><legend>Engineering instrumentation</legend>
+                        {selected.dataKey !== undefined && fieldPicker("Instrument reading field", "valueField")}
+                        {selected.valueField && <label>Engineering unit<TextInput label="Engineering unit" placeholder="GPM, PSI, mg/L…"
+                            value={selected.valueUnit ?? ""} onChange={valueUnit => update(selected.id, { valueUnit: valueUnit || undefined })} /></label>}
+                        {selected.kind === "valve" && selected.dataKey !== undefined && fieldPicker("Valve opening (%) field", "openingField")}
+                        {selected.kind === "pump" && selected.dataKey !== undefined && fieldPicker("Motor RPM field", "motorRpmField")}
+                        {selected.kind === "pipe" && <>
+                            <p class="text-secondary m-0">Connect pipe elbows with ordered local [x,y,z] centerline points. Positive flow follows the point order.</p>
+                            <label>Pipe centerline points<textarea class="form-control form-control-sm" aria-label="Pipe centerline points"
+                                rows={4} defaultValue={JSON.stringify(selected.path ?? [[-1, 0, 0], [1, 0, 0]])}
+                                onBlur={event => {
+                                    try {
+                                        const next = JSON.parse(event.currentTarget.value) as unknown;
+                                        if (Array.isArray(next) && next.length >= 2 && next.length <= scene3dLimits.pipePathPoints &&
+                                            next.every(point => Array.isArray(point) && point.length === 3 && point.every(n => typeof n === "number" && Number.isFinite(n) && Math.abs(n) <= 100))) {
+                                            setError("");
+                                            update(selected.id, { path: next as Scene3dVector[] });
+                                        }
+                                    } catch { setError("Pipe centerline must be a valid array of 2–16 [x,y,z] points."); }
+                                }} /></label>
+                            {selected.path && <NumericInput label="Pipe diameter (scene units)" value={selected.diameter ?? 0.2}
+                                min={0.04} max={2} step={0.02} onChange={diameter => update(selected.id, { diameter })} />}
+                        </>}
                     </fieldset>
                     <fieldset><legend>Object behavior</legend>
                         <label class="hp-scene3d-check"><input type="checkbox" checked={selected.visible !== false} onChange={event => update(selected.id, { visible: event.currentTarget.checked })} />Visible</label>

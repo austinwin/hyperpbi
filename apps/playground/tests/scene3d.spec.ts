@@ -235,34 +235,52 @@ test("animation studio gallery links data-driven fans and scenarios", async ({ p
     await expect(equipment.getByRole("button", { name: /Cooling fan P-102 Stopped/ })).toBeVisible();
 });
 
-test("water pump station digital twin updates equipment and KPIs across every scenario", async ({ page }) => {
+test("water pump station engineering twin updates all ten scenarios and instruments", async ({ page }) => {
     await page.goto("/examples/water-pump-station-digital-twin");
     const scene = page.locator(".hp-scene3d");
     await expect(scene.locator("canvas")).toBeVisible({ timeout: 45_000 });
+    const scenario = page.getByRole("combobox", { name: /Operating scenario/ });
     const online = page.locator("[data-hp-id=pumps_kpi] .hp-metric-value");
     const pressure = page.locator("[data-hp-id=pressure_kpi] .hp-metric-value");
     const levels = page.locator("[data-hp-id=storage_kpi] .hp-metric-value");
+    const chlorine = page.locator("[data-hp-id=chlorine_kpi] .hp-metric-value");
+    const ammonia = page.locator("[data-hp-id=ammonia_kpi] .hp-metric-value");
     const equipment = scene.getByRole("complementary", { name: "Scene objects" });
-    await expect(equipment.getByRole("button", { name: /Booster 1/ }).first()).toBeVisible();
+    await expect(equipment.getByRole("button", { name: /FM · W01A/ })).toBeVisible();
+    await expect(equipment.getByRole("button", { name: /SW1 inlet valve/ })).toBeVisible();
+    await expect(equipment.getByRole("button", { name: /Distribution Cl2 \/ NH3 analyzer/ })).toBeVisible();
     await expect(online).toHaveText("4");
-    for (const [scenario, pumps, psi] of [
+    for (const [name, pumps, psi] of [
+        ["Normal supply", "4", "64"],
         ["Peak demand", "6", "67"],
         ["Remote wells offline", "4", "57"],
         ["Surface inlet unavailable", "4", "55"],
         ["Booster maintenance", "4", "62"],
-        ["Low storage", "3", "50"],
+        ["Low storage", "3", "51"],
         ["Limited power", "2", "51"],
         ["Low distribution pressure", "2", "43"],
-        ["Normal supply", "4", "64"],
+        ["Chlorine dosing fault", "4", "63"],
+        ["Ammonia dosing fault", "4", "63"],
     ]) {
-        await page.getByRole("button", { name: scenario, exact: true }).click();
+        await scenario.selectOption(name);
         await expect(online).toHaveText(pumps);
         await expect(pressure).toContainText(psi);
     }
-    await page.getByRole("button", { name: "Low storage", exact: true }).click();
-    await expect(levels).toHaveText("26");
-    await expect(page.locator("[data-hp-id=booster_load]")).toBeVisible();
-    await expect(page.locator("[data-hp-id=storage_levels]")).toBeVisible();
-    await expect(page.locator("[data-hp-id=asset_register] tbody tr").first()).toBeVisible();
+    await scenario.selectOption("Surface inlet unavailable");
+    await expect(equipment.getByRole("button", { name: /SW1 inlet valve.*0% open/ })).toBeVisible();
+    await expect(equipment.getByRole("button", { name: /FM · SW1.*0 GPM/ })).toBeVisible();
+    await scenario.selectOption("Low storage");
+    await expect(levels).toHaveText("25");
+    await scenario.selectOption("Chlorine dosing fault");
+    await expect(chlorine).toContainText("0.23");
+    await expect(ammonia).toContainText("0.43");
+    await expect(equipment.getByRole("button", { name: /SW1 chlorine injection.*Fault/ })).toBeVisible();
+    await scenario.selectOption("Ammonia dosing fault");
+    await expect(ammonia).toContainText("0.04");
+    await expect(equipment.getByRole("button", { name: /SW1 ammonia injection.*Fault/ })).toBeVisible();
+    await expect(page.locator("[data-hp-id=source_meter_chart]")).toBeVisible();
+    await expect(page.locator("[data-hp-id=chemical_register] tbody tr").first()).toBeVisible();
     await expect(scene.getByRole("button", { name: "Pause flow" })).toBeVisible();
+    await equipment.getByRole("button", { name: /FM · W01A/ }).click();
+    await expect(scene.getByRole("button", { name: "Clear selection" })).toBeVisible();
 });

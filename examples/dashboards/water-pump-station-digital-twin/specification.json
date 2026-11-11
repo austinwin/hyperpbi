@@ -32,7 +32,7 @@
     "pageHeader": {
       "visible": true,
       "title": "Water Pump Station | Process Digital Twin",
-      "subtitle": "Sources • treatment • five storage tanks • six booster pumps • distribution",
+      "subtitle": "Well and surface metering • chlorine / ammonia dosing • 5 GSTs • 6 boosters • quality monitoring",
       "meta": [
         {
           "label": "Training model",
@@ -77,6 +77,38 @@
           "value": "Storage"
         }
       },
+      "metering": {
+        "source": "snapshots",
+        "filter": {
+          "field": "category",
+          "operator": "=",
+          "value": "Flowmeter"
+        }
+      },
+      "chemicals": {
+        "source": "snapshots",
+        "filter": {
+          "field": "category",
+          "operator": "=",
+          "value": "Chemical injection"
+        }
+      },
+      "quality": {
+        "source": "snapshots",
+        "filter": {
+          "field": "category",
+          "operator": "=",
+          "value": "Analyzer"
+        }
+      },
+      "distribution_quality": {
+        "source": "snapshots",
+        "filter": {
+          "field": "assetid",
+          "operator": "=",
+          "value": "AN-DIST"
+        }
+      },
       "trends": {
         "source": "powerbi",
         "filter": {
@@ -98,9 +130,9 @@
   },
   "components": [
     {
-      "type": "segmentedControl",
+      "type": "select",
       "id": "operating_scenario",
-      "label": "Operating scenario",
+      "label": "Operating scenario (choose one state)",
       "field": "scenario",
       "options": [
         "Normal supply",
@@ -110,7 +142,9 @@
         "Booster maintenance",
         "Low storage",
         "Limited power",
-        "Low distribution pressure"
+        "Low distribution pressure",
+        "Chlorine dosing fault",
+        "Ammonia dosing fault"
       ],
       "interaction": {
         "internalMode": "filter",
@@ -122,11 +156,18 @@
           "storage_kpi",
           "alerts_kpi",
           "source_kpi",
+          "storage_balance_kpi",
+          "chlorine_kpi",
+          "ammonia_kpi",
           "flow_history",
           "pressure_history",
           "booster_load",
           "storage_levels",
-          "asset_register"
+          "source_meter_chart",
+          "quality_chart",
+          "asset_register",
+          "meter_register",
+          "chemical_register"
         ],
         "externalMode": "none"
       }
@@ -134,7 +175,7 @@
     {
       "type": "text",
       "id": "process_legend",
-      "text": "SOURCE NETWORK  →  GROUND STORAGE  →  BOOSTER ARRAY  →  DISTRIBUTION | Teal: raw/source flows • Blue: transfer/discharge • Green: running • Amber: warning. All values are simulated and are not operational guidance."
+      "text": "PROCESS: 8 remote wells + 1 on-site well + 2 surface inlets → Cl2 / NH3 injection and chlorine monitoring → 5 GSTs → 6 booster pumps → distribution Cl2 / NH3 analyzer. Teal: well water • Blue: surface/treated water • Gold: Cl2 • Violet: NH3. Flow markers follow signed GPM. Select one scenario before reading the KPIs: All combines unrelated training states."
     },
     {
       "type": "grid",
@@ -196,6 +237,33 @@
           "aggregation": "first",
           "span": 2,
           "intent": "warning"
+        },
+        {
+          "type": "kpi",
+          "id": "storage_balance_kpi",
+          "title": "Storage net rate (GPM, + filling)",
+          "dataset": "snapshots",
+          "field": "netstoragegpm",
+          "aggregation": "first",
+          "span": 4
+        },
+        {
+          "type": "kpi",
+          "id": "chlorine_kpi",
+          "title": "Distribution Cl2 (mg/L)",
+          "dataset": "distribution_quality",
+          "field": "cl2mgL",
+          "aggregation": "first",
+          "span": 4
+        },
+        {
+          "type": "kpi",
+          "id": "ammonia_kpi",
+          "title": "Distribution NH3 (mg/L)",
+          "dataset": "distribution_quality",
+          "field": "nh3mgL",
+          "aggregation": "first",
+          "span": 4
         }
       ]
     },
@@ -203,7 +271,7 @@
       "type": "scene3d",
       "id": "water_scene",
       "dataset": "snapshots",
-      "title": "Process route | sources → storage → boosters → distribution",
+      "title": "3D engineering process | wells → meters → injection → storage → boosters → distribution",
       "objectIdField": "assetid",
       "flowField": "flowgpm",
       "levelField": "levelpct",
@@ -225,6 +293,26 @@
         {
           "value": "Offline",
           "color": "#d77378"
+        },
+        {
+          "value": "Dosing",
+          "color": "#35cbb3"
+        },
+        {
+          "value": "Fault",
+          "color": "#e96770"
+        },
+        {
+          "value": "Closed",
+          "color": "#8292a5"
+        },
+        {
+          "value": "No sample",
+          "color": "#8292a5"
+        },
+        {
+          "value": "No flow",
+          "color": "#8292a5"
         }
       ],
       "tooltipFields": [
@@ -245,1551 +333,1705 @@
           "label": "Level (%)"
         },
         {
-          "field": "pressurepsi",
-          "label": "Pressure (PSI)"
+          "field": "valveopenpct",
+          "label": "Valve open (%)"
         },
         {
-          "field": "rpm",
-          "label": "RPM"
+          "field": "dosemgL",
+          "label": "Dose (mg/L)"
+        },
+        {
+          "field": "cl2mgL",
+          "label": "Chlorine (mg/L)"
+        },
+        {
+          "field": "nh3mgL",
+          "label": "Ammonia (mg/L)"
         }
       ],
       "objects": [
         {
           "id": "distribution_delivery",
           "kind": "pipe",
-          "position": [
-            8.62,
-            0.58,
-            0
+          "path": [
+            [
+              8.35,
+              0.62,
+              0
+            ],
+            [
+              11.2,
+              0.62,
+              0
+            ]
           ],
-          "size": [
-            0.34,
-            2.78,
-            0.34
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "DIST"
+          "diameter": 0.39,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "DIST",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_1",
+          "id": "booster_discharge_BP01",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            -4
+          "path": [
+            [
+              5.99,
+              0.62,
+              -5.6
+            ],
+            [
+              8.35,
+              0.62,
+              -5.6
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP01"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP01",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_2",
+          "id": "booster_discharge_BP02",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            -2.4
+          "path": [
+            [
+              5.99,
+              0.62,
+              -3.36
+            ],
+            [
+              8.35,
+              0.62,
+              -3.36
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP02"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP02",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_3",
+          "id": "booster_discharge_BP03",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            -0.8
+          "path": [
+            [
+              5.99,
+              0.62,
+              -1.12
+            ],
+            [
+              8.35,
+              0.62,
+              -1.12
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP03"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP03",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_4",
+          "id": "booster_discharge_BP04",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            0.8
+          "path": [
+            [
+              5.99,
+              0.62,
+              1.12
+            ],
+            [
+              8.35,
+              0.62,
+              1.12
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP04"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP04",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_5",
+          "id": "booster_discharge_BP05",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            2.4
+          "path": [
+            [
+              5.99,
+              0.62,
+              3.36
+            ],
+            [
+              8.35,
+              0.62,
+              3.36
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP05"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP05",
+          "selectable": false
         },
         {
-          "id": "booster_discharge_6",
+          "id": "booster_discharge_BP06",
           "kind": "pipe",
-          "position": [
-            6.21,
-            0.58,
-            4
+          "path": [
+            [
+              5.99,
+              0.62,
+              5.6
+            ],
+            [
+              8.35,
+              0.62,
+              5.6
+            ]
           ],
-          "size": [
-            0.21,
-            2.02,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "BP06"
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP06",
+          "selectable": false
         },
         {
-          "id": "booster_suction_1",
+          "id": "booster_suction_BP01",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            -4
+          "path": [
+            [
+              2.4,
+              0.52,
+              -5.6
+            ],
+            [
+              4.6,
+              0.52,
+              -5.6
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP01",
+          "selectable": false
         },
         {
-          "id": "booster_suction_2",
+          "id": "booster_suction_BP02",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            -2.4
+          "path": [
+            [
+              2.4,
+              0.52,
+              -3.36
+            ],
+            [
+              4.6,
+              0.52,
+              -3.36
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP02",
+          "selectable": false
         },
         {
-          "id": "booster_suction_3",
+          "id": "booster_suction_BP03",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            -0.8
+          "path": [
+            [
+              2.4,
+              0.52,
+              -1.12
+            ],
+            [
+              4.6,
+              0.52,
+              -1.12
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP03",
+          "selectable": false
         },
         {
-          "id": "booster_suction_4",
+          "id": "booster_suction_BP04",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            0.8
+          "path": [
+            [
+              2.4,
+              0.52,
+              1.12
+            ],
+            [
+              4.6,
+              0.52,
+              1.12
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP04",
+          "selectable": false
         },
         {
-          "id": "booster_suction_5",
+          "id": "booster_suction_BP05",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            2.4
+          "path": [
+            [
+              2.4,
+              0.52,
+              3.36
+            ],
+            [
+              4.6,
+              0.52,
+              3.36
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP05",
+          "selectable": false
         },
         {
-          "id": "booster_suction_6",
+          "id": "booster_suction_BP06",
           "kind": "pipe",
-          "position": [
-            4.26,
-            0.54,
-            4
+          "path": [
+            [
+              2.4,
+              0.52,
+              5.6
+            ],
+            [
+              4.6,
+              0.52,
+              5.6
+            ]
           ],
-          "size": [
-            0.2,
-            1.92,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.26,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "BP06",
+          "selectable": false
         },
         {
-          "id": "tank_outlet_1",
+          "id": "gst_draw_1",
           "kind": "pipe",
-          "position": [
-            1.88,
-            0.53,
-            -4.1
+          "path": [
+            [
+              0.94,
+              0.52,
+              -5.3
+            ],
+            [
+              2.4,
+              0.52,
+              -5.3
+            ]
           ],
-          "size": [
-            0.21,
-            2.85,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "GST1"
+          "diameter": 0.23,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "OUT-GST1",
+          "selectable": false
         },
         {
-          "id": "tank_outlet_2",
+          "id": "gst_draw_2",
           "kind": "pipe",
-          "position": [
-            1.88,
-            0.53,
-            -2.05
+          "path": [
+            [
+              0.94,
+              0.52,
+              -2.65
+            ],
+            [
+              2.4,
+              0.52,
+              -2.65
+            ]
           ],
-          "size": [
-            0.21,
-            2.85,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "GST2"
+          "diameter": 0.23,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "OUT-GST2",
+          "selectable": false
         },
         {
-          "id": "tank_outlet_3",
+          "id": "gst_draw_3",
           "kind": "pipe",
-          "position": [
-            1.88,
-            0.53,
-            0
+          "path": [
+            [
+              0.94,
+              0.52,
+              0
+            ],
+            [
+              2.4,
+              0.52,
+              0
+            ]
           ],
-          "size": [
-            0.21,
-            2.85,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "GST3"
+          "diameter": 0.23,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "OUT-GST3",
+          "selectable": false
         },
         {
-          "id": "tank_outlet_4",
+          "id": "gst_draw_4",
           "kind": "pipe",
-          "position": [
-            1.88,
-            0.53,
-            2.05
+          "path": [
+            [
+              0.94,
+              0.52,
+              2.65
+            ],
+            [
+              2.4,
+              0.52,
+              2.65
+            ]
           ],
-          "size": [
-            0.21,
-            2.85,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "GST4"
+          "diameter": 0.23,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "OUT-GST4",
+          "selectable": false
         },
         {
-          "id": "tank_outlet_5",
+          "id": "gst_draw_5",
           "kind": "pipe",
-          "position": [
-            1.88,
-            0.53,
-            4.1
+          "path": [
+            [
+              0.94,
+              0.52,
+              5.3
+            ],
+            [
+              2.4,
+              0.52,
+              5.3
+            ]
           ],
-          "size": [
-            0.21,
-            2.85,
-            0.21
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48,
-          "flowKey": "GST5"
+          "diameter": 0.23,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "flowKey": "OUT-GST5",
+          "selectable": false
         },
         {
-          "id": "source_transfer",
+          "id": "gst_fill_1",
           "kind": "pipe",
-          "position": [
-            -3.55,
-            0.52,
-            0.25
+          "path": [
+            [
+              -2.4,
+              0.52,
+              -5.3
+            ],
+            [
+              -0.94,
+              0.52,
+              -5.3
+            ]
           ],
-          "size": [
-            0.28,
-            3.7,
-            0.28
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SOURCE"
+          "diameter": 0.23,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "IN-GST1",
+          "selectable": false
         },
         {
-          "id": "surface_supply_1",
+          "id": "gst_fill_2",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            3.82
+          "path": [
+            [
+              -2.4,
+              0.52,
+              -2.65
+            ],
+            [
+              -0.94,
+              0.52,
+              -2.65
+            ]
           ],
-          "size": [
-            0.2,
-            2.8,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SW1"
+          "diameter": 0.23,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "IN-GST2",
+          "selectable": false
         },
         {
-          "id": "surface_supply_2",
+          "id": "gst_fill_3",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            4.75
+          "path": [
+            [
+              -2.4,
+              0.52,
+              0
+            ],
+            [
+              -0.94,
+              0.52,
+              0
+            ]
           ],
-          "size": [
-            0.2,
-            2.8,
-            0.2
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48,
-          "flowKey": "SW2"
+          "diameter": 0.23,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "IN-GST3",
+          "selectable": false
         },
         {
-          "id": "local_source_flow",
+          "id": "gst_fill_4",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            2.63
+          "path": [
+            [
+              -2.4,
+              0.52,
+              2.65
+            ],
+            [
+              -0.94,
+              0.52,
+              2.65
+            ]
           ],
-          "size": [
-            0.16,
-            2.8,
-            0.16
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.23,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "IN-GST4",
+          "selectable": false
         },
         {
-          "id": "tank_inlet_1",
+          "id": "gst_fill_5",
           "kind": "pipe",
-          "position": [
-            -0.68,
-            0.52,
-            -4.1
+          "path": [
+            [
+              -2.4,
+              0.52,
+              5.3
+            ],
+            [
+              -0.94,
+              0.52,
+              5.3
+            ]
           ],
-          "size": [
-            0.19,
-            2.05,
-            0.19
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.23,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "IN-GST5",
+          "selectable": false
         },
         {
-          "id": "tank_inlet_2",
+          "id": "surface_inlet_SW1",
           "kind": "pipe",
-          "position": [
-            -0.68,
-            0.52,
-            -2.05
+          "path": [
+            [
+              -11.05,
+              0.52,
+              5.4
+            ],
+            [
+              -2.4,
+              0.52,
+              5.4
+            ]
           ],
-          "size": [
-            0.19,
-            2.05,
-            0.19
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.25,
+          "color": "#47add8",
+          "metalness": 0.44,
+          "flowKey": "SW1",
+          "selectable": false
         },
         {
-          "id": "tank_inlet_3",
+          "id": "surface_inlet_SW2",
           "kind": "pipe",
-          "position": [
-            -0.68,
-            0.52,
-            0
+          "path": [
+            [
+              -11.05,
+              0.52,
+              7.35
+            ],
+            [
+              -2.4,
+              0.52,
+              7.35
+            ]
           ],
-          "size": [
-            0.19,
-            2.05,
-            0.19
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.25,
+          "color": "#47add8",
+          "metalness": 0.44,
+          "flowKey": "SW2",
+          "selectable": false
         },
         {
-          "id": "tank_inlet_4",
+          "id": "onsite_inlet",
           "kind": "pipe",
-          "position": [
-            -0.68,
-            0.52,
-            2.05
+          "path": [
+            [
+              -10.9,
+              0.52,
+              3
+            ],
+            [
+              -2.4,
+              0.52,
+              3
+            ]
           ],
-          "size": [
-            0.19,
-            2.05,
-            0.19
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.2,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W09",
+          "selectable": false
         },
         {
-          "id": "tank_inlet_5",
+          "id": "remote_branch_W01A",
           "kind": "pipe",
-          "position": [
-            -0.68,
-            0.52,
-            4.1
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -5.6
+            ],
+            [
+              -7.2,
+              0.52,
+              -5.6
+            ]
           ],
-          "size": [
-            0.19,
-            2.05,
-            0.19
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W01A",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW01",
+          "id": "remote_branch_W03A",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -4.25
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -4.6499999999999995
+            ],
+            [
+              -7.2,
+              0.52,
+              -4.6499999999999995
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W03A",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW02",
+          "id": "remote_branch_W03SB",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -3.45
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -3.6999999999999997
+            ],
+            [
+              -7.2,
+              0.52,
+              -3.6999999999999997
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W03SB",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW03",
+          "id": "remote_branch_W04A",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -2.65
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -2.75
+            ],
+            [
+              -7.2,
+              0.52,
+              -2.75
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W04A",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW04",
+          "id": "remote_branch_W05A",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -1.8499999999999996
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -1.7999999999999998
+            ],
+            [
+              -7.2,
+              0.52,
+              -1.7999999999999998
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W05A",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW05",
+          "id": "remote_branch_W08",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -1.0499999999999998
+          "path": [
+            [
+              -10.9,
+              0.52,
+              -0.8499999999999996
+            ],
+            [
+              -7.2,
+              0.52,
+              -0.8499999999999996
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W08",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW06",
+          "id": "remote_branch_W11",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            -0.25
+          "path": [
+            [
+              -10.9,
+              0.52,
+              0.09999999999999964
+            ],
+            [
+              -7.2,
+              0.52,
+              0.09999999999999964
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W11",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW07",
+          "id": "remote_branch_W10",
           "kind": "pipe",
-          "position": [
-            -6.8,
-            0.52,
-            0.5500000000000007
+          "path": [
+            [
+              -10.9,
+              0.52,
+              1.0499999999999998
+            ],
+            [
+              -7.2,
+              0.52,
+              1.0499999999999998
+            ]
           ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
-            0,
-            0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
+          "diameter": 0.16,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "W10",
+          "selectable": false
         },
         {
-          "id": "well_flow_RW08",
+          "id": "remote_collector",
           "kind": "pipe",
+          "path": [
+            [
+              -7.2,
+              0.52,
+              -5.6
+            ],
+            [
+              -7.2,
+              0.52,
+              1.05
+            ]
+          ],
+          "diameter": 0.29,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "REMOTE",
+          "selectable": false
+        },
+        {
+          "id": "remote_transfer",
+          "kind": "pipe",
+          "path": [
+            [
+              -7.2,
+              0.52,
+              1.05
+            ],
+            [
+              -2.4,
+              0.52,
+              1.05
+            ]
+          ],
+          "diameter": 0.27,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
+          "flowKey": "REMOTE",
+          "selectable": false
+        },
+        {
+          "id": "well_W01A",
+          "kind": "well",
+          "label": "Remote W01A",
+          "dataKey": "W01A",
           "position": [
-            -6.8,
-            0.52,
-            1.3500000000000005
-          ],
-          "size": [
-            0.14,
-            2.8,
-            0.14
-          ],
-          "rotation": [
+            -11.2,
             0,
+            -5.6
+          ],
+          "size": [
+            0.64,
+            0.7,
+            0.64
+          ],
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "meter_W01A",
+          "kind": "flowmeter",
+          "label": "FM · W01A",
+          "dataKey": "FM-W01A",
+          "position": [
+            -9.45,
             0,
-            -90
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
-        },
-        {
-          "id": "well_head_RW01",
-          "kind": "cylinder",
-          "label": "Remote source 1",
-          "dataKey": "RW01",
-          "position": [
-            -8.2,
-            0.25,
-            -4.25
+            -5.6
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.66,
+            0.68,
+            0.66
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW02",
-          "kind": "cylinder",
-          "label": "Remote source 2",
-          "dataKey": "RW02",
+          "id": "well_W03A",
+          "kind": "well",
+          "label": "Remote W03A",
+          "dataKey": "W03A",
           "position": [
-            -8.2,
-            0.25,
-            -3.45
+            -11.2,
+            0,
+            -4.6499999999999995
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.64,
+            0.7,
+            0.64
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW03",
-          "kind": "cylinder",
-          "label": "Remote source 3",
-          "dataKey": "RW03",
+          "id": "meter_W03A",
+          "kind": "flowmeter",
+          "label": "FM · W03A",
+          "dataKey": "FM-W03A",
           "position": [
-            -8.2,
-            0.25,
-            -2.65
+            -9.45,
+            0,
+            -4.6499999999999995
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.66,
+            0.68,
+            0.66
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW04",
-          "kind": "cylinder",
-          "label": "Remote source 4",
-          "dataKey": "RW04",
+          "id": "well_W03SB",
+          "kind": "well",
+          "label": "Remote W03SB",
+          "dataKey": "W03SB",
           "position": [
-            -8.2,
-            0.25,
-            -1.8499999999999996
+            -11.2,
+            0,
+            -3.6999999999999997
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.64,
+            0.7,
+            0.64
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW05",
-          "kind": "cylinder",
-          "label": "Remote source 5",
-          "dataKey": "RW05",
+          "id": "meter_W03SB",
+          "kind": "flowmeter",
+          "label": "FM · W03SB",
+          "dataKey": "FM-W03SB",
           "position": [
-            -8.2,
-            0.25,
-            -1.0499999999999998
+            -9.45,
+            0,
+            -3.6999999999999997
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.66,
+            0.68,
+            0.66
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW06",
-          "kind": "cylinder",
-          "label": "Remote source 6",
-          "dataKey": "RW06",
+          "id": "well_W04A",
+          "kind": "well",
+          "label": "Remote W04A",
+          "dataKey": "W04A",
           "position": [
-            -8.2,
-            0.25,
-            -0.25
+            -11.2,
+            0,
+            -2.75
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.64,
+            0.7,
+            0.64
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW07",
-          "kind": "cylinder",
-          "label": "Remote source 7",
-          "dataKey": "RW07",
+          "id": "meter_W04A",
+          "kind": "flowmeter",
+          "label": "FM · W04A",
+          "dataKey": "FM-W04A",
           "position": [
-            -8.2,
-            0.25,
-            0.5500000000000007
+            -9.45,
+            0,
+            -2.75
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.66,
+            0.68,
+            0.66
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "well_head_RW08",
-          "kind": "cylinder",
-          "label": "Remote source 8",
-          "dataKey": "RW08",
+          "id": "well_W05A",
+          "kind": "well",
+          "label": "Remote W05A",
+          "dataKey": "W05A",
           "position": [
-            -8.2,
-            0.25,
-            1.3500000000000005
+            -11.2,
+            0,
+            -1.7999999999999998
           ],
           "size": [
-            0.38,
-            0.42,
-            0.38
+            0.64,
+            0.7,
+            0.64
           ],
-          "color": "#279bb9",
-          "selectable": true
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "local_source",
-          "kind": "pump",
-          "label": "On-site well",
-          "dataKey": "LW01",
+          "id": "meter_W05A",
+          "kind": "flowmeter",
+          "label": "FM · W05A",
+          "dataKey": "FM-W05A",
           "position": [
-            -8.2,
+            -9.45,
+            0,
+            -1.7999999999999998
+          ],
+          "size": [
+            0.66,
+            0.68,
+            0.66
+          ],
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "well_W08",
+          "kind": "well",
+          "label": "Remote W08",
+          "dataKey": "W08",
+          "position": [
+            -11.2,
+            0,
+            -0.8499999999999996
+          ],
+          "size": [
+            0.64,
+            0.7,
+            0.64
+          ],
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "meter_W08",
+          "kind": "flowmeter",
+          "label": "FM · W08",
+          "dataKey": "FM-W08",
+          "position": [
+            -9.45,
+            0,
+            -0.8499999999999996
+          ],
+          "size": [
+            0.66,
+            0.68,
+            0.66
+          ],
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "well_W11",
+          "kind": "well",
+          "label": "Remote W11",
+          "dataKey": "W11",
+          "position": [
+            -11.2,
+            0,
+            0.09999999999999964
+          ],
+          "size": [
+            0.64,
+            0.7,
+            0.64
+          ],
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "meter_W11",
+          "kind": "flowmeter",
+          "label": "FM · W11",
+          "dataKey": "FM-W11",
+          "position": [
+            -9.45,
+            0,
+            0.09999999999999964
+          ],
+          "size": [
+            0.66,
+            0.68,
+            0.66
+          ],
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "well_W10",
+          "kind": "well",
+          "label": "Remote W10",
+          "dataKey": "W10",
+          "position": [
+            -11.2,
+            0,
+            1.0499999999999998
+          ],
+          "size": [
+            0.64,
+            0.7,
+            0.64
+          ],
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "meter_W10",
+          "kind": "flowmeter",
+          "label": "FM · W10",
+          "dataKey": "FM-W10",
+          "position": [
+            -9.45,
+            0,
+            1.0499999999999998
+          ],
+          "size": [
+            0.66,
+            0.68,
+            0.66
+          ],
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "skid_CL2-R1",
+          "kind": "injector",
+          "label": "CL2-R1 · chlorine",
+          "dataKey": "CL2-R1",
+          "position": [
+            -6.2,
             0.04,
-            2.63
+            1.76
           ],
           "size": [
-            0.54,
-            0.58,
-            0.54
+            0.6,
+            0.67,
+            0.6
           ],
-          "selectable": true
+          "color": "#efb451",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
         },
         {
-          "id": "surface_valve_1",
-          "kind": "box",
-          "label": "Surface source valve 1",
+          "id": "skid_CL2-R2",
+          "kind": "injector",
+          "label": "CL2-R2 · chlorine",
+          "dataKey": "CL2-R2",
+          "position": [
+            -5,
+            0.04,
+            1.76
+          ],
+          "size": [
+            0.6,
+            0.67,
+            0.6
+          ],
+          "color": "#efb451",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "well_W09",
+          "kind": "well",
+          "label": "On-site W09",
+          "dataKey": "W09",
+          "position": [
+            -11.2,
+            0,
+            3
+          ],
+          "size": [
+            0.64,
+            0.7,
+            0.64
+          ],
+          "color": "#2bbfb9",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "meter_W09",
+          "kind": "flowmeter",
+          "label": "FM · W09",
+          "dataKey": "FM-W09",
+          "position": [
+            -9.45,
+            0,
+            3
+          ],
+          "size": [
+            0.66,
+            0.68,
+            0.66
+          ],
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "skid_CL2W09",
+          "kind": "injector",
+          "label": "W09 chlorine injection",
+          "dataKey": "CL2-W09",
+          "position": [
+            -6.15,
+            0.04,
+            3.72
+          ],
+          "size": [
+            0.6,
+            0.67,
+            0.6
+          ],
+          "color": "#efb451",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "skid_NH3W09",
+          "kind": "injector",
+          "label": "W09 ammonia injection",
+          "dataKey": "NH3-W09",
+          "position": [
+            -4.9,
+            0.04,
+            3.72
+          ],
+          "size": [
+            0.6,
+            0.67,
+            0.6
+          ],
+          "color": "#aa8fe8",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "valve_SW1",
+          "kind": "valve",
+          "label": "SW1 inlet valve",
           "dataKey": "SW1",
           "position": [
-            -8.3,
-            0.47,
-            3.82
+            -10.55,
+            0,
+            5.4
           ],
           "size": [
-            0.5,
-            0.52,
-            0.45
+            0.7,
+            0.7,
+            0.7
           ],
-          "color": "#d5a15d",
-          "selectable": true
+          "color": "#47add8",
+          "openingField": "valveopenpct",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "surface_meter_1",
-          "kind": "sphere",
+          "id": "meter_SW1",
+          "kind": "flowmeter",
+          "label": "FM · SW1",
+          "dataKey": "FM-SW1",
           "position": [
-            -6.65,
-            0.52,
-            3.82
+            -9.18,
+            0,
+            5.4
           ],
           "size": [
-            0.25,
-            0.25,
-            0.25
+            0.69,
+            0.69,
+            0.69
           ],
-          "color": "#b8d8e9",
-          "selectable": false
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "surface_valve_2",
-          "kind": "box",
-          "label": "Surface source valve 2",
+          "id": "analyzer_SW1",
+          "kind": "analyzer",
+          "label": "SW1 chlorine analyzer",
+          "dataKey": "AN-SW1",
+          "position": [
+            -7.75,
+            0.03,
+            6.2
+          ],
+          "size": [
+            0.55,
+            0.6,
+            0.55
+          ],
+          "color": "#8ed9e6",
+          "valueField": "cl2mgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "skid_CL2_SW1",
+          "kind": "injector",
+          "label": "SW1 chlorine injection",
+          "dataKey": "CL2-SW1",
+          "position": [
+            -6.1,
+            0.04,
+            6.12
+          ],
+          "size": [
+            0.55,
+            0.64,
+            0.55
+          ],
+          "color": "#efb451",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "skid_NH3_SW1",
+          "kind": "injector",
+          "label": "SW1 ammonia injection",
+          "dataKey": "NH3-SW1",
+          "position": [
+            -4.9,
+            0.04,
+            6.12
+          ],
+          "size": [
+            0.55,
+            0.64,
+            0.55
+          ],
+          "color": "#aa8fe8",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "valve_SW2",
+          "kind": "valve",
+          "label": "SW2 inlet valve",
           "dataKey": "SW2",
           "position": [
-            -8.3,
-            0.47,
-            4.75
+            -10.55,
+            0,
+            7.35
           ],
           "size": [
-            0.5,
-            0.52,
-            0.45
+            0.7,
+            0.7,
+            0.7
           ],
-          "color": "#d5a15d",
-          "selectable": true
+          "color": "#47add8",
+          "openingField": "valveopenpct",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
         },
         {
-          "id": "surface_meter_2",
-          "kind": "sphere",
+          "id": "meter_SW2",
+          "kind": "flowmeter",
+          "label": "FM · SW2",
+          "dataKey": "FM-SW2",
           "position": [
-            -6.65,
-            0.52,
-            4.75
+            -9.18,
+            0,
+            7.35
           ],
           "size": [
-            0.25,
-            0.25,
-            0.25
+            0.69,
+            0.69,
+            0.69
           ],
-          "color": "#b8d8e9",
+          "color": "#8ed9e6",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM"
+        },
+        {
+          "id": "analyzer_SW2",
+          "kind": "analyzer",
+          "label": "SW2 chlorine analyzer",
+          "dataKey": "AN-SW2",
+          "position": [
+            -7.75,
+            0.03,
+            8.15
+          ],
+          "size": [
+            0.55,
+            0.6,
+            0.55
+          ],
+          "color": "#8ed9e6",
+          "valueField": "cl2mgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "skid_CL2_SW2",
+          "kind": "injector",
+          "label": "SW2 chlorine injection",
+          "dataKey": "CL2-SW2",
+          "position": [
+            -6.1,
+            0.04,
+            8.07
+          ],
+          "size": [
+            0.55,
+            0.64,
+            0.55
+          ],
+          "color": "#efb451",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "skid_NH3_SW2",
+          "kind": "injector",
+          "label": "SW2 ammonia injection",
+          "dataKey": "NH3-SW2",
+          "position": [
+            -4.9,
+            0.04,
+            8.07
+          ],
+          "size": [
+            0.55,
+            0.64,
+            0.55
+          ],
+          "color": "#aa8fe8",
+          "valueField": "dosemgL",
+          "valueUnit": "mg/L"
+        },
+        {
+          "id": "tank_fill_header",
+          "kind": "pipe",
+          "path": [
+            [
+              -2.4,
+              0.52,
+              -5.3
+            ],
+            [
+              -2.4,
+              0.52,
+              7.35
+            ]
+          ],
+          "diameter": 0.35,
+          "color": "#2bbfb9",
+          "metalness": 0.44,
           "selectable": false
-        },
-        {
-          "id": "source_collector",
-          "kind": "pipe",
-          "position": [
-            -5.4,
-            0.52,
-            0.25
-          ],
-          "size": [
-            0.28,
-            9.1,
-            0.28
-          ],
-          "rotation": [
-            90,
-            0,
-            0
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
-        },
-        {
-          "id": "storage_inlet_header",
-          "kind": "pipe",
-          "position": [
-            -1.7,
-            0.52,
-            0
-          ],
-          "size": [
-            0.29,
-            8.8,
-            0.29
-          ],
-          "rotation": [
-            90,
-            0,
-            0
-          ],
-          "color": "#279bb9",
-          "metalness": 0.48
         },
         {
           "id": "tank_1",
           "kind": "tank",
-          "label": "Ground storage 1",
+          "label": "GST-1",
           "dataKey": "GST1",
           "position": [
-            0.45,
             0,
-            -4.1
+            0,
+            -5.3
           ],
           "size": [
-            1.02,
-            1.14,
-            1.02
+            0.96,
+            0.98,
+            0.96
           ],
-          "color": "#81b5cb",
-          "selectable": true
+          "color": "#7fb9cb",
+          "valueField": "levelpct",
+          "valueUnit": "%"
         },
         {
           "id": "tank_2",
           "kind": "tank",
-          "label": "Ground storage 2",
+          "label": "GST-2",
           "dataKey": "GST2",
           "position": [
-            0.45,
             0,
-            -2.05
+            0,
+            -2.65
           ],
           "size": [
-            1.02,
-            1.14,
-            1.02
+            0.96,
+            0.98,
+            0.96
           ],
-          "color": "#81b5cb",
-          "selectable": true
+          "color": "#7fb9cb",
+          "valueField": "levelpct",
+          "valueUnit": "%"
         },
         {
           "id": "tank_3",
           "kind": "tank",
-          "label": "Ground storage 3",
+          "label": "GST-3",
           "dataKey": "GST3",
           "position": [
-            0.45,
+            0,
             0,
             0
           ],
           "size": [
-            1.02,
-            1.14,
-            1.02
+            0.96,
+            0.98,
+            0.96
           ],
-          "color": "#81b5cb",
-          "selectable": true
+          "color": "#7fb9cb",
+          "valueField": "levelpct",
+          "valueUnit": "%"
         },
         {
           "id": "tank_4",
           "kind": "tank",
-          "label": "Ground storage 4",
+          "label": "GST-4",
           "dataKey": "GST4",
           "position": [
-            0.45,
             0,
-            2.05
+            0,
+            2.65
           ],
           "size": [
-            1.02,
-            1.14,
-            1.02
+            0.96,
+            0.98,
+            0.96
           ],
-          "color": "#81b5cb",
-          "selectable": true
+          "color": "#7fb9cb",
+          "valueField": "levelpct",
+          "valueUnit": "%"
         },
         {
           "id": "tank_5",
           "kind": "tank",
-          "label": "Ground storage 5",
+          "label": "GST-5",
           "dataKey": "GST5",
           "position": [
-            0.45,
             0,
-            4.1
+            0,
+            5.3
           ],
           "size": [
-            1.02,
-            1.14,
-            1.02
+            0.96,
+            0.98,
+            0.96
           ],
-          "color": "#81b5cb",
-          "selectable": true
+          "color": "#7fb9cb",
+          "valueField": "levelpct",
+          "valueUnit": "%"
         },
         {
           "id": "suction_header",
           "kind": "pipe",
+          "path": [
+            [
+              2.4,
+              0.52,
+              -5.6
+            ],
+            [
+              2.4,
+              0.52,
+              5.6
+            ]
+          ],
+          "diameter": 0.36,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "selectable": false
+        },
+        {
+          "id": "pump_BP01",
+          "kind": "pump",
+          "label": "Booster BP01",
+          "dataKey": "BP01",
           "position": [
-            3.3,
-            0.53,
-            0
-          ],
-          "size": [
-            0.32,
-            9,
-            0.32
-          ],
-          "rotation": [
-            90,
+            5.3,
             0,
-            0
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
-        },
-        {
-          "id": "booster_1",
-          "kind": "pump",
-          "label": "Booster 1",
-          "dataKey": "BP01",
-          "position": [
-            5.22,
-            0.06,
-            -4
+            -5.6
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
-          "id": "motor_fan_1",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 1",
-          "dataKey": "BP01",
-          "position": [
-            5.22,
-            1.16,
-            -4
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
-        },
-        {
-          "id": "booster_2",
+          "id": "pump_BP02",
           "kind": "pump",
-          "label": "Booster 2",
+          "label": "Booster BP02",
           "dataKey": "BP02",
           "position": [
-            5.22,
-            0.06,
-            -2.4
+            5.3,
+            0,
+            -3.36
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
-          "id": "motor_fan_2",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 2",
-          "dataKey": "BP02",
-          "position": [
-            5.22,
-            1.16,
-            -2.4
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
-        },
-        {
-          "id": "booster_3",
+          "id": "pump_BP03",
           "kind": "pump",
-          "label": "Booster 3",
+          "label": "Booster BP03",
           "dataKey": "BP03",
           "position": [
-            5.22,
-            0.06,
-            -0.8
+            5.3,
+            0,
+            -1.12
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
-          "id": "motor_fan_3",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 3",
-          "dataKey": "BP03",
-          "position": [
-            5.22,
-            1.16,
-            -0.8
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
-        },
-        {
-          "id": "booster_4",
+          "id": "pump_BP04",
           "kind": "pump",
-          "label": "Booster 4",
+          "label": "Booster BP04",
           "dataKey": "BP04",
           "position": [
-            5.22,
-            0.06,
-            0.8
+            5.3,
+            0,
+            1.12
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
-          "id": "motor_fan_4",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 4",
-          "dataKey": "BP04",
-          "position": [
-            5.22,
-            1.16,
-            0.8
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
-        },
-        {
-          "id": "booster_5",
+          "id": "pump_BP05",
           "kind": "pump",
-          "label": "Booster 5",
+          "label": "Booster BP05",
           "dataKey": "BP05",
           "position": [
-            5.22,
-            0.06,
-            2.4
+            5.3,
+            0,
+            3.36
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
-          "id": "motor_fan_5",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 5",
-          "dataKey": "BP05",
-          "position": [
-            5.22,
-            1.16,
-            2.4
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
-        },
-        {
-          "id": "booster_6",
+          "id": "pump_BP06",
           "kind": "pump",
-          "label": "Booster 6",
+          "label": "Booster BP06",
           "dataKey": "BP06",
           "position": [
-            5.22,
-            0.06,
-            4
+            5.3,
+            0,
+            5.6
           ],
           "size": [
-            0.75,
-            0.8,
-            0.8
+            0.9,
+            0.82,
+            0.9
           ],
-          "selectable": true
-        },
-        {
-          "id": "motor_fan_6",
-          "kind": "fan",
-          "label": "Pump motor cooling fan 6",
-          "dataKey": "BP06",
-          "position": [
-            5.22,
-            1.16,
-            4
-          ],
-          "size": [
-            0.45,
-            0.45,
-            0.45
-          ],
-          "color": "#65b8f4",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "rotate",
-              "axis": "z",
-              "rpm": 900,
-              "rpmField": "rpm",
-              "enabledField": "flowgpm"
-            }
-          ]
+          "color": "#6b9fb8",
+          "valueField": "flowgpm",
+          "valueUnit": "GPM",
+          "motorRpmField": "rpm"
         },
         {
           "id": "discharge_header",
           "kind": "pipe",
-          "position": [
-            7.23,
-            0.58,
-            0
+          "path": [
+            [
+              8.35,
+              0.62,
+              -5.6
+            ],
+            [
+              8.35,
+              0.62,
+              5.6
+            ]
           ],
-          "size": [
-            0.32,
-            9,
-            0.32
-          ],
-          "rotation": [
-            90,
-            0,
-            0
-          ],
-          "color": "#4b94cd",
-          "metalness": 0.48
+          "diameter": 0.42,
+          "color": "#458ccb",
+          "metalness": 0.44,
+          "selectable": false
         },
         {
-          "id": "distribution_meter",
-          "kind": "sphere",
-          "label": "Distribution meter",
-          "dataKey": "DIST",
-          "position": [
-            9.35,
-            0.59,
-            0
+          "id": "distribution_sample",
+          "kind": "pipe",
+          "path": [
+            [
+              10.15,
+              0.62,
+              0
+            ],
+            [
+              10.15,
+              0.78,
+              1.1
+            ]
           ],
-          "size": [
-            0.34,
-            0.34,
-            0.34
-          ],
-          "color": "#b9def5",
-          "selectable": true
+          "diameter": 0.09,
+          "color": "#8aaeb9",
+          "metalness": 0.44,
+          "selectable": false
         },
         {
-          "id": "CHEM1",
-          "kind": "sphere",
-          "label": "Source treatment injection",
-          "dataKey": "CHEM1",
+          "id": "analyzer_distribution",
+          "kind": "analyzer",
+          "label": "Distribution Cl2 / NH3 analyzer",
+          "dataKey": "AN-DIST",
           "position": [
-            -5.15,
-            1.15,
-            -0.9
+            10.15,
+            0.04,
+            1.42
           ],
           "size": [
-            0.27,
-            0.27,
-            0.27
+            0.65,
+            0.68,
+            0.65
           ],
-          "color": "#dfa36a",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "pulse",
-              "amplitude": 0.22,
-              "period": 1.35,
-              "enabledField": "status",
-              "enabledValue": "Running"
-            }
-          ]
-        },
-        {
-          "id": "CHEM2",
-          "kind": "sphere",
-          "label": "Surface treatment injection",
-          "dataKey": "CHEM2",
-          "position": [
-            -5.15,
-            1.15,
-            3.9
-          ],
-          "size": [
-            0.27,
-            0.27,
-            0.27
-          ],
-          "color": "#dfa36a",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "pulse",
-              "amplitude": 0.22,
-              "period": 1.35,
-              "enabledField": "status",
-              "enabledValue": "Running"
-            }
-          ]
-        },
-        {
-          "id": "quality_monitor",
-          "kind": "box",
-          "label": "Distribution residual monitor",
-          "dataKey": "QUALITY",
-          "position": [
-            9.35,
-            1.43,
-            0.9
-          ],
-          "size": [
-            0.42,
-            0.45,
-            0.28
-          ],
-          "color": "#b4d5dc",
-          "selectable": true
-        },
-        {
-          "id": "alarm_beacon",
-          "kind": "sphere",
-          "label": "Station alarm indicator",
-          "dataKey": "ALARM",
-          "position": [
-            8.6,
-            1.58,
-            0.9
-          ],
-          "size": [
-            0.22,
-            0.22,
-            0.22
-          ],
-          "color": "#f5b556",
-          "selectable": true,
-          "animations": [
-            {
-              "kind": "pulse",
-              "amplitude": 0.3,
-              "period": 1.4,
-              "enabledField": "status",
-              "enabledValue": "Warning"
-            }
-          ]
+          "color": "#8ed9e6",
+          "valueField": "cl2mgL",
+          "valueUnit": "mg/L"
         }
       ],
-      "height": 570,
+      "height": 760,
       "theme": "dark",
       "grid": true,
       "shadows": true,
@@ -1809,8 +2051,12 @@
         "clearOnSecondClick": true,
         "targets": [
           "asset_register",
+          "meter_register",
+          "chemical_register",
           "booster_load",
-          "storage_levels"
+          "storage_levels",
+          "source_meter_chart",
+          "quality_chart"
         ]
       }
     },
@@ -2025,11 +2271,201 @@
       ]
     },
     {
+      "type": "grid",
+      "id": "instrument_charts",
+      "columns": 12,
+      "children": [
+        {
+          "type": "barChart",
+          "id": "source_meter_chart",
+          "title": "Eleven source flowmeters · GPM",
+          "dataset": "metering",
+          "category": "assetid",
+          "measure": "flowgpm",
+          "aggregation": "first",
+          "span": 7,
+          "height": 290,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene",
+              "meter_register"
+            ]
+          }
+        },
+        {
+          "type": "barChart",
+          "id": "quality_chart",
+          "title": "Measured chlorine residual · mg/L",
+          "dataset": "quality",
+          "category": "assetid",
+          "measure": "cl2mgL",
+          "aggregation": "first",
+          "span": 5,
+          "height": 290,
+          "options": {
+            "color": [
+              "#31d5bf",
+              "#77b7e5",
+              "#f7ab50"
+            ],
+            "textStyle": {
+              "color": "#dce9fa"
+            },
+            "xAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "axisLine": {
+                "lineStyle": {
+                  "color": "#34445b"
+                }
+              }
+            },
+            "yAxis": {
+              "axisLabel": {
+                "color": "#91a7bc"
+              },
+              "splitLine": {
+                "lineStyle": {
+                  "color": "#273a50"
+                }
+              }
+            }
+          },
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene",
+              "chemical_register"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "grid",
+      "id": "instrument_tables",
+      "columns": 12,
+      "children": [
+        {
+          "type": "table",
+          "id": "meter_register",
+          "title": "Source metering · 8 remote / 1 on-site / 2 surface",
+          "dataset": "metering",
+          "span": 6,
+          "maxRows": 12,
+          "columns": [
+            {
+              "field": "assetid",
+              "title": "Meter"
+            },
+            {
+              "field": "equipment",
+              "title": "Source"
+            },
+            {
+              "field": "status",
+              "title": "State"
+            },
+            {
+              "field": "flowgpm",
+              "title": "GPM"
+            }
+          ],
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene"
+            ]
+          }
+        },
+        {
+          "type": "table",
+          "id": "chemical_register",
+          "title": "Chlorine / ammonia feed status",
+          "dataset": "chemicals",
+          "span": 6,
+          "maxRows": 12,
+          "columns": [
+            {
+              "field": "assetid",
+              "title": "Feed"
+            },
+            {
+              "field": "medium",
+              "title": "Chemical"
+            },
+            {
+              "field": "status",
+              "title": "Status"
+            },
+            {
+              "field": "dosemgL",
+              "title": "Dose (mg/L)"
+            }
+          ],
+          "interaction": {
+            "enabled": true,
+            "trigger": "click",
+            "internalMode": "highlight",
+            "externalMode": "selection",
+            "field": "assetid",
+            "targets": [
+              "water_scene"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "type": "table",
       "id": "asset_register",
-      "title": "Equipment | scenario snapshot",
+      "title": "Equipment and process telemetry · scenario snapshot",
       "dataset": "snapshots",
-      "maxRows": 40,
+      "maxRows": 80,
       "columns": [
         {
           "field": "assetid",
@@ -2062,6 +2498,22 @@
         {
           "field": "rpm",
           "title": "RPM"
+        },
+        {
+          "field": "valveopenpct",
+          "title": "Open (%)"
+        },
+        {
+          "field": "dosemgL",
+          "title": "Dose (mg/L)"
+        },
+        {
+          "field": "cl2mgL",
+          "title": "Cl2 (mg/L)"
+        },
+        {
+          "field": "nh3mgL",
+          "title": "NH3 (mg/L)"
         }
       ],
       "interaction": {
@@ -2078,7 +2530,7 @@
     {
       "type": "text",
       "id": "engineering_note",
-      "text": "Engineering demonstration only. Fictional equipment IDs, modeled flow paths, scenario values, and alarm rules. Not a validated hydraulic model or operating procedure."
+      "text": "Training demonstration only. Equipment labels reflect a source schematic, but values, opening percentages, chemical concentrations, capacities, scenarios and alarms are synthetic. This is a process-connectivity visualization, not a calibrated hydraulic model, chemical-treatment design, or an operating/control procedure. Mass balance uses Q(source) − Q(booster) = Q(net storage), with positive values indicating filling."
     }
   ]
 }

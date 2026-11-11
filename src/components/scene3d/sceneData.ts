@@ -8,6 +8,9 @@ export interface SceneObjectState {
     status?: unknown;
     level?: number;
     flow?: number;
+    reading?: string | number;
+    opening?: number;
+    motorRpm?: number;
     visible: boolean;
     selectable: boolean;
     row?: DataRow;
@@ -39,6 +42,9 @@ export function resolveSceneObjects(component: Scene3dComponent, sourceRows: Dat
         const level = object.kind === "tank" && row && levelField ? row[levelField] : undefined;
         const flowRow = object.flowKey === undefined ? row : bindings.get(object.flowKey)?.row;
         const flow = object.kind === "pipe" && flowRow && flowField ? flowRow[flowField] : undefined;
+        const readout = row && object.valueField ? row[object.valueField] : undefined;
+        const valveOpening = row && object.openingField ? row[object.openingField] : undefined;
+        const pumpRpm = row && object.motorRpmField ? row[object.motorRpmField] : undefined;
         return {
             object,
             label: object.label ?? String(object.dataKey ?? object.id),
@@ -46,6 +52,9 @@ export function resolveSceneObjects(component: Scene3dComponent, sourceRows: Dat
             status,
             level: typeof level === "number" && Number.isFinite(level) ? Math.max(0, Math.min(100, level)) : undefined,
             flow: typeof flow === "number" && Number.isFinite(flow) ? flow : undefined,
+            reading: typeof readout === "number" && Number.isFinite(readout) || typeof readout === "string" ? readout : undefined,
+            opening: typeof valveOpening === "number" && Number.isFinite(valveOpening) ? Math.max(0, Math.min(100, valveOpening)) : undefined,
+            motorRpm: typeof pumpRpm === "number" && Number.isFinite(pumpRpm) ? Math.max(0, Math.min(3600, pumpRpm)) : undefined,
             visible: object.visible !== false && !(bound && !row && component.hideUnmatched) && !(row && visibleField && row[visibleField] === false),
             selectable: object.selectable ?? bound,
             row,

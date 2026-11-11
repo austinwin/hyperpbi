@@ -540,61 +540,105 @@ describe("portable dashboard examples", () => {
 });
 
 describe("water pump station digital twin example", () => {
-    it("matches its generic process design and uses eight coherent synthetic scenarios", () => {
-        const entry = manifest.examples.find(item => item.slug === "water-pump-station-digital-twin");
+    const entry = manifest.examples.find(item => item.slug === "water-pump-station-digital-twin");
+    const spec = JSON.parse(readFileSync(asset(entry!, "specification"), "utf8")) as {
+        title: string; components: Array<Record<string, unknown>>;
+    };
+    const scene = spec.components.find(item => item.type === "scene3d") as {
+        objectIdField: string; levelField: string; flowField: string;
+        objects: Array<{
+            id: string; kind: string; dataKey?: string; flowKey?: string;
+            path?: number[][]; motorRpmField?: string; valueField?: string;
+            openingField?: string;
+        }>;
+    };
+    const table = parseCsvRows(readFileSync(asset(entry!, "data"), "utf8"));
+    const readings = table.slice(1).map(line => Object.fromEntries(table[0].map((field, column) => [field, line[column]])));
+    const snapshots = readings.filter(row => row.recordtype === "Snapshot");
+    const scenarioOrder = ["Normal supply", "Peak demand", "Remote wells offline",
+        "Surface inlet unavailable", "Booster maintenance", "Low storage",
+        "Limited power", "Low distribution pressure", "Chlorine dosing fault", "Ammonia dosing fault"];
+    const situation = (name: string) => snapshots.filter(row => row.scenario === name);
+    const asset = (name: string, id: string) => situation(name).find(row => row.assetid === id)!;
+    const total = (items: Array<Record<string, string>>, field = "flowgpm") =>
+        items.reduce((sum, row) => sum + Number(row[field] || 0), 0);
+
+    it("faithfully models the source-to-storage-to-booster topology and main instrument counts", () => {
         expect(entry).toBeDefined();
-        const specification = JSON.parse(readFileSync(asset(entry!, "specification"), "utf8")) as {
-            title: string;
-            components: Array<Record<string, unknown>>;
-        };
-        const scene = specification.components.find(component => component.type === "scene3d") as {
-            objects: Array<{ id: string; kind: string; dataKey?: string; flowKey?: string; animations?: unknown[] }>;
-            objectIdField: string; levelField: string; flowField: string;
-        };
-        expect(specification.title).toBe("Water Pump Station | Process Digital Twin");
-        expect(JSON.stringify(specification)).not.toMatch(/southwest repump/i);
-        expect(scene.objects.length).toBeLessThanOrEqual(80);
+        expect(spec.title).toBe("Water Pump Station | Process Digital Twin");
+        expect(JSON.stringify(spec)).not.toMatch(/southwest repump/i);
+        expect(scene.objects).toHaveLength(84);
+        expect(scene.objects.filter(object => object.kind === "well")).toHaveLength(9);
+        expect(scene.objects.filter(object => object.kind === "flowmeter")).toHaveLength(11);
+        expect(scene.objects.filter(object => object.kind === "valve")).toHaveLength(2);
+        expect(scene.objects.filter(object => object.kind === "injector")).toHaveLength(8);
+        expect(scene.objects.filter(object => object.kind === "analyzer")).toHaveLength(3);
+        expect(scene.objects.filter(object => object.kind === "tank")).toHaveLength(5);
+        expect(scene.objects.filter(object => object.kind === "pump")).toHaveLength(6);
+        expect(scene.objects.filter(object => object.kind === "pipe" && object.path)).toHaveLength(40);
+        expect(scene.objects.filter(object => object.kind === "pump" && object.motorRpmField === "rpm")).toHaveLength(6);
+        expect(scene.objects.filter(object => object.kind === "valve" && object.openingField === "valveopenpct")).toHaveLength(2);
+        expect(scene.objects.filter(object => object.kind === "flowmeter" && object.valueField === "flowgpm")).toHaveLength(11);
         expect(scene.objectIdField).toBe("assetid");
         expect(scene.levelField).toBe("levelpct");
         expect(scene.flowField).toBe("flowgpm");
-        expect(scene.objects.filter(object => object.kind === "tank")).toHaveLength(5);
-        expect(scene.objects.filter(object => object.kind === "pump" && object.dataKey?.startsWith("BP"))).toHaveLength(6);
-        expect(scene.objects.filter(object => object.kind === "fan" && object.animations?.length)).toHaveLength(6);
-        expect(scene.objects.filter(object => object.kind === "pipe" && object.flowKey).length).toBeGreaterThanOrEqual(15);
-        const rows = parseCsvRows(readFileSync(asset(entry!, "data"), "utf8"));
-        const headers = rows[0];
-        const data = rows.slice(1).map(raw => Object.fromEntries(headers.map((key, index) => [key, raw[index]])));
-        const snapshots = data.filter(row => row.recordtype === "Snapshot");
-        const scenarioOrder = ["Normal supply", "Peak demand", "Remote wells offline",
-            "Surface inlet unavailable", "Booster maintenance", "Low storage",
-            "Limited power", "Low distribution pressure"];
-        const switcher = specification.components.find(component => component.id === "operating_scenario");
-        expect(switcher?.options).toEqual(scenarioOrder);
-        for (const scenario of scenarioOrder) {
-            const state = snapshots.filter(row => row.scenario === scenario);
-            const assets = new Map(state.map(row => [row.assetid, row]));
-            expect(assets.size).toBe(30);
-            expect(state.filter(row => row.category === "Storage")).toHaveLength(5);
-            const pumps = state.filter(row => row.category === "Booster");
-            expect(pumps).toHaveLength(6);
-            const runningFlow = pumps.reduce((sum, row) => sum + Number(row.flowgpm), 0);
-            expect(Math.abs(runningFlow - Number(assets.get("DIST")?.flowgpm))).toBeLessThanOrEqual(2);
-            expect(Number(assets.get("DISCHARGE")?.pressurepsi)).toBe(Number(assets.get("DIST")?.pressurepsi));
-            expect(state.filter(row => row.assetid.startsWith("RW"))).toHaveLength(8);
-            expect(state.filter(row => row.assetid.startsWith("SW"))).toHaveLength(2);
-            for (const fan of scene.objects.filter(object => object.kind === "fan")) {
-                expect(assets.has(fan.dataKey!)).toBe(true);
-            }
+        const pipes = new Map(scene.objects.filter(item => item.kind === "pipe").map(item => [item.id, item.path!]));
+        const near = (left: number[], right: number[]) => left.every((v, i) => Math.abs(v - right[i]) < 0.01);
+        const supplyHeader = pipes.get("tank_fill_header")!;
+        const suctionHeader = pipes.get("suction_header")!;
+        const dischargeHeader = pipes.get("discharge_header")!;
+        expect(supplyHeader[0][0]).toBe(-2.4);
+        expect(suctionHeader[0][0]).toBe(2.4);
+        expect(dischargeHeader[0][0]).toBe(8.35);
+        for (let tank = 1; tank <= 5; tank++) {
+            expect(near(pipes.get("gst_fill_" + tank)![0], [-2.4, 0.52, [-5.3, -2.65, 0, 2.65, 5.3][tank - 1]])).toBe(true);
+            expect(near(pipes.get("gst_draw_" + tank)![1], [2.4, 0.52, [-5.3, -2.65, 0, 2.65, 5.3][tank - 1]])).toBe(true);
         }
-        const scenario = (name: string) => snapshots.filter(row => row.scenario === name);
-        expect(scenario("Peak demand").filter(row => row.category === "Booster" && Number(row.flowgpm) > 0)).toHaveLength(6);
-        expect(scenario("Remote wells offline").filter(row => row.category === "Remote well" && Number(row.flowgpm) !== 0)).toHaveLength(0);
-        expect(scenario("Surface inlet unavailable").filter(row => row.category === "Surface inlet" && Number(row.flowgpm) !== 0)).toHaveLength(0);
-        expect(scenario("Booster maintenance").find(row => row.assetid === "BP03")?.status).toBe("Standby");
-        expect(scenario("Booster maintenance").find(row => row.assetid === "BP05")?.status).toBe("Running");
-        expect(scenario("Limited power").filter(row => row.category === "Booster" && Number(row.flowgpm) > 0)).toHaveLength(2);
-        expect(scenario("Low storage").filter(row => row.category === "Storage" && Number(row.levelpct) < 35)).toHaveLength(5);
-        expect(scenario("Low distribution pressure").find(row => row.assetid === "ALARM")?.status).toBe("Warning");
-        expect(scenario("Normal supply").find(row => row.assetid === "QUALITY")?.status).toBe("Running");
+        for (let pump = 1; pump <= 6; pump++) {
+            const id = "BP" + String(pump).padStart(2, "0");
+            expect(pipes.get("booster_suction_" + id)![0][0]).toBe(2.4);
+            expect(pipes.get("booster_discharge_" + id)![1][0]).toBe(8.35);
+        }
+        expect(scene.objects.find(item => item.id === "analyzer_distribution")?.dataKey).toBe("AN-DIST");
+        expect(spec.components.find(item => item.id === "operating_scenario")?.options).toEqual(scenarioOrder);
+    });
+
+    it("conserves volume through each of ten synthetic operating states", () => {
+        for (const name of scenarioOrder) {
+            const state = situation(name);
+            expect(state).toHaveLength(59);
+            expect(state.filter(row => row.category === "Flowmeter")).toHaveLength(11);
+            expect(state.filter(row => row.category === "Well")).toHaveLength(9);
+            expect(state.filter(row => row.category === "Surface valve")).toHaveLength(2);
+            expect(state.filter(row => row.category === "Storage")).toHaveLength(5);
+            expect(state.filter(row => row.category === "Booster")).toHaveLength(6);
+            const source = total(state.filter(row => row.category === "Well" || row.category === "Surface valve"));
+            const metering = total(state.filter(row => row.category === "Flowmeter"));
+            const discharge = total(state.filter(row => row.category === "Booster"));
+            const fill = total(state.filter(row => row.assetid.startsWith("IN-GST")));
+            const draw = total(state.filter(row => row.assetid.startsWith("OUT-GST")));
+            expect(source).toBe(metering);
+            expect(source).toBe(fill);
+            expect(discharge).toBe(draw);
+            expect(discharge).toBe(Number(asset(name, "DIST").flowgpm));
+            expect(source - discharge).toBe(Number(state[0].netstoragegpm));
+            expect(Number(asset(name, "AN-DIST").cl2mgL)).toBeGreaterThanOrEqual(0);
+            expect(Number(asset(name, "AN-DIST").nh3mgL)).toBeGreaterThanOrEqual(0);
+        }
+        expect(situation("Peak demand").filter(row => row.category === "Booster" && Number(row.flowgpm) > 0)).toHaveLength(6);
+        expect(situation("Remote wells offline").filter(row => row.category === "Well" && row.assetid !== "W09" && Number(row.flowgpm) > 0)).toHaveLength(0);
+        expect(asset("Surface inlet unavailable", "SW1").valveopenpct).toBe("0");
+        expect(asset("Surface inlet unavailable", "SW2").valveopenpct).toBe("0");
+        expect(asset("Surface inlet unavailable", "FM-SW1").flowgpm).toBe("0");
+        expect(asset("Surface inlet unavailable", "AN-SW1").cl2mgL).toBe("");
+        expect(asset("Booster maintenance", "BP03").rpm).toBe("0");
+        expect(asset("Booster maintenance", "BP03").status).toBe("Standby");
+        expect(situation("Limited power").filter(row => row.category === "Booster" && Number(row.rpm) > 0)).toHaveLength(2);
+        expect(situation("Low storage").filter(row => row.category === "Storage" && Number(row.levelpct) < 32)).toHaveLength(5);
+        expect(Number(asset("Chlorine dosing fault", "AN-DIST").cl2mgL)).toBeLessThan(0.5);
+        expect(asset("Chlorine dosing fault", "CL2-SW1").status).toBe("Fault");
+        expect(Number(asset("Chlorine dosing fault", "AN-SW1").cl2mgL)).toBeGreaterThan(1);
+        expect(Number(asset("Ammonia dosing fault", "AN-DIST").nh3mgL)).toBeLessThan(0.1);
+        expect(asset("Ammonia dosing fault", "NH3-W09").status).toBe("Fault");
     });
 });
