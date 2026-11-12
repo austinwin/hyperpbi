@@ -49,6 +49,8 @@ Only an allowlisted series-type set passes. Semantic chart options cannot replac
 
 Declarative `svg` passes a strict element/property/binding/animation schema. Standard raw `svgMarkup` must be one parseable SVG document and passes XML parsing, element/attribute allowlists, local-ID isolation/reference rewriting, depth/path/element limits, external-value rejection, and a final DOMPurify SVG pass.
 
+SVG from `svgBinding` always passes this sanitizer, including in Trusted SVG mode. HyperPBI translates a bounded subset of numeric opacity and dash-offset animations into scoped CSS before inserting the sanitized diagram.
+
 Scripts, handlers, style, foreignObject, link/image/use, audio/video/canvas, external resources, animation elements, unsafe transforms, unknown references, and field-injected path data are blocked. Exact limits are in [SVG visuals](svg-visuals.md).
 
 ## Embedded 3D models

@@ -10,6 +10,8 @@ import { validateV2Schema } from "../src/schema/validateV2Schema";
 import { initialDashboardState } from "../src/render/stateStore";
 import { sanitizeCss } from "../src/security/sanitizeCss";
 import { resolveSvgMarkupTemplates, sanitizeSvg } from "../src/security/sanitizeSvg";
+import { parseCsvText } from "../src/data/fileImport";
+import { prepareSpecification } from "../src/schema/prepareSpecification";
 
 const elements: SvgElementDefinition[] = [{ type: "defs", children: [{ type: "linearGradient", id: "gradient", children: [{ type: "stop", offset: "0%", stopColor: "#fff" }] }] }, { type: "rect", id: "mark", x: 0, y: 0, width: 20, height: 20, fill: "url(#gradient)" }];
 const state = initialDashboardState();
@@ -52,4 +54,65 @@ describe("raw SVG and CSS security", () => {
     it("scopes keyframes without treating percentages as selectors", () => { const result = sanitizeCss(`@keyframes fade { 0% { opacity: 0 } 100% { opacity: 1 } } .mark { animation: fade 500ms ease 0ms 1 both; fill: #fff; }`, "#scope", { keyframeNamespace: "hp-svg" }); expect(result.css).toContain("@keyframes hp-svg-fade"); expect(result.css).toContain("0%"); expect(result.css).not.toContain("#scope 0%"); expect(result.css).toContain("animation:hp-svg-fade"); });
     it("escapes raw field templates and forbids structural or path injection", () => { const context = { row: { status: `\"><script>bad()</script>`, tag: "script", path: "M0 0" }, rows: [], state, warnings: [] }; expect(resolveSvgMarkupTemplates(`<svg><text>{{status}}</text></svg>`, context)).toContain("&lt;script&gt;"); expect(() => resolveSvgMarkupTemplates(`<svg><{{tag}}/></svg>`, context)).toThrow(); expect(() => resolveSvgMarkupTemplates(`<svg><path d="{{path}}"/></svg>`, context)).toThrow(); });
     it("blocks CSS URLs, expressions, behavior, unsafe durations, and infinite raw animation", () => { const result = sanitizeCss(`.x{fill:url(https://bad.test);color:expression(alert(1));behavior:url(x);animation:spin 20ms linear infinite}`, "#scope", { keyframeNamespace: "hp" }); expect(result.css).not.toMatch(/url\(|expression|behavior|20ms|infinite/i); });
+});
+
+describe("data-bound svgMarkup", () => {
+    const component = {
+        type: "svgMarkup", id: "schematic", ariaLabel: "Facility schematic",
+        svgBinding: { mode: "data", keyField: "facilityId", svgField: "svgText" },
+    };
+    const specification = (value: unknown) => ({ version: "2.0", components: [value] });
+
+    it("validates the binding and resolves field aliases in its dataset", () => {
+        const { data } = parseCsvText("Station ID,Schematic\nINT-01,example", "StationSchematics.csv");
+        const input = specification({ ...component, dataset: "registry" });
+        const prepared = prepareSpecification({
+            ...input, data: { datasets: { registry: { source: "powerbi", select: ["facilityId", "svgText"] } } },
+        }, data, { repair: false, aliasOverrides: { station_id: "facilityId", schematic: "svgText" } });
+        expect(prepared.errors).toEqual([]);
+        expect(prepared.schema?.components[0]).toMatchObject({
+            svgBinding: { mode: "data", keyField: "station_id", svgField: "schematic" },
+        });
+        expect(validateV2Schema(specification({ ...component, svgBinding: undefined })).valid).toBe(false);
+        expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, svgField: "" } })).valid).toBe(false);
+        expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, mode: "url" } })).valid).toBe(false);
+    });
+
+    it("translates only bounded numeric animation and strips resource loads", () => {
+        const markup = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 20 100 40" preserveAspectRatio="none">
+            <defs><linearGradient id="paint"><stop offset="0" stop-color="blue"/></linearGradient></defs>
+            <rect id="mark" fill="url( '#paint' )" stroke="URL(/outside.svg)" onclick="unsafe()" data-hp-svg-motion="0">
+                <animate attributeName="opacity" from="0.5" to="1" dur="2s" repeatCount="indefinite"/>
+            </rect>
+            <path FILL="url(/outside.svg)" stroke="u\72l(/outside.svg)" d="M10 20H40">
+                <animate attributeName="opacity" values="0;1" dur="10ms"/>
+                <animate attributeName="href" from="0" to="1" dur="2s"/>
+                <animate attributeName="opacity" from="0" to="1" dur="2s" begin="mark.click"/>
+                <animate attributeName="opacity" from="0" to="1" dur="2s" href="#mark"/>
+            </path>
+            <circle data-hp-svg-motion="0"/>
+            <style>@import "/outside.css";</style><image href="/outside.svg"/><script>unsafe()</script>
+        </svg>`;
+        const result = sanitizeSvg(markup, "hp-bound", { bound: { maxElements: 500, maxAnimations: 20 }, mode: "trusted" });
+        expect(result.svg).toContain('viewBox="10 20 100 40"');
+        expect(result.svg).toContain('preserveAspectRatio="xMidYMid meet"');
+        expect(result.svg).toContain('fill="url(#hp-bound-paint)"');
+        expect(result.svg).not.toMatch(/onclick|animate|outside|<style|<image|<script|unsafe/);
+        expect(result.svg.match(/data-hp-svg-motion=/g)).toHaveLength(1);
+        expect(result.animatedElementCount).toBe(1);
+        expect(result.motionCss).toContain("opacity:0.5");
+        expect(sanitizeSvg(markup, "hp-static").motionCss).toBe("");
+    });
+
+    it("rejects invalid, empty, and oversized drawings", () => {
+        const bound = { maxElements: 500, maxAnimations: 20 };
+        const wrap = (content: string) => `<svg viewBox="0 0 100 50">${content}</svg>`;
+        for (const markup of [
+            "data:image/svg+xml;base64,example", '<svg viewBox="0 0 10 10">', wrap(""),
+            wrap("<rect/>".repeat(501)), wrap("<g>".repeat(22) + "<rect/>" + "</g>".repeat(22)),
+            wrap(" ".repeat(250_001)), wrap(`<path d="${"M0 0".repeat(5_001)}"/>`),
+        ]) expect(sanitizeSvg(markup, "hp-bound", { bound }).svg).toBe("");
+        expect(sanitizeSvg('<svg width="160px" height="90"><rect width="20" height="20"/></svg>', "hp-bound", { bound }).svg)
+            .toContain('viewBox="0 0 160 90"');
+    });
 });

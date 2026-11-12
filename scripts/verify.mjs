@@ -55,7 +55,7 @@ if (full) {
     npm("package:core", "package:core");
     npm("package:maps", "package:maps");
     npm("package:capabilities", "package:verify");
-    add("browser:packaged-scenes", "node_modules/@playwright/test/cli.js", ["test", "tests/browser/scene3d-package.spec.ts", "--workers", "1"], { HYPERPBI_TEST_PACKAGES: "1" });
+    add("browser:packaged-visuals", "node_modules/@playwright/test/cli.js", ["test", "tests/browser/scene3d-package.spec.ts", "tests/browser/svg-binding-package.spec.ts", "--workers", "1"], { HYPERPBI_TEST_PACKAGES: "1" });
 }
 if (process.argv.includes("--dry-run")) { console.log(JSON.stringify(plan, null, 2)); process.exit(0); }
 mkdirSync(".verification", { recursive: true });

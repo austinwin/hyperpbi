@@ -93,15 +93,17 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
         const componentId = typeof visit.component.id === "string" ? visit.component.id : undefined;
         if (componentId) componentsById.set(componentId, visit);
         if (type === "dynamicContent") dynamicRegions.push(visit);
-        if (type === "scene3d" && object(visit.component.sceneBinding) && visit.component.sceneBinding.mode === "data") {
-            const binding = visit.component.sceneBinding;
-            for (const property of ["keyField", "sceneField"]) {
+        const bindingProperty = type === "svgMarkup" ? "svgBinding" : type === "scene3d" ? "sceneBinding" : undefined;
+        const binding = bindingProperty && visit.component[bindingProperty];
+        const hasDataBinding = object(binding) && binding.mode === "data";
+        if (hasDataBinding) {
+            for (const property of ["keyField", type === "svgMarkup" ? "svgField" : "sceneField"]) {
                 if (typeof binding[property] !== "string") continue;
                 result.push({
                     reference: binding[property] as string,
-                    path: `${visit.path}/sceneBinding/${property}`,
+                    path: `${visit.path}/${bindingProperty}/${property}`,
                     componentId,
-                    datasetName: typeof binding.dataset === "string" ? binding.dataset : "powerbi",
+                    datasetName: typeof binding.dataset === "string" ? binding.dataset : type === "svgMarkup" ? visit.datasetName : "powerbi",
                     requirement: "any",
                     source: "dataset",
                     optionalAtRuntime: true,
@@ -131,14 +133,17 @@ export function specificationFieldReferences(specification: unknown): FieldRefer
                 });
             });
         }
-        for (const descriptorField of descriptor.fields) dispatchComponentField({
-            component: visit.component,
-            descriptorField,
-            componentPath: visit.path,
-            componentId,
-            effectiveDataset: visit.datasetName,
-            emit: occurrence => result.push(occurrence),
-        });
+        for (const descriptorField of descriptor.fields) {
+            if (type === "svgMarkup" && hasDataBinding && descriptorField.property === "svg") continue;
+            dispatchComponentField({
+                component: visit.component,
+                descriptorField,
+                componentPath: visit.path,
+                componentId,
+                effectiveDataset: visit.datasetName,
+                emit: occurrence => result.push(occurrence),
+            });
+        }
     });
     for (const { component, path } of dynamicRegions) {
         const trigger = component.trigger;

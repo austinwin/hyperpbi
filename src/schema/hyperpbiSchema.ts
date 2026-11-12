@@ -10,7 +10,7 @@ import type {
 import type {
     MapViewDefinition, MapBasemapDefinition, MapLayerDefinition, MapSearchDefinition, MapLegendDefinition, MapLayerGroupDefinition, MapViewBookmarkDefinition,
 } from "./mapSchema";
-import type { SvgDataContextDefinition, SvgElementDefinition, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
+import type { SvgDataContextDefinition, SvgElementDefinition, SvgMarkupBinding, SvgMotionOptions, SvgPerformanceOptions } from "../components/svg/svgTypes";
 import type { NetworkGraphComponent } from "./networkGraphSchema";
 import type { MermaidDiagramComponent } from "./mermaidDiagramSchema";
 import type { Scene3dComponent } from "./scene3dSchema";
@@ -711,7 +711,8 @@ export interface SvgMarkupComponent extends ComponentBase {
     preserveAspectRatio?: string;
     role?: "img" | "group";
     description?: string;
-    svg: string;
+    svg?: string;
+    svgBinding?: SvgMarkupBinding;
     dataContext?: SvgDataContextDefinition;
     motion?: SvgMotionOptions;
     performance?: SvgPerformanceOptions;

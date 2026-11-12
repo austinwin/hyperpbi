@@ -192,7 +192,7 @@ Use \`svg\` for governed diagrams, gauges, pictorial marks, process flows, and s
 
 Values can be literal, bound, templated, scaled, mapped, conditional, or state-based. Data contexts are \`aggregate\`, \`selectedRow\`, and \`first\`. Repeats are bounded and may select a dataset. Animation presets are \`fade-in\`, \`slide-in\`, \`scale-in\`, \`pulse\`, \`float\`, \`swim\`, \`rotate\`, \`draw-path\`, \`progress-fill\`, \`follow-progress\`, \`flow-dash\`, \`blink-status\`, \`bounce\`, and \`shimmer\`; triggers are \`auto\`, \`hover\`, \`focus\`, \`selected\`, \`dataChange\`, \`state\`, and \`none\`. Include an accessible label and respect reduced motion.
 
-Use \`svgMarkup\` only when structured SVG is insufficient. In Standard mode it is a sanitized single SVG document: no script, handlers, style element/attribute, external URL, \`foreignObject\`, image, use, link, animation element, or field-injected path data.
+Use \`svgMarkup\` for a complete SVG document. Use \`svgBinding: { mode: "data", keyField, svgField, dataset? }\` when a text column provides the document for one facility in the filtered data. Data-bound SVG always uses the sanitizer and supports bounded numeric dash-offset and opacity animation. The sanitizer removes scripts, handlers, styles, external resources, \`foreignObject\`, image, use, and links.
 
 ## Maps
 

@@ -1,0 +1,19 @@
+{
+  "version": "2.0",
+  "title": "Water Operations Explorer",
+  "components": [
+    {
+      "type": "svgMarkup",
+      "id": "station_schematic",
+      "dataset": "powerbi",
+      "span": 12,
+      "heightMode": "fill",
+      "ariaLabel": "Selected facility process schematic",
+      "svgBinding": {
+        "mode": "data",
+        "keyField": "stationid",
+        "svgField": "schematic"
+      }
+    }
+  ]
+}

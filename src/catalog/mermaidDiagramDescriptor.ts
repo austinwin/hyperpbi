@@ -16,7 +16,7 @@ export const mermaidDiagramDescriptor: ComponentDescriptor = {
     interaction: { defaultEnabled: false, naturalTrigger: "click", autoExternalMode: "selection" },
     schema: {
         required: ["type", "id", "source"],
-        allowed: [...svgMarkup.schema.allowed.filter(property => !["svg", "viewBox", "preserveAspectRatio", "role", "description", "dataContext", "motion", "performance"].includes(property) && !mermaidProperties.includes(property)), ...mermaidProperties],
+        allowed: [...svgMarkup.schema.allowed.filter(property => !["svg", "svgBinding", "viewBox", "preserveAspectRatio", "role", "description", "dataContext", "motion", "performance"].includes(property) && !mermaidProperties.includes(property)), ...mermaidProperties],
     },
     fields: [{ property: "nodeBindings", requirement: "any", handler: "item-bindings" }],
     inspector: [

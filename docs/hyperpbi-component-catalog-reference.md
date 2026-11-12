@@ -5502,11 +5502,11 @@ _5 components_
 
 **Recommended use:** Strictly sanitized raw SVG when declarative SVG cannot express the design
 
-**Required properties:** `type`, `id`, `svg`
+**Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `svgBinding`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `svgBinding`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 

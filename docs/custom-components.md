@@ -9,7 +9,7 @@ Choose the narrowest implemented component. Standard custom content is sanitized
 | `html` | Branded static HTML | templates/repeat and slots | DOMPurify-sanitized |
 | `custom` | App-like repeated cards/lists/slicers | `html`, slots, `repeat`, safe `interactions` | HTML sanitized; CSS parsed/scoped |
 | `svg` | Structured governed vector scene | typed values, dataset context, repeats, interaction/UI actions | element/property schema, ID isolation, limits |
-| `svgMarkup` | One raw SVG document | escaped text templates and SVG data context | strict SVG parser/sanitizer |
+| `svgMarkup` | One raw SVG document | Escaped text templates for authored markup or `svgBinding` for SVG from a text field | strict SVG parser/sanitizer |
 
 ## HTML, slots, and CSS
 
@@ -29,7 +29,7 @@ For an interactive custom slicer/list, combine a repeat with a safe `interaction
 
 `svg` is a first-class declarative scene graph and should be preferred. It can bind individual geometry/text/paint values, use scales/conditions/state, repeat marks, run allowlisted animation presets, and attach normal interaction/UI actions to elements.
 
-`svgMarkup` is advanced fallback markup. Templates are XML-escaped, cannot create tag/attribute names, and cannot inject path data. External resources, handlers, styles, links, images/use, animation elements, and unknown references are removed.
+`svgMarkup` is advanced fallback markup. Authored templates are XML-escaped and cannot create tag or attribute names or inject path data. The sanitizer removes external resources, handlers, inline styles, links, images, use, and unknown references. [SVG data binding and supported animation](svg-visuals.md#svg-from-a-power-bi-slicer)
 
 ## Prefer first-class components
 

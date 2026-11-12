@@ -3,7 +3,7 @@
 HyperPBI implements two governed vector components:
 
 - `svg`: structured declarative scene graph; preferred
-- `svgMarkup`: sanitized by default; explicit `security.svgMode: "trusted"` preserves raw authored SVG in an isolated document
+- `svgMarkup`: renders authored SVG or a complete SVG from a data column. Explicit `security.svgMode: "trusted"` applies to authored SVG.
 
 Use SVG for diagrams, process flows, pictorial marks, schematics, custom gauges, and animated KPI presentation. Use semantic ECharts components for standard analytical charts.
 
@@ -108,7 +108,7 @@ Performance overrides (`maxElements`, `maxAnimatedElements`, `maxRepeatedRows`) 
 
 ## `svgMarkup`
 
-`svgMarkup` requires nonempty `svg` containing one parseable SVG document. Text templates are XML-escaped. Templates cannot create element/attribute names, and a field cannot inject `d` path data.
+Use `svg` for authored markup or `svgBinding` for SVG stored in a text column. Authored SVG text templates are XML-escaped. Templates cannot create element/attribute names or inject `d` path data.
 
 The sanitizer:
 
@@ -125,6 +125,45 @@ The sanitizer:
 Explicitly forbidden tags include `script`, `foreignObject`, `iframe`, `object`, `embed`, `image`, `use`, audio/video/canvas, `style`, `a`, `switch`, `set`, and `discard`. SVG filters are disabled in the final profile.
 
 Raw markup does not accept arbitrary CSS. Component `css`, if used, still passes the scoped CSS sanitizer and may reference only safe local SVG IDs when that mode is enabled.
+
+### SVG from a Power BI slicer
+
+Add the facility ID and SVG text columns to **Values** and set them to **Don't summarize**. Add a Power BI facility slicer and set its interaction with HyperPBI to **Filter**. The [Water Operations Explorer example](../examples/dashboards/station-schematics/README.md) includes an importable CSV, a complete specification, and setup steps.
+
+```json
+{
+  "type": "svgMarkup",
+  "id": "station_schematic",
+  "dataset": "powerbi",
+  "heightMode": "fill",
+  "ariaLabel": "Selected facility process schematic",
+  "svgBinding": {
+    "mode": "data",
+    "keyField": "stationid",
+    "svgField": "schematic"
+  }
+}
+```
+
+`svgBinding.dataset` overrides the component dataset and defaults to the component dataset or `powerbi`. Use Field Manifest aliases or logical dataset field names. The binding takes precedence over any authored `svg` and reads the complete cell as SVG, with template syntax left literal. Bound SVG always uses the sanitizer, including when the visual is set to Trusted SVG.
+
+HyperPBI draws a schematic when the filtered rows contain exactly one nonblank facility key. Identical SVG values for that facility count as one diagram. Blank schematic cells are ignored when a duplicate row supplies the diagram. Conflicting values, missing text, and malformed or truncated SVG produce an error. With zero or multiple facility keys, the visual shows “Select one facility to view its process schematic.” A dataset containing only one facility displays it immediately.
+
+Bound SVG fits the available area with aspect ratio preserved. Provide a valid `viewBox` or positive pixel `width` and `height` in the document. Use `heightMode: "fill"` to use the visual's height or a numeric component `height` to set a fixed frame. Bound documents that exceed 250,000 characters, 500 allowed elements, 20 nesting levels, or 20,000 characters in a path show an error. Power BI can truncate long cell values before they reach HyperPBI. Inline the geometry for reusable symbols exported as `<symbol>` and `<use>`. Local paint, clip, mask, and marker references retain their isolated IDs.
+
+### Safe animation in bound diagrams
+
+Place an `<animate>` child inside a shape, text element, or group. HyperPBI translates numeric `stroke-dashoffset` for flowing pipes and `opacity` for equipment indicators into scoped CSS. For example, a dashed pipe with a dash pattern totaling 18 units can use:
+
+```xml
+<path d="M20 60H260" fill="none" stroke="#0284c7" stroke-dasharray="10 8">
+  <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.2s" repeatCount="indefinite"/>
+</path>
+```
+
+Use `from` and `to` or 2–5 semicolon-separated numeric `values`. Supported durations are 1–60 seconds with `s` or `ms` units. Repeats default to 1 and can be 1–20 or `indefinite`. At most one animation per target is used, with a default of 12 and a hard limit of 20 per bound diagram. Use `motion.enabled: false` to disable motion. The system reduced-motion preference always applies to these animations. Set base presentation attributes so that the stationary diagram still communicates flow direction and equipment status.
+
+Other animation elements, animation timing events, target references, motion paths, and transforms are removed from data-bound SVG. Standard authored `svgMarkup` continues to use component CSS for animation. Structured `svg` provides its existing animation presets.
 
 ## Minimal example
 

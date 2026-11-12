@@ -288,7 +288,7 @@ and service behavior remains in [Map services](map-services.md).
 
 ## SVG
 
-`svg` requires `viewBox` and `elements`; `svgMarkup` requires `svg`. Both accept size/aspect/role/description/dataContext/motion/performance. Structured SVG elements, binding forms, animation enums, repeat behavior, sanitizer rules, and exact limits are documented in [SVG visuals](svg-visuals.md).
+`svg` requires `viewBox` and `elements`. `svgMarkup` accepts authored `svg` or `svgBinding` for a complete SVG document in a text field. The [SVG reference](svg-visuals.md) covers sizing, field bindings, animation, and sanitizer limits.
 
 ## Security restrictions
 

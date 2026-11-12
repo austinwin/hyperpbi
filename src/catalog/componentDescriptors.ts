@@ -25083,8 +25083,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
     "schema": {
       "required": [
         "type",
-        "id",
-        "svg"
+        "id"
       ],
       "allowed": [
         "type",
@@ -25117,6 +25116,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
         "role",
         "description",
         "svg",
+        "svgBinding",
         "dataContext",
         "motion",
         "performance"
@@ -25299,7 +25299,7 @@ export const componentDescriptors:ComponentDescriptor[] = [
       }
     ],
     "documentation": {
-      "summary": "Strictly sanitized raw SVG when declarative SVG cannot express the design",
+      "summary": "Renders authored SVG markup or uses svgBinding to show the SVG text for one facility in the filtered dataset.",
       "accessibility": [
         "The component wrapper supplies accessible image semantics; include title/desc content in the SVG where useful."
       ],
@@ -25833,6 +25833,9 @@ extendDescriptor("table",[
   {property:"virtualization",label:"Virtualization",control:"json",group:"Advanced",help:"Configure threshold, measured row height, and overscan."},
 ]);
 extendDescriptor("map",[{property:"tools",label:"Spatial selection tools",control:"json",group:"Interaction",help:"Enable rectangle and/or lasso selection."}]);
+extendDescriptor("svgMarkup", [
+  { property: "svgBinding", label: "SVG data binding", control: "json", group: "Data", help: 'Use { "mode": "data", "keyField": "stationid", "svgField": "schematic" }. Optionally choose a binding dataset.' },
+]);
 const eventChartTypes=new Set(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","advancedChart"]);
 for(const type of eventChartTypes)extendDescriptor(type,[
   {property:"events",label:"Chart events",control:"json",group:"Interaction",help:"Declarative zoom, range-selection, brush, and linked-filter behavior."},

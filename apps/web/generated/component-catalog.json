@@ -9379,7 +9379,7 @@
       "maturity": "beta",
       "complexity": "advanced",
       "useWhen": "Strictly sanitized raw SVG when declarative SVG cannot express the design",
-      "summary": "Strictly sanitized raw SVG when declarative SVG cannot express the design",
+      "summary": "Renders authored SVG markup or uses svgBinding to show the SVG text for one facility in the filtered dataset.",
       "accessibility": [
         "The component wrapper supplies accessible image semantics; include title/desc content in the SVG where useful."
       ],
@@ -9402,8 +9402,7 @@
       },
       "required": [
         "type",
-        "id",
-        "svg"
+        "id"
       ],
       "allowed": [
         "ariaLabel",
@@ -9436,6 +9435,7 @@
         "style",
         "subtitle",
         "svg",
+        "svgBinding",
         "title",
         "tooltip",
         "type",

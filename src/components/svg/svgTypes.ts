@@ -154,6 +154,13 @@ export interface SvgDataContextDefinition {
     sortDirection?: "asc" | "desc";
 }
 
+export interface SvgMarkupBinding {
+    mode: "data";
+    dataset?: string;
+    keyField: string;
+    svgField: string;
+}
+
 export interface SvgMotionOptions {
     enabled?: boolean;
     reducedMotion?: "respect-system" | "always-reduce" | "never-reduce";
@@ -167,6 +174,7 @@ export interface SvgPerformanceOptions {
 }
 
 export const SVG_LIMITS = Object.freeze({
+    maxMarkupLength: 250_000,
     maxElementsPerComponent: 500,
     maxElementsPerDashboard: 2_000,
     maxAnimatedPerComponent: 20,
