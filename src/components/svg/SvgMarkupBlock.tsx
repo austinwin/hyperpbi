@@ -1,12 +1,13 @@
-import { h } from "preact";
+import { h, type ComponentChildren } from "preact";
 import { TrustedDocument } from "../../security/TrustedDocument";
 import { renderTrustedTemplate } from "../../security/trustedTemplate";
-import { useMemo } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import type { NormalizedData } from "../../data/normalizeData";
 import { rowsForComponent } from "../../interactions/componentInteraction";
 import { useRenderContext } from "../../render/RenderContext";
 import type { SvgMarkupComponent } from "../../schema/hyperpbiSchema";
 import { sanitizeCss } from "../../security/sanitizeCss";
+import { compileSvgImage } from "../../security/compileSvgImage";
 import { resolveSvgMarkupTemplates, sanitizeSvg, type SanitizedSvg } from "../../security/sanitizeSvg";
 import { resolveSvgDataContextRow } from "./svgBindings";
 import { createSvgNamespace, rewriteSvgCssReferences } from "./svgIdIsolation";
@@ -28,8 +29,7 @@ function StaticSvgMarkup({ component, namespace }: { component: SvgMarkupCompone
     const trusted = context.config.security?.svgMode === "trusted";
     const compiled = useMemo(() => {
         if (trusted) return;
-        const sanitized = sanitizeSvg(resolveSvgMarkupTemplates(svg, { row, rows: context.rows, state: context.state, warnings }), namespace);
-        return { ...sanitized, warnings: [...warnings, ...sanitized.warnings] };
+        return sanitizeSvg(resolveSvgMarkupTemplates(svg, { row, rows: context.rows, state: context.state, warnings }), namespace);
     }, [svg, trusted, row, component.dataContext, namespace, context.rows, context.state]);
     if (trusted) {
         try { return <TrustedDocument title={component.ariaLabel ?? component.title ?? "Trusted SVG"} markup={renderTrustedTemplate(svg, context.data, context.state.values, component.title ?? "", { row, state: context.state.values })} css={component.css} />; }
@@ -91,37 +91,83 @@ function BoundSvgMarkup({ component, binding, namespace }: { component: SvgMarku
         component.performance?.maxAnimatedElements ?? SVG_LIMITS.maxAnimatedPerComponent,
         component.motion?.maxConcurrentAnimations ?? context.config.motion?.maxConcurrentAnimations ?? 12,
     );
-    const compiled = useMemo(() => source === undefined ? undefined : sanitizeSvg(source, namespace, {
-        bound: { maxElements, maxAnimations },
-    }), [source, namespace, maxElements, maxAnimations]);
     const motion = component.motion?.enabled !== false && context.config.motion?.enabled !== false &&
         (component.motion?.reducedMotion ?? context.config.motion?.reducedMotion) !== "always-reduce";
 
-    if (compiled?.svg) return <SvgMarkupFrame component={component} namespace={namespace} compiled={compiled} bound motion={motion} />;
-    const problem = error ?? compiled?.warnings[0];
-    return <div class={problem ? "hp-component-error" : "hp-svg-bound-placeholder"} role={problem ? "alert" : "status"}>
-        {compiled ? `Unable to display the selected SVG schematic. ${problem ?? ""}` : problem ?? "Select one facility to view its process schematic."}
+    if (source === undefined) return <SchematicMessage error={error} />;
+    return binding.renderMode === "image"
+        ? <BoundSvgImage component={component} namespace={namespace} source={source} motion={motion && maxAnimations > 0} />
+        : <BoundInlineSvg component={component} namespace={namespace} source={source} motion={motion} maxElements={maxElements} maxAnimations={maxAnimations} />;
+}
+
+function SchematicMessage({ error }: { error?: string }) {
+    return <div class={error ? "hp-svg-bound-placeholder hp-svg-bound-error" : "hp-svg-bound-placeholder"} role={error ? "alert" : "status"}>
+        {error ?? "Select one facility to view its process schematic."}
     </div>;
 }
 
-function SvgMarkupFrame({ component, namespace, compiled, bound = false, motion = false }: {
-    component: SvgMarkupComponent; namespace: string; compiled: SanitizedSvg; bound?: boolean; motion?: boolean;
+interface BoundMarkupProps {
+    component: SvgMarkupComponent;
+    namespace: string;
+    source: string;
+    motion: boolean;
+}
+
+function BoundInlineSvg({ component, namespace, source, motion, maxElements, maxAnimations }: BoundMarkupProps & {
+    maxElements: number;
+    maxAnimations: number;
+}) {
+    const compiled = useMemo(() => sanitizeSvg(source, namespace, {
+        bound: { maxElements, maxAnimations },
+    }), [source, namespace, maxElements, maxAnimations]);
+    if (!compiled.svg) return <SchematicMessage error={`Unable to display the selected SVG schematic. ${compiled.warnings[0] ?? ""}`} />;
+    return <SvgMarkupFrame component={component} namespace={namespace} compiled={compiled} bound motion={motion} />;
+}
+
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
+function BoundSvgImage({ component, namespace, source, motion }: BoundMarkupProps) {
+    const [reduced, setReduced] = useState(() => typeof matchMedia === "function" && matchMedia(reducedMotionQuery).matches);
+    const [failedSource, setFailedSource] = useState<string>();
+    useEffect(() => {
+        if (typeof matchMedia !== "function") return;
+        const query = matchMedia(reducedMotionQuery);
+        const sync = () => setReduced(query.matches);
+        sync();
+        query.addEventListener("change", sync);
+        return () => query.removeEventListener("change", sync);
+    }, []);
+    const still = reduced || !motion;
+    const image = useMemo(() => compileSvgImage(source, still), [source, still]);
+    if ("error" in image) return <SchematicMessage error={`Unable to display the selected SVG schematic. ${image.error}`} />;
+    if (failedSource === image.src) return <SchematicMessage error="The visual could not load this SVG image." />;
+    return <SvgMarkupFrame component={component} namespace={namespace} bound imageTitle={image.title}>
+        <img src={image.src} alt="" draggable={false} onError={() => setFailedSource(image.src)} />
+    </SvgMarkupFrame>;
+}
+
+function SvgMarkupFrame({ component, namespace, compiled, bound = false, motion = false, imageTitle, children }: {
+    component: SvgMarkupComponent;
+    namespace: string;
+    compiled?: SanitizedSvg;
+    bound?: boolean;
+    motion?: boolean;
+    imageTitle?: string;
+    children?: ComponentChildren;
 }) {
     const context = useRenderContext();
     const cssMode = context.config.security?.cssMode;
-    const css = useMemo(() => sanitizeCss(rewriteSvgCssReferences(component.css ?? "", compiled.idMap),
-        `[data-hp-svg="${namespace}"]`, { mode: cssMode, keyframeNamespace: namespace, allowLocalSvgReferences: true }),
-    [component.css, compiled.idMap, namespace, cssMode]);
-    const warnings = [...compiled.warnings, ...css.warnings];
+    const ids = compiled?.idMap;
+    const css = useMemo(() => sanitizeCss(ids ? rewriteSvgCssReferences(component.css ?? "", ids) : component.css ?? "",
+        `[data-hp-svg="${namespace}"]`, { mode: cssMode, keyframeNamespace: namespace, allowLocalSvgReferences: Boolean(ids) }),
+    [component.css, ids, namespace, cssMode]);
     const height = typeof component.height === "number" && component.height > 0 ? component.height : undefined;
     const layoutHeight = component.heightMode === "fill" || component.heightMode === "aspectRatio";
     const boundHeight = bound ? layoutHeight ? "100%" : height : undefined;
     return <div class={`hp-svg-block hp-svg-markup${bound ? " hp-svg-bound" : ""}${boundHeight ? " hp-svg-bound-sized" : ""}`}
-        style={boundHeight ? { height: boundHeight } : undefined} data-hp-svg={namespace} role={component.role ?? "img"} aria-label={component.ariaLabel}>
+        style={boundHeight ? { height: boundHeight } : undefined} data-hp-svg={namespace} role={component.role ?? "img"}
+        aria-label={component.ariaLabel ?? imageTitle ?? component.title}>
         {component.title ? <div class="hp-svg-heading">{component.title}</div> : null}
-        <style>{css.css}{motion && compiled.motionCss ? `@media (prefers-reduced-motion: no-preference){${compiled.motionCss}}` : ""}</style>
-        <div class="hp-svg-markup-host" dangerouslySetInnerHTML={{ __html: compiled.svg }} />
-        {context.settings.debug.showPerformance ? <div class="hp-svg-diagnostics">SVG: {compiled.elementCount} elements · {compiled.pathCount} paths · {warnings.length} warnings</div> : null}
-        {context.settings.debug.showSchemaErrors && warnings.length ? <details class="hp-debug"><summary>SVG sanitizer diagnostics ({warnings.length})</summary><ul>{Array.from(new Set(warnings)).map(item => <li>{item}</li>)}</ul></details> : null}
+        <style>{css.css}{motion && compiled?.motionCss ? `@media (prefers-reduced-motion: no-preference){${compiled.motionCss}}` : ""}</style>
+        {compiled ? <div class="hp-svg-markup-host" dangerouslySetInnerHTML={{ __html: compiled.svg }} /> : <div class="hp-svg-markup-host">{children}</div>}
     </div>;
 }

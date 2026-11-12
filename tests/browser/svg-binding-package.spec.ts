@@ -35,7 +35,7 @@ for (const profile of ["core", "maps"]) {
             type Visual = { update(options: unknown): void };
             const browser = window as unknown as {
                 powerbi: { visuals: { plugins: Record<string, { create(options: unknown): Visual }> } };
-                updateSchematic(rows: (string | null)[][], width: number): void;
+                updateSchematic(rows: (string | null)[][], width: number, imageMode?: boolean): void;
                 schematicParses: number;
             };
             browser.schematicParses = 0;
@@ -55,11 +55,14 @@ for (const profile of ["core", "maps"]) {
                     }),
                 },
             });
-            browser.updateSchematic = (rows, width) => {
+            const imageSpecification = JSON.parse(specification);
+            imageSpecification.components[0].svgBinding.renderMode = "image";
+            const imageJson = JSON.stringify(imageSpecification);
+            browser.updateSchematic = (rows, width, imageMode) => {
                 element.style.width = width + "px";
                 visual.update({
                     type: 2, viewport: { width, height: 420 },
-                    dataViews: [{ metadata: { columns, objects: { hyperpbiState: { specification } } }, table: { columns, rows } }],
+                    dataViews: [{ metadata: { columns, objects: { hyperpbiState: { specification: imageMode ? imageJson : specification } } }, table: { columns, rows } }],
                 });
             };
         }, { guid: manifest.visual.guid, columns, specification });
@@ -73,6 +76,7 @@ for (const profile of ["core", "maps"]) {
         await expect(prompt).toBeVisible();
         await update("INT-01");
         await expect(svg.locator("text").filter({ hasText: "P-101 · Running" })).toBeVisible();
+        await expect(page.getByText("SVG sanitizer diagnostics", { exact: false })).toHaveCount(0);
         await expect(svg).toHaveAttribute("viewBox", "0 0 640 300");
         await expect(svg).toHaveAttribute("preserveAspectRatio", "xMidYMid meet");
         const path = svg.locator('path[id$="-flow"]');
@@ -124,7 +128,47 @@ for (const profile of ["core", "maps"]) {
         await update("INT-01");
         await expect(svg.locator("linearGradient")).toHaveAttribute("id", gradient!);
         await expect(svg.locator("marker")).toHaveAttribute("id", marker!);
+
+        const imageDrawing = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+            <style>@import url("https://svg.example.invalid/styles.css");
+                .valve{fill:#0f766e;animation:pulse 2s infinite}@keyframes pulse{to{opacity:.75}}</style>
+            <defs><symbol id="valve"><rect width="100" height="40" class="valve"/></symbol>
+                <filter id="soft"><feGaussianBlur stdDeviation="1"/></filter></defs>
+            <use href="#valve" width="100" height="40" filter="url(#soft)"/>
+            <circle cx="90" cy="30" r="2"><animate attributeName="opacity" from="1" to="0" dur="2s"/></circle>
+        </svg>`;
+        const updateImage = (markup: string, width: number) => page.evaluate(({ markup, width }) => {
+            (window as unknown as { updateSchematic(rows: string[][], width: number, imageMode: boolean): void })
+                .updateSchematic([["INT-01", markup]], width, true);
+        }, { markup, width });
+        await updateImage(imageDrawing, 340);
+        const image = page.locator(".hp-svg-markup-host > img");
+        await expect(image).toBeVisible();
+        await expect(svg).toHaveCount(0);
+        await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
+        const pixels = await image.evaluate((element: HTMLImageElement) => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 100;
+            canvas.height = 40;
+            const context = canvas.getContext("2d")!;
+            context.drawImage(element, 0, 0, 100, 40);
+            return Array.from(context.getImageData(50, 20, 1, 1).data);
+        });
+        // SVG filters round through the renderer's color space.
+        const teal = [15, 118, 110];
+        expect(Math.max(...teal.map((channel, index) => Math.abs(channel - pixels[index])))).toBeLessThanOrEqual(2);
+        expect(pixels[3]).toBe(255);
+        const staticSource = await image.getAttribute("src");
+        expect(decodeURIComponent(staticSource!)).not.toMatch(/<animate|@keyframes/);
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await expect.poll(async () => decodeURIComponent((await image.getAttribute("src"))!)).toContain("<animate ");
+        const sameImage = await image.elementHandle();
+        await updateImage(imageDrawing, 800);
+        expect(await image.evaluate((element, previous) => element === previous, sameImage)).toBe(true);
+        await updateImage("<svg>", 800);
+        await expect(page.getByRole("alert").filter({ hasText: "could not be parsed" })).toBeVisible();
+        await expect(image).toHaveCount(0);
         expect(errors).toEqual([]);
-        expect(requests).toEqual([]);
+        expect(requests.filter(url => !url.startsWith("data:"))).toEqual([]);
     });
 }

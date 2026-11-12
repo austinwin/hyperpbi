@@ -34,5 +34,6 @@ describe("SVG renderer integration", () => {
     it("renders only the final dedicated-sanitizer output for svgMarkup", () => {
         const schema: HyperPbiSchema = { version: "2.0", components: [{ type: "svgMarkup", id: "raw", ariaLabel: "Raw status", svg: `<svg viewBox="0 0 100 40"><script>alert(1)</script><rect id="safe" onclick="bad()" width="100" height="40" fill="#2563eb"/><text x="10" y="20">{{status}}</text></svg>` }] };
         const host = document.createElement("div"); act(() => render(<HyperPbiRoot instanceId="raw-svg" schema={schema} data={data} settings={settings} renderMs={0} />, host)); const markupHost = host.querySelector(".hp-svg-markup-host")!; expect(markupHost.querySelector("svg")).not.toBeNull(); expect(markupHost.innerHTML).not.toMatch(/script|onclick|alert\(1\)|bad\(\)/i); expect(markupHost.textContent).toContain("Open"); expect(markupHost.querySelector("rect")?.getAttribute("fill")).toBe("#2563eb");
+        expect(host.querySelector(".hp-svg-markup .hp-debug")).toBeNull();
     });
 });

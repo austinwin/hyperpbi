@@ -6,10 +6,12 @@
 .hp-svg-paused * { animation-play-state: paused !important; }
 .hp-svg-markup-host > svg { display: block; width: 100%; max-width: 100%; }
 .hp-svg-bound { display: flex; flex-direction: column; min-height: 0; }
-.hp-svg-bound > .hp-svg-markup-host > svg { height: auto; overflow: hidden; }
+.hp-svg-bound > .hp-svg-markup-host > :is(svg, img) { display: block; width: 100%; height: auto; overflow: hidden; }
+.hp-svg-bound > .hp-svg-markup-host > img { object-fit: contain; }
 .hp-svg-bound-sized > .hp-svg-markup-host { flex: 1 1 0; min-height: 0; }
-.hp-svg-bound-sized > .hp-svg-markup-host > svg { height: 100%; }
-.hp-svg-bound-placeholder { padding: 1rem; color: var(--hp-text-muted); text-align: center; }
+.hp-svg-bound-sized > .hp-svg-markup-host > :is(svg, img) { height: 100%; }
+.hp-svg-bound-placeholder { display: grid; place-items: center; min-height: 6rem; padding: 1rem; color: var(--hp-text-muted); text-align: center; }
+.hp-svg-bound-error { color: var(--hp-text); }
 .hp-svg-diagnostics { margin-top: 6px; color: var(--hp-text-muted); font-size: 11px; }
 @media (prefers-reduced-motion: reduce) {
     .hp-svg-block * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }

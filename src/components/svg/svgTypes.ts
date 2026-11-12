@@ -159,6 +159,7 @@ export interface SvgMarkupBinding {
     dataset?: string;
     keyField: string;
     svgField: string;
+    renderMode?: "inline" | "image";
 }
 
 export interface SvgMotionOptions {

@@ -3,11 +3,10 @@ import type { SvgBindingContext } from "../components/svg/svgBindings";
 import { renderSvgTemplate } from "../components/svg/svgBindings";
 import { safeSvgIdentifier } from "../components/svg/svgIdIsolation";
 import { SVG_ELEMENT_TYPES, SVG_LIMITS } from "../components/svg/svgTypes";
-import { validSvgViewBox } from "../components/svg/svgSchema";
 import { compileBoundSvgMotion } from "./sanitizeSvgMotion";
+import { fitSvgViewport, parseSvgDocument, svgNamespace } from "./svgMarkupDocument";
 
 export interface SanitizedSvg { svg: string; warnings: string[]; elementCount: number; animatedElementCount: number; pathCount: number; idMap: Map<string, string>; motionCss?: string; }
-const svgNamespace = "http://www.w3.org/2000/svg";
 const elementNames = ["svg", ...SVG_ELEMENT_TYPES];
 const elements = new Set<string>(elementNames.map(name => name.toLowerCase()));
 const attributes = new Set(["id", "class", "data-hp-mermaid-node", "viewbox", "width", "height", "preserveaspectratio", "role", "aria-label", "aria-labelledby", "aria-describedby", "focusable", "tabindex", "opacity", "transform", "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "vector-effect", "paint-order", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end", "visibility", "pointer-events", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "dx", "dy", "d", "points", "pathlength", "text-anchor", "dominant-baseline", "font-family", "font-size", "font-weight", "font-style", "letter-spacing", "fx", "fy", "offset", "stop-color", "stop-opacity", "gradientunits", "gradienttransform", "spreadmethod", "markerwidth", "markerheight", "refx", "refy", "orient", "markerunits", "xmlns"]);
@@ -31,26 +30,11 @@ export function sanitizeSvg(input: string, namespace: string, options: {
     if (!bound && options.mode === "trusted") return { ...reject("Trusted SVG must be rendered in an isolated document; browser and host policies still apply."), svg: input };
     if (input.length > SVG_LIMITS.maxMarkupLength) return reject("Raw SVG exceeded the 250,000 character limit.");
     if (bound && /<!DOCTYPE\b/i.test(input)) return reject("SVG document type declarations are unsupported.");
-    const namespacedInput = /^\s*<svg\b[^>]*\bxmlns\s*=/.test(input) ? input : input.replace(/^\s*<svg\b/i, `<svg xmlns="http://www.w3.org/2000/svg"`);
-    const parser = new DOMParser(), document = parser.parseFromString(namespacedInput, "image/svg+xml"), parseError = document.querySelector("parsererror"), root = document.documentElement;
-    if (parseError || root.localName.toLowerCase() !== "svg" || bound && (root.localName !== "svg" || root.namespaceURI !== svgNamespace || root.prefix)) {
+    const root = parseSvgDocument(input);
+    if (!root || bound && (root.localName !== "svg" || root.namespaceURI !== svgNamespace || root.prefix)) {
         return reject("Raw SVG could not be parsed as a single SVG document.");
     }
-    if (bound) {
-        for (const { name } of Array.from(root.attributes)) {
-            if (["viewbox", "preserveaspectratio"].includes(name.toLowerCase()) && name !== "viewBox" && name !== "preserveAspectRatio") root.removeAttribute(name);
-        }
-        if (!validSvgViewBox(root.getAttribute("viewBox"))) {
-            const dimensions = ["width", "height"].map(name => /^(\d+(?:\.\d+)?|\.\d+)(?:px)?$/.exec(root.getAttribute(name)?.trim() ?? "")?.[1]);
-            const viewBox = `0 0 ${dimensions.join(" ")}`;
-            if (!validSvgViewBox(viewBox)) return reject("The SVG needs a valid viewBox or positive width and height in pixels.");
-            root.setAttribute("viewBox", viewBox);
-        }
-        const alignment = /^x(?:Min|Mid|Max)Y(?:Min|Mid|Max)(?:\s+meet)?$/.exec(root.getAttribute("preserveAspectRatio")?.trim() ?? "");
-        root.setAttribute("preserveAspectRatio", alignment ? `${alignment[0].split(/\s/)[0]} meet` : "xMidYMid meet");
-        root.removeAttribute("width");
-        root.removeAttribute("height");
-    }
+    if (bound && !fitSvgViewport(root)) return reject("The SVG needs a valid viewBox or positive width and height in pixels.");
     const maxElements = bound ? Math.min(bound.maxElements, SVG_LIMITS.maxElementsPerComponent) : SVG_LIMITS.maxElementsPerComponent;
     const maxAnimations = bound ? Math.min(bound.maxAnimations, SVG_LIMITS.maxAnimatedPerComponent) : 0;
     let limitError: string | undefined;
@@ -133,6 +117,9 @@ export function sanitizeSvg(input: string, namespace: string, options: {
     root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     const serialized = new XMLSerializer().serializeToString(root);
     const svg = DOMPurify.sanitize(serialized, { USE_PROFILES: { svg: true, svgFilters: false }, ADD_TAGS: [...elementNames], ADD_ATTR: [...attributes, ...(motionCss.length ? ["data-hp-svg-motion"] : [])], FORBID_TAGS: ["script", "foreignObject", "iframe", "object", "embed", "image", "use", "audio", "video", "canvas", "style", "a", "switch", "set", "discard"], FORBID_ATTR: ["style", "href", "xlink:href", "src", "srcset"], ALLOW_DATA_ATTR: false, RETURN_TRUSTED_TYPE: false }) as string;
-    if (svg !== serialized) warnings.push("Final SVG sanitization removed unsafe content.");
+    // With an SVG-only profile DOMPurify also drops its own HTML parsing wrapper.
+    if (DOMPurify.removed.some(entry => "attribute" in entry || entry.element.nodeName !== "BODY")) {
+        warnings.push("Final SVG sanitization removed unsafe content.");
+    }
     return { svg, warnings: Array.from(new Set(warnings)), elementCount, animatedElementCount, pathCount, idMap: ids, motionCss: motionCss.join("\n") };
 }

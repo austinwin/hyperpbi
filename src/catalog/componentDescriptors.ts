@@ -25834,7 +25834,7 @@ extendDescriptor("table",[
 ]);
 extendDescriptor("map",[{property:"tools",label:"Spatial selection tools",control:"json",group:"Interaction",help:"Enable rectangle and/or lasso selection."}]);
 extendDescriptor("svgMarkup", [
-  { property: "svgBinding", label: "SVG data binding", control: "json", group: "Data", help: 'Use { "mode": "data", "keyField": "stationid", "svgField": "schematic" }. Optionally choose a binding dataset.' },
+  { property: "svgBinding", label: "SVG data binding", control: "json", group: "Data", help: 'Use { "mode": "data", "keyField": "stationid", "svgField": "schematic" }. Add "renderMode": "image" for SVG exports with symbols, styles, or filters.' },
 ]);
 const eventChartTypes=new Set(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","advancedChart"]);
 for(const type of eventChartTypes)extendDescriptor(type,[

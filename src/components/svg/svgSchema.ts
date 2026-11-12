@@ -42,12 +42,15 @@ export function validateSvgComponentSchema(component: Record<string, unknown>, p
             if (!record(svgBinding)) error("INVALID_PROPERTY_TYPE", bindingPath, "svgBinding must be an object.");
             else {
                 if (svgBinding.mode !== "data") error("INVALID_ENUM_VALUE", `${bindingPath}/mode`, 'SVG binding must use mode "data".');
+                if (svgBinding.renderMode !== undefined && svgBinding.renderMode !== "inline" && svgBinding.renderMode !== "image") {
+                    error("INVALID_ENUM_VALUE", `${bindingPath}/renderMode`, 'SVG renderMode must be "inline" or "image".');
+                }
                 for (const property of ["keyField", "svgField", "dataset"]) {
                     if (property === "dataset" && svgBinding.dataset === undefined) continue;
                     if (!nonblank(svgBinding[property])) error("INVALID_PROPERTY_TYPE", `${bindingPath}/${property}`, "Enter a nonblank field or dataset name.");
                 }
                 for (const property of Object.keys(svgBinding)) {
-                    if (!["mode", "dataset", "keyField", "svgField"].includes(property)) error("UNKNOWN_PROPERTY", bindingPath, `Unsupported SVG binding property “${property}”.`);
+                    if (!["mode", "dataset", "keyField", "svgField", "renderMode"].includes(property)) error("UNKNOWN_PROPERTY", bindingPath, `Unsupported SVG binding property “${property}”.`);
                 }
             }
         }

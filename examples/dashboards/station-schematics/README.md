@@ -5,6 +5,8 @@
 3. Open HyperPBI's **Edit** mode. Paste [specification.json](specification.json) into the Advanced JSON editor and save.
 4. Add a native Power BI slicer with `StationSchematics[name]`. Set it to single select if desired. In **Edit interactions**, verify that the slicer filters the HyperPBI visual.
 
+For another facility export that uses SVG symbols, embedded styles, or filters, add `"renderMode": "image"` inside the same `svgBinding`.
+
 | Slicer choice | Expected result |
 | --- | --- |
 | North Intake | One diagram from two identical records. Blue dashes follow the pipe, the running pump indicator pulses, and the low-level alarm pulses. The arrow and status labels stay visible with reduced motion. |

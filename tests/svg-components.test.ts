@@ -12,6 +12,7 @@ import { sanitizeCss } from "../src/security/sanitizeCss";
 import { resolveSvgMarkupTemplates, sanitizeSvg } from "../src/security/sanitizeSvg";
 import { parseCsvText } from "../src/data/fileImport";
 import { prepareSpecification } from "../src/schema/prepareSpecification";
+import { compileSvgImage } from "../src/security/compileSvgImage";
 
 const elements: SvgElementDefinition[] = [{ type: "defs", children: [{ type: "linearGradient", id: "gradient", children: [{ type: "stop", offset: "0%", stopColor: "#fff" }] }] }, { type: "rect", id: "mark", x: 0, y: 0, width: 20, height: 20, fill: "url(#gradient)" }];
 const state = initialDashboardState();
@@ -38,6 +39,9 @@ describe("SVG isolation and animation", () => {
 });
 
 describe("raw SVG and CSS security", () => {
+    it("treats XML serialization differences as normal", () => {
+        expect(sanitizeSvg('<svg><rect width="10" height="10"/></svg>', "hp-safe").warnings).toEqual([]);
+    });
     it.each([
         ["script", `<svg><script>alert(1)</script><rect width="10" height="10"/></svg>`],
         ["event", `<svg><rect onclick="alert(1)" width="10" height="10"/></svg>`],
@@ -76,6 +80,8 @@ describe("data-bound svgMarkup", () => {
         expect(validateV2Schema(specification({ ...component, svgBinding: undefined })).valid).toBe(false);
         expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, svgField: "" } })).valid).toBe(false);
         expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, mode: "url" } })).valid).toBe(false);
+        expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, renderMode: "image" } })).valid).toBe(true);
+        expect(validateV2Schema(specification({ ...component, svgBinding: { ...component.svgBinding, renderMode: "iframe" } })).valid).toBe(false);
     });
 
     it("translates only bounded numeric animation and strips resource loads", () => {
@@ -114,5 +120,48 @@ describe("data-bound svgMarkup", () => {
         ]) expect(sanitizeSvg(markup, "hp-bound", { bound }).svg).toBe("");
         expect(sanitizeSvg('<svg width="160px" height="90"><rect width="20" height="20"/></svg>', "hp-bound", { bound }).svg)
             .toContain('viewBox="0 0 160 90"');
+    });
+});
+
+describe("SVG image compatibility", () => {
+    const drawing = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="40">
+        <title>Intake valve</title>
+        <style>.steel{fill:#246;animation: pulse 2s infinite}@keyframes pulse{to{opacity:0.5}}</style>
+        <defs><symbol id="valve"><rect class="steel" width="100" height="40"/></symbol><filter id="shadow"><feGaussianBlur stdDeviation="1"/></filter></defs>
+        <use xlink:href="#valve" filter="url(#shadow)" style="stroke:#fff;animation:pulse 2s infinite">
+            <animateTransform attributeName="transform" type="translate" from="0" to="1" dur="2s"/>
+        </use>
+        <script>example()</script><image href="https://example.invalid/remote.png"/>
+        <rect onclick="example()" width="2" height="2"/><foreignObject width="1" height="1"/>
+    </svg>`;
+    const decode = (result: ReturnType<typeof compileSvgImage>) => {
+        expect(result).toHaveProperty("src");
+        return "src" in result ? decodeURIComponent(result.src.split(",", 2)[1]) : "";
+    };
+
+    it("keeps local SVG design features inside the image and removes active markup", () => {
+        const result = compileSvgImage(drawing, false);
+        expect(result).toHaveProperty("title", "Intake valve");
+        const svg = decode(result);
+        for (const value of ['viewBox="0 0 100 40"', '<symbol id="valve">', 'xlink:href="#valve"', '<feGaussianBlur', '@keyframes pulse', '<animateTransform']) {
+            expect(svg).toContain(value);
+        }
+        expect(svg).not.toMatch(/<script|onclick|<foreignObject|remote\.png/);
+    });
+
+    it("keeps ordinary style and suppresses SVG and CSS motion in reduced mode", () => {
+        const svg = decode(compileSvgImage(drawing, true));
+        expect(svg).toContain('fill:#246');
+        expect(svg).toContain('stroke:#fff');
+        expect(svg).not.toMatch(/animateTransform|animation:|@keyframes/);
+    });
+
+    it("allows larger drawings and rejects malformed XML, DTDs, and excess size", () => {
+        const wrap = (content: string) => `<svg viewBox="0 0 100 40">${content}</svg>`;
+        expect(compileSvgImage(wrap("<rect/>".repeat(600)), true)).toHaveProperty("src");
+        expect(compileSvgImage(wrap("<rect/>".repeat(5_001)), true)).toHaveProperty("error");
+        expect(compileSvgImage(wrap(" ".repeat(1_000_000)), true)).toHaveProperty("error");
+        expect(compileSvgImage("<svg>", false)).toHaveProperty("error");
+        expect(compileSvgImage("<!DOCTYPE svg>" + drawing, false)).toHaveProperty("error");
     });
 });

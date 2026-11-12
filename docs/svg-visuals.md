@@ -145,13 +145,19 @@ Add the facility ID and SVG text columns to **Values** and set them to **Don't s
 }
 ```
 
-`svgBinding.dataset` overrides the component dataset and defaults to the component dataset or `powerbi`. Use Field Manifest aliases or logical dataset field names. The binding takes precedence over any authored `svg` and reads the complete cell as SVG, with template syntax left literal. Bound SVG always uses the sanitizer, including when the visual is set to Trusted SVG.
+`svgBinding.dataset` overrides the component dataset and defaults to the component dataset or `powerbi`. Use Field Manifest aliases or logical dataset field names. The binding takes precedence over any authored `svg` and reads the complete cell as SVG, with template syntax left literal. The default `svgBinding.renderMode` is `"inline"`, which uses the sanitizer even when the visual is set to Trusted SVG. The report shows the diagram on its own and displays an error when it cannot render the selected schematic.
 
 HyperPBI draws a schematic when the filtered rows contain exactly one nonblank facility key. Identical SVG values for that facility count as one diagram. Blank schematic cells are ignored when a duplicate row supplies the diagram. Conflicting values, missing text, and malformed or truncated SVG produce an error. With zero or multiple facility keys, the visual shows “Select one facility to view its process schematic.” A dataset containing only one facility displays it immediately.
 
-Bound SVG fits the available area with aspect ratio preserved. Provide a valid `viewBox` or positive pixel `width` and `height` in the document. Use `heightMode: "fill"` to use the visual's height or a numeric component `height` to set a fixed frame. Bound documents that exceed 250,000 characters, 500 allowed elements, 20 nesting levels, or 20,000 characters in a path show an error. Power BI can truncate long cell values before they reach HyperPBI. Inline the geometry for reusable symbols exported as `<symbol>` and `<use>`. Local paint, clip, mask, and marker references retain their isolated IDs.
+Bound SVG fits the available area with aspect ratio preserved. Provide a valid `viewBox` or positive pixel `width` and `height` in the document. Use `heightMode: "fill"` to use the visual's height or a numeric component `height` to set a fixed frame. Inline mode allows up to 250,000 characters, 500 allowed elements, 20 nesting levels, and 20,000 characters per path. Local paint, clip, mask, and marker references retain their isolated IDs. Power BI can truncate long cell values before they reach HyperPBI.
 
-### Safe animation in bound diagrams
+### SVG exports with symbols, styles, or filters
+
+Add `"renderMode": "image"` inside `svgBinding` for design-tool exports that rely on local `<symbol>` and `<use>`, filters, CSS, embedded raster images, or native SVG animation. Keep the same SVG text column. HyperPBI displays the SVG as an isolated browser image with a limit of 1,000,000 characters, 5,000 elements, and 64 nesting levels. HyperPBI removes scripts, event attributes, and foreign HTML content before building the image. The browser disables script execution, link interaction, and external resource loading. [SVG image rendering rules](https://www.w3.org/TR/SVG2/conform.html#secure-animated-mode)
+
+The image uses the styles inside its SVG. Component CSS can style its report frame. Image mode uses native SVG and CSS animation. It suppresses both when system reduced motion is enabled or when HyperPBI motion settings disable animation. The browser controls playback of any embedded raster animation.
+
+### Safe animation in inline bound diagrams
 
 Place an `<animate>` child inside a shape, text element, or group. HyperPBI translates numeric `stroke-dashoffset` for flowing pipes and `opacity` for equipment indicators into scoped CSS. For example, a dashed pipe with a dash pattern totaling 18 units can use:
 
