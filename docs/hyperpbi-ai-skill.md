@@ -105,6 +105,8 @@ Values can be literal, bound, templated, scaled, mapped, conditional, or state-b
 
 Use `svgMarkup` for a complete SVG document. Use `svgBinding: { mode: "data", keyField, svgField, dataset? }` when a text column provides the document for one facility in the filtered data. The default inline renderer sanitizes the SVG and supports bounded numeric dash-offset and opacity animation. Set `svgBinding.renderMode: "image"` for exports with local symbols, filters, and styles. The isolated image supports declarative animation and blocks scripts, handlers, foreign HTML, links, and external resources.
 
+Set `panZoom: true` on `svg` or `svgMarkup` in inline or image mode to enable wheel and pinch zoom, drag to pan, and floating controls. The view fits the available width and height while preserving aspect ratio and supports 1×–5× zoom. Use `heightMode: "fill"` to use the available dashboard height. The default is `panZoom: false`.
+
 ## Maps
 
 All Power BI fields arrive through the single `Values` role. Declare explicit `layers[]`; select a logical `layer.dataset` when needed; and configure each Power BI layer's `source.bindings` for geometry, latitude/longitude, X/Y, address, grouping, color, size, tooltip, and details. Never depend on a map-specific Power BI field bucket. A layer omitting `dataset` inherits the map dataset, then `powerbi`. Map center order is `[latitude, longitude]`.

@@ -692,6 +692,7 @@ export interface AvatarGroupComponent extends ComponentBase {
 export interface SvgComponent extends ComponentBase {
     type: "svg";
     viewBox: string;
+    panZoom?: boolean;
     width?: number | string;
     height?: number | string;
     preserveAspectRatio?: string;
@@ -706,6 +707,7 @@ export interface SvgComponent extends ComponentBase {
 export interface SvgMarkupComponent extends ComponentBase {
     type: "svgMarkup";
     viewBox?: string;
+    panZoom?: boolean;
     width?: number | string;
     height?: number | string;
     preserveAspectRatio?: string;

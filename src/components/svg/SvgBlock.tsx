@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useRenderContext } from "../../render/RenderContext";
 import type { SvgComponent } from "../../schema/hyperpbiSchema";
 import { sanitizeCss } from "../../security/sanitizeCss";
+import { svgContainAlignment } from "../../security/svgMarkupDocument";
+import { PanZoomViewport } from "./PanZoomViewport";
 import { resolveSvgDataContextRow } from "./svgBindings";
 import { createSvgIdMap, createSvgNamespace, rewriteSvgCssReferences } from "./svgIdIsolation";
 import { SVG_LIMITS } from "./svgTypes";
@@ -22,12 +24,20 @@ export function SvgBlock({ component }: { component: SvgComponent }) {
     useEffect(() => { if (typeof document === "undefined") return; const update = () => setInactive(document.hidden); document.addEventListener("visibilitychange", update); return () => document.removeEventListener("visibilitychange", update); }, []);
     const compileMs = (globalThis.performance?.now?.() ?? Date.now()) - compileStarted;
     const titleId = `${namespace}-title`, descId = `${namespace}-desc`, role = component.role ?? (budget.animated || component.elements.some(element => Boolean(element.interaction || element.uiAction)) ? "group" : "img");
-    return <div ref={host} class={`hp-svg-block ${offscreen || inactive ? "hp-svg-paused" : ""}`} data-hp-svg={namespace}>
+    const panZoom = component.panZoom === true;
+    const selectedRowKey = component.dataContext?.mode === "selectedRow" ? context.state.selectedRowKeys[0] : undefined;
+    const resetKey = useMemo(() => ({}), [component.viewBox, component.elements, selectedRowKey]);
+    const height = component.heightMode === "fill" || component.heightMode === "aspectRatio" ? undefined : component.height;
+    const drawing = <svg viewBox={component.viewBox} width={component.width ?? "100%"} height={component.height ?? "auto"}
+        preserveAspectRatio={panZoom ? svgContainAlignment(component.preserveAspectRatio) : component.preserveAspectRatio ?? "xMidYMid meet"}
+        role={role} aria-label={component.ariaLabel} aria-labelledby={component.title ? titleId : undefined} aria-describedby={component.description ? descId : undefined}>
+        {component.title ? <title id={titleId}>{component.title}</title> : null}{component.description ? <desc id={descId}>{component.description}</desc> : null}{content}
+    </svg>;
+    return <div ref={host} class={`hp-svg-block${offscreen || inactive ? " hp-svg-paused" : ""}${panZoom ? " hp-svg-zoomable" : ""}`}
+        style={panZoom && height !== undefined ? { height } : undefined} data-hp-svg={namespace}>
         {component.title ? <div class="hp-svg-heading">{component.title}</div> : null}
         <style>{`${ownCss.css}\n${budget.css.join("\n")}`}</style>
-        <svg viewBox={component.viewBox} width={component.width ?? "100%"} height={component.height ?? "auto"} preserveAspectRatio={component.preserveAspectRatio ?? "xMidYMid meet"} role={role} aria-label={component.ariaLabel} aria-labelledby={component.title ? titleId : undefined} aria-describedby={component.description ? descId : undefined}>
-            {component.title ? <title id={titleId}>{component.title}</title> : null}{component.description ? <desc id={descId}>{component.description}</desc> : null}{content}
-        </svg>
+        {panZoom ? <PanZoomViewport resetKey={resetKey}>{drawing}</PanZoomViewport> : drawing}
         {context.settings.debug.showPerformance ? <div class="hp-svg-diagnostics">SVG: {budget.elements} elements · {budget.animated} animated · {budget.paths} paths · {budget.repeats} repeats · {compileMs.toFixed(1)} ms compile · {warnings.length} warnings</div> : null}
         {context.settings.debug.showSchemaErrors && warnings.length ? <details class="hp-debug"><summary>SVG diagnostics ({warnings.length})</summary><ul>{Array.from(new Set(warnings)).map(item => <li>{item}</li>)}</ul></details> : null}
     </div>;

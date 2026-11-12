@@ -7,6 +7,14 @@ HyperPBI implements two governed vector components:
 
 Use SVG for diagrams, process flows, pictorial marks, schematics, custom gauges, and animated KPI presentation. Use semantic ECharts components for standard analytical charts.
 
+## Pan and zoom
+
+Set `"panZoom": true` on `svg` or `svgMarkup` to enable pan and zoom. The default is `false`. The fitted drawing uses the full component width and available height while preserving its aspect ratio. Use `heightMode: "fill"` to give the diagram the available dashboard height, or set a fixed `height` to size the viewport. In automatic-height layouts, the drawing’s aspect ratio determines its height.
+
+Scroll the mouse wheel over the drawing to zoom toward the pointer. Drag with a mouse or one finger to pan, and pinch with two fingers to zoom. The floating **+** and **−** buttons zoom around the center of the viewport within 1×–5× of the fitted view. **Fit** restores the original scale and position. Switching to a different bound schematic also restores the fitted view. Clicking, tapping, or using the keyboard on an interactive SVG mark still activates it.
+
+`svgMarkup` supports pan and zoom in sanitized inline mode and in data-bound image mode. Authored SVG in trusted mode uses its separate sandboxed document. For authored markup, include a `viewBox` or intrinsic pixel dimensions to define the drawing’s proportions.
+
 ## Structured `svg`
 
 Required properties are `viewBox` and `elements`; include `ariaLabel`. Optional component properties include width/height, preserveAspectRatio, role, description, dataContext, motion, performance, dataset, normal component interaction/UI actions, and shared styling.
@@ -136,6 +144,7 @@ Add the facility ID and SVG text columns to **Values** and set them to **Don't s
   "id": "station_schematic",
   "dataset": "powerbi",
   "heightMode": "fill",
+  "panZoom": true,
   "ariaLabel": "Selected facility process schematic",
   "svgBinding": {
     "mode": "data",

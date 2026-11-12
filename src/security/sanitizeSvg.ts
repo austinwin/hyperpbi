@@ -22,6 +22,7 @@ export function sanitizeSvg(input: string, namespace: string, options: {
     mermaidNodeIds?: ReadonlySet<string>;
     mode?: "sanitized" | "trusted";
     bound?: { maxElements: number; maxAnimations: number };
+    fallbackViewBox?: string;
 } = {}): SanitizedSvg {
     const warnings: string[] = []; let elementCount = 0, animatedElementCount = 0, pathCount = 0;
     const ids = new Map<string, string>(), motionCss: string[] = [];
@@ -35,6 +36,7 @@ export function sanitizeSvg(input: string, namespace: string, options: {
         return reject("Raw SVG could not be parsed as a single SVG document.");
     }
     if (bound && !fitSvgViewport(root)) return reject("The SVG needs a valid viewBox or positive width and height in pixels.");
+    if (!bound && options.fallbackViewBox !== undefined) fitSvgViewport(root, options.fallbackViewBox);
     const maxElements = bound ? Math.min(bound.maxElements, SVG_LIMITS.maxElementsPerComponent) : SVG_LIMITS.maxElementsPerComponent;
     const maxAnimations = bound ? Math.min(bound.maxAnimations, SVG_LIMITS.maxAnimatedPerComponent) : 0;
     let limitError: string | undefined;

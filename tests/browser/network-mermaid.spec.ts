@@ -21,6 +21,13 @@ test("bound Mermaid node filters another HyperPBI component and remains keyboard
   await page.goto("/tests/browser/network-mermaid.html?mode=mermaid");
   const node = page.locator("[data-hp-mermaid-node='WO']");
   await expect(node).toBeVisible({ timeout: 15_000 }); await expect(node).toHaveAttribute("role", "button"); await expect(node).toHaveAttribute("tabindex", "0");
+  const viewport = page.locator(".hp-mermaid-viewport");
+  await viewport.hover();
+  await page.mouse.wheel(0, -160);
+  const scale = () => viewport.locator(".hp-mermaid-transform").evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).a);
+  await expect.poll(scale).toBeGreaterThan(1);
+  await viewport.getByRole("button", { name: "Fit" }).click();
+  await expect.poll(scale).toBe(1);
   await node.press("Enter");
   await expect(page.locator("[data-hp-id='details'] tbody tr")).toHaveCount(1);
   await expect(node).toHaveClass(/is-hp-selected/);

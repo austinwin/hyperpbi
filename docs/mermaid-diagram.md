@@ -51,4 +51,4 @@ Flowchart logical-node mapping is tested and supported. Class, state, and ER nod
 
 ## Pan and zoom
 
-With `panZoom: true`, the wheel zooms from 0.35× to 5×, dragging empty diagram space pans, and the Fit button resets the view. Pointer gestures that begin on a bound node remain node interactions. `fit: "contain"` is the default; `width` fits horizontally and `none` preserves the native SVG size.
+With `panZoom: true`, the wheel zooms toward the cursor from 0.35× to 5×. Drag empty diagram space to pan, pinch to zoom on touch screens, or choose **Fit** to reset the view. Pointer gestures that begin on a bound node remain node interactions. `fit: "contain"` is the default; `width` fits horizontally and `none` preserves the native SVG size.

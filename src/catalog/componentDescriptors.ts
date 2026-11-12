@@ -25833,6 +25833,9 @@ extendDescriptor("table",[
   {property:"virtualization",label:"Virtualization",control:"json",group:"Advanced",help:"Configure threshold, measured row height, and overscan."},
 ]);
 extendDescriptor("map",[{property:"tools",label:"Spatial selection tools",control:"json",group:"Interaction",help:"Enable rectangle and/or lasso selection."}]);
+for (const type of ["svg", "svgMarkup"]) extendDescriptor(type, [
+  { property: "panZoom", label: "Pan and zoom", control: "checkbox", group: "Interaction", help: "Enable drag, pinch, wheel zoom, and floating controls for the fitted SVG." },
+]);
 extendDescriptor("svgMarkup", [
   { property: "svgBinding", label: "SVG data binding", control: "json", group: "Data", help: 'Use { "mode": "data", "keyField": "stationid", "svgField": "schematic" }. Add "renderMode": "image" for SVG exports with symbols, styles, or filters.' },
 ]);

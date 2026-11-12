@@ -5370,9 +5370,9 @@ _5 components_
 
 **Required properties:** `type`, `id`, `viewBox`, `elements`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `elements`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `elements`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `panZoom`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `elements`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `panZoom`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations Yes; scoped CSS Yes; slots Yes; interactions Yes; identity selection Yes; custom HTML No.
 
@@ -5504,9 +5504,9 @@ _5 components_
 
 **Required properties:** `type`, `id`
 
-**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `svgBinding`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`
+**Key properties:** `dataset`, `title`, `subtitle`, `span`, `className`, `hidden`, `props`, `style`, `css`, `slots`, `data`, `visibility`, `interactions`, `interaction`, `ariaLabel`, `icon`, `variant`, `size`, `disabled`, `tooltip`, `uiAction`, `viewBox`, `width`, `height`, `preserveAspectRatio`, `role`, `description`, `svg`, `svgBinding`, `dataContext`, `motion`, `performance`, `order`, `responsive`, `heightMode`, `minHeight`, `aspectRatio`, `panZoom`
 
-**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `svgBinding`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
+**All allowed properties:** `ariaLabel`, `aspectRatio`, `className`, `css`, `data`, `dataContext`, `dataset`, `description`, `disabled`, `height`, `heightMode`, `hidden`, `icon`, `id`, `interaction`, `interactions`, `minHeight`, `motion`, `order`, `panZoom`, `performance`, `preserveAspectRatio`, `props`, `responsive`, `role`, `size`, `slots`, `span`, `style`, `subtitle`, `svg`, `svgBinding`, `title`, `tooltip`, `type`, `uiAction`, `variant`, `viewBox`, `visibility`, `width`
 
 **Capabilities:** fields Yes; calculations No; scoped CSS Yes; slots Yes; interactions Yes; identity selection No; custom HTML No.
 

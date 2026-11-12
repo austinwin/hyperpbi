@@ -10,18 +10,23 @@ export function parseSvgDocument(input: string): Element | undefined {
     if (!document.querySelector("parsererror") && root.localName.toLowerCase() === "svg") return root;
 }
 
-export function fitSvgViewport(root: Element): boolean {
+export function svgContainAlignment(value: string | null | undefined): string {
+    const alignment = /^(x(?:Min|Mid|Max)Y(?:Min|Mid|Max))(?:\s+(?:meet|slice))?$/.exec(value?.trim() ?? "");
+    return `${alignment?.[1] ?? "xMidYMid"} meet`;
+}
+
+export function fitSvgViewport(root: Element, fallbackViewBox?: string): boolean {
     for (const { name } of Array.from(root.attributes)) {
         if (["viewbox", "preserveaspectratio"].includes(name.toLowerCase()) && name !== "viewBox" && name !== "preserveAspectRatio") root.removeAttribute(name);
     }
     if (!validSvgViewBox(root.getAttribute("viewBox"))) {
         const dimensions = ["width", "height"].map(name => /^(\d+(?:\.\d+)?|\.\d+)(?:px)?$/.exec(root.getAttribute(name)?.trim() ?? "")?.[1]);
-        const viewBox = `0 0 ${dimensions.join(" ")}`;
-        if (!validSvgViewBox(viewBox)) return false;
+        const intrinsicViewBox = `0 0 ${dimensions.join(" ")}`;
+        const viewBox = validSvgViewBox(intrinsicViewBox) ? intrinsicViewBox : fallbackViewBox;
+        if (!viewBox || !validSvgViewBox(viewBox)) return false;
         root.setAttribute("viewBox", viewBox);
     }
-    const alignment = /^x(?:Min|Mid|Max)Y(?:Min|Mid|Max)(?:\s+(?:meet|slice))?$/.exec(root.getAttribute("preserveAspectRatio")?.trim() ?? "");
-    root.setAttribute("preserveAspectRatio", alignment ? `${alignment[0].split(/\s/)[0]} meet` : "xMidYMid meet");
+    root.setAttribute("preserveAspectRatio", svgContainAlignment(root.getAttribute("preserveAspectRatio")));
     root.removeAttribute("width");
     root.removeAttribute("height");
     return true;
