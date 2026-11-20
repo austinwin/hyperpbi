@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f8fc">
+<title>HyperPBI · Scene3D proof of concept</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1a2638;background:#f6f8fc;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-width:320px}button{font:inherit;cursor:pointer}button:focus-visible,.pump-item:focus-visible{outline:3px solid #86b5ff;outline-offset:2px}
+header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 25px;background:#fff;border-bottom:1px solid #e6eaf1}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:17px;letter-spacing:-.5px}.logo{width:30px;height:30px;border-radius:9px;background:#1769e0;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px}.brand .sub{border-left:1px solid #dce2eb;padding-left:11px;margin-left:2px;color:#64748b;font-size:12px;font-weight:600;letter-spacing:0}
+.chip{border:1px solid #d9e7f4;background:#edf6ff;color:#35618e;border-radius:18px;padding:6px 11px;font-size:11px;font-weight:750}.headend{display:flex;gap:10px;align-items:center}
+main{padding:20px 22px;max-width:1700px;margin:auto}.headline{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 18px}.eyebrow{font-size:11px;font-weight:800;color:#627991;letter-spacing:.11em;text-transform:uppercase}.headline h1{font-size:25px;font-weight:740;letter-spacing:-.7px;margin:5px 0 3px}.headline p{color:#697a92;font-size:13px;margin:0}.btn{background:#fff;border:1px solid #dbe3ec;border-radius:8px;padding:9px 13px;font-size:12px;font-weight:700;color:#384a60;display:inline-flex;align-items:center;gap:7px}.btn:hover{background:#f0f5fb}.btn.primary{background:#1769e0;color:#fff;border-color:#1769e0}.btn.primary:hover{background:#0d55ba}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}.kpi{background:#fff;padding:15px 18px;border:1px solid #e5eaf1;border-radius:11px;min-width:0}.kpi small{display:block;color:#728197;font-size:11px;font-weight:700;margin-bottom:7px}.kpi strong{font-size:26px;font-weight:770;letter-spacing:-.8px}.kpi .suffix{font-size:12px;color:#789;letter-spacing:0;font-weight:600;margin-left:4px}
+.bodygrid{display:grid;grid-template-columns:235px minmax(0,1fr) 282px;gap:14px;align-items:stretch;min-height:570px}.panel{background:#fff;border:1px solid #e5eaf1;border-radius:12px;min-width:0;overflow:hidden}.panel-header{padding:15px 15px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-title{font-size:13px;font-weight:770}.panel-sub{font-size:11px;color:#8794a8;margin-top:4px}
+.pump-list{padding:0 8px}.pump-item{border:1px solid transparent;border-radius:9px;background:transparent;padding:12px 10px;margin:2px 0;width:100%;display:flex;align-items:center;gap:10px;text-align:left;color:#22344a}.pump-item:hover{background:#f4f8fc}.pump-item.selected{border-color:#b4cff6;background:#eff6ff}.status-dot{height:9px;width:9px;flex:0 0 9px;border-radius:50%;background:#27b58f;box-shadow:0 0 0 3px #defaf0}.status-dot.warning{background:#e4a63d;box-shadow:0 0 0 3px #fff2d6}.status-dot.stopped{background:#8594a8;box-shadow:0 0 0 3px #eef1f5}
+.pump-name{font-size:12px;font-weight:770}.pump-id{font-size:11px;color:#8591a3;margin-top:3px}.mini-status{margin-left:auto;color:#738399;font-size:10px;font-weight:750}.sidefooter{margin:17px 12px;border-top:1px solid #edf0f5;padding-top:12px;font-size:10px;color:#8492a6;line-height:1.65}
+.viewport{position:relative;background:radial-gradient(circle at 52% 10%,#f4f8ff,#e1eaf4 74%);height:100%;min-height:570px;overflow:hidden}.viewport canvas{display:block;width:100%;height:100%}.viewtools{position:absolute;z-index:2;left:15px;top:15px;display:flex;gap:7px;flex-wrap:wrap}.viewtools .btn{box-shadow:0 2px 8px #203e5f13}.viewport-hint{position:absolute;z-index:2;bottom:16px;left:16px;font-size:11px;color:#526d8c;background:#ffffffd8;padding:8px 11px;border:1px solid #e3eaf2;border-radius:8px;pointer-events:none}.viewlegend{position:absolute;z-index:2;bottom:16px;right:15px;background:#ffffffdb;border:1px solid #e3eaf2;border-radius:8px;padding:8px 11px;display:flex;gap:13px;font-size:10px;color:#65768b}.viewlegend span{display:flex;align-items:center;gap:7px}.viewlegend i{width:8px;height:8px;border-radius:50%;background:#21bf90}.viewlegend .warn{background:#eaa63d}.viewlegend .stop{background:#8391a4}
+.modeltag{position:absolute;z-index:2;background:#fffffff0;border:1px solid #d7e4f1;box-shadow:0 3px 14px #28486c12;border-radius:6px;padding:5px 7px;font-size:10px;font-weight:750;color:#47627c;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}.modeltag.active{color:#0f5dc2;border-color:#8ab6e9}.scene-note{position:absolute;top:60px;left:15px;z-index:3;background:#fff6d6;border:1px solid #f0d88d;color:#866320;border-radius:8px;padding:8px 12px;font-size:11px;max-width:90%;display:none}
+.detail{padding:0 15px 16px}.deviceicon{width:48px;height:48px;border-radius:12px;background:#ebf3ff;display:grid;place-items:center;font-size:25px;margin:4px 0 12px}.detail h2{font-size:19px;letter-spacing:-.45px;margin:0 0 5px}.detail .subtitle{color:#8694a6;font-size:11px}.state{display:inline-block;background:#e5faf4;color:#168469;font-size:10px;font-weight:800;padding:5px 8px;border-radius:6px;margin:13px 0}.state.warning{background:#fff4d9;color:#946620}.state.stopped{background:#edf0f4;color:#637489}
+.metricrow{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #eef1f5}.metricrow label{font-size:11px;color:#75849a}.metricrow strong{font-size:14px;letter-spacing:-.2px}.metricrow small{font-size:10px;color:#98a3b1;margin-left:3px}
+.sectionlabel{margin:20px 0 10px;font-size:11px;color:#75849a;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.sparkbox{border:1px solid #e7edf4;border-radius:8px;padding:8px;background:#f9fbff}.sparkbox canvas{width:100%;height:82px;display:block}.progresswrap{height:6px;background:#e7eef6;border-radius:8px;overflow:hidden;margin-top:8px}.progress{height:100%;background:#368be8;width:60%;transition:width .25s}
+.eventbox{padding:12px;margin-top:15px;border:1px dashed #cddcef;border-radius:8px;background:#f8fbff}.eventbox strong{display:block;font-size:11px;margin-bottom:7px}.eventbox code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;line-height:1.65;color:#456680;max-height:120px;overflow:auto}
+.footnote{margin-top:14px;display:flex;justify-content:space-between;gap:16px;color:#7c8aa0;font-size:11px;line-height:1.5}
+@media(max-width:1150px){.bodygrid{grid-template-columns:208px minmax(0,1fr)}.detailpanel{grid-column:1/-1}.detail{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}.deviceicon{display:none}.detail h2,.detail .subtitle,.detail .state,.detail .sectionlabel,.detail .sparkbox,.detail .eventbox{grid-column:1/-1}.viewport{min-height:520px}}@media(max-width:760px){header{padding:0 14px}.brand .sub{display:none}main{padding:14px}.headline{align-items:start;flex-direction:column}.headline h1{font-size:21px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.kpi{padding:12px}.kpi strong{font-size:22px}.bodygrid{display:block}.bodygrid .panel{margin-bottom:12px}.pump-list{display:grid;grid-template-columns:repeat(2,1fr)}.pump-item{padding:9px 7px}.viewport{height:465px;min-height:0}.viewlegend{bottom:55px}.modeltag{font-size:9px}.detail{display:block}.headend .chip{display:none}.footnote{display:block}.footnote span{display:block;margin-bottom:6px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.181.2/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.181.2/examples/jsm/"}}</script>
+</head>
+<body>
+<header><div class="brand"><span class="logo">H</span>HyperPBI <span class="sub">3D laboratory</span></div><div class="headend"><span class="chip">Experimental proof of concept</span><span class="chip" style="background:#e9f9f4;color:#14866d;border-color:#c7efe2">● Simulated data</span></div></header>
+<main>
+<div class="headline"><div><div class="eyebrow">Spatial analytics / Scene3D</div><h1>Booster station · equipment overview</h1><p>Explore a clickable 3D scene connected to a simple analytical dashboard.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="btnReset">↺ Reset view</button><button class="btn primary" id="btnSimulate">⟳ Simulate status</button></div></div>
+<div class="kpis">
+<div class="kpi"><small>Equipment online</small><strong id="kOnline">3/4</strong><span class="suffix">pumps</span></div>
+<div class="kpi"><small>Total flow</small><strong id="kFlow">3,440</strong><span class="suffix">GPM</span></div>
+<div class="kpi"><small>Average pressure</small><strong id="kPressure">65.4</strong><span class="suffix">PSI</span></div>
+<div class="kpi"><small>Active alerts</small><strong id="kAlerts">1</strong><span class="suffix">equipment</span></div>
+</div>
+<div class="bodygrid">
+<aside class="panel"><div class="panel-header"><div><div class="panel-title">Equipment</div><div class="panel-sub">Select an asset in the list or scene</div></div></div><div class="pump-list" id="pumpList"></div><div class="sidefooter">DATASET · <strong>equipment</strong><br>ROW KEY · <strong>equipmentId</strong><br>SCENE · <strong>pump-station-01</strong><br>Source: synthetic demonstration records</div></aside>
+<section class="panel viewport" id="viewport" aria-label="Interactive 3D facility visualization"><div class="viewtools"><button class="btn" id="btnTop">Top view</button><button class="btn" id="btnIso">Isometric</button><button class="btn" id="btnLabels">Labels: On</button></div><div id="sceneNotice" class="scene-note" role="status"></div><div id="modelLabels"></div><div class="viewport-hint">Drag to orbit · Scroll to zoom · Click a pump to select</div><div class="viewlegend"><span><i></i> Running</span><span><i class="warn"></i> Warning</span><span><i class="stop"></i> Stopped</span></div></section>
+<aside class="panel detailpanel"><div class="panel-header"><div><div class="panel-title">Object inspector</div><div class="panel-sub">Live scene → data binding</div></div><span class="chip">Linked</span></div><div class="detail">
+<div class="deviceicon">⚙</div><h2 id="dName">Booster Pump 1</h2><div class="subtitle" id="dId">P-101 · Centrifugal pump</div><div><span class="state" id="dStatus">Running</span></div>
+<div class="metricrow"><label>Flow rate</label><div><strong id="dFlow">1,280</strong><small>GPM</small></div></div>
+<div class="metricrow"><label>Discharge pressure</label><div><strong id="dPressure">68.4</strong><small>PSI</small></div></div>
+<div class="metricrow"><label>Motor load</label><div><strong id="dLoad">72</strong><small>%</small></div></div>
+<div class="sectionlabel">Motor utilization</div><div><div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b"><span>Current load</span><span id="loadLabel">72%</span></div><div class="progresswrap"><div class="progress" id="loadBar"></div></div></div>
+<div class="sectionlabel">Illustrative pressure trend</div><div class="sparkbox"><canvas id="spark" width="520" height="164"></canvas></div>
+<div class="eventbox"><strong>Interaction payload</strong><code id="interactionPayload"></code></div>
+</div></aside>
+</div>
+<div class="footnote"><span>HyperPBI Scene3D experiment · Interactive WebGL rendering with Three.js. Demonstration data only; not connected to Houston Water or Power BI.</span><span>The data-panel interaction is working locally; Power BI cross-visual selection still requires host integration and testing.</span></div>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const records=[
+  {id:'P-101',name:'Booster Pump 1',status:'Running',flow:1280,pressure:68.4,load:72,x:-3.15,z:-1.0},
+  {id:'P-102',name:'Booster Pump 2',status:'Running',flow:1150,pressure:65.8,load:67,x:-1.05,z:-1.0},
+  {id:'P-103',name:'Booster Pump 3',status:'Warning',flow:1010,pressure:62.0,load:92,x:1.05,z:-1.0},
+  {id:'P-104',name:'Booster Pump 4',status:'Stopped',flow:0,pressure:0,load:0,x:3.15,z:-1.0}
+];
+const state={selected:'P-101',labels:true};
+const $=id=>document.getElementById(id), number=v=>Number(v).toLocaleString('en-US');
+const colors={Running:0x13b68b,Warning:0xe7a646,Stopped:0x8592a4};
+const hex={Running:'#14b68b',Warning:'#e7a646',Stopped:'#8592a4'};
+const interactions=[];
+let syncSelection=()=>{};
+function setEvent(type,rec){const event={source:'scene3d',type,objectId:rec.id,keyField:'equipmentId',value:rec.id,matchedRows:1,externalPowerBI:'not connected in prototype'};interactions.unshift(event);$('interactionPayload').textContent=JSON.stringify(event,null,2);}
+function drawSpark(rec){
+ const c=$('spark'),ctx=c.getContext('2d');if(!ctx)return;
+ const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
+ ctx.strokeStyle='#e5edf5';ctx.lineWidth=2;
+ for(let i=1;i<=3;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}
+ const pts=Array.from({length:28},(_,i)=>rec.status==='Stopped'?0:(rec.pressure + Math.sin(i*.7+rec.id.length)*1.8 + Math.cos(i*.25)*2.4));
+ const lo=55,hi=76;ctx.beginPath();pts.forEach((v,i)=>{const x=i*w/(pts.length-1),y=h-14-(v-lo)/(hi-lo)*(h-28);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+ ctx.strokeStyle='#2f79d9';ctx.lineWidth=4;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+}
+function refreshUI(){
+ const online=records.filter(r=>r.status!=='Stopped');
+ $('kOnline').textContent=online.length+'/4';$('kFlow').textContent=number(records.reduce((s,r)=>s+r.flow,0));
+ $('kPressure').textContent=(online.reduce((s,r)=>s+r.pressure,0)/(online.length||1)).toFixed(1);
+ $('kAlerts').textContent=records.filter(r=>r.status==='Warning').length;
+ $('pumpList').innerHTML='';
+ for(const r of records){
+   const b=document.createElement('button');b.className='pump-item'+(r.id===state.selected?' selected':'');b.type='button';
+   b.setAttribute('aria-pressed',r.id===state.selected?'true':'false');
+   const dot=document.createElement('span');dot.className='status-dot '+r.status.toLowerCase();
+   const info=document.createElement('div');const name=document.createElement('div');name.className='pump-name';name.textContent=r.name;
+   const id=document.createElement('div');id.className='pump-id';id.textContent=r.id;info.append(name,id);
+   const status=document.createElement('span');status.className='mini-status';status.textContent=r.status;
+   b.append(dot,info,status);b.addEventListener('click',()=>select(r.id,'list click'));$('pumpList').append(b);
+ }
+ const r=records.find(r=>r.id===state.selected)||records[0];
+ $('dName').textContent=r.name;$('dId').textContent=r.id+' · Centrifugal pump';
+ $('dStatus').textContent=r.status;$('dStatus').className='state '+r.status.toLowerCase();
+ $('dFlow').textContent=number(r.flow);$('dPressure').textContent=r.pressure.toFixed(1);
+ $('dLoad').textContent=r.load;$('loadLabel').textContent=r.load+'%';$('loadBar').style.width=r.load+'%';
+ $('loadBar').style.background=hex[r.status];drawSpark(r);
+}
+function select(id,type){state.selected=id;const r=records.find(r=>r.id===id);if(!r)return;setEvent(type,r);refreshUI();syncSelection();}
+function showNotice(msg){const el=$('sceneNotice');el.style.display='block';el.textContent=msg;}
+let renderer;
+try{
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});
+}catch(e){showNotice('WebGL unavailable in this browser. The equipment list and data interaction still work.');}
+if(renderer){
+ const view=$('viewport');renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+ renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setClearColor(0x000000,0);
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer.domElement.setAttribute('aria-label','Interactive 3D equipment scene');
+ view.insertBefore(renderer.domElement,view.firstChild);
+ const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xeaf1fa,13,28);
+ const camera=new THREE.PerspectiveCamera(43,1,.1,70);camera.position.set(8,7,10.5);
+ const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1.1,0);controls.minDistance=5;controls.maxDistance=22;controls.maxPolarAngle=Math.PI*.48;controls.enableDamping=true;controls.dampingFactor=.085;
+ scene.add(new THREE.HemisphereLight(0xf9fdff,0x91a9c2,2.2));
+ const sun=new THREE.DirectionalLight(0xffffff,3.2);sun.position.set(5,10,4);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-11;sun.shadow.camera.right=11;sun.shadow.camera.top=11;sun.shadow.camera.bottom=-11;scene.add(sun);
+ const baseMaterial=new THREE.MeshStandardMaterial({color:0xe5eaf1,roughness:.85,metalness:.05});
+ const floor=new THREE.Mesh(new THREE.BoxGeometry(12,.25,9),baseMaterial);floor.position.y=-.17;floor.receiveShadow=true;scene.add(floor);
+ const grid=new THREE.GridHelper(12,24,0xc4d4e4,0xd6e1ee);grid.position.y=-.025;scene.add(grid);
+ const mat=(color,metalness=.4,roughness=.45)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
+ const steel=mat(0x647d93,.66,.3),pale=mat(0x9eb9ca,.53,.37),foundation=mat(0x9bb1c1,.15,.6),accent=mat(0x226ca6,.46,.32);
+ function place(parent,geometry,material,x,y,z,opts={}){
+   const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);
+   if(opts.rx)mesh.rotation.x=opts.rx;if(opts.rz)mesh.rotation.z=opts.rz;mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+ }
+ function pipe(a,b,r=.11,material=accent){
+   const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),dir=end.clone().sub(start);
+   const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,dir.length(),12),material);
+   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize());
+   mesh.position.copy(start.add(end).multiplyScalar(.5));mesh.castShadow=true;scene.add(mesh);return mesh;
+ }
+ const selectable=[],pumpGroups=new Map(),tags=new Map();
+ for(const rec of records){
+   const g=new THREE.Group();g.position.set(rec.x,0,rec.z);g.userData.equipmentId=rec.id;scene.add(g);
+   place(g,new THREE.BoxGeometry(1.7,.22,1.22),foundation,0,.15,0);
+   const pumpMat=mat(colors[rec.status],.42,.31);
+   place(g,new THREE.CylinderGeometry(.42,.42,1.2,28),pumpMat,0,.86,0,{rz:Math.PI/2});
+   place(g,new THREE.CylinderGeometry(.50,.50,.16,28),steel,-.69,.86,0,{rz:Math.PI/2});
+   place(g,new THREE.CylinderGeometry(.28,.28,.25,24),pale,.72,.86,0,{rz:Math.PI/2});
+   place(g,new THREE.BoxGeometry(.7,.18,.6),steel,.12,.35,0);
+   for(const dx of [-.55,.55])for(const dz of [-.42,.42])place(g,new THREE.CylinderGeometry(.05,.05,.05,8),steel,dx,.29,dz);
+   pumpGroups.set(rec.id,{group:g,pumpMat});
+   g.traverse(o=>{if(o.isMesh){o.userData.equipmentId=rec.id;selectable.push(o)}});
+   const tag=document.createElement('span');tag.className='modeltag';tag.textContent=rec.id;$('modelLabels').appendChild(tag);tags.set(rec.id,tag);
+   pipe([rec.x,.87,-1.62],[rec.x,.87,-2.45],.12,steel);
+   pipe([rec.x,.87,-2.45],[rec.x,1.9,-2.45],.12,steel);
+ }
+ pipe([-4.5,1.9,-2.45],[4.5,1.9,-2.45],.18,accent);
+ pipe([0,1.9,-2.45],[0,1.9,-3.7],.18,accent);
+ for(const [x,z] of [[-2.7,3],[2.7,3]]){
+   const tank=new THREE.Group();tank.position.set(x,0,z);scene.add(tank);
+   place(tank,new THREE.CylinderGeometry(1.10,1.10,2.3,36),mat(0xb9cbd8,.4,.39),0,1.21,0);
+   place(tank,new THREE.CylinderGeometry(1.12,1.12,.14,36),steel,0,2.42,0);
+   for(const y of [.6,1.6])place(tank,new THREE.TorusGeometry(1.11,.035,8,48),steel,0,y,0,{rx:Math.PI/2});
+   pipe([x,.45,z-1.15],[x,.45,1.2],.14,accent);
+ }
+ pipe([-2.7,.45,1.2],[2.7,.45,1.2],.16,accent);
+ for(let i=0;i<5;i++){place(scene,new THREE.BoxGeometry(.1,1.4,.1),steel,-5.4,.7,-3.5+i*1.6);place(scene,new THREE.BoxGeometry(.1,1.4,.1),steel,5.4,.7,-3.5+i*1.6)}
+ let selectionRing;
+ syncSelection=()=>{
+   if(selectionRing){scene.remove(selectionRing);selectionRing.geometry.dispose();selectionRing.material.dispose();}
+   const g=pumpGroups.get(state.selected)?.group;if(!g)return;
+   selectionRing=new THREE.Mesh(new THREE.RingGeometry(.88,1.03,48),new THREE.MeshBasicMaterial({color:0x1769e0,transparent:true,opacity:.86,side:THREE.DoubleSide,depthWrite:false}));
+   selectionRing.rotation.x=-Math.PI/2;selectionRing.position.set(g.position.x,.016,g.position.z);scene.add(selectionRing);
+   for(const [id,tag] of tags)tag.classList.toggle('active',id===state.selected);
+ }
+ function updateLabels(){
+   const w=view.clientWidth,h=view.clientHeight;
+   for(const rec of records){
+     const tag=tags.get(rec.id);tag.style.display=state.labels?'block':'none';if(!state.labels)continue;
+     const p=new THREE.Vector3(rec.x,1.70,rec.z).project(camera);
+     if(p.z>=1){tag.style.display='none';continue}
+     tag.style.left=((p.x+1)*.5*w)+'px';tag.style.top=((1-p.y)*.5*h)+'px';
+   }
+ }
+ function resize(){
+   const w=view.clientWidth,h=view.clientHeight;if(!w||!h)return;
+   camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);
+ }
+ const observer=new ResizeObserver(resize);observer.observe(view);resize();
+ const mouse=new THREE.Vector2(),raycaster=new THREE.Raycaster();let initial=null;
+ renderer.domElement.addEventListener('pointerdown',ev=>{initial={x:ev.clientX,y:ev.clientY}});
+ renderer.domElement.addEventListener('pointerup',ev=>{
+   if(!initial||Math.hypot(ev.clientX-initial.x,ev.clientY-initial.y)>7)return;
+   const rect=renderer.domElement.getBoundingClientRect();
+   mouse.x=(ev.clientX-rect.left)/rect.width*2-1;mouse.y=-(ev.clientY-rect.top)/rect.height*2+1;
+   raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(selectable,false);
+   if(hits.length){const id=hits[0].object.userData.equipmentId;if(id)select(id,'3d object click')}
+ });
+ function animate(){
+   requestAnimationFrame(animate);if(document.hidden)return;
+   controls.update();updateLabels();renderer.render(scene,camera);
+ }
+ animate();
+ function cameraView(kind){
+   camera.position.set(...(kind==='top'?[0,13,.2]:[8,7,10.5]));controls.target.set(0,1.1,0);controls.update();
+ }
+ $('btnReset').addEventListener('click',()=>cameraView('iso'));
+ $('btnTop').addEventListener('click',()=>cameraView('top'));
+ $('btnIso').addEventListener('click',()=>cameraView('iso'));
+ $('btnLabels').addEventListener('click',()=>{state.labels=!state.labels;$('btnLabels').textContent=state.labels?'Labels: On':'Labels: Off'});
+ $('btnSimulate').addEventListener('click',()=>{
+   const changes={Running:'Warning',Warning:'Stopped',Stopped:'Running'};
+   const rec=records.find(r=>r.id===state.selected);
+   rec.status=changes[rec.status];
+   rec.flow=rec.status==='Stopped'?0:rec.status==='Warning'?920:1250;
+   rec.pressure=rec.status==='Stopped'?0:rec.status==='Warning'?60.1:67.8;
+   rec.load=rec.status==='Stopped'?0:rec.status==='Warning'?94:71;
+   pumpGroups.get(rec.id).pumpMat.color.setHex(colors[rec.status]);
+   setEvent('simulated status change',rec);refreshUI();
+ });
+ select('P-101','initial selection');
+}
+if(!renderer){
+ $('btnSimulate').addEventListener('click',()=>{
+ const r=records.find(x=>x.id===state.selected),cycle={Running:'Warning',Warning:'Stopped',Stopped:'Running'};
+ r.status=cycle[r.status];r.flow=r.status==='Stopped'?0:r.status==='Warning'?920:1250;r.pressure=r.status==='Stopped'?0:r.status==='Warning'?60:67;r.load=r.status==='Stopped'?0:r.status==='Warning'?94:71;
+ setEvent('simulated status change',r);refreshUI();
+ });
+ $('btnReset').disabled=true;$('btnTop').disabled=true;$('btnIso').disabled=true;$('btnLabels').disabled=true;select('P-101','initial selection');
+}
+</script>
+</body>
+</html>
