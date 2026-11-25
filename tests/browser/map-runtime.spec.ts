@@ -39,7 +39,7 @@ test("normal repeat click never toggles off and modifier click supports multi-se
   await alpha.click({ force: true });
   await alpha.click({ force: true });
   await expect(page.locator('.hp-map-feature-details[data-feature-key]')).toContainText("Point Alpha");
-  await beta.click({ force: true, modifiers: ["Control"] });
+  await beta.click({ force: true, modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details-header")).toContainText("2 features selected");
 });
 
@@ -47,12 +47,12 @@ test("modifier-deselecting the active feature activates the most recent remainin
   const alpha = page.locator('[data-hp-layer-id="points"][data-hp-feature-id="duplicate"]');
   const beta = page.locator('[data-hp-layer-id="points"][data-hp-feature-id="second"]');
   await alpha.click({ force: true });
-  await beta.click({ force: true, modifiers: ["Control"] });
+  await beta.click({ force: true, modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details")).toContainText("Point Beta");
-  await beta.click({ force: true, modifiers: ["Control"] });
+  await beta.click({ force: true, modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details")).toContainText("Point Alpha");
   await expect(page.locator(".hp-map-feature-details-header")).not.toContainText("2 features selected");
-  await alpha.click({ force: true, modifiers: ["Control"] });
+  await alpha.click({ force: true, modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details")).toHaveCount(0);
 });
 
@@ -100,7 +100,7 @@ test("joined feature clicks select the mapped Power BI row exactly once", async 
   expect(await page.evaluate(() => window.hpMapHarness.selectedRows)).toEqual([1]);
   expect(await page.evaluate(() => window.hpMapHarness.selectedMulti)).toBe(false);
   expect(await page.evaluate(() => window.hpMapHarness.selectionCalls)).toBe(1);
-  await page.locator('[data-hp-layer-id="points"][data-hp-feature-id="second"]').click({ force: true, modifiers: ["Control"] });
+  await page.locator('[data-hp-layer-id="points"][data-hp-feature-id="second"]').click({ force: true, modifiers: ["ControlOrMeta"] });
   expect(await page.evaluate(() => window.hpMapHarness.selectedRows)).toEqual([1, 0]);
   expect(await page.evaluate(() => window.hpMapHarness.selectedMulti)).toBe(true);
   expect(await page.evaluate(() => window.hpMapHarness.selectionCalls)).toBe(2);

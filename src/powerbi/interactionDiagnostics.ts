@@ -3,6 +3,7 @@ export type ExternalSelectionFailureReason =
     | "host disallowed"
     | "no selection identities"
     | "no matching source rows"
+    | "selection exceeds the Power BI identity budget"
     | "field has no Power BI filter target"
     | "calculated field has no direct Power BI model filter target"
     | "unsupported external filter operator"

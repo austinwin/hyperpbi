@@ -1,3 +1,4 @@
+import { samplePreviewValue } from "../data/samplePreviewRows";
 import { DataRow, NormalizedField, Primitive } from "../data/normalizeData";
 
 export type FieldSemanticRole = "identifier" | "category" | "status" | "date" | "datetime" | "measure" | "currency" | "percentage" | "duration" | "latitude" | "longitude" | "geometry" | "url" | "label" | "unknown";
@@ -34,24 +35,53 @@ export function inferSemanticRole(field: NormalizedField): FieldSemanticRole {
     return "unknown";
 }
 
-const serialized = (value: Primitive): string => value instanceof Date ? value.toISOString() : String(value);
-const exposed = (value: Primitive): Primitive => value instanceof Date ? value.toISOString() : value;
+const serialized = (value: Primitive): string => value instanceof Date && Number.isFinite(value.getTime()) ? value.toISOString() : String(value);
+const exposed = (value: Primitive): Primitive => samplePreviewValue(value instanceof Date ? serialized(value) : value);
+const cache = new WeakMap<DataRow[], WeakMap<NormalizedField, Map<FieldPrivacyMode, FieldDataProfile>>>();
 
 export function buildFieldDataProfile(field: NormalizedField, rows: DataRow[], privacyMode: FieldPrivacyMode): FieldDataProfile | undefined {
     if (privacyMode === "types" || privacyMode === "restricted" || privacyMode === "fields") return undefined;
-    const values = rows.map(row => row[field.key]);
-    const present = values.filter((value): value is Primitive => value !== null && value !== undefined);
-    const unique = Array.from(new Map(present.map(value => [serialized(value), value])).values());
-    const profile: FieldDataProfile = { distinctCount: unique.length, nullCount: values.length - present.length };
-    const numeric = present.filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-    if (numeric.length) { profile.minimum = Math.min(...numeric); profile.maximum = Math.max(...numeric); }
-    if (field.type === "date" || field.dataType === "date" || field.dataType === "datetime") {
-        const dates = present.map(value => value instanceof Date ? value : new Date(String(value))).filter(value => !Number.isNaN(value.getTime())).sort((a,b)=>a.getTime()-b.getTime());
-        if (dates.length) { profile.dateMinimum = dates[0].toISOString(); profile.dateMaximum = dates[dates.length - 1].toISOString(); }
+    let byField = cache.get(rows);
+    if (!byField) cache.set(rows, byField = new WeakMap());
+    let byPrivacy = byField.get(field);
+    if (!byPrivacy) byField.set(field, byPrivacy = new Map());
+    const cached = byPrivacy.get(privacyMode);
+    if (cached) return cached;
+
+    const unique = new Set<string>();
+    const samples: Primitive[] = [];
+    const isDate = field.type === "date" || field.dataType === "date" || field.dataType === "datetime";
+    let nullCount = 0, minimum = Infinity, maximum = -Infinity, dateMin = Infinity, dateMax = -Infinity;
+    for (const row of rows) {
+        const value = row[field.key];
+        if (value == null) { nullCount++; continue; }
+        const key = serialized(value);
+        if (!unique.has(key)) {
+            unique.add(key);
+            if (samples.length < 12) samples.push(value);
+        }
+        if (typeof value === "number" && Number.isFinite(value)) {
+            minimum = Math.min(minimum, value);
+            maximum = Math.max(maximum, value);
+        }
+        if (isDate) {
+            const time = value instanceof Date ? value.getTime() : Date.parse(String(value));
+            if (Number.isFinite(time)) {
+                dateMin = Math.min(dateMin, time);
+                dateMax = Math.max(dateMax, time);
+            }
+        }
     }
-    if (privacyMode === "samples") profile.exampleValues = unique.slice(0, 3).map(exposed);
-    if (privacyMode === "masked") profile.exampleValues = unique.slice(0, 3).map(value => typeof value === "number" ? value : "•••");
-    if (unique.length <= 12 && ["samples", "summary"].includes(privacyMode)) profile.distinctValues = unique.slice(0, 12).map(exposed);
+    const profile: FieldDataProfile = { distinctCount: unique.size, nullCount };
+    if (minimum !== Infinity) { profile.minimum = minimum; profile.maximum = maximum; }
+    if (dateMin !== Infinity) {
+        profile.dateMinimum = new Date(dateMin).toISOString();
+        profile.dateMaximum = new Date(dateMax).toISOString();
+    }
+    if (privacyMode === "samples") profile.exampleValues = samples.slice(0, 3).map(exposed);
+    if (privacyMode === "masked") profile.exampleValues = samples.slice(0, 3).map(value => typeof value === "number" ? value : "•••");
+    if (unique.size <= 12 && (privacyMode === "samples" || privacyMode === "summary")) profile.distinctValues = samples.map(exposed);
+    byPrivacy.set(privacyMode, profile);
     return profile;
 }
 

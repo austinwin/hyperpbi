@@ -8,8 +8,5 @@ export function compareSortValues(left: unknown, right: unknown): number {
 
 export function sortRows(rows: DataRow[], field: string, direction: "asc" | "desc"): DataRow[] {
     const factor = direction === "asc" ? 1 : -1;
-    return rows
-        .map((row, index) => ({ row, index, value: row[field] }))
-        .sort((left, right) => compareSortValues(left.value, right.value) * factor || left.index - right.index)
-        .map(item => item.row);
+    return rows.slice().sort((left, right) => compareSortValues(left[field], right[field]) * factor);
 }

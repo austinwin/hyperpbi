@@ -18,9 +18,9 @@ import type { MapCommandChannel, MapStudioCommand, MapLayerStatuses } from "../.
 import { geoJsonLayerMetadata } from "./geoJsonLayerMetadata";
 import { MapImportPanel } from "./MapImportPanel";
 import { parseConfig } from "../../config/hyperpbiConfig";
-import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import type { NormalizedData, NormalizedField } from "../../data/normalizeData";
-import type { DatasetDefinition } from "../../data/datasets";
+import type { DatasetDefinition, DatasetResult } from "../../data/datasets";
 import type { MapComponent } from "../../schema/hyperpbiSchema";
 import type {
   MapLayerDefinition,
@@ -36,7 +36,7 @@ import {
 import type { PreparedAuthoringData } from "../prepareAuthoringData";
 import type { MapViewportState } from "../../components/maps/MapBlock";
 import type { ProviderAccessState } from "../../providers/providerTypes";
-import { prepareAuthoringData } from "../prepareAuthoringData";
+import { evaluateAuthoringData, validateAuthoringData } from "../prepareAuthoringData";
 import type {
   ArcGisLayerMetadata,
   ArcGisServiceInspection,
@@ -271,13 +271,16 @@ export function MapStudio({
       setSelectedLayerId(layerIds[0] ?? "__basemap__");
     setPendingDelete("");
   }, [mapId, json]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!addMenuOpen) return;
     const dismiss = (event: MouseEvent) => {
       if (!addMenuRef.current?.contains(event.target as Node)) setAddMenuOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setAddMenuOpen(false);
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setAddMenuOpen(false);
+      addMenuRef.current?.querySelector<HTMLButtonElement>('button[aria-haspopup="menu"]')?.focus();
     };
     document.addEventListener("pointerdown", dismiss);
     document.addEventListener("keydown", closeOnEscape);
@@ -294,10 +297,11 @@ export function MapStudio({
         : {},
     [parsed],
   );
+  const fallbackDatasetCache = useRef(new Map<string, DatasetResult>());
   const fallbackPrepared = useMemo(
     () =>
-      configurationJson
-        ? prepareAuthoringData(json, configurationJson, data)
+      sharedPrepared ?? (configurationJson
+        ? evaluateAuthoringData(validateAuthoringData(json, configurationJson, data), data, undefined, "lazy", fallbackDatasetCache.current)
         : ({
             aliases: aliasOverrides,
             diagnostics: [],
@@ -305,10 +309,10 @@ export function MapStudio({
               "Map Studio requires configurationJson or validateCandidate for standalone use.",
             ],
             warnings: [],
-          } satisfies PreparedAuthoringData),
-    [json, configurationJson, data, aliasOverrides],
+          } satisfies PreparedAuthoringData)),
+    [sharedPrepared, json, configurationJson, data, aliasOverrides],
   );
-  const prepared = sharedPrepared ?? fallbackPrepared;
+  const prepared = fallbackPrepared;
   const layer = map?.layers?.find(
     (candidate) => candidate.id === selectedLayerId,
   );
@@ -427,7 +431,7 @@ export function MapStudio({
     const validation = validateCandidate
       ? validateCandidate(next)
       : configurationJson
-        ? prepareAuthoringData(next, configurationJson, data)
+        ? validateAuthoringData(next, configurationJson, data)
         : ({
             aliases: aliasOverrides,
             diagnostics: [],

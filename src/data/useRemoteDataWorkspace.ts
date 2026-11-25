@@ -23,6 +23,8 @@ export interface RemoteDataWorkspaceResult {
   statuses: Record<string, RemoteDataSourceStatus>;
 }
 
+const EMPTY_DEFINITIONS: NonNullable<NonNullable<HyperPbiSchema["data"]>["sources"]> = {};
+
 interface ResolvedRemoteSource {
   requestKey: string;
   source: DataSource;
@@ -37,7 +39,7 @@ export function useRemoteDataWorkspace(
   providerAccess?: ProviderAccessState,
   webAccessAvailable = false,
 ): RemoteDataWorkspaceResult {
-  const definitions = schema.data?.sources ?? {};
+  const definitions = schema.data?.sources ?? EMPTY_DEFINITIONS;
   const signature = useMemo(
     () => remoteDataSourceRequestSignature(definitions, stateValues),
     [definitions, stateValues],
@@ -56,8 +58,8 @@ export function useRemoteDataWorkspace(
   useEffect(() => {
     const entries = Object.entries(definitions);
     if (!entries.length) {
-      setResolved({});
-      setStatuses({});
+      setResolved(current => Object.keys(current).length ? {} : current);
+      setStatuses(current => Object.keys(current).length ? {} : current);
       return;
     }
     const current = ++sequence.current;
@@ -121,7 +123,7 @@ export function useRemoteDataWorkspace(
         : createRemoteSourcePlaceholder(id, definition);
     }
     return { ...base, sources };
-  }, [baseWorkspace, baseData, definitions, requestKeys, resolved]);
+  }, [baseWorkspace, baseData.rows, baseData.fields, baseData.rowKeys, definitions, requestKeys, resolved]);
 
   return { workspace, statuses };
 }

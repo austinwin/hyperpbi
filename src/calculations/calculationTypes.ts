@@ -34,4 +34,4 @@ export interface CalculationSpecification {
 }
 
 export interface CalculationMessage { level: "error" | "warning"; path: string; message: string; }
-export interface EvaluationContext { now?: Date; warnings?: string[]; clickedRow?: Record<string, Primitive>; knownFieldKeys?: ReadonlySet<string>; }
+export interface EvaluationContext { now?: Date; warnings?: { push(message: string): unknown }; clickedRow?: Record<string, Primitive>; knownFieldKeys?: ReadonlySet<string>; }

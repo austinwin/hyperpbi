@@ -17,11 +17,14 @@ import type { ExternalSelectionResult } from "./interactionDiagnostics";
 export interface PowerBiHostBridgeContext {
     host: powerbi.extensibility.visual.IVisualHost;
     selectionManager: powerbi.extensibility.ISelectionManager;
-    selectionIds: () => Array<powerbi.visuals.ISelectionId | undefined>;
+    selectionRowCount: () => number;
+    selectionIdForRow: (index: number) => powerbi.visuals.ISelectionId | undefined;
     fields: () => Record<string, NormalizedField>;
     interactionsEnabled: () => boolean;
     reportDiagnostic?: (diagnostic: RuntimeDiagnostic) => void;
 }
+
+const MAX_SELECTION_IDENTITIES = 10_000;
 
 export class PowerBiHostBridge implements HyperPbiHostBridge {
     readonly hostType = "powerbi" as const;
@@ -31,21 +34,29 @@ export class PowerBiHostBridge implements HyperPbiHostBridge {
     requestSelectionSync(request: SelectionRequest): ExternalSelectionResult {
         if (!this.context.interactionsEnabled()) return { sent: false, reason: "interactions disabled" };
         if (!this.context.host.hostCapabilities.allowInteractions) return { sent: false, reason: "host disallowed" };
-        const selectionIds = this.context.selectionIds();
-        if (!selectionIds.length) return { sent: false, reason: "no selection identities" };
+        const rowCount = this.context.selectionRowCount();
+        if (!rowCount) return { sent: false, reason: "no selection identities" };
         if (request.clear) {
             void this.context.selectionManager.clear();
             return { sent: true };
         }
-        const indices = Array.from(new Set(request.rowIndices)).filter(
-            index => Number.isInteger(index) && index >= 0 && index < selectionIds.length
-        );
-        const identities = indices
-            .map(index => selectionIds[index])
-            .filter((identity): identity is powerbi.visuals.ISelectionId => identity !== undefined);
-        if (!indices.length) {
+        const indices = new Set<number>();
+        for (const index of request.rowIndices) {
+            if (!Number.isInteger(index) || index < 0 || index >= rowCount) continue;
+            indices.add(index);
+            if (indices.size > MAX_SELECTION_IDENTITIES) {
+                this.context.host.displayWarningIcon?.("Power BI selection is too large", `The selection covers more than ${MAX_SELECTION_IDENTITIES.toLocaleString()} source rows. Select a smaller group or use a Power BI column filter for this interaction.`);
+                return { sent: false, reason: "selection exceeds the Power BI identity budget" };
+            }
+        }
+        if (!indices.size) {
             void this.context.selectionManager.clear();
             return { sent: false, reason: "no matching source rows" };
+        }
+        const identities: powerbi.visuals.ISelectionId[] = [];
+        for (const index of indices) {
+            const identity = this.context.selectionIdForRow(index);
+            if (identity) identities.push(identity);
         }
         if (!identities.length) return { sent: false, reason: "no selection identities" };
         void this.context.selectionManager.select(identities, request.multiSelect ?? false);

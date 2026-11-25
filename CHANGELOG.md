@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — Large Power BI data views
+
+- Load Power BI data incrementally, preserve every received row and its selection lineage, and display incomplete-data notices when the host stops a fetch.
+- Reuse logical datasets and calculations, validate Studio drafts against field metadata, and virtualize data and detail previews.
+- Release inactive tab resources, bound map and chart display allocations, and expose ingestion, calculation, dataset, and render diagnostics. [Benchmark and verification notes](docs/powerbi-large-data.md)
+
 ## Interactive 3D scenes
 
 - Show data-bound water levels on selectable tanks and add signed pipe flow animation with pause and reduced-motion controls. The groundwater dashboard links its Clearwell gauge to a level KPI and trend and colors running pumps green and stopped pumps red.

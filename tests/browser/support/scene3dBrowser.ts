@@ -84,7 +84,11 @@ export async function verifyMultiStationExplorer(page: Page) {
 
     const clearwellLabel = scene.locator(".hp-scene3d-labels").getByRole("button", { name: /Treated-water clearwell/ });
     await expect(clearwellLabel).toBeVisible();
-    const pose = () => clearwellLabel.evaluate(element => element.style.transform);
+    const pose = () => clearwellLabel.evaluate(async element => {
+        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        return element.style.transform;
+    });
+    await scene.getByRole("button", { name: "Top view" }).click();
     const top = await pose();
     await scene.getByRole("button", { name: "Isometric" }).click();
     await expect.poll(pose).not.toBe(top);

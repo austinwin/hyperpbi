@@ -86,12 +86,12 @@ test("selection details follows explicit modifier deselection, close, background
   const first = page.locator('[data-hp-layer-id="response-sites"][data-hp-feature-id="ST-201"]');
   const second = page.locator('[data-hp-layer-id="response-sites"][data-hp-feature-id="ST-202"]');
   await first.click();
-  await second.click({ modifiers: ["Control"] });
+  await second.click({ modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details-header")).toContainText("2 features selected");
-  await second.click({ modifiers: ["Control"] });
+  await second.click({ modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details")).toContainText("ST-201");
   expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys)).toHaveLength(1);
-  await first.click({ modifiers: ["Control"] });
+  await first.click({ modifiers: ["ControlOrMeta"] });
   await expect(page.locator(".hp-map-feature-details")).toHaveCount(0);
   expect(await page.evaluate(() => window.hpMapDemo.interaction?.selectedFeatureKeys ?? [])).toEqual([]);
 

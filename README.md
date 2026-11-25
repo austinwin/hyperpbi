@@ -301,6 +301,8 @@ npm run package:maps
 
 The packaging script produces `*-core.pbiviz` and `*-maps.pbiviz`. Each profile is built once and inspected from its ZIP archive. Exact base names derive from the PBIVIZ packager.
 
+See [large Power BI data views](docs/powerbi-large-data.md) for completeness indicators, display limits, desktop verification, and reproducible benchmark results.
+
 ## Development commands
 
 ```powershell

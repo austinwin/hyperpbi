@@ -1,4 +1,5 @@
 import type { FieldOrigin, QueryAggregation } from "./fieldMetadata";
+import type { RuntimePerformance } from "./runtimePerformance";
 
 export type Primitive = string | number | boolean | Date | null | undefined;
 export type DataRow = Record<string, Primitive>;
@@ -118,6 +119,9 @@ export interface NormalizedMapData {
     diagnostics?: MapCoordinateDiagnostic[];
     coordinateCounts?: MapCoordinateCounts;
     locationCounts?: MapLocationCounts;
+    displayedCandidates?: number;
+    availableLayerValues?: string[];
+    requestedLayerFound?: boolean;
 }
 
 export interface Aggregates {
@@ -130,6 +134,15 @@ export interface Aggregates {
     first: Record<string, Primitive>;
 }
 
+export interface DataLoadStatus {
+    loadedRowCount: number;
+    moreRowsAvailable: boolean;
+    fetchInProgress?: boolean;
+    completeness?: "loading" | "complete" | "incomplete";
+    segments?: number;
+    message?: string;
+}
+
 export interface NormalizedData {
     fields: Record<string, NormalizedField>;
     rows: DataRow[];
@@ -138,7 +151,8 @@ export interface NormalizedData {
     map: NormalizedMapData;
     schemaFromField?: string;
     calculatedMetrics?: Record<string, Primitive>;
-    loadStatus?: { loadedRowCount: number; moreRowsAvailable: boolean; fetchInProgress?: boolean };
+    loadStatus?: DataLoadStatus;
+    performance?: RuntimePerformance;
     /** True only for a declared remote source before its real response schema is available. */
     dynamicSchema?: boolean;
 }

@@ -495,3 +495,14 @@
 .hp-dynamic-idle { padding: 12px; color: var(--hp-muted, #526174); }
 .hp-dynamic-idle h3 { margin-top: 0; }
 .hp-table tr[tabindex="0"] { cursor: pointer; }
+
+.hp-data-load-notice {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    color: #684505;
+    background: #fff5d8;
+    font-size: 12px;
+}
+
+.hp-setup-host { display: flex; flex-direction: column; height: 100%; overflow: auto; }
+.hp-studio-status > .hp-data-load-notice { white-space: normal; padding: 2px 5px; }

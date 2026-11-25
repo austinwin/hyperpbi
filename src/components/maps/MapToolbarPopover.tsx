@@ -1,5 +1,5 @@
 import { h, type ComponentChildren } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { Icon } from "../icons/Icon";
 
 export function MapToolbarPopover({
@@ -27,7 +27,7 @@ export function MapToolbarPopover({
     const [placementStyle, setPlacementStyle] = useState<{ maxHeight?: string; transform?: string }>({});
     onCloseRef.current = onClose;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const handlePointer = (event: PointerEvent) => {
             if (ref.current && event.target instanceof Node && !ref.current.contains(event.target)) onCloseRef.current();
         };

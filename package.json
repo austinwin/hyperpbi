@@ -1,7 +1,7 @@
 {
   "name": "hyperpbi",
   "description": "AI-native analytics runtime and portable dashboard specification for Power BI and the web",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "engines": {
     "node": "^20.19.0 || >=22.13.0"
@@ -34,6 +34,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:browser": "playwright test",
+    "benchmark:powerbi": "playwright test tests/browser/powerbi-large-data.spec.ts --workers=1",
     "lint": "eslint .",
     "playground:dev": "vite --config apps/playground/vite.config.mts",
     "playground:typecheck": "tsc -p apps/playground/tsconfig.json --noEmit",

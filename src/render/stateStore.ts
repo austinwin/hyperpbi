@@ -220,9 +220,14 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "interactionSignature") { const interactionSignatures = { ...state.interactionSignatures }; if (action.value === undefined) delete interactionSignatures[action.id]; else interactionSignatures[action.id] = action.value; return { ...state, interactionSignatures }; }
     if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, componentSelectionTargets: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {}, chartViewState: {}, chartDrillState: {} };
     if (action.type === "reconcileRowKeys") {
-        const indexByKey = new Map(
-            action.rowKeys.map((key, index) => [key, index] as const)
-        );
+        const desiredKeys = new Set(state.selectedRowKeys);
+        for (const keys of Object.values(state.componentSelectedRowKeys)) for (const key of keys) desiredKeys.add(key);
+        if (!desiredKeys.size) return state;
+        const indexByKey = new Map<string, number>();
+        for (let index = 0; index < action.rowKeys.length; index++) {
+            const key = action.rowKeys[index];
+            if (desiredKeys.has(key)) indexByKey.set(key, index);
+        }
         const selectedRowKeys = state.selectedRowKeys.filter(key => indexByKey.has(key));
         const selectedRows = selectedRowKeys.map(key => indexByKey.get(key)!).filter((index): index is number => index !== undefined);
         const componentSelectedRowKeys: Record<string, string[]> = {};

@@ -27,13 +27,16 @@ export interface MapSourceContext {
   /** Rows in this layer's effective dataset after dashboard interaction filtering. */
   rows: DataRow[];
   /** Positions in the evaluated logical dataset. */
-  rowIndices: number[];
+  rowIndices?: number[];
+  rowIndexAt?: (index: number) => number;
   /** Stable logical-dataset row keys. */
   rowKeys: string[];
   /** Original Power BI data-view rows contributing to each logical row. */
   sourceRowIndices?: number[][];
+  sourceRowIndicesAt?: (index: number) => number[];
   /** Contributing root-source row keys for each logical row. */
   sourceRowKeys?: string[][];
+  sourceRowKeysAt?: (index: number) => string[];
   /** Whether those root rows are real Power BI identities rather than web/remote rows. */
   powerBiIdentityAvailable?: boolean;
   fields: Record<string, NormalizedField>;
@@ -42,6 +45,19 @@ export interface MapSourceContext {
   totalRows?: number;
   geocodeCache?: Record<string, unknown>;
   layerPath?: string;
+}
+
+export function mapJoinLineage(context: MapSourceContext) {
+  return {
+    powerBiRows: context.rows,
+    powerBiRowKeys: context.rowKeys,
+    powerBiRowIndices: context.rowIndices,
+    powerBiRowIndexAt: context.rowIndexAt,
+    powerBiSourceRowIndices: context.sourceRowIndices,
+    powerBiSourceRowKeys: context.sourceRowKeys,
+    powerBiSourceRowIndicesAt: context.powerBiIdentityAvailable === false ? () => [] : context.sourceRowIndicesAt,
+    powerBiSourceRowKeysAt: context.powerBiIdentityAvailable === false ? () => [] : context.sourceRowKeysAt,
+  };
 }
 
 const issue = (
@@ -301,12 +317,24 @@ export function resolvePowerBiLayer(
       );
   }
 
+  const filters = layer.filter ? Array.isArray(layer.filter) ? layer.filter : [layer.filter] : [];
+  const visibility = layer.visibility;
+  const featureLimit = Math.max(0, Math.floor(layer.performance?.maxFeatures ?? DEFAULT_POWER_BI_MAP_MAX_FEATURES));
   const mapData = normalizeMapBindings(
     context.rows,
     context.fields,
     configured,
     (context.geocodeCache as Record<string, GeocodeCacheEntry>) ?? {},
     context.rowKeys,
+    {
+      limit: featureLimit,
+      layerValue: source.layerValue,
+      matches: row => filters.every(filter =>
+        (filter.fieldSource ?? "powerbi") === "powerbi" && matchesFilter(row[filter.field], filter.operator, filter.value),
+      ) && (!visibility?.conditionField || !visibility.conditionValues?.length ||
+        (visibility.conditionFieldSource ?? "powerbi") === "powerbi" &&
+        visibility.conditionValues.some(value => Object.is(value, row[visibility.conditionField!]))),
+    },
   );
 
   if (mapData.mode === "none")
@@ -320,17 +348,10 @@ export function resolvePowerBiLayer(
       ),
     );
 
-  let normalizedFeatures: NormalizedMapFeature[];
-  let layerValueMatched: boolean | undefined;
+  const layerValueMatched = source.layerValue !== undefined ? mapData.requestedLayerFound : undefined;
   if (source.layerValue !== undefined) {
-    const target = mapData.layers.find(
-      (candidate) => candidate.name === source.layerValue,
-    );
-    layerValueMatched = Boolean(target);
-    if (!target) {
-      const availableValues = bounded(
-        mapData.layers.map((candidate) => candidate.name),
-      );
+    if (!layerValueMatched) {
+      const availableValues = mapData.availableLayerValues;
       const message = `Layer value “${source.layerValue}” was not found. No unrelated layer value was substituted.`;
       return createEmptyLayer(
         layer,
@@ -363,55 +384,11 @@ export function resolvePowerBiLayer(
         },
       );
     }
-    normalizedFeatures = target.features;
-  } else {
-    // A declared layer without layerValue represents its complete dataset.
-    // Grouping metadata must never make the first normalized group win.
-    normalizedFeatures = mapData.layers.flatMap(
-      (candidate) => candidate.features,
-    );
   }
 
-  const filters = layer.filter
-    ? Array.isArray(layer.filter)
-      ? layer.filter
-      : [layer.filter]
-    : [];
-  if (filters.length)
-    normalizedFeatures = normalizedFeatures.filter((feature) =>
-      filters.every(
-        (filter) =>
-          (filter.fieldSource ?? "powerbi") === "powerbi" &&
-          matchesFilter(
-            feature.row[filter.field],
-            filter.operator,
-            filter.value,
-          ),
-      ),
-    );
-  if (
-    layer.visibility?.conditionField &&
-    layer.visibility.conditionValues?.length
-  ) {
-    const accepted = layer.visibility.conditionValues;
-    normalizedFeatures = normalizedFeatures.filter(
-      (feature) =>
-        (layer.visibility!.conditionFieldSource ?? "powerbi") === "powerbi" &&
-        accepted.some((value) =>
-          Object.is(value, feature.row[layer.visibility!.conditionField!]),
-        ),
-    );
-  }
-
-  const requestedCount = normalizedFeatures.length;
-  const featureLimit = Math.max(
-    0,
-    Math.floor(
-      layer.performance?.maxFeatures ?? DEFAULT_POWER_BI_MAP_MAX_FEATURES,
-    ),
-  );
+  const normalizedFeatures = mapData.layers.flatMap(group => group.features);
+  const requestedCount = mapData.displayedCandidates ?? normalizedFeatures.length;
   if (requestedCount > featureLimit) {
-    normalizedFeatures = normalizedFeatures.slice(0, featureLimit);
     issues.push(
       issue(
         "MAP_LAYER_FEATURE_LIMIT",
@@ -573,16 +550,14 @@ function materializeFeature(
 ): ResolvedMapFeature {
   const logicalIndex = feature.rowIndex;
   const sourceIndices =
-    context.sourceRowIndices?.[logicalIndex]?.filter((index) => index >= 0) ??
-    [context.rowIndices[logicalIndex] ?? logicalIndex].filter(
+    (context.sourceRowIndicesAt?.(logicalIndex) ?? context.sourceRowIndices?.[logicalIndex])?.filter(index => index >= 0) ??
+    [context.rowIndexAt?.(logicalIndex) ?? context.rowIndices?.[logicalIndex] ?? logicalIndex].filter(
       (index) => index >= 0,
     );
-  const sourceKeys = context.sourceRowKeys?.[logicalIndex]?.filter(Boolean) ?? [
+  const sourceKeys = (context.sourceRowKeysAt?.(logicalIndex) ?? context.sourceRowKeys?.[logicalIndex])?.filter(Boolean) ?? [
     context.rowKeys[logicalIndex] ?? feature.rowKey,
   ];
-  const powerBiAttributes: Record<string, unknown> = {
-    ...(feature.row as Record<string, unknown>),
-  };
+  const powerBiAttributes: Record<string, unknown> = feature.row;
   const identityAvailable = context.powerBiIdentityAvailable !== false;
   return {
     id: feature.id,

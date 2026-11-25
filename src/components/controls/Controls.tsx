@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { resolveSourceRowIndicesForFilter } from "../../data/filtering";
 import { clearComponentInteraction, executeComponentInteraction } from "../../interactions/componentInteraction";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
@@ -13,7 +13,9 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     const policy = resolveInteractionPolicy(component, context.config, "control");
     const rows = getRowsForComponent(id);
     const stateKey = policy.enabled && !component.disabled ? policy.stateKey : undefined;
-    const stored = state.values[stateKey ?? id];
+    const interactionField = policy.field ?? component.field;
+    const globalSearch = component.type === "searchBox" && !interactionField && !component.interaction && !component.filter;
+    const stored = globalSearch ? state.search : state.values[stateKey ?? id];
     const initial = stored ?? component.defaultValue ?? (component.type === "toggle" ? false : component.min ?? "");
     const [value, setValue] = useState<unknown>(initial);
     const options = useMemo(() => component.options ?? (component.field ? Array.from(new Set(rows.map(row => row[component.field!]).filter(item => item != null))).map(item =>
@@ -25,10 +27,18 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     }) : []), [component.options, component.field, rows, stateKey]);
     const multiple = component.type === "multiSelect" || component.multiple === true;
     const operator = component.interaction?.operator ?? component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : component.type === "dateRange" ? "between" : "=");
-    const interactionField=policy.field??component.field;
+    const pendingSearch = useRef<ReturnType<typeof setTimeout>>();
+    useEffect(() => () => clearTimeout(pendingSearch.current), []);
 
     const changeValue = (next: unknown, event?: Event, initializing = false) => {
         setValue(next);
+        if (globalSearch && !component.disabled) {
+            clearTimeout(pendingSearch.current);
+            const search = String(next ?? "");
+            const apply = () => dispatch({ type: "search", value: search });
+            if (data.rows.length >= 50_000 && search) pendingSearch.current = setTimeout(apply, 120);
+            else apply();
+        }
         if (!stateKey || id !== stateKey) dispatch({ type: "value", id, value: next });
         const rowIndices = interactionField ? resolveSourceRowIndicesForFilter(interactionField, operator, next, sourceRows, rows) : [];
         executeComponentInteraction(initializing ? { ...policy, externalMode: "none" } : policy,

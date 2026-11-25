@@ -4,12 +4,9 @@ import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
 import { NormalizedData } from "../data/normalizeData";
 import type { DataWorkspace } from "../data/dataWorkspace";
-import { workspaceSourceData } from "../data/dataWorkspace";
 import { GeocodeResult } from "../providers/providerTypes";
 import { HyperPbiRoot } from "../render/HyperPbiRoot";
 import { DashboardComponent, HyperPbiSchema } from "../schema/hyperpbiSchema";
-import { validateReferences } from "../schema/validateReferences";
-import { validateSchema } from "../schema/validateSchema";
 import { RuntimeSettings } from "../runtime/runtimeSettings";
 import { parseJson } from "../utils/safeJson";
 import { AiPromptTab } from "./ai/AiPromptTab";
@@ -40,14 +37,15 @@ import { sanitizeHtml } from "../security/sanitizeHtml";
 import { RuntimeConfigTab } from "./config/RuntimeConfigTab";
 import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
-import { prepareSpecification } from "../schema/prepareSpecification";
 import { SpecificationInspector } from "./inspector/SpecificationInspector";
 import { componentTree, findComponent, updateComponent } from "./inspector/specificationEditor";
 import { SpecificationHistory } from "./inspector/specificationEditor";
 import { MapStudio } from "./map-studio/MapStudio";
 import type { ProviderAccessState } from "../providers/providerTypes";
 import {
-  prepareAuthoringData,
+  validateAuthoringData,
+  evaluateAuthoringData,
+  prepareRuntimeData,
   type PreparedAuthoringData,
 } from "./prepareAuthoringData";
 import type { MapViewportState } from "../components/maps/MapBlock";
@@ -58,6 +56,11 @@ import {
   type StudioWorkspaceId,
 } from "./ui/StudioWorkspaceNav";
 
+import type { DatasetResult } from "../data/datasets";
+import { DataLoadNotice } from "../components/system/DataLoadNotice";
+import { RuntimePerformancePanel } from "../components/system/RuntimePerformancePanel";
+import { samplePreviewRows } from "../data/samplePreviewRows";
+
 type EditorTab = StudioWorkspaceId;
 type BottomTab =
   | "data"
@@ -66,7 +69,8 @@ type BottomTab =
   | "errors"
   | "mapServices"
   | "geocode"
-  | "interactions";
+  | "interactions"
+  | "performance";
 const escapeAttributeValue = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 const mapIdForSelection = (
@@ -146,49 +150,15 @@ function sanitizerWarnings(
   return Array.from(new Set(warnings));
 }
 
-function validateDraft(
-  specification: string,
-  configuration: string,
-  data: NormalizedData,
-  dataWorkspace?: DataWorkspace,
-): ValidationResult {
-  const prepared = prepareAuthoringData(specification, configuration, data, dataWorkspace);
+function validationResult(prepared: PreparedAuthoringData): ValidationResult {
   const warnings = [...prepared.warnings];
   if (prepared.specification && prepared.config)
-    warnings.push(
-      ...sanitizerWarnings(prepared.specification, prepared.config),
-    );
+    warnings.push(...sanitizerWarnings(prepared.specification, prepared.config));
   return {
-    schema: prepared.specification,
-    config: prepared.config,
-    data: prepared.configuredData,
-    errors: prepared.errors,
-    warnings: Array.from(new Set(warnings)),
-    ownerByRuntimeId: prepared.ownerByRuntimeId,
-    componentPathById: prepared.componentPathById,
+    schema: prepared.specification, config: prepared.config, data: prepared.configuredData,
+    errors: prepared.errors, warnings: Array.from(new Set(warnings)),
+    ownerByRuntimeId: prepared.ownerByRuntimeId, componentPathById: prepared.componentPathById,
   };
-}
-function validateStructure(
-  specification: string,
-  configuration: string,
-  data: NormalizedData,
-  dataWorkspace?: DataWorkspace,
-): { schema?: HyperPbiSchema; errors: string[] } {
-  const errors: string[] = [];
-  const config = parseConfig(configuration);
-  const parsed = parseJson(specification);
-  if (parsed.error) errors.push(`Specification JSON: ${parsed.error}`);
-  const prepared = parsed.value
-    ? prepareSpecification(parsed.value, data, {
-        repair: false,
-        aliasOverrides: config.config?.fields?.aliases,
-        sourceData: dataWorkspace ? workspaceSourceData(dataWorkspace) : {},
-      })
-    : undefined;
-  if (prepared && !prepared.schema)
-    errors.push(...prepared.errors.map((error) => `Specification: ${error}`));
-  errors.push(...config.errors);
-  return { schema: prepared?.schema, errors };
 }
 
 export function HyperPbiStudio({
@@ -292,10 +262,10 @@ export function HyperPbiStudio({
     specification: string;
     configuration: string;
   }>();
-  const [preview, setPreview] = useState<{
+  const [publishedPreview, setPreview] = useState<{
     schema: HyperPbiSchema;
     config: HyperPbiConfig;
-    data: NormalizedData;
+    warnings: string[];
     sourceSpecification: string;
     sourceConfiguration: string;
     ownerByRuntimeId?: Record<string, string>;
@@ -321,17 +291,23 @@ export function HyperPbiStudio({
     specification !== initialSpecification ||
     configuration !== initialConfiguration;
   const structure = useMemo(
-    () => validateStructure(specification, configuration, data, dataWorkspace),
-    [specification, configuration, data, dataWorkspace],
+    () => validateAuthoringData(specification, configuration, data, dataWorkspace),
+    [specification, configuration, data.fields, dataWorkspace],
   );
-  const preparedAuthoring = useMemo<PreparedAuthoringData>(
-    () => prepareAuthoringData(specification, configuration, data, dataWorkspace),
-    [specification, configuration, data, dataWorkspace],
-  );
+  const preview = useMemo(() => {
+    if (!publishedPreview) return undefined;
+    const runtime = prepareRuntimeData(data, publishedPreview.schema, publishedPreview.config);
+    return runtime.data ? { ...publishedPreview, data: runtime.data } : undefined;
+  }, [publishedPreview, data.rows, data.fields, data.rowKeys, data.loadStatus]);
+  const mapDatasetCache = useRef(new Map<string, DatasetResult>());
+  const preparedAuthoring = useMemo<PreparedAuthoringData>(() => {
+    if (editorTab === "mapStudio") return evaluateAuthoringData(structure, data, dataWorkspace, "lazy", mapDatasetCache.current);
+    mapDatasetCache.current.clear();
+    return structure;
+  }, [editorTab, structure, data.rows, data.fields, data.rowKeys, dataWorkspace]);
   const validateCandidate = useCallback(
-    (candidateSpecificationJson: string) =>
-      prepareAuthoringData(candidateSpecificationJson, configuration, data, dataWorkspace),
-    [configuration, data, dataWorkspace],
+    (candidateSpecificationJson: string) => validateAuthoringData(candidateSpecificationJson, configuration, data, dataWorkspace),
+    [configuration, data.fields, dataWorkspace],
   );
   const issuesAreCurrent =
     issueSource?.specification === specification &&
@@ -485,7 +461,7 @@ export function HyperPbiStudio({
   ) => updateInteraction(indices, details, { sent: false, reason });
   const validate = () => {
     try {
-      const result = validateDraft(specification, configuration, data, dataWorkspace);
+      const result = validationResult(structure);
       setErrors(result.errors);
       setWarnings(result.warnings);
       setIssueSource({ specification, configuration });
@@ -517,7 +493,10 @@ export function HyperPbiStudio({
     candidateConfig = configuration,
   ): boolean => {
     try {
-      const result = validateDraft(candidate, candidateConfig, data, dataWorkspace);
+      const candidateStructure = candidate === specification && candidateConfig === configuration
+        ? structure
+        : validateAuthoringData(candidate, candidateConfig, data, dataWorkspace);
+      const result = validationResult(evaluateAuthoringData(candidateStructure, data, dataWorkspace, "runtime"));
       setErrors(result.errors);
       setWarnings(result.warnings);
       setIssueSource({
@@ -537,7 +516,7 @@ export function HyperPbiStudio({
       setPreview({
         schema: result.schema,
         config: result.config,
-        data: result.data,
+        warnings: result.warnings,
         sourceSpecification: candidate,
         sourceConfiguration: candidateConfig,
         ownerByRuntimeId: result.ownerByRuntimeId,
@@ -564,7 +543,7 @@ export function HyperPbiStudio({
   };
   useEffect(() => {
     if (editorTab === "mapStudio" || editorTab === "inspector") run();
-  }, [editorTab, data]);
+  }, [editorTab]);
   useEffect(() => {
     if (editorTab === "mapStudio") persistLayout({ ...layout, bottomOpen: false });
   }, [editorTab]);
@@ -609,7 +588,7 @@ export function HyperPbiStudio({
         JSON.stringify({ ...(parsed.value as object), calculations }, null, 2),
       );
   };
-  const parsedConfig = parseConfig(configuration).config;
+  const parsedConfig = structure.config;
   const changeConfig = (config: HyperPbiConfig) =>
     setConfiguration(JSON.stringify(config, null, 2));
   const showBottom = editorTab === "mapStudio" ? layout.bottomOpen :
@@ -775,7 +754,7 @@ export function HyperPbiStudio({
   };
   const bottomOutput = () => {
     if (bottomTab === "data")
-      return JSON.stringify((preview?.data ?? data).rows, null, 2);
+      return JSON.stringify(samplePreviewRows(preview?.data ?? data, 10), null, 2);
     if (bottomTab === "fields")
       return JSON.stringify((preview?.data ?? data).fields, null, 2);
     if (bottomTab === "logs")
@@ -791,6 +770,11 @@ export function HyperPbiStudio({
     if (bottomTab === "geocode") return JSON.stringify(geocodeResults, null, 2);
     if (bottomTab === "mapServices")
       return JSON.stringify(parsedConfig?.providers ?? {}, null, 2);
+    if (bottomTab === "performance") return JSON.stringify({
+      ...data.performance?.snapshot(), loadStatus: data.loadStatus,
+      rows: data.rows.length, fields: Object.keys(data.fields).length,
+      datasets: preparedAuthoring.datasetEvaluation?.diagnostics,
+    }, null, 2);
     return JSON.stringify(interactionDiagnostics, null, 2);
   };
   const copyBottom = async () => {
@@ -816,6 +800,7 @@ export function HyperPbiStudio({
         ["mapServices", "Map Services"],
         ["geocode", `Geocode ${geocodeResults.length || ""}`],
         ["interactions", "Interactions"],
+        ["performance", "Performance"],
       ]
     : [
         ["data", "Data preview"],
@@ -855,10 +840,7 @@ export function HyperPbiStudio({
                     data={preview.data}
                     settings={settings}
                     config={preview.config}
-                    referenceWarnings={validateReferences(
-                      preview.schema,
-                      preview.data,
-                    )}
+                    referenceWarnings={preview.warnings}
                     renderMs={0}
                     selectExternal={selectExternal}
                     clearExternal={clearExternal}
@@ -1137,7 +1119,7 @@ export function HyperPbiStudio({
           {editorTab === "calculations" && (
             <CalculationsTab
               data={data}
-              schema={structure.schema}
+              schema={structure.specification}
               onChange={updateCalculations}
               theme={settings.theme.mode}
               fontSize={settings.editor.fontSize}
@@ -1221,7 +1203,7 @@ export function HyperPbiStudio({
                 </button>
               </header>
               <div class="hp-preview-content">
-                {previewContent}
+                {focusMode !== "editor" && previewContent}
               </div>
             </section>
           </>
@@ -1271,7 +1253,7 @@ export function HyperPbiStudio({
             </div>
             <div class="hp-bottom-actions">
               <button type="button" onClick={() => void copyBottom()}>
-                Copy
+                {bottomTab === "data" ? "Copy sample" : "Copy"}
               </button>
               <button
                 type="button"
@@ -1415,6 +1397,9 @@ export function HyperPbiStudio({
                 </div>
               )
             )}{" "}
+            {bottomTab === "performance" && (
+              <RuntimePerformancePanel data={data} filteredCount={data.rows.length} renderMs={0} datasets={preparedAuthoring.datasetEvaluation?.diagnostics} />
+            )}
             {bottomTab === "interactions" && (
               <InteractionsPanel diagnostics={interactionDiagnostics} />
             )}
@@ -1436,15 +1421,15 @@ export function HyperPbiStudio({
               ? " · Preview out of date"
               : " · Not previewed"}
         </span>
+        <DataLoadNotice status={data.loadStatus} displayed={data.rows.length} />
         <span class="hp-studio-data-status">
-          {data.rows.length.toLocaleString()} rows
-          {data.loadStatus?.moreRowsAvailable ? "+" : ""} ·{" "}
+          {data.rows.length.toLocaleString()} rows ·{" "}
           {Object.keys(data.fields).length} fields
         </span>
         {layout.advanced && (
           <span class="hp-studio-technical-status">
             Schema {authoredVersion} · {selectionIdentityCount.toLocaleString()}{" "}
-            selection IDs · Package 1.0.0.0
+            selectable source rows
           </span>
         )}
       </footer>

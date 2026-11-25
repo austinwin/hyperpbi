@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "preact/hooks";
+import { indexRows } from "../../data/rowIndex";
 import { applyChartStyle } from "./chartStyle";
 import { chartDataState } from "./chartDataState";
 import type {
@@ -28,6 +29,26 @@ import {
 } from "./chartEvents";
 
 export { formatBuiltInChartTooltip, formatBuiltInChartValue, scaleScatterPointSizes } from "./adapters/shared";
+
+const EMPTY_DRILL_PATH: NonNullable<ReturnType<typeof useRenderContext>["state"]["chartDrillState"][string]>["path"] = [];
+const MAX_CHART_CATEGORIES = 10_000;
+const MAX_SCATTER_POINTS = 30_000;
+
+function chartDisplayLimit(component: ChartComponent, rows: DataRow[]): string | undefined {
+    if (component.type === "scatterChart" && rows.length > MAX_SCATTER_POINTS) {
+        return `This plot has more than ${MAX_SCATTER_POINTS.toLocaleString()} input rows. Filter the plot or bind a grouped dataset.`;
+    }
+    if ("category" in component && component.category && component.type !== "advancedChart" && rows.length > MAX_CHART_CATEGORIES) {
+        const categories = new Set<string>();
+        for (const row of rows) {
+            categories.add(String(row[component.category] ?? "(Blank)"));
+            if (categories.size > MAX_CHART_CATEGORIES) {
+                return `This chart has more than ${MAX_CHART_CATEGORIES.toLocaleString()} categories. Filter or group its data to display it.`;
+            }
+        }
+    }
+    return undefined;
+}
 
 const sameValue = (left: unknown, right: unknown): boolean => {
     if (left instanceof Date || right instanceof Date) return String(left) === String(right);
@@ -91,7 +112,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     const storedLevelIndex = drillLevels.findIndex(level => level.id === storedDrill?.levelId);
     const drillLevelIndex = storedLevelIndex >= 0 ? storedLevelIndex : initialLevelIndex;
     const drillLevel = drillLevels[drillLevelIndex];
-    const drillPath = storedLevelIndex >= 0 ? storedDrill?.path ?? [] : [];
+    const drillPath = storedLevelIndex >= 0 ? storedDrill?.path ?? EMPTY_DRILL_PATH : EMPTY_DRILL_PATH;
     const datasetView = drillLevel ? context.getDatasetView?.(drillLevel.dataset, id) : undefined;
     const baseRows = context.getRowsForComponent(id);
     const currentRows = useMemo(() => {
@@ -109,28 +130,28 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     const effectiveFields: Record<string, NormalizedField> = datasetView?.fields ?? context.data.fields;
     const powerBiRows = context.powerBiSourceRows ?? context.sourceRows;
     const powerBiRowKeys = context.powerBiSourceRowKeys ?? context.sourceRowKeys;
-    const powerBiIndex = useMemo(() => new Map(powerBiRows.map((row, index) => [row, index] as const)), [powerBiRows]);
-    const datasetRowIndex = useMemo(() => datasetView ? new Map(datasetView.rows.map((row, index) => [row, index] as const)) : undefined, [datasetView]);
-    const staticRowIndex = useMemo(() => new Map(context.sourceRows.map((row, index) => [row, index] as const)), [context.sourceRows]);
-    const lineageForRow = (row: DataRow): number[] => {
-        if (datasetView && datasetRowIndex) {
-            const index = datasetRowIndex.get(row);
-            return index === undefined ? [] : datasetView.sourceRowIndices[index] ?? [];
-        }
-        const index = staticRowIndex.get(row);
-        if (index === undefined) return [];
-        return context.datasetLineage?.[index] ?? [powerBiIndex.get(row) ?? index];
-    };
     const buildContext = useMemo<ChartBuildContext>(() => ({
         theme: context.settings.theme,
         sourceRows: currentRows,
         sourceRowKeys: powerBiRowKeys,
-        sourceIndex: new Map(currentRows.map((row, index) => [row, index] as const)),
-        sourceIndicesForRow: lineageForRow,
-    }), [context.settings.theme, currentRows, powerBiRowKeys, datasetView, datasetRowIndex, staticRowIndex, context.datasetLineage, powerBiIndex]);
+        get sourceIndex() { return indexRows(currentRows); },
+        sourceIndicesForRow: row => {
+            if (datasetView) {
+                const index = indexRows(datasetView.rows).get(row);
+                return index === undefined ? [] : datasetView.sourceRowIndicesAt?.(index) ?? datasetView.sourceRowIndices[index] ?? [];
+            }
+            const index = indexRows(context.sourceRows).get(row);
+            if (index === undefined) return [];
+            return context.datasetLineage?.[index] ?? [context.sourceRows === powerBiRows ? index : indexRows(powerBiRows).get(row) ?? index];
+        },
+    }), [context.settings.theme, currentRows, powerBiRowKeys, datasetView, context.sourceRows, context.datasetLineage, powerBiRows]);
     const missing = adapter.fields(effectiveComponent).filter(field => !effectiveFields[field]);
-    const result = useMemo(() => adapter.build(adapterComponent, currentRows, buildContext), [adapter, adapterComponent, currentRows, buildContext]);
-    const sourceStatus=chartDataState(context.getDatasetView?.(effectiveComponent.dataset,id)?.name??effectiveComponent.dataset,context.schema.data?.datasets,context.remoteSources);
+    const displayLimit = useMemo(() => chartDisplayLimit(adapterComponent, currentRows), [adapterComponent, currentRows]);
+    const result = useMemo(
+        () => displayLimit ? { option: {}, bindings: [], warnings: [] } : adapter.build(adapterComponent, currentRows, buildContext),
+        [adapter, adapterComponent, currentRows, buildContext, displayLimit],
+    );
+    const sourceStatus = chartDataState(effectiveComponent.dataset, context.schema.data?.datasets, context.remoteSources);
     const option = useMemo(() => applyChartStyle(enableDeclarativeChartEvents(result.option, component.events), component.chartStyle), [result.option, component.events, component.chartStyle]);
     const selectedRows = useMemo(() => {
         if (context.executionMode === "fragment") {
@@ -205,7 +226,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         const observed = context.dynamicEventKeys?.has(dynamicEventKey(id, "select"));
         const indices = observed ? new Set(binding.sourceRowIndices) : undefined;
         const contextRows = indices ? currentRows.filter(row =>
-            (!binding.field || sameValue(row[binding.field], binding.value)) && lineageForRow(row).some(index => indices.has(index))) : undefined;
+            (!binding.field || sameValue(row[binding.field], binding.value)) && buildContext.sourceIndicesForRow?.(row).some(index => indices.has(index))) : undefined;
         executeComponentInteraction(drills ? { ...policy, enabled: false } : policy, createInteractionPayload(effectiveComponent, {
             rowIndices: binding.sourceRowIndices,
             sourceRowKeys: powerBiRowKeys,
@@ -257,7 +278,9 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
                 ? <EmptyState title="Drill dataset is unavailable">Missing preloaded dataset: {drillLevel.dataset}</EmptyState>
                 : missing.length
                     ? <EmptyState title="Chart fields are unavailable">Missing: {Array.from(new Set(missing)).join(", ")}. Valid fields: {Object.keys(effectiveFields).join(", ")}</EmptyState>
-                    : currentRows.length
+                    : displayLimit
+                        ? <EmptyState title="Chart display limit reached">{displayLimit} All loaded rows remain available to the dashboard.</EmptyState>
+                        : currentRows.length
                         ? <>
                             <EChartRenderer
                                 option={option}

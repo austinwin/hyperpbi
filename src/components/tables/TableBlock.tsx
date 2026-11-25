@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { indexRows } from "../../data/rowIndex";
+import { useVirtualRowViewport } from "./useVirtualRowViewport";
+import { tableVirtualRange, TABLE_OVERSCAN_ROWS, TABLE_ROW_HEIGHT } from "./tableVirtualRange";
+export { tableVirtualRange, TABLE_OVERSCAN_ROWS, TABLE_ROW_HEIGHT } from "./tableVirtualRange";
 import { sortRows } from "../../data/sorting";
 import { DataRow } from "../../data/normalizeData";
 import { TableColumn, TableComponent } from "../../schema/hyperpbiSchema";
@@ -18,43 +22,9 @@ function columnDefinition(column: string | TableColumn): TableColumn {
 }
 
 /** A final memory guard; the authored/format-pane data limit remains authoritative. */
-export const MAX_RENDERED_TABLE_ROWS = 250_000;
+export const MAX_RENDERED_TABLE_ROWS = 500_000;
 export const MAX_NON_VIRTUAL_TABLE_ROWS = 5_000;
 export const TABLE_VIRTUALIZATION_THRESHOLD = 100;
-export const TABLE_ROW_HEIGHT = 31;
-export const TABLE_OVERSCAN_ROWS = 8;
-
-export interface TableVirtualRange {
-    start: number;
-    end: number;
-    topSpacer: number;
-    bottomSpacer: number;
-}
-
-export function tableVirtualRange(
-    rowCount: number,
-    scrollTop: number,
-    viewportHeight: number,
-    rowHeight = TABLE_ROW_HEIGHT,
-    overscan = TABLE_OVERSCAN_ROWS,
-): TableVirtualRange {
-    if (rowCount <= 0) return { start: 0, end: 0, topSpacer: 0, bottomSpacer: 0 };
-    const safeHeight = Math.max(rowHeight, viewportHeight);
-    const visibleCount = Math.ceil(safeHeight / rowHeight);
-    const rawStart = Math.min(
-        Math.max(0, rowCount - visibleCount),
-        Math.floor(Math.max(0, scrollTop) / rowHeight),
-    );
-    const start = Math.max(0, Math.min(rowCount, rawStart - overscan));
-    const end = Math.max(start, Math.min(rowCount, rawStart + visibleCount + overscan));
-    return {
-        start,
-        end,
-        topSpacer: start * rowHeight,
-        bottomSpacer: Math.max(0, (rowCount - end) * rowHeight),
-    };
-}
-
 export function buildTableSearchIndex(rows: readonly DataRow[], fields: readonly string[]): string[] {
     return rows.map(row => fields.map(field => String(row[field] ?? "").toLowerCase()).join("\u0000"));
 }
@@ -92,11 +62,6 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const rows = getRowsForComponent(id);
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>();
-    const [scrollTop, setScrollTop] = useState(0);
-    const [viewportHeight, setViewportHeight] = useState(480);
-    const scrollFrameRef = useRef<number>();
-    const pendingScrollTopRef = useRef(0);
-    const tableWrapRef = useRef<HTMLDivElement>(null);
     const anonymousRowKeysRef = useRef(new WeakMap<object, string>());
     const anonymousRowKeySequenceRef = useRef(0);
 
@@ -124,72 +89,44 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const highlightedRows = componentRows(id);
     const selectedRowSet = useMemo(() => new Set(selectedRows), [selectedRows]);
     const highlightedRowSet = useMemo(() => new Set(highlightedRows), [highlightedRows]);
-    const sourceIndices = useMemo(
-        () => new Map(sourceRows.map((row, index) => [row, index] as const)),
-        [sourceRows],
-    );
-    const searchIndex = useMemo(
-        () => searchActive ? buildTableSearchIndex(rows, columnFields) : [],
-        [rows, columnFields, searchActive],
-    );
     const prepared = useMemo(() => {
-        const matching = needle ? rows.filter((_row, index) => searchIndex[index].includes(needle)) : rows;
+        // Test cells as needed; a retained lowercase string per record can
+        // duplicate the entire text payload of a wide detail table.
+        const matching = searchActive
+            ? rows.filter(row => columnFields.some(field => String(row[field] ?? "").toLowerCase().includes(needle)))
+            : rows;
         return sort ? sortRows(matching, sort.field, sort.direction) : matching;
-    }, [rows, searchIndex, needle, sort]);
+    }, [rows, columnFields, needle, searchActive, sort]);
     const pageSize = Math.max(5, component.pageSize ?? 25);
     const paginate = component.pagination ?? settings.table.pagination;
     const virtualizationAllowed = component.virtualization?.enabled !== false && !paginate;
     const maxRows = virtualizationAllowed || paginate ? configuredMaxRows : Math.min(configuredMaxRows, MAX_NON_VIRTUAL_TABLE_ROWS);
-    const limited = useMemo(() => prepared.slice(0, maxRows), [prepared, maxRows]);
-    const pages = Math.max(1, Math.ceil(limited.length / pageSize));
+    const displayedCount = Math.min(prepared.length, maxRows);
+    const pages = Math.max(1, Math.ceil(displayedCount / pageSize));
+    const currentPage = Math.min(page, pages);
+    const pageOffset = paginate ? (currentPage - 1) * pageSize : 0;
+    const pageRows = paginate ? Math.min(pageSize, displayedCount - pageOffset) : displayedCount;
     const rowHeight = Math.max(22, Math.min(80, component.virtualization?.rowHeight ?? (component.density === "compact" ? 27 : TABLE_ROW_HEIGHT)));
     const virtualizationThreshold = Math.max(1, component.virtualization?.threshold ?? TABLE_VIRTUALIZATION_THRESHOLD);
     const overscan = Math.max(1, Math.min(100, component.virtualization?.overscan ?? TABLE_OVERSCAN_ROWS));
-    const virtualized = virtualizationAllowed && limited.length > Math.min(virtualizationThreshold, MAX_NON_VIRTUAL_TABLE_ROWS);
+    const virtualized = pageRows > MAX_NON_VIRTUAL_TABLE_ROWS ||
+        virtualizationAllowed && pageRows > Math.min(virtualizationThreshold, MAX_NON_VIRTUAL_TABLE_ROWS);
+    const { viewportRef, onScroll, resetScroll, scrollTop, viewportHeight } = useVirtualRowViewport(virtualized);
     const range = virtualized
-        ? tableVirtualRange(limited.length, scrollTop, viewportHeight, rowHeight, overscan)
-        : { start: 0, end: limited.length, topSpacer: 0, bottomSpacer: 0 };
-    const visible = paginate
-        ? limited.slice((page - 1) * pageSize, page * pageSize)
-        : limited.slice(range.start, range.end);
+        ? tableVirtualRange(pageRows, scrollTop, viewportHeight, rowHeight, overscan)
+        : { start: 0, end: pageRows, topSpacer: 0, bottomSpacer: 0 };
+    const visible = prepared.slice(pageOffset + range.start, pageOffset + range.end);
 
     useEffect(() => setPage(current => Math.min(current, pages)), [pages]);
-    useEffect(() => {
-        setPage(1);
-        setScrollTop(0);
-        if (tableWrapRef.current) tableWrapRef.current.scrollTop = 0;
-    }, [needle, sort?.field, sort?.direction]);
-    useEffect(() => () => {
-        if (scrollFrameRef.current !== undefined) cancelAnimationFrame(scrollFrameRef.current);
-    }, []);
-    useEffect(() => {
-        const node = tableWrapRef.current;
-        if (!node || !virtualized || typeof ResizeObserver === "undefined") return;
-        const measure = () => {
-            const measured = node.clientHeight;
-            if (measured > 0) setViewportHeight(current => current === measured ? current : measured);
-        };
-        measure();
-        const observer = new ResizeObserver(measure);
-        observer.observe(node);
-        return () => observer.disconnect();
-    }, [virtualized, component.heightMode]);
+    useEffect(() => { setPage(1); }, [needle, sort?.field, sort?.direction]);
+    useEffect(resetScroll, [currentPage, needle, sort?.field, sort?.direction]);
 
     const toggleSort = (field: string) =>
         setSort(current => ({
             field,
             direction: current?.field === field && current.direction === "asc" ? "desc" : "asc",
         }));
-    const onScroll = (event: Event) => {
-        pendingScrollTopRef.current = event.currentTarget instanceof HTMLElement ? event.currentTarget.scrollTop : 0;
-        if (scrollFrameRef.current !== undefined) return;
-        scrollFrameRef.current = requestAnimationFrame(() => {
-            scrollFrameRef.current = undefined;
-            setScrollTop(pendingScrollTopRef.current);
-        });
-    };
-    const rowKey = (row: DataRow, fallbackIndex: number) => {
-        const sourceIndex = sourceIndices.get(row);
+    const rowKey = (row: DataRow, fallbackIndex: number, sourceIndex?: number) => {
         if (sourceIndex !== undefined)
             return sourceRowKeys[sourceIndex] ?? `source-row-${sourceIndex}`;
         let key = anonymousRowKeysRef.current.get(row);
@@ -222,8 +159,8 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
             </div>
             <span>{prepared.length.toLocaleString()} rows</span>
         </div>}
-        {columns.length > 0 && rows.length > 0 ? <div ref={tableWrapRef} class={`hp-table-wrap${virtualized ? " hp-table-virtual" : ""}${component.density === "compact" ? " is-compact" : ""}`} style={{ "--hp-table-row-height": `${rowHeight}px` }} onScroll={virtualized ? onScroll : undefined}>
-            <table class="table table-sm table-vcenter hp-table" aria-rowcount={limited.length}>
+        {columns.length > 0 && rows.length > 0 ? <div ref={viewportRef} class={`hp-table-wrap${virtualized ? " hp-table-virtual" : ""}${component.density === "compact" ? " is-compact" : ""}`} style={{ "--hp-table-row-height": `${rowHeight}px` }} onScroll={virtualized ? onScroll : undefined}>
+            <table class="table table-sm table-vcenter hp-table" aria-rowcount={displayedCount}>
                 <thead><tr>
                     {policy.showSelector && <th aria-label="Selection" />}
                     {columns.map(column => <th key={column.field} style={{ width: column.width ? `${column.width}px` : undefined }} aria-sort={sort?.field === column.field ? sort.direction === "asc" ? "ascending" : "descending" : "none"}>
@@ -233,8 +170,9 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                 <tbody>
                     {range.topSpacer > 0 && <tr key="virtual-top" class="hp-table-spacer" aria-hidden="true"><td colSpan={columns.length + (policy.showSelector ? 1 : 0)} style={{ height: `${range.topSpacer}px` }} /></tr>}
                     {visible.map((row, visibleIndex) => {
-                        const preparedIndex = (paginate ? (page - 1) * pageSize : range.start) + visibleIndex;
-                        const index = sourceIndices.get(row) ?? -1;
+                        const preparedIndex = pageOffset + range.start + visibleIndex;
+                        const sourceIndex = prepared === sourceRows ? preparedIndex : indexRows(sourceRows).get(row);
+                        const index = sourceIndex ?? -1;
                         const selected = sharedField ? !payloadValueIsEmpty(sharedValue) && row[sharedField] === sharedValue : selectedRowSet.has(index);
                         const highlighted = sharedField ? selected : highlightedRowSet.has(index);
                         const activate = (event: MouseEvent | KeyboardEvent) => {
@@ -247,7 +185,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                                 contextRows: [row],
                             }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
                         };
-                        return <tr key={rowKey(row, preparedIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2}
+                        return <tr key={rowKey(row, preparedIndex, sourceIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2}
                             tabIndex={dynamicTrigger || sharedField ? 0 : undefined} onClick={activate}
                             aria-selected={sharedField ? selected : undefined}
                             onKeyDown={dynamicTrigger || sharedField ? event => {

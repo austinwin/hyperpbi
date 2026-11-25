@@ -42,21 +42,45 @@ export interface PreparedAuthoringData {
   preparedSpecification?: PreparedSpecification;
 }
 
-/** The one calculation/configuration adapter used by saved runtime and authoring. */
+interface RuntimeCacheEntry {
+  fields: NormalizedData["fields"];
+  rowKeys: string[];
+  calculationKey: string;
+  calculated: ReturnType<typeof applyCalculations>;
+  mapKey?: string;
+  configured?: NormalizedData;
+}
+const runtimeCache = new WeakMap<NormalizedData["rows"], RuntimeCacheEntry>();
+
+/** Reuse row calculations across presentation edits and host resize updates. */
 export function prepareRuntimeData(
   data: NormalizedData,
   specification: HyperPbiSchema,
   config: HyperPbiConfig,
 ): PreparedRuntimeData {
-  const calculated = applyCalculations(data, specification.calculations);
-  if (calculated.errors.length) {
-    return {
-      errors: calculated.errors.map((error) => `Calculation: ${error}`),
-      warnings: calculated.warnings,
+  const calculationKey = JSON.stringify(specification.calculations ?? {});
+  let entry = runtimeCache.get(data.rows);
+  if (!entry || entry.fields !== data.fields || entry.rowKeys !== data.rowKeys || entry.calculationKey !== calculationKey) {
+    const started = performance.now();
+    entry = {
+      fields: data.fields, rowKeys: data.rowKeys, calculationKey,
+      calculated: applyCalculations(data, specification.calculations),
     };
+    runtimeCache.set(data.rows, entry);
+    data.performance?.record("calculations", started);
   }
+  const calculated = entry.calculated;
+  if (calculated.errors.length) {
+    return { errors: calculated.errors.map(error => `Calculation: ${error}`), warnings: calculated.warnings };
+  }
+  const mapKey = JSON.stringify([config.bindings?.map, config.providers?.geocoder?.cacheEntries]);
+  if (!entry.configured || entry.mapKey !== mapKey) {
+    entry.configured = applyConfigToData(calculated.data, config);
+    entry.mapKey = mapKey;
+  }
+  const configured = entry.configured;
   return {
-    data: applyConfigToData(calculated.data, config),
+    data: configured.loadStatus === data.loadStatus ? configured : { ...configured, loadStatus: data.loadStatus },
     errors: [],
     warnings: calculated.warnings,
   };
@@ -68,22 +92,26 @@ export function prepareLogicalDatasets(
   specification: HyperPbiSchema,
   lineageOptions: { sourceIndices?: number[]; sourceRowKeys?: string[] } = {},
   workspace?: DataWorkspace,
+  cache = new Map<string, DatasetResult>(),
+  lazy = false,
 ): DatasetEvaluation {
   return evaluateDatasets(
     data,
     specification.data?.datasets ?? {},
-    new Map(),
+    cache,
     lineageOptions,
     { ...remoteSourcePlaceholderData(specification), ...(workspace ? workspaceSourceData(workspace) : {}) },
+    lazy,
   );
 }
 
-export function prepareAuthoringData(
+export function validateAuthoringData(
   specificationJson: string,
   configurationJson: string,
   data: NormalizedData,
   workspace?: DataWorkspace,
 ): PreparedAuthoringData {
+  const started = performance.now();
   const errors: string[] = [];
   const warnings: string[] = [];
   const parsedConfig = parseConfig(configurationJson);
@@ -106,7 +134,8 @@ export function prepareAuthoringData(
     warnings.push(...prepared.warnings);
   }
 
-  const base: PreparedAuthoringData = {
+  data.performance?.record("validation", started);
+  return {
     specification: prepared?.schema,
     config: parsedConfig.config,
     aliases,
@@ -118,42 +147,37 @@ export function prepareAuthoringData(
     componentPathById: prepared?.componentPathById,
     preparedSpecification: prepared,
   };
-  if (!prepared?.schema || !parsedConfig.config) return base;
+}
 
-  const runtime = prepareRuntimeData(
-    data,
-    prepared.schema,
-    parsedConfig.config,
+export function evaluateAuthoringData(
+  base: PreparedAuthoringData,
+  data: NormalizedData,
+  workspace?: DataWorkspace,
+  mode: "runtime" | "lazy" | "all" = "all",
+  cache?: Map<string, DatasetResult>,
+): PreparedAuthoringData {
+  const { specification, config } = base;
+  if (!specification || !config) return base;
+  const runtime = prepareRuntimeData(data, specification, config);
+  const errors = [...base.errors, ...runtime.errors];
+  const warnings = [...base.warnings, ...runtime.warnings];
+  if (!runtime.data) return { ...base, errors, warnings };
+  const datasetEvaluation = mode === "runtime" ? undefined : prepareLogicalDatasets(
+    runtime.data, specification, {}, workspace, cache, mode === "lazy",
   );
-  errors.push(...runtime.errors);
-  warnings.push(...runtime.warnings);
-  if (!runtime.data) return base;
-
-  const datasetEvaluation = prepareLogicalDatasets(
-    runtime.data,
-    prepared.schema,
-    {},
-    workspace,
-  );
-  errors.push(
-    ...datasetEvaluation.errors.map(
-      (error) => `Dataset ${error.dataset}: ${error.message}`,
-    ),
-  );
-  warnings.push(
-    ...validateReferences(
-      prepared.schema,
-      runtime.data,
-      { ...remoteSourcePlaceholderData(prepared.schema), ...(workspace ? workspaceSourceData(workspace) : {}) },
-    ),
-  );
-
+  errors.push(...(datasetEvaluation?.errors ?? []).map(error => `Dataset ${error.dataset}: ${error.message}`));
+  warnings.push(...validateReferences(specification, runtime.data, workspace ? workspaceSourceData(workspace) : {}));
   return {
-    ...base,
-    configuredData: runtime.data,
-    datasets: datasetEvaluation.datasets,
-    datasetEvaluation,
-    errors: Array.from(new Set(errors)),
-    warnings: Array.from(new Set(warnings)),
+    ...base, configuredData: runtime.data, datasets: datasetEvaluation?.datasets, datasetEvaluation,
+    errors: Array.from(new Set(errors)), warnings: Array.from(new Set(warnings)),
   };
+}
+
+export function prepareAuthoringData(
+  specificationJson: string,
+  configurationJson: string,
+  data: NormalizedData,
+  workspace?: DataWorkspace,
+): PreparedAuthoringData {
+  return evaluateAuthoringData(validateAuthoringData(specificationJson, configurationJson, data, workspace), data, workspace);
 }

@@ -1,3 +1,4 @@
+import { indexRows } from "./rowIndex";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { DataRow, Primitive } from "./normalizeData";
 
@@ -19,13 +20,36 @@ export function matchesFilter(actual: Primitive, operator: FilterOperator, expec
     return left <= right;
 }
 
-export function filterRows(rows: DataRow[], filters: ActiveFilter[], search: string): DataRow[] {
+/** Keep source positions as we filter. No reverse row/key indexes or copies
+ * are needed when all rows pass. */
+export function dashboardRowView(rows: DataRow[], filters: ActiveFilter[], search: string, fieldKeys?: string[]): { rows: DataRow[]; sourceIndices?: number[] } {
     const needle = search.trim().toLowerCase();
-    return rows.filter(row => filters.every(filter => matchesFilter(row[filter.field], filter.operator, filter.value)) && (!needle || Object.values(row).some(value => String(value ?? "").toLowerCase().includes(needle))));
+    if (!filters.length && !needle) return { rows };
+    let selected: DataRow[] | undefined;
+    let indices: number[] | undefined;
+    for (let index = 0; index < rows.length; index++) {
+        const row = rows[index];
+        const matches = filters.every(filter => matchesFilter(row[filter.field], filter.operator, filter.value)) &&
+            (!needle || (fieldKeys
+                ? fieldKeys.some(field => String(row[field] ?? "").toLowerCase().includes(needle))
+                : Object.values(row).some(value => String(value ?? "").toLowerCase().includes(needle))));
+        if (!matches && !selected) {
+            selected = rows.slice(0, index);
+            indices = Array.from({ length: index }, (_, i) => i);
+        } else if (matches && selected) {
+            selected.push(row);
+            indices!.push(index);
+        }
+    }
+    return { rows: selected ?? rows, sourceIndices: indices };
+}
+
+export function filterRows(rows: DataRow[], filters: ActiveFilter[], search: string): DataRow[] {
+    return dashboardRowView(rows, filters, search).rows;
 }
 
 export function resolveSourceRowIndicesForFilter(field: string | undefined, operator: FilterOperator, value: unknown, sourceRows: DataRow[], currentRows: DataRow[] = sourceRows): number[] {
-    const sourceIndices = new Map(sourceRows.map((row, index) => [row, index] as const));
+    const sourceIndices = indexRows(sourceRows);
     return currentRows.reduce<number[]>((indices, row) => {
         const matches = field ? matchesFilter(row[field], operator, value) : operator === "contains" && Object.values(row).some(item => matchesFilter(item, "contains", value));
         const sourceIndex = matches ? sourceIndices.get(row) : undefined;

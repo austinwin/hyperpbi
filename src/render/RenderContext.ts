@@ -23,11 +23,14 @@ export interface ResolvedDatasetView {
     fields: NormalizedData["fields"];
     /** Row positions in the evaluated logical dataset before component interaction filtering. */
     rowIndices: number[];
+    rowIndexAt?: (index: number) => number;
     rowKeys: string[];
     /** Contributing original Power BI data-view row positions for each logical row. */
     sourceRowIndices: number[][];
+    sourceRowIndicesAt?: (index: number) => number[];
     /** Contributing original Power BI row keys/identities for each logical row. */
     sourceRowKeys: string[][];
+    sourceRowKeysAt?: (index: number) => string[];
     totalRows: number;
 }
 

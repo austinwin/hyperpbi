@@ -1,3 +1,4 @@
+import { indexRows } from "../../data/rowIndex";
 import { MapFeatureSearch } from "./MapFeatureSearch";
 import { useRemoteGeoJsonLayers } from "./runtime/useRemoteGeoJsonLayers";
 import {
@@ -28,6 +29,7 @@ import {
   effectiveMapLayerDataset,
   geometryAnalysis,
   resolvePowerBiLayer,
+  mapJoinLineage,
   type MapSourceContext,
 } from "../../maps/sources/mapSourceResolver";
 import {
@@ -212,18 +214,16 @@ export function MapBlock({ component }: { component: MapComponent }) {
   );
 
   // ── Source row identity mapping ──────────────────────────────────
-  const sourceIndexMap = useMemo(
-    () => new Map(sourceRows.map((row, index) => [row, index] as const)),
-    [sourceRows],
-  );
-
   const rowIndices = useMemo(() => {
-    return rows.map((row) => sourceIndexMap.get(row) ?? -1);
-  }, [rows, sourceIndexMap]);
+    if (context.getDatasetView) return [];
+    const sourceIndices = rows === sourceRows ? undefined : indexRows(sourceRows);
+    return rows.map((row, index) => sourceIndices ? sourceIndices.get(row) ?? -1 : index);
+  }, [rows, sourceRows, context.getDatasetView]);
 
   const rowKeys = useMemo(() => {
+    if (context.getDatasetView || rows === sourceRows) return data.rowKeys;
     return rows.map((_row, i) => data.rowKeys[rowIndices[i]] ?? `row-${i}`);
-  }, [rows, data.rowKeys, rowIndices]);
+  }, [rows, sourceRows, data.rowKeys, rowIndices, context.getDatasetView]);
 
   const layerDefinitions: MapLayerDefinition[] = component.layers ?? [];
 
@@ -243,10 +243,13 @@ export function MapBlock({ component }: { component: MapComponent }) {
           const sourceContext: MapSourceContext = view
             ? {
                 rows: view.rows,
-                rowIndices: view.rowIndices,
+                rowIndexAt: view.rowIndexAt,
+                rowIndices: view.rowIndexAt ? undefined : view.rowIndices,
                 rowKeys: view.rowKeys,
-                sourceRowIndices: view.sourceRowIndices,
-                sourceRowKeys: view.sourceRowKeys,
+                sourceRowIndicesAt: view.sourceRowIndicesAt,
+                sourceRowIndices: view.sourceRowIndicesAt ? undefined : view.sourceRowIndices,
+                sourceRowKeysAt: view.sourceRowKeysAt,
+                sourceRowKeys: view.sourceRowKeysAt ? undefined : view.sourceRowKeys,
                 fields: view.fields,
                 datasetName,
                 powerBiIdentityAvailable: view.sourceId === undefined || view.sourceId === "powerbi",
@@ -2054,11 +2057,7 @@ export async function resolveArcGisFeatureLayer(
     // Execute join
     const joinStarted = globalThis.performance?.now?.() ?? Date.now();
     const joinResult = executeMapJoin({
-      powerBiRows: context.rows,
-      powerBiRowIndices: context.rowIndices,
-      powerBiRowKeys: context.rowKeys,
-      powerBiSourceRowIndices: context.powerBiIdentityAvailable === false ? context.rows.map(() => []) : context.sourceRowIndices,
-      powerBiSourceRowKeys: context.powerBiIdentityAvailable === false ? context.rows.map(() => []) : context.sourceRowKeys,
+      ...mapJoinLineage(context),
       serviceFeatures: queryResult.features,
       definition: def.join,
       layerId: def.id,

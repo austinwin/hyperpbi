@@ -69,6 +69,9 @@ describe("large table runtime", () => {
         expect(middle.end - middle.start).toBeLessThan(40);
         const end = tableVirtualRange(5_000, Number.MAX_SAFE_INTEGER, 480);
         expect(end.end).toBe(5_000);
+        const wide = tableVirtualRange(500_000, 16_000_000 - 480, 480, 80);
+        expect(wide.end).toBe(500_000);
+        expect(wide.topSpacer + wide.bottomSpacer).toBeLessThan(16_000_000);
     });
 
     it("renders a bounded number of DOM rows for a 10,000-row source", () => {

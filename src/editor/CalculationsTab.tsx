@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { applyCalculations } from "../calculations/calculationEngine";
+import { applyDerivedFields } from "../calculations/derivedFields";
+import { samplePreviewRows } from "../data/samplePreviewRows";
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { validateCalculations } from "../calculations/calculationValidator";
 import { NormalizedData } from "../data/normalizeData";
@@ -38,10 +39,12 @@ export function CalculationsTab({
       validateCalculations(schema?.calculations, Object.keys(data.fields)),
     [schema?.calculations, data.fields],
   );
-  const calculated = useMemo(
-    () => applyCalculations(data, schema?.calculations),
-    [data, schema?.calculations],
-  );
+  const sample = useMemo(() => {
+    const rows = data.rows.slice(0, 3);
+    const derived = messages.some(message => message.level === "error")
+      ? rows : applyDerivedFields(rows, data.fields, schema?.calculations?.fields).rows;
+    return samplePreviewRows({ ...data, rows: derived }, 3);
+  }, [data.rows, data.fields, schema?.calculations?.fields, messages]);
   const update = (text: string) => {
     setDraft(text);
     try {
@@ -149,10 +152,10 @@ export function CalculationsTab({
             <span>None</span>
           )}
         </div>
-        <h3>Metric preview</h3>
-        <pre>{JSON.stringify(calculated.data.calculatedMetrics ?? {}, null, 2)}</pre>
+        <h3>Calculated metrics</h3>
+        <p>Run the dashboard preview to evaluate metrics across all loaded rows.</p>
         <h3>Row preview</h3>
-        <pre>{JSON.stringify(calculated.data.rows.slice(0, 3), null, 2)}</pre>
+        <pre>{JSON.stringify(sample, null, 2)}</pre>
       </aside>
     </div>
   );

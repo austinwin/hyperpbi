@@ -17,7 +17,7 @@ const identifier = (value: string): string => {
 const stableSuffix = (value: string): string => { let hash = 2166136261; for (let i=0;i<value.length;i+=1) { hash ^= value.charCodeAt(i); hash = Math.imul(hash,16777619); } return (hash>>>0).toString(36).slice(0,6); };
 const validAlias = /^[A-Za-z][A-Za-z0-9]*$/;
 
-export function createFieldAliasRegistry(data: NormalizedData, overrides: Record<string,string> = {}, privacyMode: FieldPrivacyMode = "fields"): FieldAliasRegistry {
+export function createFieldAliasRegistry(data: NormalizedData, overrides: Record<string,string> = {}, privacyMode: FieldPrivacyMode = "fields", profileFields?: ReadonlySet<string>): FieldAliasRegistry {
     const fields = Object.values(data.fields);
     const preferred = new Map(fields.map(field=>[field.key, identifier(field.sourceColumn || field.displayName || field.key)]));
     const counts = (values: string[]) => values.reduce((map,value)=>map.set(value,(map.get(value)??0)+1),new Map<string,number>());
@@ -31,7 +31,7 @@ export function createFieldAliasRegistry(data: NormalizedData, overrides: Record
         if (override && !validAlias.test(override)) errors.push(`Alias override for ${field.key} must match ${validAlias}.`);
         const alias = override && validAlias.test(override) ? override : generated;
         const semanticRole = inferSemanticRole(field); const kind = field.kind ?? (field.type === "measure" ? "measure" : field.type === "schema" ? "unknown" : "column");
-        return { alias, key:field.key, displayName:field.displayName, queryName:field.queryName, sourceTable:field.sourceTable, sourceColumn:field.sourceColumn, qualifiedName:field.qualifiedName, type:field.type, kind, dataType:field.dataType, queryAggregation:field.queryAggregation, isImplicitAggregation:field.isImplicitAggregation, origin:field.origin, format:field.format, roles:field.roles, semanticRole, defaultAggregation:defaultAggregationFor(field,semanticRole), supportsIdentitySelection:kind === "column" && field.type !== "schema", supportsExternalFilter:kind === "column" && Boolean(field.sourceTable && field.sourceColumn), profile:buildFieldDataProfile(field,data.rows,privacyMode) } satisfies FieldAliasEntry;
+        return { alias, key:field.key, displayName:field.displayName, queryName:field.queryName, sourceTable:field.sourceTable, sourceColumn:field.sourceColumn, qualifiedName:field.qualifiedName, type:field.type, kind, dataType:field.dataType, queryAggregation:field.queryAggregation, isImplicitAggregation:field.isImplicitAggregation, origin:field.origin, format:field.format, roles:field.roles, semanticRole, defaultAggregation:defaultAggregationFor(field,semanticRole), supportsIdentitySelection:kind === "column" && field.type !== "schema", supportsExternalFilter:kind === "column" && Boolean(field.sourceTable && field.sourceColumn), profile:!profileFields || profileFields.has(field.key) || profileFields.has(alias) ? buildFieldDataProfile(field,data.rows,privacyMode) : undefined } satisfies FieldAliasEntry;
     }).sort((a,b)=>a.alias.localeCompare(b.alias));
     const aliases = counts(entries.map(entry=>entry.alias));
     entries.filter(entry=>aliases.get(entry.alias)!>1).forEach(entry=>errors.push(`Alias “${entry.alias}” is not unique (field ${entry.key}).`));

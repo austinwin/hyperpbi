@@ -1,5 +1,8 @@
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { NormalizedData } from "../data/normalizeData";
+import { tableVirtualRange, TABLE_ROW_HEIGHT } from "../components/tables/tableVirtualRange";
+import { useVirtualRowViewport } from "../components/tables/useVirtualRowViewport";
+import { samplePreviewValue } from "../data/samplePreviewRows";
 import { formatValue } from "../utils/formatValue";
 
 export function DataPreview({ data }: { data: NormalizedData }) {
@@ -8,11 +11,12 @@ export function DataPreview({ data }: { data: NormalizedData }) {
   const fields = Object.values(data.fields);
   const pages = Math.max(1, Math.ceil(data.rows.length / pageSize));
   const safePage = Math.min(page, pages);
-  const rows = useMemo(
-    () =>
-      data.rows.slice((safePage - 1) * pageSize, safePage * pageSize),
-    [data.rows, safePage, pageSize],
-  );
+  const { viewportRef, onScroll, resetScroll, scrollTop, viewportHeight } = useVirtualRowViewport(Boolean(data.rows.length));
+  const pageOffset = (safePage - 1) * pageSize;
+  const pageCount = Math.min(pageSize, data.rows.length - pageOffset);
+  const range = tableVirtualRange(pageCount, scrollTop, viewportHeight);
+  const rows = data.rows.slice(pageOffset + range.start, pageOffset + range.end);
+  useEffect(resetScroll, [safePage, pageSize]);
 
   if (!fields.length)
     return (
@@ -25,8 +29,8 @@ export function DataPreview({ data }: { data: NormalizedData }) {
   return (
     <div class="hp-studio-data">
       {data.rows.length ? (
-        <div class="hp-studio-table-wrap">
-          <table>
+        <div class="hp-studio-table-wrap hp-studio-virtual" ref={viewportRef} onScroll={onScroll} style={{ "--hp-table-row-height": `${TABLE_ROW_HEIGHT}px` }}>
+          <table aria-rowcount={data.rows.length + 1}>
             <caption class="hp-visually-hidden">
               Preview of data available to this dashboard
             </caption>
@@ -39,16 +43,15 @@ export function DataPreview({ data }: { data: NormalizedData }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
-                <tr>
-                  <th scope="row">
-                    {(safePage - 1) * pageSize + index + 1}
-                  </th>
-                  {fields.map((field) => (
-                    <td>{formatValue(row[field.key], field.format)}</td>
-                  ))}
-                </tr>
-              ))}
+              {range.topSpacer > 0 && <tr class="hp-table-spacer" aria-hidden="true"><td colSpan={fields.length + 1} style={{ height: range.topSpacer }} /></tr>}
+              {rows.map((row, index) => {
+                const position = pageOffset + range.start + index;
+                return <tr key={data.rowKeys[position] ?? position} aria-rowindex={position + 2}>
+                  <th scope="row">{position + 1}</th>
+                  {fields.map(field => <td key={field.key}>{formatValue(samplePreviewValue(row[field.key]), field.format)}</td>)}
+                </tr>;
+              })}
+              {range.bottomSpacer > 0 && <tr class="hp-table-spacer" aria-hidden="true"><td colSpan={fields.length + 1} style={{ height: range.bottomSpacer }} /></tr>}
             </tbody>
           </table>
         </div>
@@ -86,6 +89,8 @@ export function DataPreview({ data }: { data: NormalizedData }) {
             : "0 rows"}
         </span>
         <div class="hp-studio-pagination">
+          {pages > 1 && <label>Page <input type="number" aria-label="Data preview page" min={1} max={pages} value={safePage}
+            onChange={event => setPage(Math.max(1, Math.min(pages, Number(event.currentTarget.value) || 1)))} /></label>}
           <button
             type="button"
             aria-label="Previous data page"

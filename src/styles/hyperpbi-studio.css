@@ -843,3 +843,7 @@
   .hp-studio *::before,
   .hp-studio *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+.hp-studio-virtual tbody > tr:not(.hp-table-spacer) { height: var(--hp-table-row-height); }
+.hp-studio-virtual .hp-table-spacer > td { padding: 0; border: 0; }
+.hp-studio-pagination input { width: 6ch; }

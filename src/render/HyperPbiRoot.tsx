@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "preact/hooks";
-import { calculateAggregates } from "../data/aggregations";
-import { normalizeMapBindings } from "../data/normalizeMapBindings";
-import { filterRows } from "../data/filtering";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
+import { lazyAggregates } from "../data/aggregations";
+import { lazyMapBindings } from "../data/normalizeMapBindings";
+import { dashboardRowView } from "../data/filtering";
 import { NormalizedData } from "../data/normalizeData";
 import type { DataWorkspace } from "../data/dataWorkspace";
 import { HyperPbiSchema } from "../schema/hyperpbiSchema";
@@ -39,6 +39,11 @@ import { componentListRequestsFill } from "../components/layout/responsiveLayout
 import { useRemoteDataWorkspace } from "../data/useRemoteDataWorkspace";
 import { IsolatedVisual } from "../security/IsolatedVisual";
 import { visitSpecificationComponents } from "../catalog/componentTraversal";
+import { samplePreviewRows } from "../data/samplePreviewRows";
+import { indexRows } from "../data/rowIndex";
+import type { DatasetResult } from "../data/datasets";
+import { DataLoadNotice } from "../components/system/DataLoadNotice";
+import { RuntimePerformancePanel } from "../components/system/RuntimePerformancePanel";
 import { dynamicEventKey, type DynamicEvent } from "../fragments/fragmentTypes";
 
 const notSent = (): ExternalSelectionResult => ({
@@ -139,72 +144,53 @@ export function HyperPbiRoot({
     setDynamicEvents(previous => ({ ...previous, [key]: { context: values, revision: (previous[key]?.revision ?? 0) + 1 } }));
   }, [dynamicEventKeys]);
   const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost, providerAccess, webAccessAvailable);
-  const rowKeySignature = useMemo(
-    () => JSON.stringify(executionMode === "fragment" && dataWorkspace
+  const renderStarted = performance.now();
+  useLayoutEffect(() => data.performance?.record("render", renderStarted));
+
+  const reconciliationKeys = useMemo(
+    () => executionMode === "fragment" && dataWorkspace
       ? Object.values(dataWorkspace.sources).flatMap(source => source.data.rowKeys)
-      : data.rowKeys),
+      : data.rowKeys,
     [data.rowKeys, dataWorkspace, executionMode],
   );
+  const loading = data.loadStatus?.completeness === "loading";
   useEffect(() => {
-    dispatch({
-      type: "reconcileRowKeys",
-      rowKeys: JSON.parse(rowKeySignature),
-    });
-  }, [rowKeySignature]);
-  const rows = useMemo(
-    () => filterRows(data.rows, state.filters, state.search),
-    [data.rows, state.filters, state.search],
-  );
-  const filteredRowKeys = useMemo(() => {
-    const sourceIndexByRow = new Map(
-      data.rows.map((row, index) => [row, index] as const),
-    );
+    if (!loading) dispatch({ type: "reconcileRowKeys", rowKeys: reconciliationKeys });
+  }, [reconciliationKeys, loading]);
 
-    return rows
-      .map((row) => {
-        const index = sourceIndexByRow.get(row);
-        return index === undefined ? undefined : data.rowKeys[index];
-      })
-      .filter((key): key is string => Boolean(key));
-  }, [data.rows, data.rowKeys, rows]);
-  const filteredData = useMemo<NormalizedData>(
-    () => ({
-      ...data,
-      rows,
-      rowKeys: filteredRowKeys,
-      aggregates: calculateAggregates(rows),
-      calculatedMetrics: calculateDerivedMetrics(
-        rows,
-        schema.calculations?.metrics,
-      ),
-      map: normalizeMapBindings(
-        rows,
-        data.fields,
-        config.bindings?.map,
-        config.providers?.geocoder?.cacheEntries,
-        filteredRowKeys,
-      ),
-    }),
-    [
-      data,
-      rows,
-      filteredRowKeys,
-      schema.calculations?.metrics,
-      config.bindings?.map,
-      config.providers?.geocoder?.cacheEntries,
-    ],
+  const { rows, sourceIndices } = useMemo(() => {
+    const started = performance.now();
+    const result = dashboardRowView(data.rows, state.filters, state.search, Object.keys(data.fields));
+    data.performance?.record("filtering", started);
+    return result;
+  }, [data.rows, data.fields, state.filters, state.search]);
+  const filteredRowKeys = useMemo(
+    () => sourceIndices ? sourceIndices.map(index => data.rowKeys[index]) : data.rowKeys,
+    [data.rowKeys, sourceIndices],
   );
-  const datasetEvaluation = useMemo(() => {
-    const sourceIndexByKey = new Map(
-      data.rowKeys.map((key, index) => [key, index] as const),
-    );
-    return prepareLogicalDatasets(filteredData, schema, {
-      sourceIndices: filteredRowKeys.map(
-        (key) => sourceIndexByKey.get(key) ?? -1,
-      ),
-      sourceRowKeys: data.rowKeys,
-    }, remoteData.workspace);
-  }, [filteredData, schema, filteredRowKeys, data.rowKeys, remoteData.workspace]);
+  const filteredData = useMemo<NormalizedData>(() => {
+    const started = performance.now();
+    const metrics = schema.calculations?.metrics;
+    const calculatedMetrics = rows === data.rows && data.calculatedMetrics
+      ? data.calculatedMetrics
+      : metrics?.length ? calculateDerivedMetrics(rows, metrics) : undefined;
+    if (metrics?.length && calculatedMetrics !== data.calculatedMetrics) data.performance?.record("calculations", started);
+    return {
+      ...data, rows, rowKeys: filteredRowKeys, calculatedMetrics,
+      aggregates: rows === data.rows ? data.aggregates : lazyAggregates(rows),
+      map: rows === data.rows ? data.map : lazyMapBindings(rows, data.fields, config.bindings?.map, config.providers?.geocoder?.cacheEntries, filteredRowKeys),
+    };
+  }, [
+    data.rows, data.fields, data.aggregates, data.calculatedMetrics, data.map, rows, filteredRowKeys,
+    schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries,
+  ]);
+  const datasetCache = useRef(new Map<string, DatasetResult>());
+  const datasetEvaluation = useMemo(() => prepareLogicalDatasets(filteredData, schema, {
+    sourceIndices,
+    sourceRowKeys: data.rowKeys,
+  }, remoteData.workspace, datasetCache.current, true), [
+    filteredData, schema.data, sourceIndices, data.rowKeys, remoteData.workspace,
+  ]);
   const runtimeWarnings = useMemo(
     () =>
       Array.from(
@@ -229,61 +215,67 @@ export function HyperPbiRoot({
       ),
     [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode],
   );
-  const getRowsForComponent = useCallback(
-    (componentId: string) =>
-      rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state }),
-    [data.rows, data.rowKeys, rows, state],
-  );
+  const getRowsForComponent = useMemo(() => {
+    const filtered = new Map<string, typeof rows>();
+    return (componentId: string) => {
+      if (!state.interactionFilters.length) return rows;
+      const result = filtered.get(componentId) ?? rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state });
+      filtered.set(componentId, result);
+      return result;
+    };
+  }, [data.rows, data.rowKeys, rows, state.interactionFilters, state.activeTabs]);
   const componentRows = useCallback(
     (componentId: string) => selectedComponentRows(componentId, { state }),
     [state],
   );
-  const getDatasetView = useCallback(
-    (name = "powerbi", componentId?: string) => {
+  const getDatasetView = useMemo(() => {
+    const views = new Map<string, ReturnType<NonNullable<RenderContextValue["getDatasetView"]>>>();
+    return (name = "powerbi", componentId?: string) => {
+      const cacheKey = JSON.stringify([name, componentId]);
+      if (views.has(cacheKey)) return views.get(cacheKey);
       const result = datasetEvaluation.datasets.get(name);
       if (!result) return undefined;
       const datasetRows = result.data.rows;
-      const selectedRows = componentId
-        ? rowsForComponent(
-            datasetRows,
-            result.data.rowKeys,
-            datasetRows,
-            componentId,
-            {
-              state,
-              datasetLineage: result.lineage,
-              powerBiSourceRowKeys: result.rootRowKeys ?? data.rowKeys,
-            },
-          )
+      const rootKeys = result.rootRowKeys ?? data.rowKeys;
+      const selectedRows = componentId && state.interactionFilters.length
+        ? rowsForComponent(datasetRows, result.data.rowKeys, datasetRows, componentId, {
+          state,
+          datasetLineage: result.lineage,
+          powerBiSourceRowKeys: rootKeys,
+        })
         : datasetRows;
-      const indexByRow = new Map(
-        datasetRows.map((row, index) => [row, index] as const),
-      );
-      const rowIndices = selectedRows
-        .map((row) => indexByRow.get(row) ?? -1)
-        .filter((index) => index >= 0);
-      return {
-        name,
-        sourceId: result.sourceId ?? "powerbi",
-        rows: rowIndices.map((index) => datasetRows[index]),
-        fields: result.data.fields,
-        rowIndices,
-        rowKeys: rowIndices.map(
-          (index) => result.data.rowKeys[index] ?? `${name}:${index}`,
-        ),
-        sourceRowIndices: rowIndices.map((index) => [
-          ...(result.lineage[index] ?? []),
-        ]),
-        sourceRowKeys: rowIndices.map((index) =>
-          (result.lineage[index] ?? []).map(
-            (sourceIndex) => (result.rootRowKeys ?? data.rowKeys)[sourceIndex] ?? String(sourceIndex),
-          ),
-        ),
+      const indices = selectedRows === datasetRows ? undefined : indexRows(datasetRows);
+      let rowIndices: number[] | undefined;
+      let rowKeys: string[] | undefined;
+      let sourceIndices: number[][] | undefined;
+      let sourceKeys: string[][] | undefined;
+      const rowIndexAt = (index: number) => indices?.get(selectedRows[index]) ?? index;
+      const sourceRowIndicesAt = (index: number) => {
+        const position = rowIndexAt(index);
+        return result.lineageAt?.(position) ?? result.lineage[position] ?? [];
+      };
+      const sourceRowKeysAt = (index: number) => sourceRowIndicesAt(index).map(source => rootKeys[source] ?? String(source));
+      const view = {
+        rowIndexAt, sourceRowIndicesAt, sourceRowKeysAt,
+        name, sourceId: result.sourceId ?? "powerbi", rows: selectedRows, fields: result.data.fields,
+        get rowIndices() { return rowIndices ??= selectedRows.map((row, index) => indices?.get(row) ?? index); },
+        get rowKeys() {
+          return rowKeys ??= indices ? this.rowIndices.map(index => result.data.rowKeys[index] ?? `${name}:${index}`) : result.data.rowKeys;
+        },
+        get sourceRowIndices() {
+          return sourceIndices ??= indices
+            ? this.rowIndices.map(index => result.lineageAt?.(index) ?? result.lineage[index] ?? [])
+            : result.lineage;
+        },
+        get sourceRowKeys() {
+          return sourceKeys ??= this.sourceRowIndices.map(lineage => lineage.map(index => rootKeys[index] ?? String(index)));
+        },
         totalRows: datasetRows.length,
       };
-    },
-    [datasetEvaluation.datasets, state, data.rowKeys],
-  );
+      views.set(cacheKey, view);
+      return view;
+    };
+  }, [datasetEvaluation.datasets, state.interactionFilters, state.activeTabs, data.rowKeys]);
   const isOverlayOpen = useCallback(
     (id: string) => state.openOverlays.includes(id),
     [state.openOverlays],
@@ -478,6 +470,7 @@ export function HyperPbiRoot({
       style={style}
     >
       <style>{sanitizedCss.css}</style>
+      <DataLoadNotice status={data.loadStatus} displayed={data.rows.length} />
       <RenderContext.Provider value={context}>
         {resolvedApp.enabled ? (
           <>
@@ -589,19 +582,11 @@ export function HyperPbiRoot({
         {settings.debug.showDataSample && (
           <details class="hp-debug">
             <summary>Normalized data sample</summary>
-            <pre>{JSON.stringify(filteredData.rows.slice(0, 10), null, 2)}</pre>
+            <pre>{JSON.stringify(samplePreviewRows(filteredData, 10), null, 2)}</pre>
           </details>
         )}
         {settings.debug.showPerformance && (
-          <div class="hp-performance">
-            Render preparation: {renderMs.toFixed(1)} ms · Loaded{" "}
-            {data.rows.length.toLocaleString()} rows
-            {data.loadStatus?.moreRowsAvailable ? " · more available" : ""}
-            {datasetEvaluation.diagnostics.map(
-              (item) =>
-                ` · ${item.name}: ${item.outputRowCount} rows/${item.evaluationMs.toFixed(1)}ms/${item.cacheStatus}`,
-            )}
-          </div>
+          <RuntimePerformancePanel data={data} filteredCount={rows.length} renderMs={renderMs} datasets={datasetEvaluation.diagnostics} />
         )}
         {config.security?.showSanitizerWarnings === true &&
           settings.showWarnings &&

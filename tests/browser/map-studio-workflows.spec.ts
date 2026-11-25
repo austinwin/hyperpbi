@@ -89,7 +89,7 @@ test("a new GeoJSON layer can be imported, styled by a field, reordered and hidd
   await page.getByRole("button", { name: "Back to layers" }).click();
   await expect(page.locator('[data-layer-id="geojson"]')).toContainText("2 features");
   await page.getByRole("switch", { name: "Show GeoJSON layer", exact: true }).uncheck();
-  expect((await specification(page)).layers.find((item: { id: string }) => item.id === "geojson").visible).toBe(false);
+  await expect.poll(async () => (await specification(page)).layers.find((item: { id: string }) => item.id === "geojson").visible).toBe(false);
   await expect(page.locator('[data-hp-layer-id="geojson"]')).toHaveCount(0);
 });
 

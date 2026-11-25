@@ -50,7 +50,7 @@ Alternatively, open `/playground` and import the folder's `project.hyperpbi` fil
 5. Paste `runtime.json` into **Runtime Configuration**.
 6. Paste `specification.json` into **Advanced JSON**, validate and preview it, then save.
 
-Every logical dataset in these examples starts from the host-neutral `powerbi` alias, so the same specification resolves the uploaded CSV in the Playground and the visual data view in Power BI. Each CSV remains below the visual's 50-field mapping limit and 30,000-row data window. Power BI still controls the received query grain, relationships, field summarization, and identity selection.
+Every logical dataset in these examples starts from the host-neutral `powerbi` alias, so the same specification resolves the uploaded CSV in the Playground and the visual data view in Power BI. Each CSV remains below the visual's 50-field mapping limit. The Power BI visual loads rows in 5,000-row windows. Power BI still controls the received query grain, relationships, field summarization, and identity selection.
 
 The Core profile has no external-provider WebAccess. The Maps profile is required where a dashboard uses approved basemap, geocoding, ArcGIS, GeoJSON, XYZ, or Dynamic Content network access. Keep credentials and private service tokens outside example JSON.
 

@@ -14,10 +14,13 @@ import type { MapJoinAggregationDiagnostic } from "../model/resolvedMapTypes";
 
 export interface MapJoinInput {
     powerBiRows: DataRow[];
-    powerBiRowIndices: number[];
+    powerBiRowIndices?: number[];
+    powerBiRowIndexAt?: (index: number) => number;
     powerBiRowKeys: string[];
     powerBiSourceRowIndices?: number[][];
+    powerBiSourceRowIndicesAt?: (index: number) => number[];
     powerBiSourceRowKeys?: string[][];
+    powerBiSourceRowKeysAt?: (index: number) => string[];
     serviceFeatures: ParsedArcGisFeature[];
     definition: MapJoinDefinition;
     layerId: string;
@@ -58,8 +61,8 @@ export function executeMapJoin(input: MapJoinInput): MapJoinResult {
         powerBiKeys.add(normalized);
         const match: PowerBiMatch = {
             row,
-            rowIndices: powerBiSourceRowIndices?.[i] ?? [powerBiRowIndices[i] ?? i],
-            rowKeys: powerBiSourceRowKeys?.[i] ?? [powerBiRowKeys[i] ?? `row-${i}`],
+            rowIndices: input.powerBiSourceRowIndicesAt?.(i) ?? powerBiSourceRowIndices?.[i] ?? [input.powerBiRowIndexAt?.(i) ?? powerBiRowIndices?.[i] ?? i],
+            rowKeys: input.powerBiSourceRowKeysAt?.(i) ?? powerBiSourceRowKeys?.[i] ?? [powerBiRowKeys[i] ?? `row-${i}`],
             originalJoinValue: rawValue,
         };
 

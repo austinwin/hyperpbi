@@ -30,12 +30,18 @@ export function bindingsForZoom(bindings: readonly ChartDatumBinding[], zoom: EC
     if (zoom.startValue !== undefined || zoom.endValue !== undefined) {
         const quantitative = [zoom.startValue, zoom.endValue].filter(value => value !== undefined).every(value => typeof value === "number" || value instanceof Date);
         if (!quantitative) {
-            const bySeries = new Map<number, ChartDatumBinding[]>();
-            for (const binding of bindings) bySeries.set(binding.seriesIndex, [...(bySeries.get(binding.seriesIndex) ?? []), binding]);
+            const bySeries = new Map<number, { first?: number; last?: number }>();
+            for (const binding of bindings) {
+                let range = bySeries.get(binding.seriesIndex);
+                if (!range) {
+                    range = { first: zoom.startValue === undefined ? -Infinity : undefined, last: zoom.endValue === undefined ? Infinity : undefined };
+                    bySeries.set(binding.seriesIndex, range);
+                }
+                if (range.first === undefined && sameCategory(binding.value, zoom.startValue)) range.first = binding.dataIndex;
+                if (range.last === undefined && sameCategory(binding.value, zoom.endValue)) range.last = binding.dataIndex;
+            }
             return bindings.filter(binding => {
-                const series = bySeries.get(binding.seriesIndex) ?? [];
-                const first = zoom.startValue === undefined ? Number.NEGATIVE_INFINITY : series.find(candidate => sameCategory(candidate.value, zoom.startValue))?.dataIndex;
-                const last = zoom.endValue === undefined ? Number.POSITIVE_INFINITY : series.find(candidate => sameCategory(candidate.value, zoom.endValue))?.dataIndex;
+                const { first, last } = bySeries.get(binding.seriesIndex)!;
                 return first !== undefined && last !== undefined && binding.dataIndex >= Math.min(first, last) && binding.dataIndex <= Math.max(first, last);
             });
         }
@@ -64,7 +70,9 @@ export function bindingsForBrush(bindings: readonly ChartDatumBinding[], brush: 
 }
 
 export function sourceRowsForBindings(bindings: readonly ChartDatumBinding[]): number[] {
-    return Array.from(new Set(bindings.flatMap(binding => binding.sourceRowIndices))).sort((left, right) => left - right);
+    const indices = new Set<number>();
+    for (const binding of bindings) for (const index of binding.sourceRowIndices) indices.add(index);
+    return Array.from(indices).sort((left, right) => left - right);
 }
 
 export function enableDeclarativeChartEvents(option: EChartsCoreOption, events: ChartEventsDefinition | undefined): EChartsCoreOption {

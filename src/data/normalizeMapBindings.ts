@@ -36,15 +36,25 @@ function coordinateFieldDiagnostic(field: NormalizedField | undefined, label: "L
     return diagnostics;
 }
 
-export function normalizeMapBindings(rows: DataRow[], fields: Record<string, NormalizedField>, overrides?: Partial<MapBindingKeys>, geocodeCache: Record<string, GeocodeCacheEntry> = {}, rowKeys: string[] = []): NormalizedMapData {
+interface MapFeatureBudget {
+    limit: number;
+    layerValue?: string;
+    matches: (row: DataRow) => boolean;
+}
+
+export function normalizeMapBindings(rows: DataRow[], fields: Record<string, NormalizedField>, overrides?: Partial<MapBindingKeys>, geocodeCache: Record<string, GeocodeCacheEntry> = {}, rowKeys: string[] = [], budget?: MapFeatureBudget): NormalizedMapData {
     const bindings = resolveMapBindings(fields, overrides);
     const mode = resolveMapMode(bindings);
     const grouped = new Map<string, NormalizedMapFeature[]>();
-    let invalidFeatureCount = 0;
+    let cachedAddressCount = 0;
+    let displayedCandidates = 0;
+    let requestedLayerFound = false;
+    const availableLayerValues = new Set<string>();
+    let invalidFeatureCount = mode === "none" ? rows.length : 0;
     let unsupportedTypeCount = 0;
     const coordinateCounts: MapCoordinateCounts = { dataViewRowCount: rows.length, validPairCount: 0, invalidPairCount: 0, incompletePairCount: 0, nonNumericPairCount: 0, outOfRangePairCount: 0 };
 
-    rows.forEach((row, rowIndex) => {
+    if (mode !== "none") rows.forEach((row, rowIndex) => {
         if (mode === "latLon") {
             const status = coordinateStatus(row, bindings.latitude, bindings.longitude);
             if (status === "valid") coordinateCounts.validPairCount += 1;
@@ -59,9 +69,19 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
         if (!location) { invalidFeatureCount += 1; return; }
         if (location.type === "address" && location.address) {
             const cached = geocodeCache[normalizeAddress(location.address)];
-            if (cached) location = { ...location, type: "point", lat: cached.latitude, lon: cached.longitude };
+            if (cached) {
+                cachedAddressCount++;
+                location = { ...location, type: "point", lat: cached.latitude, lon: cached.longitude };
+            }
         }
         const layerName = bindings.layer ? String(row[bindings.layer] ?? "(Blank)") : "Map data";
+        if (budget) {
+            if (availableLayerValues.size < 12) availableLayerValues.add(layerName);
+            if (layerName === budget.layerValue) requestedLayerFound = true;
+            if (budget.layerValue !== undefined && layerName !== budget.layerValue || !budget.matches(row)) return;
+            displayedCandidates++;
+            if (displayedCandidates > budget.limit) return;
+        }
         const size = bindings.size ? Number(row[bindings.size]) : NaN;
         const typeOverride = bindings.type ? String(row[bindings.type] ?? "").trim().toLowerCase() : "";
         const resolvedType = location.type === "geometry" && ["point", "line", "polygon"].includes(typeOverride) ? typeOverride as NormalizedMapFeature["type"] : location.type;
@@ -71,7 +91,7 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
             id: rowKey, rowIndex, rowKey, ...location, type: resolvedType,
             colorValue: bindings.color ? row[bindings.color] : null,
             sizeValue: Number.isFinite(size) ? size : null,
-            properties: propertiesFor(row, fields), row,
+            get properties() { return propertiesFor(row, fields); }, row,
         };
         const features = grouped.get(layerName) ?? [];
         features.push(feature);
@@ -92,8 +112,8 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
 
     const warnings = diagnostics.filter(item => item.severity !== "info").map(item => item.message);
     if (mode === "address") {
-        const resolved = Array.from(grouped.values()).flat().filter(feature => feature.type === "point").length;
-        const unresolved = Array.from(grouped.values()).flat().length - resolved;
+        const resolved = cachedAddressCount;
+        const unresolved = rows.length - invalidFeatureCount - resolved;
         warnings.push(resolved ? `${resolved.toLocaleString()} cached address location(s) loaded; ${unresolved.toLocaleString()} remain unresolved.` : "Address fields are bound. Geocoding is user-triggered in Studio; no address data was transmitted automatically.");
     }
     if (mode === "none") warnings.push("Choose geometry, coordinate, or address fields through the map layer source bindings. All source fields must be present in Values.");
@@ -101,7 +121,7 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
     if (unsupportedTypeCount > 0) warnings.push(`${unsupportedTypeCount.toLocaleString()} row(s) declare a non-point Map Type, but coordinate pairs render as points. Bind Geometry for lines or polygons.`);
     return {
         hasGeometry: Boolean(bindings.geometry), hasLatLon: Boolean(bindings.latitude && bindings.longitude), hasXY: Boolean(bindings.x && bindings.y), hasAddress: Boolean(bindings.address),
-        mode, bindings, layers: Array.from(grouped, ([name, features]) => ({ name, features })), warnings, invalidFeatureCount, diagnostics, coordinateCounts,
+        mode, bindings, ...(budget ? { displayedCandidates, availableLayerValues: Array.from(availableLayerValues), requestedLayerFound } : {}), layers: Array.from(grouped, ([name, features]) => ({ name, features })), warnings, invalidFeatureCount, diagnostics, coordinateCounts,
         locationCounts: {
             totalInputRows: rows.length,
             validFeatureCount: rows.length - invalidFeatureCount,
@@ -111,5 +131,34 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
             geometryParseFailureCount: mode === "geometry" ? invalidFeatureCount : 0,
             filteredRowCount: 0,
         },
+    };
+}
+
+/** Map binding metadata is used by Studio and default specifications even when
+ * no map is visible. Build feature objects only when a consumer asks for them. */
+export function lazyMapBindings(
+    rows: DataRow[],
+    fields: Record<string, NormalizedField>,
+    overrides?: Partial<MapBindingKeys>,
+    geocodeCache?: Record<string, GeocodeCacheEntry>,
+    rowKeys?: string[],
+): NormalizedMapData {
+    const bindings = resolveMapBindings(fields, overrides);
+    const mode = resolveMapMode(bindings);
+    let resolved: NormalizedMapData | undefined;
+    const resolve = () => resolved ??= normalizeMapBindings(rows, fields, overrides, geocodeCache, rowKeys);
+    return {
+        hasGeometry: Boolean(bindings.geometry),
+        hasLatLon: Boolean(bindings.latitude && bindings.longitude),
+        hasXY: Boolean(bindings.x && bindings.y),
+        hasAddress: Boolean(bindings.address),
+        mode,
+        bindings,
+        get layers() { return resolve().layers; },
+        get warnings() { return resolve().warnings; },
+        get invalidFeatureCount() { return resolve().invalidFeatureCount; },
+        get diagnostics() { return resolve().diagnostics; },
+        get coordinateCounts() { return resolve().coordinateCounts; },
+        get locationCounts() { return resolve().locationCounts; },
     };
 }

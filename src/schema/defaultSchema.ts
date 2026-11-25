@@ -76,7 +76,15 @@ export function createDefaultSchema(data: NormalizedData): HyperPbiSchema {
   if (!availableFields.length) return cloneDefault();
 
   const measure = availableFields.find(isNumeric);
-  const category = availableFields.find(isCategory);
+  const category = availableFields.filter(isCategory).find(field => {
+    if (data.rows.length <= 1_000) return true;
+    const values = new Set<string>();
+    for (let index = 0; index < Math.min(1_000, data.rows.length); index++) {
+      values.add(String(data.rows[Math.floor(index * data.rows.length / 1_000)][field.key] ?? ""));
+      if (values.size > 50) return false;
+    }
+    return values.size > 1;
+  });
   const hasSpatialFields = data.map.mode !== "none";
   const components: DashboardComponent[] = [
     {

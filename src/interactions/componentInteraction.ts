@@ -1,3 +1,4 @@
+import { indexRows } from "../data/rowIndex";
 import type { DataRow } from "../data/normalizeData";
 import type { RenderContextValue } from "../render/RenderContext";
 import type { FilterOperator } from "../schema/hyperpbiSchema";
@@ -245,9 +246,9 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
 type ComponentRowFilterContext = Pick<RenderContextValue, "state"> & Partial<Pick<RenderContextValue, "datasetLineage" | "powerBiSourceRowKeys">>;
 
 export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[], dashboardRows: DataRow[], componentId: string, context: ComponentRowFilterContext): DataRow[] {
-    const sourceIndex = new Map(sourceRows.map((row, index) => [row, index] as const));
+    const sourceIndex = () => indexRows(sourceRows);
     const sourceIndicesForRow = (row: DataRow): number[] => {
-        const index = sourceIndex.get(row);
+        const index = sourceIndex().get(row);
         if (index === undefined) return [];
         return context.datasetLineage?.[index] ?? [index];
     };
@@ -262,7 +263,7 @@ export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[],
                     : []
             );
             return rows.filter(row => {
-                const localIndex = sourceIndex.get(row);
+                const localIndex = sourceIndex().get(row);
                 if (localIndex === undefined) return false;
                 const originalKeys = context.powerBiSourceRowKeys;
                 return sourceIndicesForRow(row).some(index => allowed.has(originalKeys?.[index] ?? sourceRowKeys[localIndex]));

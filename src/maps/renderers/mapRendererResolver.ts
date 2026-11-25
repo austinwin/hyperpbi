@@ -161,15 +161,14 @@ function computeDomain(
     fieldSource: "powerbi" | "service" | "joined" | undefined
 ): [number, number] | null {
     if (!field) return null;
-    const values: number[] = [];
-    for (const f of features) {
-        const val = resolvedFeatureValue(f, field, fieldSource ?? "joined");
-        if (typeof val === "number" && isFinite(val)) {
-            values.push(val);
-        }
+    let min = Infinity, max = -Infinity;
+    for (const feature of features) {
+        const value = resolvedFeatureValue(feature, field, fieldSource ?? "joined");
+        if (typeof value !== "number" || !Number.isFinite(value)) continue;
+        min = Math.min(min, value);
+        max = Math.max(max, value);
     }
-    if (values.length === 0) return null;
-    return [Math.min(...values), Math.max(...values)];
+    return min === Infinity ? null : [min, max];
 }
 
 function resolveSymbol(symbol: MapSymbolDefinition): ResolvedMapSymbol {

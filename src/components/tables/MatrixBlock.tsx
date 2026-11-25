@@ -1,3 +1,4 @@
+import { indexRows } from "../../data/rowIndex";
 import { aggregateValue } from "../../data/aggregations";
 import { DataRow } from "../../data/normalizeData";
 import { MatrixComponent } from "../../schema/hyperpbiSchema";
@@ -42,47 +43,67 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
     const policy = resolveInteractionPolicy(component, context.config, "dataPoint");
     const selectedRows = context.componentRows(id);
     const selectedRowSet = useMemo(() => new Set(selectedRows), [selectedRows]);
-    const sourceIndices = useMemo(
-        () => new Map(sourceRows.map((row, index) => [row, index] as const)),
-        [sourceRows],
-    );
     const rowFields = component.rows;
     const columnField = component.columns?.[0];
-    const allColumnValues = columnField ? Array.from(new Set(rows.map(row => String(row[columnField] ?? BLANK)))) : [""];
-    const columnValues = allColumnValues.slice(0, MATRIX_COLUMN_LIMIT);
-    const allRowKeys = Array.from(new Map(rows.map(row => [JSON.stringify(tuple(row, rowFields)), tuple(row, rowFields)])).values());
-    const requestedRows = allRowKeys.slice(0, component.maxRows ?? 200);
-    const metrics = component.values.length ? component.values : [{ aggregation: "count" as const }];
-    const columnsPerRow = Math.max(1, columnValues.length) * metrics.length + (component.showTotals ? metrics.length : 0);
-    const rowKeys = requestedRows.slice(0, matrixVisibleRowLimit(requestedRows.length, columnsPerRow));
-    const truncated = rowKeys.length < requestedRows.length || allColumnValues.length > columnValues.length;
-
-    const rowGroups = new Map<string, DataRow[]>();
-    const cellGroups = new Map<string, DataRow[]>();
-    for (const row of rows) {
-        const rowKey = JSON.stringify(tuple(row, rowFields));
-        const rowGroup = rowGroups.get(rowKey) ?? [];
-        rowGroup.push(row);
-        rowGroups.set(rowKey, rowGroup);
-        const column = columnField ? String(row[columnField] ?? BLANK) : "";
-        const cellKey = `${rowKey}\u0000${column}`;
-        const cellGroup = cellGroups.get(cellKey) ?? [];
-        cellGroup.push(row);
-        cellGroups.set(cellKey, cellGroup);
-    }
-    const cellRows = (keys: string[], column: string) => cellGroups.get(`${JSON.stringify(keys)}\u0000${column}`) ?? [];
+    const metrics = component.values;
+    const displayedMetrics = useMemo(() => metrics.length ? metrics : [{ aggregation: "count" as const }], [metrics]);
+    const matrix = useMemo(() => {
+        const columns = new Set<string>();
+        if (!columnField) columns.add("");
+        let moreColumns = false;
+        const candidates = new Map<string, string[]>();
+        const maxRows = Math.min(MATRIX_CELL_BUDGET, component.maxRows ?? 200);
+        let moreRows = false;
+        for (const row of rows) {
+            if (columnField) {
+                const value = String(row[columnField] ?? BLANK);
+                if (columns.size < MATRIX_COLUMN_LIMIT) columns.add(value);
+                else if (!columns.has(value)) moreColumns = true;
+            }
+            if (candidates.size < maxRows || !moreRows) {
+                const keys = tuple(row, rowFields);
+                const key = JSON.stringify(keys);
+                if (candidates.size < maxRows && !candidates.has(key)) candidates.set(key, keys);
+                else if (!candidates.has(key)) moreRows = true;
+            }
+        }
+        const columnValues = Array.from(columns);
+        const columnsPerRow = Math.max(1, columnValues.length) * displayedMetrics.length + (component.showTotals ? displayedMetrics.length : 0);
+        const limit = matrixVisibleRowLimit(candidates.size, columnsPerRow);
+        const rowKeys = Array.from(candidates.values()).slice(0, limit);
+        const truncated = moreRows || moreColumns || rowKeys.length < candidates.size;
+        const groups = new Map(rowKeys.map(keys => [JSON.stringify(keys), { rows: [] as DataRow[], cells: new Map<string, DataRow[]>() }]));
+        for (const row of rows) {
+            const group = groups.get(JSON.stringify(tuple(row, rowFields)));
+            if (!group) continue;
+            if (component.showTotals) group.rows.push(row);
+            const column = columnField ? String(row[columnField] ?? BLANK) : "";
+            if (!columns.has(column)) continue;
+            const cell = group.cells.get(column);
+            if (cell) cell.push(row);
+            else group.cells.set(column, [row]);
+        }
+        const cellValues = new Map<DataRow[], ReturnType<typeof aggregateValue>[]>();
+        const maxima = displayedMetrics.map(() => 1);
+        for (const group of groups.values()) for (const subset of group.cells.values()) {
+            const values = displayedMetrics.map(metric => aggregateValue(subset, metric.field, metric.aggregation ?? "sum", metric.where));
+            cellValues.set(subset, values);
+            values.forEach((value, index) => { maxima[index] = Math.max(maxima[index], Math.abs(Number(value) || 0)); });
+        }
+        return { columnValues, rowKeys, groups, truncated, cellValues, maxima };
+    }, [rows, rowFields, columnField, displayedMetrics, component.maxRows, component.showTotals]);
+    const { columnValues, rowKeys, truncated, groups, cellValues, maxima } = matrix;
     const valueFor = (subset: DataRow[], metric: MatrixComponent["values"][number]) => aggregateValue(subset, metric.field, metric.aggregation ?? "sum", metric.where);
-    const maxima = metrics.map((metric, metricIndex) => Math.max(1, ...rowKeys.flatMap(keys => columnValues.map(column => Math.abs(Number(valueFor(cellRows(keys, column), metrics[metricIndex] ?? metric)) || 0)))));
 
     const renderCell = (keys: string[], column: string, metric: MatrixComponent["values"][number], metricIndex: number) => {
-        const subset = cellRows(keys, column);
-        const indices = subset.map(row => sourceIndices.get(row)).filter((index): index is number => index !== undefined);
+        const subset = groups.get(JSON.stringify(keys))?.cells.get(column) ?? [];
+        const values = cellValues.get(subset);
+        const value = values ? values[metricIndex] : valueFor([], metric);
+        const resolveIndices = () => subset.map(row => indexRows(sourceRows).get(row)).filter((index): index is number => index !== undefined);
         const explicitField = policy.field;
-        const values = explicitField ? Array.from(new Set(subset.map(row => row[explicitField]))) : [];
-        const value = valueFor(subset, metric);
         const formatted = formatValue(value, metric.format);
         const intensity = Math.abs(Number(value) || 0) / maxima[metricIndex];
-        const selected = indices.some(index => selectedRowSet.has(index));
+        const selected = selectedRowSet.size > 0 && subset.some(row => selectedRowSet.has(indexRows(sourceRows).get(row) ?? -1));
         const columnLabel = columnField ? `${column}, ` : "";
         const accessibleLabel = `${keys.join(", ")}, ${columnLabel}${metricLabel(metric, data.fields)}: ${formatted}`;
         return <td
@@ -91,7 +112,11 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
             class={selected ? "hp-row-selected" : ""}
             aria-label={accessibleLabel}
             title={accessibleLabel}
-            onClick={event => executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices: indices, sourceRowKeys: context.sourceRowKeys, field: explicitField, value: values.length === 1 ? values[0] : policy.value }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event })}
+            onClick={event => {
+                if (!policy.enabled) return;
+                const values = explicitField ? Array.from(new Set(subset.map(row => row[explicitField]))) : [];
+                executeComponentInteraction(policy, createInteractionPayload(component, { rowIndices: resolveIndices(), sourceRowKeys: context.sourceRowKeys, field: explicitField, value: values.length === 1 ? values[0] : policy.value }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
+            }}
             style={component.heatmap ? { background: `color-mix(in srgb, var(--hp-primary) ${Math.round(intensity * 28)}%, var(--hp-surface))` } : undefined}
         >{formatted}</td>;
     };
@@ -101,16 +126,16 @@ export function MatrixBlock({ component }: { component: MatrixComponent }) {
         <div class="hp-table-wrap"><table class="hp-matrix" aria-label={component.ariaLabel ?? component.title ?? "Matrix"}>
             <thead><tr>
                 {rowFields.map(field => <th key={field} scope="col">{data.fields[field]?.displayName ?? field}</th>)}
-                {columnValues.flatMap(column => metrics.map((metric, metricIndex) => <th key={`${column}\u0000${metric.field ?? "count"}\u0000${metricIndex}`} scope="col">{columnField ? `${column} — ${metricLabel(metric, data.fields)}` : metricLabel(metric, data.fields)}</th>))}
-                {component.showTotals && metrics.map((metric, metricIndex) => <th key={`total-${metric.field ?? "count"}-${metricIndex}`} scope="col">{metricLabel(metric, data.fields)} total</th>)}
+                {columnValues.flatMap(column => displayedMetrics.map((metric, metricIndex) => <th key={`${column}\u0000${metric.field ?? "count"}\u0000${metricIndex}`} scope="col">{columnField ? `${column} — ${metricLabel(metric, data.fields)}` : metricLabel(metric, data.fields)}</th>))}
+                {component.showTotals && displayedMetrics.map((metric, metricIndex) => <th key={`total-${metric.field ?? "count"}-${metricIndex}`} scope="col">{metricLabel(metric, data.fields)} total</th>)}
             </tr></thead>
             <tbody>{rowKeys.map(keys => {
                 const serializedKeys = JSON.stringify(keys);
-                const rowSubset = rowGroups.get(serializedKeys) ?? [];
+                const rowSubset = groups.get(serializedKeys)?.rows ?? [];
                 return <tr key={serializedKeys}>
                     {keys.map((value, index) => <th key={`${index}-${value}`} scope="row">{value}</th>)}
-                    {columnValues.flatMap(column => metrics.map((metric, metricIndex) => renderCell(keys, column, metric, metricIndex)))}
-                    {component.showTotals && metrics.map((metric, metricIndex) => <td key={`total-${metric.field ?? "count"}-${metricIndex}`}><strong>{formatValue(valueFor(rowSubset, metric), metric.format)}</strong></td>)}
+                    {columnValues.flatMap(column => displayedMetrics.map((metric, metricIndex) => renderCell(keys, column, metric, metricIndex)))}
+                    {component.showTotals && displayedMetrics.map((metric, metricIndex) => <td key={`total-${metric.field ?? "count"}-${metricIndex}`}><strong>{formatValue(valueFor(rowSubset, metric), metric.format)}</strong></td>)}
                 </tr>;
             })}</tbody>
         </table></div>
