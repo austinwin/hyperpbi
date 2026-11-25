@@ -40,17 +40,20 @@ Chrome 149 Headless Shell on an Apple M1 Max with 64 GB RAM. The host mock suppl
 
 | Rows × fields | After ingestion | Default Studio preview | Warm workflow | Sampled peak | Growth, cycle 2 → 5 | Median cycle |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10,000 × 25 | 11.8 | 16.7 | 23.6 | 67.6 | 0.2 | 0.58 s |
-| 10,000 × 50 | 12.8 | 17.9 | 26.0 | 70.4 | 0.2 | 0.67 s |
-| 35,813 × 21 | 19.9 | 25.3 | 43.5 | 105.7 | 0.2 | 0.85 s |
-| 50,000 × 25 | 24.9 | 30.4 | 55.9 | 122.0 | 0.2 | 1.04 s |
-| 50,000 × 50 | 29.7 | 35.5 | 66.0 | 138.5 | 0.2 | 1.22 s |
-| 100,000 × 25 | 41.0 | 47.6 | 96.2 | 198.5 | 0.3 | 1.86 s |
-| 100,000 × 50 | 50.6 | 57.5 | 115.8 | 228.2 | 0.3 | 2.12 s |
-| 250,000 × 25 | 88.9 | 97.8 | 216.1 | 409.4 | 1.3 | 2.97 s |
-| 250,000 × 50 | 112.8 | 122.0 | 264.4 | 499.2 | 1.4 | 3.56 s |
-| 500,000 × 25 | 169.3 | 182.6 | 416.7 | 809.9 | 1.5 | 4.96 s |
-| 500,000 × 50 | 217.1 | 230.7 | 512.8 | 956.9 | 1.5 | 6.06 s |
+| 10,000 × 25 | 11.8 | 16.6 | 23.5 | 67.8 | 0.2 | 0.60 s |
+| 10,000 × 50 | 12.8 | 17.9 | 26.0 | 68.2 | 0.2 | 0.70 s |
+| 35,813 × 21 | 19.9 | 25.3 | 43.4 | 106.2 | 0.2 | 0.76 s |
+| 50,000 × 25 | 24.9 | 30.4 | 55.9 | 122.3 | 0.2 | 1.04 s |
+| 50,000 × 50 | 29.7 | 35.5 | 66.0 | 132.0 | 0.2 | 1.23 s |
+| 100,000 × 25 | 41.0 | 47.6 | 96.2 | 197.3 | 0.3 | 1.84 s |
+| 100,000 × 50 | 50.6 | 57.5 | 115.8 | 237.1 | 0.2 | 2.30 s |
+| 250,000 × 25 | 88.9 | 97.8 | 216.1 | 408.9 | 1.3 | 3.17 s |
+| 250,000 × 50 | 112.8 | 121.9 | 264.4 | 513.8 | 1.4 | 3.71 s |
+| 500,000 × 25 | 169.3 | 182.6 | 416.6 | 830.8 | 1.4 | 4.98 s |
+| 500,000 × 50 | 217.1 | 230.7 | 512.6 | 940.1 | 1.5 | 6.09 s |
+
+After visual destruction and a settled garbage collection, JavaScript heap was 13.9–14.6 MiB across the eleven cases.
+
 
 Peak is the highest JavaScript heap sample observed at the end of a simulated host window across the test. It does not cover every allocation or total process memory. The 500K × 50 scenario is a stress test and can consume close to 1 GiB of JavaScript heap during this workflow. Actual report values, column cardinality, other visuals and native host limits affect capacity.
 

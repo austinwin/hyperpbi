@@ -1,20 +1,30 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.0.3",
-  "powerBiVersion": "1.0.3.0",
+  "releaseVersion": "1.0.4",
+  "powerBiVersion": "1.0.4.0",
   "activeComponents": 85,
-  "sourceRevision": "fabf37960af0a55e1b173127104ddf32e38b840a",
-  "baselineRevision": "16063670d6d3ab9994b7716e22f1cca8fe598f7a",
-  "builtAt": "2026-11-12T17:11:02.989Z",
+  "sourceRevision": "5ba3a885c958c27c4815dfe353ff9cd07e9df72a",
+  "baselineRevision": "07b575ded08f9f88997612ac98aa57395da139f9",
+  "builtAt": "2026-11-25T17:04:53.353946Z",
   "verification": {
-    "unitTests": 897,
+    "unitTests": 903,
     "runtimeBrowserTests": 67,
     "playgroundBrowserTests": 15,
-    "packagedVisualBrowserTests": 6,
+    "packagedVisualBrowserTests": 7,
+    "syntheticLargeDataCases": 11,
     "packageCapabilities": "passed",
+    "windowsPowerBiDesktop": "pending",
     "steps": [
       {
-        "name": "lint:changed-files",
+        "name": "types:runtime",
+        "exitCode": 0
+      },
+      {
+        "name": "types:web",
+        "exitCode": 0
+      },
+      {
+        "name": "types:playground",
         "exitCode": 0
       },
       {
@@ -34,26 +44,6 @@
         "exitCode": 0
       },
       {
-        "name": "build:web",
-        "exitCode": 0
-      },
-      {
-        "name": "types:playground",
-        "exitCode": 0
-      },
-      {
-        "name": "build:playground",
-        "exitCode": 0
-      },
-      {
-        "name": "build:website-worker",
-        "exitCode": 0
-      },
-      {
-        "name": "package:sites",
-        "exitCode": 0
-      },
-      {
         "name": "package:core",
         "exitCode": 0
       },
@@ -68,19 +58,23 @@
       {
         "name": "browser:packaged-visuals",
         "exitCode": 0
+      },
+      {
+        "name": "benchmark:powerbi",
+        "exitCode": 0
       }
     ]
   },
   "packageSizes": {
     "core": {
-      "before": 2274863,
-      "after": 2276167,
-      "increase": 1304
+      "before": 2277509,
+      "after": 2283665,
+      "increase": 6156
     },
     "maps": {
-      "before": 2275878,
-      "after": 2277160,
-      "increase": 1282
+      "before": 2278402,
+      "after": 2284617,
+      "increase": 6215
     }
   },
   "artifacts": [
@@ -285,24 +279,24 @@
       "sha256": "9820aaa80c99b6df8b0329f3a814523fbbc3a2038a6138d28e1dbf44f9a64b9e"
     },
     {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.3.0-core.pbiviz",
-      "bytes": 2277509,
-      "sha256": "d63624a57f9b10198e4e2d43da7915e9d10e3e7406e2d2b16ce2b349f72943c7"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.3.0-maps.pbiviz",
-      "bytes": 2278402,
-      "sha256": "cd02491d5035e18f879ae4f0fd17584890533334e1392680561d38e7c082e4d6"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.3.0.pbiviz",
-      "bytes": 2278402,
-      "sha256": "cd02491d5035e18f879ae4f0fd17584890533334e1392680561d38e7c082e4d6"
-    },
-    {
       "path": "dist/hyperpbi-web-sites.zip",
       "bytes": 27457659,
       "sha256": "7fb591af304deb7c015cd8457350f64304301fbc1be49426379b713f7e123365"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0-core.pbiviz",
+      "bytes": 2283665,
+      "sha256": "a729e087528dd7d93fa6004714351645a1996d28dc923bf0db33c2fc40f55a7a"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0-maps.pbiviz",
+      "bytes": 2284617,
+      "sha256": "2c2c25657fefe432761e4ff747bb7dbf32f07636cd414a0cf49f3a92e978262f"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0.pbiviz",
+      "bytes": 2284617,
+      "sha256": "2c2c25657fefe432761e4ff747bb7dbf32f07636cd414a0cf49f3a92e978262f"
     },
     {
       "path": "dist/package-capability-profiles.json",
@@ -312,7 +306,12 @@
     {
       "path": "dist/package.json",
       "bytes": 649,
-      "sha256": "db13ec1bcfe720a0dcb0fa79521681f73fcc106ea4f5024ed30b1bb9693ca1d0"
+      "sha256": "17b1a608e269cdf8be0357e5c72ffabdb6aafbb49260f716798810b75a795d63"
     }
-  ]
+  ],
+  "webDistribution": {
+    "releaseVersion": "1.0.3",
+    "sourceRevision": "fabf37960af0a55e1b173127104ddf32e38b840a",
+    "builtAt": "2026-11-12T17:11:02.989Z"
+  }
 }
