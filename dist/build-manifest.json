@@ -316,23 +316,28 @@
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0-core.pbiviz",
-      "bytes": 2289903,
-      "sha256": "29efa3a5ea601b38aecf4931b1856b15c7409c96445104d721a9f0ebe0c29c36"
+      "bytes": 2289935,
+      "sha256": "eb4b9c04a4fdaf0994cb37e2189416f76df03514dae2d17be0a3a2fa0ea71988"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0-maps.pbiviz",
-      "bytes": 2290913,
-      "sha256": "08708826105ab98ed09659dd1dbc6f21520008c622a52261feb1763290fec9c1"
+      "bytes": 2290935,
+      "sha256": "b1ce29abc4578bff17e89bdfd65c3a723186571a00e46c49663fef4eabadcb49"
     },
     {
       "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0.pbiviz",
-      "bytes": 2290913,
-      "sha256": "08708826105ab98ed09659dd1dbc6f21520008c622a52261feb1763290fec9c1"
+      "bytes": 2290935,
+      "sha256": "b1ce29abc4578bff17e89bdfd65c3a723186571a00e46c49663fef4eabadcb49"
     }
   ],
   "webDistribution": {
     "releaseVersion": "1.0.3",
     "sourceRevision": "fabf37960af0a55e1b173127104ddf32e38b840a",
     "builtAt": "2026-11-12T17:11:02.989Z"
+  },
+  "mainBranchPowerBiBuild": {
+    "sourceRevision": "d8265557f20257070fd5b00d2fcd7cf85b01f45b",
+    "packagedAt": "2026-11-25T22:21:47.029Z",
+    "verification": "build-only"
   }
 }
