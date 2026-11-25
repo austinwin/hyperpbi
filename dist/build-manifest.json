@@ -312,22 +312,22 @@
     {
       "path": "dist/package.json",
       "bytes": 649,
-      "sha256": "311464e46930ecc57161063bed6ee464d2fc3508707d487f89b4df1b0bed028b"
+      "sha256": "96c970aec6e6fb510837a811d00573cee9c27c07d8c9b26ed053a2c93e3a5a18"
     },
     {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0-core.pbiviz",
-      "bytes": 2289935,
-      "sha256": "eb4b9c04a4fdaf0994cb37e2189416f76df03514dae2d17be0a3a2fa0ea71988"
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.1-core.pbiviz",
+      "bytes": 2292084,
+      "sha256": "2395a72958526e9221b40985b9c065250999127620c445a5ec0865d4a5c87406"
     },
     {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0-maps.pbiviz",
-      "bytes": 2290935,
-      "sha256": "b1ce29abc4578bff17e89bdfd65c3a723186571a00e46c49663fef4eabadcb49"
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.1-maps.pbiviz",
+      "bytes": 2293094,
+      "sha256": "b7675f24e59563e02d80525014befb9e73940d3ffbe0de62a3c1e64e206877a2"
     },
     {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.0.pbiviz",
-      "bytes": 2290935,
-      "sha256": "b1ce29abc4578bff17e89bdfd65c3a723186571a00e46c49663fef4eabadcb49"
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.6.1.pbiviz",
+      "bytes": 2293094,
+      "sha256": "b7675f24e59563e02d80525014befb9e73940d3ffbe0de62a3c1e64e206877a2"
     }
   ],
   "webDistribution": {
@@ -336,8 +336,21 @@
     "builtAt": "2026-11-12T17:11:02.989Z"
   },
   "mainBranchPowerBiBuild": {
-    "sourceRevision": "d8265557f20257070fd5b00d2fcd7cf85b01f45b",
-    "packagedAt": "2026-11-25T22:21:47.029Z",
-    "verification": "build-only"
+    "powerBiVersion": "1.0.6.1",
+    "sourceRevision": "126f7d1a63272edcf321128785914e4ccc7fa2e4",
+    "baselineRevision": "77facc6160a8d37fdd45f4518b4252436874c458",
+    "packagedAt": "2026-11-25T23:01:00.351Z",
+    "verification": {
+      "full": "passed",
+      "unitTests": 918,
+      "runtimeBrowserTests": 69,
+      "playgroundBrowserTests": 15,
+      "packagedVisualBrowserTests": 9,
+      "packagedStressTests": 15,
+      "packagedStressDataCases": 12,
+      "mixedDashboardBenchmarkCases": 3,
+      "packageCapabilities": "passed",
+      "windowsPowerBiDesktop": "pending"
+    }
   }
 }

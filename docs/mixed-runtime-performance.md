@@ -38,6 +38,12 @@ The seven updates are five filter targets, the control and the tabs container. A
 
 Studio stayed within 100 ms to an editable surface in these samples. This pass showed no Studio speedup. Heap numbers come from Chrome after explicit garbage collection. The baseline kept one more raw generation per refresh. The optimized run reached a stable plateau after the second replacement in all three cases. Mounted state still retained older snapshot references. The browser test measures JavaScript heap without GPU, native or Power BI process memory.
 
+### Packaged visual
+
+All 12 data cases passed, including the 35,813 × 21 reproduction and 10K, 50K, 100K, 250K, and 500K rows at both 25 and 50 fields. The 500K × 50 fixture completed five filter, tab, selection, Studio edit and host refresh cycles. Its retained JavaScript heap grew by 1.2 MiB from cycle two to five and returned to 14 MiB after teardown. The largest heap sample taken at a simulated host window was 665 MiB for that fixture.
+
+At 54,990 × 21, the 1.0.6.0 and 1.0.6.1 Core archives both received two windows with the same simulated 30 ms continuation latency. Median time to the complete report was 153 → 141 ms across five measured refreshes per version. The slowest observation was 169 → 157 ms. This comparison includes the simulated host delay.
+
 ## Root causes and architecture decisions
 
 1. **Row expansion and selection work dominated CPU preparation.** The baseline profile spent about 1,007 ms reading packed row properties and 788 ms resolving chart lineage during the sampled scope and global sequence at 500 components. The normalizer now fingerprints Power BI table cells directly using precomputed column offsets. The fingerprint, duplicate ordinals, field normalization and selection identities are preserved. Chart group lineage resolves when the group is selected or highlighted. Bounded row-view caches share repeated scalar predicates and search results within an immutable source revision.
