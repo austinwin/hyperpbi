@@ -38,12 +38,12 @@ For a loading comparison, put the 1.0.4 Core package in a separate directory. Ru
 
 ## Loading comparison for 1.0.5
 
-For 54,990 rows × 21 fields, the mock used the same data and dashboard in both packages. Timing starts when the first Power BI update is delivered and ends when the visual renders the complete KPI. The median uses five measured refreshes after one warm-up.
+For 54,990 rows × 21 fields, the mock used the same data and dashboard in both packages. Timing starts just before the mock builds the first Power BI window and ends after the terminal update renders the complete KPI. The median uses five measured refreshes after one warm-up.
 
 | Power BI package | Requested rows per window | Continuation requests | Median to complete report |
 | --- | ---: | ---: | ---: |
-| 1.0.4.0 | 5,000 | 10 | 518 ms |
-| 1.0.5.0 | 30,000 | 1 | 151 ms |
+| 1.0.4.0 | 5,000 | 10 | 546 ms |
+| 1.0.5.0 | 30,000 | 1 | 152 ms |
 
 The Power BI model query before the first window and the Windows host are outside this measurement. On the original PBIX, use Performance Analyzer and the same slicer changes to compare the visual with a native Power BI table that uses the same fields, summarization, and filters.
 

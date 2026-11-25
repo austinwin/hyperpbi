@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.0.4",
-  "powerBiVersion": "1.0.4.0",
+  "releaseVersion": "1.0.5",
+  "powerBiVersion": "1.0.5.0",
   "activeComponents": 85,
-  "sourceRevision": "5ba3a885c958c27c4815dfe353ff9cd07e9df72a",
-  "baselineRevision": "07b575ded08f9f88997612ac98aa57395da139f9",
-  "builtAt": "2026-11-25T17:04:53.353946Z",
+  "sourceRevision": "17ccaff2add99d4bbeb3100cc1e63114686be203",
+  "baselineRevision": "6344850054d52c9722111fef46d987be1c2e9033",
+  "builtAt": "2026-11-25T17:36:44.192Z",
   "verification": {
-    "unitTests": 903,
+    "unitTests": 905,
     "runtimeBrowserTests": 67,
     "playgroundBrowserTests": 15,
-    "packagedVisualBrowserTests": 7,
-    "syntheticLargeDataCases": 11,
+    "packagedVisualBrowserTests": 8,
+    "syntheticLargeDataCases": 12,
     "packageCapabilities": "passed",
     "windowsPowerBiDesktop": "pending",
     "steps": [
@@ -28,6 +28,10 @@
         "exitCode": 0
       },
       {
+        "name": "lint",
+        "exitCode": 0
+      },
+      {
         "name": "unit",
         "exitCode": 0
       },
@@ -36,11 +40,23 @@
         "exitCode": 0
       },
       {
+        "name": "content",
+        "exitCode": 0
+      },
+      {
         "name": "browser:runtime",
         "exitCode": 0
       },
       {
         "name": "browser:playground",
+        "exitCode": 0
+      },
+      {
+        "name": "build:playground",
+        "exitCode": 0
+      },
+      {
+        "name": "build:website-worker",
         "exitCode": 0
       },
       {
@@ -67,14 +83,14 @@
   },
   "packageSizes": {
     "core": {
-      "before": 2277509,
-      "after": 2283665,
-      "increase": 6156
+      "before": 2283665,
+      "after": 2283127,
+      "increase": -538
     },
     "maps": {
-      "before": 2278402,
-      "after": 2284617,
-      "increase": 6215
+      "before": 2284617,
+      "after": 2284066,
+      "increase": -551
     }
   },
   "artifacts": [
@@ -284,21 +300,6 @@
       "sha256": "7fb591af304deb7c015cd8457350f64304301fbc1be49426379b713f7e123365"
     },
     {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0-core.pbiviz",
-      "bytes": 2283665,
-      "sha256": "a729e087528dd7d93fa6004714351645a1996d28dc923bf0db33c2fc40f55a7a"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0-maps.pbiviz",
-      "bytes": 2284617,
-      "sha256": "2c2c25657fefe432761e4ff747bb7dbf32f07636cd414a0cf49f3a92e978262f"
-    },
-    {
-      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.4.0.pbiviz",
-      "bytes": 2284617,
-      "sha256": "2c2c25657fefe432761e4ff747bb7dbf32f07636cd414a0cf49f3a92e978262f"
-    },
-    {
       "path": "dist/package-capability-profiles.json",
       "bytes": 532,
       "sha256": "3095e71797fe47dc3e6227ca3f5da882774c99e67bdbcf2671f9a2dd606b9a99"
@@ -306,7 +307,22 @@
     {
       "path": "dist/package.json",
       "bytes": 649,
-      "sha256": "17b1a608e269cdf8be0357e5c72ffabdb6aafbb49260f716798810b75a795d63"
+      "sha256": "ef95de21bf12c2d3156e0bd2812f116572391974e62c58194d511daafac6a58d"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.5.0-core.pbiviz",
+      "bytes": 2283127,
+      "sha256": "8b88d0e72d248daa6515dad3cc0dec756d4c9e05b5028b78baf74510fb22b85d"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.5.0-maps.pbiviz",
+      "bytes": 2284066,
+      "sha256": "fa3d93602526bba675c0f4d59342ca41e200415f98b92a47387dc1f9dfc12646"
+    },
+    {
+      "path": "dist/HyperPBI7D4A4A5C2D7B4C41B97D681FAF9F0D31.1.0.5.0.pbiviz",
+      "bytes": 2284066,
+      "sha256": "fa3d93602526bba675c0f4d59342ca41e200415f98b92a47387dc1f9dfc12646"
     }
   ],
   "webDistribution": {

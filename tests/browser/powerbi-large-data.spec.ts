@@ -207,9 +207,17 @@ for (const [rows, fields] of cases) {
         const previewPage = page.getByRole("spinbutton", { name: "Data preview page" });
         await previewPage.fill(String(Math.ceil(rows / 25)));
         await previewPage.press("Tab");
-        await page.locator(".hp-studio-table-wrap").evaluate(element => { element.scrollTop = element.scrollHeight; });
-        await expect(page.locator(".hp-studio-table-wrap")).toContainText(`WO-${String(rows - 1).padStart(6, "0")}`);
-        expect(await page.locator(".hp-studio-table-wrap tbody tr").count()).toBeLessThanOrEqual(26);
+        await expect(page.getByRole("button", { name: "Next data page" })).toBeDisabled();
+        const previewTable = page.locator(".hp-studio-table-wrap");
+        // Let the page-change effect reset the scroll position before scrolling the new page.
+        await previewTable.evaluate(element => new Promise<void>(resolve =>
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                element.scrollTop = element.scrollHeight;
+                resolve();
+            })),
+        ));
+        await expect(previewTable).toContainText(`WO-${String(rows - 1).padStart(6, "0")}`);
+        expect(await previewTable.locator("tbody tr").count()).toBeLessThanOrEqual(26);
         await page.getByRole("button", { name: "Preview changes", exact: true }).last().click();
         await expect(page.locator('[data-hp-id="record-summary"] .hp-metric-value').first()).toHaveText(countText(rows));
         const initialStudio = await heap();
