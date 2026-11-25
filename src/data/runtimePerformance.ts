@@ -1,4 +1,4 @@
-export type RuntimePhase = "ingestion" | "validation" | "calculations" | "datasets" | "filtering" | "render";
+export type RuntimePhase = "ingestion" | "validation" | "calculations" | "datasets" | "filtering" | "render" | "hostData" | "hostSegment" | "hostResize" | "hostPresentation" | "editorStart";
 
 export class RuntimePerformance {
     private readonly phases: Partial<Record<RuntimePhase, { calls: number; totalMs: number; lastMs: number; maxMs: number }>> = {};

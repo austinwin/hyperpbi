@@ -2,7 +2,7 @@ import { ExpressionNode } from "../calculations/calculationTypes";
 import { evaluateExpression } from "../calculations/expressionEvaluator";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { aggregateValue, lazyAggregates } from "./aggregations";
-import { matchesFilter } from "./filtering";
+import { compileFilter } from "./filtering";
 import { DataRow, NormalizedData, NormalizedField, Primitive } from "./normalizeData";
 import { lazyMapBindings } from "./normalizeMapBindings";
 import { compareSortValues } from "./sorting";
@@ -14,6 +14,7 @@ export interface DatasetMetric { op: "sum" | "avg" | "min" | "max" | "count" | "
 export interface DatasetSort { field: string; direction: "ascending" | "descending" | "asc" | "desc"; }
 export interface DatasetDefinition {
     source: "powerbi" | string;
+    filterContext?: "dashboard" | "host";
     select?: string[];
     rename?: Record<string,string>;
     filter?: DatasetFilter | DatasetFilter[];
@@ -79,7 +80,7 @@ function groupItems(items: LineageRow[], keys: string[]): Map<string, LineageRow
 
 function runDefinition(definition: DatasetDefinition, input: DatasetResult, name: string, fields: Record<string, NormalizedField>, warnings: string[], signature: string): DatasetResult {
     const started = performance.now();
-    const filters = definition.filter ? [definition.filter].flat() : [];
+    const filters = [definition.filter ?? []].flat().map(filter => ({ field: filter.field, matches: compileFilter(filter.operator, filter.value) }));
     const derives = Object.entries(definition.derive ?? {});
     const renames = Object.entries(definition.rename ?? {});
     const groupBy = definition.groupBy ?? [];
@@ -98,7 +99,7 @@ function runDefinition(definition: DatasetDefinition, input: DatasetResult, name
 
     for (let index = 0; index < input.data.rows.length; index++) {
         const source = input.data.rows[index];
-        if (!filters.every(filter => matchesFilter(source[filter.field], filter.operator, filter.value))) continue;
+        if (!filters.every(filter => filter.matches(source[filter.field]))) continue;
         let row = source;
         if (derives.length || renames.length) {
             row = { ...source };
@@ -201,10 +202,12 @@ export function evaluateDatasets(
     lineageOptions: LineageOptions = {},
     sourceData: Record<string, NormalizedData> = {},
     lazy = false,
+    hostData?: NormalizedData,
 ): DatasetEvaluation {
     const schema = resolveDatasetSchemas(base, definitions, sourceData);
     const roots = new Map<string, DatasetResult>([["powerbi", rootDataset("powerbi", base, lineageOptions)]]);
     for (const [id, data] of Object.entries(sourceData)) if (id !== "powerbi") roots.set(id, rootDataset(id, data));
+    const hostRoot = hostData && hostData !== base ? rootDataset("powerbi", hostData) : roots.get("powerbi")!;
     const signatures = new Map(Array.from(roots, ([id, result]) => [id, result.signature]));
     const dependencies = new Map<string, string>();
     const diagnostics: DatasetDiagnostic[] = [];
@@ -215,7 +218,7 @@ export function evaluateDatasets(
         if (signatures.has(name)) return signatures.get(name);
         const definition = definitions[name];
         if (!definition || !schema.datasets.has(name)) return undefined;
-        const input = signatureFor(definition.source);
+        const input = definition.source === "powerbi" && definition.filterContext === "host" ? hostRoot.signature : signatureFor(definition.source);
         if (!input) return undefined;
         // Store one revision token per node to keep deep dependency chains small.
         const dependency = JSON.stringify([name, input, definition]);
@@ -237,7 +240,7 @@ export function evaluateDatasets(
             return root;
         }
         const definition = definitions[name];
-        const input = datasets.get(definition.source);
+        const input = definition.source === "powerbi" && definition.filterContext === "host" ? hostRoot : datasets.get(definition.source);
         const fields = schema.datasets.get(name)?.fields;
         if (!input || !fields) return undefined;
         const cached = cache.get(name);

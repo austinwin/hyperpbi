@@ -90,7 +90,7 @@ export function prepareRuntimeData(
 export function prepareLogicalDatasets(
   data: NormalizedData,
   specification: HyperPbiSchema,
-  lineageOptions: { sourceIndices?: number[]; sourceRowKeys?: string[] } = {},
+  lineageOptions: { sourceIndices?: number[]; sourceRowKeys?: string[]; hostData?: NormalizedData } = {},
   workspace?: DataWorkspace,
   cache = new Map<string, DatasetResult>(),
   lazy = false,
@@ -102,6 +102,7 @@ export function prepareLogicalDatasets(
     lineageOptions,
     { ...remoteSourcePlaceholderData(specification), ...(workspace ? workspaceSourceData(workspace) : {}) },
     lazy,
+    lineageOptions.hostData,
   );
 }
 

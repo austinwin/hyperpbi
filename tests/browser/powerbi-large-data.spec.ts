@@ -13,7 +13,7 @@ interface Workload {
     windowMs: number;
     completeMs?: number;
     configuration: string;
-    refresh(rows: number, specification: string, rejectAfter?: number): void;
+    refresh(rows: number, specification: string, rejectAfter?: number, omitEditMode?: boolean): void;
     edit(studio: boolean): void;
     destroy(): void;
 }
@@ -87,7 +87,7 @@ async function mountVisual(page: Page, width: number, { directory = "dist", host
         let dataStart = 0, revision = -1, activeSpecification = "", reject = Infinity, requestId = 0, queryStart = 0;
         const state: Workload = {
             total: 0, requests: 0, selections: 0, builderCalls: 0, mode: 0, peakHeap: 0, windowMs: 0, configuration,
-            refresh(rows, specification, rejectAfter) {
+            refresh(rows, specification, rejectAfter, omitEditMode) {
                 queryStart = performance.now();
                 requestId++;
                 revision++;
@@ -98,7 +98,7 @@ async function mountVisual(page: Page, width: number, { directory = "dist", host
                 state.completeMs = undefined;
                 reject = rejectAfter ?? Infinity;
                 activeSpecification = specification;
-                send(false);
+                send(false, omitEditMode);
             },
             edit(studio) {
                 state.mode = studio ? 1 : 0;
@@ -120,7 +120,7 @@ async function mountVisual(page: Page, width: number, { directory = "dist", host
             if (field === 5) return -95.5 + index % 650 / 1_000;
             return (index + field) % 1_000_000;
         });
-        const send = (append: boolean) => {
+        const send = (append: boolean, omitEditMode = false) => {
             const start = performance.now();
             const end = Math.min(dataStart + windowRows, state.total);
             const overlap = append && dataStart > 0 ? 1 : 0;
@@ -129,7 +129,7 @@ async function mountVisual(page: Page, width: number, { directory = "dist", host
             const identity = rows.map((_row, index) => ({ stableKey: offset + index }));
             dataStart = end;
             visual.update({
-                type: 2, viewport, editMode: state.mode, operationKind: append ? 2 : 0,
+                type: 2, viewport, editMode: omitEditMode ? undefined : state.mode, operationKind: append ? 2 : 0,
                 dataViews: [{ metadata: metadata(end < state.total), table: { columns: state.total === 0 ? [] : columns, rows, identity, lastMergeIndex: overlap ? 0 : undefined } }],
             });
             state.windowMs = Math.max(state.windowMs, performance.now() - start);
@@ -359,4 +359,37 @@ test("compare 54,990-row loading against the previous package", async ({ browser
     const record = { rows: 54_990, fields: 21, simulatedHostLatencyMs: 30, results };
     await testInfo.attach("comparison", { body: JSON.stringify(record), contentType: "application/json" });
     console.log(JSON.stringify(record));
+});
+
+test("native edit mode starts before Power BI data and survives updates without an edit mode", async ({ page }) => {
+    const baseline = process.env.HYPERPBI_EDIT_BASELINE_PACKAGE_DIR;
+    await mountVisual(page, 21, { directory: baseline ?? "dist" });
+    await refresh(page, 0, "");
+    await page.evaluate(() => window.hpWorkload.edit(true));
+    if (baseline) {
+        await expect(page.locator(".hp-studio")).toHaveCount(0);
+    } else {
+        await expect(page.locator(".hp-studio")).toBeVisible();
+    }
+    await page.evaluate(() => window.hpWorkload.refresh(1_000, "", undefined, true));
+    if (baseline) {
+        await expect(page.locator(".hp-studio")).toHaveCount(0);
+    } else {
+        await expect(page.locator(".hp-studio")).toBeVisible();
+        await expect(page.getByRole("button", { name: "Preview changes", exact: true }).first()).toBeEnabled();
+        await expect(page.locator(".hp-studio-data-status")).toContainText("21 fields");
+        const openEditor = async () => {
+            await page.getByRole("button", { name: "Advanced", exact: true }).click();
+            await page.getByRole("menuitem", { name: /JSON editor/ }).click();
+        };
+        await openEditor();
+        const editor = page.getByLabel("HyperPBI specification JSON", { exact: true });
+        const draft = '{"unfinished":';
+        await editor.fill(draft);
+        await page.evaluate(() => window.hpWorkload.edit(false));
+        await expect(page.locator(".hp-studio")).toHaveCount(0);
+        await page.evaluate(() => window.hpWorkload.edit(true));
+        await openEditor();
+        await expect(editor).toHaveText(draft);
+    }
 });

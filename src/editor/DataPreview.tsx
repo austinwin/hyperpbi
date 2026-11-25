@@ -22,7 +22,7 @@ export function DataPreview({ data }: { data: NormalizedData }) {
     return (
       <div class="hp-bottom-empty" role="status">
         <strong>No fields are available</strong>
-        <p>Add fields to the Power BI visual, then reopen the Builder.</p>
+        <p>Add fields to Values in Power BI. The preview updates when fields arrive.</p>
       </div>
     );
 

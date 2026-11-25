@@ -23,7 +23,7 @@ import { ExternalFilterResult } from "../powerbi/externalFilters";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import {
   componentRows as selectedComponentRows,
-  rowsForComponent,
+  createComponentRowRouter,
 } from "../interactions/componentInteraction";
 import { executeUiAction, executeUiActions } from "../actions/uiActions";
 import type { UiAction, UiActionResult } from "../actions/uiActionTypes";
@@ -44,8 +44,10 @@ import { indexRows } from "../data/rowIndex";
 import type { DatasetResult } from "../data/datasets";
 import { DataLoadNotice } from "../components/system/DataLoadNotice";
 import { RuntimePerformancePanel } from "../components/system/RuntimePerformancePanel";
+import { RuntimeProfiler } from "./RuntimeProfiler";
 import { dynamicEventKey, type DynamicEvent } from "../fragments/fragmentTypes";
 
+const ignoreInteraction = () => undefined;
 const notSent = (): ExternalSelectionResult => ({
   sent: false,
   reason: "component did not call selectExternal",
@@ -120,7 +122,7 @@ function EvaluatedDashboard({
   clearExternal = notSent,
   applyExternalFilter = filterNotSent,
   clearExternalFilter = filterNotSent,
-  reportInteraction = () => undefined,
+  reportInteraction = ignoreInteraction,
   webAccessAvailable = false,
   providerAccess,
   ownerByRuntimeId,
@@ -132,14 +134,25 @@ function EvaluatedDashboard({
   state,
   dispatch,
 }: HyperPbiRootProps & { state: DashboardState; dispatch: (action: DashboardAction) => void }) {
+  const profiling = executionMode === "dashboard" && (settings.debug.showPerformance || config.renderer?.profilePerformance === true);
+  const profiler = useMemo(() => profiling ? new RuntimeProfiler() : undefined, [profiling]);
+  useEffect(() => {
+    profiler?.start();
+    return () => profiler?.dispose();
+  }, [profiler]);
+  const totalComponents = useMemo(() => {
+    let total = 0;
+    if (profiling) visitSpecificationComponents(schema, () => { total++; });
+    return total;
+  }, [schema, profiling]);
   const effectiveSettings = useMemo(
     () => resolveSchemaRuntimeSettings(schema.theme, settings),
     [schema.theme, settings],
   );
-  const effectiveProviderAccess = providerAccess ?? {
+  const effectiveProviderAccess = useMemo(() => providerAccess ?? {
     tiles: { allowed: webAccessAvailable },
     geocoder: { allowed: webAccessAvailable },
-  };
+  }, [providerAccess, webAccessAvailable]);
   const overlayRuntime = useMemo(() => executionMode === "dashboard" ? createOverlayRuntime(instanceId) : undefined, [instanceId, executionMode]);
   const { keys: dynamicEventKeys, defaults: dynamicDefaults } = useMemo(() => {
     const keys = new Set<string>();
@@ -200,12 +213,30 @@ function EvaluatedDashboard({
     data.rows, data.fields, data.aggregates, data.calculatedMetrics, data.map, rows, filteredRowKeys,
     schema.calculations?.metrics, config.bindings?.map, config.providers?.geocoder?.cacheEntries,
   ]);
+  const getCalculatedMetrics = useMemo(() => {
+    const configured = schema.calculations?.metrics;
+    const memo = new WeakMap<NormalizedData["rows"], NonNullable<NormalizedData["calculatedMetrics"]>>();
+    return (input: NormalizedData["rows"]) => {
+      if (input === rows) return filteredData.calculatedMetrics;
+      if (input === data.rows && data.calculatedMetrics) return data.calculatedMetrics;
+      if (!configured?.length) return undefined;
+      let result = memo.get(input);
+      if (!result) {
+        const started = performance.now();
+        result = calculateDerivedMetrics(input, configured);
+        memo.set(input, result);
+        data.performance?.record("calculations", started);
+      }
+      return result;
+    };
+  }, [rows, filteredData.calculatedMetrics, data.rows, data.calculatedMetrics, data.performance, schema.calculations?.metrics]);
   const datasetCache = useRef(new Map<string, DatasetResult>());
   const datasetEvaluation = useMemo(() => prepareLogicalDatasets(filteredData, schema, {
     sourceIndices,
     sourceRowKeys: data.rowKeys,
+    hostData: data,
   }, remoteData.workspace, datasetCache.current, true), [
-    filteredData, schema.data, sourceIndices, data.rowKeys, remoteData.workspace,
+    filteredData, schema.data, sourceIndices, data, remoteData.workspace,
   ]);
   const runtimeWarnings = useMemo(
     () =>
@@ -231,19 +262,22 @@ function EvaluatedDashboard({
       ),
     [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode],
   );
-  const getRowsForComponent = useMemo(() => {
-    const filtered = new Map<string, typeof rows>();
-    return (componentId: string) => {
-      if (!state.interactionFilters.length) return rows;
-      const result = filtered.get(componentId) ?? rowsForComponent(data.rows, data.rowKeys, rows, componentId, { state });
-      filtered.set(componentId, result);
-      return result;
-    };
-  }, [data.rows, data.rowKeys, rows, state.interactionFilters, state.activeTabs]);
-  const componentRows = useCallback(
-    (componentId: string) => selectedComponentRows(componentId, { state }),
-    [state],
+  const routeRows = useMemo(() => createComponentRowRouter(data.rows, data.rowKeys, rows), [data.rows, data.rowKeys, rows]);
+  const getRowsForComponent = useCallback(
+    (componentId: string) => routeRows(componentId, state.interactionFilters),
+    [routeRows, state.interactionFilters],
   );
+  const componentRows = useMemo(() => {
+    const highlights = new Map<string, number[]>();
+    return (componentId: string) => {
+      const previous = highlights.get(componentId);
+      if (previous) return previous;
+      const selection = selectedComponentRows(componentId, { state });
+      highlights.set(componentId, selection);
+      return selection;
+    };
+  }, [state.componentSelectedRows, state.componentSelectionScopes, state.componentSelectionModes, state.componentSelectionTargets]);
+  const datasetRouters = useMemo(() => new WeakMap<DatasetResult, ReturnType<typeof createComponentRowRouter>>(), [datasetEvaluation.datasets]);
   const getDatasetView = useMemo(() => {
     const views = new Map<string, ReturnType<NonNullable<RenderContextValue["getDatasetView"]>>>();
     return (name = "powerbi", componentId?: string) => {
@@ -253,13 +287,15 @@ function EvaluatedDashboard({
       if (!result) return undefined;
       const datasetRows = result.data.rows;
       const rootKeys = result.rootRowKeys ?? data.rowKeys;
-      const selectedRows = componentId && state.interactionFilters.length
-        ? rowsForComponent(datasetRows, result.data.rowKeys, datasetRows, componentId, {
-          state,
-          datasetLineage: result.lineage,
-          powerBiSourceRowKeys: rootKeys,
-        })
-        : datasetRows;
+      let selectedRows = datasetRows;
+      if (componentId && state.interactionFilters.length) {
+        let routeDataset = datasetRouters.get(result);
+        if (!routeDataset) {
+          routeDataset = createComponentRowRouter(datasetRows, result.data.rowKeys, datasetRows, result.lineage, rootKeys);
+          datasetRouters.set(result, routeDataset);
+        }
+        selectedRows = routeDataset(componentId, state.interactionFilters);
+      }
       const indices = selectedRows === datasetRows ? undefined : indexRows(datasetRows);
       let rowIndices: number[] | undefined;
       let rowKeys: string[] | undefined;
@@ -291,7 +327,7 @@ function EvaluatedDashboard({
       views.set(cacheKey, view);
       return view;
     };
-  }, [datasetEvaluation.datasets, state.interactionFilters, state.activeTabs, data.rowKeys]);
+  }, [datasetEvaluation.datasets, datasetRouters, state.interactionFilters, data.rowKeys]);
   const isOverlayOpen = useCallback(
     (id: string) => state.openOverlays.includes(id),
     [state.openOverlays],
@@ -313,6 +349,7 @@ function EvaluatedDashboard({
         powerBiSourceRowKeys: data.rowKeys,
         interactionIndexSpace: "powerbi",
         getRowsForComponent,
+        getCalculatedMetrics,
         getDatasetView,
         componentRows,
         schema,
@@ -352,6 +389,7 @@ function EvaluatedDashboard({
       data.rows,
       data.rowKeys,
       getRowsForComponent,
+      getCalculatedMetrics,
       getDatasetView,
       componentRows,
       schema,
@@ -382,6 +420,7 @@ function EvaluatedDashboard({
   const context = useMemo(
     (): RenderContextValue => ({
       instanceId,
+      profiler,
       executionMode,
       remoteSourceHost,
       data: filteredData,
@@ -392,6 +431,7 @@ function EvaluatedDashboard({
       powerBiSourceRowKeys: data.rowKeys,
       interactionIndexSpace: "powerbi",
       getRowsForComponent,
+      getCalculatedMetrics,
       getDatasetView,
       componentRows,
       schema,
@@ -424,6 +464,7 @@ function EvaluatedDashboard({
     }),
     [
       instanceId,
+      profiler,
       remoteSourceHost,
       executionMode,
       filteredData,
@@ -431,6 +472,7 @@ function EvaluatedDashboard({
       data.rows,
       data.rowKeys,
       getRowsForComponent,
+      getCalculatedMetrics,
       getDatasetView,
       componentRows,
       schema,
@@ -601,8 +643,8 @@ function EvaluatedDashboard({
             <pre>{JSON.stringify(samplePreviewRows(filteredData, 10), null, 2)}</pre>
           </details>
         )}
-        {settings.debug.showPerformance && (
-          <RuntimePerformancePanel data={data} filteredCount={rows.length} renderMs={renderMs} datasets={datasetEvaluation.diagnostics} />
+        {profiling && (
+          <RuntimePerformancePanel data={data} filteredCount={rows.length} renderMs={renderMs} datasets={datasetEvaluation.diagnostics} profiler={profiler} totalComponents={totalComponents} />
         )}
         {config.security?.showSanitizerWarnings === true &&
           settings.showWarnings &&

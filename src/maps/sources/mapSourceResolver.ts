@@ -19,7 +19,7 @@ import type {
 import { normalizeMapBindings } from "../../data/normalizeMapBindings";
 import type { GeocodeCacheEntry } from "../../providers/providerTypes";
 import { resolveRenderer } from "../renderers/mapRendererResolver";
-import { matchesFilter } from "../../data/filtering";
+import { compileFilter } from "../../data/filtering";
 import { externalFilterTargetFor } from "../../powerbi/externalFilters";
 import { DEFAULT_POWER_BI_MAP_MAX_FEATURES } from "../performance/mapPerformanceDefaults";
 
@@ -317,7 +317,9 @@ export function resolvePowerBiLayer(
       );
   }
 
-  const filters = layer.filter ? Array.isArray(layer.filter) ? layer.filter : [layer.filter] : [];
+  const filters = [layer.filter ?? []].flat().map(filter => ({
+    ...filter, matches: compileFilter(filter.operator, filter.value),
+  }));
   const visibility = layer.visibility;
   const featureLimit = Math.max(0, Math.floor(layer.performance?.maxFeatures ?? DEFAULT_POWER_BI_MAP_MAX_FEATURES));
   const mapData = normalizeMapBindings(
@@ -330,7 +332,7 @@ export function resolvePowerBiLayer(
       limit: featureLimit,
       layerValue: source.layerValue,
       matches: row => filters.every(filter =>
-        (filter.fieldSource ?? "powerbi") === "powerbi" && matchesFilter(row[filter.field], filter.operator, filter.value),
+        (filter.fieldSource ?? "powerbi") === "powerbi" && filter.matches(row[filter.field]),
       ) && (!visibility?.conditionField || !visibility.conditionValues?.length ||
         (visibility.conditionFieldSource ?? "powerbi") === "powerbi" &&
         visibility.conditionValues.some(value => Object.is(value, row[visibility.conditionField!]))),

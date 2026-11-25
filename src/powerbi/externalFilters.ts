@@ -1,4 +1,5 @@
 import powerbi from "powerbi-visuals-api";
+import { exclusiveEndDate } from "../data/filtering";
 import { NormalizedField } from "../data/normalizeData";
 import { FilterOperator } from "../schema/hyperpbiSchema";
 import { ExternalSelectionFailureReason, InteractionDetails } from "./interactionDiagnostics";
@@ -25,7 +26,8 @@ export function applyExternalFilter(host:FilterHost,fields:Record<string,Normali
         filter={$schema:BASIC_SCHEMA,target,operator:operator==="!="?"NotIn":"In",values} as powerbi.IFilter;
     }else{
         const names:Partial<Record<FilterOperator,string>>={contains:"Contains",">":"GreaterThan",">=":"GreaterThanOrEqual","<":"LessThan","<=":"LessThanOrEqual"};
-        const conditions=operator==="between"&&Array.isArray(value)&&value.length>=2?[{operator:"GreaterThanOrEqual",value:primitive(value[0])},{operator:"LessThanOrEqual",value:primitive(value[1])}]:names[operator]?[{operator:names[operator],value:primitive(value)}]:undefined;
+        const upperDate = operator === "between" && Array.isArray(value) && (metadata?.dataType === "date" || metadata?.dataType === "datetime") ? exclusiveEndDate(value[1]) : undefined;
+        const conditions=operator==="between"&&Array.isArray(value)&&value.length>=2?[{operator:"GreaterThanOrEqual",value:primitive(value[0])},{operator:upperDate?"LessThan":"LessThanOrEqual",value:upperDate??primitive(value[1])}]:names[operator]?[{operator:names[operator],value:primitive(value)}]:undefined;
         if(!conditions)return{sent:false,reason:"unsupported external filter operator",target};
         filter={$schema:ADVANCED_SCHEMA,target,logicalOperator:"And",conditions} as powerbi.IFilter;
     }

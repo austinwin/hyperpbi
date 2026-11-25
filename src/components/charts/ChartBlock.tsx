@@ -30,6 +30,7 @@ import {
 
 export { formatBuiltInChartTooltip, formatBuiltInChartValue, scaleScatterPointSizes } from "./adapters/shared";
 
+const EMPTY_CHART_SELECTION: EChartSelectionRef[] = [];
 const EMPTY_DRILL_PATH: NonNullable<ReturnType<typeof useRenderContext>["state"]["chartDrillState"][string]>["path"] = [];
 const MAX_CHART_CATEGORIES = 10_000;
 const MAX_SCATTER_POINTS = 30_000;
@@ -69,6 +70,7 @@ function componentAtDrillLevel(component: ChartComponent, level: ChartDrillLevel
 }
 
 function bindingForEvent(bindings: readonly ChartDatumBinding[], event: EChartDataEvent): ChartDatumBinding | undefined {
+    if (event.seriesType === "treemap" && event.datumId !== undefined) return bindings.find(binding => binding.seriesIndex === event.seriesIndex && binding.hierarchy?.id === event.datumId);
     const candidates = bindings.filter(candidate => candidate.seriesIndex === event.seriesIndex && candidate.dataIndex === event.dataIndex);
     return candidates.find(candidate => candidate.dataType === event.dataType) ?? (event.dataType === undefined && candidates.length === 1 ? candidates[0] : undefined);
 }
@@ -124,7 +126,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     }, [datasetView?.rows, baseRows, drillLevel?.parentField, drillPath]);
     const effectiveComponent = useMemo(() => componentAtDrillLevel(component, drillLevel), [component, drillLevel]);
     // Presentation controls must not regroup source rows or rebuild identity bindings.
-    const adapterRevision=JSON.stringify({...effectiveComponent,chartStyle:undefined});
+    const adapterRevision = useMemo(() => JSON.stringify({ ...effectiveComponent, chartStyle: undefined }), [effectiveComponent]);
     const adapterComponent=useMemo(()=>({...effectiveComponent,chartStyle:undefined}) as ChartComponent,[adapterRevision]);
     const adapter = getChartAdapter(effectiveComponent);
     const effectiveFields: Record<string, NormalizedField> = datasetView?.fields ?? context.data.fields;
@@ -160,7 +162,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         }
         return new Set([...selectedSourceRows(id, context), ...(context.state.componentSelectedRows[id] ?? [])]);
     }, [context.state, context.executionMode, id, powerBiRowKeys]);
-    const selectionRefs = useMemo<EChartSelectionRef[]>(() => result.bindings
+    const selectionRefs = useMemo<EChartSelectionRef[]>(() => !selectedRows.size ? EMPTY_CHART_SELECTION : result.bindings
         .filter(binding => binding.sourceRowIndices.some(index => selectedRows.has(index)))
         .map(binding => ({ seriesIndex: binding.seriesIndex, dataIndex: binding.dataIndex, dataType: binding.dataType })), [result.bindings, selectedRows]);
     const interactionContext: RenderContextValue = useMemo(() => ({
@@ -178,6 +180,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         context.dispatch({ type: "chartDrill", id });
     }, [storedDrill?.levelId, storedLevelIndex, id]);
 
+    const currentInteractionContext = () => ({ ...interactionContext, state: context.getLatestContext?.().state ?? context.state });
     const runBindings = (bindings: ChartDatumBinding[], definition: ChartEventDefinition, kind: "zoom" | "range" | "brush") => {
         const interaction = eventInteraction(effectiveComponent, definition, kind);
         if (!interaction) return;
@@ -192,7 +195,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
             sourceRowKeys: powerBiRowKeys,
             field: sourceField,
             value: values?.length === 1 ? values[0] : values,
-        }), { ...interactionContext, interactionUsesSourceIdentity: true }, { trigger: "click", dynamicEvent: false });
+        }), { ...currentInteractionContext(), interactionUsesSourceIdentity: true }, { trigger: "click", dynamicEvent: false });
     };
 
     const drillFromEvent = (event: EChartDataEvent) => {
@@ -222,22 +225,40 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         const binding = bindingForEvent(result.bindings, event);
         if (!binding) return;
         const drills = component.drill?.trigger === "click" && drillFromEvent(event);
-        const policy = resolveInteractionPolicy(effectiveComponent, context.config);
-        const observed = context.dynamicEventKeys?.has(dynamicEventKey(id, "select"));
+        const node = binding.hierarchy;
+        const eventConfig = node ? component.events?.nodeClick : undefined;
+        const eventComponent = eventConfig?.enabled ? {
+            ...effectiveComponent,
+            interaction: {
+                ...effectiveComponent.interaction, ...eventConfig.interaction,
+                enabled: eventConfig.interaction?.enabled ?? true, trigger: "click" as const,
+                field: eventConfig.field ?? eventConfig.interaction?.field ?? effectiveComponent.interaction?.field,
+                targets: eventConfig.targets ?? eventConfig.interaction?.targets ?? effectiveComponent.interaction?.targets,
+            },
+        } : effectiveComponent;
+        const policy = resolveInteractionPolicy(eventComponent, context.config);
+        const observed = context.dynamicEventKeys?.has(dynamicEventKey(id, "select")) || node && context.dynamicEventKeys?.has(dynamicEventKey(id, "nodeClick"));
         const indices = observed ? new Set(binding.sourceRowIndices) : undefined;
-        const contextRows = indices ? currentRows.filter(row =>
-            (!binding.field || sameValue(row[binding.field], binding.value)) && buildContext.sourceIndicesForRow?.(row).some(index => indices.has(index))) : undefined;
-        executeComponentInteraction(drills ? { ...policy, enabled: false } : policy, createInteractionPayload(effectiveComponent, {
+        const contextRows = indices ? currentRows.filter(row => (node || !binding.field || sameValue(row[binding.field], binding.value)) && buildContext.sourceIndicesForRow?.(row).some(index => indices.has(index))) : undefined;
+        const dynamicContexts = node ? { nodeClick: {
+            $nodeId: node.id, $parentId: node.parentId, $path: node.path.join(" / "), $level: node.level,
+            $category: node.category, $label: node.label, $value: node.value, $multiSelect: event.multiSelect,
+            $rowCount: binding.sourceRowIndices.length,
+        } } : undefined;
+        executeComponentInteraction(drills && !eventConfig?.enabled ? { ...policy, enabled: false } : policy, createInteractionPayload(eventComponent, {
             rowIndices: binding.sourceRowIndices,
             sourceRowKeys: powerBiRowKeys,
             field: binding.field,
             value: binding.value,
             contextRows,
-        }), interactionContext, { trigger: "click", dynamicEvent: "select", contextValue: binding.value, multiSelect: event.multiSelect, event: event.event });
+        }), currentInteractionContext(), {
+            trigger: "click", dynamicEvent: "select", contextValue: binding.value, dynamicContexts,
+            rowIdentityFilter: Boolean(node), multiSelect: event.multiSelect, event: event.event,
+        });
     };
 
     const onZoom = (zoom: EChartZoomEvent) => {
-        const previous = context.state.chartViewState[id] ?? {};
+        const previous = (context.getLatestContext?.().state ?? context.state).chartViewState[id] ?? {};
         const signature = JSON.stringify(previous.zoom);
         if (signature !== JSON.stringify(zoom)) context.dispatch({ type: "chartView", id, value: { ...previous, zoom } });
         if (component.events?.zoom?.enabled) runBindings(bindingsForZoom(result.bindings, zoom), component.events.zoom, "zoom");
@@ -248,7 +269,7 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
         const bindings = bindingsForBrush(result.bindings, brush);
         const rowIndices = sourceRowsForBindings(bindings);
         const brushRowKeys = rowIndices.map(index => powerBiRowKeys[index]).filter((key): key is string => Boolean(key));
-        const previous = context.state.chartViewState[id] ?? {};
+        const previous = (context.getLatestContext?.().state ?? context.state).chartViewState[id] ?? {};
         context.dispatch({ type: "chartView", id, value: { ...previous, brushRowKeys } });
         if (component.events?.brush?.enabled) runBindings(bindings, component.events.brush, "brush");
     };

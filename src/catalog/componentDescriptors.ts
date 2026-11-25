@@ -25841,7 +25841,7 @@ extendDescriptor("svgMarkup", [
 ]);
 const eventChartTypes=new Set(["barChart","horizontalBarChart","lineChart","areaChart","pieChart","donutChart","scatterChart","gauge","heatmap","comboChart","waterfallChart","sankeyChart","treemapChart","funnelChart","radarChart","advancedChart"]);
 for(const type of eventChartTypes)extendDescriptor(type,[
-  {property:"events",label:"Chart events",control:"json",group:"Interaction",help:"Declarative zoom, range-selection, brush, and linked-filter behavior."},
+  {property:"events",label:"Chart events",control:"json",group:"Interaction",help:"Declarative zoom, range selection, brush, Treemap nodeClick, and linked-filter behavior."},
   {property:"drill",label:"Dataset drill hierarchy",control:"json",group:"Interaction",help:"Preloaded dataset levels with breadcrumb drill state."},
 ],[{property:"events",requirement:"any",handler:"chart-events"},{property:"drill",requirement:"any",handler:"chart-drill"}]);
 

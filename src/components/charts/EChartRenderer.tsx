@@ -59,7 +59,7 @@ export interface EChartRendererProps {
     fill?: boolean;
 }
 
-export interface EChartDataEvent { seriesIndex:number;dataIndex:number;seriesType?:string;seriesName?:string;dataType?:"node"|"edge";name?:string;value?:unknown;event?:Event;multiSelect:boolean; }
+export interface EChartDataEvent { seriesIndex:number;dataIndex:number;seriesType?:string;seriesName?:string;datumId?:string;dataType?:"node"|"edge";name?:string;value?:unknown;event?:Event;multiSelect:boolean; }
 export interface EChartSelectionRef { seriesIndex:number;dataIndex:number;dataType?:"node"|"edge"; }
 
 export function EChartRenderer({
@@ -114,7 +114,7 @@ export function EChartRenderer({
         const index = Number(params.dataIndex);
         if (!Number.isInteger(index)) return undefined;
         const nativeEvent=(params.event as {event?:Event&{ctrlKey?:boolean;metaKey?:boolean}}|undefined)?.event;
-        return {seriesIndex:Number(params.seriesIndex??0),dataIndex:index,seriesType:typeof params.seriesType==="string"?params.seriesType:undefined,seriesName:typeof params.seriesName==="string"?params.seriesName:undefined,dataType:params.dataType==="node"||params.dataType==="edge"?params.dataType:undefined,name:typeof params.name==="string"?params.name:undefined,value:params.value,event:nativeEvent,multiSelect:Boolean(nativeEvent?.ctrlKey||nativeEvent?.metaKey)};
+        return {seriesIndex:Number(params.seriesIndex??0),dataIndex:index,seriesType:typeof params.seriesType==="string"?params.seriesType:undefined,seriesName:typeof params.seriesName==="string"?params.seriesName:undefined,datumId: typeof (params.data as { id?: unknown } | undefined)?.id === "string" ? (params.data as { id: string }).id : undefined,dataType:params.dataType==="node"||params.dataType==="edge"?params.dataType:undefined,name:typeof params.name==="string"?params.name:undefined,value:params.value,event:nativeEvent,multiSelect:Boolean(nativeEvent?.ctrlKey||nativeEvent?.metaKey)};
     };
 
     const scheduleResize = (chart: EChartsType) => {

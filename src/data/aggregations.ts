@@ -99,3 +99,23 @@ export function aggregateValue(rows: readonly DataRow[], field: string | undefin
     const summary = summarizeNumbers(rows, field);
     return summary.count ? aggregation === "avg" ? summary.sum / summary.count : summary[aggregation as "sum" | "min" | "max"] : null;
 }
+
+const aggregateCache = new WeakMap<readonly DataRow[], Map<string, Primitive>>();
+
+/** Runtime views are immutable. Reuse scalar summaries across widgets on the
+ * same view while capping the memo table for high-cardinality predicates. */
+export function sharedAggregateValue(rows: readonly DataRow[], field: string | undefined, aggregation = "first", where?: { field: string; equals: unknown }): Primitive {
+    if (aggregation === "count" || aggregation === "first") return aggregateValue(rows, field, aggregation, where);
+    const value = where?.equals;
+    if (value != null && !["string", "number", "boolean"].includes(typeof value)) return aggregateValue(rows, field, aggregation, where);
+    const key = JSON.stringify([field, aggregation, where?.field, typeof value, typeof value === "number" ? String(value) : value]);
+    let results = aggregateCache.get(rows);
+    if (!results) {
+        results = new Map();
+        aggregateCache.set(rows, results);
+    }
+    if (results.has(key)) return results.get(key);
+    const result = aggregateValue(rows, field, aggregation, where);
+    if (results.size < 256) results.set(key, result);
+    return result;
+}

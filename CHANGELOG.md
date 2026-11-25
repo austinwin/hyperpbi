@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6 — Reactive dashboard runtime
+
+- Update affected chart and metric leaves through scoped shared row views while keeping mounted instances. Coalesce segment progress and repeated host filter requests.
+- Keep Studio open across native Edit and Data updates, retain drafts, and reuse unchanged preview definitions.
+- Add Treemap `nodeClick`, explicit host-context datasets, inclusive calendar-date filters, and opt-in runtime diagnostics. [Architecture and benchmark](docs/runtime-architecture.md)
+
 ## 1.0.5 — Faster Power BI loading
 
 - Request 30,000 rows per Power BI window and evaluate saved dashboards once the host finishes sending the query result. Preserve the active dashboard tab and filter state across a segmented refresh.

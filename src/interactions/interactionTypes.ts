@@ -71,6 +71,10 @@ export interface InteractionModifiers {
     event?: Event;
     dynamicEvent?: import("../fragments/fragmentTypes").DynamicTrigger["event"] | false;
     contextValue?: unknown;
+    /** Match a specifically identified node by lineage, even with a shared state key. */
+    rowIdentityFilter?: boolean;
+    /** Additional declarative events and their named scalar context. */
+    dynamicContexts?: Partial<Record<import("../fragments/fragmentTypes").DynamicTrigger["event"], import("../fragments/fragmentTypes").DynamicContext>>;
 }
 
 export interface InternalInteractionFilter {

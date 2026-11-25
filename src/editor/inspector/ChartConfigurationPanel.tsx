@@ -16,6 +16,9 @@ function StyleControl({ property, value, change }: { property: ChartStylePropert
 
 export function ChartConfigurationPanel({ item, fields, onChange, onReplace, dataControls }: { item: Json; fields: Record<string,NormalizedField>; onChange: (property: string,value:unknown)=>boolean; onReplace:(changes:Json)=>boolean; dataControls:ComponentChildren }) {
     const [tab,setTab]=useState("Data"), [search,setSearch]=useState(""), [seriesIndex,setSeriesIndex]=useState(0), [axisKey,setAxisKey]=useState<"xAxis"|"yAxis">("yAxis"), [axisIndex,setAxisIndex]=useState(0);
+    const events = record(item.events) ? item.events : {};
+    const nodeClick = record(events.nodeClick) ? events.nodeClick : {};
+    const updateNodeClick = (patch: Json) => onChange("events", { ...events, nodeClick: { ...nodeClick, ...patch } });
     const style:ChartStyle=record(item.chartStyle)?item.chartStyle:{};
     const rawSeries=Array.isArray(item.series)?item.series as Json[]:[];
     const count=Math.max(1,rawSeries.length);
@@ -54,7 +57,16 @@ export function ChartConfigurationPanel({ item, fields, onChange, onReplace, dat
         </>}
         {tab==="Axes"&&<><label>Axis<select aria-label="Chart axis" value={`${axisKey}:${axisIndex}`} onChange={event=>{const [key,index]=event.currentTarget.value.split(":");setAxisKey(key as "xAxis"|"yAxis");setAxisIndex(Number(index));}}>{["xAxis","yAxis"].flatMap(key=>Array.from({length:key===axisKey?axisCount:key==="yAxis"&&rawSeries.some(series=>series.axis==="right")?2:1},(_,index)=><option value={`${key}:${index}`}>{key==="xAxis"?"X":"Y"} axis {index+1}{key==="yAxis"?(index===0?" · left":" · right"):""}</option>))}</select></label>{controls(chartAxisProperties.filter(property=>!categoryAxis||!["domain","min","max","logarithmic","decimals"].includes(property.key)).filter(property=>!["min","max"].includes(property.key)||axisStyle.domain==="fixed"),axisStyle,setAxis)}</>}
         {tab==="Appearance"&&controls(chartAppearanceProperties.filter(property=>!property.key.startsWith("tooltip")&&!["zoom","animation","animationDuration"].includes(property.key)),style,(key,value)=>update({...style,[key]:value}))}
-        {tab==="Interactions"&&<>{controls(chartAppearanceProperties.filter(property=>property.key==="zoom"),style,(key,value)=>update({...style,[key]:value}))}<p>Feature clicks use the component's existing interaction policy and valid Power BI row identities. Zoom changes preserve the current view without creating model relationships.</p></>}
+        {tab==="Interactions"&&<>{controls(chartAppearanceProperties.filter(property=>property.key==="zoom"),style,(key,value)=>update({...style,[key]:value}))}
+            {item.type==="treemapChart"&&<fieldset>
+                <legend>Treemap node click</legend>
+                <label><input type="checkbox" checked={nodeClick.enabled===true} onChange={event=>updateNodeClick({enabled:event.currentTarget.checked})}/> Configure node click interaction</label>
+                {nodeClick.enabled===true&&<label>Linked filter field<select aria-label="Node click field" value={String(nodeClick.field??"")} onChange={event=>updateNodeClick({field:event.currentTarget.value||undefined})}>
+                    <option value="">Use the clicked hierarchy level</option>
+                    {Object.values(fields).map(field=><option key={field.key} value={field.key}>{field.displayName}</option>)}
+                </select></label>}
+            </fieldset>}
+            <p>Feature clicks use the component's existing interaction policy and valid Power BI row identities. Zoom changes preserve the current view without creating model relationships.</p></>}
         {tab==="Advanced"&&<>{controls(chartAppearanceProperties.filter(property=>["animation","animationDuration"].includes(property.key)),style,(key,value)=>update({...style,[key]:value}))}<button type="button" onClick={()=>onChange("chartStyle",undefined)}>Reset chart presentation</button><p>The existing Structured JSON section accepts validated declarative ECharts options. Functions, callbacks, external resources and unknown option keys are rejected.</p></>}
     </section>;
 }

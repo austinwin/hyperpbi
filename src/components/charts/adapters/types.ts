@@ -3,7 +3,18 @@ import type { DataRow } from "../../../data/normalizeData";
 import type { ChartComponent } from "../../../schema/hyperpbiSchema";
 import type { RuntimeSettings } from "../../../runtime/runtimeSettings";
 
+export interface ChartHierarchyNode {
+    id: string;
+    parentId?: string;
+    path: readonly string[];
+    category: string;
+    label: string;
+    level: number;
+    value: number;
+}
+
 export interface ChartDatumBinding {
+    hierarchy?: ChartHierarchyNode;
     seriesIndex: number;
     dataIndex: number;
     dataType?: "node" | "edge";

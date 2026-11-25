@@ -32,6 +32,7 @@ import { configuredMapEndpoints } from "./providers/configuredMapEndpoints";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
 import { configuredRemoteDataEndpoints } from "./data/remoteDataSources";
+import type { RuntimePhase } from "./data/runtimePerformance";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -46,13 +47,16 @@ export class Visual implements IVisual {
     private readonly formattingSettingsService = new FormattingSettingsService();
     private readonly viewerRenderStability = new ViewerRenderStability(900);
     private formattingSettings = new VisualFormattingSettingsModel();
+    private runtimeSettings = toRuntimeSettings(this.formattingSettings);
+    private runtimeSettingsSignature = JSON.stringify(this.runtimeSettings);
+    private progressFrame?: number;
     private readonly ingestion = new IncrementalData();
     private data = this.ingestion.data;
     private specification = "";
     private configuration = defaultConfigJson;
     private editMode = powerbi.EditMode.Default;
-    private draftSpecification = "";
-    private draftConfiguration = "";
+    private draftSpecification?: string;
+    private draftConfiguration?: string;
     private renderMs = 0;
     private studioLayout = JSON.stringify(defaultStudioLayout);
     private webAccessAvailable = false;
@@ -70,7 +74,7 @@ export class Visual implements IVisual {
     constructor(options?: VisualConstructorOptions) {
         if (!options) throw new Error("HyperPBI requires Power BI visual constructor options.");
         this.target = options.element; this.host = options.host; this.selectionManager = this.host.createSelectionManager();
-        this.hostBridge = new PowerBiHostBridge({ host: this.host, selectionManager: this.selectionManager, selectionRowCount: () => this.ingestion.selectionCount ? this.data.rows.length : 0, selectionIdForRow: index => this.ingestion.getSelectionId(this.host, index), fields: () => this.data.fields, interactionsEnabled: () => toRuntimeSettings(this.formattingSettings).enableInteractions });
+        this.hostBridge = new PowerBiHostBridge({ host: this.host, selectionManager: this.selectionManager, selectionRowCount: () => this.ingestion.selectionCount ? this.data.rows.length : 0, selectionIdForRow: index => this.ingestion.getSelectionId(this.host, index), fields: () => this.data.fields, interactionsEnabled: () => this.runtimeSettings.enableInteractions });
         this.target.classList.add("hyperpbi-visual-host");
         void this.checkProviderAccess();
     }
@@ -85,32 +89,64 @@ export class Visual implements IVisual {
         // persisted edits, and provider access are handled by regular updates.
         if (operation !== "replace" && (options.editMode === undefined || options.editMode === this.editMode)) {
             this.acceptData(dataView, operation, started);
-            this.host.eventService?.renderingFinished(options);
+            this.finishHostUpdate(options, started, "hostSegment");
             this.scheduleFetch();
             return;
         }
         const previousEditMode = this.editMode;
-        const nextEditMode = options.editMode ?? powerbi.EditMode.Default;
-        if (dataView) this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, dataView);
+        const nextEditMode = options.editMode ?? this.editMode;
+        const resizeMask = powerbi.VisualUpdateType.Resize | powerbi.VisualUpdateType.ResizeEnd;
+        if (operation === "replace" && options.operationKind === undefined && nextEditMode === previousEditMode &&
+            (options.type & resizeMask) !== 0 && (options.type & ~resizeMask) === 0 && this.target.firstChild) {
+            this.finishHostUpdate(options, started, "hostResize");
+            return;
+        }
+        if (dataView) {
+            this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, dataView);
+            const nextSettings = toRuntimeSettings(this.formattingSettings);
+            const signature = JSON.stringify(nextSettings);
+            if (signature !== this.runtimeSettingsSignature) {
+                this.runtimeSettingsSignature = signature;
+                this.runtimeSettings = nextSettings;
+            }
+        }
         const leavingNativeEditor = previousEditMode === powerbi.EditMode.Advanced && nextEditMode !== powerbi.EditMode.Advanced && Boolean(this.draftSpecification);
-        if (leavingNativeEditor && this.parseSpecification(this.draftSpecification).schema && parseConfig(this.draftConfiguration).config) {
-            this.specification = this.draftSpecification; this.configuration = this.draftConfiguration; persistVisualState(this.host, { specification: this.specification, configuration: this.configuration });
+        if (leavingNativeEditor && this.draftSpecification && this.draftConfiguration !== undefined &&
+            this.parseSpecification(this.draftSpecification).schema && !this.readConfig(this.draftConfiguration).errors.length) {
+            this.specification = this.draftSpecification;
+            this.configuration = this.draftConfiguration;
+            this.draftSpecification = this.draftConfiguration = undefined;
+            persistVisualState(this.host, { specification: this.specification, configuration: this.configuration });
         } else {
             const persisted = readVisualState(dataView); if (persisted.specification !== undefined) this.specification = persisted.specification; if (persisted.configuration !== undefined) this.configuration = persisted.configuration || defaultConfigJson; if (persisted.studioLayout !== undefined) this.studioLayout = persisted.studioLayout;
         }
-        if ((options.type & powerbi.VisualUpdateType.Data) !== 0 || options.operationKind !== undefined) {
+        const dataUpdate = (options.type & powerbi.VisualUpdateType.Data) !== 0 || options.operationKind !== undefined;
+        if (dataUpdate) {
             if (this.ingestion.accept(dataView, operation)) {
+                if (operation === "replace") this.hostBridge.dataUpdated();
                 this.clearFetchTimeout();
                 this.data = this.ingestion.data;
             }
         }
         this.editMode = nextEditMode;
         void this.checkProviderAccess();
-        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.ingestion.selectionCount };
+        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: this.runtimeSettings.enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.ingestion.selectionCount };
         this.renderMs = performance.now() - started;
         this.renderCurrent();
-        this.host.eventService?.renderingFinished(options);
+        if (previousEditMode !== this.editMode && this.editMode === powerbi.EditMode.Advanced && this.profilingEnabled()) {
+            this.ingestion.performance.record("editorStart", started);
+        }
+        this.finishHostUpdate(options, started, dataUpdate ? "hostData" : "hostPresentation");
         this.scheduleFetch();
+    }
+
+    private profilingEnabled(): boolean {
+        return this.runtimeSettings.debug.showPerformance || this.configCache?.result.config?.renderer?.profilePerformance === true;
+    }
+
+    private finishHostUpdate(options: VisualUpdateOptions, started: number, phase: RuntimePhase): void {
+        if (this.profilingEnabled()) this.ingestion.performance.record(phase, started);
+        this.host.eventService?.renderingFinished(options);
     }
 
     private acceptData(dataView: powerbi.DataView | undefined, operation: DataOperation, started: number): void {
@@ -121,21 +157,30 @@ export class Visual implements IVisual {
         const showProgress = this.readConfig(this.configuration).config?.renderer?.showDataLoadProgress !== false;
         if (this.data.loadStatus?.completeness === "loading" && this.editMode !== powerbi.EditMode.Advanced && !showProgress) return;
         this.renderMs = performance.now() - started;
+        if (this.data.loadStatus?.completeness === "loading") {
+            if (this.progressFrame === undefined) this.progressFrame = requestAnimationFrame(() => {
+                this.progressFrame = undefined;
+                this.renderCurrent();
+            });
+            return;
+        }
         this.renderCurrent();
     }
 
     private renderCurrent(): void {
         if (this.destroyed) return;
-        const settings = toRuntimeSettings(this.formattingSettings);
-        if (shouldRenderLandingPage(this.data, this.specification)) {
-            this.viewerRenderStability.reset();
-            render(h(LandingPage, {}), this.target);
-            return;
-        }
+        if (this.progressFrame !== undefined) cancelAnimationFrame(this.progressFrame);
+        this.progressFrame = undefined;
+        const settings = this.runtimeSettings;
         if (this.editMode === powerbi.EditMode.Advanced) {
             this.viewerRenderStability.reset();
             const initialSpec = this.specification || JSON.stringify(createDefaultSchema(this.data), null, 2);
-            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.ingestion.selectionCount, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi" }), this.target);
+            render(h(HyperPbiStudio, { instanceId: this.instanceId, data: this.data, settings, initialSpecification: initialSpec, initialConfiguration: this.configuration || defaultConfigJson, initialDraftSpecification: this.draftSpecification, initialDraftConfiguration: this.draftConfiguration, initialLayout: this.studioLayout, onSave: this.saveAndCloseStudio, onDraftChange: this.captureDraft, onLayoutChange: this.saveStudioLayout, selectionIdentityCount: this.ingestion.selectionCount, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, initialInteractionDiagnostics: this.interactionDiagnostics, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, initialEditorTab: "ai", webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi" }), this.target);
+            return;
+        }
+        if (shouldRenderLandingPage(this.data, this.specification)) {
+            this.viewerRenderStability.reset();
+            render(h(LandingPage, {}), this.target);
             return;
         }
         if (!this.specification.trim()) {
@@ -302,17 +347,22 @@ export class Visual implements IVisual {
 
     private saveAndCloseStudio = (specification: string, configuration: string): void => {
         this.specification = specification; this.configuration = configuration;
+        this.draftSpecification = this.draftConfiguration = undefined;
         persistVisualState(this.host, { specification, configuration, studioLayout: this.studioLayout });
         this.host.switchFocusModeState(false);
         this.editMode = powerbi.EditMode.Default; this.renderCurrent();
     };
 
-    private captureDraft = (specification: string, configuration: string): void => { this.draftSpecification = specification; this.draftConfiguration = configuration;void this.checkProviderAccess(); };
+    private captureDraft = (specification: string, configuration: string): void => {
+        this.draftSpecification = specification;
+        this.draftConfiguration = configuration;
+        void this.checkProviderAccess();
+    };
 
     private saveStudioLayout = (studioLayout: string): void => { this.studioLayout = studioLayout; persistVisualState(this.host, { specification: this.specification, configuration: this.configuration, studioLayout }); };
 
     private updateInteractionDiagnostics = (rowIndices: number[], details: InteractionDetails, result: ExternalSelectionResult): void => {
-        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: toRuntimeSettings(this.formattingSettings).enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.ingestion.selectionCount, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount:details.matchedRowCount??rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalMode:details.externalMode??"selection",filterSent:false,selectionSent:result.sent, externalSelectionSent: result.sent, filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
+        this.interactionDiagnostics = { ...this.interactionDiagnostics, externalInteractionEnabled: this.runtimeSettings.enableInteractions, hostAllowsInteractions: this.host.hostCapabilities.allowInteractions === true, selectionIdentityCount: this.ingestion.selectionCount, lastClickedComponentId: details.componentId, lastClickedComponentType: details.componentType, lastClickedField: details.field, lastClickedValue: details.value, lastResolvedSourceRowCount:details.matchedRowCount??rowIndices.length, lastSelectedSourceRowIndices: rowIndices.slice(0, 25), externalMode:details.externalMode??"selection",filterSent:false,selectionSent:result.sent, externalSelectionSent: result.sent, filterTargetTable:undefined,filterTargetColumn:undefined,reasonExternalSelectionNotSent: result.sent ? undefined : result.reason };
     };
 
     private selectRows = (rowIndices: number[], multiSelect = false, details: InteractionDetails = {}): ExternalSelectionResult => {
@@ -327,7 +377,7 @@ export class Visual implements IVisual {
         this.updateInteractionDiagnostics([], details, result); return result;
     };
 
-    private updateFilterDiagnostics=(details:InteractionDetails,result:ExternalFilterResult):void=>{this.interactionDiagnostics={...this.interactionDiagnostics,externalInteractionEnabled:toRuntimeSettings(this.formattingSettings).enableInteractions,hostAllowsInteractions:this.host.hostCapabilities.allowInteractions===true,selectionIdentityCount:this.ingestion.selectionCount,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??0,lastSelectedSourceRowIndices:[],externalMode:"filter",filterSent:result.sent,selectionSent:false,externalSelectionSent:false,filterTargetTable:result.target?.table,filterTargetColumn:result.target?.column,reasonExternalSelectionNotSent:result.sent?undefined:result.reason};};
+    private updateFilterDiagnostics=(details:InteractionDetails,result:ExternalFilterResult):void=>{this.interactionDiagnostics={...this.interactionDiagnostics,externalInteractionEnabled:this.runtimeSettings.enableInteractions,hostAllowsInteractions:this.host.hostCapabilities.allowInteractions===true,selectionIdentityCount:this.ingestion.selectionCount,lastClickedComponentId:details.componentId,lastClickedComponentType:details.componentType,lastClickedField:details.field,lastClickedValue:details.value,lastResolvedSourceRowCount:details.matchedRowCount??0,lastSelectedSourceRowIndices:[],externalMode:"filter",filterSent:result.sent,selectionSent:false,externalSelectionSent:false,filterTargetTable:result.target?.table,filterTargetColumn:result.target?.column,reasonExternalSelectionNotSent:result.sent?undefined:result.reason};};
     private applyFilter=(field:string,operator:FilterOperator,value:unknown,details:InteractionDetails={}):ExternalFilterResult=>{const result=this.hostBridge.requestExternalFilterSync({field,operator,value,details});this.updateFilterDiagnostics({...details,field},result);return result;};
     private clearFilter=(details:InteractionDetails={}):ExternalFilterResult=>{const result=this.hostBridge.requestExternalFilterSync({clear:true,details});this.updateFilterDiagnostics(details,result);return result;};
 
@@ -363,8 +413,11 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel { return this.formattingSettingsService.buildFormattingModel(this.formattingSettings); }
     public destroy(): void {
         this.destroyed = true;
+        if (this.progressFrame !== undefined) cancelAnimationFrame(this.progressFrame);
+        this.progressFrame = undefined;
         this.clearFetchTimeout();
         this.viewerRenderStability.dispose();
+        this.hostBridge.dispose();
         render(null, this.target);
         this.ingestion.reset();
         this.data = this.ingestion.data;

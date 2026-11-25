@@ -31,6 +31,7 @@ export function RuntimeConfigTab({data,configuration,onChange}:{data:NormalizedD
                 <label><input type="checkbox" checked={form.showRowCount} onChange={event=>update("showRowCount",event.currentTarget.checked)}/>Show row count</label>
                 <label><input type="checkbox" checked={form.showStudioButton} onChange={event=>update("showStudioButton",event.currentTarget.checked)}/>Show Studio button</label>
                 <label><input type="checkbox" checked={form.showDataLoadProgress} onChange={event=>update("showDataLoadProgress",event.currentTarget.checked)}/>Show data loading progress</label>
+                <label><input type="checkbox" checked={form.profilePerformance} onChange={event=>update("profilePerformance",event.currentTarget.checked)}/>Profile dashboard performance</label>
             </div>
             <p>Incomplete data warnings always appear.</p>
         </section>

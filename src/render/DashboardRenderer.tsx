@@ -1,5 +1,7 @@
+import { memo } from "preact/compat";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 import { DashboardComponent } from "../schema/hyperpbiSchema";
-import { ComponentRegistry } from "./ComponentRegistry";
+import { ComponentRegistry, isChartComponent, isDataDisplayComponent } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
 import { SlotRenderer } from "../components/custom/slotRenderer";
 import { sanitizeStyleObject } from "../security/sanitizeCss";
@@ -12,10 +14,101 @@ import { componentOwnsResponsiveLayout, componentSubtreeRequestsFill, responsive
 function isFixedCanvasMapComponent(component: DashboardComponent): boolean {
   return component.type === "map";
 }
+interface NodeProps {
+    component: DashboardComponent;
+    index: number;
+    context: RenderContextValue;
+}
+
+const renderChildren = (children: DashboardComponent[]) => <DashboardRenderer components={children} />;
+
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
-    const context=useRenderContext();const { schema, config } = context;
-    const renderChildren = (children: DashboardComponent[]) => <DashboardRenderer components={children} />;
-    return <>{components.filter(component => !component.hidden).map((component, index) => {
+    const current = useRenderContext();
+    const live = useRef(current);
+    useLayoutEffect(() => { live.current = current; }, [current]);
+    const getLatestContext = useCallback(() => live.current, []);
+    const context = useMemo(() => ({ ...current, getLatestContext }), [current, getLatestContext]);
+    return <>{components.filter(component => !component.hidden).map((component, index) => (
+        <DashboardNode key={component.id ?? `${component.type}-${index}`} component={component} index={index} context={context} />
+    ))}</>;
+}
+
+function sameRows(left: number[], right: number[]): boolean {
+    return left === right || left.length === right.length && left.every((row, index) => row === right[index]);
+}
+
+/** Leaf boundaries opt in when all fields read during render are known.
+ * Containers and context-dependent authored extensions keep full context. */
+function sameNode(previous: NodeProps, next: NodeProps): boolean {
+    const { component, index, context } = next;
+    const before = previous.context;
+    if (previous.component !== component || previous.index !== index) return false;
+    if (before === context) return true;
+    const chart = isChartComponent(component.type);
+    const display = isDataDisplayComponent(component.type) && component.type !== "detailPanel";
+    if ((!chart && !display) || component.slots || component.uiAction || context.executionMode === "fragment") return false;
+    if (chart && "drill" in component && component.drill) return false;
+    if (
+        before.profiler !== context.profiler || before.settings !== context.settings || before.config !== context.config ||
+        before.data.fields !== context.data.fields || before.sourceRows !== context.sourceRows ||
+        before.sourceRowKeys !== context.sourceRowKeys || before.datasetLineage !== context.datasetLineage ||
+        before.remoteSources !== context.remoteSources ||
+        before.schema.styles?.components !== context.schema.styles?.components ||
+        before.schema.data?.datasets !== context.schema.data?.datasets ||
+        before.reportInteraction !== context.reportInteraction || before.selectExternal !== context.selectExternal ||
+        before.clearExternal !== context.clearExternal || before.applyExternalFilter !== context.applyExternalFilter ||
+        before.clearExternalFilter !== context.clearExternalFilter
+    ) return false;
+    const id = component.id ?? component.type;
+    if (before.ownerByRuntimeId?.[id] !== context.ownerByRuntimeId?.[id]) return false;
+    if (before.dynamicEventKeys !== context.dynamicEventKeys && ["click", "select", "nodeClick"].some(event =>
+        Boolean(before.dynamicEventKeys?.has(`${id}:${event}`)) !== Boolean(context.dynamicEventKeys?.has(`${id}:${event}`)))) return false;
+    const dataset = component.dataset;
+    if (dataset) {
+        const previousView = before.getDatasetView?.(dataset, id);
+        const nextView = context.getDatasetView?.(dataset, id);
+        if (previousView?.rows !== nextView?.rows || previousView?.fields !== nextView?.fields ||
+            before.datasets?.get(dataset) !== context.datasets?.get(dataset)) return false;
+    } else if (before.getRowsForComponent(id) !== context.getRowsForComponent(id)) return false;
+    if (display && before.data.calculatedMetrics !== context.data.calculatedMetrics) return false;
+    if (chart && (
+        before.state.chartViewState[id] !== context.state.chartViewState[id] ||
+        before.state.chartDrillState[id] !== context.state.chartDrillState[id] ||
+        before.state.componentSelectedRows[id] !== context.state.componentSelectedRows[id]
+    )) return false;
+    return sameRows(before.componentRows(id), context.componentRows(id));
+}
+
+function ProfiledRegistry({ profile, component, owner, id, context }: {
+    profile: NonNullable<RenderContextValue["profiler"]>;
+    component: DashboardComponent;
+    owner: string;
+    id: string;
+    context: RenderContextValue;
+}) {
+    const marker = useRef<HTMLSpanElement>(null);
+    const previous = useRef<RenderContextValue>();
+    const started = performance.now();
+    useLayoutEffect(() => {
+        const element = marker.current?.closest("[data-hp-id]");
+        if (!element) return;
+        profile.attach(id, component.type, element);
+        return () => profile.detach(element);
+    }, [profile, id, component.type]);
+    useLayoutEffect(() => {
+        const before = previous.current;
+        const cause = !before ? "Mount" : before.sourceRows !== context.sourceRows ? "Source data"
+            : before.getRowsForComponent(id) !== context.getRowsForComponent(id) ? "Filtered rows"
+            : before.settings !== context.settings || before.schema !== context.schema ? "Configuration"
+            : "Interaction or local state";
+        profile.component(id, started, cause);
+        previous.current = context;
+    });
+    return <><span ref={marker} hidden /><ComponentRegistry component={component} renderChildren={renderChildren} authoringOwnerId={owner} /></>;
+}
+
+const DashboardNode = memo(function DashboardNode({ component, index, context }: NodeProps) {
+        const { schema, config } = context;
         const componentId = component.id ?? `${component.type}-${index}`;
         const authoringOwnerId = context.ownerByRuntimeId?.[componentId] ?? componentId;
         const datasetResult=component.dataset?context.datasets?.get(component.dataset):undefined;
@@ -31,13 +124,14 @@ export function DashboardRenderer({ components }: { components: DashboardCompone
             sourceRowKeys: datasetResult.data.rowKeys,
             ...(fragmentDatasetRoot ? { powerBiSourceRows: fragmentDatasetRoot.rows, powerBiSourceRowKeys } : {}),
             datasetLineage: datasetResult.lineage,
+            getCalculatedMetrics: undefined,
             interactionIndexSpace: "component",
             selectExternal: hasPowerBiLineage ? context.selectExternal : () => ({ sent: false, reason: "no selection identities" }),
             selectSourceRows: hasPowerBiLineage ? context.selectSourceRows : () => ({ sent: false, reason: "no selection identities" }),
             clearExternal: hasPowerBiLineage ? context.clearExternal : () => ({ sent: false, reason: "no selection identities" }),
             applyExternalFilter: hasPowerBiLineage ? context.applyExternalFilter : () => ({ sent: false, reason: "field has no Power BI filter target" }),
             clearExternalFilter: hasPowerBiLineage ? context.clearExternalFilter : () => ({ sent: false, reason: "field has no Power BI filter target" }),
-            getRowsForComponent: (id: string) => rowsForComponent(
+            getRowsForComponent: (id: string) => context.getDatasetView?.(component.dataset, id)?.rows ?? rowsForComponent(
                 datasetResult.data.rows,
                 datasetResult.data.rowKeys,
                 datasetResult.data.rows,
@@ -150,9 +244,10 @@ const componentClasses = [
                 <SlotRenderer component={component} name="actions" />
                 {remoteStatus?.status === "loading" && <div class="hp-remote-source-status" role="status">Loading remote data…</div>}
                 {remoteStatus?.status === "error" && <div class="hp-remote-source-status hp-remote-source-error" role="alert">Remote data unavailable: {remoteStatus.error ?? "request failed"}</div>}
-                <ComponentErrorBoundary id={componentId} type={component.type} dataset={component.dataset} developer={context.settings.debug.showSchemaErrors}><ComponentRegistry component={component} renderChildren={renderChildren} authoringOwnerId={authoringOwnerId} /></ComponentErrorBoundary>
+                <ComponentErrorBoundary id={componentId} type={component.type} dataset={component.dataset} developer={context.settings.debug.showSchemaErrors}>{context.profiler
+                    ? <ProfiledRegistry profile={context.profiler} component={component} owner={authoringOwnerId} id={componentId} context={componentContext} />
+                    : <ComponentRegistry component={component} renderChildren={renderChildren} authoringOwnerId={authoringOwnerId} />}</ComponentErrorBoundary>
                 <SlotRenderer component={component} name="footer" />
             </RenderContext.Provider>
         </div>;
-    })}</>;
-}
+}, sameNode);

@@ -6,7 +6,7 @@ import type { ResolvedMapFeature, ResolvedMapLayer } from "../model/resolvedMapT
 import { geometryAnalysis } from "./mapSourceResolver";
 import { resolveRenderer } from "../renderers/mapRendererResolver";
 import { featureAttribute } from "../attributes/mapFeatureAttributes";
-import { matchesFilter } from "../../data/filtering";
+import { compileFilter } from "../../data/filtering";
 import type { Primitive } from "../../data/normalizeData";
 
 export function resolveGeoJsonLayer(
@@ -23,14 +23,12 @@ export function resolveGeoJsonLayer(
     const ids = new Set<string>();
     if (rawFeatures.some(raw => (source?.idField ? raw.properties?.[source.idField] : undefined) == null && raw.id == null)) warnings.push("Some features have no stable ID. Set source.idField; positional identity cannot survive reordered data.");
     let features = rawFeatures.slice(0, maximum).map((raw, index) => { const feature = materializeGeoJsonFeature(definition, raw, index, source?.idField); if (ids.has(feature.id)) warnings.push(`Duplicate feature ID “${feature.id}”; set a unique source.idField to preserve selection identity.`); ids.add(feature.id); return feature; });
-    const filters = definition.filter ? Array.isArray(definition.filter) ? definition.filter : [definition.filter] : [];
+    const filters = [definition.filter ?? []].flat().map(filter => ({
+        ...filter, matches: compileFilter(filter.operator, filter.value),
+    }));
     if (filters.length && !definition.join?.enabled)
         features = features.filter((feature) => filters.every((filter) =>
-            matchesFilter(
-                featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive,
-                filter.operator,
-                filter.value as Primitive,
-            ),
+            filter.matches(featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive),
         ));
     const geometry = geometryAnalysis(features);
     const renderer = resolveRenderer(
@@ -119,7 +117,7 @@ export function resolveGeoJsonLayer(
     };
     if (definition.join?.enabled && context) {
         const bound = bindGeoJsonLayer(layer, definition, context);
-        if (filters.length) bound.features = bound.features.filter(feature => filters.every(filter => matchesFilter(featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive, filter.operator, filter.value as Primitive)));
+        if (filters.length) bound.features = bound.features.filter(feature => filters.every(filter => filter.matches(featureAttribute(feature, filter.field, filter.fieldSource ?? "service") as Primitive)));
         bound.renderer = resolveRenderer(definition.renderer ?? { type: "simple", symbol: {} }, bound.features, "joined");
         return bound;
     }

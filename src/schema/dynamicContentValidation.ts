@@ -30,7 +30,7 @@ export function validateDynamicContent(component: Record<string, unknown>, path:
         else {
             for (const key of Object.keys(trigger)) if (!["source", "event", "refresh"].includes(key)) error(`trigger/${key}`, `Unsupported trigger property “${key}”.`);
             if (typeof trigger.source !== "string" || !trigger.source || trigger.source === componentId) error("trigger/source", "Use the ID of another component as the event source.");
-            if (trigger.event !== "click" && trigger.event !== "change" && trigger.event !== "select") error("trigger/event", "Use click, change, or select.");
+            if (trigger.event !== "click" && trigger.event !== "change" && trigger.event !== "select" && trigger.event !== "nodeClick") error("trigger/event", "Use click, change, select, or nodeClick.");
             if (trigger.refresh !== undefined && typeof trigger.refresh !== "boolean") error("trigger/refresh", "Refresh must be true or false.");
         }
     }

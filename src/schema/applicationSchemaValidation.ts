@@ -110,7 +110,7 @@ export function validateApplicationComponentSchema(
     if (component.events !== undefined) {
         if (!object(component.events)) issue(diagnostics, `${path}/events`, componentId, "Chart events must be an object.", component.events);
         else {
-            unknownKeys(component.events, ["zoom", "rangeSelect", "brush"], `${path}/events`, componentId, diagnostics);
+            unknownKeys(component.events, ["zoom", "rangeSelect", "brush", "nodeClick"], `${path}/events`, componentId, diagnostics);
             for (const [eventName, raw] of Object.entries(component.events)) {
                 const eventPath = `${path}/events/${eventName}`;
                 if (!object(raw)) { issue(diagnostics, eventPath, componentId, "Chart event configuration must be an object.", raw); continue; }

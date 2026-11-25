@@ -23,6 +23,7 @@ const STUDIO_SAMPLE_LIMIT = 5_000;
 export class IncrementalData {
     readonly performance = new RuntimePerformance();
     private dictionary = buildFieldDictionary([]);
+    private fieldSignature = "";
     private keys?: DashboardRowKeys;
     private buffer: NormalizedDashboardData = { fields: this.dictionary.fields, rows: [], rowKeys: [] };
     private visible = finalizeDashboardData(this.buffer);
@@ -51,10 +52,13 @@ export class IncrementalData {
         const input = dataViewRows(view);
         const dictionary = buildFieldDictionary(input.columns);
         if (isNewQuery) {
+            const signature = JSON.stringify(dictionary.fields);
+            const fields = signature === this.fieldSignature ? this.dictionary : dictionary;
             this.reset();
-            this.dictionary = dictionary;
-            this.keys = new DashboardRowKeys(dictionary);
-            this.buffer = { fields: dictionary.fields, rows: [], rowKeys: [] };
+            this.fieldSignature = signature;
+            this.dictionary = fields;
+            this.keys = new DashboardRowKeys(fields);
+            this.buffer = { fields: fields.fields, rows: [], rowKeys: [] };
             this.kind = input.kind;
         } else if (input.kind !== this.kind || input.columns.length !== this.dictionary.keys.length ||
             dictionary.keys.some((key, index) => key !== this.dictionary.keys[index] ||
@@ -156,6 +160,7 @@ export class IncrementalData {
     }
 
     reset(): void {
+        this.fieldSignature = "";
         this.awaitingSegment = false;
         this.dictionary = buildFieldDictionary([]);
         this.keys = undefined;

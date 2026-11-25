@@ -77,7 +77,14 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     }
     if (component.type === "select" || component.type === "multiSelect") return <label class="hp-control">{label && <span>{label}</span>}<select class="form-select form-select-sm" multiple={multiple} value={multiple ? undefined : String(value ?? "")} onChange={event => changeValue(multiple ? Array.from(event.currentTarget.selectedOptions).map(option => option.value) : event.currentTarget.value, event)}><option value="">All</option>{options.map(option => { const item = typeof option === "string" ? { label: option, value: option } : option; return <option value={String(item.value)} selected={multiple && Array.isArray(value) && value.includes(String(item.value))}>{item.label}</option>; })}</select></label>;
     if (component.type === "slider") return <label class="hp-control">{label && <span>{label}: <strong>{String(value)}</strong></span>}<input class="form-range" type="range" min={component.min} max={component.max} step={component.step} value={Number(value)} onInput={event => changeValue(Number(event.currentTarget.value), event)} /></label>;
-    if (component.type === "dateRange") return <div class="hp-control hp-date-range"><span>{label}</span><input class="form-control form-control-sm" type="date" onChange={event => changeValue([event.currentTarget.value, Array.isArray(value) ? value[1] : ""], event)} /><input class="form-control form-control-sm" type="date" onChange={event => changeValue([Array.isArray(value) ? value[0] : "", event.currentTarget.value], event)} /></div>;
+    if (component.type === "dateRange") {
+        const [start = "", end = ""] = Array.isArray(value) ? value : [];
+        return <fieldset class="hp-control hp-date-range">
+            <legend>{label}</legend>
+            <input class="form-control form-control-sm" type="date" aria-label={label ? `${label} start` : "Start date"} value={String(start)} onChange={event => changeValue([event.currentTarget.value, end], event)} />
+            <input class="form-control form-control-sm" type="date" aria-label={label ? `${label} end` : "End date"} value={String(end)} onChange={event => changeValue([start, event.currentTarget.value], event)} />
+        </fieldset>;
+    }
     const inputType = component.type === "numberInput" ? "number" : component.type === "searchBox" ? "search" : "text";
     return <label class="hp-control">{label && <span>{label}</span>}<input class="form-control form-control-sm" type={inputType} placeholder={component.placeholder} min={component.min} max={component.max} step={component.step} value={String(value ?? "")} onInput={event => changeValue(component.type === "numberInput" ? Number(event.currentTarget.value) : event.currentTarget.value, event)} /></label>;
 }

@@ -1,5 +1,6 @@
+import { reuseSpecification } from "./reuseSpecification";
 import { createMapCommandChannel } from "../maps/interactions/mapStudioCommands";
-import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import { CalculationSpecification } from "../calculations/calculationTypes";
 import { HyperPbiConfig, parseConfig } from "../config/hyperpbiConfig";
 import { NormalizedData } from "../data/normalizeData";
@@ -168,6 +169,8 @@ export function HyperPbiStudio({
   settings,
   initialSpecification,
   initialConfiguration,
+  initialDraftSpecification,
+  initialDraftConfiguration,
   initialLayout,
   onSave,
   onDraftChange,
@@ -202,6 +205,8 @@ export function HyperPbiStudio({
   settings: RuntimeSettings;
   initialSpecification: string;
   initialConfiguration: string;
+  initialDraftSpecification?: string;
+  initialDraftConfiguration?: string;
   initialLayout?: string;
   onSave: (specification: string, configuration: string) => void;
   onDraftChange?: (specification: string, configuration: string) => void;
@@ -227,8 +232,15 @@ export function HyperPbiStudio({
   providerAccess?: ProviderAccessState;
   remoteSourceHost?: "web" | "powerbi";
 }) {
-  const [specification, setSpecification] = useState(initialSpecification);
-  const [configuration, setConfiguration] = useState(initialConfiguration);
+  const [specification, setSpecification] = useState(initialDraftSpecification ?? initialSpecification);
+  const [configuration, setConfiguration] = useState(initialDraftConfiguration ?? initialConfiguration);
+  const savedInput = useRef({ specification: initialSpecification, configuration: initialConfiguration });
+  useEffect(() => {
+    const previous = savedInput.current;
+    savedInput.current = { specification: initialSpecification, configuration: initialConfiguration };
+    setSpecification(current => current === previous.specification ? initialSpecification : current);
+    setConfiguration(current => current === previous.configuration ? initialConfiguration : current);
+  }, [initialSpecification, initialConfiguration]);
   const [editorTab, setEditorTab] = useState<EditorTab>(initialEditorTab);
   const [bottomTab, setBottomTab] = useState<BottomTab>("data");
   const [selectedComponentId, setSelectedComponentId] = useState("");
@@ -244,7 +256,7 @@ export function HyperPbiStudio({
     Record<string, MapViewportState>
   >({});
   const specificationHistory = useRef(
-    new SpecificationHistory(initialSpecification),
+    new SpecificationHistory(initialDraftSpecification ?? initialSpecification),
   );
   const specificationRef = useRef(specification);
   specificationRef.current = specification;
@@ -331,7 +343,7 @@ export function HyperPbiStudio({
       : previewCurrent
         ? "Ready"
         : "Saved";
-  useEffect(
+  useLayoutEffect(
     () => onDraftChange?.(specification, configuration),
     [specification, configuration],
   );
@@ -515,15 +527,16 @@ export function HyperPbiStudio({
         setBottomTab("errors");
         return false;
       }
-      setPreview({
-        schema: result.schema,
-        config: result.config,
+      const { schema: nextSchema, config: nextConfig } = result;
+      setPreview(previous => ({
+        schema: reuseSpecification(previous?.schema, nextSchema),
+        config: reuseSpecification(previous?.config, nextConfig),
         warnings: result.warnings,
         sourceSpecification: candidate,
         sourceConfiguration: candidateConfig,
-        ownerByRuntimeId: result.ownerByRuntimeId,
-        componentPathById: result.componentPathById,
-      });
+        ownerByRuntimeId: reuseSpecification(previous?.ownerByRuntimeId, result.ownerByRuntimeId),
+        componentPathById: reuseSpecification(previous?.componentPathById, result.componentPathById),
+      }));
       appendLog(
         loadingPowerBiData
           ? "Preview will render after Power BI finishes loading data."

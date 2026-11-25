@@ -20,7 +20,7 @@ export interface RemoteFragmentRequest {
 export type DynamicContext = Readonly<Record<string, unknown>>;
 export interface DynamicTrigger {
     source: string;
-    event: "click" | "change" | "select";
+    event: "click" | "change" | "select" | "nodeClick";
     refresh?: boolean;
 }
 

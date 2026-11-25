@@ -36,6 +36,7 @@ export interface ResolvedDatasetView {
 
 export interface RenderContextValue {
     instanceId?: string;
+    profiler?: import("./RuntimeProfiler").RuntimeProfiler;
     executionMode?: "dashboard" | "fragment";
     remoteSourceHost?: "web" | "powerbi";
     data: NormalizedData;
@@ -45,12 +46,15 @@ export interface RenderContextValue {
     /** Unadapted rows and identities from the single Power BI data view. */
     powerBiSourceRows?: DataRow[];
     powerBiSourceRowKeys?: string[];
+    getCalculatedMetrics?: (rows: DataRow[]) => NormalizedData["calculatedMetrics"];
     getRowsForComponent: (componentId: string) => DataRow[];
     getDatasetView?: (name?: string, componentId?: string) => ResolvedDatasetView | undefined;
     componentRows: (componentId: string) => number[];
     schema: HyperPbiSchema;
     settings: RuntimeSettings;
     state: DashboardState;
+    /** Read the committed dashboard state when an event fires on a retained leaf. */
+    getLatestContext?: () => RenderContextValue;
     dispatch: (action: DashboardAction) => void;
     warnings: string[];
     selectExternal: (rowIndices: number[], multiSelect?: boolean, details?: InteractionDetails) => ExternalSelectionResult;

@@ -1,15 +1,17 @@
 import { indexRows } from "../data/rowIndex";
+import { compileFilter } from "../data/filtering";
 import type { DataRow } from "../data/normalizeData";
 import type { RenderContextValue } from "../render/RenderContext";
 import type { FilterOperator } from "../schema/hyperpbiSchema";
 import { claimInteractionEvent, payloadValueIsEmpty } from "./interactionPayload";
-import type { InteractionExecutionResult, InteractionModifiers, InteractionPayload, InteractionSelectionMode, ResolvedInteractionPolicy } from "./interactionTypes";
+import type { InteractionExecutionResult, InteractionModifiers, InteractionPayload, InteractionSelectionMode, InternalInteractionFilter, ResolvedInteractionPolicy } from "./interactionTypes";
 import { dynamicEventKey } from "../fragments/fragmentTypes";
 
 export function resolveInteractionSelection<T>(current: T[], matching: T[], mode: InteractionSelectionMode = "replace", modifier = false): T[] {
-    const selected = new Set(current); const matches = Array.from(new Set(matching));
+    const matches = Array.from(new Set(matching));
     const effective = modifier && mode === "replace" ? "toggle" : mode;
     if (effective === "replace") return matches;
+    const selected = new Set(current);
     if (effective === "add") { matches.forEach(item => selected.add(item)); return Array.from(selected); }
     const remove = matches.length > 0 && matches.every(item => selected.has(item));
     matches.forEach(item => remove ? selected.delete(item) : selected.add(item));
@@ -120,20 +122,31 @@ function normalizeDatasetInteraction(
     };
 }
 
-export function executeComponentInteraction(inputPolicy: ResolvedInteractionPolicy, inputPayload: InteractionPayload, inputContext: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
+export function executeComponentInteraction(policy: ResolvedInteractionPolicy, payload: InteractionPayload, context: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
+    if (!context.profiler) return runComponentInteraction(policy, payload, context, modifiers);
+    const started = performance.now();
+    try {
+        return runComponentInteraction(policy, payload, context, modifiers);
+    } finally {
+        context.profiler.record("Interaction dispatch", started);
+    }
+}
+
+function runComponentInteraction(inputPolicy: ResolvedInteractionPolicy, inputPayload: InteractionPayload, inputContext: RenderContextValue, modifiers: InteractionModifiers): InteractionExecutionResult {
     const skipped = (reason: string): InteractionExecutionResult => ({ executed: false, cleared: false, selectedRows: componentRows(inputPayload.componentId, inputContext), internalApplied: false, externalSent: false, reason });
     const dynamicEvent = modifiers.dynamicEvent ?? modifiers.trigger;
-    const observed = dynamicEvent && inputContext.dynamicEventKeys?.has(dynamicEventKey(inputPayload.componentId, dynamicEvent));
+    const candidates = new Set(Object.keys(modifiers.dynamicContexts ?? {}) as import("../fragments/fragmentTypes").DynamicTrigger["event"][]);
+    if (dynamicEvent) candidates.add(dynamicEvent);
+    const observed = [...candidates].filter(event => inputContext.dynamicEventKeys?.has(dynamicEventKey(inputPayload.componentId, event)));
     const skipReason = !inputPolicy.enabled ? "interaction disabled" : inputPolicy.trigger !== modifiers.trigger ? "trigger mismatch" : undefined;
-    if (skipReason && !observed) return skipped(skipReason);
+    if (skipReason && !observed.length) return skipped(skipReason);
     if (!claimInteractionEvent(modifiers.event)) return skipped("interaction event already handled");
-    if (observed && dynamicEvent) {
+    if (observed.length) {
         const rows = inputPayload.contextRows ?? inputPayload.rowIndices.map(index => inputContext.sourceRows[index]).filter(Boolean);
         const sharedFields = Object.entries(rows[0] ?? {}).filter(([field, value]) => rows.every(row => Object.is(row[field], value)));
-        inputContext.emitDynamicEvent?.(inputPayload.componentId, dynamicEvent, {
-            ...Object.fromEntries(sharedFields), $field: inputPayload.field,
-            $value: Object.hasOwn(modifiers, "contextValue") ? modifiers.contextValue : inputPayload.value,
-        });
+        const values = { ...Object.fromEntries(sharedFields), $field: inputPayload.field,
+            $value: Object.hasOwn(modifiers, "contextValue") ? modifiers.contextValue : inputPayload.value };
+        for (const event of observed) inputContext.emitDynamicEvent?.(inputPayload.componentId, event, { ...values, ...modifiers.dynamicContexts?.[event] });
     }
     if (skipReason) return skipped(skipReason);
     const normalized = normalizeDatasetInteraction(inputPolicy, inputPayload, inputContext);
@@ -144,7 +157,7 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
         value: policy.value !== undefined ? policy.value : payload.value,
         operator: policy.operator ?? payload.operator
     };
-    const nextSignature = signature(effectivePayload);
+    const nextSignature = policy.clearOnSecondClick ? signature(effectivePayload) : undefined;
     if (policy.clearOnSecondClick && context.state.interactionSignatures[payload.componentId] === nextSignature &&
         (!policy.stateKey || context.state.values[policy.stateKey] === effectivePayload.value)) return clearComponentInteraction(policy, payload.componentId, context);
     const inputValue = effectivePayload.value;
@@ -163,13 +176,15 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
             modifiers.multiSelect === true
         );
 
-        const indexByKey = new Map(
-            context.sourceRowKeys.map((key, index) => [key, index] as const)
-        );
-
-        selectedRows = selectedRowKeys
-            .map(key => indexByKey.get(key))
-            .filter((index): index is number => index !== undefined);
+        const knownIndices = new Map(effectivePayload.rowIndices.map(index => [context.sourceRowKeys[index], index] as const));
+        const missing = new Set(selectedRowKeys.filter(key => !knownIndices.has(key)));
+        if (missing.size) {
+            for (let index = 0; index < context.sourceRowKeys.length && missing.size; index++) {
+                const key = context.sourceRowKeys[index];
+                if (missing.delete(key)) knownIndices.set(key, index);
+            }
+        }
+        selectedRows = selectedRowKeys.map(key => knownIndices.get(key)).filter((index): index is number => index !== undefined);
     } else {
         // Backward-compatible path: use rowIndices directly
         const current = context.state.componentSelectedRows[payload.componentId] ?? [];
@@ -199,35 +214,30 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
     }
     context.dispatch({ type: "interactionSignature", id: payload.componentId, value: nextSignature });
 
-    let internalApplied = false;
+    const incompleteRange = effectivePayload.operator === "between" && (
+        !Array.isArray(inputValue) || inputValue.length < 2 || inputValue.some(payloadValueIsEmpty)
+    );
     const sharedValue = inputValue ?? effectivePayload.value;
-    if (policy.stateKey && (payloadValueIsEmpty(sharedValue) || typeof sharedValue === "string" ||
-        typeof sharedValue === "boolean" || typeof sharedValue === "number" && Number.isFinite(sharedValue))) {
-        const filterId = `@state:${policy.stateKey}`;
-        context.dispatch({ type: "value", id: policy.stateKey, value: payloadValueIsEmpty(sharedValue) ? "" : sharedValue });
-        if (!payloadValueIsEmpty(sharedValue) && policy.internalMode === "filter" && effectivePayload.field) {
-            context.dispatch({ type: "interactionFilter", filter: {
-                originComponentId: filterId,
-                sourceComponentId: payload.componentId,
-                field: effectivePayload.field,
-                operator: effectivePayload.operator,
-                value: sharedValue,
-                scope: policy.internalScope,
-                targets: policy.targets,
-            } });
-            internalApplied = true;
-        } else context.dispatch({ type: "clearInteractionFilter", id: filterId });
-    } else if (!policy.stateKey && policy.internalMode === "filter") {
-        // A logical dataset may rename or aggregate fields. Fan linked filtering out by
-        // original row identity while retaining the semantic field for an external filter.
-        const useSourceIdentity = normalized.translated || context.interactionUsesSourceIdentity === true || !effectivePayload.field;
-        const field = useSourceIdentity ? (hasSourceKeys ? "__source_row_key__" : "__source_row_index__") : effectivePayload.field!;
-        const value = useSourceIdentity ? (hasSourceKeys ? selectedRowKeys : selectedRows) : effectivePayload.value;
-        if (!payloadValueIsEmpty(value)) {
-            context.dispatch({ type: "interactionFilter", filter: { originComponentId: payload.componentId, field, operator: useSourceIdentity ? "in" : effectivePayload.operator, value, scope: policy.internalScope, targets: policy.targets } });
-            internalApplied = true;
-        } else context.dispatch({ type: "clearInteractionFilter", id: payload.componentId });
-    } else context.dispatch({ type: "clearInteractionFilter", id: payload.componentId });
+    const scalar = (value: unknown) => value === null || typeof value === "string" ||
+        typeof value === "boolean" || typeof value === "number" && Number.isFinite(value);
+    const writableState = policy.stateKey && (payloadValueIsEmpty(sharedValue) || scalar(sharedValue) ||
+        Array.isArray(sharedValue) && sharedValue.every(scalar));
+    const filterId = writableState ? `@state:${policy.stateKey}` : payload.componentId;
+    if (writableState) context.dispatch({ type: "value", id: policy.stateKey!, value: payloadValueIsEmpty(sharedValue) ? "" : sharedValue });
+    const useSourceIdentity = Boolean(modifiers.rowIdentityFilter) || !writableState &&
+        (normalized.translated || context.interactionUsesSourceIdentity === true || !effectivePayload.field);
+    const filterField = useSourceIdentity ? (hasSourceKeys ? "__source_row_key__" : "__source_row_index__") : effectivePayload.field!;
+    const filterValue = useSourceIdentity ? (hasSourceKeys ? selectedRowKeys : selectedRows) : writableState ? sharedValue : effectivePayload.value;
+    const internalApplied = policy.internalMode === "filter" && (!policy.stateKey || Boolean(writableState)) &&
+        !incompleteRange && Boolean(filterField) && !payloadValueIsEmpty(filterValue);
+    if (internalApplied) {
+        context.dispatch({ type: "interactionFilter", filter: {
+            originComponentId: filterId,
+            sourceComponentId: payload.componentId,
+            field: filterField, operator: useSourceIdentity ? "in" : effectivePayload.operator, value: filterValue,
+            scope: policy.internalScope, targets: policy.targets,
+        } });
+    } else context.dispatch({ type: "clearInteractionFilter", id: filterId });
 
     let externalSent = false;
     if (policy.externalMode === "none") context.reportInteraction(details(effectivePayload), "external interaction disabled", selectedRows);
@@ -236,7 +246,7 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
         externalSent = selectedRows.length ? context.selectExternal(selectedRows, policy.selectionMode !== "replace" || policy.multiSelect && modifiers.multiSelect === true, details(effectivePayload,"selection")).sent : context.clearExternal(details(effectivePayload,"selection")).sent;
     } else if (!effectivePayload.field) context.reportInteraction(details(effectivePayload,"filter"), "field has no Power BI filter target", selectedRows);
     else {
-        externalSent = (policy.componentKind === "dataPoint" || policy.componentKind === "custom") && selectedRows.length === 0 || payloadValueIsEmpty(effectivePayload.value)
+        externalSent = (policy.componentKind === "dataPoint" || policy.componentKind === "custom") && selectedRows.length === 0 || incompleteRange || payloadValueIsEmpty(effectivePayload.value)
             ? context.clearExternalFilter(details(effectivePayload,"filter")).sent
             : context.applyExternalFilter(effectivePayload.field, effectivePayload.operator as FilterOperator, effectivePayload.value, details(effectivePayload,"filter")).sent;
     }
@@ -245,35 +255,59 @@ export function executeComponentInteraction(inputPolicy: ResolvedInteractionPoli
 
 type ComponentRowFilterContext = Pick<RenderContextValue, "state"> & Partial<Pick<RenderContextValue, "datasetLineage" | "powerBiSourceRowKeys">>;
 
-export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[], dashboardRows: DataRow[], componentId: string, context: ComponentRowFilterContext): DataRow[] {
-    const sourceIndex = () => indexRows(sourceRows);
-    const sourceIndicesForRow = (row: DataRow): number[] => {
-        const index = sourceIndex().get(row);
-        if (index === undefined) return [];
-        return context.datasetLineage?.[index] ?? [index];
+export function createComponentRowRouter(
+    sourceRows: DataRow[],
+    sourceRowKeys: string[],
+    dashboardRows: DataRow[],
+    datasetLineage?: number[][],
+    powerBiSourceRowKeys?: string[],
+) {
+    // Filters and row arrays are immutable snapshots. A single matching pass
+    // can serve every component reached by the same ordered filter chain.
+    const results = new WeakMap<InternalInteractionFilter, WeakMap<DataRow[], DataRow[]>>();
+    const predicateFor = (filter: InternalInteractionFilter): ((row: DataRow) => boolean) => {
+        if (filter.field !== "__source_row_key__" && filter.field !== "__source_row_index__") {
+            const match = compileFilter(filter.operator, filter.value, "component");
+            return row => match(row[filter.field]);
+        }
+        const allowed = new Set<unknown>(Array.isArray(filter.value) ? filter.value : []);
+        const matchSource = filter.field === "__source_row_index__"
+            ? (index: number) => allowed.has(index)
+            : (index: number, localIndex: number) => allowed.has(powerBiSourceRowKeys?.[index] ?? sourceRowKeys[localIndex]);
+        const sourceIndex = indexRows(sourceRows);
+        return row => {
+            const localIndex = sourceIndex.get(row);
+            if (localIndex === undefined) return false;
+            const lineage = datasetLineage?.[localIndex];
+            return lineage ? lineage.some(index => matchSource(index, localIndex)) : matchSource(localIndex, localIndex);
+        };
     };
-    return context.state.interactionFilters.reduce((rows, filter) => {
-        const origin = filter.sourceComponentId ?? filter.originComponentId;
-        const applies = filter.targets?.length ? filter.targets.includes(componentId) : filter.scope === "all" || filter.scope === "self" && origin === componentId || filter.scope === "others" && origin !== componentId;
-        if (!applies) return rows;
-        if (filter.field === "__source_row_key__") {
-            const allowed = new Set(
-                Array.isArray(filter.value)
-                    ? filter.value as string[]
-                    : []
-            );
-            return rows.filter(row => {
-                const localIndex = sourceIndex().get(row);
-                if (localIndex === undefined) return false;
-                const originalKeys = context.powerBiSourceRowKeys;
-                return sourceIndicesForRow(row).some(index => allowed.has(originalKeys?.[index] ?? sourceRowKeys[localIndex]));
-            });
+
+    return (componentId: string, filters: readonly InternalInteractionFilter[]): DataRow[] => {
+        let rows = dashboardRows;
+        for (const filter of filters) {
+            const origin = filter.sourceComponentId ?? filter.originComponentId;
+            const applies = filter.targets?.length ? filter.targets.includes(componentId)
+                : filter.scope === "all" || filter.scope === "self" && origin === componentId ||
+                    filter.scope === "others" && origin !== componentId;
+            if (!applies) continue;
+            let cached = results.get(filter);
+            if (!cached) {
+                cached = new WeakMap();
+                results.set(filter, cached);
+            }
+            let filtered = cached.get(rows);
+            if (!filtered) {
+                const result = rows.filter(predicateFor(filter));
+                filtered = result.length === rows.length ? rows : result;
+                cached.set(rows, filtered);
+            }
+            rows = filtered;
         }
-        if (filter.field === "__source_row_index__") {
-            const allowed = new Set(Array.isArray(filter.value) ? filter.value as number[] : []);
-            return rows.filter(row => sourceIndicesForRow(row).some(index => allowed.has(index)));
-        }
-        const compare = (left: unknown, operator: FilterOperator, right: unknown) => operator === "in" && Array.isArray(right) ? right.some(value => value === left) : operator === "=" ? left === right : operator === "!=" ? left !== right : operator === "contains" ? String(left ?? "").toLowerCase().includes(String(right ?? "").toLowerCase()) : operator === ">" ? Number(left) > Number(right) : operator === ">=" ? Number(left) >= Number(right) : operator === "<" ? Number(left) < Number(right) : operator === "<=" ? Number(left) <= Number(right) : operator === "between" && Array.isArray(right) ? String(left ?? "") >= String(right[0] ?? "") && String(left ?? "") <= String(right[1] ?? "") : false;
-        return rows.filter(row => compare(row[filter.field], filter.operator, filter.value));
-    }, dashboardRows);
+        return rows;
+    };
+}
+
+export function rowsForComponent(sourceRows: DataRow[], sourceRowKeys: string[], dashboardRows: DataRow[], componentId: string, context: ComponentRowFilterContext): DataRow[] {
+    return createComponentRowRouter(sourceRows, sourceRowKeys, dashboardRows, context.datasetLineage, context.powerBiSourceRowKeys)(componentId, context.state.interactionFilters);
 }

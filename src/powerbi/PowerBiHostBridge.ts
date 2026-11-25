@@ -29,7 +29,38 @@ const MAX_SELECTION_IDENTITIES = 10_000;
 export class PowerBiHostBridge implements HyperPbiHostBridge {
     readonly hostType = "powerbi" as const;
 
+    private pendingFilter?: string;
+    private disposed = false;
+
     constructor(private readonly context: PowerBiHostBridgeContext) {}
+
+    dataUpdated(): void { this.pendingFilter = undefined; }
+
+    dispose(): void {
+        this.disposed = true;
+        this.pendingFilter = undefined;
+    }
+
+    private readonly applyFilterOnce: Pick<powerbi.extensibility.visual.IVisualHost, "applyJsonFilter"> = {
+        applyJsonFilter: (filter, objectName, propertyName, action) => {
+            const signature = JSON.stringify([action, filter]);
+            if (this.pendingFilter === signature) return;
+            const previous = this.pendingFilter;
+            this.pendingFilter = signature;
+            try {
+                this.context.host.applyJsonFilter(filter, objectName, propertyName, action);
+            } catch (cause) {
+                this.pendingFilter = previous;
+                throw cause;
+            }
+        }
+    };
+
+    private monitorSelection<T>(operation: powerbi.IPromise<T>): void {
+        operation?.then?.(() => undefined, () => {
+            if (!this.disposed) this.reportDiagnostic({ code: "POWERBI_SELECTION_REJECTED", severity: "warning", message: "Power BI rejected the selection update." });
+        });
+    }
 
     requestSelectionSync(request: SelectionRequest): ExternalSelectionResult {
         if (!this.context.interactionsEnabled()) return { sent: false, reason: "interactions disabled" };
@@ -37,7 +68,7 @@ export class PowerBiHostBridge implements HyperPbiHostBridge {
         const rowCount = this.context.selectionRowCount();
         if (!rowCount) return { sent: false, reason: "no selection identities" };
         if (request.clear) {
-            void this.context.selectionManager.clear();
+            this.monitorSelection(this.context.selectionManager.clear());
             return { sent: true };
         }
         const indices = new Set<number>();
@@ -50,7 +81,7 @@ export class PowerBiHostBridge implements HyperPbiHostBridge {
             }
         }
         if (!indices.size) {
-            void this.context.selectionManager.clear();
+            this.monitorSelection(this.context.selectionManager.clear());
             return { sent: false, reason: "no matching source rows" };
         }
         const identities: powerbi.visuals.ISelectionId[] = [];
@@ -59,7 +90,7 @@ export class PowerBiHostBridge implements HyperPbiHostBridge {
             if (identity) identities.push(identity);
         }
         if (!identities.length) return { sent: false, reason: "no selection identities" };
-        void this.context.selectionManager.select(identities, request.multiSelect ?? false);
+        this.monitorSelection(this.context.selectionManager.select(identities, request.multiSelect ?? false));
         return { sent: true };
     }
 
@@ -76,12 +107,12 @@ export class PowerBiHostBridge implements HyperPbiHostBridge {
     requestExternalFilterSync(request: FilterRequest): ExternalFilterResult {
         if (!this.context.interactionsEnabled()) return { sent: false, reason: "interactions disabled" };
         if (!this.context.host.hostCapabilities.allowInteractions) return { sent: false, reason: "host disallowed" };
-        if (request.clear) return clearExternalFilter(this.context.host, request.details);
+        if (request.clear) return clearExternalFilter(this.applyFilterOnce, request.details);
         if (!request.field || !request.operator) {
             return { sent: false, reason: "field has no Power BI filter target" };
         }
         return applyExternalFilter(
-            this.context.host,
+            this.applyFilterOnce,
             this.context.fields(),
             request.field,
             request.operator,

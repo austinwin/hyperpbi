@@ -220,6 +220,8 @@ export interface ChartEventDefinition {
 }
 
 export interface ChartEventsDefinition {
+    /** Override the default linked interaction for a Treemap node click. */
+    nodeClick?: ChartEventDefinition;
     /** Persist the current ECharts data-zoom window and optionally link it. */
     zoom?: ChartEventDefinition;
     /** Convert the visible zoom window into a row range selection. */

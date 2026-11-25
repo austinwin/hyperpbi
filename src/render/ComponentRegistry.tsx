@@ -54,6 +54,9 @@ const controlTypes = new Set(["searchBox", "textInput", "numberInput", "slider",
 const dataTypes = new Set(["kpi", "metricGrid", "infoCard", "statusBadge", "progressBar", "alert", "statList", "detailPanel"]);
 const chartTypes = new Set(["barChart", "horizontalBarChart", "lineChart", "areaChart", "pieChart", "donutChart", "scatterChart", "gauge", "heatmap", "comboChart", "waterfallChart", "sankeyChart", "treemapChart", "funnelChart", "radarChart", "advancedChart", "networkGraph"]);
 
+export const isChartComponent = (type: string) => chartTypes.has(type);
+export const isDataDisplayComponent = (type: string) => dataTypes.has(type);
+
 const componentRenderers: Record<string, ComponentRenderer> = {
     dynamicContent: c => h(DynamicContentBlock, { component: c as DynamicContentComponent }),
     table: c => h(TableBlock, { component: c as TableComponent }),
