@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 — Faster Power BI loading
+
+- Request 30,000 rows per Power BI window and evaluate saved dashboards once the host finishes sending the query result. Preserve the active dashboard tab and filter state across a segmented refresh.
+- Add **Show data loading progress** under **Runtime Configuration → Renderer**. Reports can hide transient progress while keeping incomplete-data warnings.
+- Refresh the Power BI welcome and setup screens with package edition, version, and UTC build date.
+
 ## 1.0.4 — Large Power BI data views
 
 - Load Power BI data incrementally, preserve every received row and its selection lineage, and display incomplete-data notices when the host stops a fetch.

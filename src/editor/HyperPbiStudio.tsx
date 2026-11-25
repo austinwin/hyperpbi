@@ -294,11 +294,13 @@ export function HyperPbiStudio({
     () => validateAuthoringData(specification, configuration, data, dataWorkspace),
     [specification, configuration, data.fields, dataWorkspace],
   );
+  const loadingPowerBiData = remoteSourceHost === "powerbi" && data.loadStatus?.completeness === "loading";
   const preview = useMemo(() => {
     if (!publishedPreview) return undefined;
+    if (loadingPowerBiData) return { ...publishedPreview, data };
     const runtime = prepareRuntimeData(data, publishedPreview.schema, publishedPreview.config);
     return runtime.data ? { ...publishedPreview, data: runtime.data } : undefined;
-  }, [publishedPreview, data.rows, data.fields, data.rowKeys, data.loadStatus]);
+  }, [publishedPreview, data.rows, data.fields, data.rowKeys, data.loadStatus, loadingPowerBiData]);
   const mapDatasetCache = useRef(new Map<string, DatasetResult>());
   const preparedAuthoring = useMemo<PreparedAuthoringData>(() => {
     if (editorTab === "mapStudio") return evaluateAuthoringData(structure, data, dataWorkspace, "lazy", mapDatasetCache.current);
@@ -523,7 +525,9 @@ export function HyperPbiStudio({
         componentPathById: result.componentPathById,
       });
       appendLog(
-        `Rendered ${result.data.rows.length.toLocaleString()} rows with ${result.warnings.length} warning(s).`,
+        loadingPowerBiData
+          ? "Preview will render after Power BI finishes loading data."
+          : `Rendered ${result.data.rows.length.toLocaleString()} rows with ${result.warnings.length} warning(s).`,
         "success",
       );
       if (result.warnings.length) setBottomTab("errors");
@@ -1421,9 +1425,9 @@ export function HyperPbiStudio({
               ? " · Preview out of date"
               : " · Not previewed"}
         </span>
-        <DataLoadNotice status={data.loadStatus} displayed={data.rows.length} />
+        <DataLoadNotice status={data.loadStatus} />
         <span class="hp-studio-data-status">
-          {data.rows.length.toLocaleString()} rows ·{" "}
+          {data.rows.length.toLocaleString()} {loadingPowerBiData ? "preview rows" : "rows"} ·{" "}
           {Object.keys(data.fields).length} fields
         </span>
         {layout.advanced && (

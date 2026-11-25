@@ -425,6 +425,27 @@ kbd {
   color: var(--success);
 }
 
+.hero-powerbi-release {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-powerbi-release a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .runtime-window {
   overflow: hidden;
   border: 1px solid #d8dbe7;

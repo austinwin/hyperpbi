@@ -1,8 +1,8 @@
 # Large Power BI data views
 
-HyperPBI 1.0.4.0 loads the Power BI Values table in 5,000-row windows with `fetchMoreData(false)`. The visual appends each segment once and uses Power BI's `lastMergeIndex` to skip the prefix echoed from the prior window. Identical values from distinct records are preserved. The visual assigns compact content-based row keys with duplicate ordinals and builds Power BI selection identities against the exact original table and row offset when a user interacts. Wide records share the host row's values and calculated fields share the unchanged base values.
+HyperPBI 1.0.5.0 requests 30,000-row windows for the Power BI Values table and fetches continuations with `fetchMoreData(false)`. The visual appends each segment once and uses Power BI's `lastMergeIndex` to skip the prefix echoed from the prior window. Identical values from distinct records are preserved. The visual assigns compact content-based row keys with duplicate ordinals and builds Power BI selection identities against the exact original table and row offset when a user interacts. Wide records share the host row's values and calculated fields share the unchanged base values.
 
-An initial preview can render while the remaining windows arrive. The loading notice shows both the received count and the count currently used for results. HyperPBI evaluates the complete set when Power BI removes its segment marker. If the request is refused, stalls for 60 seconds, or returns an invalid continuation, the visual shows **Incomplete data** and publishes all rows received so far. In this state, totals, maps and selections reflect those received rows. Power BI controls the visual query grain, summarization, and fetch policy. Microsoft documents a 100 MB fetch cap and requests can be refused by the host. [Microsoft fetch API](https://learn.microsoft.com/en-us/power-bi/developer/visuals/fetch-more-data)
+The saved report evaluates the complete set when Power BI removes its segment marker. During loading, Studio remains available with a bounded data sample, and the report can show a progress message with the received row count. To hide that message, clear **Show data loading progress** in **Runtime Configuration → Renderer**, then select **Save & return**. If the host refuses a request, stalls for 60 seconds, or returns an invalid continuation, the visual always shows **Incomplete data** and publishes all rows received so far. In this state, totals, maps and selections reflect those received rows. Power BI controls the visual query grain, summarization, and fetch policy. [Microsoft fetch API](https://learn.microsoft.com/en-us/power-bi/developer/visuals/fetch-more-data)
 
 ## Results versus display limits
 
@@ -32,9 +32,22 @@ npm run package:core
 HYPERPBI_BENCHMARK=1 npm run benchmark:powerbi
 ```
 
-The benchmark loads the compiled `.pbiviz` with a Power BI host mock. It generates a 35,813 × 21 reproduction-shaped case and 10K, 50K, 100K, 250K, and 500K datasets at both 25 and 50 fields. Each test covers the default dashboard, first and last rows, grouped logical data, derived fields and metrics, search, table selection, chart/map/tab mount and unmount, Studio validation and preview, refresh, and a refused fetch. The test measures retained JavaScript heap after explicit garbage collection and writes raw results to `.verification/powerbi-benchmark/`.
+The benchmark loads the compiled `.pbiviz` with a Power BI host mock. It generates 35,813 × 21 and 54,990 × 21 reproduction-shaped cases and 10K, 50K, 100K, 250K, and 500K datasets at both 25 and 50 fields. Each test covers the default dashboard, first and last rows, grouped logical data, derived fields and metrics, search, table selection, chart/map/tab mount and unmount, Studio validation and preview, refresh, and a refused fetch. The test measures retained JavaScript heap after explicit garbage collection and writes raw results to `.verification/powerbi-benchmark/`.
 
-## Packaged Chromium results
+For a loading comparison, put the 1.0.4 Core package in a separate directory. Run `HYPERPBI_BASELINE_PACKAGE_DIR=/path/to/old-package HYPERPBI_TEST_PACKAGES=1 npm run benchmark:powerbi -- -g "compare 54,990"`. The mock reads the window size from each package and adds 30 ms to each continuation.
+
+## Loading comparison for 1.0.5
+
+For 54,990 rows × 21 fields, the mock used the same data and dashboard in both packages. Timing starts when the first Power BI update is delivered and ends when the visual renders the complete KPI. The median uses five measured refreshes after one warm-up.
+
+| Power BI package | Requested rows per window | Continuation requests | Median to complete report |
+| --- | ---: | ---: | ---: |
+| 1.0.4.0 | 5,000 | 10 | 518 ms |
+| 1.0.5.0 | 30,000 | 1 | 151 ms |
+
+The Power BI model query before the first window and the Windows host are outside this measurement. On the original PBIX, use Performance Analyzer and the same slicer changes to compare the visual with a native Power BI table that uses the same fields, summarization, and filters.
+
+## Packaged Chromium results for 1.0.4
 
 Chrome 149 Headless Shell on an Apple M1 Max with 64 GB RAM. The host mock supplied all rows in every complete case. Values are JavaScript MiB, rounded after collection unless labeled peak. The five workflow cycles each included search, chart/map/table tab switching, a Studio edit and preview, and a full data refresh.
 

@@ -2,7 +2,8 @@
 .vercel/
 **/node_modules/
 .tmp/
-dist/
+dist/*
+!dist/build-manifest.json
 test-results/
 playwright-report/
 webpack.statistics*.html

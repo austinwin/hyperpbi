@@ -11,6 +11,8 @@ interface Workload {
     mode: number;
     peakHeap: number;
     windowMs: number;
+    completeMs?: number;
+    configuration: string;
     refresh(rows: number, specification: string, rejectAfter?: number): void;
     edit(studio: boolean): void;
     destroy(): void;
@@ -56,17 +58,18 @@ const tabsSpecification = JSON.stringify({
     ],
 });
 
-async function mountVisual(page: Page, width: number) {
-    const archive = (await readdir("dist")).find(name => name.endsWith("-core.pbiviz"));
+async function mountVisual(page: Page, width: number, { directory = "dist", hostLatency = 0 } = {}) {
+    const archive = (await readdir(directory)).find(name => name.endsWith("-core.pbiviz"));
     if (!archive) throw new Error("Build the Core PBIVIZ first.");
-    const entries = await readZipEntries(`dist/${archive}`);
+    const entries = await readZipEntries(`${directory}/${archive}`);
     const manifest = JSON.parse([...entries].find(([path]) => path.endsWith(".pbiviz.json"))![1].toString("utf8"));
+    const windowRows: number = manifest.capabilities.dataViewMappings[0].table.rows.dataReductionAlgorithm.window.count;
     await page.setViewportSize({ width: 1280, height: 840 });
     await page.setContent('<div id="visual" style="width:1260px;height:810px"></div>');
     await page.addStyleTag({ content: manifest.content.css });
     await page.evaluate(() => Object.assign(window, { powerbi: {} }));
     await page.addScriptTag({ content: manifest.content.js });
-    await page.evaluate(({ guid, width, configuration }) => {
+    await page.evaluate(({ guid, width, configuration, windowRows, hostLatency }) => {
         const browser = window as unknown as { powerbi: { visuals: { plugins: Record<string, {
             create(options: unknown): { update(options: unknown): void; destroy(): void };
         }> } } };
@@ -81,16 +84,18 @@ async function mountVisual(page: Page, width: number) {
             return { displayName: name, queryName: `Orders.${name}`, index, roles: { values: true }, isMeasure: numeric, type: numeric ? { numeric: true } : { text: true } };
         });
         const viewport = { width: 1260, height: 810 };
-        let dataStart = 0, revision = -1, activeSpecification = "", reject = Infinity, requestId = 0;
+        let dataStart = 0, revision = -1, activeSpecification = "", reject = Infinity, requestId = 0, queryStart = 0;
         const state: Workload = {
-            total: 0, requests: 0, selections: 0, builderCalls: 0, mode: 0, peakHeap: 0, windowMs: 0,
+            total: 0, requests: 0, selections: 0, builderCalls: 0, mode: 0, peakHeap: 0, windowMs: 0, configuration,
             refresh(rows, specification, rejectAfter) {
+                queryStart = performance.now();
                 requestId++;
                 revision++;
                 dataStart = 0;
                 state.total = rows;
                 state.requests = 0;
                 state.windowMs = 0;
+                state.completeMs = undefined;
                 reject = rejectAfter ?? Infinity;
                 activeSpecification = specification;
                 send(false);
@@ -102,9 +107,9 @@ async function mountVisual(page: Page, width: number) {
             destroy() { requestId++; visual.destroy(); },
         };
         const metadata = (more: boolean) => ({
-            columns,
+            columns: state.total === 0 ? [] : columns,
             segment: more ? {} : undefined,
-            objects: { hyperpbiState: { specification: activeSpecification, configuration, studioLayout: layout } },
+            objects: { hyperpbiState: { specification: activeSpecification, configuration: state.configuration, studioLayout: layout } },
         });
         const makeRow = (index: number) => columns.map((_, field) => {
             if (field === 0) return `WO-${String(index).padStart(6, "0")}`;
@@ -117,7 +122,7 @@ async function mountVisual(page: Page, width: number) {
         });
         const send = (append: boolean) => {
             const start = performance.now();
-            const end = Math.min(dataStart + 5_000, state.total);
+            const end = Math.min(dataStart + windowRows, state.total);
             const overlap = append && dataStart > 0 ? 1 : 0;
             const offset = dataStart - overlap;
             const rows = Array.from({ length: end - offset }, (_, index) => makeRow(offset + index));
@@ -125,9 +130,10 @@ async function mountVisual(page: Page, width: number) {
             dataStart = end;
             visual.update({
                 type: 2, viewport, editMode: state.mode, operationKind: append ? 2 : 0,
-                dataViews: [{ metadata: metadata(end < state.total), table: { columns, rows, identity, lastMergeIndex: overlap ? 0 : undefined } }],
+                dataViews: [{ metadata: metadata(end < state.total), table: { columns: state.total === 0 ? [] : columns, rows, identity, lastMergeIndex: overlap ? 0 : undefined } }],
             });
             state.windowMs = Math.max(state.windowMs, performance.now() - start);
+            if (end === state.total) state.completeMs = performance.now() - queryStart;
             const memory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
             state.peakHeap = Math.max(state.peakHeap, memory?.usedJSHeapSize ?? 0);
         };
@@ -135,7 +141,10 @@ async function mountVisual(page: Page, width: number) {
             element,
             host: {
                 hostCapabilities: { allowInteractions: true },
-                persistProperties: () => undefined, switchFocusModeState: () => undefined,
+                persistProperties: ({ merge: [{ properties }] }: { merge: { properties: { configuration: string } }[] }) => {
+                    state.configuration = properties.configuration;
+                },
+                switchFocusModeState: (enabled: boolean) => { state.mode = enabled ? 1 : 0; },
                 createSelectionManager: () => ({
                     clear: async () => [],
                     select: async (ids: unknown[]) => { state.selections += ids.length; return ids; },
@@ -151,13 +160,14 @@ async function mountVisual(page: Page, width: number) {
                     if (accumulated !== false) throw new Error("Visual requested accumulated segments.");
                     if (++state.requests > reject) return false;
                     const current = requestId;
-                    setTimeout(() => { if (requestId === current) send(true); }, 0);
+                    setTimeout(() => { if (requestId === current) send(true); }, hostLatency);
                     return true;
                 },
             },
         });
         window.hpWorkload = state;
-    }, { guid: manifest.visual.guid, width, configuration: defaultConfigJson });
+    }, { guid: manifest.visual.guid, width, configuration: defaultConfigJson, windowRows, hostLatency });
+    return { windowRows, version: manifest.visual.version as string };
 }
 
 async function refresh(page: Page, rows: number, specification = tabsSpecification, rejectAfter?: number) {
@@ -167,7 +177,7 @@ async function refresh(page: Page, rows: number, specification = tabsSpecificati
 
 const countText = (count: number) => count.toLocaleString("en-US");
 const cases = benchmark
-    ? [...[10_000, 50_000, 100_000, 250_000, 500_000].flatMap(rows => [25, 50].map(fields => [rows, fields])), [35_813, 21]]
+    ? [...[10_000, 50_000, 100_000, 250_000, 500_000].flatMap(rows => [25, 50].map(fields => [rows, fields])), [35_813, 21], [54_990, 21]]
     : [[10_000, 25]];
 
 for (const [rows, fields] of cases) {
@@ -182,11 +192,11 @@ for (const [rows, fields] of cases) {
             await session.send("HeapProfiler.collectGarbage");
             return (await session.send("Runtime.getHeapUsage")).usedSize;
         };
-        await mountVisual(page, fields);
+        const { windowRows } = await mountVisual(page, fields);
         await refresh(page, rows, "");
-        await expect(page.locator(".hp-setup header")).toContainText(countText(rows));
+        await expect(page.locator(".hp-visual-welcome-field-summary")).toContainText(countText(rows));
         await expect(page.locator(".hp-data-load-notice")).toHaveCount(0);
-        expect(await page.evaluate(() => window.hpWorkload.requests)).toBe(Math.ceil(rows / 5000) - 1);
+        expect(await page.evaluate(() => window.hpWorkload.requests)).toBe(Math.ceil(rows / windowRows) - 1);
         expect(await page.evaluate(() => window.hpWorkload.builderCalls)).toBe(0);
         const maxWindowMs = await page.evaluate(() => window.hpWorkload.windowMs);
         const retainedIngest = await heap();
@@ -255,7 +265,7 @@ for (const [rows, fields] of cases) {
         const peakHeap = await page.evaluate(() => window.hpWorkload.peakHeap);
         const retainedGrowth = heaps.at(-1)! - heaps[1];
         if (heaps.length > 2) expect(retainedGrowth).toBeLessThan(Math.max(24 * 2 ** 20, heaps[1] * 0.12));
-        await refresh(page, rows, "", 0);
+        await refresh(page, Math.max(rows, windowRows + 1), "", 0);
         await expect(page.getByRole("alert")).toContainText("Incomplete data");
         await page.evaluate(() => window.hpWorkload.destroy());
         await expect(page.locator("#visual").locator("> *")).toHaveCount(0);
@@ -275,3 +285,70 @@ for (const [rows, fields] of cases) {
         console.log(JSON.stringify(record));
     });
 }
+
+test("packaged welcome identifies the build and saved progress can be hidden", async ({ page }, testInfo) => {
+    const { version, windowRows } = await mountVisual(page, 21, { hostLatency: 1_500 });
+    await page.locator("#visual").evaluate(element => { (element as HTMLElement).style.width = "318px"; });
+    await refresh(page, 0, "");
+    await expect(page.getByRole("heading", { name: "Connect your report data" })).toBeVisible();
+    const build = page.locator(".hp-visual-welcome-build");
+    await expect(build).toContainText(`Core · v${version}`);
+    await expect(build.locator("time")).toHaveAttribute("datetime", /^\d{4}-\d{2}-\d{2}T.*Z$/);
+    expect(await page.locator(".hp-visual-welcome").evaluate(element => element.scrollWidth)).toBeLessThanOrEqual(318);
+    if (benchmark) await testInfo.attach("welcome-narrow", { body: await page.locator("#visual").screenshot(), contentType: "image/png" });
+    await page.locator("#visual").evaluate(element => { (element as HTMLElement).style.width = "1260px"; });
+
+    const total = page.locator('[data-hp-id="total"] .hp-metric-value');
+    const notice = page.locator(".hp-data-load-notice");
+    await refresh(page, 54_990);
+    await expect(notice).toContainText(`${countText(windowRows)} rows received`);
+    await expect(total).toHaveCount(0);
+    await expect(total).toHaveText("54,990");
+
+    await page.getByRole("tab", { name: "Records", exact: true }).click();
+    await refresh(page, 54_990);
+    await expect(notice).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Records", exact: true })).toHaveAttribute("aria-selected", "true");
+
+    await page.evaluate(() => window.hpWorkload.edit(true));
+    await page.getByRole("button", { name: "Advanced", exact: true }).click();
+    await page.getByRole("menuitem", { name: /Runtime settings/ }).click();
+    const checkbox = page.getByRole("checkbox", { name: "Show data loading progress" });
+    await expect(checkbox).toBeChecked();
+    await checkbox.uncheck();
+    await page.getByRole("button", { name: "Save & return" }).click();
+    expect(await page.evaluate(() => JSON.parse(window.hpWorkload.configuration).renderer.showDataLoadProgress)).toBe(false);
+    await refresh(page, 54_990);
+    await expect(page.locator(".hp-dashboard-loading")).toHaveAttribute("aria-busy", "true");
+    await expect(notice).toHaveCount(0);
+    await expect(total).toHaveCount(0);
+    await expect(total).toHaveText("54,990");
+    expect(await page.evaluate(() => window.hpWorkload.requests)).toBe(1);
+
+    await refresh(page, 54_990, tabsSpecification, 0);
+    await expect(page.getByRole("alert")).toContainText("Incomplete data");
+    await expect(total).toHaveText(countText(windowRows));
+});
+
+const baselineDirectory = process.env.HYPERPBI_BASELINE_PACKAGE_DIR;
+test("compare 54,990-row loading against the previous package", async ({ browser }, testInfo) => {
+    test.skip(!baselineDirectory, "Supply the directory with the previous Core PBIVIZ for comparison.");
+    const results = [];
+    for (const directory of [baselineDirectory!, "dist"]) {
+        const page = await browser.newPage();
+        const { version, windowRows } = await mountVisual(page, 21, { directory, hostLatency: 30 });
+        const timings: number[] = [];
+        for (let index = 0; index < 6; index++) {
+            await refresh(page, 54_990);
+            await expect(page.locator('[data-hp-id="total"] .hp-metric-value')).toHaveText("54,990");
+            expect(await page.evaluate(() => window.hpWorkload.requests)).toBe(Math.ceil(54_990 / windowRows) - 1);
+            const elapsed = await page.evaluate(() => window.hpWorkload.completeMs!);
+            if (index > 0) timings.push(Math.round(elapsed));
+        }
+        results.push({ version, windowRows, continuationRequests: Math.ceil(54_990 / windowRows) - 1, timings });
+        await page.close();
+    }
+    const record = { rows: 54_990, fields: 21, simulatedHostLatencyMs: 30, results };
+    await testInfo.attach("comparison", { body: JSON.stringify(record), contentType: "application/json" });
+    console.log(JSON.stringify(record));
+});

@@ -14,6 +14,14 @@ import {
 } from "lucide-react";
 import { componentCatalog } from "@/lib/catalog";
 import { listDashboardExamples } from "@/lib/examples";
+import powerBiRelease from "../../../dist/build-manifest.json";
+
+const powerBiBuildDate = new Intl.DateTimeFormat("en", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+}).format(new Date(powerBiRelease.builtAt));
 
 export default function HomePage() {
   const exampleCount = listDashboardExamples().length;
@@ -42,6 +50,12 @@ export default function HomePage() {
               <span><Check size={14} /> Schema 2.0</span>
               <span><Check size={14} /> No user JavaScript</span>
               <span><Check size={14} /> Local-first authoring</span>
+            </div>
+            <div className="hero-powerbi-release">
+              <a href={`https://github.com/austinwin/hyperpbi/releases/tag/v${powerBiRelease.releaseVersion}`}>
+                Download Power BI visual <ArrowRight size={13} aria-hidden="true" />
+              </a>
+              <span>v{powerBiRelease.powerBiVersion} · Built <time dateTime={powerBiRelease.builtAt}>{powerBiBuildDate} UTC</time></span>
             </div>
           </div>
           <div className="runtime-window" aria-label="HyperPBI specification and dashboard preview">

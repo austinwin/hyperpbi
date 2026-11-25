@@ -31,7 +31,6 @@ import { EXTERNAL_PROVIDERS_AVAILABLE } from "./providers/providerBuild";
 import { configuredMapEndpoints } from "./providers/configuredMapEndpoints";
 import { shouldRenderLandingPage } from "./powerbi/visualRuntimeMode";
 import { PowerBiHostBridge } from "./powerbi/PowerBiHostBridge";
-import { DataLoadNotice } from "./components/system/DataLoadNotice";
 import { configuredRemoteDataEndpoints } from "./data/remoteDataSources";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -60,7 +59,7 @@ export class Visual implements IVisual {
     private providerAccess:ProviderAccessState={tiles:{allowed:false,reason:"Provider access has not been checked."},geocoder:{allowed:false,reason:"Provider access has not been checked."}};
     private providerAccessSequence=0;private providerAccessSignature="";
     private interactionDiagnostics: InteractionDiagnostics = createInteractionDiagnostics(false, false, 0);
-    private nextFetch?: ReturnType<typeof setTimeout>;
+    private nextFetchQueued = false;
     private fetchTimeout?: ReturnType<typeof setTimeout>;
     private destroyed = false;
     private parsedSpecification?: { text: string; configuration: string; fields: NormalizedData["fields"]; result: ReturnType<Visual["parseSpecification"]> };
@@ -79,7 +78,19 @@ export class Visual implements IVisual {
     public update(options: VisualUpdateOptions): void {
         if (this.destroyed) return;
         const started = performance.now(); this.host.eventService?.renderingStarted(options);
-        const dataView = options.dataViews?.[0]; const previousEditMode = this.editMode; const nextEditMode = options.editMode ?? powerbi.EditMode.Default;
+        const dataView = options.dataViews?.[0];
+        const operation: DataOperation = options.operationKind === powerbi.VisualDataChangeOperationKind.Segment ? "segment"
+            : options.operationKind === powerbi.VisualDataChangeOperationKind.Append ? "append" : "replace";
+        // Segment callbacks carry data for the active query. Formatting,
+        // persisted edits, and provider access are handled by regular updates.
+        if (operation !== "replace" && (options.editMode === undefined || options.editMode === this.editMode)) {
+            this.acceptData(dataView, operation, started);
+            this.host.eventService?.renderingFinished(options);
+            this.scheduleFetch();
+            return;
+        }
+        const previousEditMode = this.editMode;
+        const nextEditMode = options.editMode ?? powerbi.EditMode.Default;
         if (dataView) this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, dataView);
         const leavingNativeEditor = previousEditMode === powerbi.EditMode.Advanced && nextEditMode !== powerbi.EditMode.Advanced && Boolean(this.draftSpecification);
         if (leavingNativeEditor && this.parseSpecification(this.draftSpecification).schema && parseConfig(this.draftConfiguration).config) {
@@ -88,10 +99,8 @@ export class Visual implements IVisual {
             const persisted = readVisualState(dataView); if (persisted.specification !== undefined) this.specification = persisted.specification; if (persisted.configuration !== undefined) this.configuration = persisted.configuration || defaultConfigJson; if (persisted.studioLayout !== undefined) this.studioLayout = persisted.studioLayout;
         }
         if ((options.type & powerbi.VisualUpdateType.Data) !== 0 || options.operationKind !== undefined) {
-            const operation: DataOperation = options.operationKind === powerbi.VisualDataChangeOperationKind.Segment ? "segment"
-                : options.operationKind === powerbi.VisualDataChangeOperationKind.Append ? "append" : "replace";
             if (this.ingestion.accept(dataView, operation)) {
-                this.cancelFetchTimers();
+                this.clearFetchTimeout();
                 this.data = this.ingestion.data;
             }
         }
@@ -102,6 +111,17 @@ export class Visual implements IVisual {
         this.renderCurrent();
         this.host.eventService?.renderingFinished(options);
         this.scheduleFetch();
+    }
+
+    private acceptData(dataView: powerbi.DataView | undefined, operation: DataOperation, started: number): void {
+        if (!this.ingestion.accept(dataView, operation)) return;
+        this.clearFetchTimeout();
+        this.data = this.ingestion.data;
+        this.interactionDiagnostics = { ...this.interactionDiagnostics, selectionIdentityCount: this.ingestion.selectionCount };
+        const showProgress = this.readConfig(this.configuration).config?.renderer?.showDataLoadProgress !== false;
+        if (this.data.loadStatus?.completeness === "loading" && this.editMode !== powerbi.EditMode.Advanced && !showProgress) return;
+        this.renderMs = performance.now() - started;
+        this.renderCurrent();
     }
 
     private renderCurrent(): void {
@@ -120,7 +140,8 @@ export class Visual implements IVisual {
         }
         if (!this.specification.trim()) {
             this.viewerRenderStability.reset();
-            render(h("div", { class: "hp-setup-host" }, h(DataLoadNotice, { status: this.data.loadStatus, displayed: this.data.rows.length }), h(SetupExperience, { data: this.data })), this.target);
+            const showProgress = this.readConfig(this.configuration).config?.renderer?.showDataLoadProgress;
+            render(h(SetupExperience, { data: this.data, showProgress }), this.target);
             return;
         }
 
@@ -131,20 +152,21 @@ export class Visual implements IVisual {
             return;
         }
 
-        const runtimeData = prepareRuntimeData(this.data, schemaResult.schema, configResult.config);
+        const loading = this.data.loadStatus?.completeness === "loading";
+        const runtimeData = loading ? { data: this.data, errors: [] } : prepareRuntimeData(this.data, schemaResult.schema, configResult.config);
         if (!runtimeData.data) {
             this.renderViewerFailure(runtimeData.errors);
             return;
         }
 
-        if (this.referenceCache?.schema !== schemaResult.schema || this.referenceCache.fields !== runtimeData.data.fields) {
+        if (!loading && (this.referenceCache?.schema !== schemaResult.schema || this.referenceCache.fields !== runtimeData.data.fields)) {
             this.referenceCache = {
                 schema: schemaResult.schema, fields: runtimeData.data.fields,
                 warnings: validateReferences(schemaResult.schema, runtimeData.data),
             };
         }
         this.viewerRenderStability.markSuccess();
-        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: this.referenceCache.warnings, renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi",ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
+        render(h(HyperPbiRoot, { instanceId: this.instanceId, schema: schemaResult.schema, data: runtimeData.data, settings, config: configResult.config, referenceWarnings: this.referenceCache?.warnings, renderMs: this.renderMs, selectExternal: this.selectRows, clearExternal: this.clearSelection, applyExternalFilter:this.applyFilter,clearExternalFilter:this.clearFilter, reportInteraction: this.reportInteraction, webAccessAvailable: this.webAccessAvailable,providerAccess:this.providerAccess,remoteSourceHost:"powerbi",ownerByRuntimeId:schemaResult.ownerByRuntimeId,componentPathById:schemaResult.componentPathById }), this.target);
     }
 
     private renderViewerFailure(errors: string[]): void {
@@ -312,10 +334,13 @@ export class Visual implements IVisual {
     private reportInteraction = (details: InteractionDetails, reason: ExternalSelectionFailureReason = "component did not call selectExternal", rowIndices: number[] = []): void => this.updateInteractionDiagnostics(rowIndices, details, { sent: false, reason });
 
     private scheduleFetch(): void {
-        if (!this.ingestion.canFetch || this.nextFetch !== undefined || this.destroyed) return;
-        this.nextFetch = setTimeout(() => {
-            this.nextFetch = undefined;
-            // Yield between host windows so loading status and the editor stay responsive.
+        if (!this.ingestion.canFetch || this.nextFetchQueued || this.destroyed) return;
+        this.nextFetchQueued = true;
+        // Avoid the per-window timer delay and stay outside any synchronous
+        // update callback the host might make while accepting a request.
+        queueMicrotask(() => {
+            this.nextFetchQueued = false;
+            if (!this.ingestion.canFetch || this.destroyed) return;
             this.fetchTimeout = setTimeout(() => {
                 this.fetchTimeout = undefined;
                 this.ingestion.markIncomplete("Power BI did not finish sending data. Refresh the visual to retry.");
@@ -323,24 +348,22 @@ export class Visual implements IVisual {
                 this.renderCurrent();
             }, 60_000);
             if (!this.ingestion.requestNext(this.host)) {
-                this.cancelFetchTimers();
+                this.clearFetchTimeout();
                 this.data = this.ingestion.data;
                 this.renderCurrent();
             }
-        }, 0);
+        });
     }
 
-    private cancelFetchTimers(): void {
-        clearTimeout(this.nextFetch);
+    private clearFetchTimeout(): void {
         clearTimeout(this.fetchTimeout);
-        this.nextFetch = undefined;
         this.fetchTimeout = undefined;
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel { return this.formattingSettingsService.buildFormattingModel(this.formattingSettings); }
     public destroy(): void {
         this.destroyed = true;
-        this.cancelFetchTimers();
+        this.clearFetchTimeout();
         this.viewerRenderStability.dispose();
         render(null, this.target);
         this.ingestion.reset();

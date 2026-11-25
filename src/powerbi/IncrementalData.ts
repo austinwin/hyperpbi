@@ -18,6 +18,7 @@ interface SelectionSegment {
 }
 
 type MergeMetadata = { lastMergeIndex?: number };
+const STUDIO_SAMPLE_LIMIT = 5_000;
 
 export class IncrementalData {
     readonly performance = new RuntimePerformance();
@@ -92,9 +93,13 @@ export class IncrementalData {
         this.status = { loadedRowCount: end, moreRowsAvailable, completeness: moreRowsAvailable ? "loading" : "complete", segments: (this.status.segments ?? 0) + 1 };
         if (!moreRowsAvailable) this.publish();
         else if (isNewQuery) {
-            // Render one bounded snapshot during collection. The remaining
-            // segments append to private buffers without invalidating analytics.
-            this.visible = finalizeDashboardData({ ...this.buffer, rows: this.buffer.rows.slice(), rowKeys: this.buffer.rowKeys.slice() });
+            // Keep an immutable, bounded sample for Studio's data tab. Report
+            // analytics start when Power BI finishes sending rows.
+            this.visible = finalizeDashboardData({
+                ...this.buffer,
+                rows: this.buffer.rows.slice(0, STUDIO_SAMPLE_LIMIT),
+                rowKeys: this.buffer.rowKeys.slice(0, STUDIO_SAMPLE_LIMIT),
+            });
         }
         this.performance.record("ingestion", started);
         return true;

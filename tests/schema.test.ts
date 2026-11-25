@@ -150,6 +150,6 @@ describe("schema 2.0 validation", () => {
     expect(capabilities.dataRoles).toEqual([{ displayName: "Values", name: "values", kind: "GroupingOrMeasure" }]);
     expect(capabilities.advancedEditModeSupport).toBe(2);
     expect(reportRenderer).not.toContain("Design with AI");
-    expect(setupExperience).toContain("Select Edit");
+    expect(setupExperience).toContain("choose <strong>Edit</strong>");
   });
 });

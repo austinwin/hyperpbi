@@ -69,6 +69,7 @@ try {
         await writeFile(buildPath, [
             "/** Generated temporarily by package-profile.mjs. */",
             `export const EXTERNAL_PROVIDERS_AVAILABLE = ${profile === "maps"};`,
+            `export const POWER_BI_BUILT_AT: string | undefined = ${JSON.stringify(new Date().toISOString())};`,
         ].join("\n") + "\n");
 
         if (originalHostPolicy && profile === "maps") {

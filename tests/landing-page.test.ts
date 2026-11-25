@@ -32,12 +32,17 @@ describe("product landing page", () => {
         expect(home).not.toMatch(/Dedicated Map Latitude|Dedicated Map Longitude/i);
     });
     it("shows linked product attribution in both visual entry screens", () => {
-        for (const source of [visualLanding, setupExperience]) {
-            expect(source).toContain("Designed, Developed and Maintained by H.Nguyen - WWO");
-            expect(source).toContain("https://hyperpbi.com");
-            expect(source).toContain('target="_blank"');
-            expect(source).toContain('rel="noreferrer"');
-        }
+        expect(visualLanding).toContain("H. Nguyen, WWO");
+        expect(visualLanding).toContain("https://hyperpbi.com/docs/user-guide");
+        expect(visualLanding).toContain('target="_blank"');
+        expect(visualLanding).toContain('rel="noreferrer"');
+        expect(setupExperience).toContain("<VisualWelcome hasData>");
+    });
+    it("links the public landing page to the packaged Power BI release", () => {
+        expect(home).toContain('from "../../../dist/build-manifest.json"');
+        expect(home).toContain("powerBiRelease.powerBiVersion");
+        expect(home).toContain("dateTime={powerBiRelease.builtAt}");
+        expect(home).toContain("releases/tag/v${powerBiRelease.releaseVersion}");
     });
     it("publishes the canonical website and source repository in product metadata", () => {
         expect(packageMetadata.homepage).toBe("https://hyperpbi.com");

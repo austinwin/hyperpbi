@@ -16,7 +16,7 @@ for (const profile of profiles) {
     const archive = join(dist, archives[0]);
     const capabilities = await readPackagedCapabilities(archive);
     const window = capabilities.dataViewMappings?.[0]?.table?.rows?.dataReductionAlgorithm?.window?.count;
-    if (window !== 5000) throw new Error(`${profile} package must request 5,000-row Power BI windows. Received ${String(window)}.`);
+    if (window !== 30000) throw new Error(`${profile} package must request 30,000-row Power BI windows. Received ${String(window)}.`);
     const packagedRoles = capabilities.dataRoles ?? [];
     if (JSON.stringify(packagedRoles) !== JSON.stringify(requiredDataRoles)) {
         throw new Error(`${profile} package must expose the shared Values-only data-role contract; received ${JSON.stringify(packagedRoles)}.`);

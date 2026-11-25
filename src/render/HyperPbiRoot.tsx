@@ -12,7 +12,7 @@ import { resolveSchemaRuntimeSettings, themeVariables } from "../styles/tokens";
 import { FieldDictionaryPanel } from "../components/system/FieldDictionaryPanel";
 import { DashboardRenderer } from "./DashboardRenderer";
 import { RenderContext, RenderContextValue } from "./RenderContext";
-import { dashboardReducer, initialDashboardState } from "./stateStore";
+import { dashboardReducer, initialDashboardState, type DashboardAction, type DashboardState } from "./stateStore";
 import { calculateDerivedMetrics } from "../calculations/derivedMetrics";
 import {
   ExternalSelectionFailureReason,
@@ -54,29 +54,7 @@ const filterNotSent = (): ExternalFilterResult => ({
   sent: false,
   reason: "component did not call selectExternal",
 });
-export function HyperPbiRoot({
-  instanceId,
-  schema,
-  data,
-  dataWorkspace,
-  settings,
-  renderMs,
-  referenceWarnings = [],
-  config = defaultConfig,
-  selectExternal = notSent,
-  clearExternal = notSent,
-  applyExternalFilter = filterNotSent,
-  clearExternalFilter = filterNotSent,
-  reportInteraction = () => undefined,
-  webAccessAvailable = false,
-  providerAccess,
-  ownerByRuntimeId,
-  componentPathById,
-  onMapViewportChange,
-  mapCommands,
-  remoteSourceHost = "web",
-  executionMode = "dashboard",
-}: {
+interface HyperPbiRootProps {
   executionMode?: "dashboard" | "fragment";
   instanceId: string;
   schema: HyperPbiSchema;
@@ -111,7 +89,49 @@ export function HyperPbiRoot({
   mapCommands?: import("../maps/interactions/mapStudioCommands").MapCommandChannel;
   onMapViewportChange?: (mapId: string, viewport: MapViewportState) => void;
   remoteSourceHost?: "web" | "powerbi";
-}) {
+}
+
+export function HyperPbiRoot(props: HyperPbiRootProps) {
+  const { schema, data, config, remoteSourceHost, executionMode } = props;
+  const [state, dispatch] = useReducer(
+    dashboardReducer,
+    initialDashboardState(schema.state?.search, schema.state?.activeTab),
+  );
+  // Keep report controls and selection state across native slicer refreshes,
+  // while releasing the previous dataset and mounted dashboard resources.
+  if (remoteSourceHost === "powerbi" && executionMode !== "fragment" && data.loadStatus?.completeness === "loading") {
+    return <div class="hp-dashboard-loading" aria-busy={config?.renderer?.showDataLoadProgress === false || undefined}>
+      <DataLoadNotice status={data.loadStatus} showProgress={config?.renderer?.showDataLoadProgress} />
+    </div>;
+  }
+  return <EvaluatedDashboard {...props} state={state} dispatch={dispatch} />;
+}
+
+function EvaluatedDashboard({
+  instanceId,
+  schema,
+  data,
+  dataWorkspace,
+  settings,
+  renderMs,
+  referenceWarnings = [],
+  config = defaultConfig,
+  selectExternal = notSent,
+  clearExternal = notSent,
+  applyExternalFilter = filterNotSent,
+  clearExternalFilter = filterNotSent,
+  reportInteraction = () => undefined,
+  webAccessAvailable = false,
+  providerAccess,
+  ownerByRuntimeId,
+  componentPathById,
+  onMapViewportChange,
+  mapCommands,
+  remoteSourceHost = "web",
+  executionMode = "dashboard",
+  state,
+  dispatch,
+}: HyperPbiRootProps & { state: DashboardState; dispatch: (action: DashboardAction) => void }) {
   const effectiveSettings = useMemo(
     () => resolveSchemaRuntimeSettings(schema.theme, settings),
     [schema.theme, settings],
@@ -120,10 +140,6 @@ export function HyperPbiRoot({
     tiles: { allowed: webAccessAvailable },
     geocoder: { allowed: webAccessAvailable },
   };
-  const [state, dispatch] = useReducer(
-    dashboardReducer,
-    initialDashboardState(schema.state?.search, schema.state?.activeTab),
-  );
   const overlayRuntime = useMemo(() => executionMode === "dashboard" ? createOverlayRuntime(instanceId) : undefined, [instanceId, executionMode]);
   const { keys: dynamicEventKeys, defaults: dynamicDefaults } = useMemo(() => {
     const keys = new Set<string>();
@@ -470,7 +486,7 @@ export function HyperPbiRoot({
       style={style}
     >
       <style>{sanitizedCss.css}</style>
-      <DataLoadNotice status={data.loadStatus} displayed={data.rows.length} />
+      <DataLoadNotice status={data.loadStatus} showProgress={config.renderer?.showDataLoadProgress} />
       <RenderContext.Provider value={context}>
         {resolvedApp.enabled ? (
           <>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type powerbi from "powerbi-visuals-api";
 import { defaultConfig, defaultConfigJson, parseConfig, resolveConfiguredField } from "../src/config/hyperpbiConfig";
+import { runtimeConfigToForm } from "../src/editor/config/runtimeConfigForm";
 import { readVisualState } from "../src/powerbi/visualState";
 import { toRuntimeSettings, VisualFormattingSettingsModel } from "../src/settings";
 
@@ -8,6 +9,11 @@ describe("studio configuration and persistence", () => {
     it("parses the default editor configuration", () => {
         const result = parseConfig(defaultConfigJson);
         expect(result.errors).toEqual([]); expect(result.config?.interactions?.crossFilter).toBe(true);expect(defaultConfig.renderer).toEqual({showHeader:false,showRowCount:false,showStudioButton:true});expect(result.config?.security).toMatchObject({cssMode:"scoped",htmlMode:"sanitized",showSanitizerWarnings:false});
+    });
+    it("keeps loading progress enabled for old reports and respects an explicit opt-out", () => {
+        expect(runtimeConfigToForm({ version: "1.0", renderer: {} }).showDataLoadProgress).toBe(true);
+        expect(parseConfig('{"renderer":{"showDataLoadProgress":false}}').config?.renderer?.showDataLoadProgress).toBe(false);
+        expect(parseConfig('{"renderer":{"showDataLoadProgress":"false"}}').errors).toContain("renderer.showDataLoadProgress must be a boolean.");
     });
     it("resolves canonical keys without accepting Power BI display names", () => {
         const fields = { asset_id: { key: "asset_id", displayName: "Asset ID", type: "dimension" as const, roles: ["values"] } };

@@ -27,6 +27,8 @@ The dashboards in [`examples/dashboards`](../examples/dashboards) are a starting
 
 Core has no external provider access. Use a Maps package only when the report needs approved tiles, geocoding, or public ArcGIS services.
 
+To hide the report's loading message, open Studio and select **Advanced → Runtime settings**. Under **Renderer**, clear **Show data loading progress**, then select **Save & return**. Incomplete-data warnings still appear if Power BI stops sending rows. The welcome and setup screens display the installed package edition, version, and UTC build date.
+
 ## Edit Mode workflow
 
 The normal path is:
@@ -143,7 +145,7 @@ For hierarchical navigation, define `drill.levels` with at least two already-dec
 
 ## Tables and exports
 
-Native tables virtualize large result sets by default once the threshold is reached. `virtualization` can explicitly set `enabled`, `threshold` (up to the 5,000-row non-virtual DOM guard), measured `rowHeight` (`22`–`80` pixels), and bounded `overscan`. Only the viewport window plus overscan is mounted, while search, sort, filters, row count, selection, pagination, and export continue to use the complete prepared result. Explicitly disabling virtualization keeps the existing 5,000-row DOM safety limit. The visual-format maximum-row setting remains the authoritative ingestion guard.
+Native tables virtualize large result sets by default once the threshold is reached. `virtualization` can explicitly set `enabled`, `threshold` (up to the 5,000-row non-virtual DOM guard), measured `rowHeight` (`22`–`80` pixels), and bounded `overscan`. Only the viewport window plus overscan is mounted, while search, sort, filters, row count, selection, pagination, and export continue to use the complete prepared result. Explicitly disabling virtualization keeps the existing 5,000-row DOM safety limit. The visual-format maximum-row setting applies to table display.
 
 Enable `export` with one or both `formats: ["csv", "xlsx"]`, `scope: "filtered" | "selected" | "selectedOrFiltered"`, and an optional `fileName`. Exports use visible columns and the complete filtered/selected row set, not only mounted virtual rows. CSV is UTF-8 with a BOM; both formats neutralize spreadsheet-formula prefixes. XLSX output is generated locally without sending data to a provider.
 
