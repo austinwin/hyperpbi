@@ -202,7 +202,7 @@ export function initialDashboardState(search = "", activeTab = ""): DashboardSta
 
 export function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
     // ── Existing actions ──────────────────────────────────────────
-    if (action.type === "search") return { ...state, search: action.value };
+    if (action.type === "search") return state.search === action.value ? state : { ...state, search: action.value };
     if (action.type === "tab") return { ...state, activeTabs: { ...state.activeTabs, [action.id]: action.value } };
     if (action.type === "collapse") return { ...state, collapsed: { ...state.collapsed, [action.id]: action.value ?? !state.collapsed[action.id] } };
     if (action.type === "filter") return { ...state, filters: [...state.filters.filter(item => item.id !== action.filter.id), action.filter] };
@@ -216,7 +216,10 @@ export function dashboardReducer(state: DashboardState, action: DashboardAction)
     if (action.type === "componentSelectionMode") { const componentSelectionModes={...state.componentSelectionModes};if(action.mode)componentSelectionModes[action.id]=action.mode;else delete componentSelectionModes[action.id];return{...state,componentSelectionModes}; }
     if (action.type === "componentSelectionTargets") { const componentSelectionTargets={...state.componentSelectionTargets};if(action.targets?.length)componentSelectionTargets[action.id]=Array.from(new Set(action.targets));else delete componentSelectionTargets[action.id];return{...state,componentSelectionTargets}; }
     if (action.type === "interactionFilter") return { ...state, interactionFilters: [...state.interactionFilters.filter(filter => filter.originComponentId !== action.filter.originComponentId), action.filter] };
-    if (action.type === "clearInteractionFilter") return { ...state, interactionFilters: state.interactionFilters.filter(filter => filter.originComponentId !== action.id) };
+    if (action.type === "clearInteractionFilter") {
+        const interactionFilters = state.interactionFilters.filter(filter => filter.originComponentId !== action.id);
+        return interactionFilters.length === state.interactionFilters.length ? state : { ...state, interactionFilters };
+    }
     if (action.type === "interactionSignature") { const interactionSignatures = { ...state.interactionSignatures }; if (action.value === undefined) delete interactionSignatures[action.id]; else interactionSignatures[action.id] = action.value; return { ...state, interactionSignatures }; }
     if (action.type === "resetInteractions") return { ...state, selectedRows: [], selectedRowKeys: [], componentSelectedRows: {}, componentSelectedRowKeys: {}, componentSelectionScopes: {}, componentSelectionModes: {}, componentSelectionTargets: {}, interactionFilters: [], interactionSignatures: {}, selectedMapFeature: undefined, mapSelectedFeatureIds: {}, mapInteractionState: {}, chartViewState: {}, chartDrillState: {} };
     if (action.type === "reconcileRowKeys") {

@@ -1,5 +1,5 @@
 import { indexRows } from "../data/rowIndex";
-import { compileFilter } from "../data/filtering";
+import { compileFilter, scalarFilterKey } from "../data/filtering";
 import type { DataRow } from "../data/normalizeData";
 import type { RenderContextValue } from "../render/RenderContext";
 import type { FilterOperator } from "../schema/hyperpbiSchema";
@@ -176,15 +176,21 @@ function runComponentInteraction(inputPolicy: ResolvedInteractionPolicy, inputPa
             modifiers.multiSelect === true
         );
 
-        const knownIndices = new Map(effectivePayload.rowIndices.map(index => [context.sourceRowKeys[index], index] as const));
-        const missing = new Set(selectedRowKeys.filter(key => !knownIndices.has(key)));
-        if (missing.size) {
-            for (let index = 0; index < context.sourceRowKeys.length && missing.size; index++) {
-                const key = context.sourceRowKeys[index];
-                if (missing.delete(key)) knownIndices.set(key, index);
+        const matching = effectivePayload.rowIndices;
+        if (matching.length === selectedRowKeys.length &&
+            matching.every((index, position) => context.sourceRowKeys[index] === selectedRowKeys[position])) {
+            selectedRows = matching;
+        } else {
+            const knownIndices = new Map(matching.map(index => [context.sourceRowKeys[index], index] as const));
+            const missing = new Set(selectedRowKeys.filter(key => !knownIndices.has(key)));
+            if (missing.size) {
+                for (let index = 0; index < context.sourceRowKeys.length && missing.size; index++) {
+                    const key = context.sourceRowKeys[index];
+                    if (missing.delete(key)) knownIndices.set(key, index);
+                }
             }
+            selectedRows = selectedRowKeys.map(key => knownIndices.get(key)).filter((index): index is number => index !== undefined);
         }
-        selectedRows = selectedRowKeys.map(key => knownIndices.get(key)).filter((index): index is number => index !== undefined);
     } else {
         // Backward-compatible path: use rowIndices directly
         const current = context.state.componentSelectedRows[payload.componentId] ?? [];
@@ -265,6 +271,7 @@ export function createComponentRowRouter(
     // Filters and row arrays are immutable snapshots. A single matching pass
     // can serve every component reached by the same ordered filter chain.
     const results = new WeakMap<InternalInteractionFilter, WeakMap<DataRow[], DataRow[]>>();
+    const repeatedResults = new WeakMap<DataRow[], Map<string, DataRow[]>>();
     const predicateFor = (filter: InternalInteractionFilter): ((row: DataRow) => boolean) => {
         if (filter.field !== "__source_row_key__" && filter.field !== "__source_row_index__") {
             const match = compileFilter(filter.operator, filter.value, "component");
@@ -298,8 +305,19 @@ export function createComponentRowRouter(
             }
             let filtered = cached.get(rows);
             if (!filtered) {
-                const result = rows.filter(predicateFor(filter));
-                filtered = result.length === rows.length ? rows : result;
+                const key = filter.field === "__source_row_key__" || filter.field === "__source_row_index__"
+                    ? undefined : scalarFilterKey(filter.field, filter.operator, filter.value);
+                let repeated = key !== undefined ? repeatedResults.get(rows) : undefined;
+                filtered = key !== undefined ? repeated?.get(key) : undefined;
+                if (!filtered) {
+                    const result = rows.filter(predicateFor(filter));
+                    filtered = result.length === rows.length ? rows : result;
+                    if (key !== undefined && result.length <= 100_000) {
+                        if (!repeated) repeatedResults.set(rows, repeated = new Map());
+                        if (repeated.size === 3) repeated.delete(repeated.keys().next().value!);
+                        repeated.set(key, filtered);
+                    }
+                }
                 cached.set(rows, filtered);
             }
             rows = filtered;

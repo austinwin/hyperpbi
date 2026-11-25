@@ -18,7 +18,7 @@ import { dynamicEventKey } from "../../fragments/fragmentTypes";
 import { createInteractionPayload } from "../../interactions/interactionPayload";
 import { resolveInteractionPolicy } from "../../interactions/interactionPolicy";
 import { getChartAdapter } from "./adapters/registry";
-import type { ChartBuildContext, ChartDatumBinding } from "./adapters/types";
+import type { ChartBuildContext, ChartBuildResult, ChartDatumBinding } from "./adapters/types";
 import {
     bindingsForBrush,
     bindingsForZoom,
@@ -35,18 +35,27 @@ const EMPTY_DRILL_PATH: NonNullable<ReturnType<typeof useRenderContext>["state"]
 const MAX_CHART_CATEGORIES = 10_000;
 const MAX_SCATTER_POINTS = 30_000;
 
+const categoryLimits = new WeakMap<DataRow[], Map<string, boolean>>();
+
 function chartDisplayLimit(component: ChartComponent, rows: DataRow[]): string | undefined {
     if (component.type === "scatterChart" && rows.length > MAX_SCATTER_POINTS) {
         return `This plot has more than ${MAX_SCATTER_POINTS.toLocaleString()} input rows. Filter the plot or bind a grouped dataset.`;
     }
     if ("category" in component && component.category && component.type !== "advancedChart" && rows.length > MAX_CHART_CATEGORIES) {
-        const categories = new Set<string>();
-        for (const row of rows) {
-            categories.add(String(row[component.category] ?? "(Blank)"));
-            if (categories.size > MAX_CHART_CATEGORIES) {
-                return `This chart has more than ${MAX_CHART_CATEGORIES.toLocaleString()} categories. Filter or group its data to display it.`;
+        let limits = categoryLimits.get(rows);
+        if (!limits) categoryLimits.set(rows, limits = new Map());
+        const field = component.category;
+        let exceeded = limits.get(field);
+        if (exceeded === undefined) {
+            const categories = new Set<string>();
+            for (const row of rows) {
+                categories.add(String(row[field] ?? "(Blank)"));
+                if (categories.size > MAX_CHART_CATEGORIES) break;
             }
+            exceeded = categories.size > MAX_CHART_CATEGORIES;
+            if (limits.size < 64) limits.set(field, exceeded);
         }
+        if (exceeded) return `This chart has more than ${MAX_CHART_CATEGORIES.toLocaleString()} categories. Filter or group its data to display it.`;
     }
     return undefined;
 }
@@ -149,10 +158,21 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
     }), [context.settings.theme, currentRows, powerBiRowKeys, datasetView, context.sourceRows, context.datasetLineage, powerBiRows]);
     const missing = adapter.fields(effectiveComponent).filter(field => !effectiveFields[field]);
     const displayLimit = useMemo(() => chartDisplayLimit(adapterComponent, currentRows), [adapterComponent, currentRows]);
-    const result = useMemo(
-        () => displayLimit ? { option: {}, bindings: [], warnings: [] } : adapter.build(adapterComponent, currentRows, buildContext),
-        [adapter, adapterComponent, currentRows, buildContext, displayLimit],
-    );
+    // Repeated scoped filters can return the same row view. Cache its
+    // preparation for the lifetime of this source and chart definition.
+    const prepared = useMemo(() => new WeakMap<DataRow[], ChartBuildResult>(), [
+        adapter, adapterComponent, context.settings.theme, context.sourceRows,
+        context.datasetLineage, powerBiRows, powerBiRowKeys,
+    ]);
+    const result = useMemo(() => {
+        if (displayLimit) return { option: {}, bindings: [], warnings: [] };
+        if (datasetView || currentRows.length < 1_000) return adapter.build(adapterComponent, currentRows, buildContext);
+        const cached = prepared.get(currentRows);
+        if (cached) return cached;
+        const built = adapter.build(adapterComponent, currentRows, buildContext);
+        prepared.set(currentRows, built);
+        return built;
+    }, [adapter, adapterComponent, currentRows, buildContext, displayLimit, datasetView, prepared]);
     const sourceStatus = chartDataState(effectiveComponent.dataset, context.schema.data?.datasets, context.remoteSources);
     const option = useMemo(() => applyChartStyle(enableDeclarativeChartEvents(result.option, component.events), component.chartStyle), [result.option, component.events, component.chartStyle]);
     const selectedRows = useMemo(() => {
@@ -310,6 +330,8 @@ export function ChartBlock({ component }: { component: ChartComponent }) {
                                 initOptions={component.initOptions}
                                 setOptionOptions={component.setOption}
                                 completeOption={component.type !== "advancedChart"}
+                                incrementalData={["barChart", "horizontalBarChart", "lineChart", "areaChart"].includes(component.type) &&
+                                    !component.options && !component.setOption && !component.chartStyle && !component.events && !component.drill}
                                 selectedDataPoints={selectionRefs}
                                 onDataPoint={onDataPoint}
                                 onZoom={component.chartStyle?.zoom || component.events?.zoom?.enabled || component.events?.rangeSelect?.enabled ? onZoom : undefined}

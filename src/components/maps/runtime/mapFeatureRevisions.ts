@@ -37,6 +37,23 @@ function pointImplementation(
     : "circle";
 }
 
+function structuralFeatureRevision(
+  feature: ResolvedMapFeature,
+  renderer: ResolvedMapRenderer,
+  pane?: string,
+  clusterParent = false,
+): string {
+  return stableMapRevision({
+    geometryType: feature.geometryType,
+    geometry: feature.geometry,
+    lat: feature.lat,
+    lon: feature.lon,
+    implementation: pointImplementation(feature, renderer),
+    pane,
+    clusterParent,
+  });
+}
+
 export function resolveMapFeatureRevision(
   feature: ResolvedMapFeature,
   layer: Pick<
@@ -52,15 +69,7 @@ export function resolveMapFeatureRevision(
   } = {},
 ): ResolvedMapFeatureRevision {
   return {
-    structuralRevision: stableMapRevision({
-      geometryType: feature.geometryType,
-      geometry: feature.geometry,
-      lat: feature.lat,
-      lon: feature.lon,
-      implementation: pointImplementation(feature, layer.renderer),
-      pane: options.pane,
-      clusterParent: options.clusterParent ?? false,
-    }),
+    structuralRevision: structuralFeatureRevision(feature, layer.renderer, options.pane, options.clusterParent ?? false),
     visualRevision: stableMapRevision({
       style: options.visualStyle ?? featureStyle(feature, layer.renderer),
       selected: options.selected ?? feature.selected,
@@ -113,9 +122,7 @@ export function resolvedLayerStructuralRevision(
           : undefined,
       features: layer.features.map((feature) => ({
         key: feature.featureKey ?? feature.id,
-        revision: resolveMapFeatureRevision(feature, layer, {
-          clusterParent: layer.renderer.type === "cluster",
-        }).structuralRevision,
+        revision: structuralFeatureRevision(feature, layer.renderer, undefined, layer.renderer.type === "cluster"),
       })),
     })),
   });

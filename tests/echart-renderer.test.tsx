@@ -16,6 +16,7 @@ const runtime = vi.hoisted(() => {
         const handlers: Record<string, (params: Record<string, unknown>) => void> = {};
         const chart = {
             setOption: vi.fn(), resize: vi.fn(), dispatchAction: vi.fn(), handlers,
+            getWidth: () => 300, getHeight: () => 200,
             dispose: vi.fn(() => { disposed = true; }),
             isDisposed: () => disposed,
             on: vi.fn((name: string, handler: (params: Record<string, unknown>) => void) => { handlers[name] = handler; }),
@@ -48,7 +49,8 @@ describe("Power BI ECharts runtime options", () => {
 });
 
 describe("EChartRenderer lifecycle", () => {
-    let resizeCallbacks: Array<() => void>;
+    let resizeCallbacks: Array<(entries: Array<{ target: Element; contentRect: { width: number; height: number } }>) => void>;
+    let hosts: HTMLElement[];
     let animationFrames: Map<number, FrameRequestCallback>;
     let nextFrame: number;
 
@@ -58,11 +60,13 @@ describe("EChartRenderer lifecycle", () => {
         runtime.getInstanceByDom.mockReset();
         runtime.getInstanceByDom.mockReturnValue(undefined);
         resizeCallbacks = [];
+        hosts = [];
         animationFrames = new Map();
         nextFrame = 1;
         vi.stubGlobal("ResizeObserver", class {
-            constructor(callback: () => void) { resizeCallbacks.push(callback); }
+            constructor(callback: typeof resizeCallbacks[number]) { resizeCallbacks.push(callback); }
             observe() {}
+            unobserve() {}
             disconnect() {}
         });
         vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
@@ -74,9 +78,16 @@ describe("EChartRenderer lifecycle", () => {
     });
 
     afterEach(() => {
+        act(() => hosts.forEach(host => render(null, host)));
         vi.unstubAllGlobals();
         document.body.replaceChildren();
     });
+
+    const makeHost = () => {
+        const host = document.createElement("div");
+        hosts.push(host);
+        return host;
+    };
 
     const flushFrames = () => {
         const pending = [...animationFrames.entries()];
@@ -85,7 +96,7 @@ describe("EChartRenderer lifecycle", () => {
     };
 
     it("keeps one instance for ordinary option changes and applies complete replacement", () => {
-        const host = document.createElement("div");
+        const host = makeHost();
         act(() => render(h(EChartRenderer, { option: { series: [{ type: "bar", data: [1] }] }, initOptions: { useDirtyRect: true } }), host));
         expect(runtime.init).toHaveBeenCalledWith(expect.any(HTMLElement), undefined, expect.objectContaining({ renderer: "canvas", useDirtyRect: false }));
         expect(runtime.charts[0].setOption).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ notMerge: true, lazyUpdate: false }));
@@ -95,14 +106,17 @@ describe("EChartRenderer lifecycle", () => {
     });
 
     it("coalesces observer updates, cancels pending work, and disposes once", () => {
-        const host = document.createElement("div");
+        const host = makeHost();
         act(() => render(h(EChartRenderer, { option: {} }), host));
-        flushFrames();
-        resizeCallbacks[0](); resizeCallbacks[0](); resizeCallbacks[0]();
+        const target = host.querySelector(".hp-chart-canvas")!;
+        const emit = (width: number) => resizeCallbacks[0]([{ target, contentRect: { width, height: 200 } }]);
+        emit(300);
+        expect(animationFrames.size).toBe(0);
+        emit(301); emit(302); emit(303);
         expect(animationFrames.size).toBe(1);
         flushFrames();
-        expect(runtime.charts[0].resize).toHaveBeenCalledTimes(2);
-        resizeCallbacks[0]();
+        expect(runtime.charts[0].resize).toHaveBeenCalledTimes(1);
+        emit(304);
         act(() => render(null, host));
         expect(animationFrames.size).toBe(0);
         expect(runtime.charts[0].dispose).toHaveBeenCalledTimes(1);
@@ -111,14 +125,14 @@ describe("EChartRenderer lifecycle", () => {
     it("disposes an unexpected existing instance before initializing", () => {
         const unexpected = { dispose: vi.fn(), isDisposed: () => false };
         runtime.getInstanceByDom.mockReturnValue(unexpected as never);
-        const host = document.createElement("div");
+        const host = makeHost();
         act(() => render(h(EChartRenderer, { option: {} }), host));
         expect(unexpected.dispose).toHaveBeenCalledTimes(1);
         act(() => render(null, host));
     });
 
     it("keeps click multi-select and persistent selection independent of hover", () => {
-        const host = document.createElement("div");
+        const host = makeHost();
         const onDataIndex = vi.fn();
         act(() => render(h(EChartRenderer, { option: {}, selectedDataIndices: [2], selectionSeriesIndex: 0, onDataIndex }), host));
         expect(runtime.charts[0].dispatchAction).toHaveBeenCalledWith({ type: "select", seriesIndex: 0, dataIndex: 2 });
@@ -131,14 +145,14 @@ describe("EChartRenderer lifecycle", () => {
     });
 
     it("does not guess a series for advanced multi-series selection", () => {
-        const host = document.createElement("div");
+        const host = makeHost();
         act(() => render(h(EChartRenderer, { option: {}, completeOption: false, setOptionOptions: { notMerge: false, lazyUpdate: true }, selectedDataIndices: [1] }), host));
         expect(runtime.charts[0].setOption).toHaveBeenCalledWith({}, expect.objectContaining({ notMerge: false, lazyUpdate: false }));
         expect(runtime.charts[0].dispatchAction).not.toHaveBeenCalled();
     });
 
     it("emits full ECharts data context and highlights exact series/data types", () => {
-        const host = document.createElement("div"); const onDataPoint = vi.fn();
+        const host = makeHost(); const onDataPoint = vi.fn();
         act(() => render(h(EChartRenderer, { option: {}, selectedDataPoints: [{ seriesIndex: 2, dataIndex: 4, dataType: "edge" }], onDataPoint }), host));
         expect(runtime.charts[0].dispatchAction).toHaveBeenCalledWith({ type: "highlight", seriesIndex: 2, dataIndex: 4, dataType: "edge" });
         runtime.charts[0].handlers.click({ seriesIndex: 2, dataIndex: 4, seriesType: "sankey", seriesName: "Flow", dataType: "edge", name: "A", value: 12, event: { event: { metaKey: true } } });
@@ -148,7 +162,7 @@ describe("EChartRenderer lifecycle", () => {
     });
 
     it("emits zoom, brush, and drill events and restores zoom silently", () => {
-        const host = document.createElement("div");
+        const host = makeHost();
         const onZoom = vi.fn();
         const onBrush = vi.fn();
         const onDrill = vi.fn();

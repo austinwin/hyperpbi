@@ -15,9 +15,7 @@ function propertiesFor(row: DataRow, fields: Record<string, NormalizedField>): R
 }
 
 type CoordinateStatus = "valid" | "incomplete" | "non-numeric" | "out-of-range";
-function coordinateStatus(row: DataRow, latitude?: string, longitude?: string): CoordinateStatus {
-    if (!latitude || !longitude) return "incomplete";
-    const lat = row[latitude], lon = row[longitude];
+function coordinateStatus(lat: Primitive, lon: Primitive): CoordinateStatus {
     const missing = (value: Primitive) => value === null || value === undefined || typeof value === "string" && !value.trim();
     if (missing(lat) || missing(lon)) return "incomplete";
     if (typeof lat !== "number" || typeof lon !== "number" || !Number.isFinite(lat) || !Number.isFinite(lon)) return "non-numeric";
@@ -55,19 +53,25 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
     const coordinateCounts: MapCoordinateCounts = { dataViewRowCount: rows.length, validPairCount: 0, invalidPairCount: 0, incompletePairCount: 0, nonNumericPairCount: 0, outOfRangePairCount: 0 };
 
     if (mode !== "none") rows.forEach((row, rowIndex) => {
+        const latitude = mode === "latLon" && bindings.latitude ? row[bindings.latitude] : null;
+        const longitude = mode === "latLon" && bindings.longitude ? row[bindings.longitude] : null;
         if (mode === "latLon") {
-            const status = coordinateStatus(row, bindings.latitude, bindings.longitude);
+            const status = coordinateStatus(latitude, longitude);
             if (status === "valid") coordinateCounts.validPairCount += 1;
             else {
                 coordinateCounts.invalidPairCount += 1;
                 if (status === "incomplete") coordinateCounts.incompletePairCount += 1;
                 else if (status === "non-numeric") coordinateCounts.nonNumericPairCount += 1;
                 else coordinateCounts.outOfRangePairCount += 1;
+                invalidFeatureCount += 1;
+                return;
             }
         }
-        let location = resolveMapLocation(row, bindings, mode);
-        if (!location) { invalidFeatureCount += 1; return; }
-        if (location.type === "address" && location.address) {
+        // Coordinate diagnostics still scan every row. Allocate point objects
+        // only for the rows the existing displayed-feature budget admits.
+        let location = mode === "latLon" ? undefined : resolveMapLocation(row, bindings, mode);
+        if (location === null) { invalidFeatureCount += 1; return; }
+        if (location?.type === "address" && location.address) {
             const cached = geocodeCache[normalizeAddress(location.address)];
             if (cached) {
                 cachedAddressCount++;
@@ -82,6 +86,7 @@ export function normalizeMapBindings(rows: DataRow[], fields: Record<string, Nor
             displayedCandidates++;
             if (displayedCandidates > budget.limit) return;
         }
+        location ??= { type: "point", geometry: null, lat: latitude as number, lon: longitude as number, x: null, y: null, address: null };
         const size = bindings.size ? Number(row[bindings.size]) : NaN;
         const typeOverride = bindings.type ? String(row[bindings.type] ?? "").trim().toLowerCase() : "";
         const resolvedType = location.type === "geometry" && ["point", "line", "polygon"].includes(typeOverride) ? typeOverride as NormalizedMapFeature["type"] : location.type;

@@ -27,23 +27,23 @@ export function ControlBlock({ component }: { component: ControlComponent }) {
     }) : []), [component.options, component.field, rows, stateKey]);
     const multiple = component.type === "multiSelect" || component.multiple === true;
     const operator = component.interaction?.operator ?? component.filter?.operator ?? (multiple ? "in" : component.type === "searchBox" || component.type === "textInput" ? "contains" : component.type === "dateRange" ? "between" : "=");
-    const pendingSearch = useRef<ReturnType<typeof setTimeout>>();
-    useEffect(() => () => clearTimeout(pendingSearch.current), []);
+    const pendingSearch = useRef<number>();
+    useEffect(() => () => pendingSearch.current !== undefined && cancelAnimationFrame(pendingSearch.current), []);
 
     const changeValue = (next: unknown, event?: Event, initializing = false) => {
         setValue(next);
         if (globalSearch && !component.disabled) {
-            clearTimeout(pendingSearch.current);
+            pendingSearch.current !== undefined && cancelAnimationFrame(pendingSearch.current);
             const search = String(next ?? "");
             const apply = () => dispatch({ type: "search", value: search });
-            if (data.rows.length >= 50_000 && search) pendingSearch.current = setTimeout(apply, 120);
+            if (data.rows.length >= 50_000 && search) pendingSearch.current = requestAnimationFrame(() => { pendingSearch.current = undefined; apply(); });
             else apply();
         }
         if (!stateKey || id !== stateKey) dispatch({ type: "value", id, value: next });
         const rowIndices = interactionField ? resolveSourceRowIndicesForFilter(interactionField, operator, next, sourceRows, rows) : [];
         executeComponentInteraction(initializing ? { ...policy, externalMode: "none" } : policy,
             createInteractionPayload(component, { rowIndices, sourceRowKeys: context.sourceRowKeys, field: interactionField, value: next, operator }),
-            context, { trigger: policy.trigger, dynamicEvent: initializing ? false : "change", contextValue: next, multiSelect: multiple, event });
+            { ...context, state: context.getLatestContext?.().state ?? context.state }, { trigger: policy.trigger, dynamicEvent: initializing ? false : "change", contextValue: next, multiSelect: multiple, event });
     };
 
     useEffect(() => { setValue(stored ?? initial); }, [stored, stateKey]);

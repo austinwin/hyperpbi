@@ -17,6 +17,8 @@ import {
 import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import { useEffect, useRef } from "preact/hooks";
 import type { EChartsCoreOption, EChartsInitOpts, EChartsType, SetOptionOpts } from "echarts/core";
+import { observeChartSize } from "./chartResize";
+import { cartesianDataPatch } from "./echartDataPatch";
 import { normalizeEChartInitOptions, normalizeEChartSetOptionOptions } from "./echartRuntimeOptions";
 import type { EChartBrushEvent, EChartZoomEvent } from "./chartEvents";
 
@@ -47,6 +49,7 @@ export interface EChartRendererProps {
     initOptions?: EChartsInitOpts;
     setOptionOptions?: SetOptionOpts;
     completeOption?: boolean;
+    incrementalData?: boolean;
     selectedDataIndices?: number[];
     selectionSeriesIndex?: number;
     onDataIndex?: (dataIndex: number, modifiers: { multiSelect: boolean; event?: Event }) => void;
@@ -68,6 +71,7 @@ export function EChartRenderer({
     initOptions,
     setOptionOptions,
     completeOption = true,
+    incrementalData = false,
     selectedDataIndices = [],
     selectionSeriesIndex,
     onDataIndex,
@@ -81,6 +85,7 @@ export function EChartRenderer({
 }: EChartRendererProps) {
     const ref = useRef<HTMLDivElement>(null);
     const chartRef = useRef<EChartsType | null>(null);
+    const previousOptionRef = useRef<EChartsCoreOption>();
     const clickRef = useRef(onDataIndex);
     const dataPointRef = useRef(onDataPoint);
     const zoomRef = useRef(onZoom);
@@ -115,14 +120,6 @@ export function EChartRenderer({
         if (!Number.isInteger(index)) return undefined;
         const nativeEvent=(params.event as {event?:Event&{ctrlKey?:boolean;metaKey?:boolean}}|undefined)?.event;
         return {seriesIndex:Number(params.seriesIndex??0),dataIndex:index,seriesType:typeof params.seriesType==="string"?params.seriesType:undefined,seriesName:typeof params.seriesName==="string"?params.seriesName:undefined,datumId: typeof (params.data as { id?: unknown } | undefined)?.id === "string" ? (params.data as { id: string }).id : undefined,dataType:params.dataType==="node"||params.dataType==="edge"?params.dataType:undefined,name:typeof params.name==="string"?params.name:undefined,value:params.value,event:nativeEvent,multiSelect:Boolean(nativeEvent?.ctrlKey||nativeEvent?.metaKey)};
-    };
-
-    const scheduleResize = (chart: EChartsType) => {
-        if (resizeFrameRef.current !== null) return;
-        resizeFrameRef.current = requestAnimationFrame(() => {
-            resizeFrameRef.current = null;
-            if (chartRef.current === chart && !chart.isDisposed()) chart.resize();
-        });
     };
 
     const applyPersistentSelection = (chart: EChartsType, force = false) => {
@@ -162,31 +159,52 @@ export function EChartRenderer({
         chart.on("dblclick", params => { const event=dataEvent(params as unknown as Record<string,unknown>);if(event)drillRef.current?.(event); });
         chart.on("datazoom", params => { const source=(Array.isArray((params as {batch?:unknown[]}).batch)?(params as {batch:Record<string,unknown>[]}).batch[0]:params) as Record<string,unknown>;zoomRef.current?.({start:typeof source.start==="number"?source.start:undefined,end:typeof source.end==="number"?source.end:undefined,startValue:source.startValue,endValue:source.endValue}); });
         chart.on("brushselected", params => { const batches=Array.isArray((params as {batch?:unknown[]}).batch)?(params as {batch:Record<string,unknown>[]}).batch:[];const selections=batches.flatMap(batch=>Array.isArray(batch.selected)?(batch.selected as Record<string,unknown>[]).map(selected=>({seriesIndex:Number(selected.seriesIndex??0),dataIndices:Array.isArray(selected.dataIndex)?(selected.dataIndex as unknown[]).map(Number).filter(Number.isInteger):[]})):[]);brushRef.current?.({selections}); });
-        const observer = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => scheduleResize(chart));
-        observer?.observe(ref.current);
-        const resize = () => scheduleResize(chart);
-        globalThis.addEventListener("resize", resize);
-        globalThis.addEventListener("hyperpbi:layout-resize", resize);
+        let width = chart.getWidth();
+        let height = chart.getHeight();
+        const resize = () => {
+            if (resizeFrameRef.current !== null) return;
+            resizeFrameRef.current = requestAnimationFrame(() => {
+                resizeFrameRef.current = null;
+                if (chartRef.current === chart && !chart.isDisposed()) chart.resize();
+            });
+        };
+        const unobserve = observeChartSize(ref.current, (nextWidth, nextHeight) => {
+            if (!nextWidth || !nextHeight || nextWidth === width && nextHeight === height) return;
+            width = nextWidth;
+            height = nextHeight;
+            resize();
+        });
+        if (!unobserve) {
+            globalThis.addEventListener("resize", resize);
+            globalThis.addEventListener("hyperpbi:layout-resize", resize);
+        }
         return () => {
-            observer?.disconnect();
-            globalThis.removeEventListener("resize", resize);
-            globalThis.removeEventListener("hyperpbi:layout-resize", resize);
+            if (unobserve) unobserve();
+            else {
+                globalThis.removeEventListener("resize", resize);
+                globalThis.removeEventListener("hyperpbi:layout-resize", resize);
+            }
             if (resizeFrameRef.current !== null) cancelAnimationFrame(resizeFrameRef.current);
             resizeFrameRef.current = null;
             previousSelectedRef.current = [];
             previousPointSelectionRef.current = [];
             chartRef.current = null;
+            previousOptionRef.current = undefined;
             if (!chart.isDisposed()) chart.dispose();
         };
     }, [initSignature]);
     useEffect(() => {
         const chart = chartRef.current;
         if (!chart) return;
-        chart.setOption(option, normalizedSetOptionOptions);
+        const previous = previousOptionRef.current;
+        const patch = incrementalData && previous ? cartesianDataPatch(previous, option) : undefined;
+        previousOptionRef.current = option;
+        if (patch && !Object.keys(patch).length) return;
+        if (patch) chart.setOption(patch, { lazyUpdate: false });
+        else chart.setOption(option, normalizedSetOptionOptions);
         if (restoredZoomRef.current) chart.dispatchAction({ type: "dataZoom", ...restoredZoomRef.current }, { silent: true });
         applyPersistentSelection(chart, true);
-        scheduleResize(chart);
-    }, [option, setOptionSignature]);
+    }, [option, setOptionSignature, initSignature, incrementalData]);
     useEffect(() => {
         const chart = chartRef.current;
         if (chart) applyPersistentSelection(chart);

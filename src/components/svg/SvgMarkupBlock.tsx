@@ -10,7 +10,7 @@ import { sanitizeCss } from "../../security/sanitizeCss";
 import { compileSvgImage } from "../../security/compileSvgImage";
 import { resolveSvgMarkupTemplates, sanitizeSvg, type SanitizedSvg } from "../../security/sanitizeSvg";
 import { PanZoomViewport } from "./PanZoomViewport";
-import { resolveSvgDataContextRow } from "./svgBindings";
+import { resolveSvgDataContextRow, svgTemplateFields } from "./svgBindings";
 import { createSvgNamespace, rewriteSvgCssReferences } from "./svgIdIsolation";
 import { SVG_LIMITS, type SvgMarkupBinding } from "./svgTypes";
 
@@ -24,15 +24,22 @@ export function SvgMarkupBlock({ component }: { component: SvgMarkupComponent })
 
 function StaticSvgMarkup({ component, namespace }: { component: SvgMarkupComponent; namespace: string }) {
     const context = useRenderContext();
-    const warnings: string[] = [];
-    const row = resolveSvgDataContextRow(component.dataContext, context.rows, context.sourceRowKeys, context.state.selectedRowKeys, warnings);
     const svg = component.svg ?? "";
     const trusted = context.config.security?.svgMode === "trusted";
+    const hasTemplates = svg.includes("{{");
+    const fields = useMemo(() => !trusted && hasTemplates ? svgTemplateFields(svg) : [], [svg, trusted, hasTemplates]);
+    const row = useMemo(() => {
+        if (!hasTemplates || !trusted && fields.length === 0) return undefined;
+        return resolveSvgDataContextRow(component.dataContext, context.rows, context.sourceRowKeys,
+            context.state.selectedRowKeys, [], trusted ? undefined : fields);
+    }, [hasTemplates, trusted, fields, component.dataContext, context.rows, context.sourceRowKeys, context.state.selectedRowKeys]);
     const fallbackViewBox = component.panZoom === true ? component.viewBox ?? "0 0 300 150" : undefined;
     const compiled = useMemo(() => {
         if (trusted) return;
-        return sanitizeSvg(resolveSvgMarkupTemplates(svg, { row, rows: context.rows, state: context.state, warnings }), namespace, { fallbackViewBox });
-    }, [svg, trusted, row, component.dataContext, namespace, context.rows, context.state, fallbackViewBox]);
+        const warnings: string[] = [];
+        const markup = hasTemplates ? resolveSvgMarkupTemplates(svg, { row: row ?? {}, rows: context.rows, state: context.state, warnings }) : svg;
+        return sanitizeSvg(markup, namespace, { fallbackViewBox });
+    }, [svg, trusted, row, namespace, hasTemplates ? context.rows : undefined, hasTemplates ? context.state.values : undefined, fallbackViewBox]);
     if (trusted) {
         try { return <TrustedDocument title={component.ariaLabel ?? component.title ?? "Trusted SVG"} markup={renderTrustedTemplate(svg, context.data, context.state.values, component.title ?? "", { row, state: context.state.values })} css={component.css} />; }
         catch (error) { return <div role="alert" class="hp-component-error">Trusted SVG: {error instanceof Error ? error.message : String(error)}</div>; }

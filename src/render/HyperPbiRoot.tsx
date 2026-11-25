@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import { lazyAggregates } from "../data/aggregations";
 import { lazyMapBindings } from "../data/normalizeMapBindings";
-import { dashboardRowView } from "../data/filtering";
+import { createDashboardRowSelector } from "../data/filtering";
 import { NormalizedData } from "../data/normalizeData";
 import type { DataWorkspace } from "../data/dataWorkspace";
 import { HyperPbiSchema } from "../schema/hyperpbiSchema";
@@ -46,6 +46,39 @@ import { DataLoadNotice } from "../components/system/DataLoadNotice";
 import { RuntimePerformancePanel } from "../components/system/RuntimePerformancePanel";
 import { RuntimeProfiler } from "./RuntimeProfiler";
 import { dynamicEventKey, type DynamicEvent } from "../fragments/fragmentTypes";
+
+// Keep callbacks that survive source refreshes out of the render's lexical
+// scope. Otherwise they can retain its entire data snapshot and other memoized
+// callbacks, which in turn retain their older snapshots.
+function useDynamicEventEmitter(keys: Set<string>, setEvents: (update: (events: Record<string, DynamicEvent>) => Record<string, DynamicEvent>) => void) {
+  return useCallback<NonNullable<RenderContextValue["emitDynamicEvent"]>>((source, event, values) => {
+    const key = dynamicEventKey(source, event);
+    if (!keys.has(key)) return;
+    setEvents(previous => ({ ...previous, [key]: { context: values, revision: (previous[key]?.revision ?? 0) + 1 } }));
+  }, [keys, setEvents]);
+}
+
+function useScopedRowLookup(route: ReturnType<typeof createComponentRowRouter>, filters: DashboardState["interactionFilters"]) {
+  return useCallback((id: string) => route(id, filters), [route, filters]);
+}
+
+function useHighlightLookup(state: DashboardState) {
+  const { componentSelectedRows, componentSelectionScopes, componentSelectionModes, componentSelectionTargets } = state;
+  return useMemo(() => {
+    const highlights = new Map<string, number[]>();
+    return (componentId: string) => {
+      const cached = highlights.get(componentId);
+      if (cached) return cached;
+      const selection = selectedComponentRows(componentId, { state });
+      highlights.set(componentId, selection);
+      return selection;
+    };
+  }, [componentSelectedRows, componentSelectionScopes, componentSelectionModes, componentSelectionTargets]);
+}
+
+function useOverlayLookup(openOverlays: DashboardState["openOverlays"]) {
+  return useCallback((id: string) => openOverlays.includes(id), [openOverlays]);
+}
 
 const ignoreInteraction = () => undefined;
 const notSent = (): ExternalSelectionResult => ({
@@ -167,11 +200,7 @@ function EvaluatedDashboard({
   }, [schema, executionMode]);
   const dynamicState = useMemo(() => ({ ...dynamicDefaults, ...state.values }), [dynamicDefaults, state.values]);
   const [dynamicEvents, setDynamicEvents] = useState<Record<string, DynamicEvent>>({});
-  const emitDynamicEvent = useCallback<NonNullable<RenderContextValue["emitDynamicEvent"]>>((source, event, values) => {
-    const key = dynamicEventKey(source, event);
-    if (!dynamicEventKeys.has(key)) return;
-    setDynamicEvents(previous => ({ ...previous, [key]: { context: values, revision: (previous[key]?.revision ?? 0) + 1 } }));
-  }, [dynamicEventKeys]);
+  const emitDynamicEvent = useDynamicEventEmitter(dynamicEventKeys, setDynamicEvents);
   const remoteData = useRemoteDataWorkspace(schema, dataWorkspace, data, state.values, remoteSourceHost, providerAccess, webAccessAvailable);
   const renderStarted = performance.now();
   useLayoutEffect(() => data.performance?.record("render", renderStarted));
@@ -187,12 +216,13 @@ function EvaluatedDashboard({
     if (!loading) dispatch({ type: "reconcileRowKeys", rowKeys: reconciliationKeys });
   }, [reconciliationKeys, loading]);
 
+  const selectDashboardRows = useMemo(() => createDashboardRowSelector(data.rows, Object.keys(data.fields)), [data.rows, data.fields]);
   const { rows, sourceIndices } = useMemo(() => {
     const started = performance.now();
-    const result = dashboardRowView(data.rows, state.filters, state.search, Object.keys(data.fields));
+    const result = selectDashboardRows(state.filters, state.search);
     data.performance?.record("filtering", started);
     return result;
-  }, [data.rows, data.fields, state.filters, state.search]);
+  }, [selectDashboardRows, state.filters, state.search]);
   const filteredRowKeys = useMemo(
     () => sourceIndices ? sourceIndices.map(index => data.rowKeys[index]) : data.rowKeys,
     [data.rowKeys, sourceIndices],
@@ -263,20 +293,8 @@ function EvaluatedDashboard({
     [schema.styles?.globalCss, schema.css, settings.customCss, scope, cssMode],
   );
   const routeRows = useMemo(() => createComponentRowRouter(data.rows, data.rowKeys, rows), [data.rows, data.rowKeys, rows]);
-  const getRowsForComponent = useCallback(
-    (componentId: string) => routeRows(componentId, state.interactionFilters),
-    [routeRows, state.interactionFilters],
-  );
-  const componentRows = useMemo(() => {
-    const highlights = new Map<string, number[]>();
-    return (componentId: string) => {
-      const previous = highlights.get(componentId);
-      if (previous) return previous;
-      const selection = selectedComponentRows(componentId, { state });
-      highlights.set(componentId, selection);
-      return selection;
-    };
-  }, [state.componentSelectedRows, state.componentSelectionScopes, state.componentSelectionModes, state.componentSelectionTargets]);
+  const getRowsForComponent = useScopedRowLookup(routeRows, state.interactionFilters);
+  const componentRows = useHighlightLookup(state);
   const datasetRouters = useMemo(() => new WeakMap<DatasetResult, ReturnType<typeof createComponentRowRouter>>(), [datasetEvaluation.datasets]);
   const getDatasetView = useMemo(() => {
     const views = new Map<string, ReturnType<NonNullable<RenderContextValue["getDatasetView"]>>>();
@@ -328,10 +346,7 @@ function EvaluatedDashboard({
       return view;
     };
   }, [datasetEvaluation.datasets, datasetRouters, state.interactionFilters, data.rowKeys]);
-  const isOverlayOpen = useCallback(
-    (id: string) => state.openOverlays.includes(id),
-    [state.openOverlays],
-  );
+  const isOverlayOpen = useOverlayLookup(state.openOverlays);
 
   // Build a context object that executeUiAction can read from
   const execUiAction = useCallback(

@@ -2,7 +2,7 @@ import { aggregateValue } from "../../../data/aggregations";
 import type { DataRow } from "../../../data/normalizeData";
 import type { TreemapChartComponent } from "../../../schema/hyperpbiSchema";
 import type { ChartAdapter, ChartDatumBinding } from "./types";
-import { baseOption, semanticResult, sourceIndices } from "./shared";
+import { baseOption, bindingWithLineage, semanticResult } from "./shared";
 
 interface TreeNode {
     label: string;
@@ -40,11 +40,11 @@ export const treemapAdapter: ChartAdapter<TreemapChartComponent> = {
             const path = [...parent, node.category];
             const id = JSON.stringify(path);
             const value = Number(aggregateValue(node.rows, component.valueField, component.aggregation ?? "sum") ?? 0);
-            bindings.push({
+            bindings.push(bindingWithLineage({
                 seriesIndex: 0, dataIndex: dataIndex++, dataType: "node",
-                sourceRowIndices: sourceIndices(node.rows, context), field: node.field, value: node.category,
+                field: node.field, value: node.category,
                 hierarchy: { id, parentId, path, category: node.category, label: node.label, level: path.length - 1, value },
-            });
+            }, node.rows, context));
             return { id, name: node.label, value, children: node.children.size ? [...node.children.values()].map(child => build(child, path, id)) : undefined };
         };
         const data = [...roots.values()].map(node => build(node, []));

@@ -1,5 +1,11 @@
 # Changelog
 
+## Power BI build 1.0.6.1 — Mixed dashboard performance
+
+- Route scoped updates through shared row views and component boundaries for tables, charts, controls, text and static SVG.
+- Resolve chart selection lineage when needed, reduce chart resize and option work, and break the render callback chain that retained successive datasets.
+- Compare mixed dashboards up to 500 components and 100,000 rows, with separate packaged stress cases through 500,000 rows. [Benchmark and limits](docs/mixed-runtime-performance.md)
+
 ## 1.0.6 — Reactive dashboard runtime
 
 - Update affected chart and metric leaves through scoped shared row views while keeping mounted instances. Coalesce segment progress and repeated host filter requests.

@@ -55,6 +55,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
     const context = useRenderContext();
     const { sourceRows, sourceRowKeys, data, settings, state, dispatch, getRowsForComponent, componentRows } = context;
     const id = component.id ?? "table";
+    const liveContext = () => ({ ...context, state: context.getLatestContext?.().state ?? context.state });
     const dynamicTrigger = !component.disabled && context.dynamicEventKeys?.has(dynamicEventKey(id, "click"));
     const policy = resolveInteractionPolicy(component, context.config, "dataPoint");
     const sharedField = policy.enabled && policy.stateKey ? policy.field : undefined;
@@ -154,7 +155,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
         {toolbarVisible && <div class="hp-table-toolbar">
             {(component.search ?? settings.table.search) && <input class="form-control form-control-sm" type="search" placeholder="Search table…" value={state.tableSearch[id] ?? ""} onInput={event => dispatch({ type: "tableSearch", id, value: event.currentTarget.value })} />}
             <div class="hp-table-toolbar-actions">
-                {selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => clearComponentInteraction(policy, id, context)}>{policy.internalMode === "filter" ? "Show all" : "Clear selection"}</button>}
+                {selectedRows.length > 0 && <button type="button" class="btn btn-sm" onClick={() => clearComponentInteraction(policy, id, liveContext())}>{policy.internalMode === "filter" ? "Show all" : "Clear selection"}</button>}
                 {exportEnabled && exportFormats.map(format => <button type="button" class="btn btn-sm hp-table-export" onClick={() => runExport(format)} disabled={effectiveExportScope === "selected" && selectedExportIndices.size === 0}>Export {effectiveExportScope} {format.toUpperCase()}</button>)}
             </div>
             <span>{prepared.length.toLocaleString()} rows</span>
@@ -183,7 +184,7 @@ export function SimpleVirtualTable({ component }: { component: TableComponent })
                                 field,
                                 value: field ? row[field] : undefined,
                                 contextRows: [row],
-                            }), context, { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
+                            }), liveContext(), { trigger: "click", multiSelect: event.ctrlKey || event.metaKey, event });
                         };
                         return <tr key={rowKey(row, preparedIndex, sourceIndex)} class={highlighted ? "hp-row-selected" : ""} aria-rowindex={preparedIndex + 2}
                             tabIndex={dynamicTrigger || sharedField ? 0 : undefined} onClick={activate}

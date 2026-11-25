@@ -3,6 +3,15 @@ import { formatValue } from "../utils/formatValue";
 
 const tokenPattern = /\{\{\s*([A-Za-z][A-Za-z0-9_.-]{0,100})\s*\}\}/g;
 
+export function templateStateKeys(template: string): string[] {
+    const keys = new Set<string>();
+    for (const match of template.matchAll(tokenPattern)) {
+        const [namespace, key] = match[1].split(".");
+        if (key && (namespace === "state" || namespace === "selected")) keys.add(key);
+    }
+    return [...keys];
+}
+
 export interface TemplateContext { selected?: Record<string, unknown>; row?: DataRow; props?: Record<string, unknown>; state?: Record<string, unknown>; title?: string; }
 export function renderTemplate(template: string, data: NormalizedData, selected: Record<string, unknown> = {}, title = "", context: TemplateContext = {}): string {
     return template.replace(tokenPattern, (_match, token: string) => {

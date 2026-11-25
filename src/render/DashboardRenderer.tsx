@@ -1,5 +1,5 @@
 import { memo } from "preact/compat";
-import { useCallback, useLayoutEffect, useMemo, useRef } from "preact/hooks";
+import { useLayoutEffect, useMemo, useRef } from "preact/hooks";
 import { DashboardComponent } from "../schema/hyperpbiSchema";
 import { ComponentRegistry, isChartComponent, isDataDisplayComponent } from "./ComponentRegistry";
 import { scopeComponentCss } from "../components/custom/componentCssScope";
@@ -9,6 +9,7 @@ import { RenderContext, useRenderContext, type RenderContextValue } from "./Rend
 import { componentRowKeys, componentRows as selectedComponentRows, executeComponentInteraction, rowsForComponent } from "../interactions/componentInteraction";
 import { deriveBoundPayload } from "../interactions/interactionPayload";
 import { componentKindForType, resolveInteractionPolicy } from "../interactions/interactionPolicy";
+import { templateStateKeys } from "./renderTemplate";
 import { ComponentErrorBoundary } from "./ComponentErrorBoundary";
 import { componentOwnsResponsiveLayout, componentSubtreeRequestsFill, responsiveComponentStyle } from "../components/layout/responsiveLayout";
 function isFixedCanvasMapComponent(component: DashboardComponent): boolean {
@@ -22,16 +23,26 @@ interface NodeProps {
 
 const renderChildren = (children: DashboardComponent[]) => <DashboardRenderer components={children} />;
 
+function useLiveContextGetter(value: RenderContextValue) {
+    const live = useRef(value);
+    useLayoutEffect(() => { live.current = value; }, [value]);
+    return useMemo(() => liveContextReader(live), [live]);
+}
+
+function liveContextReader(live: { current: RenderContextValue }) {
+    return () => live.current;
+}
+
 export function DashboardRenderer({ components }: { components: DashboardComponent[] }) {
     const current = useRenderContext();
-    const live = useRef(current);
-    useLayoutEffect(() => { live.current = current; }, [current]);
-    const getLatestContext = useCallback(() => live.current, []);
+    const getLatestContext = useLiveContextGetter(current);
     const context = useMemo(() => ({ ...current, getLatestContext }), [current, getLatestContext]);
     return <>{components.filter(component => !component.hidden).map((component, index) => (
         <DashboardNode key={component.id ?? `${component.type}-${index}`} component={component} index={index} context={context} />
     ))}</>;
 }
+
+const templateDependencies = new WeakMap<DashboardComponent, string[]>();
 
 function sameRows(left: number[], right: number[]): boolean {
     return left === right || left.length === right.length && left.every((row, index) => row === right[index]);
@@ -46,7 +57,12 @@ function sameNode(previous: NodeProps, next: NodeProps): boolean {
     if (before === context) return true;
     const chart = isChartComponent(component.type);
     const display = isDataDisplayComponent(component.type) && component.type !== "detailPanel";
-    if ((!chart && !display) || component.slots || component.uiAction || context.executionMode === "fragment") return false;
+    const table = component.type === "table";
+    const control = component.type === "segmentedControl" || component.type === "searchBox";
+    const text = (component.type === "text" || component.type === "markdown") && !component.interaction && !component.interactions;
+    const staticSvg = component.type === "svgMarkup" && "svg" in component &&
+        !component.svg?.includes("{{") && component.svgBinding?.mode !== "data";
+    if ((!chart && !display && !table && !control && !text && !staticSvg) || component.slots || component.uiAction || context.executionMode === "fragment") return false;
     if (chart && "drill" in component && component.drill) return false;
     if (
         before.profiler !== context.profiler || before.settings !== context.settings || before.config !== context.config ||
@@ -56,21 +72,52 @@ function sameNode(previous: NodeProps, next: NodeProps): boolean {
         before.schema.styles?.components !== context.schema.styles?.components ||
         before.schema.data?.datasets !== context.schema.data?.datasets ||
         before.reportInteraction !== context.reportInteraction || before.selectExternal !== context.selectExternal ||
+        before.selectSourceRows !== context.selectSourceRows ||
         before.clearExternal !== context.clearExternal || before.applyExternalFilter !== context.applyExternalFilter ||
         before.clearExternalFilter !== context.clearExternalFilter
     ) return false;
     const id = component.id ?? component.type;
     if (before.ownerByRuntimeId?.[id] !== context.ownerByRuntimeId?.[id]) return false;
-    if (before.dynamicEventKeys !== context.dynamicEventKeys && ["click", "select", "nodeClick"].some(event =>
+    if (before.dynamicEventKeys !== context.dynamicEventKeys && ["click", "change", "select", "nodeClick"].some(event =>
         Boolean(before.dynamicEventKeys?.has(`${id}:${event}`)) !== Boolean(context.dynamicEventKeys?.has(`${id}:${event}`)))) return false;
     const dataset = component.dataset;
+    if (staticSvg && !dataset) return before.instanceId === context.instanceId;
+    const previousDataset = dataset ? before.datasets?.get(dataset) : undefined;
+    const nextDataset = dataset ? context.datasets?.get(dataset) : undefined;
     if (dataset) {
         const previousView = before.getDatasetView?.(dataset, id);
         const nextView = context.getDatasetView?.(dataset, id);
         if (previousView?.rows !== nextView?.rows || previousView?.fields !== nextView?.fields ||
-            before.datasets?.get(dataset) !== context.datasets?.get(dataset)) return false;
+            previousDataset?.data.rows !== nextDataset?.data.rows ||
+            previousDataset?.data.rowKeys !== nextDataset?.data.rowKeys ||
+            previousDataset?.data.calculatedMetrics !== nextDataset?.data.calculatedMetrics ||
+            previousDataset?.signature !== nextDataset?.signature) return false;
     } else if (before.getRowsForComponent(id) !== context.getRowsForComponent(id)) return false;
-    if (display && before.data.calculatedMetrics !== context.data.calculatedMetrics) return false;
+    if (display && !dataset && before.data.calculatedMetrics !== context.data.calculatedMetrics) return false;
+    if (control) {
+        const stateKey = component.interaction?.stateKey ?? id;
+        if (before.state.values[stateKey] !== context.state.values[stateKey] ||
+            before.state.values[id] !== context.state.values[id] ||
+            (component.type === "searchBox" && before.state.search !== context.state.search)) return false;
+    }
+    if (table) {
+        const stateKey = component.interaction?.stateKey;
+        if (before.state.tableSearch[id] !== context.state.tableSearch[id] ||
+            before.state.componentSelectedRows[id] !== context.state.componentSelectedRows[id] ||
+            (stateKey && before.state.values[stateKey] !== context.state.values[stateKey])) return false;
+    }
+    if (text && "text" in component) {
+        const oldData = previousDataset?.data ?? before.data;
+        const newData = nextDataset?.data ?? context.data;
+        if (before.schema.title !== context.schema.title || oldData.aggregates !== newData.aggregates ||
+            oldData.calculatedMetrics !== newData.calculatedMetrics) return false;
+        let keys = templateDependencies.get(component);
+        if (!keys) {
+            keys = templateStateKeys(component.text ?? "");
+            templateDependencies.set(component, keys);
+        }
+        if (keys.some(key => before.state.values[key] !== context.state.values[key])) return false;
+    }
     if (chart && (
         before.state.chartViewState[id] !== context.state.chartViewState[id] ||
         before.state.chartDrillState[id] !== context.state.chartDrillState[id] ||

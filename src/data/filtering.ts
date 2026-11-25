@@ -102,17 +102,59 @@ export function dashboardRowView(rows: DataRow[], filters: ActiveFilter[], searc
     return { rows: selected ?? rows, sourceIndices: indices };
 }
 
+/** Cache keys are limited to scalar operands whose serialization keeps the
+ * matcher semantics. Opaque values and large identity selections stay uncached. */
+export function scalarFilterKey(field: string, operator: FilterOperator, value: unknown): string | undefined {
+    const scalar = (item: unknown) => item === null || typeof item === "boolean" ||
+        typeof item === "number" && Number.isFinite(item) || typeof item === "string" && item.length <= 256;
+    if (!scalar(value) && !(Array.isArray(value) && value.length <= 16 && Array.from(value).every(scalar))) return undefined;
+    return JSON.stringify([field, operator, value]);
+}
+
+type DashboardRowsView = ReturnType<typeof dashboardRowView>;
+
+/** Keep two recently used search results for the current immutable source.
+ * Do not retain a lowercase copy of the text or cache filter objects. */
+export function createDashboardRowSelector(rows: DataRow[], fieldKeys: string[]) {
+    const searches = new Map<string, DashboardRowsView>();
+    return (filters: ActiveFilter[], search: string): DashboardRowsView => {
+        const needle = search.trim().toLowerCase();
+        if (filters.length || !needle) return dashboardRowView(rows, filters, needle, fieldKeys);
+        const cached = searches.get(needle);
+        if (cached) return cached;
+        const result = dashboardRowView(rows, filters, needle, fieldKeys);
+        if (needle.length <= 128 && (result.rows === rows || result.rows.length <= 100_000)) {
+            if (searches.size === 2) searches.delete(searches.keys().next().value!);
+            searches.set(needle, result);
+        }
+        return result;
+    };
+}
+
 export function filterRows(rows: DataRow[], filters: ActiveFilter[], search: string): DataRow[] {
     return dashboardRowView(rows, filters, search).rows;
 }
 
+const selectionMatches = new WeakMap<DataRow[], Map<string, number[]>>();
+
 export function resolveSourceRowIndicesForFilter(field: string | undefined, operator: FilterOperator, value: unknown, sourceRows: DataRow[], currentRows: DataRow[] = sourceRows): number[] {
-    const sourceIndices = indexRows(sourceRows);
+    const key = field && currentRows === sourceRows ? scalarFilterKey(field, operator, value) : undefined;
+    let cached = key !== undefined ? selectionMatches.get(sourceRows) : undefined;
+    if (key !== undefined && cached?.has(key)) return cached.get(key)!;
+    const sourceIndices = currentRows === sourceRows ? undefined : indexRows(sourceRows);
     const match = compileFilter(operator, value);
-    return currentRows.reduce<number[]>((indices, row) => {
+    const indices: number[] = [];
+    for (let index = 0; index < currentRows.length; index++) {
+        const row = currentRows[index];
         const matches = field ? match(row[field]) : operator === "contains" && Object.values(row).some(match);
-        const sourceIndex = matches ? sourceIndices.get(row) : undefined;
+        if (!matches) continue;
+        const sourceIndex = sourceIndices ? sourceIndices.get(row) : index;
         if (sourceIndex !== undefined) indices.push(sourceIndex);
-        return indices;
-    }, []);
+    }
+    if (key !== undefined && indices.length <= 100_000) {
+        if (!cached) selectionMatches.set(sourceRows, cached = new Map());
+        if (cached.size === 3) cached.delete(cached.keys().next().value!);
+        cached.set(key, indices);
+    }
+    return indices;
 }

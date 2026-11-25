@@ -4,7 +4,7 @@
 
 HyperPBI keeps a shared dashboard state and sends components immutable row views. Each linked filter retains its origin, scope, targets and source lineage. Components with the same ordered set of applicable filters share the matching pass and row-array reference. The cache follows the lifetime of the source view and filter objects. It also supports datasets with grouped or renamed rows through the original source lineage.
 
-The renderer has keyed component boundaries. Chart leaves and metric displays compare their component definition, row view, selection, format and relevant chart state at the boundary. Views that depend on arbitrary templates, inherited layout, details, or drill state use the full render context. Retained action handlers read current interaction state when invoked. Charts keep their ECharts instance for compatible in-place updates. Stateful routes and template consumers remain explicit candidates for future dependency tracking.
+The renderer has keyed component boundaries. Chart leaves, metric displays, tables, search and segmented controls, and eligible text and SVG compare the inputs they read. Authored and interactive views with wider dependencies retain the full context. Retained action handlers read current interaction state when invoked. Plain Cartesian charts can patch compatible axis and series data in place. A shared resize observer resizes each chart when its surface actually changes. Stateful routes and arbitrary templates still need broader traversal.
 
 Current performance work preserves behavior as follows:
 
@@ -102,3 +102,5 @@ P95 in this 15-event run is the slowest observation. Initial mount for 500 compo
 ## Current limits
 
 Whole-dashboard filtering and a new received row set can still invalidate many data-bearing views. The editor still parses and validates the full specification and dense mixed-component canvases still carry the cost of each visible chart, map or scene. A single native table or measure may receive a different query grain and amount of data. Power BI's opaque selection identities stay on the main thread. Dedicated worker processing for a general mixed-type dataset was not introduced because structured cloning the same data cost more than the measured operation. See the [large-data benchmark](powerbi-large-data.md).
+
+The newer [mixed-workload performance report](mixed-runtime-performance.md) covers complete enterprise-shaped dashboards, consecutive data refreshes, and the remaining latency and memory costs.

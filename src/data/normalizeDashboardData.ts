@@ -33,16 +33,31 @@ type FieldDictionary = ReturnType<typeof buildFieldDictionary>;
  * ordinal across segments. Measures do not affect a dimension group's key. */
 export class DashboardRowKeys {
     private readonly fields: string[];
+    private readonly positions: number[];
+    private readonly values: Primitive[];
     private readonly occurrences = new Map<string, number>();
 
     constructor(dictionary: FieldDictionary) {
         const dimensions = dictionary.keys.filter(key => !["measure", "schema"].includes(dictionary.fields[key].type));
         const available = dictionary.keys.filter(key => dictionary.fields[key].type !== "schema");
         this.fields = dimensions.length ? dimensions : available;
+        const positions = new Map(dictionary.keys.map((key, index) => [key, index]));
+        this.positions = this.fields.map(key => positions.get(key)!);
+        this.values = Array.from({ length: this.fields.length }, () => null);
     }
 
     next(row: DataRow): string {
-        const encoded = JSON.stringify(this.fields.map(key => row[key]));
+        for (let index = 0; index < this.fields.length; index++) this.values[index] = row[this.fields[index]];
+        return this.fingerprint();
+    }
+
+    nextTableRow(row: powerbi.DataViewTableRow): string {
+        for (let index = 0; index < this.positions.length; index++) this.values[index] = normalizeValue(row[this.positions[index]]);
+        return this.fingerprint();
+    }
+
+    private fingerprint(): string {
+        const encoded = JSON.stringify(this.values);
         // Two independently seeded 53-bit fingerprints keep large text and
         // repeated field names out of retained keys. Ordinals never drop rows.
         let a = 0xdeadbeef, b = 0x41c6ce57, c = 0x6a09e667, d = 0xbb67ae85;
@@ -53,7 +68,7 @@ export class DashboardRowKeys {
             c = Math.imul(c ^ value, 2246822507);
             d = Math.imul(d ^ value, 3266489909);
         }
-        const base = [a ^ (b >>> 13), b ^ (a >>> 16), c ^ (d >>> 15), d ^ (c >>> 12)].map(value => (value >>> 0).toString(36)).join(".");
+        const base = `${((a ^ (b >>> 13)) >>> 0).toString(36)}.${((b ^ (a >>> 16)) >>> 0).toString(36)}.${((c ^ (d >>> 15)) >>> 0).toString(36)}.${((d ^ (c >>> 12)) >>> 0).toString(36)}`;
         const occurrence = this.occurrences.get(base) ?? 0;
         this.occurrences.set(base, occurrence + 1);
         return `${base}:${occurrence}`;
@@ -83,7 +98,7 @@ export function appendDashboardRows(
             for (let column = 0; column < fields.length; column++) row[fields[column]] = normalizeValue(input.value(index, column));
         }
         output.rows.push(row);
-        output.rowKeys.push(keys.next(row));
+        output.rowKeys.push(input.kind === "table" ? keys.nextTableRow(input.rows[index]) : keys.next(row));
         if (schemaKey && !output.schemaFromField && row[schemaKey]) output.schemaFromField = String(row[schemaKey]);
     }
 }

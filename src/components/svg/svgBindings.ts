@@ -9,6 +9,20 @@ const object = (value: unknown): value is Record<string, unknown> => Boolean(val
 const fieldValue = (field: string, context: SvgBindingContext): unknown => field === "$index" ? context.index ?? 0 : field === "$count" ? context.count ?? context.rows.length : context.row[field];
 const compare = (condition: SvgConditionDefinition, context: SvgBindingContext): boolean => { const left = fieldValue(condition.field, context), right = condition.value; switch (condition.operator) { case "=": return left === right || String(left) === String(right); case "!=": return !(left === right || String(left) === String(right)); case ">": return Number(left) > Number(right); case ">=": return Number(left) >= Number(right); case "<": return Number(left) < Number(right); case "<=": return Number(left) <= Number(right); case "contains": return String(left ?? "").includes(String(right ?? "")); case "in": return Array.isArray(right) && right.some(item => String(item) === String(left)); case "between": return Array.isArray(right) && right.length === 2 && Number(left) >= Number(right[0]) && Number(left) <= Number(right[1]); } };
 export const renderSvgTemplate = (template: string, context: SvgBindingContext): string => template.replace(/\{\{\s*([A-Za-z_$][\w$.-]*)\s*\}\}/g, (_match, token: string) => { const key = token.startsWith("row.") ? token.slice(4) : token.startsWith("state.") ? token.slice(6) : token; const value = token.startsWith("state.") ? context.state.values[key] : fieldValue(key, context); if (value === undefined) { context.warnings?.push(`SVG template field “${token}” was not found.`); return ""; } return String(value); });
+const svgTokens = /\{\{\s*([A-Za-z_$][\w$.-]*)\s*\}\}/g;
+
+/** Markup may use state and metadata tokens without reading any row field. */
+export function svgTemplateFields(template: string): string[] {
+    const fields = new Set<string>();
+    for (const match of template.matchAll(svgTokens)) {
+        const token = match[1];
+        if (token.startsWith("state.")) continue;
+        const field = token.startsWith("row.") ? token.slice(4) : token;
+        if (field !== "$index" && field !== "$count") fields.add(field);
+    }
+    return [...fields];
+}
+
 const scaleByRows = new WeakMap<DataRow[], WeakMap<SvgScaleDefinition, Map<string, (value: unknown) => SvgPrimitive>>>();
 const aggregatesByRows = new WeakMap<DataRow[], DataRow>();
 
@@ -56,14 +70,51 @@ export function aggregateSvgRow(rows: DataRow[]): DataRow {
     return result;
 }
 
-export function resolveSvgDataContextRow(dataContext: SvgDataContextDefinition | undefined, rows: DataRow[], rowKeys: string[], selectedKeys: string[], warnings: string[]): DataRow {
+const markupAggregates = new WeakMap<DataRow[], Map<string, Primitive>>();
+
+function aggregateMarkupFields(rows: DataRow[], fields: readonly string[]): DataRow {
+    let cached = markupAggregates.get(rows);
+    if (!cached) {
+        cached = new Map();
+        markupAggregates.set(rows, cached);
+    }
+    const result: DataRow = Object.create(null);
+    for (const field of fields) {
+        if (!cached.has(field)) {
+            let sum = 0;
+            let first: Primitive = null;
+            let numeric = true;
+            let exists = false;
+            for (const row of rows) {
+                if (!Object.hasOwn(row, field)) continue;
+                exists = true;
+                const value = row[field];
+                if (value == null) continue;
+                if (first == null) first = value;
+                if (typeof value === "number" && Number.isFinite(value)) sum += value;
+                else {
+                    numeric = false;
+                    break;
+                }
+            }
+            // Bound the cache even when many authored templates refer to different columns.
+            if (cached.size >= 256) cached.clear();
+            cached.set(field, exists ? numeric && first != null ? sum : first : undefined);
+        }
+        const value = cached.get(field);
+        if (value !== undefined) result[field] = value;
+    }
+    return result;
+}
+
+export function resolveSvgDataContextRow(dataContext: SvgDataContextDefinition | undefined, rows: DataRow[], rowKeys: string[], selectedKeys: string[], warnings: string[], fields?: readonly string[]): DataRow {
     const mode = dataContext?.mode ?? "aggregate";
     if (mode === "selectedRow") {
         const selected = selectedKeys.length ? rowKeys.indexOf(selectedKeys[0]) : -1;
         if (selected >= 0 && rows[selected]) return rows[selected];
         warnings.push("SVG selectedRow context has no selected row; aggregate context was used.");
     }
-    if (mode !== "first") return aggregateSvgRow(rows);
+    if (mode !== "first") return fields ? aggregateMarkupFields(rows, fields) : aggregateSvgRow(rows);
     const field = dataContext?.sortBy;
     let first = rows[0];
     if (field) {

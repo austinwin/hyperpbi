@@ -34,6 +34,18 @@ export function sourceIndices(rows: DataRow[], context: ChartBuildContext): numb
     }
     return Array.from(unique);
 }
+/** Rendering uses values only. Resolve row lineage when a chart is clicked or highlighted. */
+export function bindingWithLineage(
+    binding: Omit<ChartDatumBinding, "sourceRowIndices">,
+    rows: DataRow[],
+    context: ChartBuildContext,
+): ChartDatumBinding {
+    let lineage: number[] | undefined;
+    return {
+        ...binding,
+        get sourceRowIndices() { return lineage ??= sourceIndices(rows, context); },
+    };
+}
 export function groupRows(rows: DataRow[], category: string, measure: string|undefined, aggregation: MetricDefinition["aggregation"] = "sum") { const groups=new Map<string,{key:string;rawKey:Primitive;rows:DataRow[]}>();for(const row of rows){const rawKey=row[category];const key=String(rawKey??"(Blank)");const group=groups.get(key)??{key,rawKey,rows:[]};group.rows.push(row);groups.set(key,group);}return Array.from(groups.values()).map(group=>({...group,value:Number(aggregateValue(group.rows,measure,aggregation)??0)})); }
 export function semanticResult(base: EChartsCoreOption, component: BaseChartComponent, bindings: ChartDatumBinding[], warnings: string[] = []): ChartBuildResult { const merged=mergeSemanticChartOptions(base,component.options);return{option:merged.option,bindings,warnings:Array.from(new Set([...warnings,...merged.warnings]))}; }
 export function intentColor(intent: UiIntent|undefined, context: ChartBuildContext, fallback: string): string { if(intent==="success")return context.theme.success;if(intent==="warning")return context.theme.warning;if(intent==="danger")return context.theme.danger;if(intent==="primary")return context.theme.primary;return fallback; }
