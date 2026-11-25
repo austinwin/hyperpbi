@@ -32,7 +32,9 @@ describe("product landing page", () => {
         expect(home).not.toMatch(/Dedicated Map Latitude|Dedicated Map Longitude/i);
     });
     it("shows linked product attribution in both visual entry screens", () => {
-        expect(visualLanding).toContain("H. Nguyen, WWO");
+        expect(visualLanding).toContain("by Hoang Nguyen, COH");
+        expect(visualLanding).toContain('href="https://www.hyperpbi.com"');
+        expect(visualLanding).toContain(">https://www.hyperpbi.com</a>");
         expect(visualLanding).toContain("https://hyperpbi.com/docs/user-guide");
         expect(visualLanding).toContain('target="_blank"');
         expect(visualLanding).toContain('rel="noreferrer"');

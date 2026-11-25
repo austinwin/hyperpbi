@@ -20,7 +20,7 @@ export function VisualWelcome({ children, hasData = false }: { children: Compone
         </header>
         <div class="hp-visual-welcome-content">{children}</div>
         <footer class="hp-visual-welcome-footer">
-            <span>HyperPBI 2.0 specification · H. Nguyen, WWO</span>
+            <span>HyperPBI 2.0 specification · by Hoang Nguyen, COH · <a href="https://www.hyperpbi.com" target="_blank" rel="noreferrer">https://www.hyperpbi.com</a></span>
             <a href="https://hyperpbi.com/docs/user-guide" target="_blank" rel="noreferrer">User guide ↗</a>
         </footer>
     </div>;
