@@ -87,6 +87,18 @@ To compare the pre-change runtime, copy the three `tests/browser/dense-runtime*`
 
 Separate packaged tests exercise native edit entry, data refresh, complete datasets up to 500,000 × 50, exported/selected row lineage, chart and map tab disposal, SVG actions and repeated 3D switching. The Chromium harness and a Power BI API mock do not recreate the Windows Desktop query engine, viewport compositor or memory limits. Measure the supplied Windows PBIX using Power BI Performance Analyzer for native comparison.
 
+### Scoped interaction results
+
+| Mounted components | Leaf updates per interaction | Median JavaScript commit | P95 JavaScript commit | P95 across two animation frames |
+| ---: | ---: | ---: | ---: | ---: |
+| 25 | 25 → 6 | 5.7 → 2.8 ms | 8.9 → 5.0 ms | 31.2 → 31.0 ms |
+| 50 | 50 → 6 | 6.3 → 2.9 ms | 10.1 → 4.9 ms | 32.2 → 31.1 ms |
+| 100 | 100 → 6 | 7.5 → 2.8 ms | 12.0 → 5.7 ms | 31.9 → 30.6 ms |
+| 200 | 200 → 6 | 10.6 → 3.6 ms | 16.7 → 6.2 ms | 30.1 → 30.6 ms |
+| 500 | 500 → 6 | 19.1 → 3.9 ms | 34.7 → 6.9 ms | 65.6 → 28.0 ms |
+
+P95 in this 15-event run is the slowest observation. Initial mount for 500 components was 110.7 → 114.4 ms and Studio entry was 52.6 → 57.5 ms in these single-run samples.
+
 ## Current limits
 
 Whole-dashboard filtering and a new received row set can still invalidate many data-bearing views. The editor still parses and validates the full specification and dense mixed-component canvases still carry the cost of each visible chart, map or scene. A single native table or measure may receive a different query grain and amount of data. Power BI's opaque selection identities stay on the main thread. Dedicated worker processing for a general mixed-type dataset was not introduced because structured cloning the same data cost more than the measured operation. See the [large-data benchmark](powerbi-large-data.md).
